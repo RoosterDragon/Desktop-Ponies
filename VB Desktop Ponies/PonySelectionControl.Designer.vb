@@ -67,7 +67,7 @@ Partial Class PonySelectionControl
         Me.PonyCount.Name = "PonyCount"
         Me.PonyCount.Size = New System.Drawing.Size(36, 20)
         Me.PonyCount.TabIndex = 4
-        Me.PonyCount.Text = "1"
+        Me.PonyCount.Text = "0"
         Me.PonyCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'PonyName

@@ -800,15 +800,26 @@ Public Class Main
     End Sub
 
     Private Sub SaveProfileButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SaveProfileButton.Click
-        If String.Equals(ProfileComboBox.Text, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile")
-            Exit Sub
-        End If
-        If Trim(ProfileComboBox.Text) = "" Then
+        Dim profileToSave = Trim(ProfileComboBox.Text)
+
+        If profileToSave = "" Then
             MsgBox("Enter a profile name first!")
             Exit Sub
         End If
-        Options.SaveProfile(ProfileComboBox.Text)
+
+        If String.Equals(profileToSave, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile")
+            Exit Sub
+        End If
+
+        If Not ProfileComboBox.Items.Contains(profileToSave) Then
+            ProfileComboBox.Items.Add(profileToSave)
+        End If
+        ProfileComboBox.SelectedItem = profileToSave
+        
+        Options.SaveProfile(profileToSave)
+        MessageBox.Show(Me, "Profile '" & profileToSave & "' saved.", "Profile Saved",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     Private Sub LoadProfileButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles LoadProfileButton.Click
@@ -917,14 +928,20 @@ Public Class Main
     Private Sub CopyProfileButton_Click(sender As System.Object, e As System.EventArgs) Handles CopyProfileButton.Click
         dont_load_profile = True
 
-        Dim new_profile_name = InputBox("Enter name of new profile to copy to:")
-        If Trim(new_profile_name) = "" Then
+        Dim copiedProfileName = InputBox("Enter name of new profile to copy to:")
+        copiedProfileName = Trim(copiedProfileName)
+        If copiedProfileName = "" Then
             MsgBox("Can't enter a blank profile name!  Try again.")
             Exit Sub
         End If
 
-        Options.SaveProfile(new_profile_name)
-        GetProfiles(new_profile_name)
+        If String.Equals(copiedProfileName, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+            MsgBox("Cannot copy over the '" & Options.DefaultProfileName & "' profile")
+            Exit Sub
+        End If
+
+        Options.SaveProfile(copiedProfileName)
+        GetProfiles(copiedProfileName)
 
         dont_load_profile = False
     End Sub
@@ -950,7 +967,7 @@ Public Class Main
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not dont_load_profile Then
             'Options.LoadProfile(ProfileComboBox.Text)
-            OptionsForm.Instance.Load_Button_Click(sender, e, ProfileComboBox.Text)
+            OptionsForm.Instance.Load_Button_Click(sender, e, Trim(ProfileComboBox.Text))
         End If
     End Sub
 
