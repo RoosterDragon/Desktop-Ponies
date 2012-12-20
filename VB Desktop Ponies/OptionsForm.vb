@@ -389,8 +389,8 @@
     End Sub
 
     Private Sub Change_Active_Sound_Volume(Volume As Integer)
-        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In Main.Instance.Active_Sounds
-            sound.Volume = Volume
+        For Each activeSound In Main.Instance.Active_Sounds
+            activeSound.Volume = Volume
         Next
     End Sub
 

@@ -8,7 +8,7 @@ Public Class Main
     Friend Shared Instance As Main
 
 #Region "Fields and Properties"
-    Private loading As Boolean = True
+    Private loading As Boolean = False
 
     Friend DesktopHandle As IntPtr
     Friend ShellHandle As IntPtr
@@ -20,7 +20,7 @@ Public Class Main
     Friend Startup_Ponies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
     Friend Dead_Effects As New List(Of Effect)
-    Friend Active_Sounds As New List(Of Object)
+    Friend Active_Sounds As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
     Friend HouseBases As New List(Of HouseBase)
 
     'Variables used for displaying the pony selection menu
@@ -58,7 +58,7 @@ Public Class Main
 
     Friend screen_saver_mode As Boolean = False
     Friend screen_saver_path As String = ""
-    Dim screensaver_settings_file_path As String = System.IO.Path.GetTempPath & System.IO.Path.DirectorySeparatorChar & "DesktopPonies_ScreenSaver_Settings.ini"
+    Dim screensaver_settings_file_path As String = Path.Combine(Path.GetTempPath, "DesktopPonies_ScreenSaver_Settings.ini")
 
     Friend games As New List(Of Game)
     Friend current_game As Game = Nothing
@@ -220,8 +220,8 @@ Public Class Main
                         Options.InstallLocation = screen_saver_path
                         screen_saver_mode = True
                         auto_started = True
-                        Me.ShowInTaskbar = False
                         ShowInTaskbar = False
+                        WindowState = FormWindowState.Minimized
 
                         Try
                             Options.LoadProfile("screensaver")
@@ -252,6 +252,8 @@ Public Class Main
         Catch ex As Exception
             MsgBox("Error processing command line arguments." & ControlChars.NewLine & ex.Message & ControlChars.NewLine & ex.StackTrace)
         End Try
+
+        loading = True
 
         If Not auto_started Then
             WindowState = FormWindowState.Normal
@@ -294,8 +296,10 @@ Public Class Main
         ' fully drawn.
         Application.DoEvents()
 
+        Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
         Dim loadTemplates = True
-        If Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
+        If startedAsScr AndAlso
+            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
             Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
             Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory)) Then
             MsgBox("The screensaver path does not appear to be correct. Please adjust it.")
@@ -308,6 +312,16 @@ Public Class Main
             loadTemplates = False
             loading = False
             Close()
+        End If
+
+        If startedAsScr Then
+            ShowInTaskbar = False
+            WindowState = FormWindowState.Minimized
+            Try
+                Options.LoadProfile("screensaver")
+            Catch
+                Options.LoadDefaultProfile()
+            End Try
         End If
 
         If loadTemplates Then
@@ -1439,7 +1453,7 @@ Public Class Main
 
         Dim sounds_to_remove As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
 
-        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In Active_Sounds
+        For Each sound In Active_Sounds
             If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse sound.Duration = sound.CurrentPosition Then
                 sound.Dispose()
                 sounds_to_remove.Add(sound)

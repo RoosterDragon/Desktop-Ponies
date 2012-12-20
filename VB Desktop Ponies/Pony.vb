@@ -2730,7 +2730,6 @@ Class Pony
 
     End Function
 
-
     'Make a lists of targets from what ponies exist, and get their references.
     Friend Sub InitializeInteractions(otherPonies As IEnumerable(Of Pony))
 
