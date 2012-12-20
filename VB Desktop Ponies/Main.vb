@@ -20,7 +20,7 @@ Public Class Main
     Friend Startup_Ponies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
     Friend Dead_Effects As New List(Of Effect)
-    Friend Active_Sounds As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
+    Friend Active_Sounds As New List(Of Object)
     Friend HouseBases As New List(Of HouseBase)
 
     'Variables used for displaying the pony selection menu
@@ -292,29 +292,26 @@ Public Class Main
         End Try
         GetProfiles(profile)
 
-        ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
-        ' fully drawn.
-        Application.DoEvents()
-
-        Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
         Dim loadTemplates = True
-        If startedAsScr AndAlso
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
+        Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
+        If startedAsScr Then
+            ' Check screensaver path is still valid.
+            If Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
             Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
             Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory)) Then
-            MsgBox("The screensaver path does not appear to be correct. Please adjust it.")
-            Dim result = SetScreensaverPath()
-            If Not result Then
-                MsgBox("Will not be able to run screensaver mode until the correct path is specified.")
-            Else
-                MsgBox("Restart the screensaver for changes to take effect.")
+                MsgBox("The screensaver path does not appear to be correct. Please adjust it.")
+                Dim result = SetScreensaverPath()
+                If Not result Then
+                    MsgBox("Will not be able to run screensaver mode until the correct path is specified.")
+                Else
+                    MsgBox("Restart the screensaver for changes to take effect.")
+                End If
+                loadTemplates = False
+                loading = False
+                Close()
             End If
-            loadTemplates = False
-            loading = False
-            Close()
-        End If
 
-        If startedAsScr Then
+            ' Start in a minimized state to load, and attempt to open the screensaver profile.
             ShowInTaskbar = False
             WindowState = FormWindowState.Minimized
             Try
@@ -323,6 +320,10 @@ Public Class Main
                 Options.LoadDefaultProfile()
             End Try
         End If
+
+        ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
+        ' fully drawn.
+        Application.DoEvents()
 
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
@@ -760,7 +761,7 @@ Public Class Main
 
         PonySelectionPanel.Enabled = True
         SelectionControlsPanel.Enabled = True
-        If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+        LoadingProgressBar.Visible = False
         AnimationTimer.Enabled = True
         loading = False
         GC.Collect()
@@ -1045,7 +1046,7 @@ Public Class Main
         Else
             loading = True
             SelectionControlsPanel.Enabled = False
-            If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = True
+            LoadingProgressBar.Visible = True
             PonyLoader.RunWorkerAsync()
         End If
     End Sub
@@ -1348,7 +1349,7 @@ Public Class Main
         LoadingProgressBar.Value = 0
         LoadingProgressBar.Maximum = 1
         SelectionControlsPanel.Enabled = True
-        If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+        LoadingProgressBar.Visible = False
 
         Dim oldLoader = PonyLoader
         PonyLoader = New System.ComponentModel.BackgroundWorker() With {
@@ -1453,7 +1454,7 @@ Public Class Main
 
         Dim sounds_to_remove As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
 
-        For Each sound In Active_Sounds
+        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In Active_Sounds
             If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse sound.Duration = sound.CurrentPosition Then
                 sound.Dispose()
                 sounds_to_remove.Add(sound)

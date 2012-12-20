@@ -33,10 +33,8 @@ Partial Class SpriteDebugForm
         Me.colBehaviorTarget = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFollowTarget = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colVisualOverrideBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        CType(Me.SpriteContainer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SpriteContainer.Panel1.SuspendLayout()
         Me.SpriteContainer.SuspendLayout()
-        CType(Me.PonyDataGridView, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'SpriteContainer
@@ -133,9 +131,7 @@ Partial Class SpriteDebugForm
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Sprite Debugging - Desktop Ponies"
         Me.SpriteContainer.Panel1.ResumeLayout(False)
-        CType(Me.SpriteContainer, System.ComponentModel.ISupportInitialize).EndInit()
         Me.SpriteContainer.ResumeLayout(False)
-        CType(Me.PonyDataGridView, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
