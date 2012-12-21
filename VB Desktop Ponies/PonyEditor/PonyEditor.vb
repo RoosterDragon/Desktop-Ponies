@@ -212,6 +212,7 @@ Public Class PonyEditor
         pe_animator.AddPony(PreviewPony)
         Load_Parameters(PreviewPony)
 
+        PausePonyButton.Text = "Pause Pony"
         pe_animator.Unpause()
 
         Enabled = True
@@ -1434,12 +1435,12 @@ Public Class PonyEditor
     Private Sub PausePonyButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PausePonyButton.Click
 
         Try
-            If PausePonyButton.Text = "Pause Pony" Then
-                PausePonyButton.Text = "Resume Pony"
+            If Not pe_animator.Paused Then
                 pe_animator.Pause(False)
+                PausePonyButton.Text = "Resume Pony"
             Else
-                PausePonyButton.Text = "Pause Pony"
                 pe_animator.Unpause()
+                PausePonyButton.Text = "Pause Pony"
             End If
         Catch ex As Exception
             MsgBox("Error on pause/resume! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
