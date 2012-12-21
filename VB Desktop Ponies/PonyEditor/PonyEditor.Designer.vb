@@ -685,6 +685,7 @@ Partial Class PonyEditor
         '
         'PausePonyButton
         '
+        Me.PausePonyButton.Enabled = False
         Me.PausePonyButton.Location = New System.Drawing.Point(577, 253)
         Me.PausePonyButton.Name = "PausePonyButton"
         Me.PausePonyButton.Size = New System.Drawing.Size(75, 21)

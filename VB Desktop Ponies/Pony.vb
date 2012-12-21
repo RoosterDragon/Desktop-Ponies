@@ -3443,7 +3443,7 @@ Class HouseBase
     End Sub
 
     Private Sub LoadFromIni()
-        Dim fullDirectory = Path.Combine(RootDirectory, Directory)
+        Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, Directory)
         Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
             Do Until configFile.EndOfStream
 

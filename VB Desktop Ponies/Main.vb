@@ -2,8 +2,9 @@
 Imports System.IO
 Imports CsDesktopPonies.SpriteManagement
 
-'This is the Main form that handles startup and pony selection.
-
+''' <summary>
+''' This is the Main form that handles startup and pony selection.
+''' </summary>
 Public Class Main
     Friend Shared Instance As Main
 
@@ -24,12 +25,10 @@ Public Class Main
     Friend HouseBases As New List(Of HouseBase)
 
     'Variables used for displaying the pony selection menu
-    Dim PonyImages As New LazyDictionary(Of String, AnimatedImage(Of BitmapFrame))(
+    Private ReadOnly ponyImages As New LazyDictionary(Of String, AnimatedImage(Of BitmapFrame))(
         Function(fileName As String)
-            Return New AnimatedImage(Of BitmapFrame)(fileName, Function(file As String)
-                                                                   Return New BitmapFrame(file)
-                                                               End Function,
-                                                               BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+            Return New AnimatedImage(Of BitmapFrame)(fileName, Function(file As String) New BitmapFrame(file),
+                                                     BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
         End Function)
 
     'How big the area around the cursor used for cursor detection should be, in pixels.
@@ -91,7 +90,7 @@ Public Class Main
     Dim Temp_Filters As New List(Of String)
 
     Dim dont_load_profile As Boolean = False
-    Dim startup_profile As String = "default"
+    Dim startup_profile As String = Options.DefaultProfileName
 
     Private previewWindowRectangle As Func(Of Rectangle)
 #End Region
@@ -135,6 +134,7 @@ Public Class Main
 #Region "Initialization"
     'Read all configuration files and pony folders.
     Private Sub Main_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        Mac.WriteLine("Main_Load started.")
         Instance = Me
 
         Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
@@ -272,7 +272,7 @@ Public Class Main
         ' Ensure therefore that the instances are initialized on this application thread for later.
         ' The PonyEditor also requires this, but must wait until templates are loaded.
         OptionsForm.Instance = New OptionsForm()
-        'OptionsForm.Instance.Load_Button_Click(Nothing, Nothing, "default", True)
+        'OptionsForm.Instance.Load_Button_Click(Nothing, Nothing, Option.DefaultProfileName, True)
 
         LoadFilterSelections()
 
@@ -280,7 +280,7 @@ Public Class Main
         Dim profile = Options.DefaultProfileName
         Dim profileFile As IO.StreamReader = Nothing
         Try
-            profileFile = New IO.StreamReader(IO.Path.Combine(Options.InstallLocation, "Profiles", "current.txt"),
+            profileFile = New IO.StreamReader(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
                                               System.Text.Encoding.UTF8)
             profile = profileFile.ReadLine()
         Catch ex As IO.FileNotFoundException
@@ -325,6 +325,8 @@ Public Class Main
         ' fully drawn.
         Application.DoEvents()
 
+        Mac.WriteLine("Main_Load ending. About to run template loader.")
+
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
         End If
@@ -361,13 +363,6 @@ Public Class Main
                 SetScreensaverPath()
             End If
 
-            If Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory)) Then
-                MsgBox("The screensaver path does not appear to be correct. Please adjust it.")
-                SetScreensaverPath()
-            End If
-
             Dim SettingsFile As New System.IO.StreamReader(screensaver_settings_file_path)
 
             screen_saver_path = SettingsFile.ReadLine()
@@ -376,12 +371,14 @@ Public Class Main
             'UserIsolatedStorageFile.Close()
             'UserIsolatedStorage.Close()
 
-            If Not My.Computer.FileSystem.DirectoryExists(screen_saver_path) Then
-                MsgBox("Screensaver error:  Path to pony files does not exist.  Please update the screensaver settings with the right path. " _
-                                    & ControlChars.NewLine & "Tried path: " & screen_saver_path)
-                screen_saver_path = ""
-                Exit Sub
-            End If
+            While Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
+            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
+            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory))
+                MsgBox("The screensaver path does not appear to be correct. Please adjust it." & vbNewLine &
+                       "The '" & PonyBase.RootDirectory & "', '" & HouseBase.RootDirectory &
+                   "' and '" & Game.RootDirectory & "' directories are expected to exist in this location. Please check your selection.")
+                If Not SetScreensaverPath() Then Exit Sub
+            End While
 
         Catch ex As Exception
             MsgBox("Error: You need to set the settings of the screensaver first before using it." & ControlChars.NewLine & _
@@ -451,6 +448,7 @@ Public Class Main
     End Sub
 
     Private Sub TemplateLoader_DoWork(sender As System.Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
+        Mac.WriteLine("TemplateLoader_DoWork started. No more startup output to follow.")
         Try
             Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
 
@@ -653,9 +651,9 @@ Public Class Main
         End If
 
         Dim ponyImageName = ponyBase.Behaviors(0).RightImagePath
-        PonyImages.Add(ponyImageName)
+        ponyImages.Add(ponyImageName)
 
-        Dim ponySelection As New PonySelectionControl(ponyBase, PonyImages(ponyImageName), False)
+        Dim ponySelection As New PonySelectionControl(ponyBase, ponyImages(ponyImageName), False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
@@ -816,7 +814,7 @@ Public Class Main
             ProfileComboBox.Items.Add(profileToSave)
         End If
         ProfileComboBox.SelectedItem = profileToSave
-        
+
         Options.SaveProfile(profileToSave)
         MessageBox.Show(Me, "Profile '" & profileToSave & "' saved.", "Profile Saved",
                         MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -1522,12 +1520,21 @@ Public Class Main
     End Sub
 
     Private Sub Main_FormClosing(sender As System.Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+        Mac.WriteLine("Main_FormClosing started.")
         e.Cancel = loading
+        Mac.WriteLine("Main_FormClosing ending with cancel set to " & e.Cancel & ".")
     End Sub
 
     Private Sub Main_Disposed(sender As System.Object, e As System.EventArgs) Handles MyBase.Disposed
-        For Each image In PonyImages.InitializedValues
-            image.Dispose()
+        Mac.WriteLine("Main_Disposed started.")
+        For Each kvp In ponyImages.InitializedItems
+            If kvp.Value IsNot Nothing Then
+                kvp.Value.Dispose()
+            Else
+                Console.WriteLine("Main_Disposed encountered a null image. Key: " & kvp.Key)
+            End If
         Next
+        Mac.WriteLine("Main_Disposed ended.")
+        Console.WriteLine("Main has been disposed. Program ending.")
     End Sub
 End Class

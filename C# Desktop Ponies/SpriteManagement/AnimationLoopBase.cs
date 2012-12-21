@@ -789,8 +789,8 @@ using System.Text;
             elapsedWatch.Start();
             intervalWatch.Start();
 
-            // Loop whilst not paused or stopped.
-            while (running.WaitOne() && !Stopped)
+            // Loop whilst not disposed, paused or stopped.
+            while (!Disposed && running.WaitOne() && !Stopped)
             {
                 // Run an update and draw cycle for one frame.
                 ElapsedTime = elapsedWatch.Elapsed;
@@ -842,7 +842,8 @@ using System.Text;
         private void Tick()
         {
             Update();
-            Draw();
+            if (!Disposed)
+                Draw();
         }
 
         /// <summary>
@@ -886,7 +887,8 @@ using System.Text;
                 {
                     // Un-pause so the main thread can gracefully exit now the signal to stop has been issued.
                     running.Set();
-                    runner.Join();
+                    if (Thread.CurrentThread != runner)
+                        runner.Join();
                     runner = null;
                 }
                 Viewer.Close();

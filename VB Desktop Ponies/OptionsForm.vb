@@ -255,7 +255,7 @@
 
     End Sub
 
-    Friend Sub Save_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional profile As String = "default") Handles SaveButton.Click
+    Friend Sub Save_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional profile As String = Options.DefaultProfileName) Handles SaveButton.Click
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
             MsgBox("You need to select at least one monitor.")
@@ -295,7 +295,7 @@
 
     End Sub
 
-    Friend Sub Load_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional selected_profile As String = "default", Optional ByVal silent As Boolean = False) Handles LoadButton.Click
+    Friend Sub Load_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional selected_profile As String = Options.DefaultProfileName, Optional ByVal silent As Boolean = False) Handles LoadButton.Click
         Try
             If Not IsNothing(sender) Then
                 If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
@@ -311,11 +311,15 @@
             End If
 
             Scale_Slider_Scroll(Nothing, Nothing)
-
-            IO.File.WriteAllText(IO.Path.Combine(Options.InstallLocation, "Profiles", "current.txt"),
-                                 selected_profile, System.Text.Encoding.UTF8)
         Catch ex As IO.IOException
             MsgBox("Failed to load profile '" & selected_profile & "'")
+        End Try
+        Try
+            IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
+                     selected_profile, System.Text.Encoding.UTF8)
+        Catch ex As IO.IOException
+            ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
+            Console.WriteLine("Warning: Failed to save current.txt file.")
         End Try
     End Sub
 

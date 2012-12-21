@@ -203,6 +203,7 @@ Public Class PonyEditor
         Pony.CurrentAnimator = pe_animator
         If Not pe_animator.Started Then
             pe_animator.Begin()
+            PausePonyButton.Enabled = True
         Else
             pe_animator.Pause(True)
             pe_animator.Clear()
@@ -1449,7 +1450,10 @@ Public Class PonyEditor
     Private Sub HidePony()
 
         PausePonyButton.Text = "Resume Pony"
-        pe_animator.Pause(False)
+
+        If pe_animator.Started Then
+            pe_animator.Pause(False)
+        End If
         If Not IsNothing(PreviewPony) Then
             pe_interface.Hide()
 
@@ -1460,7 +1464,10 @@ Public Class PonyEditor
 
     Private Sub ShowPony()
         PausePonyButton.Text = "Pause Pony"
-        pe_animator.Unpause()
+
+        If pe_animator.Started Then
+            pe_animator.Unpause()
+        End If
 
         If Not IsNothing(PreviewPony) Then
 
@@ -1785,6 +1792,7 @@ Public Class PonyEditor
                 End If
             End Using
 
+            MsgBox("All ponies must now be reloaded. Once this operation is complete, you can reopen the editor and select your pony for editing.")
             changes_made = True
             Me.Close()
 
@@ -1812,9 +1820,9 @@ Public Class PonyEditor
             Main.Instance.SelectablePonies = temp_list
 
             Dim comments As New List(Of String)
-            Dim ini_file_path = System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
-            If My.Computer.FileSystem.FileExists(ini_file_path) Then
-                Using existing_ini As New System.IO.StreamReader(ini_file_path)
+            Dim ponyIniFilePath = System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
+            If My.Computer.FileSystem.FileExists(ponyIniFilePath) Then
+                Using existing_ini As New System.IO.StreamReader(ponyIniFilePath)
                     Do Until existing_ini.EndOfStream
                         Dim line = existing_ini.ReadLine()
                         If line.Length > 0 AndAlso line(0) = "'" Then
@@ -1824,101 +1832,101 @@ Public Class PonyEditor
                 End Using
             End If
 
-            Dim new_ini As New System.IO.StreamWriter(ini_file_path, False, System.Text.Encoding.UTF8)
+            Using newPonyIniFile As New System.IO.StreamWriter(ponyIniFilePath, False, System.Text.Encoding.UTF8)
+                For Each line In comments
+                    newPonyIniFile.WriteLine(line)
+                Next
 
-            For Each line In comments
-                new_ini.WriteLine(line)
-            Next
+                newPonyIniFile.WriteLine(String.Join(",", "Name", PreviewPony.Name))
+                newPonyIniFile.WriteLine(String.Join(",", "Categories", String.Join(",", PreviewPony.Tags.Select(Function(tag As String)
+                                                                                                                     Return Quoted(tag)
+                                                                                                                 End Function))))
 
-            new_ini.WriteLine(String.Join(",", "Name", PreviewPony.Name))
-            new_ini.WriteLine(String.Join(",", "Categories", String.Join(",", PreviewPony.Tags.Select(Function(tag As String)
-                                                                                                          Return Quoted(tag)
-                                                                                                      End Function))))
+                For Each behaviorGroup In PreviewPony.BehaviorGroups
+                    newPonyIniFile.WriteLine(String.Join(",", "behaviorgroup", behaviorGroup.Number, behaviorGroup.Name))
+                Next
 
-            For Each behaviorGroup In PreviewPony.BehaviorGroups
-                new_ini.WriteLine(String.Join(",", "behaviorgroup", behaviorGroup.Number, behaviorGroup.Name))
-            Next
+                For Each behavior In PreviewPony.Behaviors
+                    newPonyIniFile.WriteLine(String.Join(
+                                      ",", "Behavior",
+                                      Quoted(behavior.Name),
+                                      behavior.chance_of_occurance.ToString(CultureInfo.InvariantCulture),
+                                      behavior.MaxDuration.ToString(CultureInfo.InvariantCulture),
+                                      behavior.MinDuration.ToString(CultureInfo.InvariantCulture),
+                                      behavior.Speed.ToString(CultureInfo.InvariantCulture),
+                                      Quoted(Get_Filename(behavior.RightImagePath)),
+                                      Quoted(Get_Filename(behavior.LeftImagePath)),
+                                      Space_To_Under(Movement_ToString(behavior.Allowed_Movement)),
+                                      Quoted(behavior.LinkedBehaviorName),
+                                      Quoted(behavior.StartLineName),
+                                      Quoted(behavior.EndLineName),
+                                      behavior.Skip,
+                                      behavior.original_destination_xcoord.ToString(CultureInfo.InvariantCulture),
+                                      behavior.original_destination_ycoord.ToString(CultureInfo.InvariantCulture),
+                                      Quoted(behavior.original_follow_object_name),
+                                      behavior.Auto_Select_Images_On_Follow,
+                                      behavior.FollowStoppedBehaviorName,
+                                      behavior.FollowMovingBehaviorName,
+                                      Quoted(behavior.RightImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
+                                             behavior.RightImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
+                                      Quoted(behavior.LeftImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
+                                             behavior.LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
+                                      behavior.dont_repeat_image_animations,
+                                      behavior.Group.ToString(CultureInfo.InvariantCulture)))
 
-            For Each behavior In PreviewPony.Behaviors
-                new_ini.WriteLine(String.Join(
-                                  ",", "Behavior",
-                                  Quoted(behavior.Name),
-                                  behavior.chance_of_occurance.ToString(CultureInfo.InvariantCulture),
-                                  behavior.MaxDuration.ToString(CultureInfo.InvariantCulture),
-                                  behavior.MinDuration.ToString(CultureInfo.InvariantCulture),
-                                  behavior.Speed.ToString(CultureInfo.InvariantCulture),
-                                  Quoted(Get_Filename(behavior.RightImagePath)),
-                                  Quoted(Get_Filename(behavior.LeftImagePath)),
-                                  Space_To_Under(Movement_ToString(behavior.Allowed_Movement)),
-                                  Quoted(behavior.LinkedBehaviorName),
-                                  Quoted(behavior.StartLineName),
-                                  Quoted(behavior.EndLineName),
-                                  behavior.Skip,
-                                  behavior.original_destination_xcoord.ToString(CultureInfo.InvariantCulture),
-                                  behavior.original_destination_ycoord.ToString(CultureInfo.InvariantCulture),
-                                  Quoted(behavior.original_follow_object_name),
-                                  behavior.Auto_Select_Images_On_Follow,
-                                  behavior.FollowStoppedBehaviorName,
-                                  behavior.FollowMovingBehaviorName,
-                                  Quoted(behavior.RightImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                                         behavior.RightImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-                                  Quoted(behavior.LeftImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                                         behavior.LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-                                  behavior.dont_repeat_image_animations,
-                                  behavior.Group.ToString(CultureInfo.InvariantCulture)))
+                Next
 
-            Next
+                For Each effect In PreviewPonyEffects()
+                    newPonyIniFile.WriteLine(String.Join(
+                                      ",", "Effect",
+                                      Quoted(effect.Name),
+                                      Quoted(effect.behavior_name),
+                                      Quoted(Get_Filename(effect.right_image_path)),
+                                      Quoted(Get_Filename(effect.left_image_path)),
+                                      effect.Duration.ToString(CultureInfo.InvariantCulture),
+                                      effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),
+                                      Space_To_Under(Location_ToString(effect.placement_direction_right)),
+                                      Space_To_Under(Location_ToString(effect.centering_right)),
+                                      Space_To_Under(Location_ToString(effect.placement_direction_left)),
+                                      Space_To_Under(Location_ToString(effect.centering_left)),
+                                      effect.follow,
+                                      effect.dont_repeat_image_animations))
+                Next
 
-            For Each effect In PreviewPonyEffects()
-                new_ini.WriteLine(String.Join(
-                                  ",", "Effect",
-                                  Quoted(effect.Name),
-                                  Quoted(effect.behavior_name),
-                                  Quoted(Get_Filename(effect.right_image_path)),
-                                  Quoted(Get_Filename(effect.left_image_path)),
-                                  effect.Duration.ToString(CultureInfo.InvariantCulture),
-                                  effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),
-                                  Space_To_Under(Location_ToString(effect.placement_direction_right)),
-                                  Space_To_Under(Location_ToString(effect.centering_right)),
-                                  Space_To_Under(Location_ToString(effect.placement_direction_left)),
-                                  Space_To_Under(Location_ToString(effect.centering_left)),
-                                  effect.follow,
-                                  effect.dont_repeat_image_animations))
-            Next
+                For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
 
-            For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
+                    'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
 
-                'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
-
-                If speech.SoundFile = "" Then
-                    new_ini.WriteLine(String.Join(
-                                      ",", "Speak",
-                                      Quoted(speech.Name),
-                                      Quoted(speech.Text),
-                                      "",
-                                      speech.Skip,
-                                      speech.Group))
-                Else
-                    new_ini.WriteLine(String.Join(
-                                      ",", "Speak",
-                                      Quoted(speech.Name),
-                                      Quoted(speech.Text),
-                                      "{" & Quoted(Get_Filename(speech.SoundFile)) & "," & Quoted(Replace(Get_Filename(speech.SoundFile), ".mp3", ".ogg")) & "}",
-                                      speech.Skip,
-                                      speech.Group))
-                End If
-            Next
-
-            new_ini.Close()
+                    If speech.SoundFile = "" Then
+                        newPonyIniFile.WriteLine(String.Join(
+                                          ",", "Speak",
+                                          Quoted(speech.Name),
+                                          Quoted(speech.Text),
+                                          "",
+                                          speech.Skip,
+                                          speech.Group))
+                    Else
+                        newPonyIniFile.WriteLine(String.Join(
+                                          ",", "Speak",
+                                          Quoted(speech.Name),
+                                          Quoted(speech.Text),
+                                          "{" & Quoted(Get_Filename(speech.SoundFile)) & "," & Quoted(Replace(Get_Filename(speech.SoundFile), ".mp3", ".ogg")) & "}",
+                                          speech.Skip,
+                                          speech.Group))
+                    End If
+                Next
+            End Using
 
             Try
 
                 Dim interactions_lines As New List(Of String)
 
-                Using interactions_ini As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
+                Using interactionsIniFile As System.IO.StreamReader =
+                    New System.IO.StreamReader(
+                    System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
 
-                    Do Until interactions_ini.EndOfStream
-                        Dim line = interactions_ini.ReadLine()
+                    Do Until interactionsIniFile.EndOfStream
+                        Dim line = interactionsIniFile.ReadLine()
 
                         Dim name_check = CommaSplitQuoteQualified(line)
 

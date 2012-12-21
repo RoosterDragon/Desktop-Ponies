@@ -119,6 +119,7 @@
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Monitoring\Mac.vb" />
     <Compile Include="DesktopControlForm.Designer.vb">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </Compile>
@@ -138,10 +139,10 @@
     <Compile Include="PonySelectionControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SpriteDebugForm.Designer.vb">
+    <Compile Include="Monitoring\SpriteDebugForm.Designer.vb">
       <DependentUpon>SpriteDebugForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="SpriteDebugForm.vb">
+    <Compile Include="Monitoring\SpriteDebugForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Win32.vb" />
@@ -338,7 +339,7 @@
     <EmbeddedResource Include="PonyEditor\TagsForm.resx">
       <DependentUpon>TagsForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SpriteDebugForm.resx">
+    <EmbeddedResource Include="Monitoring\SpriteDebugForm.resx">
       <DependentUpon>SpriteDebugForm.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

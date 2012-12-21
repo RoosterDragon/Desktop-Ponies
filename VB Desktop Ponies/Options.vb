@@ -53,7 +53,7 @@ Public NotInheritable Class Options
     Public Shared PonyCounts As New Dictionary(Of String, Integer)
     Public Shared CustomTags As New List(Of String)
 
-    Private Shared ReadOnly Property profileDirectory As String
+    Public Shared ReadOnly Property ProfileDirectory As String
         Get
             Return Path.Combine(Options.InstallLocation, "Profiles")
         End Get
@@ -78,9 +78,9 @@ Public NotInheritable Class Options
 
     Public Shared Function GetKnownProfiles() As String()
         Try
-            Dim files = Directory.GetFiles(profileDirectory, "*.ini", SearchOption.TopDirectoryOnly)
+            Dim files = Directory.GetFiles(ProfileDirectory, "*.ini", SearchOption.TopDirectoryOnly)
             For i = 0 To files.Length - 1
-                files(i) = files(i).Replace(profileDirectory & Path.DirectorySeparatorChar, "").Replace(".ini", "")
+                files(i) = files(i).Replace(ProfileDirectory & Path.DirectorySeparatorChar, "").Replace(".ini", "")
             Next
             Return files
         Catch ex As DirectoryNotFoundException
@@ -95,7 +95,7 @@ Public NotInheritable Class Options
         If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
             LoadDefaultProfile()
         Else
-            Using file As New StreamReader(Path.Combine(profileDirectory, profile & ".ini"), Encoding.UTF8)
+            Using file As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
                 ProfileName = profile
                 MonitorNames.Clear()
                 PonyCounts.Clear()
@@ -234,7 +234,7 @@ Public NotInheritable Class Options
     Public Shared Sub SaveProfile(profile As String)
         ValidateProfileName(profile)
 
-        Using file As New StreamWriter(Path.Combine(profileDirectory, profile & ".ini"), False, Encoding.UTF8)
+        Using file As New StreamWriter(Path.Combine(ProfileDirectory, profile & ".ini"), False, Encoding.UTF8)
             Dim optionsLine = String.Join(",", "options",
                                      PonySpeechEnabled,
                                      PonySpeechChance.ToString(CultureInfo.InvariantCulture),
@@ -289,7 +289,7 @@ Public NotInheritable Class Options
     Public Shared Function DeleteProfile(profile As String) As Boolean
         ValidateProfileName(profile)
         Try
-            File.Delete(Path.Combine(profileDirectory, profile & ".ini"))
+            File.Delete(Path.Combine(ProfileDirectory, profile & ".ini"))
             Return True
         Catch
             Return False

@@ -149,7 +149,7 @@ Public Class HouseOptionsForm
             Dim base = house.Base
 
             Dim comments As New List(Of String)
-            Dim ini_file_path = Path.Combine(HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
+            Dim ini_file_path = Path.Combine(Options.InstallLocation, HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
             If My.Computer.FileSystem.FileExists(ini_file_path) Then
                 Using existing_ini As New StreamReader(ini_file_path)
                     Do Until existing_ini.EndOfStream

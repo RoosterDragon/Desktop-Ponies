@@ -43,7 +43,7 @@ Public Class DesktopPonyAnimator
         MyBase.New(spriteViewer, spriteCollection)
         MaximumFramesPerSecond = 30
         Viewer.WindowTitle = "Desktop Ponies"
-        Viewer.WindowIconFilePath = "Twilight.ico"
+        Viewer.WindowIconFilePath = IO.Path.Combine(Options.InstallLocation, "Twilight.ico")
         AddHandler Viewer.MouseUp, AddressOf PonyGraphicsForm_MouseUp
         AddHandler Viewer.MouseDown, AddressOf PonyGraphicsForm_MouseDown
 
@@ -122,7 +122,9 @@ Public Class DesktopPonyAnimator
                 End If
 
                 If .cursor_position <> Cursor.Position Then
-                    .Close()
+                    Finish()
+                    .Invoke(Sub() Main.Instance.Close())
+                    Exit Sub
                 End If
             Else
                 If Options.SuspendForFullscreenApplication Then
@@ -649,7 +651,7 @@ Public Class DesktopPonyAnimator
     ''' </summary>
     Private Sub ManualControl()
 
-        If Main.Instance.screen_saver_mode Then Main.Instance.Close()
+        'If Main.Instance.screen_saver_mode Then Main.Instance.Close()
 
         With Main.Instance
             .PonyDown = KeyboardState.IsKeyPressed(Keys.Down)
