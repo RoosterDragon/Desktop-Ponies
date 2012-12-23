@@ -60,21 +60,21 @@ Public Class HouseOptionsForm
         Next
     End Sub
 
-    Private Sub MinSpawn_Counter_ValueChanged(sender As System.Object, e As System.EventArgs) Handles MinSpawn_Counter.ValueChanged
+    Private Sub MinSpawn_Counter_ValueChanged(sender As Object, e As EventArgs) Handles MinSpawn_Counter.ValueChanged
         MaxSpawn_Counter.Minimum = MinSpawn_Counter.Value
         If MaxSpawn_Counter.Value < MinSpawn_Counter.Value Then
             MaxSpawn_Counter.Value = MinSpawn_Counter.Value
         End If
     End Sub
 
-    Private Sub MaxSpawn_Counter_ValueChanged(sender As System.Object, e As System.EventArgs) Handles MaxSpawn_Counter.ValueChanged
+    Private Sub MaxSpawn_Counter_ValueChanged(sender As Object, e As EventArgs) Handles MaxSpawn_Counter.ValueChanged
         MinSpawn_Counter.Maximum = MaxSpawn_Counter.Value
         If MinSpawn_Counter.Value > MaxSpawn_Counter.Value Then
             MinSpawn_Counter.Value = MaxSpawn_Counter.Value
         End If
     End Sub
 
-    Private Sub ClearVisitors_Button_Click(sender As System.Object, e As System.EventArgs) Handles ClearVisitors_Button.Click
+    Private Sub ClearVisitors_Button_Click(sender As Object, e As EventArgs) Handles ClearVisitors_Button.Click
         If Visitors_CheckedListBox.Items.Count = 0 Then Exit Sub
 
         Dim status = Visitors_CheckedListBox.CheckedItems.Count <> 0
@@ -88,17 +88,17 @@ Public Class HouseOptionsForm
         Return New Point(CInt(sizeDifference.Width / 2), CInt(sizeDifference.Height / 2))
     End Function
 
-    Private Sub House_ImageBox_MouseClick(sender As System.Object, e As System.Windows.Forms.MouseEventArgs) Handles House_ImageBox.MouseClick
+    Private Sub House_ImageBox_MouseClick(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles House_ImageBox.MouseClick
         doorLocation = Point.Subtract(e.Location, CType(GetHouseImageDrawLocation(), Size))
         DoorLocation_Label.Text = doorLocation.ToString()
         House_ImageBox.Invalidate()
     End Sub
 
-    Private Sub House_ImageBox_SizeChanged(sender As System.Object, e As System.EventArgs) Handles House_ImageBox.SizeChanged
+    Private Sub House_ImageBox_SizeChanged(sender As Object, e As EventArgs) Handles House_ImageBox.SizeChanged
         House_ImageBox.Invalidate()
     End Sub
 
-    Private Sub House_ImageBox_Paint(sender As System.Object, e As System.Windows.Forms.PaintEventArgs) Handles House_ImageBox.Paint
+    Private Sub House_ImageBox_Paint(sender As Object, e As System.Windows.Forms.PaintEventArgs) Handles House_ImageBox.Paint
         Dim g = e.Graphics
 
         g.Clear(Color.White)
@@ -142,7 +142,7 @@ Public Class HouseOptionsForm
         Return True
     End Function
 
-    Private Sub Save_Button_Click(sender As System.Object, e As System.EventArgs) Handles Save_Button.Click
+    Private Sub Save_Button_Click(sender As Object, e As EventArgs) Handles Save_Button.Click
         If SaveSettings() = False Then Exit Sub
 
         Try
@@ -198,11 +198,11 @@ Public Class HouseOptionsForm
         MsgBox("Save completed!")
     End Sub
 
-    Private Sub Close_Button_Click(sender As System.Object, e As System.EventArgs) Handles Close_Button.Click
+    Private Sub Close_Button_Click(sender As Object, e As EventArgs) Handles Close_Button.Click
         Me.Close()
     End Sub
 
-    Private Sub HouseOptionsForm_FormClosed(sender As System.Object, e As System.Windows.Forms.FormClosedEventArgs) Handles MyBase.FormClosed
+    Private Sub HouseOptionsForm_FormClosed(sender As Object, e As System.Windows.Forms.FormClosedEventArgs) Handles MyBase.FormClosed
         house.Base.OptionsForm = Nothing
     End Sub
 End Class

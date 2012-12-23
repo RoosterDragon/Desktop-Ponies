@@ -228,7 +228,7 @@ Public Class DesktopControlForm
         Return contextMenu
     End Function
 
-    Private Sub ReturnButton_Click(sender As System.Object, e As System.EventArgs) Handles ReturnButton.Click
+    Private Sub ReturnButton_Click(sender As Object, e As EventArgs) Handles ReturnButton.Click
         Pony.CurrentAnimator.Finish()
         Main.Instance.Invoke(Sub()
                                  Main.Instance.Pony_Shutdown()
@@ -244,11 +244,11 @@ Public Class DesktopControlForm
         Close()
     End Sub
 
-    Private Sub DesktopControlForm_FormClosing(sender As System.Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+    Private Sub DesktopControlForm_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = Not allowClose
     End Sub
 
-    Private Sub PonyComboBox_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles PonyComboBox.SelectedIndexChanged
+    Private Sub PonyComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyComboBox.SelectedIndexChanged
         Dim selected As ISprite = CType(PonyComboBox.SelectedItem, ISprite)
         Dim center = Point.Round(selected.Region.Center())
         animator.PonyGraphicsForm_MouseDown(sender, New SimpleMouseEventArgs(SimpleMouseButtons.Right, center.X, center.Y))

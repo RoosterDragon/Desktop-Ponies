@@ -62,7 +62,7 @@ Public Class PonyEditor
         Icon = My.Resources.Twilight
     End Sub
 
-    Private Sub PonyEditor_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub PonyEditor_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         Try
             has_saved = True
             changes_made = False
@@ -158,7 +158,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PonySelectionView_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PonySelectionView.SelectedIndexChanged
+    Private Sub PonySelectionView_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles PonySelectionView.SelectedIndexChanged
 
         Try
 
@@ -780,7 +780,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEditor_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
+    Private Sub PonyEditor_Resize(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Resize
 
         If Me.loaded = False Then Exit Sub
 
@@ -809,7 +809,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
+    Private Sub PonyBehaviorsGrid_CellClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
 
         Try
 
@@ -1333,13 +1333,13 @@ Public Class PonyEditor
     End Function
 
     'Swap positions of the grids.
-    Private Sub Swap0_1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Swap0_1.Click, Swap1_0.Click
+    Private Sub Swap0_1_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap0_1.Click, Swap1_0.Click
         SwapGrids(0, 1, Slot0Label, Slot1Label)
     End Sub
-    Private Sub Swap2_0_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Swap2_0.Click
+    Private Sub Swap2_0_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap2_0.Click
         SwapGrids(2, 0, Slot2Label, Slot0Label)
     End Sub
-    Private Sub Swap3_0_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Swap3_0.Click
+    Private Sub Swap3_0_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap3_0.Click
         SwapGrids(3, 0, Slot3Label, Slot0Label)
     End Sub
 
@@ -1432,7 +1432,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PausePonyButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PausePonyButton.Click
+    Private Sub PausePonyButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PausePonyButton.Click
 
         Try
             If Not pe_animator.Paused Then
@@ -1478,7 +1478,7 @@ Public Class PonyEditor
         End If
     End Sub
 
-    Private Sub NewBehaviorButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewBehaviorButton.Click
+    Private Sub NewBehaviorButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewBehaviorButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1680,7 +1680,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PonyName_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PonyName.TextChanged
+    Private Sub PonyName_TextChanged(ByVal sender As Object, ByVal e As EventArgs) Handles PonyName.TextChanged
 
         If already_updating = False Then
             PreviewPony.Base.Name = PonyName.Text
@@ -1689,7 +1689,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub NewSpeechButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewSpeechButton.Click
+    Private Sub NewSpeechButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewSpeechButton.Click
         Try
             If IsNothing(PreviewPony) Then
                 MsgBox("Select a pony or create a new one first,")
@@ -1712,7 +1712,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub NewEffectButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewEffectButton.Click
+    Private Sub NewEffectButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewEffectButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1736,7 +1736,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub NewInteractionButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewInteractionButton.Click
+    Private Sub NewInteractionButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewInteractionButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1760,7 +1760,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub NewPonyButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewPonyButton.Click
+    Private Sub NewPonyButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewPonyButton.Click
 
         Try
 
@@ -2008,7 +2008,7 @@ Public Class PonyEditor
         Return Replace(Replace(text, " ", "_"), "/", "_")
     End Function
 
-    Private Sub SaveButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SaveButton.Click
+    Private Sub SaveButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SaveButton.Click
 
         PausePonyButton.Enabled = False
         pe_animator.Pause(False)
@@ -2023,7 +2023,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechGrid_CellContentClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
+    Private Sub PonySpeechGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2072,7 +2072,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyEffectsGrid_CellContentClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
+    Private Sub PonyEffectsGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2132,7 +2132,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyInteractionGrid_CellContentClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
+    Private Sub PonyInteractionGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2219,7 +2219,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub EditTagsButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles EditTagsButton.Click
+    Private Sub EditTagsButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles EditTagsButton.Click
 
         If IsNothing(PreviewPony) Then
             MsgBox("Select a pony first!")
@@ -2235,7 +2235,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub SetImageCentersButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SetImageCentersButton.Click
+    Private Sub SetImageCentersButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SetImageCentersButton.Click
 
         If IsNothing(PreviewPony) Then
             MsgBox("Select a pony first.")
@@ -2250,12 +2250,12 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub RefreshButton_Click(sender As System.Object, e As System.EventArgs) Handles RefreshButton.Click
+    Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
         Load_Parameters(PreviewPony)
         RestoreSortOrder()
     End Sub
 
-    Private Sub Grid_DataError(sender As System.Object, e As System.Windows.Forms.DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
+    Private Sub Grid_DataError(sender As Object, e As System.Windows.Forms.DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
         MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
     End Sub
 End Class

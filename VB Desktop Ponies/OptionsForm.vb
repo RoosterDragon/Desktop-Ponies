@@ -66,7 +66,7 @@
         FirstLoad()
     End Sub
 
-    Private Sub Options_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Options_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         'FirstLoad()
     End Sub
 
@@ -173,7 +173,7 @@
         alreadyLoaded = True
     End Sub
 
-    Private Sub Avoidance_Area_Changed(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
+    Private Sub Avoidance_Area_Changed(ByVal sender As Object, ByVal e As EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
         Options.ExclusionZone.X = AvoidanceZoneX.Value / 100
         Options.ExclusionZone.Y = AvoidanceZoneY.Value / 100
         Options.ExclusionZone.Width = AvoidanceZoneWidth.Value / 100
@@ -187,7 +187,7 @@
         End If
     End Sub
 
-    Private Sub ScreenSelection_Box_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MonitorsSelection.SelectedIndexChanged
+    Private Sub ScreenSelection_Box_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
         If selectingMonitors Then Exit Sub
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
@@ -244,18 +244,18 @@
 
     End Sub
 
-    Private Sub Cursor_zone_counter_ValueChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CursorAvoidanceRadius.ValueChanged
+    Private Sub Cursor_zone_counter_ValueChanged(ByVal sender As Object, ByVal e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
         Main.Instance.cursor_zone_size = CInt(CursorAvoidanceRadius.Value)
         Options.CursorAvoidanceSize = CursorAvoidanceRadius.Value
     End Sub
 
-    Private Sub Close_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CloseButton.Click
+    Private Sub Close_Click(ByVal sender As Object, ByVal e As EventArgs) Handles CloseButton.Click
 
         Me.Visible = False
 
     End Sub
 
-    Friend Sub Save_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional profile As String = Options.DefaultProfileName) Handles SaveButton.Click
+    Friend Sub Save_Button_Click(ByVal sender As Object, ByVal e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles SaveButton.Click
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
             MsgBox("You need to select at least one monitor.")
@@ -278,7 +278,7 @@
 
     End Sub
 
-    Friend Sub Reset_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional ByVal counts_only As Boolean = False) Handles ResetButton.Click
+    Friend Sub Reset_Click(ByVal sender As Object, ByVal e As EventArgs, Optional ByVal counts_only As Boolean = False) Handles ResetButton.Click
 
         If counts_only = False Then
             alreadyLoaded = False
@@ -295,7 +295,7 @@
 
     End Sub
 
-    Friend Sub Load_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs, Optional selected_profile As String = Options.DefaultProfileName, Optional ByVal silent As Boolean = False) Handles LoadButton.Click
+    Friend Sub Load_Button_Click(ByVal sender As Object, ByVal e As EventArgs, Optional selected_profile As String = Options.DefaultProfileName, Optional ByVal silent As Boolean = False) Handles LoadButton.Click
         Try
             If Not IsNothing(sender) Then
                 If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
@@ -348,7 +348,7 @@
 
     End Sub
 
-    Private Sub Window_Avoidance_Enabled_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WindowAvoidance.CheckedChanged
+    Private Sub Window_Avoidance_Enabled_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles WindowAvoidance.CheckedChanged
 
         If WindowAvoidance.Checked = False Then
             PoniesAvoidPonies.Enabled = False
@@ -361,11 +361,11 @@
         Options.WindowAvoidanceEnabled = WindowAvoidance.Checked
     End Sub
 
-    Private Sub Scale_Slider_Scroll(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SizeScale.ValueChanged
+    Private Sub Scale_Slider_Scroll(ByVal sender As Object, ByVal e As EventArgs) Handles SizeScale.ValueChanged
         SizeScaleValueLabel.Text = Math.Round(SizeScale.Value / 100.0F, 2) & "x"
     End Sub
 
-    Private Sub Scale_Slider_MouseUp(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SizeScale.MouseUp
+    Private Sub Scale_Slider_MouseUp(ByVal sender As Object, ByVal e As EventArgs) Handles SizeScale.MouseUp
         Options.ScaleFactor = SizeScale.Value / 100.0F
         Main.Instance.PonySelectionPanel.SuspendLayout()
         For Each control As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
@@ -375,7 +375,7 @@
         Main.Instance.PonySelectionPanel.ResumeLayout()
     End Sub
 
-    Private Sub Volume_Control_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Volume.ValueChanged
+    Private Sub Volume_Control_Change(ByVal sender As Object, ByVal e As EventArgs) Handles Volume.ValueChanged
 
         'The slider is in %, we need to convert that to the volume that an
         'Microsoft.DirectX.AudioVideoPlayback.Audio.volume would take.
@@ -398,11 +398,11 @@
         Next
     End Sub
 
-    Private Sub Custom_Filters_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CustomFiltersButton.Click
+    Private Sub Custom_Filters_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles CustomFiltersButton.Click
         FiltersForm.ShowDialog()
     End Sub
 
-    Private Sub Color_Select_Button_Click(sender As System.Object, e As System.EventArgs) Handles ScreensaverColorButton.Click
+    Private Sub Color_Select_Button_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
 
         Dim colorpicker As New System.Windows.Forms.ColorDialog
 
@@ -415,7 +415,7 @@
 
     End Sub
 
-    Private Sub Screensaver_solidcolor_checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles ScreensaverColor.CheckedChanged
+    Private Sub Screensaver_solidcolor_checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverColor.CheckedChanged
 
         If ScreensaverColor.Checked Then
             If IsNothing(ScreenSaverBackgroundColor) OrElse ScreenSaverBackgroundColor = New Color Then
@@ -428,7 +428,7 @@
         End If
     End Sub
 
-    Private Sub Screensaver_use_bgimage_checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles ScreensaverImage.CheckedChanged
+    Private Sub Screensaver_use_bgimage_checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverImage.CheckedChanged
 
         If ScreensaverImage.Checked Then
             If ScreenSaverBackgroundImagePath = "" OrElse Not System.IO.File.Exists(ScreenSaverBackgroundImagePath) Then
@@ -442,7 +442,7 @@
 
     End Sub
 
-    Private Sub Screensaver_background_image_select_button_Click(sender As System.Object, e As System.EventArgs) Handles ScreensaverImageButton.Click
+    Private Sub Screensaver_background_image_select_button_Click(sender As Object, e As EventArgs) Handles ScreensaverImageButton.Click
 
         Dim image_file_selection As New System.Windows.Forms.OpenFileDialog
 
@@ -471,14 +471,14 @@
 
     End Sub
 
-    Private Sub PoniesAlwaysOnTop_Checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles AlwaysOnTop.CheckedChanged
+    Private Sub PoniesAlwaysOnTop_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
         Options.AlwaysOnTop = AlwaysOnTop.Checked
         If Not IsNothing(Pony.CurrentViewer) Then
             Pony.CurrentViewer.Topmost = Options.AlwaysOnTop
         End If
     End Sub
 
-    Private Sub SlowDownFactor_Slider_Scroll(sender As System.Object, e As System.EventArgs) Handles TimeScale.Scroll
+    Private Sub SlowDownFactor_Slider_Scroll(sender As Object, e As EventArgs) Handles TimeScale.Scroll
         TimeScaleFactor = TimeScale.Value / 10
         TimeScaleValueLabel.Text = TimeScaleFactor & "x"
         Options.TimeFactor = TimeScale.Value / 10.0F
@@ -558,75 +558,75 @@
 
     End Sub
 
-    Private Sub Pony_Speak_Chance_Counter_ValueChanged(sender As System.Object, e As System.EventArgs) Handles PonySpeechChance.ValueChanged
+    Private Sub Pony_Speak_Chance_Counter_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged
         Options.PonySpeechChance = PonySpeechChance.Value / 100
     End Sub
 
-    Private Sub Disable_Speech_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles SpeechDisabled.CheckedChanged
+    Private Sub Disable_Speech_CheckedChanged(sender As Object, e As EventArgs) Handles SpeechDisabled.CheckedChanged
         Options.PonySpeechEnabled = Not SpeechDisabled.Checked
     End Sub
 
-    Private Sub Cursor_Avoidance_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles CursorAvoidance.CheckedChanged
+    Private Sub Cursor_Avoidance_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles CursorAvoidance.CheckedChanged
         Options.CursorAvoidanceEnabled = CursorAvoidance.Checked
     End Sub
 
-    Private Sub Pony_Dragging_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles PonyDragging.CheckedChanged
+    Private Sub Pony_Dragging_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles PonyDragging.CheckedChanged
         Options.PonyDraggingEnabled = PonyDragging.Checked
     End Sub
 
-    Private Sub Interactions_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles Interactions.CheckedChanged
+    Private Sub Interactions_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles Interactions.CheckedChanged
         Options.PonyInteractionsEnabled = Interactions.Checked
     End Sub
 
-    Private Sub Interaction_Errors_Displayed_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles InteractionErrorsDisplayed.CheckedChanged
+    Private Sub Interaction_Errors_Displayed_CheckedChanged(sender As Object, e As EventArgs) Handles InteractionErrorsDisplayed.CheckedChanged
         Options.DisplayPonyInteractionsErrors = InteractionErrorsDisplayed.Checked
     End Sub
 
-    Private Sub Max_Pony_Counter_ValueChanged(sender As System.Object, e As System.EventArgs) Handles MaxPonies.ValueChanged
+    Private Sub Max_Pony_Counter_ValueChanged(sender As Object, e As EventArgs) Handles MaxPonies.ValueChanged
         Options.MaxPonyCount = CInt(MaxPonies.Value)
     End Sub
 
-    Private Sub Alpha_Blending_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles AlphaBlending.CheckedChanged
+    Private Sub Alpha_Blending_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles AlphaBlending.CheckedChanged
         Options.AlphaBlendingEnabled = AlphaBlending.Checked
     End Sub
 
-    Private Sub Effects_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles Effects.CheckedChanged
+    Private Sub Effects_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles Effects.CheckedChanged
         Options.PonyEffectsEnabled = Effects.Checked
     End Sub
 
-    Private Sub PoniesAvoidPonies_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles PoniesAvoidPonies.CheckedChanged
+    Private Sub PoniesAvoidPonies_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesAvoidPonies.CheckedChanged
         Options.PonyAvoidsPonies = PoniesAvoidPonies.Checked
     End Sub
 
-    Private Sub PoniesStayInBoxes_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles PoniesStayInBoxes.CheckedChanged
+    Private Sub PoniesStayInBoxes_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesStayInBoxes.CheckedChanged
         Options.PonyStaysInBox = PoniesStayInBoxes.Checked
     End Sub
 
-    Private Sub Teleport_Checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles Teleport.CheckedChanged
+    Private Sub Teleport_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles Teleport.CheckedChanged
         Options.PonyTeleportEnabled = Teleport.Checked
     End Sub
 
-    Private Sub Sounds_Enabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles Sound.CheckedChanged
+    Private Sub Sounds_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles Sound.CheckedChanged
         Options.SoundEnabled = Sound.Checked
     End Sub
 
-    Private Sub Sounds_Limit1_Radio_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles SoundLimitOneGlobally.CheckedChanged
+    Private Sub Sounds_Limit1_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOneGlobally.CheckedChanged
         Options.SoundSingleChannelOnly = SoundLimitOneGlobally.Checked
     End Sub
 
-    Private Sub Sounds_Per_Pony_Radio_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles SoundLimitOnePerPony.CheckedChanged
+    Private Sub Sounds_Per_Pony_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOnePerPony.CheckedChanged
         Options.SoundSingleChannelOnly = Not SoundLimitOnePerPony.Checked
     End Sub
 
-    Private Sub Suspend_on_Fullscreen_Checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles SuspendForFullscreenApp.CheckedChanged
+    Private Sub Suspend_on_Fullscreen_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles SuspendForFullscreenApp.CheckedChanged
         Options.SuspendForFullscreenApplication = SuspendForFullscreenApp.Checked
     End Sub
 
-    Private Sub ScreenSaver_Sounds_Checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles ScreensaverSounds.CheckedChanged
+    Private Sub ScreenSaver_Sounds_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverSounds.CheckedChanged
         Options.SoundEnabled = ScreensaverSounds.Checked
     End Sub
 
-    Private Sub Screensaver_Transparent_Checkbox_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles ScreensaverTransparent.CheckedChanged
+    Private Sub Screensaver_Transparent_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverTransparent.CheckedChanged
         If ScreensaverTransparent.Checked Then
             Options.ScreenSaverStyle = Options.ScreenSaverBackgroundStyle.Transparent
         End If

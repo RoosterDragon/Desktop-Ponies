@@ -11,7 +11,7 @@ Public Class NewInteractionDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
 
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new behavior.")
@@ -128,7 +128,7 @@ Public Class NewInteractionDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
 
         Me.Close()
     End Sub

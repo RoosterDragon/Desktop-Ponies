@@ -7,7 +7,7 @@ Public Class NewPonyDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
         Dim newName = Trim(Name_Textbox.Text)
 
         If newName = "" Then
@@ -51,18 +51,18 @@ Public Class NewPonyDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
         Me.DialogResult = DialogResult.Cancel
         Me.Close()
     End Sub
 
-    Private Sub New_Pony_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub New_Pony_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         Name_Textbox.Text = ""
         Name_Textbox.Enabled = True
         Right_ImageBox.Image = Nothing
     End Sub
 
-    Private Sub First_Behavior_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles First_Behavior_Button.Click
+    Private Sub First_Behavior_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles First_Behavior_Button.Click
 
         Dim newName = Trim(Name_Textbox.Text)
 

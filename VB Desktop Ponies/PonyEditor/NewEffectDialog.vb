@@ -11,7 +11,7 @@ Public Class NewEffectDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
 
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new effect.")
@@ -92,12 +92,12 @@ Public Class NewEffectDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
 
         Me.Close()
     End Sub
 
-    Private Sub New_Behavior_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub New_Behavior_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
 
         Behavior_Box.Items.Clear()
         R_Placement_Box.Items.Clear()
@@ -141,7 +141,7 @@ Public Class NewEffectDialog
 
     End Sub
 
-    Private Sub Left_Image_Set_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Left_Image_Set_Button.Click
+    Private Sub Left_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Left_Image_Set_Button.Click
 
         If Not IsNothing(Left_ImageBox.Image) Then
             Left_ImageBox.Image.Dispose()
@@ -163,7 +163,7 @@ Public Class NewEffectDialog
 
     End Sub
 
-    Private Sub Right_Image_Set_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Right_Image_Set_Button.Click
+    Private Sub Right_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Right_Image_Set_Button.Click
 
         If Not IsNothing(Right_ImageBox.Image) Then
             Right_ImageBox.Image.Dispose()

@@ -7,7 +7,7 @@ Public Class SelectFilesPathDialog
         Icon = My.Resources.Twilight
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
 
         If Not My.Computer.FileSystem.DirectoryExists(Main.Instance.screen_saver_path) Then
             MsgBox("Selected path does not exist.")
@@ -24,12 +24,12 @@ Public Class SelectFilesPathDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
         Me.DialogResult = System.Windows.Forms.DialogResult.Cancel
         Me.Close()
     End Sub
 
-    Private Sub Browse_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles BrowsePathButton.Click
+    Private Sub Browse_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles BrowsePathButton.Click
 
         If FolderBrowserDialog.ShowDialog() = DialogResult.OK Then
             Main.Instance.screen_saver_path = FolderBrowserDialog.SelectedPath

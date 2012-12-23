@@ -27,7 +27,7 @@
         m_editor = editor
     End Sub
 
-    Private Sub Image_Centers_Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Image_Centers_Form_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
 
         previewpony = m_editor.PreviewPony
         Me.Text = "Image Centering for " & previewpony.Directory
@@ -85,7 +85,7 @@
         End If
     End Sub
 
-    Private Sub Left_ImageBox_Click(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Left_ImageBox.MouseClick
+    Private Sub Left_ImageBox_Click(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Left_ImageBox.MouseClick
 
         left_center = e.Location
         previewpony.Behaviors(behavior_index).SetLeftImageCenter(left_center)
@@ -93,7 +93,7 @@
 
     End Sub
 
-    Private Sub Right_ImageBox_Click(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Right_ImageBox.MouseClick
+    Private Sub Right_ImageBox_Click(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Right_ImageBox.MouseClick
 
         right_center = e.Location
         previewpony.Behaviors(behavior_index).SetRightImageCenter(right_center)
@@ -152,7 +152,7 @@
 
     End Sub
 
-    Private Sub Next_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Next_Button.Click
+    Private Sub Next_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Next_Button.Click
 
         If behavior_index = previewpony.Behaviors.Count - 1 Then
             behavior_index = 0
@@ -164,7 +164,7 @@
 
     End Sub
 
-    Private Sub Prev_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Prev_Button.Click
+    Private Sub Prev_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Prev_Button.Click
 
         If behavior_index = 0 Then
             behavior_index = previewpony.Behaviors.Count - 1
@@ -176,7 +176,7 @@
 
     End Sub
 
-    Private Sub Frame_Slider_Scroll(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles frame_slider.Scroll
+    Private Sub Frame_Slider_Scroll(ByVal sender As Object, ByVal e As EventArgs) Handles frame_slider.Scroll
 
         animation_index = frame_slider.Value
         frame_label.Text = CStr(animation_index)
@@ -188,23 +188,23 @@
 
     End Sub
 
-    Private Sub Right_Image_Set_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Right_Image_Set_Button.Click
+    Private Sub Right_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Right_Image_Set_Button.Click
         right_center = right_previous_center
         previewpony.Behaviors(behavior_index).SetRightImageCenter(right_center)
         RedrawMarker()
     End Sub
 
-    Private Sub Left_Image_Set_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Left_Image_Set_Button.Click
+    Private Sub Left_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Left_Image_Set_Button.Click
         left_center = left_previous_center
         previewpony.Behaviors(behavior_index).SetLeftImageCenter(left_center)
         RedrawMarker()
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
         Me.Close()
     End Sub
 
-    Private Sub BG_Black_Radio_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles BG_Black_Radio.CheckedChanged
+    Private Sub BG_Black_Radio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles BG_Black_Radio.CheckedChanged
         RedrawMarker()
     End Sub
 End Class

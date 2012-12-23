@@ -140,7 +140,7 @@ Public Class Main
     End Sub
 
     'Read all configuration files and pony folders.
-    Private Sub Main_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Main_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         Mac.WriteLine("Main_Load started.")
         Instance = Me
 
@@ -454,7 +454,7 @@ Public Class Main
 
     End Sub
 
-    Private Sub TemplateLoader_DoWork(sender As System.Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
+    Private Sub TemplateLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
         Mac.WriteLine("TemplateLoader_DoWork started. No more startup output to follow.")
         Try
             Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
@@ -745,11 +745,11 @@ Public Class Main
         End Using
     End Sub
 
-    Private Sub TemplateLoader_ProgressChanged(sender As System.Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles TemplateLoader.ProgressChanged
+    Private Sub TemplateLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles TemplateLoader.ProgressChanged
         LoadingProgressBar.Value = e.ProgressPercentage
     End Sub
 
-    Private Sub TemplateLoader_RunWorkerCompleted(sender As System.Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles TemplateLoader.RunWorkerCompleted
+    Private Sub TemplateLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles TemplateLoader.RunWorkerCompleted
         TemplateLoader.Dispose()
 
         If auto_started = True Then
@@ -798,13 +798,13 @@ Public Class Main
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Friend Sub ZeroPoniesButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ZeroPoniesButton.Click
+    Friend Sub ZeroPoniesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
         Next
     End Sub
 
-    Private Sub SaveProfileButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SaveProfileButton.Click
+    Private Sub SaveProfileButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SaveProfileButton.Click
         Dim profileToSave = Trim(ProfileComboBox.Text)
 
         If profileToSave = "" Then
@@ -827,24 +827,24 @@ Public Class Main
                         MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
-    Private Sub LoadProfileButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles LoadProfileButton.Click
+    Private Sub LoadProfileButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles LoadProfileButton.Click
         'Options.LoadProfile(ProfileComboBox.Text)
         OptionsForm.Instance.Load_Button_Click(sender, e, ProfileComboBox.Text)
     End Sub
 
-    Private Sub OnePoniesButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OnePoniesButton.Click
+    Private Sub OnePoniesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OnePoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "1"
         Next
     End Sub
 
-    Private Sub OptionsButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OptionsButton.Click
+    Private Sub OptionsButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OptionsButton.Click
         Main.Instance.Invoke(Sub()
                                  OptionsForm.Instance.Show()
                              End Sub)
     End Sub
 
-    Private Sub PonyEditorButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PonyEditorButton.Click
+    Private Sub PonyEditorButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PonyEditorButton.Click
 
         Preview_Mode = True
         Me.Visible = False
@@ -874,51 +874,46 @@ Public Class Main
         Return previewWindowRectangle()
     End Function
 
-    Private Sub GamesButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GamesButton.Click
-
-#If Not Debug Then
+    Private Sub GamesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles GamesButton.Click
         Try
-#End If
-
-
-        If games.Count <> 0 Then
-            games.Clear()
-        End If
-
-        Dim Install_Folder = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
-
-        For Each folder In Install_Folder
-
-            Try
-                'some languages don't use \ as a separator between folders
-                Dim config_file_name = Path.Combine(folder, Game.ConfigFilename)
-
-                Dim new_game As New Game(config_file_name, folder & System.IO.Path.DirectorySeparatorChar)
-
-                games.Add(new_game)
-
-            Catch ex As Exception
-                MsgBox("Error loading game: " & folder & ex.Message & ex.StackTrace)
-            End Try
-        Next
-
-        Me.Visible = False
-        If GameSelectionForm.ShowDialog() = DialogResult.OK Then
-            Startup_Ponies.Clear()
-            Pony_Startup()
-            current_game.Setup()
-            Animator.Begin()
-        Else
-            If Me.IsDisposed = False Then
-                Me.Visible = True
+            If games.Count <> 0 Then
+                games.Clear()
             End If
-        End If
 
-#If Not Debug Then
+            Dim Install_Folder = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
+
+            For Each folder In Install_Folder
+
+                Try
+                    'some languages don't use \ as a separator between folders
+                    Dim config_file_name = Path.Combine(folder, Game.ConfigFilename)
+
+                    Dim new_game As New Game(config_file_name, folder & System.IO.Path.DirectorySeparatorChar)
+
+                    games.Add(new_game)
+
+                Catch ex As Exception
+                    MsgBox("Error loading game: " & folder & ex.Message & ex.StackTrace)
+                End Try
+            Next
+
+            Me.Visible = False
+            If GameSelectionForm.ShowDialog() = DialogResult.OK Then
+                Startup_Ponies.Clear()
+                Pony_Startup()
+                current_game.Setup()
+                Animator.Begin()
+            Else
+                If Me.IsDisposed = False Then
+                    Me.Visible = True
+                End If
+            End If
         Catch ex As Exception
             MsgBox("Error loading games: " & ex.Message & ex.StackTrace)
-        End Try
+#If Debug Then
+            Throw
 #End If
+        End Try
     End Sub
 
     Private Sub GetProfiles(profileToAttemptToLoad As String)
@@ -930,7 +925,7 @@ Public Class Main
         If profileIndex <> -1 Then ProfileComboBox.SelectedIndex = profileIndex
     End Sub
 
-    Private Sub CopyProfileButton_Click(sender As System.Object, e As System.EventArgs) Handles CopyProfileButton.Click
+    Private Sub CopyProfileButton_Click(sender As Object, e As EventArgs) Handles CopyProfileButton.Click
         dont_load_profile = True
 
         Dim copiedProfileName = InputBox("Enter name of new profile to copy to:")
@@ -951,7 +946,7 @@ Public Class Main
         dont_load_profile = False
     End Sub
 
-    Private Sub DeleteProfileButton_Click(sender As System.Object, e As System.EventArgs) Handles DeleteProfileButton.Click
+    Private Sub DeleteProfileButton_Click(sender As Object, e As EventArgs) Handles DeleteProfileButton.Click
         If String.Equals(ProfileComboBox.Text, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
             MsgBox("Cannot delete the '" & Options.DefaultProfileName & "' profile")
             Exit Sub
@@ -969,14 +964,14 @@ Public Class Main
         dont_load_profile = False
     End Sub
 
-    Private Sub ProfileComboBox_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles ProfileComboBox.SelectedIndexChanged
+    Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not dont_load_profile Then
             'Options.LoadProfile(ProfileComboBox.Text)
             OptionsForm.Instance.Load_Button_Click(sender, e, Trim(ProfileComboBox.Text))
         End If
     End Sub
 
-    Private Sub FilterAnyRadio_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FilterAnyRadio.CheckedChanged
+    Private Sub FilterAnyRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterAnyRadio.CheckedChanged
 
         If FilterAnyRadio.Checked Then
             FilterOptionsBox.Enabled = True
@@ -985,7 +980,7 @@ Public Class Main
 
     End Sub
 
-    Private Sub FilterExactlyRadio_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FilterExactlyRadio.CheckedChanged
+    Private Sub FilterExactlyRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterExactlyRadio.CheckedChanged
 
         If FilterExactlyRadio.Checked Then
             FilterOptionsBox.Enabled = True
@@ -994,14 +989,14 @@ Public Class Main
 
     End Sub
 
-    Private Sub FilterAllRadio_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FilterAllRadio.CheckedChanged
+    Private Sub FilterAllRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterAllRadio.CheckedChanged
         If FilterAllRadio.Checked AndAlso Me.Visible Then
             FilterOptionsBox.Enabled = False
             RefilterSelection()
         End If
     End Sub
 
-    Private Sub FilterOptionsBox_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FilterOptionsBox.SelectedIndexChanged
+    Private Sub FilterOptionsBox_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterOptionsBox.SelectedIndexChanged
         RefilterSelection()
     End Sub
 
@@ -1042,7 +1037,7 @@ Public Class Main
         PonySelectionPanel.ResumeLayout()
     End Sub
 
-    Private Sub Main_KeyPress(sender As System.Object, e As System.Windows.Forms.KeyPressEventArgs) Handles MyBase.KeyPress
+    Private Sub Main_KeyPress(sender As Object, e As System.Windows.Forms.KeyPressEventArgs) Handles MyBase.KeyPress
         If ProfileComboBox.Focused Then Exit Sub
 
         Dim character = e.KeyChar
@@ -1061,7 +1056,7 @@ Public Class Main
 #End Region
 
 #Region "Pony Startup"
-    Private Sub GoButton_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GoButton.Click
+    Private Sub GoButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles GoButton.Click
         If PonyLoader.IsBusy Then
             MessageBox.Show(Me, "Already busy loading ponies. Cannot start any more at this time.",
                             "Busy", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -1073,7 +1068,7 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub PonyLoader_DoWork(sender As System.Object, e As System.ComponentModel.DoWorkEventArgs) Handles PonyLoader.DoWork
+    Private Sub PonyLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles PonyLoader.DoWork
         Try
             Startup_Ponies.Clear()
 
@@ -1358,14 +1353,14 @@ Public Class Main
         Return viewer
     End Function
 
-    Private Sub PonyLoader_ProgressChanged(sender As System.Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles PonyLoader.ProgressChanged
+    Private Sub PonyLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles PonyLoader.ProgressChanged
         ' Lazy solution to invoking issues and deadlocking the main thread.
         If Not InvokeRequired Then
             LoadingProgressBar.Value = e.ProgressPercentage
         End If
     End Sub
 
-    Private Sub PonyLoader_RunWorkerCompleted(sender As System.Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles PonyLoader.RunWorkerCompleted
+    Private Sub PonyLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles PonyLoader.RunWorkerCompleted
         loading = False
 
         LoadingProgressBar.Value = 0
@@ -1400,7 +1395,7 @@ Public Class Main
     ' ''' <param name="sender"></param>
     ' ''' <param name="e"></param>
     ' ''' <remarks></remarks>
-    'Private Sub Main_VisibleChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles MyBase.VisibleChanged
+    'Private Sub Main_VisibleChanged(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.VisibleChanged
     '    If Not auto_started Then
     '        Me.Opacity = 100
     '    End If
@@ -1516,23 +1511,23 @@ Public Class Main
 
     End Sub
 
-    Private Sub AnimationTimer_Tick(sender As System.Object, e As System.EventArgs) Handles AnimationTimer.Tick
+    Private Sub AnimationTimer_Tick(sender As Object, e As EventArgs) Handles AnimationTimer.Tick
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.AdvanceTimeIndex(TimeSpan.FromMilliseconds(AnimationTimer.Interval))
         Next
     End Sub
 
-    Private Sub Main_VisibleChanged(sender As System.Object, e As System.EventArgs) Handles MyBase.VisibleChanged
+    Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
         AnimationTimer.Enabled = Visible AndAlso Not loading
     End Sub
 
-    Private Sub Main_FormClosing(sender As System.Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+    Private Sub Main_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
         Mac.WriteLine("Main_FormClosing started.")
         e.Cancel = loading
         Mac.WriteLine("Main_FormClosing ending with cancel set to " & e.Cancel & ".")
     End Sub
 
-    Private Sub Main_Disposed(sender As System.Object, e As System.EventArgs) Handles MyBase.Disposed
+    Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
         Mac.WriteLine("Main_Disposed started.")
         For Each kvp In ponyImages.InitializedItems
             If kvp.Value IsNot Nothing Then

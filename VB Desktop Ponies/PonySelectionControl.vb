@@ -58,17 +58,17 @@ Public Class PonySelectionControl
         e.Graphics.DrawImage(PonyImage(timeIndex).Image, 0, 0, PonyImage.Width * Options.ScaleFactor, PonyImage.Height * Options.ScaleFactor)
     End Sub
 
-    Private Sub MinusButton_Click(sender As System.Object, e As System.EventArgs) Handles MinusButton.Click
+    Private Sub MinusButton_Click(sender As Object, e As EventArgs) Handles MinusButton.Click
         Dim count As Integer
         If Integer.TryParse(PonyCount.Text, count) Then PonyCount.Text = CStr((count - 1))
     End Sub
 
-    Private Sub PlusButton_Click(sender As System.Object, e As System.EventArgs) Handles PlusButton.Click
+    Private Sub PlusButton_Click(sender As Object, e As EventArgs) Handles PlusButton.Click
         Dim count As Integer
         If Integer.TryParse(PonyCount.Text, count) Then PonyCount.Text = CStr((count + 1))
     End Sub
 
-    Private Sub PonyCount_TextChanged(sender As System.Object, e As System.EventArgs) Handles PonyCount.TextChanged
+    Private Sub PonyCount_TextChanged(sender As Object, e As EventArgs) Handles PonyCount.TextChanged
         Dim count As Integer
         Dim parsed = Integer.TryParse(PonyCount.Text, count)
         If parsed AndAlso count = 0 Then
@@ -78,11 +78,11 @@ Public Class PonySelectionControl
         End If
     End Sub
 
-    Private Sub PonyCount_KeyPress(sender As System.Object, e As System.Windows.Forms.KeyPressEventArgs) Handles PonyCount.KeyPress
+    Private Sub PonyCount_KeyPress(sender As Object, e As System.Windows.Forms.KeyPressEventArgs) Handles PonyCount.KeyPress
         e.Handled = Not (Char.IsControl(e.KeyChar) OrElse Char.IsDigit(e.KeyChar))
     End Sub
 
-    Private Sub PonyCount_Leave(sender As System.Object, e As System.EventArgs) Handles PonyCount.Leave
+    Private Sub PonyCount_Leave(sender As Object, e As EventArgs) Handles PonyCount.Leave
         If String.IsNullOrEmpty(PonyCount.Text) Then PonyCount.Text = "0"
     End Sub
 End Class

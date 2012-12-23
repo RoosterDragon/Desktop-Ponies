@@ -6,7 +6,7 @@ Public Class GameSelectionForm
     Dim team2 As Game.Team = Nothing
     Dim game As Game = Nothing
 
-    Private Sub GameSelectionForm_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub GameSelectionForm_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         Icon = My.Resources.Twilight
 
         'add all possible ponies to the selection window.
@@ -69,7 +69,7 @@ Public Class GameSelectionForm
 
     End Sub
 
-    Private Sub Game_Selection_View_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Game_Selection_View.SelectedIndexChanged
+    Private Sub Game_Selection_View_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Game_Selection_View.SelectedIndexChanged
 
         If Game_Selection_View.SelectedIndices.Count = 0 Then Exit Sub
 
@@ -143,11 +143,11 @@ Public Class GameSelectionForm
 
     End Sub
 
-    Private Sub Add_To_Team1_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Add_Team1_Button.Click
+    Private Sub Add_To_Team1_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Add_Team1_Button.Click
         Add_to_panel(Team1_Panel, 1)
     End Sub
 
-    Private Sub Add_To_Team2_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Add_Team2_Button.Click
+    Private Sub Add_To_Team2_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Add_Team2_Button.Click
         Add_to_panel(Team2_Panel, 2)
     End Sub
 
@@ -223,7 +223,7 @@ Public Class GameSelectionForm
 
     End Sub
 
-    Private Sub PictureClick(ByVal sender As Object, ByVal e As System.EventArgs)
+    Private Sub PictureClick(ByVal sender As Object, ByVal e As EventArgs)
 
         Dim pony_picturebox As PictureBox = CType(sender, PictureBox)
 
@@ -286,7 +286,7 @@ Public Class GameSelectionForm
 
     End Sub
 
-    Private Sub Play_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Play_Button.Click
+    Private Sub Play_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Play_Button.Click
 
         If IsNothing(game) Then
             MsgBox("Select a game first!")
@@ -310,7 +310,7 @@ Public Class GameSelectionForm
         Main.Instance.current_game = game
     End Sub
 
-    Private Sub Info_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Info_Button.Click
+    Private Sub Info_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Info_Button.Click
         If IsNothing(game) Then
             MsgBox("Select a game first!")
         Else
