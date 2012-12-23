@@ -132,6 +132,13 @@ Public Class Main
     End Enum
 
 #Region "Initialization"
+
+    Public Sub New()
+        Mac.WriteLine("Main_ctor started.")
+        InitializeComponent()
+        Mac.WriteLine("Main_ctor ended.")
+    End Sub
+
     'Read all configuration files and pony folders.
     Private Sub Main_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Mac.WriteLine("Main_Load started.")

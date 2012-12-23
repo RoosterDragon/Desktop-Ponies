@@ -46,6 +46,8 @@
         /// <exception cref="T:System.ArgumentException">The <see cref="T:System.Drawing.Imaging.PixelFormat"/> of
         /// <paramref name="bitmap"/> was not <see cref="P:System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</exception>
         /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
+        /// <remarks>This method handles invoking from cross-thread calls as required, and need not be directly called from the UI thread.
+        /// </remarks>
         public void SetBitmap(Bitmap bitmap)
         {
             SetBitmap(bitmap, 255);
@@ -61,6 +63,8 @@
         /// <exception cref="T:System.ArgumentException">The <see cref="T:System.Drawing.Imaging.PixelFormat"/> of
         /// <paramref name="bitmap"/> was not <see cref="P:System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</exception>
         /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
+        /// <remarks>This method handles invoking from cross-thread calls as required, and need not be directly called from the UI thread.
+        /// </remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
             Justification = "Following Windows API conventions, which use Hungarian notation.")]

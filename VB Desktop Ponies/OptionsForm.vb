@@ -181,10 +181,10 @@
         If Not IsNothing(AvoidanceZonePreviewGraphics) Then
             AvoidanceZonePreviewGraphics.Clear(Color.White)
             AvoidanceZonePreviewGraphics.FillRectangle(
-                Brushes.ForestGreen, Options.ExclusionZoneForBounds(Rectangle.Round(AvoidanceZonePreviewGraphics.ClipBounds)))
+                Brushes.ForestGreen, Options.ExclusionZoneForBounds(Rectangle.Round(AvoidanceZonePreviewGraphics.VisibleClipBounds)))
             AvoidanceZonePreviewImage.Invalidate()
+            AvoidanceZonePreviewImage.Update()
         End If
-
     End Sub
 
     Private Sub ScreenSelection_Box_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MonitorsSelection.SelectedIndexChanged

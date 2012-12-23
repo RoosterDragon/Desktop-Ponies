@@ -155,7 +155,7 @@
     /// <summary>
     /// Flags for <see cref="M:CsDesktopPonies.SpriteManagement.Win32.NativeMethods.UpdateLayeredWindow"/>.
     /// </summary>
-    internal enum UlwFlags : int
+    internal enum UlwFlags : uint
     {
         /// <summary>
         /// Use when hdcSrc is NULL.
@@ -180,7 +180,7 @@
     /// The following are the extended window styles.
     /// </summary>
     [Flags]
-    internal enum ExtendedWindowStyles
+    internal enum ExtendedWindowStyles : int
     {
         /// <summary>
         /// The window accepts drag-drop files.

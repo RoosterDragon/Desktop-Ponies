@@ -24,7 +24,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="options"/> is invalid.</exception>
         /// <exception cref="T:System.ArgumentException">The dimensions of the <paramref name="qualifiers"/> array are invalid.-or-There is
-        /// a conflict between separator and qualifier characters.-or-<paramref name="source"/> contains a an opening qualifier character
+        /// a conflict between separator and qualifier characters.-or-<paramref name="source"/> contains an opening qualifier character
         /// with no matching closing qualifier.</exception>
         public static string[] SplitQualified(this string source, char[] separators, char[,] qualifiers, StringSplitOptions options)
         {
