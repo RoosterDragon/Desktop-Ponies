@@ -93,7 +93,6 @@ Public Class NewEffectDialog
     End Sub
 
     Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
-
         Me.Close()
     End Sub
 

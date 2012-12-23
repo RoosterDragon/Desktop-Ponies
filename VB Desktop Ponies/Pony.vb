@@ -3521,7 +3521,7 @@ Class House
         deployedPonies.Clear()
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
             For Each guest In base.Visitors
-                If LCase(Pony.Directory) = LCase(guest) Then
+                If String.Equals(Pony.Directory, guest, StringComparison.OrdinalIgnoreCase) Then
                     deployedPonies.Add(Pony)
                     Exit For
                 End If

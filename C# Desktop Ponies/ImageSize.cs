@@ -7,7 +7,7 @@
     using System.Linq;
 
     /// <summary>
-    /// Provides static methods to get the size of an image without having to load the whole file.
+    /// Provides methods to get the size of an image without having to load the whole file.
     /// </summary>
     /// <remarks>
     /// Modified from http://stackoverflow.com/questions/111345/getting-image-dimensions-without-reading-the-entire-file by user ICR
@@ -44,7 +44,7 @@
         /// <summary>
         /// Gets the width and height of an image, in pixels.
         /// </summary>
-        /// <param name="path">The path to an image file of BMP, GIF, PNG or JPEG format whose size is to be found.</param>
+        /// <param name="path">The path to an image file of PNG, JPEG, GIF or BMP format whose size is to be found.</param>
         /// <returns>The width and height of the image, in pixels.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="path"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
@@ -70,8 +70,8 @@
         /// <summary>
         /// Gets the width and height of an image, in pixels.
         /// </summary>
-        /// <param name="binaryReader">A <see cref="T:System.IO.BinaryReader"/> that is positioned to read an image stream of BMP, PNG, GIF
-        /// or JPEG format.</param>
+        /// <param name="binaryReader">A <see cref="T:System.IO.BinaryReader"/> that is positioned to read an image stream of PNG, JPEG,
+        /// GIF or BMP format.</param>
         /// <returns>The width and height of the image, in pixels.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="binaryReader"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>    

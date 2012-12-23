@@ -878,6 +878,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Right Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetRightImagePath(new_image_path)
+                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = Get_Filename(new_image_path)
                         ImageSizeCheck(changed_behavior.RightImageSize)
                         changes_made_now = True
                     End If
@@ -887,6 +888,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Left Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetLeftImagePath(new_image_path)
+                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = Get_Filename(new_image_path)
                         ImageSizeCheck(changed_behavior.LeftImageSize)
                         changes_made_now = True
                     End If
@@ -911,6 +913,170 @@ Public Class PonyEditor
             MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
         End Try
 
+    End Sub
+
+    Private Sub PonySpeechesGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
+        Try
+
+            If e.RowIndex < 0 Then Exit Sub
+
+            SaveSortOrder()
+
+            Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
+            Dim changed_speech As PonyBase.Behavior.SpeakingLine = Nothing
+
+            For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
+                If speech.Name = changed_speech_name Then
+                    changed_speech = speech
+                    Exit For
+                End If
+            Next
+
+            If IsNothing(changed_speech) Then
+                Load_Parameters(PreviewPony)
+                RestoreSortOrder()
+                Exit Sub
+            End If
+
+            Dim changes_made_now = False
+
+            Select Case e.ColumnIndex
+
+                Case colSpeechSoundFile.Index
+                    HidePony()
+                    changed_speech.SoundFile = SetSound()
+                    PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechSoundFile.Index).Value = changed_speech.SoundFile
+                    changes_made_now = True
+                    ShowPony()
+                Case Else
+                    Exit Sub
+
+            End Select
+
+            If changes_made_now Then
+                'Load_Parameters(Preview_Pony)
+                'RestoreSortOrder()
+                has_saved = False
+            End If
+
+
+        Catch ex As Exception
+            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+        End Try
+    End Sub
+
+    Private Sub PonyEffectsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
+        Try
+
+            If e.RowIndex < 0 Then Exit Sub
+
+            SaveSortOrder()
+
+            Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
+            Dim changed_effect As Effect = Nothing
+
+            For Each effect In PreviewPonyEffects()
+                If effect.Name = changed_effect_name Then
+                    changed_effect = effect
+                    Exit For
+                End If
+            Next
+
+            If IsNothing(changed_effect) Then
+                Load_Parameters(PreviewPony)
+                RestoreSortOrder()
+                Exit Sub
+            End If
+
+            Dim changes_made_now = False
+
+            Select Case e.ColumnIndex
+
+                Case colEffectRightImage.Index
+                    HidePony()
+                    Dim new_image_path As String = Add_Picture(changed_effect_name & " Right Image...")
+                    If Not IsNothing(new_image_path) Then
+                        changed_effect.SetRightImagePath(new_image_path)
+                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = Get_Filename(new_image_path)
+                        changes_made_now = True
+                    End If
+                    ShowPony()
+                Case colEffectLeftImage.Index
+                    HidePony()
+                    Dim new_image_path = Add_Picture(changed_effect_name & " Left Image...")
+                    If Not IsNothing(new_image_path) Then
+                        changed_effect.SetLeftImagePath(new_image_path)
+                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = Get_Filename(new_image_path)
+                        changes_made_now = True
+                    End If
+                    ShowPony()
+                Case Else
+                    Exit Sub
+
+            End Select
+
+            If changes_made_now Then
+                'Load_Parameters(Preview_Pony)
+                'RestoreSortOrder()
+                has_saved = False
+            End If
+
+
+        Catch ex As Exception
+            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+        End Try
+    End Sub
+
+    Private Sub PonyInteractionsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
+        Try
+
+            If e.RowIndex < 0 Then Exit Sub
+
+            SaveSortOrder()
+
+            Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
+            Dim changed_interaction As PonyBase.Interaction = Nothing
+
+            For Each interaction As PonyBase.Interaction In PreviewPony.Interactions
+                If interaction.Name = changed_interaction_name Then
+                    changed_interaction = interaction
+                    Exit For
+                End If
+            Next
+
+            If IsNothing(changed_interaction) Then
+                Load_Parameters(PreviewPony)
+                RestoreSortOrder()
+                Exit Sub
+            End If
+
+            Dim changes_made_now = False
+
+
+            Select Case e.ColumnIndex
+                Case colInteractionTargets.Index
+                Case colInteractionBehaviors.Index
+                    HidePony()
+                    Using form = New NewInteractionDialog(Me)
+                        form.Change_Interaction(changed_interaction)
+                        form.ShowDialog()
+                    End Using
+                    changes_made_now = True
+                    ShowPony()
+                Case Else
+                    Exit Sub
+            End Select
+
+            If changes_made_now Then
+                'Load_Parameters(Preview_Pony)
+                'RestoreSortOrder()
+                has_saved = False
+            End If
+
+
+        Catch ex As Exception
+            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+        End Try
     End Sub
 
     Private Sub PonyBehaviorsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
@@ -1504,6 +1670,77 @@ Public Class PonyEditor
 
     End Sub
 
+    Private Sub NewSpeechButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewSpeechButton.Click
+        Try
+            If IsNothing(PreviewPony) Then
+                MsgBox("Select a pony or create a new one first,")
+                Exit Sub
+            End If
+
+            HidePony()
+
+            Using form = New NewSpeechDialog(Me)
+                form.ShowDialog()
+            End Using
+
+            ShowPony()
+
+            Load_Parameters(PreviewPony)
+            has_saved = False
+        Catch ex As Exception
+            MsgBox("Error creating new speech! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            Me.Close()
+        End Try
+    End Sub
+
+    Private Sub NewEffectButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewEffectButton.Click
+        Try
+
+            If IsNothing(PreviewPony) Then
+                MsgBox("Select a pony or create a new one first,")
+                Exit Sub
+            End If
+
+            HidePony()
+
+            Using form = New NewEffectDialog(Me)
+                form.ShowDialog()
+            End Using
+
+            ShowPony()
+
+            Load_Parameters(PreviewPony)
+            has_saved = False
+        Catch ex As Exception
+            MsgBox("Error creating new effect! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            Me.Close()
+        End Try
+    End Sub
+
+    Private Sub NewInteractionButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewInteractionButton.Click
+        Try
+
+            If IsNothing(PreviewPony) Then
+                MsgBox("Select a pony or create a new one first,")
+                Exit Sub
+            End If
+
+            HidePony()
+            Using form = New NewInteractionDialog(Me)
+                form.Change_Interaction(Nothing)
+                form.ShowDialog()
+            End Using
+            ShowPony()
+
+            Load_Parameters(PreviewPony)
+            has_saved = False
+
+        Catch ex As Exception
+            MsgBox("Error creating new interaction! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            Me.Close()
+        End Try
+    End Sub
+
     ''' <summary>
     ''' Note that we try to rename the file and save the path as all lowercase.
     ''' This is for compatibility with other ports that run on case-sensitive operating systems.
@@ -1515,9 +1752,9 @@ Public Class PonyEditor
 
         Try
 
-            OpenPictureDialog.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*"
+            OpenPictureDialog.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|All Files (*.*)|*.*"
             OpenPictureDialog.FilterIndex = 4
-            OpenPictureDialog.InitialDirectory = PreviewPony.Directory
+            OpenPictureDialog.InitialDirectory = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
 
             If text = "" Then
                 OpenPictureDialog.Title = "Select picture..."
@@ -1535,7 +1772,8 @@ Public Class PonyEditor
 
             Dim test_bitmap = Image.FromFile(picture_path)
 
-            Dim new_path = IO.Path.Combine(PreviewPony.Directory, Get_Filename(picture_path))
+            Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
+                                           PreviewPony.Directory, Get_Filename(picture_path))
 
             If new_path <> picture_path Then
                 Try
@@ -1545,8 +1783,6 @@ Public Class PonyEditor
                            & ControlChars.NewLine & "Details: " & ex.Message)
                 End Try
             End If
-
-            test_bitmap = Image.FromFile(picture_path)
 
             Return LCase(new_path)
 
@@ -1558,6 +1794,33 @@ Public Class PonyEditor
             Return Nothing
 
         End Try
+
+    End Function
+
+    Function SetSound() As String
+        Dim sound_path As String = Nothing
+
+        Using dialog = New NewSpeechDialog(Me)
+            dialog.OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
+            dialog.OpenSoundDialog.InitialDirectory = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
+            If dialog.OpenSoundDialog.ShowDialog() = DialogResult.OK Then
+                sound_path = dialog.OpenSoundDialog.FileName
+            End If
+        End Using
+
+        If IsNothing(sound_path) Then
+            Return ""
+            Exit Function
+        End If
+
+        Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
+                                       PreviewPony.Directory, Get_Filename(sound_path))
+
+        If new_path <> sound_path Then
+            My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
+        End If
+
+        Return Get_Filename(sound_path)
 
     End Function
 
@@ -1644,6 +1907,10 @@ Public Class PonyEditor
         'RestoreSortOrder()
     End Sub
 
+    Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
+        MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+    End Sub
+
     Private Sub Set_Behavior_Follow_Parameters(ByRef behavior As PonyBase.Behavior)
         Try
 
@@ -1666,18 +1933,15 @@ Public Class PonyEditor
 
     Friend Function Get_Filename(ByVal path As String) As String
         Try
-
-            Dim path_components = Split(path, System.IO.Path.DirectorySeparatorChar)
+            Dim path_components = Split(path, IO.Path.DirectorySeparatorChar)
 
             'force lowercase for compatibility with other ports (like Browser ponies)
             Return LCase(path_components(UBound(path_components)))
-
         Catch ex As Exception
             MsgBox("Error getting filename from path! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
             Me.Close()
             Return Nothing
         End Try
-
     End Function
 
     Private Sub PonyName_TextChanged(ByVal sender As Object, ByVal e As EventArgs) Handles PonyName.TextChanged
@@ -1687,77 +1951,6 @@ Public Class PonyEditor
             has_saved = False
         End If
 
-    End Sub
-
-    Private Sub NewSpeechButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewSpeechButton.Click
-        Try
-            If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
-                Exit Sub
-            End If
-
-            HidePony()
-
-            Using form = New NewSpeechDialog(Me)
-                form.ShowDialog()
-            End Using
-
-            ShowPony()
-
-            Load_Parameters(PreviewPony)
-            has_saved = False
-        Catch ex As Exception
-            MsgBox("Error creating new speech! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-            Me.Close()
-        End Try
-    End Sub
-
-    Private Sub NewEffectButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewEffectButton.Click
-        Try
-
-            If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
-                Exit Sub
-            End If
-
-            HidePony()
-
-            Using form = New NewEffectDialog(Me)
-                form.ShowDialog()
-            End Using
-
-            ShowPony()
-
-            Load_Parameters(PreviewPony)
-            has_saved = False
-        Catch ex As Exception
-            MsgBox("Error creating new effect! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-            Me.Close()
-        End Try
-    End Sub
-
-    Private Sub NewInteractionButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewInteractionButton.Click
-        Try
-
-            If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
-                Exit Sub
-            End If
-
-            HidePony()
-            Using form = New NewInteractionDialog(Me)
-                form.Change_Interaction(Nothing)
-                form.ShowDialog()
-            End Using
-            ShowPony()
-
-            Load_Parameters(PreviewPony)
-            has_saved = False
-
-        Catch ex As Exception
-            MsgBox("Error creating new interaction! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-            Me.Close()
-        End Try
     End Sub
 
     Private Sub NewPonyButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewPonyButton.Click
@@ -2023,193 +2216,6 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
-        Try
-
-            If e.RowIndex < 0 Then Exit Sub
-
-            SaveSortOrder()
-
-            Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
-            Dim changed_speech As PonyBase.Behavior.SpeakingLine = Nothing
-
-            For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
-                If speech.Name = changed_speech_name Then
-                    changed_speech = speech
-                    Exit For
-                End If
-            Next
-
-            If IsNothing(changed_speech) Then
-                Load_Parameters(PreviewPony)
-                RestoreSortOrder()
-                Exit Sub
-            End If
-
-            Dim changes_made_now = False
-
-            Select Case e.ColumnIndex
-
-                Case colSpeechSoundFile.Index
-                    HidePony()
-                    changed_speech.SoundFile = SetSound()
-                    changes_made_now = True
-                    ShowPony()
-                Case Else
-                    Exit Sub
-
-            End Select
-
-            If changes_made_now Then
-                'Load_Parameters(Preview_Pony)
-                'RestoreSortOrder()
-                has_saved = False
-            End If
-
-
-        Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-        End Try
-    End Sub
-
-    Private Sub PonyEffectsGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
-        Try
-
-            If e.RowIndex < 0 Then Exit Sub
-
-            SaveSortOrder()
-
-            Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
-            Dim changed_effect As Effect = Nothing
-
-            For Each effect In PreviewPonyEffects()
-                If effect.Name = changed_effect_name Then
-                    changed_effect = effect
-                    Exit For
-                End If
-            Next
-
-            If IsNothing(changed_effect) Then
-                Load_Parameters(PreviewPony)
-                RestoreSortOrder()
-                Exit Sub
-            End If
-
-            Dim changes_made_now = False
-
-            Select Case e.ColumnIndex
-
-                Case colEffectRightImage.Index
-                    HidePony()
-                    Dim new_image_path As String = Add_Picture(changed_effect_name & " Right Image...")
-                    If Not IsNothing(new_image_path) Then
-                        changed_effect.SetRightImagePath(new_image_path)
-                        changes_made_now = True
-                    End If
-                    ShowPony()
-                Case colEffectLeftImage.Index
-                    HidePony()
-                    Dim new_image_path = Add_Picture(changed_effect_name & " Left Image...")
-                    If Not IsNothing(new_image_path) Then
-                        changed_effect.SetLeftImagePath(new_image_path)
-                        changes_made_now = True
-                    End If
-                    ShowPony()
-                Case Else
-                    Exit Sub
-
-            End Select
-
-            If changes_made_now Then
-                'Load_Parameters(Preview_Pony)
-                'RestoreSortOrder()
-                has_saved = False
-            End If
-
-
-        Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-        End Try
-    End Sub
-
-    Private Sub PonyInteractionGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
-        Try
-
-            If e.RowIndex < 0 Then Exit Sub
-
-            SaveSortOrder()
-
-            Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
-            Dim changed_interaction As PonyBase.Interaction = Nothing
-
-            For Each interaction As PonyBase.Interaction In PreviewPony.Interactions
-                If interaction.Name = changed_interaction_name Then
-                    changed_interaction = interaction
-                    Exit For
-                End If
-            Next
-
-            If IsNothing(changed_interaction) Then
-                Load_Parameters(PreviewPony)
-                RestoreSortOrder()
-                Exit Sub
-            End If
-
-            Dim changes_made_now = False
-
-
-            Select Case e.ColumnIndex
-                Case colInteractionTargets.Index
-                Case colInteractionBehaviors.Index
-                    HidePony()
-                    Using form = New NewInteractionDialog(Me)
-                        form.Change_Interaction(changed_interaction)
-                        form.ShowDialog()
-                    End Using
-                    changes_made_now = True
-                    ShowPony()
-                Case Else
-                    Exit Sub
-            End Select
-
-            If changes_made_now Then
-                'Load_Parameters(Preview_Pony)
-                'RestoreSortOrder()
-                has_saved = False
-            End If
-
-
-        Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-        End Try
-    End Sub
-
-    Function SetSound() As String
-        Dim sound_path As String = Nothing
-
-        Using form = New NewSpeechDialog(Me)
-            form.OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-            form.OpenSoundDialog.InitialDirectory = Options.InstallLocation
-            If form.OpenSoundDialog.ShowDialog() = DialogResult.OK Then
-                sound_path = form.OpenSoundDialog.FileName
-            End If
-        End Using
-
-        If IsNothing(sound_path) Then
-            Return ""
-            Exit Function
-        End If
-
-        Dim new_path = IO.Path.Combine(PreviewPony.Directory, Get_Filename(sound_path))
-
-        If new_path <> sound_path Then
-            My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
-        End If
-
-        Return Get_Filename(sound_path)
-
-    End Function
-
     Sub ImageSizeCheck(ByVal imageSize As Size)
 
         If imageSize.Height > PonyPreviewPanel.Size.Height OrElse
@@ -2253,9 +2259,5 @@ Public Class PonyEditor
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
         Load_Parameters(PreviewPony)
         RestoreSortOrder()
-    End Sub
-
-    Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
-        MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
     End Sub
 End Class

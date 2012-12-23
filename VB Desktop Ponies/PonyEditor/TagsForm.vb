@@ -11,7 +11,6 @@
     End Sub
 
     Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
-
         m_editor.PreviewPony.Tags.Clear()
 
         For Each Tag As String In PonyFilterList.CheckedItems
@@ -19,11 +18,9 @@
         Next
 
         Me.Close()
-
     End Sub
 
     Private Sub Tags_Form_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
-
         PonyFilterList.Items.Clear()
 
         Me.Text = "Tags for " & m_editor.PreviewPony.Directory
@@ -41,8 +38,5 @@
                 End If
             Next
         Next
-
-
     End Sub
-
 End Class

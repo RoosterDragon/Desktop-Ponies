@@ -26,17 +26,16 @@ Partial Class NewSpeechDialog
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.Name_Textbox = New System.Windows.Forms.TextBox()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.NameLabel = New System.Windows.Forms.Label()
         Me.Text_TextBox = New System.Windows.Forms.TextBox()
-        Me.Label12 = New System.Windows.Forms.Label()
+        Me.LineLabel = New System.Windows.Forms.Label()
         Me.Sound_Textbox = New System.Windows.Forms.TextBox()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.SoundLabel = New System.Windows.Forms.Label()
         Me.SetSound_Button = New System.Windows.Forms.Button()
         Me.Random_Checkbox = New System.Windows.Forms.CheckBox()
-        Me.Label3 = New System.Windows.Forms.Label()
         Me.OpenSoundDialog = New System.Windows.Forms.OpenFileDialog()
         Me.Group_NumberBox = New System.Windows.Forms.NumericUpDown()
-        Me.Label4 = New System.Windows.Forms.Label()
+        Me.GroupLabel = New System.Windows.Forms.Label()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -85,14 +84,14 @@ Partial Class NewSpeechDialog
         Me.Name_Textbox.Size = New System.Drawing.Size(100, 20)
         Me.Name_Textbox.TabIndex = 1
         '
-        'Label1
+        'NameLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(58, 44)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(78, 13)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Speech Name:"
+        Me.NameLabel.AutoSize = True
+        Me.NameLabel.Location = New System.Drawing.Point(58, 44)
+        Me.NameLabel.Name = "NameLabel"
+        Me.NameLabel.Size = New System.Drawing.Size(78, 13)
+        Me.NameLabel.TabIndex = 0
+        Me.NameLabel.Text = "Speech Name:"
         '
         'Text_TextBox
         '
@@ -102,14 +101,14 @@ Partial Class NewSpeechDialog
         Me.Text_TextBox.Size = New System.Drawing.Size(333, 20)
         Me.Text_TextBox.TabIndex = 5
         '
-        'Label12
+        'LineLabel
         '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(58, 116)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(78, 13)
-        Me.Label12.TabIndex = 4
-        Me.Label12.Text = "Text to display:"
+        Me.LineLabel.AutoSize = True
+        Me.LineLabel.Location = New System.Drawing.Point(58, 116)
+        Me.LineLabel.Name = "LineLabel"
+        Me.LineLabel.Size = New System.Drawing.Size(78, 13)
+        Me.LineLabel.TabIndex = 4
+        Me.LineLabel.Text = "Text to display:"
         '
         'Sound_Textbox
         '
@@ -120,14 +119,14 @@ Partial Class NewSpeechDialog
         Me.Sound_Textbox.Size = New System.Drawing.Size(333, 20)
         Me.Sound_Textbox.TabIndex = 7
         '
-        'Label2
+        'SoundLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(58, 184)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(103, 13)
-        Me.Label2.TabIndex = 6
-        Me.Label2.Text = "Sound file (optional):"
+        Me.SoundLabel.AutoSize = True
+        Me.SoundLabel.Location = New System.Drawing.Point(58, 184)
+        Me.SoundLabel.Name = "SoundLabel"
+        Me.SoundLabel.Size = New System.Drawing.Size(103, 13)
+        Me.SoundLabel.TabIndex = 6
+        Me.SoundLabel.Text = "Sound file (optional):"
         '
         'SetSound_Button
         '
@@ -145,19 +144,11 @@ Partial Class NewSpeechDialog
         Me.Random_Checkbox.CheckState = System.Windows.Forms.CheckState.Checked
         Me.Random_Checkbox.Location = New System.Drawing.Point(78, 279)
         Me.Random_Checkbox.Name = "Random_Checkbox"
-        Me.Random_Checkbox.Size = New System.Drawing.Size(380, 17)
+        Me.Random_Checkbox.Size = New System.Drawing.Size(355, 30)
         Me.Random_Checkbox.TabIndex = 9
-        Me.Random_Checkbox.Text = "Use Randomly? (uncheck if you want this to be used for one behavior only,"
+        Me.Random_Checkbox.Text = "Use Randomly? (uncheck if you want this to be used for one behavior" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "only, which " & _
+    "you will specify on the behavior edit screen)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
         Me.Random_Checkbox.UseVisualStyleBackColor = True
-        '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(179, 299)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(246, 13)
-        Me.Label3.TabIndex = 10
-        Me.Label3.Text = " which you will specify on the behavior edit screen)"
         '
         'Group_NumberBox
         '
@@ -166,14 +157,14 @@ Partial Class NewSpeechDialog
         Me.Group_NumberBox.Size = New System.Drawing.Size(120, 20)
         Me.Group_NumberBox.TabIndex = 3
         '
-        'Label4
+        'GroupLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(250, 44)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(92, 13)
-        Me.Label4.TabIndex = 2
-        Me.Label4.Text = "Behavior group #:"
+        Me.GroupLabel.AutoSize = True
+        Me.GroupLabel.Location = New System.Drawing.Point(250, 44)
+        Me.GroupLabel.Name = "GroupLabel"
+        Me.GroupLabel.Size = New System.Drawing.Size(92, 13)
+        Me.GroupLabel.TabIndex = 2
+        Me.GroupLabel.Text = "Behavior group #:"
         '
         'NewSpeechDialog
         '
@@ -183,16 +174,15 @@ Partial Class NewSpeechDialog
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(514, 370)
-        Me.Controls.Add(Me.Label4)
+        Me.Controls.Add(Me.GroupLabel)
         Me.Controls.Add(Me.Group_NumberBox)
-        Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.Random_Checkbox)
         Me.Controls.Add(Me.SetSound_Button)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.SoundLabel)
         Me.Controls.Add(Me.Sound_Textbox)
-        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.LineLabel)
         Me.Controls.Add(Me.Text_TextBox)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.NameLabel)
         Me.Controls.Add(Me.Name_Textbox)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
@@ -211,16 +201,15 @@ Partial Class NewSpeechDialog
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
     Friend WithEvents Name_Textbox As System.Windows.Forms.TextBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
+    Friend WithEvents NameLabel As System.Windows.Forms.Label
     Friend WithEvents Text_TextBox As System.Windows.Forms.TextBox
-    Friend WithEvents Label12 As System.Windows.Forms.Label
+    Friend WithEvents LineLabel As System.Windows.Forms.Label
     Friend WithEvents Sound_Textbox As System.Windows.Forms.TextBox
-    Friend WithEvents Label2 As System.Windows.Forms.Label
+    Friend WithEvents SoundLabel As System.Windows.Forms.Label
     Friend WithEvents SetSound_Button As System.Windows.Forms.Button
     Friend WithEvents Random_Checkbox As System.Windows.Forms.CheckBox
-    Friend WithEvents Label3 As System.Windows.Forms.Label
     Friend WithEvents OpenSoundDialog As System.Windows.Forms.OpenFileDialog
     Friend WithEvents Group_NumberBox As System.Windows.Forms.NumericUpDown
-    Friend WithEvents Label4 As System.Windows.Forms.Label
+    Friend WithEvents GroupLabel As System.Windows.Forms.Label
 
 End Class
