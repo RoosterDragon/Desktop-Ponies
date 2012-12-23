@@ -404,7 +404,7 @@
 
     Private Sub Color_Select_Button_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
 
-        Dim colorpicker As New System.Windows.Forms.ColorDialog
+        Dim colorpicker As New ColorDialog
 
         If colorpicker.ShowDialog() = DialogResult.OK Then
             ScreensaverColorNeededLabel.Visible = False
@@ -444,7 +444,7 @@
 
     Private Sub Screensaver_background_image_select_button_Click(sender As Object, e As EventArgs) Handles ScreensaverImageButton.Click
 
-        Dim image_file_selection As New System.Windows.Forms.OpenFileDialog
+        Dim image_file_selection As New OpenFileDialog
 
         image_file_selection.Title = "Select your screensaver background image..."
         image_file_selection.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*"

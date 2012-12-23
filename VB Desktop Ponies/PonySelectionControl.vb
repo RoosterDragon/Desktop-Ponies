@@ -31,9 +31,9 @@ Public Class PonySelectionControl
     Public Sub ResizeToFit()
         Dim borderWidth As Integer = 0
         Select Case BorderStyle
-            Case System.Windows.Forms.BorderStyle.FixedSingle
+            Case BorderStyle.FixedSingle
                 borderWidth = SystemInformation.FixedFrameBorderSize.Width
-            Case System.Windows.Forms.BorderStyle.Fixed3D
+            Case BorderStyle.Fixed3D
                 borderWidth = SystemInformation.Border3DSize.Width
         End Select
 
@@ -78,7 +78,7 @@ Public Class PonySelectionControl
         End If
     End Sub
 
-    Private Sub PonyCount_KeyPress(sender As Object, e As System.Windows.Forms.KeyPressEventArgs) Handles PonyCount.KeyPress
+    Private Sub PonyCount_KeyPress(sender As Object, e As KeyPressEventArgs) Handles PonyCount.KeyPress
         e.Handled = Not (Char.IsControl(e.KeyChar) OrElse Char.IsDigit(e.KeyChar))
     End Sub
 

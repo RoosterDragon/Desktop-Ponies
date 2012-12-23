@@ -88,7 +88,7 @@ Public Class HouseOptionsForm
         Return New Point(CInt(sizeDifference.Width / 2), CInt(sizeDifference.Height / 2))
     End Function
 
-    Private Sub House_ImageBox_MouseClick(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles House_ImageBox.MouseClick
+    Private Sub House_ImageBox_MouseClick(sender As Object, e As MouseEventArgs) Handles House_ImageBox.MouseClick
         doorLocation = Point.Subtract(e.Location, CType(GetHouseImageDrawLocation(), Size))
         DoorLocation_Label.Text = doorLocation.ToString()
         House_ImageBox.Invalidate()
@@ -98,7 +98,7 @@ Public Class HouseOptionsForm
         House_ImageBox.Invalidate()
     End Sub
 
-    Private Sub House_ImageBox_Paint(sender As Object, e As System.Windows.Forms.PaintEventArgs) Handles House_ImageBox.Paint
+    Private Sub House_ImageBox_Paint(sender As Object, e As PaintEventArgs) Handles House_ImageBox.Paint
         Dim g = e.Graphics
 
         g.Clear(Color.White)
@@ -202,7 +202,7 @@ Public Class HouseOptionsForm
         Me.Close()
     End Sub
 
-    Private Sub HouseOptionsForm_FormClosed(sender As Object, e As System.Windows.Forms.FormClosedEventArgs) Handles MyBase.FormClosed
+    Private Sub HouseOptionsForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
         house.Base.OptionsForm = Nothing
     End Sub
 End Class

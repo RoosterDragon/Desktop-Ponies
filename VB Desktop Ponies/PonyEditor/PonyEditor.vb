@@ -37,8 +37,8 @@ Public Class PonyEditor
         Friend grid As DataGridView
         Friend slot As Integer
         Friend button As Button
-        Friend Sort_Column As System.Windows.Forms.DataGridViewColumn = Nothing
-        Friend Sort_Order As System.Windows.Forms.SortOrder = Nothing
+        Friend Sort_Column As DataGridViewColumn = Nothing
+        Friend Sort_Order As SortOrder = Nothing
 
         Sub New(ByVal _grid As DataGridView, ByVal _slot As Integer, ByVal _button As Button)
             grid = _grid
@@ -219,7 +219,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEditor_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+    Private Sub PonyEditor_FormClosing(ByVal sender As Object, ByVal e As FormClosingEventArgs) Handles Me.FormClosing
         If has_saved = False Then
             If SaveDialog.ShowDialog() = DialogResult.Cancel Then
                 e.Cancel = True
@@ -230,7 +230,7 @@ Public Class PonyEditor
         If pe_animator.Started Then pe_animator.Pause(True)
     End Sub
 
-    Private Sub PonyEditor_FormClosed(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosedEventArgs) Handles Me.FormClosed
+    Private Sub PonyEditor_FormClosed(ByVal sender As Object, ByVal e As FormClosedEventArgs) Handles Me.FormClosed
         pe_animator.Finish()
         pe_animator.Dispose()
         If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
@@ -748,7 +748,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
-    Private Sub GridError(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewDataErrorEventArgs)
+    Private Sub GridError(ByVal sender As Object, ByVal e As DataGridViewDataErrorEventArgs)
         Try
 
             Dim grid As DataGridView = CType(sender, DataGridView)
@@ -809,7 +809,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
+    Private Sub PonyBehaviorsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
 
         Try
 
@@ -913,7 +913,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellValueChanged(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
+    Private Sub PonyBehaviorsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1056,7 +1056,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEffectsGrid_CellValueChanged(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
+    Private Sub PonyEffectsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1157,7 +1157,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechesGrid_CellValueChanged(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
+    Private Sub PonySpeechesGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1235,7 +1235,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyInteractionsGrid_CellValueChanged(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
+    Private Sub PonyInteractionsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1419,7 +1419,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="sort"></param>
     ''' <returns></returns>
-    Private Function ConvertSortOrder(ByVal sort As System.Windows.Forms.SortOrder) As System.ComponentModel.ListSortDirection
+    Private Function ConvertSortOrder(ByVal sort As SortOrder) As System.ComponentModel.ListSortDirection
 
         Select Case sort
             Case SortOrder.Ascending
@@ -2023,7 +2023,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
+    Private Sub PonySpeechGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2072,7 +2072,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyEffectsGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
+    Private Sub PonyEffectsGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2132,7 +2132,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyInteractionGrid_CellContentClick(ByVal sender As Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
+    Private Sub PonyInteractionGrid_CellContentClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -2255,7 +2255,7 @@ Public Class PonyEditor
         RestoreSortOrder()
     End Sub
 
-    Private Sub Grid_DataError(sender As Object, e As System.Windows.Forms.DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
+    Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
         MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
     End Sub
 End Class

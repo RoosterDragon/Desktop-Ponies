@@ -6,7 +6,7 @@ Public Module KeyboardState
     Private Function GetKeyState(ByVal vKey As Integer) As Short
     End Function
 
-    Public Function IsKeyPressed(ByVal key As System.Windows.Forms.Keys) As Boolean
+    Public Function IsKeyPressed(ByVal key As Keys) As Boolean
         If Not OperatingSystemInfo.IsWindows Then
             Return False
         End If

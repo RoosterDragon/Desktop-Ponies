@@ -244,7 +244,7 @@ Public Class DesktopControlForm
         Close()
     End Sub
 
-    Private Sub DesktopControlForm_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+    Private Sub DesktopControlForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = Not allowClose
     End Sub
 

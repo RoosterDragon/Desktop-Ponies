@@ -85,7 +85,7 @@
         End If
     End Sub
 
-    Private Sub Left_ImageBox_Click(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Left_ImageBox.MouseClick
+    Private Sub Left_ImageBox_Click(ByVal sender As Object, ByVal e As MouseEventArgs) Handles Left_ImageBox.MouseClick
 
         left_center = e.Location
         previewpony.Behaviors(behavior_index).SetLeftImageCenter(left_center)
@@ -93,7 +93,7 @@
 
     End Sub
 
-    Private Sub Right_ImageBox_Click(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Right_ImageBox.MouseClick
+    Private Sub Right_ImageBox_Click(ByVal sender As Object, ByVal e As MouseEventArgs) Handles Right_ImageBox.MouseClick
 
         right_center = e.Location
         previewpony.Behaviors(behavior_index).SetRightImageCenter(right_center)

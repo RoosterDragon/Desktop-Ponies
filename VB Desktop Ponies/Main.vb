@@ -37,7 +37,7 @@ Public Class Main
     Friend cursor_position As New Point
 
     'A list of monitors the user has selected to use, from the options screen.
-    Friend screens_to_use As New List(Of System.Windows.Forms.Screen) From {Screen.PrimaryScreen}
+    Friend screens_to_use As New List(Of Screen) From {Screen.PrimaryScreen}
 
     'Are ponies currently walking around the desktop?
     Friend Ponies_Have_Launched As Boolean = False
@@ -1037,7 +1037,7 @@ Public Class Main
         PonySelectionPanel.ResumeLayout()
     End Sub
 
-    Private Sub Main_KeyPress(sender As Object, e As System.Windows.Forms.KeyPressEventArgs) Handles MyBase.KeyPress
+    Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles MyBase.KeyPress
         If ProfileComboBox.Focused Then Exit Sub
 
         Dim character = e.KeyChar
@@ -1521,7 +1521,7 @@ Public Class Main
         AnimationTimer.Enabled = Visible AndAlso Not loading
     End Sub
 
-    Private Sub Main_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles MyBase.FormClosing
+    Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         Mac.WriteLine("Main_FormClosing started.")
         e.Cancel = loading
         Mac.WriteLine("Main_FormClosing ending with cancel set to " & e.Cancel & ".")
