@@ -9,6 +9,7 @@ Public Class Main
     Friend Shared Instance As Main
 
 #Region "Fields and Properties"
+    Private initialized As Boolean = False
     Private loading As Boolean = False
 
     Friend DesktopHandle As IntPtr
@@ -93,6 +94,11 @@ Public Class Main
     Dim startup_profile As String = Options.DefaultProfileName
 
     Private previewWindowRectangle As Func(Of Rectangle)
+
+    Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)
+    Private ponyOffset As Integer
+    Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
+        selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
 #End Region
 
     Enum BehaviorOption
@@ -136,6 +142,7 @@ Public Class Main
     Public Sub New()
         Mac.WriteLine("Main_ctor started.")
         InitializeComponent()
+        initialized = True
         Mac.WriteLine("Main_ctor ended.")
     End Sub
 
@@ -671,6 +678,7 @@ Public Class Main
         End If
 
         PonySelectionPanel.Controls.Add(ponySelection)
+        selectionControlFilter.Add(ponySelection, True)
     End Sub
 
     Sub LoadInteractions(Optional ByVal displayWarnings As Boolean = True)
@@ -761,12 +769,16 @@ Public Class Main
 
         CountSelectedPonies()
 
+        LoadingProgressBar.Visible = False
         LoadingProgressBar.Value = 0
         LoadingProgressBar.Maximum = 1
 
+        PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
+        PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", PonySelectionPanel.Controls.Count)
+        PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+
         PonySelectionPanel.Enabled = True
         SelectionControlsPanel.Enabled = True
-        LoadingProgressBar.Visible = False
         AnimationTimer.Enabled = True
         loading = False
         GC.Collect()
@@ -1001,11 +1013,10 @@ Public Class Main
     End Sub
 
     Private Sub RefilterSelection()
-        PonySelectionPanel.SuspendLayout()
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
             'reshow all ponies in show all mode.
             If FilterAllRadio.Checked Then
-                selectionControl.Visible = True
+                selectionControlFilter(selectionControl) = True
             End If
 
             'don't show ponies that don't have at least one of the desired tags in Show Any.. mode
@@ -1018,7 +1029,7 @@ Public Class Main
                         Exit For
                     End If
                 Next
-                selectionControl.Visible = visible
+                selectionControlFilter(selectionControl) = visible
             End If
 
             'don't show ponies that don't have all of the desired tags in Show Exactly.. mode
@@ -1031,10 +1042,55 @@ Public Class Main
                         Exit For
                     End If
                 Next
-                selectionControl.Visible = visible
+                selectionControlFilter(selectionControl) = visible
             End If
         Next
+
+        ponyOffset = 0
+        RepaginateSelection()
+    End Sub
+
+    Private Sub RepaginateSelection()
+        PonySelectionPanel.SuspendLayout()
+
+        Dim localOffset = -1
+        Dim visibleCount = 0
+        For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
+            If Not PaginationEnabled.Checked Then
+                Dim makeVisible = selectionControlFilter(selectionControl)
+                If makeVisible Then visibleCount += 1
+                selectionControl.Visible = makeVisible
+            Else
+                localOffset += 1
+                Dim inPageRange = True
+                If localOffset < ponyOffset Then inPageRange = False
+                If visibleCount >= PoniesPerPage.Value Then inPageRange = False
+                Dim makeVisible = inPageRange AndAlso selectionControlFilter(selectionControl)
+                If makeVisible Then visibleCount += 1
+                selectionControl.Visible = makeVisible
+            End If
+        Next
+
         PonySelectionPanel.ResumeLayout()
+
+        If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
+            PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", visibleCount)
+        Else
+            PonyPaginationLabel.Text =
+            String.Format("Viewing {0} to {1} of {2} ponies",
+                          ponyOffset + 1,
+                          Math.Min(ponyOffset + PoniesPerPage.Value, selectionControlsFilteredVisible.Count),
+                          selectionControlsFilteredVisible.Count)
+        End If
+
+        Dim min = ponyOffset = 0
+        Dim max = ponyOffset >= selectionControlsFilteredVisible.Count - PoniesPerPage.Value
+        FirstPageButton.Enabled = Not min
+        PreviousPageButton.Enabled = Not min
+        PreviousPonyButton.Enabled = Not min
+        NextPonyButton.Enabled = Not max
+        NextPageButton.Enabled = Not max
+        LastPageButton.Enabled = Not max
     End Sub
 
     Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles MyBase.KeyPress
@@ -1538,5 +1594,44 @@ Public Class Main
         Next
         Mac.WriteLine("Main_Disposed ended.")
         Console.WriteLine("Main has been disposed. Program ending.")
+    End Sub
+
+    Private Sub FirstPageButton_Click(sender As System.Object, e As System.EventArgs) Handles FirstPageButton.Click
+        ponyOffset = 0
+        RepaginateSelection()
+    End Sub
+
+    Private Sub PreviousPageButton_Click(sender As System.Object, e As System.EventArgs) Handles PreviousPageButton.Click
+        ponyOffset -= Math.Min(ponyOffset, CInt(PoniesPerPage.Value))
+        RepaginateSelection()
+    End Sub
+
+    Private Sub PreviousPonyButton_Click(sender As System.Object, e As System.EventArgs) Handles PreviousPonyButton.Click
+        ponyOffset -= Math.Min(ponyOffset, 1)
+        RepaginateSelection()
+    End Sub
+
+    Private Sub NextPonyButton_Click(sender As System.Object, e As System.EventArgs) Handles NextPonyButton.Click
+        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value) - ponyOffset, 1)
+        RepaginateSelection()
+    End Sub
+
+    Private Sub NextPageButton_Click(sender As System.Object, e As System.EventArgs) Handles NextPageButton.Click
+        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value) - ponyOffset, CInt(PoniesPerPage.Value))
+        RepaginateSelection()
+    End Sub
+
+    Private Sub LastPageButton_Click(sender As System.Object, e As System.EventArgs) Handles LastPageButton.Click
+        ponyOffset = selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value)
+        RepaginateSelection()
+    End Sub
+
+    Private Sub PoniesPerPage_ValueChanged(sender As System.Object, e As System.EventArgs) Handles PoniesPerPage.ValueChanged
+        If initialized Then RepaginateSelection()
+    End Sub
+
+    Private Sub PaginationEnabled_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles PaginationEnabled.CheckedChanged
+        PonyPaginationPanel.Enabled = PaginationEnabled.Checked
+        RepaginateSelection()
     End Sub
 End Class

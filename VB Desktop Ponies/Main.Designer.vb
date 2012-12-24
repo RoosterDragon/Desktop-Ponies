@@ -48,8 +48,20 @@ Partial Class Main
         Me.PonyEditorButton = New System.Windows.Forms.Button()
         Me.OptionsButton = New System.Windows.Forms.Button()
         Me.GoButton = New System.Windows.Forms.Button()
+        Me.PonyPaginationPanel = New System.Windows.Forms.Panel()
+        Me.PonyPaginationLabel = New System.Windows.Forms.Label()
+        Me.LastPageButton = New System.Windows.Forms.Button()
+        Me.NextPageButton = New System.Windows.Forms.Button()
+        Me.NextPonyButton = New System.Windows.Forms.Button()
+        Me.PreviousPonyButton = New System.Windows.Forms.Button()
+        Me.PreviousPageButton = New System.Windows.Forms.Button()
+        Me.FirstPageButton = New System.Windows.Forms.Button()
+        Me.PoniesPerPageLabel = New System.Windows.Forms.Label()
+        Me.PoniesPerPage = New System.Windows.Forms.NumericUpDown()
+        Me.PaginationEnabled = New System.Windows.Forms.CheckBox()
         Me.SelectionControlsPanel.SuspendLayout()
         Me.FilterGroupBox.SuspendLayout()
+        Me.PonyPaginationPanel.SuspendLayout()
         Me.SuspendLayout()
         '
         'AnimationTimer
@@ -63,11 +75,11 @@ Partial Class Main
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PonySelectionPanel.AutoScroll = True
         Me.PonySelectionPanel.Enabled = False
-        Me.PonySelectionPanel.Location = New System.Drawing.Point(0, 0)
+        Me.PonySelectionPanel.Location = New System.Drawing.Point(0, 30)
         Me.PonySelectionPanel.Margin = New System.Windows.Forms.Padding(0)
         Me.PonySelectionPanel.Name = "PonySelectionPanel"
-        Me.PonySelectionPanel.Size = New System.Drawing.Size(734, 488)
-        Me.PonySelectionPanel.TabIndex = 0
+        Me.PonySelectionPanel.Size = New System.Drawing.Size(734, 458)
+        Me.PonySelectionPanel.TabIndex = 2
         '
         'LoadingProgressBar
         '
@@ -78,7 +90,7 @@ Partial Class Main
         Me.LoadingProgressBar.Name = "LoadingProgressBar"
         Me.LoadingProgressBar.Size = New System.Drawing.Size(716, 23)
         Me.LoadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.LoadingProgressBar.TabIndex = 1
+        Me.LoadingProgressBar.TabIndex = 3
         '
         'TemplateLoader
         '
@@ -112,7 +124,7 @@ Partial Class Main
         Me.SelectionControlsPanel.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.SelectionControlsPanel.Name = "SelectionControlsPanel"
         Me.SelectionControlsPanel.Size = New System.Drawing.Size(734, 121)
-        Me.SelectionControlsPanel.TabIndex = 2
+        Me.SelectionControlsPanel.TabIndex = 4
         '
         'PonyCountValueLabel
         '
@@ -311,6 +323,116 @@ Partial Class Main
         Me.GoButton.Text = "GIVE ME PONIES!"
         Me.GoButton.UseVisualStyleBackColor = True
         '
+        'PonyPaginationPanel
+        '
+        Me.PonyPaginationPanel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.PonyPaginationPanel.Controls.Add(Me.PonyPaginationLabel)
+        Me.PonyPaginationPanel.Controls.Add(Me.LastPageButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.NextPageButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.NextPonyButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.PreviousPonyButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.PreviousPageButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.FirstPageButton)
+        Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPageLabel)
+        Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPage)
+        Me.PonyPaginationPanel.Enabled = False
+        Me.PonyPaginationPanel.Location = New System.Drawing.Point(127, 0)
+        Me.PonyPaginationPanel.Margin = New System.Windows.Forms.Padding(0)
+        Me.PonyPaginationPanel.Name = "PonyPaginationPanel"
+        Me.PonyPaginationPanel.Size = New System.Drawing.Size(607, 30)
+        Me.PonyPaginationPanel.TabIndex = 1
+        '
+        'PonyPaginationLabel
+        '
+        Me.PonyPaginationLabel.AutoSize = True
+        Me.PonyPaginationLabel.Location = New System.Drawing.Point(358, 9)
+        Me.PonyPaginationLabel.Name = "PonyPaginationLabel"
+        Me.PonyPaginationLabel.Size = New System.Drawing.Size(88, 13)
+        Me.PonyPaginationLabel.TabIndex = 8
+        Me.PonyPaginationLabel.Text = "Loading ponies..."
+        '
+        'LastPageButton
+        '
+        Me.LastPageButton.Location = New System.Drawing.Point(324, 4)
+        Me.LastPageButton.Name = "LastPageButton"
+        Me.LastPageButton.Size = New System.Drawing.Size(28, 22)
+        Me.LastPageButton.TabIndex = 7
+        Me.LastPageButton.Text = ">|"
+        Me.LastPageButton.UseVisualStyleBackColor = True
+        '
+        'NextPageButton
+        '
+        Me.NextPageButton.Location = New System.Drawing.Point(290, 4)
+        Me.NextPageButton.Name = "NextPageButton"
+        Me.NextPageButton.Size = New System.Drawing.Size(28, 22)
+        Me.NextPageButton.TabIndex = 6
+        Me.NextPageButton.Text = ">>"
+        Me.NextPageButton.UseVisualStyleBackColor = True
+        '
+        'NextPonyButton
+        '
+        Me.NextPonyButton.Location = New System.Drawing.Point(256, 4)
+        Me.NextPonyButton.Name = "NextPonyButton"
+        Me.NextPonyButton.Size = New System.Drawing.Size(28, 22)
+        Me.NextPonyButton.TabIndex = 5
+        Me.NextPonyButton.Text = ">"
+        Me.NextPonyButton.UseVisualStyleBackColor = True
+        '
+        'PreviousPonyButton
+        '
+        Me.PreviousPonyButton.Location = New System.Drawing.Point(222, 4)
+        Me.PreviousPonyButton.Name = "PreviousPonyButton"
+        Me.PreviousPonyButton.Size = New System.Drawing.Size(28, 22)
+        Me.PreviousPonyButton.TabIndex = 4
+        Me.PreviousPonyButton.Text = "<"
+        Me.PreviousPonyButton.UseVisualStyleBackColor = True
+        '
+        'PreviousPageButton
+        '
+        Me.PreviousPageButton.Location = New System.Drawing.Point(188, 4)
+        Me.PreviousPageButton.Name = "PreviousPageButton"
+        Me.PreviousPageButton.Size = New System.Drawing.Size(28, 22)
+        Me.PreviousPageButton.TabIndex = 3
+        Me.PreviousPageButton.Text = "<<"
+        Me.PreviousPageButton.UseVisualStyleBackColor = True
+        '
+        'FirstPageButton
+        '
+        Me.FirstPageButton.Location = New System.Drawing.Point(154, 4)
+        Me.FirstPageButton.Name = "FirstPageButton"
+        Me.FirstPageButton.Size = New System.Drawing.Size(28, 22)
+        Me.FirstPageButton.TabIndex = 2
+        Me.FirstPageButton.Text = "|<"
+        Me.FirstPageButton.UseVisualStyleBackColor = True
+        '
+        'PoniesPerPageLabel
+        '
+        Me.PoniesPerPageLabel.AutoSize = True
+        Me.PoniesPerPageLabel.Location = New System.Drawing.Point(3, 9)
+        Me.PoniesPerPageLabel.Name = "PoniesPerPageLabel"
+        Me.PoniesPerPageLabel.Size = New System.Drawing.Size(88, 13)
+        Me.PoniesPerPageLabel.TabIndex = 0
+        Me.PoniesPerPageLabel.Text = "Ponies per Page:"
+        '
+        'PoniesPerPage
+        '
+        Me.PoniesPerPage.Location = New System.Drawing.Point(98, 5)
+        Me.PoniesPerPage.Name = "PoniesPerPage"
+        Me.PoniesPerPage.Size = New System.Drawing.Size(50, 20)
+        Me.PoniesPerPage.TabIndex = 1
+        Me.PoniesPerPage.Value = New Decimal(New Integer() {7, 0, 0, 0})
+        '
+        'PaginationEnabled
+        '
+        Me.PaginationEnabled.AutoSize = True
+        Me.PaginationEnabled.Location = New System.Drawing.Point(12, 8)
+        Me.PaginationEnabled.Name = "PaginationEnabled"
+        Me.PaginationEnabled.Size = New System.Drawing.Size(112, 17)
+        Me.PaginationEnabled.TabIndex = 0
+        Me.PaginationEnabled.Text = "Enable Pagination"
+        Me.PaginationEnabled.UseVisualStyleBackColor = True
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -318,6 +440,8 @@ Partial Class Main
         Me.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.ClientSize = New System.Drawing.Size(734, 612)
+        Me.Controls.Add(Me.PaginationEnabled)
+        Me.Controls.Add(Me.PonyPaginationPanel)
         Me.Controls.Add(Me.LoadingProgressBar)
         Me.Controls.Add(Me.PonySelectionPanel)
         Me.Controls.Add(Me.SelectionControlsPanel)
@@ -330,7 +454,10 @@ Partial Class Main
         Me.SelectionControlsPanel.PerformLayout()
         Me.FilterGroupBox.ResumeLayout(False)
         Me.FilterGroupBox.PerformLayout()
+        Me.PonyPaginationPanel.ResumeLayout(False)
+        Me.PonyPaginationPanel.PerformLayout()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
     Friend WithEvents AnimationTimer As System.Windows.Forms.Timer
@@ -358,5 +485,16 @@ Partial Class Main
     Friend WithEvents PonyEditorButton As System.Windows.Forms.Button
     Friend WithEvents OptionsButton As System.Windows.Forms.Button
     Friend WithEvents GoButton As System.Windows.Forms.Button
+    Friend WithEvents PonyPaginationPanel As System.Windows.Forms.Panel
+    Friend WithEvents LastPageButton As System.Windows.Forms.Button
+    Friend WithEvents NextPageButton As System.Windows.Forms.Button
+    Friend WithEvents NextPonyButton As System.Windows.Forms.Button
+    Friend WithEvents PreviousPonyButton As System.Windows.Forms.Button
+    Friend WithEvents PreviousPageButton As System.Windows.Forms.Button
+    Friend WithEvents FirstPageButton As System.Windows.Forms.Button
+    Friend WithEvents PoniesPerPageLabel As System.Windows.Forms.Label
+    Friend WithEvents PoniesPerPage As System.Windows.Forms.NumericUpDown
+    Friend WithEvents PonyPaginationLabel As System.Windows.Forms.Label
+    Friend WithEvents PaginationEnabled As System.Windows.Forms.CheckBox
 
 End Class
