@@ -1777,14 +1777,17 @@ Public Class PonyEditor
 
             If new_path <> picture_path Then
                 Try
-                    My.Computer.FileSystem.CopyFile(picture_path, LCase(new_path), True)
+                    If Not My.Computer.FileSystem.FileExists(new_path) Then
+                        File.Create(new_path).Close()
+                    End If
+                    My.Computer.FileSystem.CopyFile(picture_path, new_path, True)
                 Catch ex As Exception
-                    MsgBox("Warning:  Couldn't copy the image file to the pony directory.  If you were trying to use the same image for left and right, you can safely ignore this message. " _
+                    MsgBox("Warning: Couldn't copy the image file to the pony directory. If you were trying to use the same image for left and right, you can safely ignore this message. " _
                            & ControlChars.NewLine & "Details: " & ex.Message)
                 End Try
             End If
 
-            Return LCase(new_path)
+            Return new_path
 
             has_saved = False
 
@@ -1810,13 +1813,15 @@ Public Class PonyEditor
 
         If IsNothing(sound_path) Then
             Return ""
-            Exit Function
         End If
 
         Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
                                        PreviewPony.Directory, Get_Filename(sound_path))
 
         If new_path <> sound_path Then
+            If Not My.Computer.FileSystem.FileExists(new_path) Then
+                File.Create(new_path).Close()
+            End If
             My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
         End If
 

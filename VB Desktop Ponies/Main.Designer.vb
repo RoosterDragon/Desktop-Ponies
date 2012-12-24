@@ -76,9 +76,9 @@ Partial Class Main
         Me.LayoutTable.SetColumnSpan(Me.PonySelectionPanel, 2)
         Me.PonySelectionPanel.Dock = System.Windows.Forms.DockStyle.Fill
         Me.PonySelectionPanel.Enabled = False
-        Me.PonySelectionPanel.Location = New System.Drawing.Point(3, 38)
+        Me.PonySelectionPanel.Location = New System.Drawing.Point(3, 32)
         Me.PonySelectionPanel.Name = "PonySelectionPanel"
-        Me.PonySelectionPanel.Size = New System.Drawing.Size(728, 440)
+        Me.PonySelectionPanel.Size = New System.Drawing.Size(728, 446)
         Me.PonySelectionPanel.TabIndex = 2
         '
         'LoadingProgressBar
@@ -334,7 +334,8 @@ Partial Class Main
         Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPage)
         Me.PonyPaginationPanel.Dock = System.Windows.Forms.DockStyle.Right
         Me.PonyPaginationPanel.Enabled = False
-        Me.PonyPaginationPanel.Location = New System.Drawing.Point(181, 3)
+        Me.PonyPaginationPanel.Location = New System.Drawing.Point(181, 0)
+        Me.PonyPaginationPanel.Margin = New System.Windows.Forms.Padding(3, 0, 3, 0)
         Me.PonyPaginationPanel.Name = "PonyPaginationPanel"
         Me.PonyPaginationPanel.Size = New System.Drawing.Size(550, 29)
         Me.PonyPaginationPanel.TabIndex = 1
@@ -414,6 +415,7 @@ Partial Class Main
         'PoniesPerPage
         '
         Me.PoniesPerPage.Location = New System.Drawing.Point(97, 5)
+        Me.PoniesPerPage.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
         Me.PoniesPerPage.Name = "PoniesPerPage"
         Me.PoniesPerPage.Size = New System.Drawing.Size(50, 20)
         Me.PoniesPerPage.TabIndex = 1
@@ -426,7 +428,7 @@ Partial Class Main
         Me.PaginationEnabled.Enabled = False
         Me.PaginationEnabled.Location = New System.Drawing.Point(63, 3)
         Me.PaginationEnabled.Name = "PaginationEnabled"
-        Me.PaginationEnabled.Size = New System.Drawing.Size(112, 29)
+        Me.PaginationEnabled.Size = New System.Drawing.Size(112, 23)
         Me.PaginationEnabled.TabIndex = 0
         Me.PaginationEnabled.Text = "Enable Pagination"
         Me.PaginationEnabled.UseVisualStyleBackColor = True

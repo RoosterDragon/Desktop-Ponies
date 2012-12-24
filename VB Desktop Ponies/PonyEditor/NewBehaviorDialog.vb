@@ -16,29 +16,29 @@ Public Class NewBehaviorDialog
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
-        If Trim(Name_Textbox.Text) = "" Then
+        If Trim(NameTextbox.Text) = "" Then
             MsgBox("You must enter a name for the new behavior.")
             Exit Sub
         End If
 
         For Each behavior In m_editor.PreviewPony.Behaviors
-            If LCase(behavior.Name) = LCase(Name_Textbox.Text) Then
+            If String.Equals(behavior.Name, NameTextbox.Text, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Behavior '" & behavior.Name & "' already exists for this pony.  Please select another name.")
                 Exit Sub
             End If
         Next
 
-        If InStr(Name_Textbox.Text, ",") <> 0 Then
+        If InStr(NameTextbox.Text, ",") <> 0 Then
             MsgBox("The behavior name can't have a comma in it.")
             Exit Sub
         End If
 
-        If InStr(Name_Textbox.Text, "{") <> 0 Then
+        If InStr(NameTextbox.Text, "{") <> 0 Then
             MsgBox("The behavior name can't have a { in it.")
             Exit Sub
         End If
 
-        If InStr(Name_Textbox.Text, "}") <> 0 Then
+        If InStr(NameTextbox.Text, "}") <> 0 Then
             MsgBox("The behavior name can't have a } in it.")
             Exit Sub
         End If
@@ -106,7 +106,7 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        m_editor.PreviewPony.Base.AddBehavior(True, Name_Textbox.Text, _
+        m_editor.PreviewPony.Base.AddBehavior(True, NameTextbox.Text, _
                                                        chance / 100, _
                                                        maxDuration, _
                                                        minDuration, _
@@ -146,7 +146,7 @@ Public Class NewBehaviorDialog
         follow_name = ""
         follow_x = 0
         follow_y = 0
-        Name_Textbox.Text = ""
+        NameTextbox.Text = ""
 
         right_image_path = ""
         left_image_path = ""

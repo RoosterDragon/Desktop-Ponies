@@ -27,14 +27,14 @@ Partial Class NewBehaviorDialog
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.Left_ImageBox = New System.Windows.Forms.PictureBox()
         Me.Right_ImageBox = New System.Windows.Forms.PictureBox()
-        Me.Name_Textbox = New System.Windows.Forms.TextBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
+        Me.NameTextbox = New System.Windows.Forms.TextBox()
+        Me.NameLabel = New System.Windows.Forms.Label()
+        Me.LeftImageLabel = New System.Windows.Forms.Label()
+        Me.RightImageLabel = New System.Windows.Forms.Label()
         Me.Left_Image_Set_Button = New System.Windows.Forms.Button()
         Me.Right_Image_Set_Button = New System.Windows.Forms.Button()
         Me.Movement_Combobox = New System.Windows.Forms.ComboBox()
-        Me.Label4 = New System.Windows.Forms.Label()
+        Me.MovementLabel = New System.Windows.Forms.Label()
         Me.Chance_Box = New System.Windows.Forms.TextBox()
         Me.Max_Box = New System.Windows.Forms.TextBox()
         Me.Min_Box = New System.Windows.Forms.TextBox()
@@ -43,19 +43,19 @@ Partial Class NewBehaviorDialog
         Me.Follow_Box = New System.Windows.Forms.TextBox()
         Me.SetFollow_Button = New System.Windows.Forms.Button()
         Me.Link_Box = New System.Windows.Forms.ComboBox()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.Label8 = New System.Windows.Forms.Label()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
+        Me.ChanceLabel = New System.Windows.Forms.Label()
+        Me.MaxDurationLabel = New System.Windows.Forms.Label()
+        Me.MinDurationLabel = New System.Windows.Forms.Label()
+        Me.StartSpeechLabel = New System.Windows.Forms.Label()
+        Me.EndSpeechLabel = New System.Windows.Forms.Label()
+        Me.FollowLabel = New System.Windows.Forms.Label()
+        Me.LinkLabel = New System.Windows.Forms.Label()
         Me.Speed_Box = New System.Windows.Forms.TextBox()
-        Me.Label12 = New System.Windows.Forms.Label()
+        Me.SpeedLabel = New System.Windows.Forms.Label()
         Me.DontRepeat_CheckBox = New System.Windows.Forms.CheckBox()
         Me.DontRunRandomly_CheckBox = New System.Windows.Forms.CheckBox()
         Me.Group_Numberbox = New System.Windows.Forms.NumericUpDown()
-        Me.Label13 = New System.Windows.Forms.Label()
+        Me.GroupLabel = New System.Windows.Forms.Label()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -115,39 +115,39 @@ Partial Class NewBehaviorDialog
         Me.Right_ImageBox.TabIndex = 2
         Me.Right_ImageBox.TabStop = False
         '
-        'Name_Textbox
+        'NameTextbox
         '
-        Me.Name_Textbox.Location = New System.Drawing.Point(87, 60)
-        Me.Name_Textbox.Name = "Name_Textbox"
-        Me.Name_Textbox.Size = New System.Drawing.Size(100, 20)
-        Me.Name_Textbox.TabIndex = 1
+        Me.NameTextbox.Location = New System.Drawing.Point(87, 60)
+        Me.NameTextbox.Name = "NameTextbox"
+        Me.NameTextbox.Size = New System.Drawing.Size(100, 20)
+        Me.NameTextbox.TabIndex = 1
         '
-        'Label1
+        'NameLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(58, 44)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(83, 13)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Behavior Name:"
+        Me.NameLabel.AutoSize = True
+        Me.NameLabel.Location = New System.Drawing.Point(58, 44)
+        Me.NameLabel.Name = "NameLabel"
+        Me.NameLabel.Size = New System.Drawing.Size(83, 13)
+        Me.NameLabel.TabIndex = 0
+        Me.NameLabel.Text = "Behavior Name:"
         '
-        'Label2
+        'LeftImageLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(80, 139)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(60, 13)
-        Me.Label2.TabIndex = 8
-        Me.Label2.Text = "Left Image:"
+        Me.LeftImageLabel.AutoSize = True
+        Me.LeftImageLabel.Location = New System.Drawing.Point(80, 139)
+        Me.LeftImageLabel.Name = "LeftImageLabel"
+        Me.LeftImageLabel.Size = New System.Drawing.Size(60, 13)
+        Me.LeftImageLabel.TabIndex = 8
+        Me.LeftImageLabel.Text = "Left Image:"
         '
-        'Label3
+        'RightImageLabel
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(365, 139)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(67, 13)
-        Me.Label3.TabIndex = 10
-        Me.Label3.Text = "Right Image:"
+        Me.RightImageLabel.AutoSize = True
+        Me.RightImageLabel.Location = New System.Drawing.Point(365, 139)
+        Me.RightImageLabel.Name = "RightImageLabel"
+        Me.RightImageLabel.Size = New System.Drawing.Size(67, 13)
+        Me.RightImageLabel.TabIndex = 10
+        Me.RightImageLabel.Text = "Right Image:"
         '
         'Left_Image_Set_Button
         '
@@ -176,14 +176,14 @@ Partial Class NewBehaviorDialog
         Me.Movement_Combobox.Size = New System.Drawing.Size(121, 21)
         Me.Movement_Combobox.TabIndex = 3
         '
-        'Label4
+        'MovementLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(243, 44)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(60, 13)
-        Me.Label4.TabIndex = 2
-        Me.Label4.Text = "Movement:"
+        Me.MovementLabel.AutoSize = True
+        Me.MovementLabel.Location = New System.Drawing.Point(243, 44)
+        Me.MovementLabel.Name = "MovementLabel"
+        Me.MovementLabel.Size = New System.Drawing.Size(60, 13)
+        Me.MovementLabel.TabIndex = 2
+        Me.MovementLabel.Text = "Movement:"
         '
         'Chance_Box
         '
@@ -250,68 +250,68 @@ Partial Class NewBehaviorDialog
         Me.Link_Box.Size = New System.Drawing.Size(121, 21)
         Me.Link_Box.TabIndex = 27
         '
-        'Label5
+        'ChanceLabel
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(80, 366)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(106, 13)
-        Me.Label5.TabIndex = 13
-        Me.Label5.Text = "Chance to occur (%):"
+        Me.ChanceLabel.AutoSize = True
+        Me.ChanceLabel.Location = New System.Drawing.Point(80, 366)
+        Me.ChanceLabel.Name = "ChanceLabel"
+        Me.ChanceLabel.Size = New System.Drawing.Size(106, 13)
+        Me.ChanceLabel.TabIndex = 13
+        Me.ChanceLabel.Text = "Chance to occur (%):"
         '
-        'Label6
+        'MaxDurationLabel
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(242, 366)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(151, 13)
-        Me.Label6.TabIndex = 15
-        Me.Label6.Text = "Maximum Duration in seconds:"
+        Me.MaxDurationLabel.AutoSize = True
+        Me.MaxDurationLabel.Location = New System.Drawing.Point(242, 366)
+        Me.MaxDurationLabel.Name = "MaxDurationLabel"
+        Me.MaxDurationLabel.Size = New System.Drawing.Size(151, 13)
+        Me.MaxDurationLabel.TabIndex = 15
+        Me.MaxDurationLabel.Text = "Maximum Duration in seconds:"
         '
-        'Label7
+        'MinDurationLabel
         '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(435, 366)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(150, 13)
-        Me.Label7.TabIndex = 17
-        Me.Label7.Text = "Minimum Duration in Seconds:"
+        Me.MinDurationLabel.AutoSize = True
+        Me.MinDurationLabel.Location = New System.Drawing.Point(435, 366)
+        Me.MinDurationLabel.Name = "MinDurationLabel"
+        Me.MinDurationLabel.Size = New System.Drawing.Size(150, 13)
+        Me.MinDurationLabel.TabIndex = 17
+        Me.MinDurationLabel.Text = "Minimum Duration in Seconds:"
         '
-        'Label8
+        'StartSpeechLabel
         '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(71, 452)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(86, 13)
-        Me.Label8.TabIndex = 19
-        Me.Label8.Text = "Starting Speech:"
+        Me.StartSpeechLabel.AutoSize = True
+        Me.StartSpeechLabel.Location = New System.Drawing.Point(71, 452)
+        Me.StartSpeechLabel.Name = "StartSpeechLabel"
+        Me.StartSpeechLabel.Size = New System.Drawing.Size(86, 13)
+        Me.StartSpeechLabel.TabIndex = 19
+        Me.StartSpeechLabel.Text = "Starting Speech:"
         '
-        'Label9
+        'EndSpeechLabel
         '
-        Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(258, 452)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(83, 13)
-        Me.Label9.TabIndex = 21
-        Me.Label9.Text = "Ending Speech:"
+        Me.EndSpeechLabel.AutoSize = True
+        Me.EndSpeechLabel.Location = New System.Drawing.Point(258, 452)
+        Me.EndSpeechLabel.Name = "EndSpeechLabel"
+        Me.EndSpeechLabel.Size = New System.Drawing.Size(83, 13)
+        Me.EndSpeechLabel.TabIndex = 21
+        Me.EndSpeechLabel.Text = "Ending Speech:"
         '
-        'Label10
+        'FollowLabel
         '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(457, 452)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(97, 13)
-        Me.Label10.TabIndex = 23
-        Me.Label10.Text = "Follow/Goto mode:"
+        Me.FollowLabel.AutoSize = True
+        Me.FollowLabel.Location = New System.Drawing.Point(457, 452)
+        Me.FollowLabel.Name = "FollowLabel"
+        Me.FollowLabel.Size = New System.Drawing.Size(97, 13)
+        Me.FollowLabel.TabIndex = 23
+        Me.FollowLabel.Text = "Follow/Goto mode:"
         '
-        'Label11
+        'LinkLabel
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(71, 531)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(47, 13)
-        Me.Label11.TabIndex = 26
-        Me.Label11.Text = "Links to:"
+        Me.LinkLabel.AutoSize = True
+        Me.LinkLabel.Location = New System.Drawing.Point(71, 531)
+        Me.LinkLabel.Name = "LinkLabel"
+        Me.LinkLabel.Size = New System.Drawing.Size(47, 13)
+        Me.LinkLabel.TabIndex = 26
+        Me.LinkLabel.Text = "Links to:"
         '
         'Speed_Box
         '
@@ -321,14 +321,14 @@ Partial Class NewBehaviorDialog
         Me.Speed_Box.Size = New System.Drawing.Size(100, 20)
         Me.Speed_Box.TabIndex = 5
         '
-        'Label12
+        'SpeedLabel
         '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(458, 44)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(94, 13)
-        Me.Label12.TabIndex = 4
-        Me.Label12.Text = "Movement Speed:"
+        Me.SpeedLabel.AutoSize = True
+        Me.SpeedLabel.Location = New System.Drawing.Point(458, 44)
+        Me.SpeedLabel.Name = "SpeedLabel"
+        Me.SpeedLabel.Size = New System.Drawing.Size(94, 13)
+        Me.SpeedLabel.TabIndex = 4
+        Me.SpeedLabel.Text = "Movement Speed:"
         '
         'DontRepeat_CheckBox
         '
@@ -358,14 +358,14 @@ Partial Class NewBehaviorDialog
         Me.Group_Numberbox.Size = New System.Drawing.Size(120, 20)
         Me.Group_Numberbox.TabIndex = 7
         '
-        'Label13
+        'GroupLabel
         '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(71, 105)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(286, 13)
-        Me.Label13.TabIndex = 6
-        Me.Label13.Text = "Behavior Group (leave at 0 to be used regardless of group):"
+        Me.GroupLabel.AutoSize = True
+        Me.GroupLabel.Location = New System.Drawing.Point(71, 105)
+        Me.GroupLabel.Name = "GroupLabel"
+        Me.GroupLabel.Size = New System.Drawing.Size(286, 13)
+        Me.GroupLabel.TabIndex = 6
+        Me.GroupLabel.Text = "Behavior Group (leave at 0 to be used regardless of group):"
         '
         'NewBehaviorDialog
         '
@@ -375,19 +375,19 @@ Partial Class NewBehaviorDialog
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(655, 622)
-        Me.Controls.Add(Me.Label13)
+        Me.Controls.Add(Me.GroupLabel)
         Me.Controls.Add(Me.Group_Numberbox)
         Me.Controls.Add(Me.DontRunRandomly_CheckBox)
         Me.Controls.Add(Me.DontRepeat_CheckBox)
-        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.SpeedLabel)
         Me.Controls.Add(Me.Speed_Box)
-        Me.Controls.Add(Me.Label11)
-        Me.Controls.Add(Me.Label10)
-        Me.Controls.Add(Me.Label9)
-        Me.Controls.Add(Me.Label8)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.LinkLabel)
+        Me.Controls.Add(Me.FollowLabel)
+        Me.Controls.Add(Me.EndSpeechLabel)
+        Me.Controls.Add(Me.StartSpeechLabel)
+        Me.Controls.Add(Me.MinDurationLabel)
+        Me.Controls.Add(Me.MaxDurationLabel)
+        Me.Controls.Add(Me.ChanceLabel)
         Me.Controls.Add(Me.Link_Box)
         Me.Controls.Add(Me.SetFollow_Button)
         Me.Controls.Add(Me.Follow_Box)
@@ -396,14 +396,14 @@ Partial Class NewBehaviorDialog
         Me.Controls.Add(Me.Min_Box)
         Me.Controls.Add(Me.Max_Box)
         Me.Controls.Add(Me.Chance_Box)
-        Me.Controls.Add(Me.Label4)
+        Me.Controls.Add(Me.MovementLabel)
         Me.Controls.Add(Me.Movement_Combobox)
         Me.Controls.Add(Me.Right_Image_Set_Button)
         Me.Controls.Add(Me.Left_Image_Set_Button)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Name_Textbox)
+        Me.Controls.Add(Me.RightImageLabel)
+        Me.Controls.Add(Me.LeftImageLabel)
+        Me.Controls.Add(Me.NameLabel)
+        Me.Controls.Add(Me.NameTextbox)
         Me.Controls.Add(Me.Right_ImageBox)
         Me.Controls.Add(Me.Left_ImageBox)
         Me.Controls.Add(Me.TableLayoutPanel1)
@@ -424,14 +424,14 @@ Partial Class NewBehaviorDialog
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
     Friend WithEvents Left_ImageBox As System.Windows.Forms.PictureBox
     Friend WithEvents Right_ImageBox As System.Windows.Forms.PictureBox
-    Friend WithEvents Name_Textbox As System.Windows.Forms.TextBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Label3 As System.Windows.Forms.Label
+    Friend WithEvents NameTextbox As System.Windows.Forms.TextBox
+    Friend WithEvents NameLabel As System.Windows.Forms.Label
+    Friend WithEvents LeftImageLabel As System.Windows.Forms.Label
+    Friend WithEvents RightImageLabel As System.Windows.Forms.Label
     Friend WithEvents Left_Image_Set_Button As System.Windows.Forms.Button
     Friend WithEvents Right_Image_Set_Button As System.Windows.Forms.Button
     Friend WithEvents Movement_Combobox As System.Windows.Forms.ComboBox
-    Friend WithEvents Label4 As System.Windows.Forms.Label
+    Friend WithEvents MovementLabel As System.Windows.Forms.Label
     Friend WithEvents Chance_Box As System.Windows.Forms.TextBox
     Friend WithEvents Max_Box As System.Windows.Forms.TextBox
     Friend WithEvents Min_Box As System.Windows.Forms.TextBox
@@ -440,18 +440,18 @@ Partial Class NewBehaviorDialog
     Friend WithEvents Follow_Box As System.Windows.Forms.TextBox
     Friend WithEvents SetFollow_Button As System.Windows.Forms.Button
     Friend WithEvents Link_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents Label8 As System.Windows.Forms.Label
-    Friend WithEvents Label9 As System.Windows.Forms.Label
-    Friend WithEvents Label10 As System.Windows.Forms.Label
-    Friend WithEvents Label11 As System.Windows.Forms.Label
+    Friend WithEvents ChanceLabel As System.Windows.Forms.Label
+    Friend WithEvents MaxDurationLabel As System.Windows.Forms.Label
+    Friend WithEvents MinDurationLabel As System.Windows.Forms.Label
+    Friend WithEvents StartSpeechLabel As System.Windows.Forms.Label
+    Friend WithEvents EndSpeechLabel As System.Windows.Forms.Label
+    Friend WithEvents FollowLabel As System.Windows.Forms.Label
+    Friend WithEvents LinkLabel As System.Windows.Forms.Label
     Friend WithEvents Speed_Box As System.Windows.Forms.TextBox
-    Friend WithEvents Label12 As System.Windows.Forms.Label
+    Friend WithEvents SpeedLabel As System.Windows.Forms.Label
     Friend WithEvents DontRepeat_CheckBox As System.Windows.Forms.CheckBox
     Friend WithEvents DontRunRandomly_CheckBox As System.Windows.Forms.CheckBox
     Friend WithEvents Group_Numberbox As System.Windows.Forms.NumericUpDown
-    Friend WithEvents Label13 As System.Windows.Forms.Label
+    Friend WithEvents GroupLabel As System.Windows.Forms.Label
 
 End Class

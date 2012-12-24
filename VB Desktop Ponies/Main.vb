@@ -1100,7 +1100,7 @@ Public Class Main
 
         Dim character = e.KeyChar
         If Char.IsLetter(character) Then
-            For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
+            For Each selectionControl In selectionControlsFilteredVisible
                 Dim compare = String.Compare(selectionControl.PonyName.Text(0), character, StringComparison.OrdinalIgnoreCase)
                 If compare = 0 Then
                     PonySelectionPanel.ScrollControlIntoView(selectionControl)
