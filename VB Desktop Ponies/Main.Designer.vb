@@ -59,9 +59,11 @@ Partial Class Main
         Me.PoniesPerPageLabel = New System.Windows.Forms.Label()
         Me.PoniesPerPage = New System.Windows.Forms.NumericUpDown()
         Me.PaginationEnabled = New System.Windows.Forms.CheckBox()
+        Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
         Me.SelectionControlsPanel.SuspendLayout()
         Me.FilterGroupBox.SuspendLayout()
         Me.PonyPaginationPanel.SuspendLayout()
+        Me.LayoutTable.SuspendLayout()
         Me.SuspendLayout()
         '
         'AnimationTimer
@@ -70,25 +72,22 @@ Partial Class Main
         '
         'PonySelectionPanel
         '
-        Me.PonySelectionPanel.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PonySelectionPanel.AutoScroll = True
+        Me.LayoutTable.SetColumnSpan(Me.PonySelectionPanel, 2)
+        Me.PonySelectionPanel.Dock = System.Windows.Forms.DockStyle.Fill
         Me.PonySelectionPanel.Enabled = False
-        Me.PonySelectionPanel.Location = New System.Drawing.Point(0, 30)
-        Me.PonySelectionPanel.Margin = New System.Windows.Forms.Padding(0)
+        Me.PonySelectionPanel.Location = New System.Drawing.Point(3, 38)
         Me.PonySelectionPanel.Name = "PonySelectionPanel"
-        Me.PonySelectionPanel.Size = New System.Drawing.Size(734, 458)
+        Me.PonySelectionPanel.Size = New System.Drawing.Size(728, 440)
         Me.PonySelectionPanel.TabIndex = 2
         '
         'LoadingProgressBar
         '
-        Me.LoadingProgressBar.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.LoadingProgressBar.Location = New System.Drawing.Point(9, 465)
-        Me.LoadingProgressBar.Margin = New System.Windows.Forms.Padding(0)
+        Me.LayoutTable.SetColumnSpan(Me.LoadingProgressBar, 2)
+        Me.LoadingProgressBar.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LoadingProgressBar.Location = New System.Drawing.Point(3, 484)
         Me.LoadingProgressBar.Name = "LoadingProgressBar"
-        Me.LoadingProgressBar.Size = New System.Drawing.Size(716, 23)
+        Me.LoadingProgressBar.Size = New System.Drawing.Size(728, 23)
         Me.LoadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.LoadingProgressBar.TabIndex = 3
         '
@@ -102,8 +101,7 @@ Partial Class Main
         '
         'SelectionControlsPanel
         '
-        Me.SelectionControlsPanel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LayoutTable.SetColumnSpan(Me.SelectionControlsPanel, 2)
         Me.SelectionControlsPanel.Controls.Add(Me.PonyCountValueLabel)
         Me.SelectionControlsPanel.Controls.Add(Me.DeleteProfileButton)
         Me.SelectionControlsPanel.Controls.Add(Me.CopyProfileButton)
@@ -119,17 +117,17 @@ Partial Class Main
         Me.SelectionControlsPanel.Controls.Add(Me.PonyEditorButton)
         Me.SelectionControlsPanel.Controls.Add(Me.OptionsButton)
         Me.SelectionControlsPanel.Controls.Add(Me.GoButton)
+        Me.SelectionControlsPanel.Dock = System.Windows.Forms.DockStyle.Fill
         Me.SelectionControlsPanel.Enabled = False
-        Me.SelectionControlsPanel.Location = New System.Drawing.Point(0, 491)
-        Me.SelectionControlsPanel.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
+        Me.SelectionControlsPanel.Location = New System.Drawing.Point(3, 513)
         Me.SelectionControlsPanel.Name = "SelectionControlsPanel"
-        Me.SelectionControlsPanel.Size = New System.Drawing.Size(734, 121)
+        Me.SelectionControlsPanel.Size = New System.Drawing.Size(728, 121)
         Me.SelectionControlsPanel.TabIndex = 4
         '
         'PonyCountValueLabel
         '
         Me.PonyCountValueLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.PonyCountValueLabel.Location = New System.Drawing.Point(678, 66)
+        Me.PonyCountValueLabel.Location = New System.Drawing.Point(675, 66)
         Me.PonyCountValueLabel.Name = "PonyCountValueLabel"
         Me.PonyCountValueLabel.Size = New System.Drawing.Size(43, 13)
         Me.PonyCountValueLabel.TabIndex = 13
@@ -139,7 +137,7 @@ Partial Class Main
         'DeleteProfileButton
         '
         Me.DeleteProfileButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.DeleteProfileButton.Location = New System.Drawing.Point(236, 95)
+        Me.DeleteProfileButton.Location = New System.Drawing.Point(233, 95)
         Me.DeleteProfileButton.Name = "DeleteProfileButton"
         Me.DeleteProfileButton.Size = New System.Drawing.Size(68, 23)
         Me.DeleteProfileButton.TabIndex = 8
@@ -149,7 +147,7 @@ Partial Class Main
         'CopyProfileButton
         '
         Me.CopyProfileButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.CopyProfileButton.Location = New System.Drawing.Point(162, 95)
+        Me.CopyProfileButton.Location = New System.Drawing.Point(159, 95)
         Me.CopyProfileButton.Name = "CopyProfileButton"
         Me.CopyProfileButton.Size = New System.Drawing.Size(68, 23)
         Me.CopyProfileButton.TabIndex = 7
@@ -160,7 +158,7 @@ Partial Class Main
         '
         Me.ProfileLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.ProfileLabel.AutoSize = True
-        Me.ProfileLabel.Location = New System.Drawing.Point(12, 68)
+        Me.ProfileLabel.Location = New System.Drawing.Point(9, 68)
         Me.ProfileLabel.Name = "ProfileLabel"
         Me.ProfileLabel.Size = New System.Drawing.Size(84, 13)
         Me.ProfileLabel.TabIndex = 3
@@ -169,7 +167,7 @@ Partial Class Main
         'ProfileComboBox
         '
         Me.ProfileComboBox.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.ProfileComboBox.Location = New System.Drawing.Point(102, 63)
+        Me.ProfileComboBox.Location = New System.Drawing.Point(99, 63)
         Me.ProfileComboBox.Name = "ProfileComboBox"
         Me.ProfileComboBox.Size = New System.Drawing.Size(202, 21)
         Me.ProfileComboBox.TabIndex = 4
@@ -177,7 +175,7 @@ Partial Class Main
         'ZeroPoniesButton
         '
         Me.ZeroPoniesButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.ZeroPoniesButton.Location = New System.Drawing.Point(622, 3)
+        Me.ZeroPoniesButton.Location = New System.Drawing.Point(619, 3)
         Me.ZeroPoniesButton.Name = "ZeroPoniesButton"
         Me.ZeroPoniesButton.Size = New System.Drawing.Size(100, 23)
         Me.ZeroPoniesButton.TabIndex = 10
@@ -188,7 +186,7 @@ Partial Class Main
         '
         Me.PonyCountLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.PonyCountLabel.AutoSize = True
-        Me.PonyCountLabel.Location = New System.Drawing.Point(604, 66)
+        Me.PonyCountLabel.Location = New System.Drawing.Point(601, 66)
         Me.PonyCountLabel.Name = "PonyCountLabel"
         Me.PonyCountLabel.Size = New System.Drawing.Size(69, 13)
         Me.PonyCountLabel.TabIndex = 12
@@ -201,7 +199,7 @@ Partial Class Main
         Me.FilterGroupBox.Controls.Add(Me.FilterOptionsBox)
         Me.FilterGroupBox.Controls.Add(Me.FilterAnyRadio)
         Me.FilterGroupBox.Controls.Add(Me.FilterExactlyRadio)
-        Me.FilterGroupBox.Location = New System.Drawing.Point(310, 3)
+        Me.FilterGroupBox.Location = New System.Drawing.Point(307, 3)
         Me.FilterGroupBox.Name = "FilterGroupBox"
         Me.FilterGroupBox.Size = New System.Drawing.Size(288, 115)
         Me.FilterGroupBox.TabIndex = 9
@@ -256,7 +254,7 @@ Partial Class Main
         'GamesButton
         '
         Me.GamesButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.GamesButton.Location = New System.Drawing.Point(208, 3)
+        Me.GamesButton.Location = New System.Drawing.Point(205, 3)
         Me.GamesButton.Name = "GamesButton"
         Me.GamesButton.Size = New System.Drawing.Size(96, 23)
         Me.GamesButton.TabIndex = 2
@@ -266,7 +264,7 @@ Partial Class Main
         'LoadProfileButton
         '
         Me.LoadProfileButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.LoadProfileButton.Location = New System.Drawing.Point(14, 95)
+        Me.LoadProfileButton.Location = New System.Drawing.Point(11, 95)
         Me.LoadProfileButton.Name = "LoadProfileButton"
         Me.LoadProfileButton.Size = New System.Drawing.Size(68, 23)
         Me.LoadProfileButton.TabIndex = 5
@@ -276,7 +274,7 @@ Partial Class Main
         'SaveProfileButton
         '
         Me.SaveProfileButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.SaveProfileButton.Location = New System.Drawing.Point(88, 95)
+        Me.SaveProfileButton.Location = New System.Drawing.Point(85, 95)
         Me.SaveProfileButton.Name = "SaveProfileButton"
         Me.SaveProfileButton.Size = New System.Drawing.Size(68, 23)
         Me.SaveProfileButton.TabIndex = 6
@@ -286,7 +284,7 @@ Partial Class Main
         'OnePoniesButton
         '
         Me.OnePoniesButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.OnePoniesButton.Location = New System.Drawing.Point(622, 32)
+        Me.OnePoniesButton.Location = New System.Drawing.Point(619, 32)
         Me.OnePoniesButton.Name = "OnePoniesButton"
         Me.OnePoniesButton.Size = New System.Drawing.Size(100, 23)
         Me.OnePoniesButton.TabIndex = 11
@@ -296,7 +294,7 @@ Partial Class Main
         'PonyEditorButton
         '
         Me.PonyEditorButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.PonyEditorButton.Location = New System.Drawing.Point(110, 3)
+        Me.PonyEditorButton.Location = New System.Drawing.Point(107, 3)
         Me.PonyEditorButton.Name = "PonyEditorButton"
         Me.PonyEditorButton.Size = New System.Drawing.Size(92, 23)
         Me.PonyEditorButton.TabIndex = 1
@@ -306,7 +304,7 @@ Partial Class Main
         'OptionsButton
         '
         Me.OptionsButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.OptionsButton.Location = New System.Drawing.Point(12, 3)
+        Me.OptionsButton.Location = New System.Drawing.Point(9, 3)
         Me.OptionsButton.Name = "OptionsButton"
         Me.OptionsButton.Size = New System.Drawing.Size(92, 23)
         Me.OptionsButton.TabIndex = 0
@@ -316,7 +314,7 @@ Partial Class Main
         'GoButton
         '
         Me.GoButton.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.GoButton.Location = New System.Drawing.Point(604, 95)
+        Me.GoButton.Location = New System.Drawing.Point(601, 95)
         Me.GoButton.Name = "GoButton"
         Me.GoButton.Size = New System.Drawing.Size(118, 23)
         Me.GoButton.TabIndex = 14
@@ -325,8 +323,6 @@ Partial Class Main
         '
         'PonyPaginationPanel
         '
-        Me.PonyPaginationPanel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PonyPaginationPanel.Controls.Add(Me.PonyPaginationLabel)
         Me.PonyPaginationPanel.Controls.Add(Me.LastPageButton)
         Me.PonyPaginationPanel.Controls.Add(Me.NextPageButton)
@@ -336,17 +332,17 @@ Partial Class Main
         Me.PonyPaginationPanel.Controls.Add(Me.FirstPageButton)
         Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPageLabel)
         Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPage)
+        Me.PonyPaginationPanel.Dock = System.Windows.Forms.DockStyle.Right
         Me.PonyPaginationPanel.Enabled = False
-        Me.PonyPaginationPanel.Location = New System.Drawing.Point(127, 0)
-        Me.PonyPaginationPanel.Margin = New System.Windows.Forms.Padding(0)
+        Me.PonyPaginationPanel.Location = New System.Drawing.Point(181, 3)
         Me.PonyPaginationPanel.Name = "PonyPaginationPanel"
-        Me.PonyPaginationPanel.Size = New System.Drawing.Size(607, 30)
+        Me.PonyPaginationPanel.Size = New System.Drawing.Size(550, 29)
         Me.PonyPaginationPanel.TabIndex = 1
         '
         'PonyPaginationLabel
         '
         Me.PonyPaginationLabel.AutoSize = True
-        Me.PonyPaginationLabel.Location = New System.Drawing.Point(358, 9)
+        Me.PonyPaginationLabel.Location = New System.Drawing.Point(358, 7)
         Me.PonyPaginationLabel.Name = "PonyPaginationLabel"
         Me.PonyPaginationLabel.Size = New System.Drawing.Size(88, 13)
         Me.PonyPaginationLabel.TabIndex = 8
@@ -399,7 +395,7 @@ Partial Class Main
         '
         'FirstPageButton
         '
-        Me.FirstPageButton.Location = New System.Drawing.Point(154, 4)
+        Me.FirstPageButton.Location = New System.Drawing.Point(153, 4)
         Me.FirstPageButton.Name = "FirstPageButton"
         Me.FirstPageButton.Size = New System.Drawing.Size(28, 22)
         Me.FirstPageButton.TabIndex = 2
@@ -409,7 +405,7 @@ Partial Class Main
         'PoniesPerPageLabel
         '
         Me.PoniesPerPageLabel.AutoSize = True
-        Me.PoniesPerPageLabel.Location = New System.Drawing.Point(3, 9)
+        Me.PoniesPerPageLabel.Location = New System.Drawing.Point(3, 7)
         Me.PoniesPerPageLabel.Name = "PoniesPerPageLabel"
         Me.PoniesPerPageLabel.Size = New System.Drawing.Size(88, 13)
         Me.PoniesPerPageLabel.TabIndex = 0
@@ -417,7 +413,7 @@ Partial Class Main
         '
         'PoniesPerPage
         '
-        Me.PoniesPerPage.Location = New System.Drawing.Point(98, 5)
+        Me.PoniesPerPage.Location = New System.Drawing.Point(97, 5)
         Me.PoniesPerPage.Name = "PoniesPerPage"
         Me.PoniesPerPage.Size = New System.Drawing.Size(50, 20)
         Me.PoniesPerPage.TabIndex = 1
@@ -426,12 +422,35 @@ Partial Class Main
         'PaginationEnabled
         '
         Me.PaginationEnabled.AutoSize = True
-        Me.PaginationEnabled.Location = New System.Drawing.Point(12, 8)
+        Me.PaginationEnabled.Dock = System.Windows.Forms.DockStyle.Right
+        Me.PaginationEnabled.Enabled = False
+        Me.PaginationEnabled.Location = New System.Drawing.Point(63, 3)
         Me.PaginationEnabled.Name = "PaginationEnabled"
-        Me.PaginationEnabled.Size = New System.Drawing.Size(112, 17)
+        Me.PaginationEnabled.Size = New System.Drawing.Size(112, 29)
         Me.PaginationEnabled.TabIndex = 0
         Me.PaginationEnabled.Text = "Enable Pagination"
         Me.PaginationEnabled.UseVisualStyleBackColor = True
+        '
+        'LayoutTable
+        '
+        Me.LayoutTable.ColumnCount = 2
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.LayoutTable.Controls.Add(Me.SelectionControlsPanel, 0, 3)
+        Me.LayoutTable.Controls.Add(Me.PaginationEnabled, 0, 0)
+        Me.LayoutTable.Controls.Add(Me.LoadingProgressBar, 0, 2)
+        Me.LayoutTable.Controls.Add(Me.PonyPaginationPanel, 1, 0)
+        Me.LayoutTable.Controls.Add(Me.PonySelectionPanel, 0, 1)
+        Me.LayoutTable.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LayoutTable.Location = New System.Drawing.Point(0, 0)
+        Me.LayoutTable.Name = "LayoutTable"
+        Me.LayoutTable.RowCount = 4
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.Size = New System.Drawing.Size(734, 637)
+        Me.LayoutTable.TabIndex = 0
         '
         'Main
         '
@@ -439,12 +458,8 @@ Partial Class Main
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.ClientSize = New System.Drawing.Size(734, 612)
-        Me.Controls.Add(Me.PaginationEnabled)
-        Me.Controls.Add(Me.PonyPaginationPanel)
-        Me.Controls.Add(Me.LoadingProgressBar)
-        Me.Controls.Add(Me.PonySelectionPanel)
-        Me.Controls.Add(Me.SelectionControlsPanel)
+        Me.ClientSize = New System.Drawing.Size(734, 637)
+        Me.Controls.Add(Me.LayoutTable)
         Me.KeyPreview = True
         Me.MinimumSize = New System.Drawing.Size(750, 350)
         Me.Name = "Main"
@@ -456,8 +471,9 @@ Partial Class Main
         Me.FilterGroupBox.PerformLayout()
         Me.PonyPaginationPanel.ResumeLayout(False)
         Me.PonyPaginationPanel.PerformLayout()
+        Me.LayoutTable.ResumeLayout(False)
+        Me.LayoutTable.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
     Friend WithEvents AnimationTimer As System.Windows.Forms.Timer
@@ -496,5 +512,6 @@ Partial Class Main
     Friend WithEvents PoniesPerPage As System.Windows.Forms.NumericUpDown
     Friend WithEvents PonyPaginationLabel As System.Windows.Forms.Label
     Friend WithEvents PaginationEnabled As System.Windows.Forms.CheckBox
+    Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
 
 End Class
