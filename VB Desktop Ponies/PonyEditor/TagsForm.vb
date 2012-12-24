@@ -6,11 +6,11 @@
         m_editor = editor
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
         Me.Close()
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         m_editor.PreviewPony.Tags.Clear()
 
         For Each Tag As String In PonyFilterList.CheckedItems
@@ -20,7 +20,7 @@
         Me.Close()
     End Sub
 
-    Private Sub Tags_Form_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub Tags_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         PonyFilterList.Items.Clear()
 
         Me.Text = "Tags for " & m_editor.PreviewPony.Directory

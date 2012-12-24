@@ -40,7 +40,7 @@ Public Class PonyEditor
         Friend Sort_Column As DataGridViewColumn = Nothing
         Friend Sort_Order As SortOrder = Nothing
 
-        Sub New(ByVal _grid As DataGridView, ByVal _slot As Integer, ByVal _button As Button)
+        Sub New(_grid As DataGridView, _slot As Integer, _button As Button)
             grid = _grid
             slot = _slot
             button = _button
@@ -62,7 +62,7 @@ Public Class PonyEditor
         Icon = My.Resources.Twilight
     End Sub
 
-    Private Sub PonyEditor_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
             has_saved = True
             changes_made = False
@@ -142,7 +142,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="ponyname"></param>
     ''' <returns></returns>
-    Private Function GetPonyOrder(ByVal ponyname As String) As Integer
+    Private Function GetPonyOrder(ponyname As String) As Integer
 
         Dim index As Integer = 0
 
@@ -158,7 +158,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PonySelectionView_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles PonySelectionView.SelectedIndexChanged
+    Private Sub PonySelectionView_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonySelectionView.SelectedIndexChanged
 
         Try
 
@@ -183,7 +183,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub LoadPony(ByVal menu_index As Integer)
+    Private Sub LoadPony(menu_index As Integer)
 
         Enabled = False
 
@@ -219,7 +219,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEditor_FormClosing(ByVal sender As Object, ByVal e As FormClosingEventArgs) Handles Me.FormClosing
+    Private Sub PonyEditor_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         If has_saved = False Then
             If SaveDialog.ShowDialog() = DialogResult.Cancel Then
                 e.Cancel = True
@@ -230,7 +230,7 @@ Public Class PonyEditor
         If pe_animator.Started Then pe_animator.Pause(True)
     End Sub
 
-    Private Sub PonyEditor_FormClosed(ByVal sender As Object, ByVal e As FormClosedEventArgs) Handles Me.FormClosed
+    Private Sub PonyEditor_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
         pe_animator.Finish()
         pe_animator.Dispose()
         If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
@@ -526,7 +526,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Function Find_Next_Link(ByVal link_name As String, ByVal depth As Integer, ByVal series As Integer, ByRef pony As Pony, ByRef chain_list As List(Of ChainLink)) As List(Of ChainLink)
+    Private Function Find_Next_Link(link_name As String, depth As Integer, series As Integer, ByRef pony As Pony, ByRef chain_list As List(Of ChainLink)) As List(Of ChainLink)
 
         For Each behavior In pony.Behaviors
             If behavior.Name = link_name Then
@@ -547,7 +547,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Function Movement_ToString(ByVal movement As Pony.Allowed_Moves) As String
+    Private Function Movement_ToString(movement As Pony.Allowed_Moves) As String
         Select Case movement
             Case Pony.Allowed_Moves.None
                 Return "None"
@@ -576,7 +576,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Friend Function String_ToMovement(ByVal movement As String) As Pony.Allowed_Moves
+    Friend Function String_ToMovement(movement As String) As Pony.Allowed_Moves
         Select Case movement
             Case "None"
                 Return Pony.Allowed_Moves.None
@@ -605,7 +605,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Private Function Location_ToString(ByVal location As Directions) As String
+    Private Function Location_ToString(location As Directions) As String
 
         Select Case location
 
@@ -636,7 +636,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Friend Function String_ToLocation(ByVal location As String) As Directions
+    Friend Function String_ToLocation(location As String) As Directions
         Select Case location
             Case "Top"
                 Return Directions.top
@@ -670,7 +670,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="ponyname"></param>
     ''' <returns></returns>
-    Private Function AddPony(ByVal ponyname As String) As Pony
+    Private Function AddPony(ponyname As String) As Pony
 
         Try
             For Each pony In pe_animator.Ponies()
@@ -699,7 +699,7 @@ Public Class PonyEditor
         Return Nothing
     End Function
 
-    Private Function AddEffect(ByVal name As String) As Effect
+    Private Function AddEffect(name As String) As Effect
 
         Try
 
@@ -748,7 +748,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
-    Private Sub GridError(ByVal sender As Object, ByVal e As DataGridViewDataErrorEventArgs)
+    Private Sub GridError(sender As Object, e As DataGridViewDataErrorEventArgs)
         Try
 
             Dim grid As DataGridView = CType(sender, DataGridView)
@@ -780,7 +780,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEditor_Resize(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Resize
+    Private Sub PonyEditor_Resize(sender As Object, e As EventArgs) Handles Me.Resize
 
         If Me.loaded = False Then Exit Sub
 
@@ -809,7 +809,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
+    Private Sub PonyBehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
 
         Try
 
@@ -915,7 +915,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechesGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
+    Private Sub PonySpeechesGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -965,7 +965,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyEffectsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
+    Private Sub PonyEffectsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1027,7 +1027,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyInteractionsGrid_CellClick(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
+    Private Sub PonyInteractionsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1079,7 +1079,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
+    Private Sub PonyBehaviorsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1222,7 +1222,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEffectsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
+    Private Sub PonyEffectsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1323,7 +1323,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechesGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
+    Private Sub PonySpeechesGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1401,7 +1401,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyInteractionsGrid_CellValueChanged(ByVal sender As Object, ByVal e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
+    Private Sub PonyInteractionsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
         If already_updating Then Return
         Try
 
@@ -1499,17 +1499,17 @@ Public Class PonyEditor
     End Function
 
     'Swap positions of the grids.
-    Private Sub Swap0_1_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap0_1.Click, Swap1_0.Click
+    Private Sub Swap0_1_Click(sender As Object, e As EventArgs) Handles Swap0_1.Click, Swap1_0.Click
         SwapGrids(0, 1, Slot0Label, Slot1Label)
     End Sub
-    Private Sub Swap2_0_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap2_0.Click
+    Private Sub Swap2_0_Click(sender As Object, e As EventArgs) Handles Swap2_0.Click
         SwapGrids(2, 0, Slot2Label, Slot0Label)
     End Sub
-    Private Sub Swap3_0_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Swap3_0.Click
+    Private Sub Swap3_0_Click(sender As Object, e As EventArgs) Handles Swap3_0.Click
         SwapGrids(3, 0, Slot3Label, Slot0Label)
     End Sub
 
-    Private Sub SwapGrids(ByVal slot0_number As Integer, ByVal slot1_number As Integer, ByVal label0 As Label, ByVal label1 As Label)
+    Private Sub SwapGrids(slot0_number As Integer, slot1_number As Integer, label0 As Label, label1 As Label)
 
         Dim slot0 As DataGridView = Nothing
         Dim slot1 As DataGridView = Nothing
@@ -1585,7 +1585,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="sort"></param>
     ''' <returns></returns>
-    Private Function ConvertSortOrder(ByVal sort As SortOrder) As System.ComponentModel.ListSortDirection
+    Private Function ConvertSortOrder(sort As SortOrder) As System.ComponentModel.ListSortDirection
 
         Select Case sort
             Case SortOrder.Ascending
@@ -1598,7 +1598,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PausePonyButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PausePonyButton.Click
+    Private Sub PausePonyButton_Click(sender As Object, e As EventArgs) Handles PausePonyButton.Click
 
         Try
             If Not pe_animator.Paused Then
@@ -1644,7 +1644,7 @@ Public Class PonyEditor
         End If
     End Sub
 
-    Private Sub NewBehaviorButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewBehaviorButton.Click
+    Private Sub NewBehaviorButton_Click(sender As Object, e As EventArgs) Handles NewBehaviorButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1670,7 +1670,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub NewSpeechButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewSpeechButton.Click
+    Private Sub NewSpeechButton_Click(sender As Object, e As EventArgs) Handles NewSpeechButton.Click
         Try
             If IsNothing(PreviewPony) Then
                 MsgBox("Select a pony or create a new one first,")
@@ -1693,7 +1693,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub NewEffectButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewEffectButton.Click
+    Private Sub NewEffectButton_Click(sender As Object, e As EventArgs) Handles NewEffectButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1717,7 +1717,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub NewInteractionButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewInteractionButton.Click
+    Private Sub NewInteractionButton_Click(sender As Object, e As EventArgs) Handles NewInteractionButton.Click
         Try
 
             If IsNothing(PreviewPony) Then
@@ -1748,7 +1748,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="text"></param>
     ''' <returns></returns>
-    Friend Function Add_Picture(Optional ByVal text As String = "") As String
+    Friend Function Add_Picture(Optional text As String = "") As String
 
         Try
 
@@ -1824,7 +1824,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub Grid_UserDeletingRow(ByVal sender As Object, ByVal e As DataGridViewRowCancelEventArgs) Handles PonyBehaviorsGrid.UserDeletingRow, PonyEffectsGrid.UserDeletingRow,
+    Private Sub Grid_UserDeletingRow(sender As Object, e As DataGridViewRowCancelEventArgs) Handles PonyBehaviorsGrid.UserDeletingRow, PonyEffectsGrid.UserDeletingRow,
                                                                                                             PonyInteractionsGrid.UserDeletingRow, PonySpeechesGrid.UserDeletingRow
         Try
             SaveSortOrder()
@@ -1901,7 +1901,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub Grid_UserDeletedRow(ByVal sender As Object, ByVal e As DataGridViewRowEventArgs) Handles PonyBehaviorsGrid.UserDeletedRow, PonyEffectsGrid.UserDeletedRow,
+    Private Sub Grid_UserDeletedRow(sender As Object, e As DataGridViewRowEventArgs) Handles PonyBehaviorsGrid.UserDeletedRow, PonyEffectsGrid.UserDeletedRow,
                                                                                                         PonyInteractionsGrid.UserDeletedRow, PonySpeechesGrid.UserDeletedRow
         'Load_Parameters(Preview_Pony)
         'RestoreSortOrder()
@@ -1931,7 +1931,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Friend Function Get_Filename(ByVal path As String) As String
+    Friend Function Get_Filename(path As String) As String
         Try
             Dim path_components = Split(path, IO.Path.DirectorySeparatorChar)
 
@@ -1944,7 +1944,7 @@ Public Class PonyEditor
         End Try
     End Function
 
-    Private Sub PonyName_TextChanged(ByVal sender As Object, ByVal e As EventArgs) Handles PonyName.TextChanged
+    Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
 
         If already_updating = False Then
             PreviewPony.Base.Name = PonyName.Text
@@ -1953,7 +1953,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub NewPonyButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles NewPonyButton.Click
+    Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
 
         Try
 
@@ -1997,7 +1997,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Sub SavePony(ByVal path As String)
+    Friend Sub SavePony(path As String)
 
         Try
 
@@ -2189,19 +2189,19 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Function Quoted(ByVal text As String) As String
+    Friend Function Quoted(text As String) As String
         Return ControlChars.Quote & text & ControlChars.Quote
     End Function
 
-    Friend Function Braced(ByVal text As String) As String
+    Friend Function Braced(text As String) As String
         Return "{" & text & "}"
     End Function
 
-    Private Function Space_To_Under(ByVal text As String) As String
+    Private Function Space_To_Under(text As String) As String
         Return Replace(Replace(text, " ", "_"), "/", "_")
     End Function
 
-    Private Sub SaveButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SaveButton.Click
+    Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
 
         PausePonyButton.Enabled = False
         pe_animator.Pause(False)
@@ -2216,7 +2216,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Sub ImageSizeCheck(ByVal imageSize As Size)
+    Sub ImageSizeCheck(imageSize As Size)
 
         If imageSize.Height > PonyPreviewPanel.Size.Height OrElse
             imageSize.Width > PonyPreviewPanel.Size.Width Then
@@ -2225,7 +2225,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub EditTagsButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles EditTagsButton.Click
+    Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
 
         If IsNothing(PreviewPony) Then
             MsgBox("Select a pony first!")
@@ -2241,7 +2241,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub SetImageCentersButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SetImageCentersButton.Click
+    Private Sub SetImageCentersButton_Click(sender As Object, e As EventArgs) Handles SetImageCentersButton.Click
 
         If IsNothing(PreviewPony) Then
             MsgBox("Select a pony first.")

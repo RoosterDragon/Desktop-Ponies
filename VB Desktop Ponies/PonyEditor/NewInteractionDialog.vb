@@ -11,7 +11,7 @@ Public Class NewInteractionDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new behavior.")
@@ -128,13 +128,13 @@ Public Class NewInteractionDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
 
         Me.Close()
     End Sub
 
 
-    Friend Sub Change_Interaction(ByVal interaction As PonyBase.Interaction)
+    Friend Sub Change_Interaction(interaction As PonyBase.Interaction)
 
         Targets_Box.Items.Clear()
         Behaviors_Box.Items.Clear()

@@ -66,7 +66,7 @@
         FirstLoad()
     End Sub
 
-    Private Sub Options_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub Options_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         'FirstLoad()
     End Sub
 
@@ -173,7 +173,7 @@
         alreadyLoaded = True
     End Sub
 
-    Private Sub Avoidance_Area_Changed(ByVal sender As Object, ByVal e As EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
+    Private Sub Avoidance_Area_Changed(sender As Object, e As EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
         Options.ExclusionZone.X = AvoidanceZoneX.Value / 100
         Options.ExclusionZone.Y = AvoidanceZoneY.Value / 100
         Options.ExclusionZone.Width = AvoidanceZoneWidth.Value / 100
@@ -187,7 +187,7 @@
         End If
     End Sub
 
-    Private Sub ScreenSelection_Box_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
+    Private Sub ScreenSelection_Box_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
         If selectingMonitors Then Exit Sub
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
@@ -244,18 +244,18 @@
 
     End Sub
 
-    Private Sub Cursor_zone_counter_ValueChanged(ByVal sender As Object, ByVal e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
+    Private Sub Cursor_zone_counter_ValueChanged(sender As Object, e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
         Main.Instance.cursor_zone_size = CInt(CursorAvoidanceRadius.Value)
         Options.CursorAvoidanceSize = CursorAvoidanceRadius.Value
     End Sub
 
-    Private Sub Close_Click(ByVal sender As Object, ByVal e As EventArgs) Handles CloseButton.Click
+    Private Sub Close_Click(sender As Object, e As EventArgs) Handles CloseButton.Click
 
         Me.Visible = False
 
     End Sub
 
-    Friend Sub Save_Button_Click(ByVal sender As Object, ByVal e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles SaveButton.Click
+    Friend Sub Save_Button_Click(sender As Object, e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles SaveButton.Click
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
             MsgBox("You need to select at least one monitor.")
@@ -278,7 +278,7 @@
 
     End Sub
 
-    Friend Sub Reset_Click(ByVal sender As Object, ByVal e As EventArgs, Optional ByVal counts_only As Boolean = False) Handles ResetButton.Click
+    Friend Sub Reset_Click(sender As Object, e As EventArgs, Optional counts_only As Boolean = False) Handles ResetButton.Click
 
         If counts_only = False Then
             alreadyLoaded = False
@@ -295,7 +295,7 @@
 
     End Sub
 
-    Friend Sub Load_Button_Click(ByVal sender As Object, ByVal e As EventArgs, Optional selected_profile As String = Options.DefaultProfileName, Optional ByVal silent As Boolean = False) Handles LoadButton.Click
+    Friend Sub Load_Button_Click(sender As Object, e As EventArgs, Optional selected_profile As String = Options.DefaultProfileName, Optional silent As Boolean = False) Handles LoadButton.Click
         Try
             If Not IsNothing(sender) Then
                 If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
@@ -323,7 +323,7 @@
         End Try
     End Sub
 
-    Private Sub SelectMonitors(ByVal monitors As List(Of String))
+    Private Sub SelectMonitors(monitors As List(Of String))
         Argument.EnsureNotNull(monitors, "monitors")
 
         selectingMonitors = True
@@ -348,7 +348,7 @@
 
     End Sub
 
-    Private Sub Window_Avoidance_Enabled_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles WindowAvoidance.CheckedChanged
+    Private Sub Window_Avoidance_Enabled_CheckedChanged(sender As Object, e As EventArgs) Handles WindowAvoidance.CheckedChanged
 
         If WindowAvoidance.Checked = False Then
             PoniesAvoidPonies.Enabled = False
@@ -361,11 +361,11 @@
         Options.WindowAvoidanceEnabled = WindowAvoidance.Checked
     End Sub
 
-    Private Sub Scale_Slider_Scroll(ByVal sender As Object, ByVal e As EventArgs) Handles SizeScale.ValueChanged
+    Private Sub Scale_Slider_Scroll(sender As Object, e As EventArgs) Handles SizeScale.ValueChanged
         SizeScaleValueLabel.Text = Math.Round(SizeScale.Value / 100.0F, 2) & "x"
     End Sub
 
-    Private Sub Scale_Slider_MouseUp(ByVal sender As Object, ByVal e As EventArgs) Handles SizeScale.MouseUp
+    Private Sub Scale_Slider_MouseUp(sender As Object, e As EventArgs) Handles SizeScale.MouseUp
         Options.ScaleFactor = SizeScale.Value / 100.0F
         Main.Instance.PonySelectionPanel.SuspendLayout()
         For Each control As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
@@ -375,7 +375,7 @@
         Main.Instance.PonySelectionPanel.ResumeLayout()
     End Sub
 
-    Private Sub Volume_Control_Change(ByVal sender As Object, ByVal e As EventArgs) Handles Volume.ValueChanged
+    Private Sub Volume_Control_Change(sender As Object, e As EventArgs) Handles Volume.ValueChanged
 
         'The slider is in %, we need to convert that to the volume that an
         'Microsoft.DirectX.AudioVideoPlayback.Audio.volume would take.
@@ -398,7 +398,7 @@
         Next
     End Sub
 
-    Private Sub Custom_Filters_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles CustomFiltersButton.Click
+    Private Sub Custom_Filters_Button_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
         FiltersForm.ShowDialog()
     End Sub
 

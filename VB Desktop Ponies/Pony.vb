@@ -423,9 +423,9 @@ Class PonyBase
         End Using
     End Sub
 
-    Friend Sub AddInteraction(ByVal interaction_name As String, ByVal name As String, ByVal probability As Double, ByVal proximity As String, _
-                           ByVal target_list As String, ByVal target_selection As PonyBase.Interaction.TargetActivation, _
-                           ByVal behaviorlist As String, ByVal repeat_delay As Integer, ByVal displaywarnings As Boolean)
+    Friend Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
+                           target_list As String, target_selection As PonyBase.Interaction.TargetActivation, _
+                           behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean)
 
         Dim new_interaction As New PonyBase.Interaction
 
@@ -530,17 +530,17 @@ Class PonyBase
 
     End Sub
 
-    Overloads Sub AddBehavior(ByVal Load_Images As Boolean, ByVal name As String, ByVal chance As Double,
-                           ByVal max_duration As Double, ByVal min_duration As Double, ByVal speed As Double,
-                           ByVal right_image_path As String, ByVal left_image_path As String,
-                           ByVal Allowed_Moves As Pony.Allowed_Moves, ByVal _Linked_Behavior As String,
-                           ByVal _Startline As String, ByVal _Endline As String, Optional ByVal _skip As Boolean = False,
-                           Optional ByVal _xcoord As Integer = Nothing, Optional ByVal _ycoord As Integer = Nothing,
-                           Optional ByVal _object_to_follow As String = "",
-                           Optional ByVal _auto_select_images_on_follow As Boolean = True,
-                           Optional ByVal _follow_stopped_behavior As String = "",
-                           Optional ByVal _follow_moving_behavior As String = "",
-                           Optional ByVal right_image_center As Point = Nothing, Optional ByVal left_image_center As Point = Nothing,
+    Overloads Sub AddBehavior(Load_Images As Boolean, name As String, chance As Double,
+                           max_duration As Double, min_duration As Double, speed As Double,
+                           right_image_path As String, left_image_path As String,
+                           Allowed_Moves As Pony.Allowed_Moves, _Linked_Behavior As String,
+                           _Startline As String, _Endline As String, Optional _skip As Boolean = False,
+                           Optional _xcoord As Integer = Nothing, Optional _ycoord As Integer = Nothing,
+                           Optional _object_to_follow As String = "",
+                           Optional _auto_select_images_on_follow As Boolean = True,
+                           Optional _follow_stopped_behavior As String = "",
+                           Optional _follow_moving_behavior As String = "",
+                           Optional right_image_center As Point = Nothing, Optional left_image_center As Point = Nothing,
                            Optional _dont_repeat_image_animations As Boolean = False, Optional _group As Integer = 0)
 
         Dim new_behavior As New Behavior(right_image_path, left_image_path)
@@ -605,9 +605,9 @@ Class PonyBase
     ''' <summary>
     ''' This overload is in case the editor happens upon a very incomplete pony that has no behaviors (wasn't created by the editor).
     ''' </summary>
-    Overloads Sub AddBehavior(ByVal name As String, ByVal chance As Double, ByVal max_duration As Double, ByVal min_duration As Double, ByVal speed As Double, _
-                   ByVal right_image As Image, ByVal left_image As Image, ByVal Allowed_Moves As Pony.Allowed_Moves, _
-                   ByVal _Linked_Behavior As String, ByVal _Startline As String, ByVal _Endline As String)
+    Overloads Sub AddBehavior(name As String, chance As Double, max_duration As Double, min_duration As Double, speed As Double, _
+                   right_image As Image, left_image As Image, Allowed_Moves As Pony.Allowed_Moves, _
+                   _Linked_Behavior As String, _Startline As String, _Endline As String)
 
         Dim new_behavior As New Behavior("", "")
 
@@ -692,7 +692,7 @@ Class PonyBase
     ''' </summary>
     ''' <param name="lines">The collection of speaking lines that should be used to repopulate the specific and random speaking lines.
     ''' </param>
-    Friend Sub SetLines(ByVal lines As IEnumerable(Of Behavior.SpeakingLine))
+    Friend Sub SetLines(lines As IEnumerable(Of Behavior.SpeakingLine))
         SpeakingLinesSpecific.Clear()
         SpeakingLinesRandom.Clear()
 
@@ -885,10 +885,10 @@ Class PonyBase
             left_image_center = center
         End Sub
 
-        Friend Sub AddEffect(ByVal effectname As String, ByVal right_path As String, ByVal left_path As String, ByVal duration As Double, ByVal repeat_delay As Double, _
-                             ByVal direction_right As Directions, ByVal centering_right As Directions, _
-                             ByVal direction_left As Directions, ByVal centering_left As Directions, ByVal follow As Boolean, _dont_repeat_image_animations As Boolean, _
-                             Optional ByVal load_images_now As Boolean = False)
+        Friend Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double, _
+                             direction_right As Directions, centering_right As Directions, _
+                             direction_left As Directions, centering_left As Directions, follow As Boolean, _dont_repeat_image_animations As Boolean, _
+                             Optional load_images_now As Boolean = False)
 
             Dim new_effect As New Effect(right_path, left_path)
 
@@ -916,7 +916,7 @@ Class PonyBase
             Friend Skip As Boolean = False 'don't use randomly if true
             Friend Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
 
-            Friend Sub New(ByVal ponyname As String, ByVal _name As String, ByVal _text As String, ByVal _path As String, ByVal _soundfile As String, ByVal _skip As Boolean, _group As Integer)
+            Friend Sub New(ponyname As String, _name As String, _text As String, _path As String, _soundfile As String, _skip As Boolean, _group As Integer)
 
                 Name = _name
                 Text = _text
@@ -1166,7 +1166,7 @@ Class Pony
         _base = base
     End Sub
 
-    Friend Sub PonySpeak(Optional ByVal line As PonyBase.Behavior.SpeakingLine = Nothing)
+    Friend Sub PonySpeak(Optional line As PonyBase.Behavior.SpeakingLine = Nothing)
         'When hovering over with the mouse, don't talk more than once every x seconds.
         If Cursor_Halt AndAlso (internalTime - lastSpeakTime).TotalSeconds < 15 Then
             Exit Sub
@@ -1202,7 +1202,7 @@ Class Pony
 
     End Sub
 
-    Private Sub PonyPlaySound(ByVal filename As String)
+    Private Sub PonyPlaySound(filename As String)
 
         If My.Computer.FileSystem.FileExists(filename) Then
 
@@ -2815,7 +2815,7 @@ Class Pony
 
     End Sub
 
-    Friend Sub StartInteractionAsTarget(ByRef BehaviorName As String, ByRef initiator As Pony, ByVal interaction As PonyBase.Interaction)
+    Friend Sub StartInteractionAsTarget(ByRef BehaviorName As String, ByRef initiator As Pony, interaction As PonyBase.Interaction)
         For Each behavior In Behaviors
             If BehaviorName = behavior.Name Then
                 SelectBehavior(behavior)
@@ -3357,7 +3357,7 @@ Class HouseBase
         Get
             Return _name
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             _name = value
         End Set
     End Property
@@ -3367,7 +3367,7 @@ Class HouseBase
         Get
             Return _doorPosition
         End Get
-        Set(ByVal value As Point)
+        Set(value As Point)
             _doorPosition = value
         End Set
     End Property
@@ -3377,7 +3377,7 @@ Class HouseBase
         Get
             Return _imageFilename
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             _imageFilename = value
         End Set
     End Property
@@ -3387,7 +3387,7 @@ Class HouseBase
         Get
             Return _cycleInterval
         End Get
-        Set(ByVal value As TimeSpan)
+        Set(value As TimeSpan)
             _cycleInterval = value
         End Set
     End Property
@@ -3397,7 +3397,7 @@ Class HouseBase
         Get
             Return _minimumPonies
         End Get
-        Set(ByVal value As Integer)
+        Set(value As Integer)
             _minimumPonies = value
         End Set
     End Property
@@ -3407,7 +3407,7 @@ Class HouseBase
         Get
             Return _maximumPonies
         End Get
-        Set(ByVal value As Integer)
+        Set(value As Integer)
             _maximumPonies = value
         End Set
     End Property
@@ -3417,7 +3417,7 @@ Class HouseBase
         Get
             Return _bias
         End Get
-        Set(ByVal value As Decimal)
+        Set(value As Decimal)
             _bias = value
         End Set
     End Property
@@ -3506,7 +3506,7 @@ Class House
         End Get
     End Property
 
-    Friend Shared Function ImageScale(ByVal size As Size) As Size
+    Friend Shared Function ImageScale(size As Size) As Size
         Dim scale = Options.ScaleFactor
         Return New Size(CInt(size.Width * scale), CInt(size.Height * scale))
     End Function

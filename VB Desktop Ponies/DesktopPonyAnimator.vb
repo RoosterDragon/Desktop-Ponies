@@ -108,9 +108,9 @@ Public Class DesktopPonyAnimator
 #End If
     End Sub
 
-        ''' <summary>
-        ''' Updates the ponies and effect. Cycles houses.
-        ''' </summary>
+    ''' <summary>
+    ''' Updates the ponies and effect. Cycles houses.
+    ''' </summary>
     Protected Overrides Sub Update()
         Pony.CursorLocation = Viewer.CursorPosition
         ManualControl()
@@ -521,7 +521,7 @@ Public Class DesktopPonyAnimator
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
-    Friend Sub PonyGraphicsForm_MouseDown(ByVal sender As Object, ByVal e As SimpleMouseEventArgs)
+    Friend Sub PonyGraphicsForm_MouseDown(sender As Object, e As SimpleMouseEventArgs)
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
             If Not Options.PonyDraggingEnabled Then Exit Sub
 
@@ -591,7 +591,7 @@ Public Class DesktopPonyAnimator
             End If
 
             ponyMenu.Show(e.X, e.Y)
-            End If
+        End If
     End Sub
 
     Friend Sub ShowPonyMenu(x As Integer, y As Integer)
@@ -622,7 +622,7 @@ Public Class DesktopPonyAnimator
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
-    Private Sub PonyGraphicsForm_MouseUp(ByVal sender As Object, ByVal e As SimpleMouseEventArgs)
+    Private Sub PonyGraphicsForm_MouseUp(sender As Object, e As SimpleMouseEventArgs)
 
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
             If draggingPony Then

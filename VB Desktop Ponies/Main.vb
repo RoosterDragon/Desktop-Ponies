@@ -147,7 +147,7 @@ Public Class Main
     End Sub
 
     'Read all configuration files and pony folders.
-    Private Sub Main_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Mac.WriteLine("Main_Load started.")
         Instance = Me
 
@@ -346,11 +346,11 @@ Public Class Main
         End If
     End Sub
 
-    Sub Unhandled_Exception_Catch(ByVal sender As Object, ByVal e As UnhandledExceptionEventArgs)
+    Sub Unhandled_Exception_Catch(sender As Object, e As UnhandledExceptionEventArgs)
         UnhandledException(DirectCast(e.ExceptionObject, Exception))
     End Sub
 
-    Sub ThreadException_Catch(ByVal sender As Object, ByVal e As System.Threading.ThreadExceptionEventArgs)
+    Sub ThreadException_Catch(sender As Object, e As System.Threading.ThreadExceptionEventArgs)
         UnhandledException(e.Exception)
     End Sub
 
@@ -589,7 +589,7 @@ Public Class Main
         End Try
     End Function
 
-    Friend Function GetDirection(ByVal setting As String) As Directions
+    Friend Function GetDirection(setting As String) As Directions
 
         Select Case setting
 
@@ -621,7 +621,7 @@ Public Class Main
 
     End Function
 
-    Private Sub Add_to_Menu(ByVal ponyBase As PonyBase, ByVal redraw As Boolean)
+    Private Sub Add_to_Menu(ponyBase As PonyBase, redraw As Boolean)
 
         If Not redraw Then
             SelectablePonies.Add(ponyBase)
@@ -681,7 +681,7 @@ Public Class Main
         selectionControlFilter.Add(ponySelection, True)
     End Sub
 
-    Sub LoadInteractions(Optional ByVal displayWarnings As Boolean = True)
+    Sub LoadInteractions(Optional displayWarnings As Boolean = True)
 
         If Not My.Computer.FileSystem.FileExists(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename)) Then
             Options.PonyInteractionsExist = False
@@ -810,13 +810,13 @@ Public Class Main
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Friend Sub ZeroPoniesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles ZeroPoniesButton.Click
+    Friend Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
         Next
     End Sub
 
-    Private Sub SaveProfileButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SaveProfileButton.Click
+    Private Sub SaveProfileButton_Click(sender As Object, e As EventArgs) Handles SaveProfileButton.Click
         Dim profileToSave = Trim(ProfileComboBox.Text)
 
         If profileToSave = "" Then
@@ -839,24 +839,24 @@ Public Class Main
                         MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
-    Private Sub LoadProfileButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles LoadProfileButton.Click
+    Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
         'Options.LoadProfile(ProfileComboBox.Text)
         OptionsForm.Instance.Load_Button_Click(sender, e, ProfileComboBox.Text)
     End Sub
 
-    Private Sub OnePoniesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OnePoniesButton.Click
+    Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "1"
         Next
     End Sub
 
-    Private Sub OptionsButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OptionsButton.Click
+    Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
         Main.Instance.Invoke(Sub()
                                  OptionsForm.Instance.Show()
                              End Sub)
     End Sub
 
-    Private Sub PonyEditorButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles PonyEditorButton.Click
+    Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
 
         Preview_Mode = True
         Me.Visible = False
@@ -886,7 +886,7 @@ Public Class Main
         Return previewWindowRectangle()
     End Function
 
-    Private Sub GamesButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles GamesButton.Click
+    Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
             If games.Count <> 0 Then
                 games.Clear()
@@ -983,7 +983,7 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub FilterAnyRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterAnyRadio.CheckedChanged
+    Private Sub FilterAnyRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAnyRadio.CheckedChanged
 
         If FilterAnyRadio.Checked Then
             FilterOptionsBox.Enabled = True
@@ -992,7 +992,7 @@ Public Class Main
 
     End Sub
 
-    Private Sub FilterExactlyRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterExactlyRadio.CheckedChanged
+    Private Sub FilterExactlyRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterExactlyRadio.CheckedChanged
 
         If FilterExactlyRadio.Checked Then
             FilterOptionsBox.Enabled = True
@@ -1001,14 +1001,14 @@ Public Class Main
 
     End Sub
 
-    Private Sub FilterAllRadio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterAllRadio.CheckedChanged
+    Private Sub FilterAllRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAllRadio.CheckedChanged
         If FilterAllRadio.Checked AndAlso Me.Visible Then
             FilterOptionsBox.Enabled = False
             RefilterSelection()
         End If
     End Sub
 
-    Private Sub FilterOptionsBox_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles FilterOptionsBox.SelectedIndexChanged
+    Private Sub FilterOptionsBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles FilterOptionsBox.SelectedIndexChanged
         RefilterSelection()
     End Sub
 
@@ -1112,7 +1112,7 @@ Public Class Main
 #End Region
 
 #Region "Pony Startup"
-    Private Sub GoButton_Click(ByVal sender As Object, ByVal e As EventArgs) Handles GoButton.Click
+    Private Sub GoButton_Click(sender As Object, e As EventArgs) Handles GoButton.Click
         If PonyLoader.IsBusy Then
             MessageBox.Show(Me, "Already busy loading ponies. Cannot start any more at this time.",
                             "Busy", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -1266,7 +1266,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private Function FindPonyBaseByDirectory(ByVal directory As String) As PonyBase
+    Private Function FindPonyBaseByDirectory(directory As String) As PonyBase
         For Each base As PonyBase In SelectablePonies
             If base.Directory = directory Then
                 Return base
@@ -1451,7 +1451,7 @@ Public Class Main
     ' ''' <param name="sender"></param>
     ' ''' <param name="e"></param>
     ' ''' <remarks></remarks>
-    'Private Sub Main_VisibleChanged(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.VisibleChanged
+    'Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
     '    If Not auto_started Then
     '        Me.Opacity = 100
     '    End If

@@ -14,7 +14,7 @@ Public Class NewBehaviorDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new behavior.")
@@ -127,12 +127,12 @@ Public Class NewBehaviorDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
 
         Me.Close()
     End Sub
 
-    Private Sub New_Behavior_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub New_Behavior_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Link_Box.Items.Clear()
         EndSpeech_Box.Items.Clear()
@@ -178,7 +178,7 @@ Public Class NewBehaviorDialog
 
     End Sub
 
-    Private Sub Left_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Left_Image_Set_Button.Click
+    Private Sub Left_Image_Set_Button_Click(sender As Object, e As EventArgs) Handles Left_Image_Set_Button.Click
 
         If Not IsNothing(Left_ImageBox.Image) Then
             Left_ImageBox.Image.Dispose()
@@ -202,7 +202,7 @@ Public Class NewBehaviorDialog
 
     End Sub
 
-    Private Sub Right_Image_Set_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Right_Image_Set_Button.Click
+    Private Sub Right_Image_Set_Button_Click(sender As Object, e As EventArgs) Handles Right_Image_Set_Button.Click
 
         If Not IsNothing(Right_ImageBox.Image) Then
             Right_ImageBox.Image.Dispose()
@@ -226,7 +226,7 @@ Public Class NewBehaviorDialog
 
     End Sub
 
-    Private Sub SetFollow_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SetFollow_Button.Click
+    Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
 
         Dim new_behavior As New PonyBase.Behavior("", "")
 
@@ -251,7 +251,7 @@ Public Class NewBehaviorDialog
 
     End Sub
 
-    Friend Function GetGifTotalRuntime(ByVal image As Image) As Double
+    Friend Function GetGifTotalRuntime(image As Image) As Double
 
         Try
             Dim gif_dimensions = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))

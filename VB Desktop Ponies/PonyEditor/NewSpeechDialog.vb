@@ -8,7 +8,7 @@ Public Class NewSpeechDialog
         m_editor = editor
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new speech.")
@@ -36,12 +36,12 @@ Public Class NewSpeechDialog
         Me.Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
 
         Me.Close()
     End Sub
 
-    Private Sub New_Behavior_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub New_Behavior_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Text_TextBox.Text = ""
         Name_Textbox.Text = ""
@@ -50,7 +50,7 @@ Public Class NewSpeechDialog
     End Sub
 
 
-    Private Sub SetSound_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SetSound_Button.Click
+    Private Sub SetSound_Button_Click(sender As Object, e As EventArgs) Handles SetSound_Button.Click
 
         OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
         OpenSoundDialog.InitialDirectory = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, m_editor.PreviewPony.Directory)

@@ -3,8 +3,8 @@
 Module Win32
 
     'Functions for detecting other windows - thanks to WindowPonies for this.
-    Public Declare Function WindowFromPoint Lib "user32.dll" (ByVal point As Point) As IntPtr
-    Public Declare Function GetWindowThreadProcessId Lib "user32.dll" (ByVal hWnd As IntPtr, Optional ByRef processId As Integer = 0) As Integer
+    Public Declare Function WindowFromPoint Lib "user32.dll" (point As Point) As IntPtr
+    Public Declare Function GetWindowThreadProcessId Lib "user32.dll" (hWnd As IntPtr, Optional ByRef processId As Integer = 0) As Integer
 
     Private Declare Function GetForegroundWindow Lib "user32.dll" () As IntPtr
     Private Declare Function GetDesktopWindow Lib "user32.dll" () As IntPtr

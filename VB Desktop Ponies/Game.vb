@@ -84,7 +84,7 @@ Module Games
 
         Friend Goals As New List(Of Goal_Area)
 
-        Sub New(ByVal config_file_path As String, ByVal files_path As String)
+        Sub New(config_file_path As String, files_path As String)
 
             Dim position_data As New List(Of String)
             Dim game_data As String = Nothing
@@ -406,7 +406,7 @@ Module Games
 
         End Sub
 
-        Function Get_Ball_LastHandler_Team(ByVal ball As Ball) As Team
+        Function Get_Ball_LastHandler_Team(ball As Ball) As Team
 
             If IsNothing(ball.Last_Handled_By) Then Return Nothing
 
@@ -414,7 +414,7 @@ Module Games
 
         End Function
 
-        Function Get_Team_By_Player(ByVal Player As Pony) As Team
+        Function Get_Team_By_Player(Player As Pony) As Team
 
             For Each Team In Teams
                 For Each Position In Team.Positions
@@ -487,8 +487,8 @@ Module Games
 
             Friend Handler As Pony 'the ball is a pony type that move like a pony
 
-            Sub New(ByVal _type As String, ByVal idle_image_filename As String, ByVal slow_right_image_filename As String, ByVal slow_left_image_filename As String,
-                    ByVal fast_right_image_filename As String, ByVal fast_left_image_filename As String, ByVal x_location As Integer, ByVal y_location As Integer, ByVal files_path As String)
+            Sub New(_type As String, idle_image_filename As String, slow_right_image_filename As String, slow_left_image_filename As String,
+                    fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer, files_path As String)
 
                 ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
                 Dim handlerBase = New PonyBase()
@@ -525,7 +525,7 @@ Module Games
                 End Select
             End Sub
 
-            Sub Initialize(ByVal gamescreen As Screen)
+            Sub Initialize(gamescreen As Screen)
 
                 StartPosition = New Point(CInt(Initial_Position.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
                                    CInt(Initial_Position.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
@@ -571,7 +571,7 @@ Module Games
                 Handler.Move()
             End Sub
 
-            Friend Sub Kick(ByVal _speed As Double, ByVal _angle As Double, ByVal kicker As Position)
+            Friend Sub Kick(_speed As Double, _angle As Double, kicker As Position)
                 Last_Handled_By = kicker
 
                 Handler.CurrentBehavior = Handler.GetAppropriateBehavior(Pony.Allowed_Moves.All, True)
@@ -588,7 +588,7 @@ Module Games
             Friend Score As Integer = 0
             Friend Goal As Goal_Area = Nothing
 
-            Sub New(ByVal _name As String, ByVal _number As Integer)
+            Sub New(_name As String, _number As Integer)
                 Name = _name
                 Number = _number
             End Sub
@@ -602,7 +602,7 @@ Module Games
             Dim start_point As Point = New Point
             Dim image As Image
 
-            Sub New(ByVal _team_number As Integer, ByVal image_filename As String, ByVal location As String)
+            Sub New(_team_number As Integer, image_filename As String, location As String)
 
                 team_number = _team_number
                 form = New Effect(image_filename, image_filename)
@@ -619,7 +619,7 @@ Module Games
 
             End Sub
 
-            Sub Initialize(ByVal gamescreen As Screen)
+            Sub Initialize(gamescreen As Screen)
                 form.Location = New Point(CInt(start_point.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
                                    CInt(start_point.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
                 form.current_image_path = form.right_image_path
@@ -643,7 +643,7 @@ Module Games
             Dim team1_score As Integer = 0
             Dim team2_score As Integer = 0
 
-            Sub New(ByVal location As String, ByVal image_filename As String)
+            Sub New(location As String, image_filename As String)
                 If Not My.Computer.FileSystem.FileExists(image_filename) Then Throw New FileNotFoundException("File does not exist: " & image_filename)
 
                 form = New Effect(image_filename, image_filename)
@@ -656,7 +656,7 @@ Module Games
 
             End Sub
 
-            Sub Initialize(ByVal gamescreen As Screen)
+            Sub Initialize(gamescreen As Screen)
                 form.Location = New Point(CInt(start_point.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
                                    CInt(start_point.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
             End Sub
@@ -665,7 +665,7 @@ Module Games
                 Return New Point(CInt(Me.form.Location.X + (form.CurrentImageSize().Width / 2)), CInt(Me.form.Location.Y + (form.CurrentImageSize().Height) / 2))
             End Function
 
-            Sub SetScore(ByVal _team1 As String, ByVal _team1_score As Integer, ByVal _team2 As String, ByVal _team2_score As Integer)
+            Sub SetScore(_team1 As String, _team1_score As Integer, _team2 As String, _team2_score As Integer)
                 team1 = _team1
                 team1_score = _team1_score
                 team2 = _team2
@@ -721,9 +721,9 @@ Module Games
             Friend Distant_Ball_Actions As New List(Of PlayerActionType)
             Friend No_Ball_Actions As New List(Of PlayerActionType)
 
-            Sub New(ByVal _Name As String, ByVal _team_number As Integer, ByVal _start_location As String, ByVal _Allowed_area As String,
-                    ByVal _Have_Ball_Actions As String, ByVal _Hostile_Ball_Actions As String, ByVal _Friendly_Ball_Actions As String, _
-                    ByVal _Neutral_Ball_Actions As String, ByVal _Distance_Ball_Actions As String, ByVal _No_Ball_Actions As String, ByVal _required As String)
+            Sub New(_Name As String, _team_number As Integer, _start_location As String, _Allowed_area As String,
+                    _Have_Ball_Actions As String, _Hostile_Ball_Actions As String, _Friendly_Ball_Actions As String, _
+                    _Neutral_Ball_Actions As String, _Distance_Ball_Actions As String, _No_Ball_Actions As String, _required As String)
 
                 Name = Trim(_Name.Replace(ControlChars.Quote, ""))
                 Team_Number = _team_number
@@ -777,7 +777,7 @@ Module Games
 
             End Sub
 
-            Sub Initialize(ByVal gamescreen As Screen)
+            Sub Initialize(gamescreen As Screen)
                 If Not IsNothing(area_points) Then
                     Allowed_Area = New Rectangle(
                         CInt(Double.Parse(area_points(0), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
@@ -787,7 +787,7 @@ Module Games
                 End If
             End Sub
 
-            Sub Decide_On_Action(ByVal game As Game)
+            Sub Decide_On_Action(game As Game)
 
                 Dim nearest_ball = get_nearest_ball(game.Active_Balls)
 
@@ -824,7 +824,7 @@ Module Games
 
             End Sub
 
-            Sub PerformAction(ByVal action_list As List(Of PlayerActionType), ByVal ball As Ball)
+            Sub PerformAction(action_list As List(Of PlayerActionType), ball As Ball)
 
                 If Not IsNothing(Current_Action_Group) Then ' AndAlso Not ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
                     If ReferenceEquals(action_list, Current_Action_Group) Then
@@ -938,7 +938,7 @@ Module Games
 
             End Sub
 
-            Function get_nearest_ball(ByVal balls As List(Of Ball)) As Ball
+            Function get_nearest_ball(balls As List(Of Ball)) As Ball
                 Dim nearest_ball As Ball = Nothing
                 Dim nearest_ball_distance As Double = Double.MaxValue
 
@@ -981,7 +981,7 @@ Module Games
 
             End Function
 
-            Sub SetFollowBehavior(ByVal target_name As String, ByVal target As ISprite, Optional ByVal return_to_start As Boolean = False, Optional ByVal lead_target As Boolean = False)
+            Sub SetFollowBehavior(target_name As String, target As ISprite, Optional return_to_start As Boolean = False, Optional lead_target As Boolean = False)
 
                 SetSpeed()
 
@@ -1007,7 +1007,7 @@ Module Games
                 End If
             End Sub
 
-            Sub Kick_Ball(ByVal ball As Ball, ByVal speed As Double, ByVal target_goal As Goal_Area, ByVal target_pony As Pony, ByVal kicker As Position, ByVal line As String)
+            Sub Kick_Ball(ball As Ball, speed As Double, target_goal As Goal_Area, target_pony As Pony, kicker As Position, line As String)
 
                 If Rng.NextDouble() < 0.05 Then
                     Speak("Missed!")
@@ -1038,7 +1038,7 @@ Module Games
 
             End Sub
 
-            Sub Bounce_Ball(ByVal ball As Ball, ByVal speed As Double, ByVal kicker As Position, ByVal line As String)
+            Sub Bounce_Ball(ball As Ball, speed As Double, kicker As Position, line As String)
 
                 If Main.Instance.current_game.Name = "Ping Pong Pony" Then
                     'avoid boucing the ball back into our own goal.
@@ -1112,7 +1112,7 @@ Module Games
             End Sub
 
             'returns radians
-            Function Get_Angle_To_Object(ByVal target As Point) As Double
+            Function Get_Angle_To_Object(target As Point) As Double
 
                 'opposite = y_distance
                 Dim opposite = Player.Center.Y - target.Y
@@ -1145,12 +1145,12 @@ Module Games
 
             End Function
 
-            Sub Speak(ByVal line As String)
+            Sub Speak(line As String)
                 Dim new_line As New PonyBase.Behavior.SpeakingLine(Player.Name, "Kick", line, "", "", True, 0)
                 Player.PonySpeak(new_line)
             End Sub
 
-            Sub PushBackOverlappingPonies(ByVal all_positions As List(Of Position))
+            Sub PushBackOverlappingPonies(all_positions As List(Of Position))
 
                 For Each otherposition As Position In all_positions
                     Dim otherpony = otherposition.Player
@@ -1168,7 +1168,7 @@ Module Games
 
             End Sub
 
-            Function DoesPonyOverlap(ByVal pony As Pony, ByVal otherpony As Pony) As Boolean
+            Function DoesPonyOverlap(pony As Pony, otherpony As Pony) As Boolean
 
                 Dim otherpony_area As New Rectangle(otherpony.Location.X, _
                                                  otherpony.Location.Y, _
@@ -1185,7 +1185,7 @@ Module Games
 
             End Function
 
-            Sub PonyPush(ByVal pony1 As Pony, ByVal pony2 As Pony, ByVal allowed_area As Rectangle?)
+            Sub PonyPush(pony1 As Pony, pony2 As Pony, allowed_area As Rectangle?)
 
                 Dim xchange = 1
                 Dim ychange = 2
@@ -1212,7 +1212,7 @@ Module Games
 
             End Sub
 
-            Function Friendly_Ponies_Around_Ball(ByVal ball As Ball, ByVal team As Team, ByVal min_distance As Integer) As List(Of Pony)
+            Function Friendly_Ponies_Around_Ball(ball As Ball, team As Team, min_distance As Integer) As List(Of Pony)
 
                 Dim ponies As New List(Of Pony)
 
@@ -1227,7 +1227,7 @@ Module Games
             End Function
 
             'get a teammate that is not near any enemy players and is closer to the goal than we are.
-            Function Get_Open_Teammate(ByVal team As Team, ByVal goal As Goal_Area) As Pony
+            Function Get_Open_Teammate(team As Team, goal As Goal_Area) As Pony
 
                 Dim open_teammates As New List(Of Pony)
 
