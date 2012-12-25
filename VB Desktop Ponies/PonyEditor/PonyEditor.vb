@@ -466,14 +466,14 @@ Public Class PonyEditor
 
                             If ReferenceEquals(effect, othereffect) Then Continue For
 
-                            If LCase(effect.Name) = LCase(othereffect.Name) Then
+                            If String.Equals(effect.Name, othereffect.Name, StringComparison.OrdinalIgnoreCase) Then
                                 Conflicting_names = True
                                 If Not conflicts.Contains("Effect: " & effect.Name) Then conflicts.Add("Effect: " & effect.Name)
                             End If
                         Next
                     Next
 
-                    If LCase(behavior.Name) = LCase(otherbehavior.Name) Then
+                    If String.Equals(behavior.Name, otherbehavior.Name, StringComparison.OrdinalIgnoreCase) Then
                         Conflicting_names = True
                         If Not conflicts.Contains("Behavior: " & behavior.Name) Then conflicts.Add("Behavior: " & behavior.Name)
                     End If
@@ -484,7 +484,7 @@ Public Class PonyEditor
             For Each speech In pony.Base.SpeakingLines
                 For Each otherspeech In pony.Base.SpeakingLines
                     If ReferenceEquals(speech, otherspeech) Then Continue For
-                    If LCase(speech.Name) = LCase(otherspeech.Name) Then
+                    If String.Equals(speech.Name, otherspeech.Name, StringComparison.OrdinalIgnoreCase) Then
                         Conflicting_names = True
                         If Not conflicts.Contains("Speech: " & speech.Name) Then conflicts.Add("Speech: " & speech.Name)
                     End If
@@ -495,7 +495,7 @@ Public Class PonyEditor
             For Each interaction In pony.Interactions
                 For Each otherinteraction In pony.Interactions
                     If ReferenceEquals(interaction, otherinteraction) Then Continue For
-                    If LCase(interaction.Name) = LCase(otherinteraction.Name) Then
+                    If String.Equals(interaction.Name, otherinteraction.Name, StringComparison.OrdinalIgnoreCase) Then
                         Conflicting_names = True
                         If Not conflicts.Contains("Interaction: " & interaction.Name) Then conflicts.Add("Interaction: " & interaction.Name)
                     End If
@@ -1120,7 +1120,7 @@ Public Class PonyEditor
                         End If
 
                         For Each behavior In PreviewPony.Behaviors
-                            If LCase(behavior.Name) = LCase(new_value) Then
+                            If String.Equals(behavior.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Behavior names must be unique.  Behavior '" & new_value & "' already exists.")
                                 PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = changed_behavior_name
                                 Exit Sub
@@ -1262,7 +1262,7 @@ Public Class PonyEditor
                         End If
 
                         For Each effect In get_effect_list()
-                            If LCase(effect.Name) = LCase(new_value) Then
+                            If String.Equals(effect.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Effect names must be unique.  Effect '" & new_value & "' already exists.")
                                 PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectName.Index).Value = changed_effect_name
                                 Exit Sub
@@ -1363,7 +1363,7 @@ Public Class PonyEditor
                         End If
 
                         For Each speechname In PreviewPony.Base.SpeakingLines
-                            If LCase(speechname.Name) = LCase(new_value) Then
+                            If String.Equals(speechname.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Speech names must be unique.  Speech '" & new_value & "' already exists.")
                                 PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
                                 Exit Sub
@@ -1441,7 +1441,7 @@ Public Class PonyEditor
                         End If
 
                         For Each Interaction In PreviewPony.Interactions
-                            If LCase(Interaction.Name) = LCase(new_value) Then
+                            If String.Equals(Interaction.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists for this pony.  Please select another name.")
                                 PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
                                 Exit Sub
@@ -1835,66 +1835,60 @@ Public Class PonyEditor
             SaveSortOrder()
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
-            Select Case grid.Name
-                Case "Pony_Effects_Grid"
-                    grid = PonyEffectsGrid
-                    Dim todelete As Effect = Nothing
-                    For Each behavior In PreviewPony.Behaviors
-                        For Each effect In behavior.Effects
-                            If effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value) Then
-                                todelete = effect
-                                Exit For
-                            End If
-                        Next
-                        If Not IsNothing(todelete) Then
-                            behavior.Effects.Remove(todelete)
-                            Exit Select
-                        End If
-                    Next
-                Case "Pony_Behaviors_Grid"
-                    grid = PonyBehaviorsGrid
-                    If grid.RowCount = 1 Then
-                        e.Cancel = True
-                        MsgBox("A pony must have at least 1 behavior.  You can't delete the last one.")
-                    End If
-                    Dim todelete As PonyBase.Behavior = Nothing
-                    For Each behavior In PreviewPony.Behaviors
-                        If CStr(e.Row.Cells(colBehaviorName.Index).Value) = behavior.Name Then
-                            todelete = behavior
+            If Object.ReferenceEquals(grid, PonyEffectsGrid) Then
+                Dim todelete As Effect = Nothing
+                For Each behavior In PreviewPony.Behaviors
+                    For Each effect In behavior.Effects
+                        If effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value) Then
+                            todelete = effect
                             Exit For
                         End If
                     Next
                     If Not IsNothing(todelete) Then
-                        PreviewPony.Behaviors.Remove(todelete)
+                        behavior.Effects.Remove(todelete)
                     End If
-                Case "Pony_Interaction_Grid"
-                    grid = PonyInteractionsGrid
-                    Dim todelete As PonyBase.Interaction = Nothing
-                    For Each interaction In PreviewPony.Interactions
-                        If CStr(e.Row.Cells(colInteractionName.Index).Value) = interaction.Name Then
-                            todelete = interaction
-                            Exit For
-                        End If
-                    Next
-                    If Not IsNothing(todelete) Then
-                        PreviewPony.Interactions.Remove(todelete)
+                Next
+            ElseIf Object.ReferenceEquals(grid, PonyBehaviorsGrid) Then
+                If grid.RowCount = 1 Then
+                    e.Cancel = True
+                    MsgBox("A pony must have at least 1 behavior.  You can't delete the last one.")
+                End If
+                Dim todelete As PonyBase.Behavior = Nothing
+                For Each behavior In PreviewPony.Behaviors
+                    If CStr(e.Row.Cells(colBehaviorName.Index).Value) = behavior.Name Then
+                        todelete = behavior
+                        Exit For
                     End If
-                Case "Pony_Speech_Grid"
-                    grid = PonySpeechesGrid
-                    Dim todelete As PonyBase.Behavior.SpeakingLine = Nothing
-                    For Each speech In PreviewPony.Base.SpeakingLines
-                        If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
-                            todelete = speech
-                            Exit For
-                        End If
-                    Next
-                    If Not IsNothing(todelete) Then
-                        PreviewPony.Base.SpeakingLines.Remove(todelete)
-                        PreviewPony.Base.SetLines(PreviewPony.Base.SpeakingLines)
+                Next
+                If Not IsNothing(todelete) Then
+                    PreviewPony.Behaviors.Remove(todelete)
+                End If
+            ElseIf Object.ReferenceEquals(grid, PonyInteractionsGrid) Then
+                Dim todelete As PonyBase.Interaction = Nothing
+                For Each interaction In PreviewPony.Interactions
+                    If CStr(e.Row.Cells(colInteractionName.Index).Value) = interaction.Name Then
+                        todelete = interaction
+                        Exit For
                     End If
-                Case Else
-                    Throw New Exception("Unknown grid when deleting row: " & grid.Name)
-            End Select
+                Next
+                If Not IsNothing(todelete) Then
+                    PreviewPony.Interactions.Remove(todelete)
+                End If
+            ElseIf Object.ReferenceEquals(grid, PonySpeechesGrid) Then
+                Dim todelete As PonyBase.Behavior.SpeakingLine = Nothing
+                For Each speech In PreviewPony.Base.SpeakingLines
+                    If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
+                        todelete = speech
+                        Exit For
+                    End If
+                Next
+                If Not IsNothing(todelete) Then
+                    PreviewPony.Base.SpeakingLines.Remove(todelete)
+                    PreviewPony.Base.SetLines(PreviewPony.Base.SpeakingLines)
+                End If
+            Else
+                Throw New Exception("Unknown grid when deleting row: " & grid.Name)
+            End If
 
             has_saved = False
 
