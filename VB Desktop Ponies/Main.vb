@@ -1520,11 +1520,9 @@ Public Class Main
             Next
             PonySelectionPanel.ResumeLayout()
             ' Perform a layout so cached positions are cleared, then restore visibility to its previous state.
-            PonySelectionPanel.SuspendLayout()
             For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
                 selectionControl.Visible = selectionControlFilter(selectionControl)
             Next
-            PonySelectionPanel.ResumeLayout()
         End If
     End Sub
 
@@ -1639,8 +1637,8 @@ Public Class Main
     End Sub
 
     Private Sub AnimationTimer_Tick(sender As Object, e As EventArgs) Handles AnimationTimer.Tick
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            ponyPanel.AdvanceTimeIndex(TimeSpan.FromMilliseconds(AnimationTimer.Interval))
+        For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
+            selectionControl.AdvanceTimeIndex(TimeSpan.FromMilliseconds(AnimationTimer.Interval))
         Next
     End Sub
 
