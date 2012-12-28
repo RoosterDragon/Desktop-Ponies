@@ -1070,6 +1070,12 @@ Public Class Main
 
         PonySelectionPanel.ResumeLayout()
 
+        ' Force an update on Mac to try and clear leftover graphics.
+        If OperatingSystemInfo.IsMacOSX Then
+            PonySelectionPanel.Invalidate()
+            PonySelectionPanel.Update()
+        End If
+
         If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
             PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", visibleCount)
         Else
