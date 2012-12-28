@@ -117,7 +117,6 @@
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Monitoring\Mac.vb" />
     <Compile Include="DesktopControlForm.Designer.vb">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </Compile>

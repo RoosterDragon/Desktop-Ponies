@@ -140,15 +140,12 @@ Public Class Main
 #Region "Initialization"
 
     Public Sub New()
-        Mac.WriteLine("Main_ctor started.")
         InitializeComponent()
         initialized = True
-        Mac.WriteLine("Main_ctor ended.")
     End Sub
 
     'Read all configuration files and pony folders.
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Mac.WriteLine("Main_Load started.")
         Instance = Me
 
         Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
@@ -339,8 +336,6 @@ Public Class Main
         ' fully drawn.
         Application.DoEvents()
 
-        Mac.WriteLine("Main_Load ending. About to run template loader.")
-
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
         End If
@@ -462,7 +457,6 @@ Public Class Main
     End Sub
 
     Private Sub TemplateLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
-        Mac.WriteLine("TemplateLoader_DoWork started. No more startup output to follow.")
         Try
             Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
 
@@ -676,6 +670,7 @@ Public Class Main
                                                                       NoRandomDuplicates = ponySelection.NoDuplicates.Checked
                                                                   End Sub
         End If
+        If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
         PonySelectionPanel.Controls.Add(ponySelection)
         selectionControlFilter.Add(ponySelection, True)
@@ -1405,25 +1400,8 @@ Public Class Main
             PonyViewer.LoadImages(imagesToLoad, loaded)
         End If
 
-        Dim viewer = PonyViewer
-#If DEBUG AndAlso False Then
-        view = New SpriteInfoView(PonyViewer, {"Type", "Behavior", "Location", "Size", "Image"},
-                                  Function(sprite As ISprite)
-                                      Dim details(5) As String
-                                      details(0) = sprite.GetType().FullName
-                                      If TypeOf sprite Is Pony Then
-                                          details(1) = DirectCast(sprite, Pony).current_behavior.Name
-                                      ElseIf TypeOf sprite Is Effect Then
-                                          details(1) = DirectCast(sprite, Effect).behavior_name
-                                      End If
-                                      details(2) = String.Format("{0,4}, {1,4}", sprite.Region.X, sprite.Region.Y)
-                                      details(3) = String.Format("{0,3} x {1,3}", sprite.Region.Width, sprite.Region.Height)
-                                      details(4) = sprite.ImagePath.Replace(AppDomain.CurrentDomain.BaseDirectory, "")
-                                      Return details
-                                  End Function)
-#End If
-        Animator = New DesktopPonyAnimator(viewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
-        Pony.CurrentViewer = viewer
+        Animator = New DesktopPonyAnimator(PonyViewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
+        Pony.CurrentViewer = PonyViewer
         Pony.CurrentAnimator = Animator
     End Sub
 
@@ -1647,13 +1625,10 @@ Public Class Main
     End Sub
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        Mac.WriteLine("Main_FormClosing started.")
         e.Cancel = loading
-        Mac.WriteLine("Main_FormClosing ending with cancel set to " & e.Cancel & ".")
     End Sub
 
     Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        Mac.WriteLine("Main_Disposed started.")
         For Each kvp In ponyImages.InitializedItems
             If kvp.Value IsNot Nothing Then
                 kvp.Value.Dispose()
@@ -1661,7 +1636,5 @@ Public Class Main
                 Console.WriteLine("Main_Disposed encountered a null image. Key: " & kvp.Key)
             End If
         Next
-        Mac.WriteLine("Main_Disposed ended.")
-        Console.WriteLine("Main has been disposed. Program ending.")
     End Sub
 End Class
