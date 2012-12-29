@@ -1022,7 +1022,6 @@ Class Pony
     Friend Is_Interacting As Boolean = False
 
     Friend Playing_Game As Boolean = False
-    Friend Position As Game.Position = Nothing
 
     Private vertical As Boolean = False
     Private horizontal As Boolean = False

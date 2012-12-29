@@ -203,7 +203,6 @@ Public Class GameSelectionForm
                     For Each position In team1.Positions
                         If ReferenceEquals(position.Selection_Menu_Picturebox, position_picturebox) Then
                             position.Player = pony
-                            pony.Position = position
                             position.Team = team1
                             Exit For
                         End If
@@ -212,7 +211,6 @@ Public Class GameSelectionForm
                     For Each position In team2.Positions
                         If ReferenceEquals(position.Selection_Menu_Picturebox, position_picturebox) Then
                             position.Player = pony
-                            pony.Position = position
                             position.Team = team2
                             Exit For
                         End If
