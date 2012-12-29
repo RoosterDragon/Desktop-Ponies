@@ -12,6 +12,9 @@ Public Class Main
     Private initialized As Boolean = False
     Private loading As Boolean = False
 
+    Private oldWindowState As FormWindowState
+    Private layoutPendingFromRestore As Boolean
+
     Friend DesktopHandle As IntPtr
     Friend ShellHandle As IntPtr
     Friend process_id As Integer = 0
@@ -1618,6 +1621,22 @@ Public Class Main
             Next
         End If
 
+    End Sub
+
+    Private Sub Main_LocationChanged(sender As Object, e As EventArgs) Handles MyBase.LocationChanged
+        ' If we have just returned from the minimized state, the flow panel will have an incorrect scrollbar.
+        ' Force a layout to get the bar re-evaluated and fixed.
+        If oldWindowState = FormWindowState.Minimized AndAlso WindowState <> FormWindowState.Minimized Then
+            layoutPendingFromRestore = True
+        End If
+        oldWindowState = WindowState
+    End Sub
+
+    Private Sub PonySelectionPanel_Paint(sender As Object, e As PaintEventArgs) Handles PonySelectionPanel.Paint
+        If layoutPendingFromRestore Then
+            PonySelectionPanel.PerformLayout()
+            layoutPendingFromRestore = False
+        End If
     End Sub
 
     Private Sub AnimationTimer_Tick(sender As Object, e As EventArgs) Handles AnimationTimer.Tick
