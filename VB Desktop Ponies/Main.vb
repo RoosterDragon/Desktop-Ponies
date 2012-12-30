@@ -698,10 +698,10 @@ Public Class Main
 
                 Dim ponyfound = False
 
-                Dim ponyname = Trim(LCase(CommaSplitQuoteQualified(columns(InteractionParameter.Initiator))(0)))
+                Dim ponyname = CommaSplitQuoteQualified(columns(InteractionParameter.Initiator))(0)
                 For Each Pony In SelectablePonies
                     Try
-                        If Trim(LCase(Pony.Directory)) = ponyname Then
+                        If Pony.Directory = ponyname Then
 
                             ponyfound = True
 

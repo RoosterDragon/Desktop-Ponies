@@ -869,8 +869,7 @@
         }
 
         /// <summary>
-        /// Invokes a method synchronously on the main application thread. The form object should be synchronized and EnsureNotClosing
-        /// called before calling this method to prevent race conditions and ensure the form is still available.
+        /// Invokes a method synchronously on the main application thread.
         /// </summary>
         /// <param name="method">The method to invoke. The method should take no parameters and return void.</param>
         private void ApplicationInvoke(MethodInvoker method)

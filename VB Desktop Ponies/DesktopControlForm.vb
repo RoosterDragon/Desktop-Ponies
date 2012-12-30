@@ -49,8 +49,8 @@ Public Class DesktopControlForm
                 Else
                     winFormSubItemsList.Add(
                         New ToolStripItemAsContextMenuItem(CType(_toolStripItem, ToolStripMenuItem), subItemsList(index).SubItems))
-                    index += 1
                 End If
+                index += 1
             Next
 
             subItems = New ReadOnlyCollection(Of ISimpleContextMenuItem)(winFormSubItemsList)
@@ -64,9 +64,9 @@ Public Class DesktopControlForm
                 Return _handler
             End Get
             Set(value As System.EventHandler)
-                RemoveHandler _menuItem.Click, _handler
+                If _handler IsNot Nothing Then RemoveHandler _menuItem.Click, _handler
                 _handler = value
-                AddHandler _menuItem.Click, _handler
+                If _handler IsNot Nothing Then AddHandler _menuItem.Click, _handler
             End Set
         End Property
 

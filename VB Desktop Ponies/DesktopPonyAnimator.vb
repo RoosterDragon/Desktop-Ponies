@@ -74,11 +74,17 @@ Public Class DesktopPonyAnimator
 
     Private Sub ControlFormItemRemoved(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim pony = TryCast(e.Item, Pony)
-        If pony IsNot Nothing Then
-            controlForm.SmartInvoke(Sub()
-                                        controlForm.PonyComboBox.Items.Remove(pony)
-                                        controlForm.NotifyRemovedPonyItems()
-                                    End Sub)
+        If pony IsNot Nothing AndAlso Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
+            Try
+                controlForm.SmartInvoke(Sub()
+                                            controlForm.PonyComboBox.Items.Remove(pony)
+                                            controlForm.NotifyRemovedPonyItems()
+                                        End Sub)
+            Catch ex As ObjectDisposedException
+                If ex.ObjectName <> controlForm.GetType().Name Then
+                    Throw
+                End If
+            End Try
         End If
     End Sub
 
