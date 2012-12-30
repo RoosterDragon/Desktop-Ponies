@@ -151,18 +151,7 @@ Public Class Main
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Instance = Me
 
-        Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
-        Dim fileVersion = New Version(fileVersionInfo.FileVersion)
-        Dim versionFields As Integer = 1
-        If fileVersion.Revision <> 0 Then
-            versionFields = 4
-        ElseIf fileVersion.Build <> 0 Then
-            versionFields = 3
-        ElseIf fileVersion.Minor <> 0 Then
-            versionFields = 2
-        End If
-
-        Text = "Desktop Ponies v" & fileVersion.ToString(versionFields)
+        Text = "Desktop Ponies v" & GetProgramVersion()
         Me.Icon = My.Resources.Twilight
 
         Application.DoEvents()
@@ -344,6 +333,21 @@ Public Class Main
         End If
     End Sub
 
+    Private Function GetProgramVersion() As String
+        Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
+        Dim fileVersion = New Version(fileVersionInfo.FileVersion)
+        Dim versionFields As Integer = 1
+        If fileVersion.Revision <> 0 Then
+            versionFields = 4
+        ElseIf fileVersion.Build <> 0 Then
+            versionFields = 3
+        ElseIf fileVersion.Minor <> 0 Then
+            versionFields = 2
+        End If
+
+        Return fileVersion.ToString(versionFields)
+    End Function
+
     Sub Unhandled_Exception_Catch(sender As Object, e As UnhandledExceptionEventArgs)
         UnhandledException(DirectCast(e.ExceptionObject, Exception))
     End Sub
@@ -353,10 +357,32 @@ Public Class Main
     End Sub
 
     Private Sub UnhandledException(ex As Exception)
-        MessageBox.Show("An unexpected error occurred and Desktop Ponies must close. Please report this error so it can be fixed." &
-                        vbNewLine & vbNewLine & ex.ToString(), "Unhandled Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        loading = False
-        Application.Exit()
+        Try
+            Dim exceptionString = ex.ToString()
+            Dim version = GetProgramVersion()
+            Try
+                ' Attempt to log error.
+                Using errorFile As New IO.StreamWriter(
+                    IO.Path.Combine(Options.InstallLocation, "error.txt"), False, System.Text.Encoding.UTF8)
+                    errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version &
+                                        " occurred " & DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) & " UTC")
+                    errorFile.WriteLine()
+                    errorFile.WriteLine(exceptionString)
+                End Using
+            Catch
+                ' Ignore any logging errors, it's too late now.
+            End Try
+            ' Attempt to notify user of error.
+            MessageBox.Show("An unexpected error occurred and Desktop Ponies must close. Please report this error so it can be fixed." &
+                            vbNewLine & vbNewLine & exceptionString,
+                            "Unhandled Error - Desktop Ponies v" & version,
+                            MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Catch
+            ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
+        Finally
+            loading = False
+            Application.Exit()
+        End Try
     End Sub
 
     Sub Get_ScreenSaver_Path()
