@@ -1076,34 +1076,35 @@ Public Class Main
     Private Sub RepaginateSelection()
         PonySelectionPanel.SuspendLayout()
 
-        Dim localOffset = -1
+        Dim localOffset = 0
         Dim visibleCount = 0
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
+            Dim makeVisible = False
             If Not PaginationEnabled.Checked Then
-                Dim makeVisible = selectionControlFilter(selectionControl)
-                If makeVisible Then visibleCount += 1
-                selectionControl.Visible = makeVisible
-            Else
-                Dim makeVisible = False
-                If selectionControlFilter(selectionControl) Then
-                    localOffset += 1
-                    Dim inPageRange = True
-                    If localOffset < ponyOffset Then inPageRange = False
-                    If visibleCount >= PoniesPerPage.Value Then inPageRange = False
-                    makeVisible = inPageRange
-                End If
-                If makeVisible Then visibleCount += 1
-                selectionControl.Visible = makeVisible
+                ' If pagination is disabled, simply show/hide the control according to the current filter.
+                makeVisible = selectionControlFilter(selectionControl)
+            ElseIf selectionControlFilter(selectionControl) Then
+                ' If pagination is enabled, we will show it if it is filtered visible and within the page range.
+                makeVisible = localOffset >= ponyOffset AndAlso visibleCount < PoniesPerPage.Value
+                localOffset += 1
+            End If
+            If makeVisible Then visibleCount += 1
+            Dim visibleChanged = selectionControl.Visible <> makeVisible
+            selectionControl.Visible = makeVisible
+            ' Force an update on Mac to try and get visibility change applied.
+            If OperatingSystemInfo.IsMacOSX AndAlso visibleChanged Then
+                selectionControl.Invalidate()
+                selectionControl.Update()
             End If
         Next
-
-        PonySelectionPanel.ResumeLayout()
 
         ' Force an update on Mac to try and clear leftover graphics.
         If OperatingSystemInfo.IsMacOSX Then
             PonySelectionPanel.Invalidate()
             PonySelectionPanel.Update()
         End If
+
+        PonySelectionPanel.ResumeLayout()
 
         If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
             PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", visibleCount)

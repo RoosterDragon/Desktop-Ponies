@@ -249,9 +249,11 @@ Public Class DesktopControlForm
     End Sub
 
     Private Sub PonyComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyComboBox.SelectedIndexChanged
-        Dim selected As ISprite = CType(PonyComboBox.SelectedItem, ISprite)
-        Dim center = Point.Round(selected.Region.Center())
-        animator.PonyGraphicsForm_MouseDown(sender, New SimpleMouseEventArgs(SimpleMouseButtons.Right, center.X, center.Y))
+        Dim selected As ISprite = TryCast(PonyComboBox.SelectedItem, ISprite)
+        If selected IsNot Nothing Then
+            Dim center = Point.Round(selected.Region.Center())
+            animator.PonyGraphicsForm_MouseDown(sender, New SimpleMouseEventArgs(SimpleMouseButtons.Right, center.X, center.Y))
+        End If
     End Sub
 
     Public Sub NotifyRemovedPonyItems()
