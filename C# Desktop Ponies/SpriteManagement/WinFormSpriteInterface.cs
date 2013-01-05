@@ -708,7 +708,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseDown(object sender, MouseEventArgs e)
         {
-            MouseDown.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X, e.Y));
+            MouseDown.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a mouse button has been clicked.
@@ -718,7 +718,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseClick(object sender, MouseEventArgs e)
         {
-            MouseClick.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X, e.Y));
+            MouseClick.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a mouse button has been released.
@@ -728,7 +728,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseUp(object sender, MouseEventArgs e)
         {
-            MouseUp.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X, e.Y));
+            MouseUp.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a key has been pressed.
@@ -1218,6 +1218,9 @@
             else
                 surface = bufferedGraphics.Graphics;
 
+            // Translate drawing surface so top-left of the form and the drawing area coincide.
+            surface.TranslateTransform(-form.Left, -form.Top);
+
             // Save the invalid region from last frame.
             preUpdateInvalidRegion.MakeEmpty();
             preUpdateInvalidRegion.Union(postUpdateInvalidRegion);
@@ -1329,6 +1332,8 @@
                 surface.DrawString(timingsInfo, font, whiteBrush, timingsArea.Left, timingsArea.Top);
             }
             #endregion
+
+            surface.ResetTransform();
 
             // Render the result.
             ApplicationInvoke(() =>
