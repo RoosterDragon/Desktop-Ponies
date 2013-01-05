@@ -24,7 +24,7 @@ Public Class NewInteractionDialog
         End If
 
         For Each Interaction In m_editor.PreviewPony.Interactions
-            If LCase(Interaction.Name) = LCase(Trim(Name_Textbox.Text)) Then
+            If String.Equals(Interaction.Name, Trim(Name_Textbox.Text), StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
                 Exit Sub
             End If
@@ -190,7 +190,7 @@ Public Class NewInteractionDialog
 
         For Each target In targets
             For Each item As String In Targets_Box.Items
-                If LCase(Trim(target)) = LCase(Trim(item)) Then
+                If String.Equals(Trim(target), Trim(item), StringComparison.OrdinalIgnoreCase) Then
                     target_index_list.Add(Targets_Box.Items.IndexOf(item))
                 End If
             Next
@@ -200,7 +200,7 @@ Public Class NewInteractionDialog
 
         For Each behavior In interaction.BehaviorList
             For Each item As String In Behaviors_Box.Items
-                If LCase(Trim(behavior.Name)) = LCase(Trim(item)) Then
+                If String.Equals(Trim(behavior.Name), Trim(item), StringComparison.OrdinalIgnoreCase) Then
                     behaviors_index_list.Add(Behaviors_Box.Items.IndexOf(item))
                 End If
             Next

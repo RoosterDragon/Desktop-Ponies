@@ -32,7 +32,7 @@
 
         For Each Tag As String In m_editor.PreviewPony.Tags
             For Each category As String In PonyFilterList.Items
-                If LCase(Tag) = LCase(category) Then
+                If String.Equals(Tag, category, StringComparison.OrdinalIgnoreCase) Then
                     PonyFilterList.SetItemChecked(PonyFilterList.Items.IndexOf(category), True)
                     Exit For
                 End If

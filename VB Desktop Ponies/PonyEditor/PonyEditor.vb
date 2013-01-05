@@ -674,13 +674,13 @@ Public Class PonyEditor
 
         Try
             For Each pony In pe_animator.Ponies()
-                If LCase(Trim(pony.Directory)) = LCase(Trim(ponyname)) Then
+                If String.Equals(Trim(pony.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Return pony
                 End If
             Next
 
             For Each ponyBase In Main.Instance.SelectablePonies
-                If LCase(Trim(ponyBase.Directory)) = LCase(Trim(ponyname)) Then
+                If String.Equals(Trim(ponyBase.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Dim new_pony = New Pony(ponyBase)
                     new_pony.Teleport()
                     pe_animator.AddPony(new_pony)
@@ -708,7 +708,7 @@ Public Class PonyEditor
             Dim effect As Effect = Nothing
 
             For Each listing In effects_list
-                If LCase(Trim(listing.Name)) = LCase(Trim(name)) Then
+                If String.Equals(Trim(listing.Name), Trim(name), StringComparison.OrdinalIgnoreCase) Then
                     effect = listing
                 End If
             Next

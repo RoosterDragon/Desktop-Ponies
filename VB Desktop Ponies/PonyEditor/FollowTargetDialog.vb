@@ -131,7 +131,7 @@
         If (Not IsNothing(behavior.original_follow_object_name) AndAlso behavior.original_follow_object_name <> "") Then
             pony = True
             For Each item As String In Follow_ComboBox.Items
-                If LCase(string_to_effectname(item)) = LCase(behavior_to_change.original_follow_object_name) Then
+                If String.Equals(string_to_effectname(item), behavior_to_change.original_follow_object_name, StringComparison.OrdinalIgnoreCase) Then
                     Follow_ComboBox.SelectedItem = item
                 End If
             Next
@@ -139,7 +139,7 @@
 
         If (Not IsNothing(behavior.FollowMovingBehavior) AndAlso behavior.FollowMovingBehaviorName <> "") Then
             For Each item As String In moving_behavior_box.Items
-                If LCase(item) = LCase(behavior.FollowMovingBehaviorName) Then
+                If String.Equals(item, behavior.FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase) Then
                     moving_behavior_box.SelectedItem = item
                 End If
             Next
@@ -147,7 +147,7 @@
 
         If (Not IsNothing(behavior.FollowStoppedBehavior) AndAlso behavior.FollowStoppedBehaviorName <> "") Then
             For Each item As String In stopped_behavior_box.Items
-                If LCase(item) = LCase(behavior.FollowStoppedBehaviorName) Then
+                If String.Equals(item, behavior.FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase) Then
                     stopped_behavior_box.SelectedItem = item
                 End If
             Next

@@ -462,7 +462,7 @@ Class PonyBase
             Dim found = False
 
             For Each Behavior In Me.Behaviors
-                If LCase(Trim(Behavior.Name)) = LCase(Trim(iBehavior)) Then
+                If String.Equals(Trim(Behavior.Name), Trim(iBehavior), StringComparison.OrdinalIgnoreCase) Then
                     new_interaction.BehaviorList.Add(Behavior)
                     found = True
                 End If
@@ -482,7 +482,7 @@ Class PonyBase
 
             For Each Pony In Main.Instance.SelectablePonies
 
-                If LCase(Trim(target)) = LCase(Trim(Pony.Directory)) Then
+                If String.Equals(Trim(target), Trim(Pony.Directory), StringComparison.OrdinalIgnoreCase) Then
                     ponyfound = True
 
                     ok_targets.Add(Pony.Directory)
@@ -492,7 +492,7 @@ Class PonyBase
                         Dim found = False
 
                         For Each ponybehavior In Pony.Behaviors
-                            If Trim(LCase(Behavior)) = Trim(LCase(ponybehavior.Name)) Then
+                            If String.Equals(Trim(Behavior), Trim(ponybehavior.Name), StringComparison.OrdinalIgnoreCase) Then
                                 found = True
                                 Exit For
                             End If
@@ -3052,14 +3052,15 @@ Class Pony
 
             'If we are interacting, and the name of the pony we should be following matches that of the trigger, follow that one.
             'Otherwise, we may end up following the wrong copy if there are more than one.
-            If Is_Interacting AndAlso Trim(LCase(follow_object_name)) = Trim(LCase(CurrentInteraction.Trigger.Directory)) Then
+            If Is_Interacting AndAlso
+                String.Equals(Trim(follow_object_name), Trim(CurrentInteraction.Trigger.Directory), StringComparison.OrdinalIgnoreCase) Then
                 follow_object = CurrentInteraction.Trigger
                 Return New Point(CurrentInteraction.Trigger.Center.X + destination_coords.X,
                                  CurrentInteraction.Trigger.Center.Y + destination_coords.Y)
             End If
             'For the reverse case of a trigger pony trying to find out which initiator to follow when interacting.
             If Is_Interacting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
-                Trim(LCase(follow_object_name)) = Trim(LCase(CurrentInteraction.Initiator.Directory)) Then
+                String.Equals(Trim(follow_object_name), Trim(CurrentInteraction.Initiator.Directory), StringComparison.OrdinalIgnoreCase) Then
                 follow_object = CurrentInteraction.Initiator
                 Return New Point(CurrentInteraction.Initiator.Location.X + destination_coords.X,
                                  CurrentInteraction.Initiator.Location.Y + destination_coords.Y)

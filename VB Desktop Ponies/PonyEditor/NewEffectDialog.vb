@@ -19,7 +19,7 @@ Public Class NewEffectDialog
         End If
 
         For Each effect In m_editor.get_effect_list()
-            If LCase(effect.Name) = LCase(Name_Textbox.Text) Then
+            If String.Equals(effect.Name, Name_Textbox.Text, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Effect names must be unique.  Effect '" & Name_Textbox.Text & "' already exists.  Please select a different name.")
                 Exit Sub
             End If
@@ -67,7 +67,7 @@ Public Class NewEffectDialog
         Dim behavior As PonyBase.Behavior = Nothing
 
         For Each behavior In m_editor.PreviewPony.Behaviors
-            If LCase(behavior.Name) = LCase(CStr(Behavior_Box.SelectedItem)) Then
+            If String.Equals(behavior.Name, CStr(Behavior_Box.SelectedItem), StringComparison.OrdinalIgnoreCase) Then
                 behavior = behavior
                 Exit For
             End If
