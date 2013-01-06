@@ -830,11 +830,6 @@ Public Class Main
 #End Region
 
 #Region "Selection"
-    ''' <summary>
-    ''' Set each pony's count to 0
-    ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
     Friend Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
@@ -842,7 +837,7 @@ Public Class Main
     End Sub
 
     Private Sub SaveProfileButton_Click(sender As Object, e As EventArgs) Handles SaveProfileButton.Click
-        Dim profileToSave = Trim(ProfileComboBox.Text)
+        Dim profileToSave = ProfileComboBox.Text
 
         If profileToSave = "" Then
             MsgBox("Enter a profile name first!")
@@ -866,7 +861,7 @@ Public Class Main
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
         'Options.LoadProfile(ProfileComboBox.Text)
-        OptionsForm.Instance.LoadButton_Click(sender, e, Trim(ProfileComboBox.Text))
+        OptionsForm.Instance.LoadButton_Click(sender, e, ProfileComboBox.Text)
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
@@ -1004,26 +999,22 @@ Public Class Main
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not dont_load_profile Then
             'Options.LoadProfile(ProfileComboBox.Text)
-            OptionsForm.Instance.LoadButton_Click(sender, e, Trim(ProfileComboBox.Text))
+            OptionsForm.Instance.LoadButton_Click(sender, e, ProfileComboBox.Text)
         End If
     End Sub
 
     Private Sub FilterAnyRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAnyRadio.CheckedChanged
-
         If FilterAnyRadio.Checked Then
             FilterOptionsBox.Enabled = True
             RefilterSelection()
         End If
-
     End Sub
 
     Private Sub FilterExactlyRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterExactlyRadio.CheckedChanged
-
         If FilterExactlyRadio.Checked Then
             FilterOptionsBox.Enabled = True
             RefilterSelection()
         End If
-
     End Sub
 
     Private Sub FilterAllRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAllRadio.CheckedChanged

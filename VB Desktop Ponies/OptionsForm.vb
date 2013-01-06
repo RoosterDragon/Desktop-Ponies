@@ -172,15 +172,15 @@
 
     End Sub
 
-    Friend Sub LoadButton_Click(sender As Object, e As EventArgs, Optional selected_profile As String = Options.DefaultProfileName) Handles LoadButton.Click
+    Friend Sub LoadButton_Click(sender As Object, e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles LoadButton.Click
         Try
             If Not IsNothing(sender) Then
                 If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
-                    selected_profile = Trim(Main.Instance.ProfileComboBox.Text)
+                    profile = Trim(Main.Instance.ProfileComboBox.Text)
                 End If
             End If
 
-            Options.LoadProfile(selected_profile)
+            Options.LoadProfile(profile)
 
             RefreshOptions()
             If Main.Instance.FilterOptionsBox.Items.Count = 0 Then
@@ -189,11 +189,11 @@
 
             SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
-            MsgBox("Failed to load profile '" & selected_profile & "'")
+            MsgBox("Failed to load profile '" & profile & "'")
         End Try
         Try
             IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
-                     selected_profile, System.Text.Encoding.UTF8)
+                     profile, System.Text.Encoding.UTF8)
         Catch ex As IO.IOException
             ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
             Console.WriteLine("Warning: Failed to save current.txt file.")

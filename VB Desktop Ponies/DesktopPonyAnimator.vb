@@ -44,8 +44,8 @@ Public Class DesktopPonyAnimator
         MaximumFramesPerSecond = 30
         Viewer.WindowTitle = "Desktop Ponies"
         Viewer.WindowIconFilePath = IO.Path.Combine(Options.InstallLocation, "Twilight.ico")
-        AddHandler Viewer.MouseUp, AddressOf PonyGraphicsForm_MouseUp
-        AddHandler Viewer.MouseDown, AddressOf PonyGraphicsForm_MouseDown
+        AddHandler Viewer.MouseUp, AddressOf Viewer_MouseUp
+        AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
 
         If createDesktopControlForm Then
             Main.Instance.Invoke(Sub() controlForm = New DesktopControlForm(Me))
@@ -522,12 +522,42 @@ Public Class DesktopPonyAnimator
     End Function
 
     ''' <summary>
+    ''' Occurs when a mouse button is raised.
+    ''' Any dragged pony will be dropped.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The event data.</param>
+    Private Sub Viewer_MouseUp(sender As Object, e As SimpleMouseEventArgs)
+
+        If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
+            If draggingPony Then
+                If Not IsNothing(draggedPony) Then
+                    draggedPony.BeingDragged = False
+                    If draggedPonyWasSleeping = False Then
+                        draggedPony.should_be_sleeping = False
+                    End If
+                End If
+                If Not IsNothing(draggedEffect) Then
+                    draggedEffect.beingDragged = False
+                End If
+                Main.Instance.Dragging = False
+
+                draggingPony = False
+
+                draggedPony = Nothing
+                draggedEffect = Nothing
+            End If
+        End If
+
+    End Sub
+
+    ''' <summary>
     ''' Occurs when a mouse button is pressed down initially.
     ''' Selects the nearest pony to be dragged by the mouse.
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
-    Friend Sub PonyGraphicsForm_MouseDown(sender As Object, e As SimpleMouseEventArgs)
+    Friend Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
             If Not Options.PonyDraggingEnabled Then Exit Sub
 
@@ -623,42 +653,9 @@ Public Class DesktopPonyAnimator
     End Sub
 
     ''' <summary>
-    ''' Occurs when a mouse button is raised.
-    ''' Any dragged pony will be dropped.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">The event data.</param>
-    Private Sub PonyGraphicsForm_MouseUp(sender As Object, e As SimpleMouseEventArgs)
-
-        If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
-            If draggingPony Then
-                If Not IsNothing(draggedPony) Then
-                    draggedPony.BeingDragged = False
-                    If draggedPonyWasSleeping = False Then
-                        draggedPony.should_be_sleeping = False
-                    End If
-                End If
-                If Not IsNothing(draggedEffect) Then
-                    draggedEffect.beingDragged = False
-                End If
-                Main.Instance.Dragging = False
-
-                draggingPony = False
-
-                draggedPony = Nothing
-                draggedEffect = Nothing
-            End If
-        End If
-
-    End Sub
-
-    ''' <summary>
     ''' Allows ponies to be manually controlled.
     ''' </summary>
     Private Sub ManualControl()
-
-        'If Main.Instance.screen_saver_mode Then Main.Instance.Close()
-
         With Main.Instance
             .PonyDown = KeyboardState.IsKeyPressed(Keys.Down)
             .PonyUp = KeyboardState.IsKeyPressed(Keys.Up)
@@ -674,7 +671,6 @@ Public Class DesktopPonyAnimator
             .PonySpeed_2 = KeyboardState.IsKeyPressed(Keys.LShiftKey)
             .PonyAction_2 = KeyboardState.IsKeyPressed(Keys.LControlKey)
         End With
-
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)
