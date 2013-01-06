@@ -29,7 +29,7 @@ Partial Class OptionsForm
         Me.AvoidanceZoneHeight = New System.Windows.Forms.NumericUpDown()
         Me.AvoidanceZoneX = New System.Windows.Forms.NumericUpDown()
         Me.AvoidanceZoneWidth = New System.Windows.Forms.NumericUpDown()
-        Me.AvoidanceZonePreviewImage = New System.Windows.Forms.PictureBox()
+        Me.AvoidanceZonePreview = New System.Windows.Forms.PictureBox()
         Me.MonitorsLabel = New System.Windows.Forms.Label()
         Me.MonitorsSelection = New System.Windows.Forms.ListBox()
         Me.MonitorsMinimumLabel = New System.Windows.Forms.Label()
@@ -175,17 +175,17 @@ Partial Class OptionsForm
         Me.AvoidanceZoneWidth.Size = New System.Drawing.Size(46, 20)
         Me.AvoidanceZoneWidth.TabIndex = 4
         '
-        'AvoidanceZonePreviewImage
+        'AvoidanceZonePreview
         '
-        Me.AvoidanceZonePreviewImage.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+        Me.AvoidanceZonePreview.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AvoidanceZonePreviewImage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.AvoidanceZonePreviewImage.Location = New System.Drawing.Point(6, 77)
-        Me.AvoidanceZonePreviewImage.Name = "AvoidanceZonePreviewImage"
-        Me.AvoidanceZonePreviewImage.Size = New System.Drawing.Size(257, 109)
-        Me.AvoidanceZonePreviewImage.TabIndex = 15
-        Me.AvoidanceZonePreviewImage.TabStop = False
+        Me.AvoidanceZonePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.AvoidanceZonePreview.Location = New System.Drawing.Point(6, 77)
+        Me.AvoidanceZonePreview.Name = "AvoidanceZonePreview"
+        Me.AvoidanceZonePreview.Size = New System.Drawing.Size(257, 109)
+        Me.AvoidanceZonePreview.TabIndex = 15
+        Me.AvoidanceZonePreview.TabStop = False
         '
         'MonitorsLabel
         '
@@ -464,7 +464,7 @@ Partial Class OptionsForm
         Me.AvoidanceZoneGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZoneAreaTable)
         Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZonePreviewLabel)
-        Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZonePreviewImage)
+        Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZonePreview)
         Me.AvoidanceZoneGroup.Location = New System.Drawing.Point(247, 122)
         Me.AvoidanceZoneGroup.Name = "AvoidanceZoneGroup"
         Me.AvoidanceZoneGroup.Size = New System.Drawing.Size(269, 218)
@@ -1043,7 +1043,7 @@ Partial Class OptionsForm
     Friend WithEvents AvoidanceZoneHeight As System.Windows.Forms.NumericUpDown
     Friend WithEvents AvoidanceZoneX As System.Windows.Forms.NumericUpDown
     Friend WithEvents AvoidanceZoneWidth As System.Windows.Forms.NumericUpDown
-    Friend WithEvents AvoidanceZonePreviewImage As System.Windows.Forms.PictureBox
+    Friend WithEvents AvoidanceZonePreview As System.Windows.Forms.PictureBox
     Friend WithEvents MonitorsLabel As System.Windows.Forms.Label
     Friend WithEvents MonitorsSelection As System.Windows.Forms.ListBox
     Friend WithEvents MonitorsMinimumLabel As System.Windows.Forms.Label

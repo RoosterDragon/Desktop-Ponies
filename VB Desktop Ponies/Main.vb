@@ -866,7 +866,7 @@ Public Class Main
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
         'Options.LoadProfile(ProfileComboBox.Text)
-        OptionsForm.Instance.Load_Button_Click(sender, e, ProfileComboBox.Text)
+        OptionsForm.Instance.LoadButton_Click(sender, e, Trim(ProfileComboBox.Text))
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
@@ -1004,7 +1004,7 @@ Public Class Main
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not dont_load_profile Then
             'Options.LoadProfile(ProfileComboBox.Text)
-            OptionsForm.Instance.Load_Button_Click(sender, e, Trim(ProfileComboBox.Text))
+            OptionsForm.Instance.LoadButton_Click(sender, e, Trim(ProfileComboBox.Text))
         End If
     End Sub
 
