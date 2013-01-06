@@ -401,7 +401,7 @@ Public Class Main
                 SetScreensaverPath()
             End If
 
-            Dim SettingsFile As New System.IO.StreamReader(screensaver_settings_file_path)
+            Dim SettingsFile As New StreamReader(screensaver_settings_file_path)
 
             screen_saver_path = SettingsFile.ReadLine()
 
@@ -429,7 +429,7 @@ Public Class Main
 
             Try
                 If My.Computer.FileSystem.FileExists(screensaver_settings_file_path) Then
-                    Using existing_file As New System.IO.StreamReader(screensaver_settings_file_path)
+                    Using existing_file As New StreamReader(screensaver_settings_file_path)
                         screen_saver_path = existing_file.ReadLine()
                         SelectFilesPathDialog.PathTextBox.Text = screen_saver_path
                     End Using
@@ -449,7 +449,7 @@ Public Class Main
             'Dim SettingsFile As New System.IO.StreamWriter(UserIsolatedStorageFile, System.Text.Encoding.Unicode)
 
             'we use Unicode here, and any time we save a file as other languages can cause problems.
-            Dim SettingsFile As New System.IO.StreamWriter(screensaver_settings_file_path, False, System.Text.Encoding.UTF8)
+            Dim SettingsFile As New StreamWriter(screensaver_settings_file_path, False, System.Text.Encoding.UTF8)
 
             SettingsFile.WriteLine(screen_saver_path)
 
@@ -670,13 +670,13 @@ Public Class Main
 
     Sub LoadInteractions(Optional displayWarnings As Boolean = True)
 
-        If Not My.Computer.FileSystem.FileExists(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename)) Then
+        If Not My.Computer.FileSystem.FileExists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename)) Then
             Options.PonyInteractionsExist = False
             Exit Sub
         End If
 
-        Using interactions_file As New System.IO.StreamReader(
-            System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
+        Using interactions_file As New StreamReader(
+            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
             Do Until interactions_file.EndOfStream
 
                 Dim line = interactions_file.ReadLine
@@ -883,7 +883,7 @@ Public Class Main
                     'some languages don't use \ as a separator between folders
                     Dim config_file_name = Path.Combine(folder, Game.ConfigFilename)
 
-                    Dim new_game As New Game(config_file_name, folder & System.IO.Path.DirectorySeparatorChar)
+                    Dim new_game As New Game(config_file_name, folder & Path.DirectorySeparatorChar)
 
                     games.Add(new_game)
 
