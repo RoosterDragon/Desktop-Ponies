@@ -650,43 +650,6 @@ Public Class Main
             SelectablePonies.Add(ponyBase)
         End If
 
-        'don't show ponies that don't have at least one of the desired tags in Show Any.. mode
-        If FilterAnyRadio.Checked Then
-            Dim match = False
-            For Each tag_to_show As String In FilterOptionsBox.CheckedItems
-                If ponyBase.Tags.Contains(tag_to_show) OrElse
-                   (ponyBase.Tags.Count = 0 AndAlso tag_to_show = "Not Tagged") Then
-                    match = True
-                    Exit For
-                End If
-            Next
-            If match = False Then
-                Exit Sub
-            End If
-        End If
-
-        'don't show ponies that don't have all of the desired tags in Show Exactly.. mode
-        If FilterExactlyRadio.Checked Then
-            Dim all_match = False
-            For Each tag_to_show As String In FilterOptionsBox.CheckedItems
-                Dim match = False
-                If ponyBase.Tags.Contains(tag_to_show) Then
-                    match = True
-                    all_match = True
-                End If
-                If ponyBase.Tags.Count = 0 AndAlso tag_to_show = "Not Tagged" Then
-                    match = True
-                    all_match = True
-                End If
-                If Not match Then
-                    Exit Sub
-                End If
-            Next
-            If Not all_match Then
-                Exit Sub
-            End If
-        End If
-
         Dim ponyImageName = ponyBase.Behaviors(0).RightImagePath
         ponyImages.Add(ponyImageName)
 
@@ -701,8 +664,8 @@ Public Class Main
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
+        selectionControlFilter.Add(ponySelection, ponySelection.Visible)
         PonySelectionPanel.Controls.Add(ponySelection)
-        selectionControlFilter.Add(ponySelection, True)
     End Sub
 
     Sub LoadInteractions(Optional displayWarnings As Boolean = True)
@@ -1525,9 +1488,7 @@ Public Class Main
             Next
             PonySelectionPanel.ResumeLayout()
             ' Perform a layout so cached positions are cleared, then restore visibility to its previous state.
-            For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
-                selectionControl.Visible = selectionControlFilter(selectionControl)
-            Next
+            RepaginateSelection()
         End If
     End Sub
 
