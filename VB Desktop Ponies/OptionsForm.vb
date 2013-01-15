@@ -39,7 +39,7 @@
             MonitorsSelection.SetSelected(i, True)
         Next
 
-        If Main.Instance.DisableSoundsDueToDirectXFailure = True Then
+        If Not Main.Instance.DirectXSoundAvailable Then
             SoundDisabledLabel.Visible = True
             Sound.Enabled = False
             Sound.Checked = False
@@ -319,7 +319,7 @@
 
         VolumeValueLabel.Text = CStr(Volume.Value / 100)
 
-        If Not Main.Instance.DisableSoundsDueToDirectXFailure Then
+        If Main.Instance.DirectXSoundAvailable Then
             For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Main.Instance.Active_Sounds
                 activeSound.Volume = SoundVolume
             Next

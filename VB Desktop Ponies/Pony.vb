@@ -1175,7 +1175,7 @@ Class Pony
 
         If Not IsNothing(line) Then
             lineToSpeak = line.Text
-            If line.SoundFile <> "" AndAlso Not Main.Instance.DisableSoundsDueToDirectXFailure Then
+            If line.SoundFile <> "" AndAlso Main.Instance.DirectXSoundAvailable Then
                 PonyPlaySound(line.SoundFile)
             End If
         Else
@@ -1188,7 +1188,7 @@ Class Pony
 
                 Dim randomLine = randomGroupLines(Rng.Next(randomGroupLines.Count))
                 lineToSpeak = randomLine.Text
-                If randomLine.SoundFile <> "" AndAlso Not Main.Instance.DisableSoundsDueToDirectXFailure Then
+                If randomLine.SoundFile <> "" AndAlso Main.Instance.DirectXSoundAvailable Then
                     PonyPlaySound(randomLine.SoundFile)
                 End If
             End If

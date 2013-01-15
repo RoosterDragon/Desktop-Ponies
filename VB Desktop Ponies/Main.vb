@@ -84,7 +84,7 @@ Public Class Main
 
     Friend NoRandomDuplicates As Boolean = True
 
-    Friend DisableSoundsDueToDirectXFailure As Boolean = False
+    Friend DirectXSoundAvailable As Boolean = False
 
     Dim all_sleeping As Boolean = False
 
@@ -178,8 +178,9 @@ Public Class Main
             If InStr(dependency.ToString, "DirectX") <> 0 Then
                 Try
                     System.Reflection.Assembly.Load(dependency)
+                    DirectXSoundAvailable = True
                 Catch ex As Exception
-                    DisableSoundsDueToDirectXFailure = True
+                    ' If we can't load the assembly, just don't enable sound.
                 End Try
             End If
         Next

@@ -214,7 +214,7 @@ Public Class DesktopPonyAnimator
                 .Dead_Effects.Remove(effect)
             Next
 
-            If .DisableSoundsDueToDirectXFailure = False Then
+            If .DirectXSoundAvailable Then
                 .Cleanup_Sounds()
             End If
 
