@@ -500,7 +500,10 @@
 
                 System.Drawing.Rectangle area = System.Drawing.Rectangle.Empty;
                 foreach (Screen screen in Screen.AllScreens)
-                    area = System.Drawing.Rectangle.Union(area, screen.Bounds);
+                    if (area == System.Drawing.Rectangle.Empty)
+                        area = screen.WorkingArea;
+                    else
+                        area = System.Drawing.Rectangle.Union(area, screen.WorkingArea);
 
                 EnableControls(false);
                 if (InterfaceWinFormOption.Checked)

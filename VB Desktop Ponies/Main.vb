@@ -1416,7 +1416,11 @@ Public Class Main
         ' Begin Glue Code
         Dim area As Rectangle = Rectangle.Empty
         For Each screen In screens_to_use
-            area = Rectangle.Union(area, screen.WorkingArea)
+            If area = Rectangle.Empty Then
+                area = screen.WorkingArea
+            Else
+                area = Rectangle.Union(area, screen.WorkingArea)
+            End If
         Next
 
         Dim viewer As ISpriteCollectionView
@@ -1560,7 +1564,7 @@ Public Class Main
     End Sub
 
     Friend Sub SetVolumeOnAllSounds(volume As Integer)
-        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Main.Instance.Active_Sounds
+        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Active_Sounds
             activeSound.Volume = volume
         Next
     End Sub
