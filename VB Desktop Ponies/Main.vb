@@ -1559,6 +1559,12 @@ Public Class Main
         PonySelectionPanel.Controls.Clear()
     End Sub
 
+    Friend Sub SetVolumeOnAllSounds(volume As Integer)
+        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Main.Instance.Active_Sounds
+            activeSound.Volume = volume
+        Next
+    End Sub
+
     Friend Sub Cleanup_Sounds()
 
         Dim sounds_to_remove As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)

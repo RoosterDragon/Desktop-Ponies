@@ -320,9 +320,7 @@
         VolumeValueLabel.Text = CStr(Volume.Value / 100)
 
         If Main.Instance.DirectXSoundAvailable Then
-            For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Main.Instance.Active_Sounds
-                activeSound.Volume = SoundVolume
-            Next
+            Main.Instance.SetVolumeOnAllSounds(SoundVolume)
         End If
     End Sub
 
