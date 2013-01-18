@@ -2009,9 +2009,9 @@ Public Class PonyEditor
             Main.Instance.SelectablePonies = temp_list
 
             Dim comments As New List(Of String)
-            Dim ponyIniFilePath = System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
+            Dim ponyIniFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
             If My.Computer.FileSystem.FileExists(ponyIniFilePath) Then
-                Using existing_ini As New System.IO.StreamReader(ponyIniFilePath)
+                Using existing_ini As New StreamReader(ponyIniFilePath)
                     Do Until existing_ini.EndOfStream
                         Dim line = existing_ini.ReadLine()
                         If line.Length > 0 AndAlso line(0) = "'" Then
@@ -2021,7 +2021,7 @@ Public Class PonyEditor
                 End Using
             End If
 
-            Using newPonyIniFile As New System.IO.StreamWriter(ponyIniFilePath, False, System.Text.Encoding.UTF8)
+            Using newPonyIniFile As New StreamWriter(ponyIniFilePath, False, System.Text.Encoding.UTF8)
                 For Each line In comments
                     newPonyIniFile.WriteLine(line)
                 Next
@@ -2110,13 +2110,10 @@ Public Class PonyEditor
 
                 Dim interactions_lines As New List(Of String)
 
-                Using interactionsIniFile As System.IO.StreamReader =
-                    New System.IO.StreamReader(
-                    System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
-
-                    Do Until interactionsIniFile.EndOfStream
-                        Dim line = interactionsIniFile.ReadLine()
-
+                Using reader = New StreamReader(IO.Path.Combine(
+                                                Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
+                    Do Until reader.EndOfStream
+                        Dim line = reader.ReadLine()
                         Dim name_check = CommaSplitQuoteQualified(line)
 
                         If UBound(name_check) > 2 Then
@@ -2128,49 +2125,32 @@ Public Class PonyEditor
                     Loop
                 End Using
 
-                Dim new_interactions As System.IO.StreamWriter = Nothing
+                Using writer = New StreamWriter(IO.Path.Combine(
+                                                Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename),
+                                            False, System.Text.Encoding.UTF8)
+                    If IsNothing(writer) Then Throw New Exception("Unable to write back to interactions.ini file...")
 
-                'we always use Unicode as characters in other languages will not save properly in the default encoding.
-                Try
-                    new_interactions = New System.IO.StreamWriter(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename), False, System.Text.Encoding.UTF8)
-                Catch ex As Exception
-                    'closing then immediately reopening a file may sometimes fail.
-                    'Just try again...
-                    Try
-                        System.Threading.Thread.Sleep(2000)
-                        new_interactions = New System.IO.StreamWriter(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename), False, System.Text.Encoding.UTF8)
-                    Catch ex2 As Exception
-                        System.Threading.Thread.Sleep(2000)
-                        new_interactions = New System.IO.StreamWriter(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename), False, System.Text.Encoding.UTF8)
-                    End Try
-                Finally
-                    If new_interactions IsNot Nothing Then new_interactions.Dispose()
-                End Try
+                    For Each line In interactions_lines
+                        writer.WriteLine(line)
+                    Next
 
-                If IsNothing(new_interactions) Then Throw New Exception("Unable to write back to interactions.ini file...")
+                    For Each interaction In PreviewPony.Interactions
+                        Dim behaviors_list = String.Join(",", interaction.BehaviorList.Select(Function(behavior As PonyBase.Behavior)
+                                                                                                  Return Quoted(behavior.Name)
+                                                                                              End Function))
 
-                For Each line In interactions_lines
-                    new_interactions.WriteLine(line)
-                Next
-
-                For Each interaction In PreviewPony.Interactions
-                    Dim behaviors_list = String.Join(",", interaction.BehaviorList.Select(Function(behavior As PonyBase.Behavior)
-                                                                                              Return Quoted(behavior.Name)
-                                                                                          End Function))
-
-                    Dim interactionLine = String.Join(",",
-                        interaction.Name,
-                        Quoted(interaction.PonyName),
-                        interaction.Probability.ToString(CultureInfo.InvariantCulture),
-                        interaction.Proximity_Activation_Distance.ToString(CultureInfo.InvariantCulture),
-                        Braced(interaction.Targets_String),
-                        interaction.Targets_Activated.ToString(),
-                        Braced(behaviors_list),
-                        interaction.Reactivation_Delay.ToString(CultureInfo.InvariantCulture))
-                    new_interactions.WriteLine(interactionLine)
-                Next
-
-                new_interactions.Close()
+                        Dim interactionLine = String.Join(",",
+                            interaction.Name,
+                            Quoted(interaction.PonyName),
+                            interaction.Probability.ToString(CultureInfo.InvariantCulture),
+                            interaction.Proximity_Activation_Distance.ToString(CultureInfo.InvariantCulture),
+                            Braced(interaction.Targets_String),
+                            interaction.Targets_Activated.ToString(),
+                            Braced(behaviors_list),
+                            interaction.Reactivation_Delay.ToString(CultureInfo.InvariantCulture))
+                        writer.WriteLine(interactionLine)
+                    Next
+                End Using
 
             Catch ex As Exception
                 Throw New Exception("Failed while updating interactions: " & ex.Message, ex)

@@ -50,13 +50,13 @@
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         public static Size GetSize(string path)
         {
-            using (FileStream fileStream =
+            using (FileStream stream =
                 new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 32, FileOptions.SequentialScan))
-            using (BinaryReader binaryReader = new BinaryReader(fileStream))
+            using (BinaryReader reader = new BinaryReader(stream))
             {
                 try
                 {
-                    return GetSize(binaryReader);
+                    return GetSize(reader);
                 }
                 catch (ArgumentException ex)
                 {
@@ -71,26 +71,27 @@
         /// <summary>
         /// Gets the width and height of an image, in pixels.
         /// </summary>
-        /// <param name="binaryReader">A <see cref="T:System.IO.BinaryReader"/> that is positioned to read an image stream of PNG, JPEG,
+        /// <param name="reader">A <see cref="T:System.IO.BinaryReader"/> that is positioned to read an image stream of PNG, JPEG,
         /// GIF or BMP format.</param>
         /// <returns>The width and height of the image, in pixels.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="binaryReader"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="reader"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>    
-        public static Size GetSize(BinaryReader binaryReader)
+        public static Size GetSize(BinaryReader reader)
         {
-            Argument.EnsureNotNull(binaryReader, "binaryReader");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
             
             byte[] magicBytes = new byte[MaxMagicBytesLength];
 
             for (int i = 0; i < magicBytes.Length; i++)
             {
-                magicBytes[i] = binaryReader.ReadByte();
+                magicBytes[i] = reader.ReadByte();
                 foreach (var imageFormatDecoder in ImageDecoders.Where(decoder => decoder.Key.Length == i + 1))
                     if (magicBytes.StartsWith(imageFormatDecoder.Key))
-                        return imageFormatDecoder.Value(binaryReader);
+                        return imageFormatDecoder.Value(reader);
             }
 
-            throw new ArgumentException(ErrorMessage, "binaryReader");
+            throw new ArgumentException(ErrorMessage, "reader");
         }
 
         /// <summary>

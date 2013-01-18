@@ -8,10 +8,9 @@ Public Class DesktopPonyAnimator
     Private selectedHouse As House
     Private selectedPony As Pony
     Private draggedPony As Pony
-    Private draggingPony As Boolean
-    Private draggedPonyWasSleeping As Boolean
     Private draggedEffect As Effect
-    Private draggingEffect As Boolean
+    Private draggingPonyOrEffect As Boolean
+    Private draggedPonyWasSleeping As Boolean
     Private poniesToRemove As New List(Of Pony)
 
     Private controlForm As DesktopControlForm
@@ -530,7 +529,7 @@ Public Class DesktopPonyAnimator
     Private Sub Viewer_MouseUp(sender As Object, e As SimpleMouseEventArgs)
 
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
-            If draggingPony Then
+            If draggingPonyOrEffect Then
                 If Not IsNothing(draggedPony) Then
                     draggedPony.BeingDragged = False
                     If draggedPonyWasSleeping = False Then
@@ -542,7 +541,7 @@ Public Class DesktopPonyAnimator
                 End If
                 Main.Instance.Dragging = False
 
-                draggingPony = False
+                draggingPonyOrEffect = False
 
                 draggedPony = Nothing
                 draggedEffect = Nothing
@@ -572,7 +571,7 @@ Public Class DesktopPonyAnimator
             selectedForDragPony.BeingDragged = True
             draggedPony = selectedForDragPony
             Main.Instance.Dragging = True
-            draggingPony = True
+            draggingPonyOrEffect = True
             If Not Paused Then
                 selectedForDragPony.BeingDragged = True
                 If selectedForDragPony.sleeping = False Then
@@ -646,7 +645,7 @@ Public Class DesktopPonyAnimator
     Friend Sub DragEffect(effect As Effect)
 
         effect.beingDragged = True
-        draggingPony = True
+        draggingPonyOrEffect = True
         draggedEffect = effect
         Main.Instance.Dragging = True
 

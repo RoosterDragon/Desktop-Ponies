@@ -363,7 +363,8 @@
         /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex, bool initialize)
         {
-            Argument.EnsureNotNull(array, "array");
+            if (array == null)
+                throw new ArgumentNullException("array");
             if (arrayIndex < 0 || arrayIndex >= array.Length)
                 throw new ArgumentOutOfRangeException("arrayIndex");
             int count = initialize ? Count : InitializedCount;

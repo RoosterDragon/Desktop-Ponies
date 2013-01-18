@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeAnalysisConfiguration Version="2.0" Enable="true">
+  <EnableSearchGAC Override="false" Value="true" />
+  <IgnoreGeneratedCode Override="false" Value="true" />
+  <Timeout Override="false" Value="60" />
+  <RuleSet Override="false" Value="Bundled;MinimumRecommendedRules.ruleset" />
+  <FilterPatterns Override="inherit">
+    <FilterPattern Value="^.+\.[Dd]esigner\.[^\.]+$" />
+    <FilterPattern Value="^.+\.[Gg]enerated\.[^\.]+$" />
+    <FilterPattern Value="^.+\.g\.[^\.]+$" />
+    <FilterPattern Value="^.+\.g\.i\.[^\.]+$" />
+  </FilterPatterns>
+</CodeAnalysisConfiguration>

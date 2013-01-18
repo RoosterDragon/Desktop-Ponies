@@ -148,7 +148,7 @@
     End Sub
 
     Private Sub SelectMonitors(monitors As List(Of String))
-        Argument.EnsureNotNull(monitors, "monitors")
+        If monitors Is Nothing Then Throw New ArgumentNullException("monitors")
 
         selectingMonitors = True
         MonitorsSelection.SelectedItems.Clear()

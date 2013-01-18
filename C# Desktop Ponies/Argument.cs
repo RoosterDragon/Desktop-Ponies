@@ -10,18 +10,6 @@
     public static class Argument
     {
         /// <summary>
-        /// Checks that an argument is not null.
-        /// </summary>
-        /// <param name="arg">The argument to validate.</param>
-        /// <param name="paramName">The name of the parameter.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
-        public static void EnsureNotNull(object arg, string paramName)
-        {
-            if (arg == null)
-                throw new ArgumentNullException(paramName);
-        }
-
-        /// <summary>
         /// Checks that an argument is greater than or equal to zero.
         /// </summary>
         /// <param name="arg">The argument to validate.</param>
@@ -75,7 +63,7 @@
                         break;
                     }
                 if (!found)
-                    ThrowInvalidEnumArgumentException(arg, paramName, enumType);
+                    throw NewInvalidEnumArgumentException(arg, paramName, enumType);
             }
             else
             {
@@ -90,28 +78,28 @@
                 while (checkFlag <= flags || checkFlag == 0)
                 {
                     if ((flags & checkFlag & badFlags) > 0)
-                        ThrowInvalidEnumArgumentException(arg, paramName, enumType);
+                        throw NewInvalidEnumArgumentException(arg, paramName, enumType);
                     checkFlag <<= 1;
                 }
             }
         }
 
         /// <summary>
-        /// Throws an <see cref="T:System.ComponentModel.InvalidEnumArgumentException"/>.
+        /// Creates a new <see cref="T:System.ComponentModel.InvalidEnumArgumentException"/>.
         /// </summary>
         /// <param name="arg">The invalid argument.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="enumType">An enumeration type.</param>
-        /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException">Thrown when this method is invoked.</exception>
-        private static void ThrowInvalidEnumArgumentException(object arg, string paramName, Type enumType)
+        /// <returns>A new <see cref="T:System.ComponentModel.InvalidEnumArgumentException"/>.</returns>
+        private static InvalidEnumArgumentException NewInvalidEnumArgumentException(object arg, string paramName, Type enumType)
         {
             TypeCode underlyingTypeCode = Type.GetTypeCode(Enum.GetUnderlyingType(enumType));
             if (underlyingTypeCode == TypeCode.Int64 || underlyingTypeCode == TypeCode.UInt64 || underlyingTypeCode == TypeCode.UInt32)
-                throw new InvalidEnumArgumentException(string.Format(CultureInfo.CurrentCulture,
+                return new InvalidEnumArgumentException(string.Format(CultureInfo.CurrentCulture,
                     "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.\nParameter name: {0}",
                     paramName, arg, enumType.Name));
             else
-                throw new InvalidEnumArgumentException(paramName, (int)arg, enumType);
+                return new InvalidEnumArgumentException(paramName, (int)arg, enumType);
         }
     }
 }

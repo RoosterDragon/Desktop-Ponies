@@ -226,8 +226,10 @@
         /// </exception>
         private void LoadFromIni(string directory, IEnumerable<PonyTemplate> templates)
         {
-            Argument.EnsureNotNull(directory, "directory");
-            Argument.EnsureNotNull(templates, "templates");
+            if (directory == null)
+                throw new ArgumentNullException("directory");
+            if (templates == null)
+                throw new ArgumentNullException("templates");
 
             // Open the file for reading.
             string path = Path.Combine(directory, IniFilename);
@@ -433,7 +435,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="template"/> is null.</exception>
         public InteractionInstance(InteractionTemplate template, TimeSpan currentTime)
         {
-            Argument.EnsureNotNull(template, "template");
+            if (template == null)
+                throw new ArgumentNullException("template");
 
             Template = template;
             InteractionStartTime = currentTime;
@@ -492,7 +495,8 @@
         public InteractionTemplate(string name, int minRepeatDuration, int maxRepeatDuration, int proximity, string behaviorName,
             ICollection<PonyTemplate> targets)
         {
-            Argument.EnsureNotNull(targets, "targets");
+            if (targets == null)
+                throw new ArgumentNullException("targets");
 
             if (targets.Count < 2)
                 throw new ArgumentException("There must be at least two targets.", "targets");
@@ -518,7 +522,8 @@
         /// <exception cref="T:System.ArgumentException"><paramref name="targets"/> contains less than two targets.</exception>
         public bool Run(IList<PonyInstance> targets)
         {
-            Argument.EnsureNotNull(targets, "targets");
+            if (targets == null)
+                throw new ArgumentNullException("targets");
 
             if (targets.Count < 2)
                 throw new ArgumentException("There must be at least two targets.", "targets");
@@ -1171,7 +1176,8 @@
         /// </exception>
         private void LoadFromXml(string directory)
         {
-            Argument.EnsureNotNull(directory, "directory");
+            if (directory == null)
+                throw new ArgumentNullException("directory");
 
             Directory = directory;
             TemplateName = Directory.Substring(Directory.LastIndexOf(Path.DirectorySeparatorChar) + 1);
@@ -1323,7 +1329,7 @@
             }
             finally
             {
-                stream.Close();
+                stream.Dispose();
             }
         }
 
@@ -1615,7 +1621,8 @@
         /// </exception>
         private void LoadFromIni(string directory)
         {
-            Argument.EnsureNotNull(directory, "directory");
+            if (directory == null)
+                throw new ArgumentNullException("directory");
             if (directory.Length == 0)
                 throw new ArgumentException("directory must not be empty.", "directory");
 
@@ -1768,7 +1775,8 @@
         /// <param name="chunks">The chunks that define the behavior.</param>
         private void ReadBehaviorFromIni(string[] chunks)
         {
-            Argument.EnsureNotNull(chunks, "chunks");
+            if (chunks == null)
+                throw new ArgumentNullException("chunks");
             if (chunks.Length < 9)
                 throw new ArgumentException("There must be at least 9 chunks.", "chunks");
 
@@ -2506,7 +2514,8 @@
         /// <exception cref="T:System.ArgumentException">There was no behavior with the name requested as the next behavior.</exception>
         public void ResolveNextBehavior(IEnumerable<Behavior> behaviors)
         {
-            Argument.EnsureNotNull(behaviors, "behaviors");
+            if (behaviors == null)
+                throw new ArgumentNullException("behaviors");
 
             if (!string.IsNullOrEmpty(nextBehaviorName))
             {
@@ -2531,7 +2540,8 @@
         /// <exception cref="T:System.ArgumentException">There was no effect with the name requested by a behavior.</exception>
         public void ResolveEffects(IEnumerable<EffectTemplate> effects)
         {
-            Argument.EnsureNotNull(effects, "effects");
+            if (effects == null)
+                throw new ArgumentNullException("effects");
 
             if (EffectNames != null && EffectNames.Count != 0)
             {
@@ -2633,7 +2643,8 @@
         /// <param name="elapsedTime">The current elapsed time to be used as the effective zero time for animation.</param>
         public EffectInstance(EffectTemplate template, PonyInstance parent, Behavior trigger, TimeSpan elapsedTime)
         {
-            Argument.EnsureNotNull(parent, "parent");
+            if (parent == null)
+                throw new ArgumentNullException("parent");
 
             AdditionPending = true;
             Template = template;

@@ -125,8 +125,10 @@
             /// null.</exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripSeparator separatorItem)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(separatorItem, "separatorItem");
+                if (parent == null)
+                    throw new ArgumentNullException("parent");
+                if (separatorItem == null)
+                    throw new ArgumentNullException("separatorItem");
 
                 owner = parent;
                 separator = separatorItem;
@@ -144,8 +146,10 @@
             /// </exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem, EventHandler activated)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                if (parent == null)
+                    throw new ArgumentNullException("parent");
+                if (menuItem == null)
+                    throw new ArgumentNullException("menuItem");
 
                 owner = parent;
                 item = menuItem;
@@ -167,9 +171,12 @@
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem,
                 IEnumerable<ISimpleContextMenuItem> subItems)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItem, "menuItem");
-                Argument.EnsureNotNull(subItems, "subItems");
+                if (parent == null)
+                    throw new ArgumentNullException("parent");
+                if (menuItem == null)
+                    throw new ArgumentNullException("menuItem");
+                if (subItems == null)
+                    throw new ArgumentNullException("subItems");
                 if (!menuItem.HasDropDownItems)
                     throw new ArgumentException("menuItem must have drop down items.", "menuItem");
 
@@ -341,8 +348,10 @@
             /// null.</exception>
             public WinFormContextMenu(WinFormSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItems, "menuItems");
+                if (parent == null)
+                    throw new ArgumentNullException("parent");
+                if (menuItems == null)
+                    throw new ArgumentNullException("menuItems");
 
                 owner = parent;
 
@@ -395,7 +404,8 @@
             /// </exception>
             private ToolStripMenuItem CreateItemWithSubitems(ISimpleContextMenuItem menuItem)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                if (menuItem == null)
+                    throw new ArgumentNullException("menuItem");
                 if (menuItem.SubItems == null || menuItem.SubItems.Count == 0)
                     throw new ArgumentException("menuItem.SubItems must not be null or empty.");
 
@@ -1071,7 +1081,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
         public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
         {
-            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
+            if (imageFilePaths == null)
+                throw new ArgumentNullException("imageFilePaths");
 
             foreach (string imageFilePath in imageFilePaths)
                 images.Add(imageFilePath);
@@ -1205,7 +1216,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
         public void Draw(AsyncLinkedList<ISprite> sprites)
         {
-            Argument.EnsureNotNull(sprites, "sprites");
+            if (sprites == null)
+                throw new ArgumentNullException("sprites");
 
             if (paused)
                 return;
@@ -1437,37 +1449,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_Disposed(object sender, EventArgs e)
         {
-            foreach (AnimatedImage<BitmapFrame> image in images.InitializedValues)
-                image.Dispose();
-
-            if (graphics != null)
-                graphics.Dispose();
-            if (bufferedGraphics != null)
-                bufferedGraphics.Dispose();
-            if (bufferedGraphicsContext != null)
-                bufferedGraphicsContext.Dispose();
-            if (alphaBitmap != null)
-                alphaBitmap.Dispose();
-            if (alphaGraphics != null)
-                alphaGraphics.Dispose();
-            if (windowIcon != null)
-                windowIcon.Dispose();
-
-            foreach (WinFormContextMenu contextMenu in contextMenus)
-                contextMenu.Dispose();
-
-            preUpdateInvalidRegion.Dispose();
-            postUpdateInvalidRegion.Dispose();
-
-            identityMatrix.Dispose();
-            font.Dispose();
-            whiteBrush.Dispose();
-            blackBrush.Dispose();
-            blackPen.Dispose();
-
             Application.ExitThread();
-
-            GC.Collect();
         }
 
         /// <summary>
@@ -1478,7 +1460,39 @@
         protected override void Dispose(bool disposing)
         {
             if (!form.Disposing && !form.IsDisposed)
+            {
                 form.Dispose();
+
+                foreach (AnimatedImage<BitmapFrame> image in images.InitializedValues)
+                    image.Dispose();
+
+                if (graphics != null)
+                    graphics.Dispose();
+                if (bufferedGraphics != null)
+                    bufferedGraphics.Dispose();
+                if (bufferedGraphicsContext != null)
+                    bufferedGraphicsContext.Dispose();
+                if (alphaBitmap != null)
+                    alphaBitmap.Dispose();
+                if (alphaGraphics != null)
+                    alphaGraphics.Dispose();
+                if (windowIcon != null)
+                    windowIcon.Dispose();
+
+                foreach (WinFormContextMenu contextMenu in contextMenus)
+                    contextMenu.Dispose();
+
+                preUpdateInvalidRegion.Dispose();
+                postUpdateInvalidRegion.Dispose();
+
+                identityMatrix.Dispose();
+                font.Dispose();
+                whiteBrush.Dispose();
+                blackBrush.Dispose();
+                blackPen.Dispose();
+
+                GC.Collect();
+            }
         }
     }
 }

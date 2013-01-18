@@ -29,7 +29,8 @@
         /// <exception cref="T:System.IO.InvalidDataException">The length of the file was not valid.</exception>
         public void LoadMap(string path)
         {
-            Argument.EnsureNotNull(path, "path");
+            if (path == null)
+                throw new ArgumentNullException("path");
 
             if (Path.GetExtension(path) != FileExtension)
                 throw new ArgumentException("path must point to a " + FileExtension + " file.", "path");
@@ -58,7 +59,8 @@
         /// <see cref="F:CsDesktopPonies.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
         public bool SaveMap(string path)
         {
-            Argument.EnsureNotNull(path, "path");
+            if (path == null)
+                throw new ArgumentNullException("path");
 
             if (Path.GetExtension(path) != FileExtension)
                 throw new ArgumentException("path must point to a " + FileExtension + " file.", "path");

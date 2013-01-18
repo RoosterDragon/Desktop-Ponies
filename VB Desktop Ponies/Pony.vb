@@ -86,7 +86,7 @@ Class PonyBase
     End Property
 
     Public Sub New(directory As String)
-        Argument.EnsureNotNull(directory, "directory")
+        If directory Is Nothing Then Throw New ArgumentNullException("directory")
 
         Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
         If lastSeparator <> -1 Then
@@ -1141,7 +1141,7 @@ Class Pony
     End Enum
 
     Public Sub New(base As PonyBase)
-        Argument.EnsureNotNull(base, "base")
+        If base Is Nothing Then Throw New ArgumentNullException("base")
         _base = base
     End Sub
 
@@ -3401,7 +3401,7 @@ Class HouseBase
     End Property
 
     Public Sub New(directory As String)
-        Argument.EnsureNotNull(directory, "directory")
+        If directory Is Nothing Then Throw New ArgumentNullException("directory")
 
         Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
         If lastSeparator <> -1 Then

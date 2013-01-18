@@ -23,7 +23,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="frame"/> is null.</exception>
         public GifControl(GifFrame<BitmapFrame> frame, string info)
         {
-            Argument.EnsureNotNull(frame, "frame");
+            if (frame == null)
+                throw new ArgumentNullException("frame");
 
             InitializeComponent();
             

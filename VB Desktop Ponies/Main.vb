@@ -402,11 +402,9 @@ Public Class Main
                 SetScreensaverPath()
             End If
 
-            Dim SettingsFile As New StreamReader(screensaver_settings_file_path)
-
-            screen_saver_path = SettingsFile.ReadLine()
-
-            SettingsFile.Close()
+            Using reader As New StreamReader(screensaver_settings_file_path)
+                screen_saver_path = reader.ReadLine()
+            End Using
             'UserIsolatedStorageFile.Close()
             'UserIsolatedStorage.Close()
 

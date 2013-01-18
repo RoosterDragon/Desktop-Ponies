@@ -852,8 +852,10 @@
         /// file.</exception>
         public GifImage(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
         {
-            Argument.EnsureNotNull(stream, "stream");
-            Argument.EnsureNotNull(imageFactory, "frameFactory");
+            if (stream == null)
+                throw new ArgumentNullException("stream");
+            if (imageFactory == null)
+                throw new ArgumentNullException("imageFactory");
             Argument.EnsureEnumIsValid(allowableDepths, "allowableDepths");
             if (!stream.CanRead)
                 throw new ArgumentException("stream must support reading.", "stream");

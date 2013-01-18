@@ -110,8 +110,10 @@
             public PonyDisplay(PonyTemplate template, EventHandler<CountChangedEventArgs> countChangedHandler,
                 LazyDictionary<string, AnimatedImage<BitmapFrame>> displayImageManager)
             {
-                Argument.EnsureNotNull(template, "template");
-                Argument.EnsureNotNull(displayImageManager, "displayImageManager");
+                if (template == null)
+                    throw new ArgumentNullException("template");
+                if (displayImageManager == null)
+                    throw new ArgumentNullException("displayImageManager");
 
                 Template = template;
                 manager = displayImageManager;

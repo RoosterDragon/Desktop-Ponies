@@ -733,7 +733,8 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="separatorItem"/> is null.</exception>
             public GtkContextMenuItem(SeparatorMenuItem separatorItem)
             {
-                Argument.EnsureNotNull(separatorItem, "separatorItem");
+                if (separatorItem == null)
+                    throw new ArgumentNullException("separatorItem");
 
                 item = separatorItem;
             }
@@ -746,7 +747,8 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.</exception>
             public GtkContextMenuItem(MenuItem menuItem, EventHandler activated)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                if (menuItem == null)
+                    throw new ArgumentNullException("menuItem");
 
                 item = menuItem;
                 Activated = activated;
@@ -764,8 +766,10 @@
             /// <exception cref="T:System.ArgumentException"><paramref name="subItems"/> is empty.</exception>
             public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
-                Argument.EnsureNotNull(subItems, "subItems");
+                if (menuItem == null)
+                    throw new ArgumentNullException("menuItem");
+                if (subItems == null)
+                    throw new ArgumentNullException("subItems");
 
                 List<ISimpleContextMenuItem> subItemsList = new List<ISimpleContextMenuItem>(subItems);
 
@@ -895,8 +899,10 @@
             /// null.</exception>
             public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItems, "menuItems");
+                if (parent == null)
+                    throw new ArgumentNullException("parent");
+                if (menuItems == null)
+                    throw new ArgumentNullException("menuItems");
 
                 owner = parent;
 
@@ -1049,7 +1055,8 @@
             }
             set
             {
-                Argument.EnsureNotNull(value, "value");
+                if (value == null)
+                    throw new ArgumentNullException("value");
 
                 if (windowIconFilePath != value)
                 {
@@ -1411,7 +1418,8 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
         {
-            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
+            if (imageFilePaths == null)
+                throw new ArgumentNullException("imageFilePaths");
 
             if (disposed)
                 throw new ObjectDisposedException(GetType().FullName);
@@ -1529,7 +1537,8 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Draw(AsyncLinkedList<ISprite> sprites)
         {
-            Argument.EnsureNotNull(sprites, "sprites");
+            if (sprites == null)
+                throw new ArgumentNullException("sprites");
 
             if (disposed)
                 throw new ObjectDisposedException(GetType().FullName);
