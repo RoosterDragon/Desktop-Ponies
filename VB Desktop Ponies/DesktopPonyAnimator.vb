@@ -655,7 +655,7 @@ Public Class DesktopPonyAnimator
     ''' <summary>
     ''' Allows ponies to be manually controlled.
     ''' </summary>
-    Private Sub ManualControl()
+    Private Shared Sub ManualControl()
         With Main.Instance
             .PonyDown = KeyboardState.IsKeyPressed(Keys.Down)
             .PonyUp = KeyboardState.IsKeyPressed(Keys.Up)

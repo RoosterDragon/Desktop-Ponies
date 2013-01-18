@@ -57,10 +57,8 @@ Module Games
 
         Public Name As String = ""
         Friend Description As String = ""
-        Dim files_path As String = ""
 
-        Dim MinTeams As Integer = 2
-        Dim MaxTeams As Integer = 2
+        Const MinTeams As Integer = 2
         Friend Teams As New List(Of Team)
         Dim AllPlayers As New List(Of Position)
 
@@ -88,9 +86,9 @@ Module Games
 
             Dim position_data As New List(Of String)
             Dim game_data As String = Nothing
+            Dim description_data As String = Nothing
             Dim ball_data As New List(Of String)
             Dim goal_data As New List(Of String)
-            Dim description_data As String = ""
 
             Using config_file As New System.IO.StreamReader(config_file_path)
                 Do Until config_file.EndOfStream
@@ -406,7 +404,7 @@ Module Games
 
         End Sub
 
-        Function Get_Ball_LastHandler_Team(ball As Ball) As Team
+        Shared Function Get_Ball_LastHandler_Team(ball As Ball) As Team
 
             If IsNothing(ball.Last_Handled_By) Then Return Nothing
 
@@ -495,15 +493,15 @@ Module Games
                 handlerBase.Name = "Ball"
                 Handler = New Pony(handlerBase)
 
-                handlerBase.AddBehavior(True, "idle", 100, 99, 99, 0,
+                handlerBase.AddBehavior("idle", 100, 99, 99, 0,
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
                                         Pony.Allowed_Moves.None, "", "", "")
-                handlerBase.AddBehavior(True, "slow", 100, 99, 99, 3,
+                handlerBase.AddBehavior("slow", 100, 99, 99, 3,
                                         files_path & Replace(slow_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(slow_left_image_filename, ControlChars.Quote, ""),
                                         Pony.Allowed_Moves.All, "", "", "")
-                handlerBase.AddBehavior(True, "fast", 100, 99, 99, 5,
+                handlerBase.AddBehavior("fast", 100, 99, 99, 5,
                                         files_path & Replace(fast_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
                                         Pony.Allowed_Moves.All, "", "", "")
@@ -1049,18 +1047,15 @@ Module Games
 
                 Speak(line)
 
-                Dim angle As Double = Nothing
-                Dim right As Boolean = True
+                Dim angle As Double
                 Dim gamescreen = Main.Instance.current_game.GameScreen
 
                 If ball.Handler.diagonal < (Math.PI / 2) OrElse ball.Handler.diagonal > (3 / 2) * Math.PI Then
                     'ball is going to the right, it will 'bounce' to the left.
                     angle = Math.PI
-                    right = False
                 Else
                     'ball is going to the left, and will 'bounce' right.
                     angle = 0
-                    right = True
                 End If
 
                 Dim ball_center As Point = ball.Handler.Center
@@ -1168,7 +1163,7 @@ Module Games
 
             End Sub
 
-            Function DoesPonyOverlap(pony As Pony, otherpony As Pony) As Boolean
+            Shared Function DoesPonyOverlap(pony As Pony, otherpony As Pony) As Boolean
 
                 Dim otherpony_area As New Rectangle(otherpony.Location.X, _
                                                  otherpony.Location.Y, _
@@ -1185,7 +1180,7 @@ Module Games
 
             End Function
 
-            Sub PonyPush(pony1 As Pony, pony2 As Pony, allowed_area As Rectangle?)
+            Shared Sub PonyPush(pony1 As Pony, pony2 As Pony, allowed_area As Rectangle?)
 
                 Dim xchange = 1
                 Dim ychange = 2
@@ -1212,7 +1207,7 @@ Module Games
 
             End Sub
 
-            Function Friendly_Ponies_Around_Ball(ball As Ball, team As Team, min_distance As Integer) As List(Of Pony)
+            Shared Function Friendly_Ponies_Around_Ball(ball As Ball, team As Team, min_distance As Integer) As List(Of Pony)
 
                 Dim ponies As New List(Of Pony)
 

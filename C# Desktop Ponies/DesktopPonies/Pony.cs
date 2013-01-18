@@ -231,10 +231,11 @@
 
             // Open the file for reading.
             string path = Path.Combine(directory, IniFilename);
-            using (StreamReader stream = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
-                while (!stream.EndOfStream)
+            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (StreamReader reader = new StreamReader(stream))
+                while (!reader.EndOfStream)
                 {
-                    string line = stream.ReadLine();
+                    string line = reader.ReadLine();
 
                     // Ignore blank lines.
                     if (string.IsNullOrWhiteSpace(line))
@@ -1024,7 +1025,7 @@
     }
 
     /// <summary>
-    /// Represents the a basis for a pony, which can be realized by a <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/>.
+    /// Represents a basis for a pony, which can be realized by a <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/>.
     /// </summary>
     public class PonyTemplate
     {
@@ -1640,10 +1641,11 @@
 
             // Open the file for reading.
             string path = Path.Combine(Directory, IniFilename);
-            using (StreamReader stream = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
-                while (!stream.EndOfStream)
+            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (StreamReader reader = new StreamReader(stream))
+                while (!reader.EndOfStream)
                 {
-                    string line = stream.ReadLine();
+                    string line = reader.ReadLine();
 
                     // Ignore blank lines.
                     if (string.IsNullOrWhiteSpace(line))
@@ -1786,7 +1788,7 @@
             // Get image filenames and resolve image mirroring.
             string rightImageName = chunks[6] == "mirror" ? null : Path.Combine(Directory, chunks[6]);
             string leftImageName = chunks[7] == "mirror" ? null : Path.Combine(Directory, chunks[7]);
-             //Force mirroring.
+            // Force mirroring.
             rightImageName = null;
             ImageFlip imageFlip = ImageFlip.UseOriginal;
             if (leftImageName == null && rightImageName == null)

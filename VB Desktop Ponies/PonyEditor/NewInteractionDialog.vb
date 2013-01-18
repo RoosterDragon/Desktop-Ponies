@@ -67,9 +67,6 @@ Public Class NewInteractionDialog
             Exit Sub
         End If
 
-        Dim linked_behavior = ""
-        Dim skip = False
-
         If Targets_Box.CheckedItems.Count = 0 Then
             MsgBox("You need to select at least one pony to interact with.")
             Exit Sub
@@ -83,7 +80,7 @@ Public Class NewInteractionDialog
         Dim targetlist As String = ""
 
         For Each Pony As String In Targets_Box.CheckedItems
-            targetlist += m_editor.Quoted(Pony) & ","
+            targetlist += PonyEditor.Quoted(Pony) & ","
         Next
 
         targetlist = Mid(targetlist, 1, targetlist.Length - 1)

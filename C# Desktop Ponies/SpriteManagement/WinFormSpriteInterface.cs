@@ -27,7 +27,7 @@
     /// When alpha blending is enabled, the transparency key is not used. The use of alpha blending forces the whole area to be refreshed
     /// with each draw, which will cause higher CPU usage compared to a non-blended form that can reduce the overall clipping rectangle.
     /// </remarks>
-    public sealed class WinFormSpriteInterface : ISpriteCollectionView
+    public sealed class WinFormSpriteInterface : Disposable, ISpriteCollectionView
     {
         #region GraphicsForm class
         /// <summary>
@@ -840,7 +840,6 @@
             form.MouseUp += GraphicsForm_MouseUp;
             form.KeyPress += GraphicsForm_KeyPress;
             
-
 #if DEBUG
             form.KeyPress += (sender, e) =>
             {
@@ -1408,14 +1407,6 @@
         /// <summary>
         /// Closes the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
-        public void Dispose()
-        {
-            Close();
-        }
-
-        /// <summary>
-        /// Closes the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
-        /// </summary>
         public void Close()
         {
             if (closing)
@@ -1474,11 +1465,20 @@
             blackBrush.Dispose();
             blackPen.Dispose();
 
-            form.Dispose();
-
             Application.ExitThread();
 
             GC.Collect();
+        }
+
+        /// <summary>
+        /// Cleans up any resources being used.
+        /// </summary>
+        /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise, only
+        /// unmanaged resources should be disposed.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!form.Disposing && !form.IsDisposed)
+                form.Dispose();
         }
     }
 }

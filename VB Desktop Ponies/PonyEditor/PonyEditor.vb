@@ -32,18 +32,18 @@ Public Class PonyEditor
     ''' <summary>
     ''' Used so we can swap grid positions and keep track of how everything is sorted when we refresh.
     ''' </summary>
-    Class PonyInfoGrid
+    Private Class PonyInfoGrid
 
-        Friend grid As DataGridView
-        Friend slot As Integer
-        Friend button As Button
-        Friend Sort_Column As DataGridViewColumn = Nothing
-        Friend Sort_Order As SortOrder = Nothing
+        Public Grid As DataGridView
+        Public Slot As Integer
+        Public SwapButton As Button
+        Public SortColumn As DataGridViewColumn = Nothing
+        Public SortOrder As SortOrder = Nothing
 
-        Sub New(_grid As DataGridView, _slot As Integer, _button As Button)
-            grid = _grid
-            slot = _slot
-            button = _button
+        Sub New(_grid As DataGridView, _slot As Integer, _swapButton As Button)
+            Grid = _grid
+            Slot = _slot
+            SwapButton = _swapButton
         End Sub
 
     End Class
@@ -142,7 +142,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="ponyname"></param>
     ''' <returns></returns>
-    Private Function GetPonyOrder(ponyname As String) As Integer
+    Private Shared Function GetPonyOrder(ponyname As String) As Integer
 
         Dim index As Integer = 0
 
@@ -193,7 +193,7 @@ Public Class PonyEditor
         PreviewPony = New Pony(Main.Instance.SelectablePonies(index))
 
         If PreviewPony.Behaviors.Count = 0 Then
-            PreviewPony.Base.AddBehavior("Default", 1, 60, 60, 0, My.Resources.MysteryThumb, My.Resources.MysteryThumb, Pony.Allowed_Moves.None, "", "", "")
+            PreviewPony.Base.AddBehavior("Default", 1, 60, 60, 0, Pony.Allowed_Moves.None, "", "", "")
         End If
 
         SaveSortOrder()
@@ -526,7 +526,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Function Find_Next_Link(link_name As String, depth As Integer, series As Integer, ByRef pony As Pony, ByRef chain_list As List(Of ChainLink)) As List(Of ChainLink)
+    Private Shared Function Find_Next_Link(link_name As String, depth As Integer, series As Integer, ByRef pony As Pony, ByRef chain_list As List(Of ChainLink)) As List(Of ChainLink)
 
         For Each behavior In pony.Behaviors
             If behavior.Name = link_name Then
@@ -547,7 +547,7 @@ Public Class PonyEditor
 
     End Function
 
-    Private Function Movement_ToString(movement As Pony.Allowed_Moves) As String
+    Private Shared Function Movement_ToString(movement As Pony.Allowed_Moves) As String
         Select Case movement
             Case Pony.Allowed_Moves.None
                 Return "None"
@@ -576,7 +576,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Friend Function String_ToMovement(movement As String) As Pony.Allowed_Moves
+    Friend Shared Function String_ToMovement(movement As String) As Pony.Allowed_Moves
         Select Case movement
             Case "None"
                 Return Pony.Allowed_Moves.None
@@ -605,7 +605,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Private Function Location_ToString(location As Directions) As String
+    Private Shared Function Location_ToString(location As Directions) As String
 
         Select Case location
 
@@ -636,7 +636,7 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Friend Function String_ToLocation(location As String) As Directions
+    Friend Shared Function String_ToLocation(location As String) As Directions
         Select Case location
             Case "Top"
                 Return Directions.top
@@ -789,13 +789,13 @@ Public Class PonyEditor
         Dim slot3 As DataGridView = Nothing
 
         For Each entry In grids
-            Select Case entry.slot
+            Select Case entry.Slot
                 Case 1
-                    slot1 = entry.grid
+                    slot1 = entry.Grid
                 Case 2
-                    slot2 = entry.grid
+                    slot2 = entry.Grid
                 Case 3
-                    slot3 = entry.grid
+                    slot3 = entry.Grid
             End Select
         Next
 
@@ -832,8 +832,6 @@ Public Class PonyEditor
                 RestoreSortOrder()
                 Exit Sub
             End If
-
-            Dim changes_made_now = False
 
             Select Case e.ColumnIndex
 
@@ -880,7 +878,6 @@ Public Class PonyEditor
                         changed_behavior.SetRightImagePath(new_image_path)
                         PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = Get_Filename(new_image_path)
                         ImageSizeCheck(changed_behavior.RightImageSize)
-                        changes_made_now = True
                     End If
                     ShowPony()
                 Case colBehaviorLeftImage.Index
@@ -890,13 +887,11 @@ Public Class PonyEditor
                         changed_behavior.SetLeftImagePath(new_image_path)
                         PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = Get_Filename(new_image_path)
                         ImageSizeCheck(changed_behavior.LeftImageSize)
-                        changes_made_now = True
                     End If
                     ShowPony()
                 Case colBehaviorFollow.Index
                     HidePony()
                     Set_Behavior_Follow_Parameters(changed_behavior)
-                    changes_made_now = True
                     ShowPony()
 
                 Case Else
@@ -1479,7 +1474,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Function get_effect_list() As List(Of Effect)
+    Friend Shared Function get_effect_list() As List(Of Effect)
 
         Dim effect_list As New List(Of Effect)
 
@@ -1517,15 +1512,15 @@ Public Class PonyEditor
         Dim button1 As Button = Nothing
 
         For Each entry In grids
-            Select Case entry.slot
+            Select Case entry.Slot
                 Case slot0_number
-                    slot0 = entry.grid
-                    button0 = entry.button
-                    entry.slot = slot1_number
+                    slot0 = entry.Grid
+                    button0 = entry.SwapButton
+                    entry.Slot = slot1_number
                 Case slot1_number
-                    slot1 = entry.grid
-                    entry.slot = slot0_number
-                    button1 = entry.button
+                    slot1 = entry.Grid
+                    entry.Slot = slot0_number
+                    button1 = entry.SwapButton
             End Select
         Next
 
@@ -1561,8 +1556,8 @@ Public Class PonyEditor
 
     Private Sub SaveSortOrder()
         For Each control As PonyInfoGrid In grids
-            control.Sort_Column = control.grid.SortedColumn
-            control.Sort_Order = control.grid.SortOrder
+            control.SortColumn = control.Grid.SortedColumn
+            control.SortOrder = control.Grid.SortOrder
         Next
     End Sub
 
@@ -1570,8 +1565,8 @@ Public Class PonyEditor
         Try
 
             For Each control As PonyInfoGrid In grids
-                If IsNothing(control.Sort_Column) Then Continue For
-                control.grid.Sort(control.Sort_Column, ConvertSortOrder(control.Sort_Order))
+                If IsNothing(control.SortColumn) Then Continue For
+                control.Grid.Sort(control.SortColumn, ConvertSortOrder(control.SortOrder))
             Next
 
         Catch ex As Exception
@@ -1585,7 +1580,7 @@ Public Class PonyEditor
     ''' </summary>
     ''' <param name="sort"></param>
     ''' <returns></returns>
-    Private Function ConvertSortOrder(sort As SortOrder) As System.ComponentModel.ListSortDirection
+    Private Shared Function ConvertSortOrder(sort As SortOrder) As System.ComponentModel.ListSortDirection
 
         Select Case sort
             Case SortOrder.Ascending
@@ -1770,7 +1765,8 @@ Public Class PonyEditor
                 Return Nothing
             End If
 
-            Dim test_bitmap = Image.FromFile(picture_path)
+            ' Try to load this image.
+            Image.FromFile(picture_path)
 
             Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
                                            PreviewPony.Directory, Get_Filename(picture_path))
@@ -2147,7 +2143,8 @@ Public Class PonyEditor
                         System.Threading.Thread.Sleep(2000)
                         new_interactions = New System.IO.StreamWriter(System.IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename), False, System.Text.Encoding.UTF8)
                     End Try
-
+                Finally
+                    If new_interactions IsNot Nothing Then new_interactions.Dispose()
                 End Try
 
                 If IsNothing(new_interactions) Then Throw New Exception("Unable to write back to interactions.ini file...")
@@ -2188,15 +2185,15 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Function Quoted(text As String) As String
+    Friend Shared Function Quoted(text As String) As String
         Return ControlChars.Quote & text & ControlChars.Quote
     End Function
 
-    Friend Function Braced(text As String) As String
+    Friend Shared Function Braced(text As String) As String
         Return "{" & text & "}"
     End Function
 
-    Private Function Space_To_Under(text As String) As String
+    Private Shared Function Space_To_Under(text As String) As String
         Return Replace(Replace(text, " ", "_"), "/", "_")
     End Function
 

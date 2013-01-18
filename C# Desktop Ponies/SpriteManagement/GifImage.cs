@@ -1028,7 +1028,7 @@
         /// Reads the header block (required - one per stream).
         /// </summary>
         /// <param name="input">The input stream.</param>
-        private void ReadHeader(BinaryReader input)
+        private static void ReadHeader(BinaryReader input)
         {
             const string SignatureExpected = "GIF";
             string signature = new string(input.ReadChars(3));
@@ -1061,7 +1061,7 @@
         /// </summary>
         /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GifLogicalScreenDescriptor"/> describing the logical screen.</returns>
-        private LogicalScreenDescriptor ReadLogicalScreenDescriptor(BinaryReader input)
+        private static LogicalScreenDescriptor ReadLogicalScreenDescriptor(BinaryReader input)
         {
             ushort logicalScreenWidth = input.ReadUInt16();
             ushort logicalScreenHeight = input.ReadUInt16();
@@ -1199,7 +1199,7 @@
         /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> describing how a
         /// graphic-rendering block section is to be modified.</returns>
-        private GraphicControlExtension ReadGraphicControlExtension(BinaryReader input)
+        private static GraphicControlExtension ReadGraphicControlExtension(BinaryReader input)
         {
             // Read block size.
             if (input.ReadByte() != 4)
@@ -1259,7 +1259,7 @@
         /// Reads a series of data sub blocks until a terminator is encountered.
         /// </summary>
         /// <param name="input">The input stream.</param>
-        private void SkipDataSubBlocks(BinaryReader input)
+        private static void SkipDataSubBlocks(BinaryReader input)
         {
             byte blockSize;
             do
@@ -1292,7 +1292,7 @@
         /// </summary>
         /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the subframe.</returns>
-        private ImageDescriptor ReadImageDescriptor(BinaryReader input)
+        private static ImageDescriptor ReadImageDescriptor(BinaryReader input)
         {
             ushort imageLeftPosition = input.ReadUInt16();
             ushort imageTopPosition = input.ReadUInt16();

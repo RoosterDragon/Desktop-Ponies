@@ -26,7 +26,7 @@
         /// Contains a collection of known image formats based on the magic bytes in the header of those formats. Each sequence of magic
         /// bytes maps to a decoding function which reads the image and returns its size.
         /// </summary>
-        private static readonly Dictionary<byte[], Func<BinaryReader, Size>> imageDecoders =
+        private static readonly Dictionary<byte[], Func<BinaryReader, Size>> ImageDecoders =
             new Dictionary<byte[], Func<BinaryReader, Size>>
         {
             { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, DecodePng },
@@ -39,7 +39,7 @@
         /// <summary>
         /// The length of the longest sequence of magic bytes in the collection of image decoders.
         /// </summary>
-        private static readonly int maxMagicBytesLength = imageDecoders.Keys.Max(magicBytes => magicBytes.Length);
+        private static readonly int MaxMagicBytesLength = ImageDecoders.Keys.Max(magicBytes => magicBytes.Length);
 
         /// <summary>
         /// Gets the width and height of an image, in pixels.
@@ -50,8 +50,9 @@
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         public static Size GetSize(string path)
         {
-            using (BinaryReader binaryReader = new BinaryReader(
-                new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 32, FileOptions.SequentialScan)))
+            using (FileStream fileStream =
+                new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 32, FileOptions.SequentialScan))
+            using (BinaryReader binaryReader = new BinaryReader(fileStream))
             {
                 try
                 {
@@ -79,12 +80,12 @@
         {
             Argument.EnsureNotNull(binaryReader, "binaryReader");
             
-            byte[] magicBytes = new byte[maxMagicBytesLength];
+            byte[] magicBytes = new byte[MaxMagicBytesLength];
 
             for (int i = 0; i < magicBytes.Length; i++)
             {
                 magicBytes[i] = binaryReader.ReadByte();
-                foreach (var imageFormatDecoder in imageDecoders.Where(decoder => decoder.Key.Length == i + 1))
+                foreach (var imageFormatDecoder in ImageDecoders.Where(decoder => decoder.Key.Length == i + 1))
                     if (magicBytes.StartsWith(imageFormatDecoder.Key))
                         return imageFormatDecoder.Value(binaryReader);
             }

@@ -334,7 +334,7 @@ Public Class Main
         End If
     End Sub
 
-    Private Function GetProgramVersion() As String
+    Private Shared Function GetProgramVersion() As String
         Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
         Dim fileVersion = New Version(fileVersionInfo.FileVersion)
         Dim versionFields As Integer = 1
@@ -450,11 +450,9 @@ Public Class Main
             'Dim SettingsFile As New System.IO.StreamWriter(UserIsolatedStorageFile, System.Text.Encoding.Unicode)
 
             'we use Unicode here, and any time we save a file as other languages can cause problems.
-            Dim SettingsFile As New StreamWriter(screensaver_settings_file_path, False, System.Text.Encoding.UTF8)
-
-            SettingsFile.WriteLine(screen_saver_path)
-
-            SettingsFile.Close()
+            Using writer = New StreamWriter(screensaver_settings_file_path, False, System.Text.Encoding.UTF8)
+                writer.WriteLine(screen_saver_path)
+            End Using
             'UserIsolatedStorageFile.Close()
             'UserIsolatedStorage.Close()
 
@@ -613,7 +611,7 @@ Public Class Main
         End Try
     End Function
 
-    Friend Function GetDirection(setting As String) As Directions
+    Friend Shared Function GetDirection(setting As String) As Directions
 
         Select Case setting
 
@@ -704,9 +702,9 @@ Public Class Main
                             Dim targetsActivated As PonyBase.Interaction.TargetActivation
                             If Not [Enum].TryParse(Trim(columns(InteractionParameter.Target_Selection_Option)), targetsActivated) Then
                                 If Not Main.Instance.screen_saver_mode Then
-                                    Throw New ArgumentException("Invalid option for target selection. Use either 'One', 'Any' or 'All'." _
+                                    Throw New InvalidDataException("Invalid option for target selection. Use either 'One', 'Any' or 'All'." _
                                                         & ControlChars.NewLine & " Interaction file specified: " & columns(InteractionParameter.Target_Selection_Option) & _
-                                                        " for interaction named: " & columns(InteractionParameter.Name), "target_selection")
+                                                        " for interaction named: " & columns(InteractionParameter.Name))
                                 End If
                             End If
 
@@ -762,7 +760,7 @@ Public Class Main
         LoadingProgressBar.Maximum = 1
 
         PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
-        PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", PonySelectionPanel.Controls.Count)
+        PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
         PaginationEnabled.Enabled = True
         PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
 
@@ -1062,10 +1060,11 @@ Public Class Main
         PonySelectionPanel.ResumeLayout()
 
         If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
-            PonyPaginationLabel.Text = String.Format("Viewing {0} ponies", visibleCount)
+            PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture, "Viewing {0} ponies", visibleCount)
         Else
             PonyPaginationLabel.Text =
-            String.Format("Viewing {0} to {1} of {2} ponies",
+            String.Format(CultureInfo.CurrentCulture,
+                          "Viewing {0} to {1} of {2} ponies",
                           ponyOffset + 1,
                           Math.Min(ponyOffset + PoniesPerPage.Value, selectionControlsFilteredVisible.Count),
                           selectionControlsFilteredVisible.Count)
@@ -1515,22 +1514,6 @@ Public Class Main
         If Not IsNothing(PonyViewer) Then
             PonyViewer.Close()
         End If
-    End Sub
-
-    Friend Sub Redraw_Menu()
-
-        Temp_Save_Counts()
-
-        DisposeMenu()
-
-        PonySelectionPanel.Visible = False
-        For Each Pony In SelectablePonies
-            Add_to_Menu(Pony, True)
-        Next
-        PonySelectionPanel.Visible = True
-
-        Options.LoadPonyCounts()
-
     End Sub
 
     ''' <summary>

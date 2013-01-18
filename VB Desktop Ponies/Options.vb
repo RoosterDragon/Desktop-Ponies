@@ -95,13 +95,13 @@ Public NotInheritable Class Options
         If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
             LoadDefaultProfile()
         Else
-            Using file As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
+            Using reader As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
                 ProfileName = profile
                 MonitorNames.Clear()
                 PonyCounts.Clear()
                 CustomTags.Clear()
-                While Not file.EndOfStream
-                    Dim columns = CommaSplitQuoteQualified(file.ReadLine())
+                While Not reader.EndOfStream
+                    Dim columns = CommaSplitQuoteQualified(reader.ReadLine())
                     If columns.Length = 0 Then Continue While
 
                     Select Case columns(0)

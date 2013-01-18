@@ -806,7 +806,7 @@
         /// <param name="e">The event data.</param>
         private void GifAlphaCommand_Click(object sender, EventArgs e)
         {
-            SwitchToForm(new GifAlphaForm());
+            SwitchToForm<GifAlphaForm>();
         }
 
         /// <summary>
@@ -817,7 +817,7 @@
         /// <param name="e">The event data.</param>
         private void GifViewerCommand_Click(object sender, EventArgs e)
         {
-            SwitchToForm(new GifForm());
+            SwitchToForm<GifForm>();
         }
 
         /// <summary>
@@ -832,22 +832,27 @@
             foreach (PonyDisplay display in ponyDisplays)
                 ponyTemplates.Add(display.Template);
 
-            SwitchToForm(new PonyEditorForm(ponyTemplates));
+            using (var editor = new PonyEditorForm())
+            {
+                editor.Templates = ponyTemplates;
+                editor.Disposed += (dSender, dE) => Show();
+                editor.Show();
+                Hide();
+            }
         }
 
         /// <summary>
-        /// Shows the given form and hides the selection menu until the given form is closed, as which point it is disposed.
+        /// Shows a new form of the specified type and hides the selection menu until the given form is closed, after which it reappears.
         /// </summary>
-        /// <param name="form">The form to show.</param>
-        private void SwitchToForm(Form form)
+        /// <typeparam name="TForm">The type of the form to show.</typeparam>
+        private void SwitchToForm<TForm>() where TForm : Form, new()
         {
-            form.FormClosed += (sender, e) =>
+            using (Form form = new TForm())
             {
-                Show();
-                form.Dispose();
-            };
-            form.Show();
-            Hide();
+                form.Disposed += (sender, e) => Show();
+                form.Show();
+                Hide();
+            }
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        For Each effect In m_editor.get_effect_list()
+        For Each effect In PonyEditor.get_effect_list()
             If String.Equals(effect.Name, Name_Textbox.Text, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Effect names must be unique.  Effect '" & Name_Textbox.Text & "' already exists.  Please select a different name.")
                 Exit Sub
@@ -83,11 +83,11 @@ Public Class NewEffectDialog
                            left_image_path, _
                            duration, _
                            repeatDelay, _
-                           m_editor.String_ToLocation(CStr(R_Placement_Box.SelectedItem)), _
-                           m_editor.String_ToLocation(CStr(R_Centering_Box.SelectedItem)), _
-                           m_editor.String_ToLocation(CStr(L_Placement_Box.SelectedItem)), _
-                           m_editor.String_ToLocation(CStr(L_Centering_Box.SelectedItem)), _
-                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, True)
+                           PonyEditor.String_ToLocation(CStr(R_Placement_Box.SelectedItem)), _
+                           PonyEditor.String_ToLocation(CStr(R_Centering_Box.SelectedItem)), _
+                           PonyEditor.String_ToLocation(CStr(L_Placement_Box.SelectedItem)), _
+                           PonyEditor.String_ToLocation(CStr(L_Centering_Box.SelectedItem)), _
+                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked)
 
         Me.Close()
     End Sub
@@ -183,7 +183,7 @@ Public Class NewEffectDialog
 
     End Sub
 
-    Friend Function GetGifTotalRuntime(image As Image) As Double
+    Friend Shared Function GetGifTotalRuntime(image As Image) As Double
 
         Try
             Dim gif_dimensions = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))

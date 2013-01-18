@@ -63,18 +63,20 @@
             right_graphics.DrawImage(right_image, New Point(0, 0))
             left_graphics.DrawImage(left_image, New Point(0, 0))
 
-            left_graphics.DrawLine(New System.Drawing.Pen(Color.Red, 2), _
-                                            New Point(left_center.X - 5, left_center.Y - 5), _
-                                            New Point(left_center.X + 5, left_center.Y + 5))
-            left_graphics.DrawLine(New System.Drawing.Pen(Color.Red, 2), _
-                                           New Point(left_center.X + 5, left_center.Y - 5), _
-                                           New Point(left_center.X - 5, left_center.Y + 5))
-            right_graphics.DrawLine(New System.Drawing.Pen(Color.Red, 2), _
-                                          New Point(right_center.X - 5, right_center.Y - 5), _
-                                          New Point(right_center.X + 5, right_center.Y + 5))
-            right_graphics.DrawLine(New System.Drawing.Pen(Color.Red, 2), _
-                                           New Point(right_center.X + 5, right_center.Y - 5), _
-                                           New Point(right_center.X - 5, right_center.Y + 5))
+            Using redPen As New Pen(Color.Red, 2)
+                left_graphics.DrawLine(redPen,
+                                       New Point(left_center.X - 5, left_center.Y - 5),
+                                       New Point(left_center.X + 5, left_center.Y + 5))
+                left_graphics.DrawLine(redPen,
+                                       New Point(left_center.X + 5, left_center.Y - 5),
+                                       New Point(left_center.X - 5, left_center.Y + 5))
+                right_graphics.DrawLine(redPen,
+                                        New Point(right_center.X - 5, right_center.Y - 5),
+                                        New Point(right_center.X + 5, right_center.Y + 5))
+                right_graphics.DrawLine(redPen,
+                                        New Point(right_center.X + 5, right_center.Y - 5),
+                                        New Point(right_center.X - 5, right_center.Y + 5))
+            End Using
 
             Left_ImageBox.Invalidate()
             Right_ImageBox.Invalidate()

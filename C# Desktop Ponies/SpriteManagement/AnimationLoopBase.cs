@@ -4,9 +4,9 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.Globalization;
+    using System.Text;
     using System.Threading;
     using CsDesktopPonies.Collections;
-using System.Text;
 
     /// <summary>
     /// Defines a base class for animators. Provides a timing loop and monitors the frame rate.

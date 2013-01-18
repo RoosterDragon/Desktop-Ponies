@@ -77,7 +77,7 @@
         alreadyLoaded = True
     End Sub
 
-    Private Sub SetDefaultFilterCategories()
+    Private Shared Sub SetDefaultFilterCategories()
 
         Main.Instance.FilterOptionsBox.Items.Clear()
 
@@ -371,7 +371,7 @@
             If dialog.ShowDialog() = DialogResult.OK Then
                 If IO.File.Exists(dialog.FileName) Then
                     Try
-                        Dim test_image = Image.FromFile(dialog.FileName)
+                        Image.FromFile(dialog.FileName)
                     Catch ex As Exception
                         MsgBox("Error:  Could not load image '" & dialog.FileName & "'.  Details: " & ex.Message)
                         Exit Sub

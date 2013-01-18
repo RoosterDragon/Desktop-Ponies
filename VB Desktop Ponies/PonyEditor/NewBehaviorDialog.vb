@@ -106,14 +106,14 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        m_editor.PreviewPony.Base.AddBehavior(True, NameTextbox.Text, _
+        m_editor.PreviewPony.Base.AddBehavior(NameTextbox.Text, _
                                                        chance / 100, _
                                                        maxDuration, _
                                                        minDuration, _
                                                        speed, _
                                                        right_image_path, _
                                                        left_image_path, _
-                                                       m_editor.String_ToMovement(CStr(Movement_Combobox.SelectedItem)), _
+                                                       PonyEditor.String_ToMovement(CStr(Movement_Combobox.SelectedItem)), _
                                                        linked_behavior, _
                                                        start_line, _
                                                        end_line, _
@@ -251,7 +251,7 @@ Public Class NewBehaviorDialog
 
     End Sub
 
-    Friend Function GetGifTotalRuntime(image As Image) As Double
+    Friend Shared Function GetGifTotalRuntime(image As Image) As Double
 
         Try
             Dim gif_dimensions = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))

@@ -19,18 +19,29 @@
         private IList<PonyTemplate> templates;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonyEditorForm"/> class for the given templates.
+        /// Gets or sets the list of templates that can be edited.
         /// </summary>
-        /// <param name="templates">The list of templates to appear in this editor.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="templates"/> is null.</exception>
-        public PonyEditorForm(IList<PonyTemplate> templates)
+        public IList<PonyTemplate> Templates
         {
-            Argument.EnsureNotNull(templates, "templates");
+            get
+            {
+                return templates;
+            }
+            set
+            {
+                templates = value;
+                PonyDirectorySelector.DataSource = templates;
+                PonyDirectorySelector.DisplayMember = "Directory";
+            }
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonyEditorForm"/> class.
+        /// </summary>
+        public PonyEditorForm()
+        {
             InitializeComponent();
             Icon = Properties.Resources.Twilight;
-
-            this.templates = templates;
 
             foreach (Directions direction in Enum.GetValues(typeof(Directions)))
                 BehaviorMovementColumn.Items.Add(direction);
@@ -43,8 +54,6 @@
                 EffectAlignmentParentRightColumn.Items.Add(alignment);
                 EffectAlignmentOffsetRightColumn.Items.Add(alignment);
             }
-            PonyDirectorySelector.DataSource = templates;
-            PonyDirectorySelector.DisplayMember = "Directory";
             PonyRaceSelector.DataSource = Enum.GetValues(typeof(PonyRace));
             PonyRoleSelector.DataSource = Enum.GetValues(typeof(Role));
         }
@@ -82,94 +91,97 @@
             EffectLeftImageColumn.Items.Clear();
             EffectRightImageColumn.Items.Clear();
 
-            PonyTemplate template = templates[index];
-
-            PonyNameField.Text = template.Name;
-            PonyRaceSelector.SelectedItem = template.Race;
-            PonyRoleSelector.SelectedItem = template.Role;
-
-            BehaviorNextBehaviorColumn.Items.Add("");
-            foreach (Behavior behavior in template.Behaviors)
-                BehaviorNextBehaviorColumn.Items.Add(behavior.Name);
-
-            BehaviorSpeechStartColumn.Items.Add("");
-            BehaviorSpeechEndColumn.Items.Add("");
-            foreach (Speech speech in template.Speeches)
+            if (index != -1)
             {
-                BehaviorSpeechStartColumn.Items.Add(speech.Name);
-                BehaviorSpeechEndColumn.Items.Add(speech.Name);
-            }
-            foreach (string filename in
-                Directory.GetFiles(template.Directory, "*.gif").Union<string>(Directory.GetFiles(template.Directory, "*.png")))
-            {
-                BehaviorLeftImageColumn.Items.Add(Path.GetFileName(filename));
-                BehaviorRightImageColumn.Items.Add(Path.GetFileName(filename));
-                EffectLeftImageColumn.Items.Add(Path.GetFileName(filename));
-                EffectRightImageColumn.Items.Add(Path.GetFileName(filename));
-            }
+                PonyTemplate template = templates[index];
 
-            foreach (Behavior behavior in template.Behaviors)
-            {
-                DataGridViewRow newRow = null;
-                try
-                {
-                    newRow = new DataGridViewRow();
-                    newRow.CreateCells(BehaviorsTable, "Run", behavior.Name, behavior.Chance,
-                        behavior.MinDuration, behavior.MaxDuration,
-                        behavior.Speed, behavior.MovementAllowed,
-                        Path.GetFileName(behavior.LeftImageName).ToLowerInvariant(),
-                        Path.GetFileName(behavior.RightImageName).ToLowerInvariant(),
-                        behavior.StartSpeech == null ? "" : behavior.StartSpeech.Name,
-                        behavior.EndSpeech == null ? "" : behavior.EndSpeech.Name,
-                        behavior.NextBehavior == null ? "" : behavior.NextBehavior.Name,
-                        ListEffects(behavior.Effects));
-                    BehaviorsTable.Rows.Add(newRow);
-                }
-                catch (InvalidOperationException)
-                {
-                    if (newRow != null)
-                        newRow.Dispose();
-                    throw;
-                }
-            }
+                PonyNameField.Text = template.Name;
+                PonyRaceSelector.SelectedItem = template.Race;
+                PonyRoleSelector.SelectedItem = template.Role;
 
-            foreach (Speech speech in template.Speeches)
-            {
-                DataGridViewRow newRow = null;
-                try
-                {
-                    newRow = new DataGridViewRow();
-                    newRow.CreateCells(SpeechesTable, speech.Name, speech.Line, speech.Trigger);
-                }
-                catch (InvalidOperationException)
-                {
-                    if (newRow != null)
-                        newRow.Dispose();
-                    throw;
-                }
-                SpeechesTable.Rows.Add(newRow);
-            }
+                BehaviorNextBehaviorColumn.Items.Add("");
+                foreach (Behavior behavior in template.Behaviors)
+                    BehaviorNextBehaviorColumn.Items.Add(behavior.Name);
 
-            foreach (EffectTemplate effect in template.Effects)
-            {
-                DataGridViewRow newRow = null;
-                try
+                BehaviorSpeechStartColumn.Items.Add("");
+                BehaviorSpeechEndColumn.Items.Add("");
+                foreach (Speech speech in template.Speeches)
                 {
-                    newRow = new DataGridViewRow();
-                    newRow.CreateCells(EffectsTable, effect.Name, effect.Duration,
-                        effect.MinRepeatDuration, effect.MaxRepeatDuration,
-                        effect.FollowParent,
-                        Path.GetFileName(effect.LeftImageName),
-                        Path.GetFileName(effect.RightImageName),
-                        effect.AlignmentToParentLeft, effect.AlignmentAtOffsetLeft,
-                        effect.AlignmentToParentRight, effect.AlignmentAtOffsetRight);
-                    EffectsTable.Rows.Add(newRow);
+                    BehaviorSpeechStartColumn.Items.Add(speech.Name);
+                    BehaviorSpeechEndColumn.Items.Add(speech.Name);
                 }
-                catch (InvalidOperationException)
+                foreach (string filename in
+                    Directory.GetFiles(template.Directory, "*.gif").Union<string>(Directory.GetFiles(template.Directory, "*.png")))
                 {
-                    if (newRow != null)
-                        newRow.Dispose();
-                    throw;
+                    BehaviorLeftImageColumn.Items.Add(Path.GetFileName(filename));
+                    BehaviorRightImageColumn.Items.Add(Path.GetFileName(filename));
+                    EffectLeftImageColumn.Items.Add(Path.GetFileName(filename));
+                    EffectRightImageColumn.Items.Add(Path.GetFileName(filename));
+                }
+
+                foreach (Behavior behavior in template.Behaviors)
+                {
+                    DataGridViewRow newRow = null;
+                    try
+                    {
+                        newRow = new DataGridViewRow();
+                        newRow.CreateCells(BehaviorsTable, "Run", behavior.Name, behavior.Chance,
+                            behavior.MinDuration, behavior.MaxDuration,
+                            behavior.Speed, behavior.MovementAllowed,
+                            Path.GetFileName(behavior.LeftImageName).ToLowerInvariant(),
+                            Path.GetFileName(behavior.RightImageName).ToLowerInvariant(),
+                            behavior.StartSpeech == null ? "" : behavior.StartSpeech.Name,
+                            behavior.EndSpeech == null ? "" : behavior.EndSpeech.Name,
+                            behavior.NextBehavior == null ? "" : behavior.NextBehavior.Name,
+                            ListEffects(behavior.Effects));
+                        BehaviorsTable.Rows.Add(newRow);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        if (newRow != null)
+                            newRow.Dispose();
+                        throw;
+                    }
+                }
+
+                foreach (Speech speech in template.Speeches)
+                {
+                    DataGridViewRow newRow = null;
+                    try
+                    {
+                        newRow = new DataGridViewRow();
+                        newRow.CreateCells(SpeechesTable, speech.Name, speech.Line, speech.Trigger);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        if (newRow != null)
+                            newRow.Dispose();
+                        throw;
+                    }
+                    SpeechesTable.Rows.Add(newRow);
+                }
+
+                foreach (EffectTemplate effect in template.Effects)
+                {
+                    DataGridViewRow newRow = null;
+                    try
+                    {
+                        newRow = new DataGridViewRow();
+                        newRow.CreateCells(EffectsTable, effect.Name, effect.Duration,
+                            effect.MinRepeatDuration, effect.MaxRepeatDuration,
+                            effect.FollowParent,
+                            Path.GetFileName(effect.LeftImageName),
+                            Path.GetFileName(effect.RightImageName),
+                            effect.AlignmentToParentLeft, effect.AlignmentAtOffsetLeft,
+                            effect.AlignmentToParentRight, effect.AlignmentAtOffsetRight);
+                        EffectsTable.Rows.Add(newRow);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        if (newRow != null)
+                            newRow.Dispose();
+                        throw;
+                    }
                 }
             }
 

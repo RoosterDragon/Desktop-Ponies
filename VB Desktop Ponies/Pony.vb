@@ -315,7 +315,7 @@ Class PonyBase
 
 
                     '                    Load images now?,  name,     , Probability, Max_Secs  , Min_Secs  , Speed     , image path, left image path, move_type, Linked behavior, speaking line_start, speaking line_end , skip normally unless processing links, x coord, ycoord, object to follow
-                    AddBehavior(False, columns(Main.BehaviorOption.name),
+                    AddBehavior(columns(Main.BehaviorOption.name),
                                          Double.Parse(columns(Main.BehaviorOption.probability), CultureInfo.InvariantCulture),
                                          Double.Parse(columns(Main.BehaviorOption.max_duration), CultureInfo.InvariantCulture),
                                          Double.Parse(columns(Main.BehaviorOption.min_duration), CultureInfo.InvariantCulture),
@@ -373,10 +373,10 @@ Class PonyBase
                             Dim dont_repeat_image_animations As Boolean = False
 
                             Try
-                                direction_right = Main.Instance.GetDirection(Trim(LCase(columns(7))))
-                                centering_right = Main.Instance.GetDirection(Trim(LCase(columns(8))))
-                                direction_left = Main.Instance.GetDirection(Trim(LCase(columns(9))))
-                                centering_left = Main.Instance.GetDirection(Trim(LCase(columns(10))))
+                                direction_right = Main.GetDirection(Trim(LCase(columns(7))))
+                                centering_right = Main.GetDirection(Trim(LCase(columns(8))))
+                                direction_left = Main.GetDirection(Trim(LCase(columns(9))))
+                                centering_left = Main.GetDirection(Trim(LCase(columns(10))))
 
                             Catch ex As Exception
                                 MsgBox("Invalid placement direction or centering for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine & effectName)
@@ -530,7 +530,7 @@ Class PonyBase
 
     End Sub
 
-    Overloads Sub AddBehavior(Load_Images As Boolean, name As String, chance As Double,
+    Overloads Sub AddBehavior(name As String, chance As Double,
                            max_duration As Double, min_duration As Double, speed As Double,
                            right_image_path As String, left_image_path As String,
                            Allowed_Moves As Pony.Allowed_Moves, _Linked_Behavior As String,
@@ -605,9 +605,8 @@ Class PonyBase
     ''' <summary>
     ''' This overload is in case the editor happens upon a very incomplete pony that has no behaviors (wasn't created by the editor).
     ''' </summary>
-    Overloads Sub AddBehavior(name As String, chance As Double, max_duration As Double, min_duration As Double, speed As Double, _
-                   right_image As Image, left_image As Image, Allowed_Moves As Pony.Allowed_Moves, _
-                   _Linked_Behavior As String, _Startline As String, _Endline As String)
+    Overloads Sub AddBehavior(name As String, chance As Double, max_duration As Double, min_duration As Double, speed As Double,
+                              Allowed_Moves As Pony.Allowed_Moves, _Linked_Behavior As String, _Startline As String, _Endline As String)
 
         Dim new_behavior As New Behavior("", "")
 
@@ -744,20 +743,6 @@ Class PonyBase
             ''' </summary>
             All
         End Enum
-
-        Function getBehaviors() As String
-
-            If BehaviorList.Count = 0 Then Return ""
-
-            Dim behaviors_list As String = ""
-
-            For Each behavior As Behavior In BehaviorList
-                behaviors_list += behavior.Name & ","
-            Next
-
-            Return Mid(behaviors_list, 1, behaviors_list.Length - 1)
-
-        End Function
     End Class
 #End Region
 
@@ -885,10 +870,10 @@ Class PonyBase
             left_image_center = center
         End Sub
 
-        Friend Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double, _
-                             direction_right As Directions, centering_right As Directions, _
-                             direction_left As Directions, centering_left As Directions, follow As Boolean, _dont_repeat_image_animations As Boolean, _
-                             Optional load_images_now As Boolean = False)
+        Friend Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
+                             direction_right As Directions, centering_right As Directions,
+                             direction_left As Directions, centering_left As Directions,
+                             follow As Boolean, _dont_repeat_image_animations As Boolean)
 
             Dim new_effect As New Effect(right_path, left_path)
 
@@ -934,11 +919,6 @@ Class PonyBase
                 End If
 
             End Sub
-
-            Friend Function duplicate() As SpeakingLine
-                Return New SpeakingLine("", Name, Text, "", SoundFile, Skip, Group)
-            End Function
-
         End Class
     End Class
 #End Region
@@ -1219,13 +1199,11 @@ Class Pony
                 If DateTime.UtcNow.Subtract(Main.Instance.Audio_Last_Played).TotalMilliseconds <= Main.Instance.Last_Audio_Length Then Exit Sub
             End If
 
+            'If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
+            'Apparently it is a bug with DirectX that only occurs with Visual Studio...
+            'We use DirectX now so that we can use MP3 instead of WAV files
+            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filename)
             Try
-
-                'If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
-                'Apparently it is a bug with DirectX that only occurs with Visual Studio...
-                'We use DirectX now so that we can use MP3 instead of WAV files
-                Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filename)
-
                 'volume is between -10000 and 0, with 0 being the loudest.
                 audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
 
@@ -1247,8 +1225,9 @@ Class Pony
                     MsgBox("Error playing sound " & filename & " for " & Me.Directory & ControlChars.NewLine _
                            & "Further sound errors will be suppressed." & ControlChars.NewLine & ex.Message)
                 End If
+            Finally
+                audio.Dispose()
             End Try
-
         End If
     End Sub
 
@@ -2036,12 +2015,6 @@ Class Pony
 
     End Sub
 
-    'only used for debugging
-    'Function SetDateAhead(ByRef time As DateTime)
-    '    time = DateAdd(DateInterval.Year, 1, time)
-    '    Return time
-    'End Function
-
     Friend Function GetBehaviorGroupName(groupnumber As Integer) As String
 
         If groupnumber = 0 Then
@@ -2345,7 +2318,7 @@ Class Pony
 
     End Function
 
-    Function GetScreenContainingPoint(point As Point) As Screen
+    Shared Function GetScreenContainingPoint(point As Point) As Screen
         For Each screen In Main.Instance.screens_to_use
             If (screen.WorkingArea.Contains(point)) Then Return screen
         Next
@@ -2652,8 +2625,6 @@ Class Pony
         Dim UsableScreens = Main.Instance.screens_to_use
 
         Dim teleport_location As Point = Nothing
-
-        Dim closest As Integer = Integer.MaxValue
 
         If teleport_location = Nothing Then
 

@@ -38,11 +38,11 @@
         private static class NSWindow
         {
             /// <summary>
-            /// Indicates if the class is supported on the current operating system.
+            /// Indicates whether the class is supported on the current operating system.
             /// </summary>
             private static bool isSupported = OperatingSystemInfo.IsMacOSX && OperatingSystemInfo.OSVersion >= new Version(10, 0);
             /// <summary>
-            /// Gets a value indicating if the class is supported on the current operating system.
+            /// Gets a value indicating whether the class is supported on the current operating system.
             /// </summary>
             public static bool IsSupported
             {
@@ -104,8 +104,6 @@
                     set { ((Label)Child).Text = value; }
                 }
 
-                private readonly Thread uiThread;
-
                 /// <summary>
                 /// Initializes a new instance of the
                 /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow.SpeechWindow"/> class.
@@ -118,11 +116,6 @@
 
                     Child = new Label();
                     Child.Show();
-
-                    if (Thread.CurrentThread.Name != "GtkSpriteInterface.ApplicationRun")
-                        Console.WriteLine(
-                            "Warning: SpeechWindow.ctor() not called from the UI thread. Called from: " + Thread.CurrentThread.Name);
-                    uiThread = Thread.CurrentThread;
                 }
 
                 /// <summary>
@@ -132,9 +125,6 @@
                 /// <param name="y">The y co-ordinate of the location where the bottom of the speech window should coincide.</param>
                 public void ShowAboveCenter(int x, int y)
                 {
-                    if (uiThread != Thread.CurrentThread)
-                        Console.WriteLine("Warning: SpeechWindow.ShowAboveCenter(int, int) not called from UI thread. Called from: " +
-                            Thread.CurrentThread.Name);
                     const int XPadding = 6;
                     const int YPadding = 2;
                     Gtk.Requisition size = Child.SizeRequest();
