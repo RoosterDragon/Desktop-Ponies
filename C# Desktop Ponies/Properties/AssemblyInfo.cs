@@ -4,8 +4,6 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(true)]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", Justification="Assembly will not be localized.")]
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
