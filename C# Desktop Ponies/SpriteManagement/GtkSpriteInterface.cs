@@ -733,8 +733,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="separatorItem"/> is null.</exception>
             public GtkContextMenuItem(SeparatorMenuItem separatorItem)
             {
-                if (separatorItem == null)
-                    throw new ArgumentNullException("separatorItem");
+                Argument.EnsureNotNull(separatorItem, "separatorItem");
 
                 item = separatorItem;
             }
@@ -747,8 +746,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.</exception>
             public GtkContextMenuItem(MenuItem menuItem, EventHandler activated)
             {
-                if (menuItem == null)
-                    throw new ArgumentNullException("menuItem");
+                Argument.EnsureNotNull(menuItem, "menuItem");
 
                 item = menuItem;
                 Activated = activated;
@@ -766,10 +764,8 @@
             /// <exception cref="T:System.ArgumentException"><paramref name="subItems"/> is empty.</exception>
             public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent)
             {
-                if (menuItem == null)
-                    throw new ArgumentNullException("menuItem");
-                if (subItems == null)
-                    throw new ArgumentNullException("subItems");
+                Argument.EnsureNotNull(menuItem, "menuItem");
+                Argument.EnsureNotNull(subItems, "subItems");
 
                 List<ISimpleContextMenuItem> subItemsList = new List<ISimpleContextMenuItem>(subItems);
 
@@ -899,10 +895,8 @@
             /// null.</exception>
             public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
             {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-                if (menuItems == null)
-                    throw new ArgumentNullException("menuItems");
+                Argument.EnsureNotNull(parent, "parent");
+                Argument.EnsureNotNull(menuItems, "menuItems");
 
                 owner = parent;
 
@@ -1055,8 +1049,7 @@
             }
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException("value");
+                Argument.EnsureNotNull(value, "value");
 
                 if (windowIconFilePath != value)
                 {
@@ -1322,9 +1315,7 @@
         /// </returns>
         private GtkFrame GtkFrameFromFile(string fileName)
         {
-            GtkFrame frame = new GtkFrame(fileName);
-            AlterPixbufForTransparency(fileName, frame.Image.Image);
-            return frame;
+            return new GtkFrame(fileName).SetupSafely(frame => AlterPixbufForTransparency(fileName, frame.Image.Image));
         }
 
         /// <summary>
@@ -1418,8 +1409,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
         {
-            if (imageFilePaths == null)
-                throw new ArgumentNullException("imageFilePaths");
+            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
 
             if (disposed)
                 throw new ObjectDisposedException(GetType().FullName);
@@ -1514,17 +1504,17 @@
             GraphicsWindow window = null;
             ApplicationInvoke(() =>
             {
-                window = new GraphicsWindow()
+                window = new GraphicsWindow().SetupSafely(win =>
                 {
-                    Sprite = sprite,
-                    Title = windowTitle,
-                    Icon = windowIcon,
-                    KeepAbove = windowTopmost
-                };
-                window.ButtonPressEvent += GraphicsWindow_ButtonPressEvent;
-                window.ButtonReleaseEvent += GraphicsWindow_ButtonReleaseEvent;
-                window.KeyPressEvent += GraphicsWindow_KeyPressEvent;
-                window.Realize();
+                    win.Sprite = sprite;
+                    win.Title = windowTitle;
+                    win.Icon = windowIcon;
+                    win.KeepAbove = windowTopmost;
+                    win.ButtonPressEvent += GraphicsWindow_ButtonPressEvent;
+                    win.ButtonReleaseEvent += GraphicsWindow_ButtonReleaseEvent;
+                    win.KeyPressEvent += GraphicsWindow_KeyPressEvent;
+                    win.Realize();
+                });
             });
             return window;
         }
@@ -1537,8 +1527,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Draw(AsyncLinkedList<ISprite> sprites)
         {
-            if (sprites == null)
-                throw new ArgumentNullException("sprites");
+            Argument.EnsureNotNull(sprites, "sprites");
 
             if (disposed)
                 throw new ObjectDisposedException(GetType().FullName);

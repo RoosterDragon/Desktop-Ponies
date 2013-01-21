@@ -24,8 +24,8 @@ Public Class DesktopControlForm
         End Sub
 
         Public Sub New(menuItem As ToolStripMenuItem, subItems As IEnumerable(Of ISimpleContextMenuItem))
-            If menuItem Is Nothing Then Throw New ArgumentNullException("menuItem")
-            If subItems Is Nothing Then Throw New ArgumentNullException("subItems")
+            Argument.EnsureNotNull(menuItem, "menuItem")
+            Argument.EnsureNotNull(subItems, "subItems")
             If Not menuItem.HasDropDownItems Then
                 Throw New ArgumentException("menuItem must have drop down items.", "menuItem")
             End If
@@ -132,8 +132,8 @@ Public Class DesktopControlForm
         Private _readOnlyItems As New ReadOnlyCollection(Of ISimpleContextMenuItem)(_items)
 
         Public Sub New(parent As DesktopControlForm, menuItems As IEnumerable(Of ISimpleContextMenuItem))
-            If parent Is Nothing Then Throw New ArgumentNullException("parent")
-            If menuItems Is Nothing Then Throw New ArgumentNullException("menuItems")
+            Argument.EnsureNotNull(parent, "parent")
+            Argument.EnsureNotNull(menuItems, "menuItems")
 
             LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow
             Dock = DockStyle.Fill
@@ -166,7 +166,7 @@ Public Class DesktopControlForm
         End Sub
 
         Private Function CreateItemWithSubItems(_menuItem As ISimpleContextMenuItem) As ToolStripMenuItem
-            If _menuItem Is Nothing Then Throw New ArgumentNullException("_menuItem")
+            Argument.EnsureNotNull(_menuItem, "_menuItem")
             If _menuItem.SubItems Is Nothing OrElse _menuItem.SubItems.Count = 0 Then
                 Throw New ArgumentException("_menuItem.SubItems must not be null or empty.")
             End If

@@ -19,8 +19,7 @@
 
         public SpriteInfoView(ISpriteCollectionView viewer, IList<string> columns, Func<ISprite, IList<string>> detailFactory)
         {
-            if (viewer == null)
-                throw new ArgumentNullException("viewer");
+            Argument.EnsureNotNull(viewer, "viewer");
             view = viewer;
             this.columns = columns;
             this.detailFactory = detailFactory;

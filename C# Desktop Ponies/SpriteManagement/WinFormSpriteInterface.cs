@@ -125,10 +125,8 @@
             /// null.</exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripSeparator separatorItem)
             {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-                if (separatorItem == null)
-                    throw new ArgumentNullException("separatorItem");
+                Argument.EnsureNotNull(parent, "parent");
+                Argument.EnsureNotNull(separatorItem, "separatorItem");
 
                 owner = parent;
                 separator = separatorItem;
@@ -146,10 +144,8 @@
             /// </exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem, EventHandler activated)
             {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-                if (menuItem == null)
-                    throw new ArgumentNullException("menuItem");
+                Argument.EnsureNotNull(parent, "parent");
+                Argument.EnsureNotNull(menuItem, "menuItem");
 
                 owner = parent;
                 item = menuItem;
@@ -171,12 +167,9 @@
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem,
                 IEnumerable<ISimpleContextMenuItem> subItems)
             {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-                if (menuItem == null)
-                    throw new ArgumentNullException("menuItem");
-                if (subItems == null)
-                    throw new ArgumentNullException("subItems");
+                Argument.EnsureNotNull(parent, "parent");
+                Argument.EnsureNotNull(menuItem, "menuItem");
+                Argument.EnsureNotNull(subItems, "subItems");
                 if (!menuItem.HasDropDownItems)
                     throw new ArgumentException("menuItem must have drop down items.", "menuItem");
 
@@ -348,10 +341,8 @@
             /// null.</exception>
             public WinFormContextMenu(WinFormSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
             {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-                if (menuItems == null)
-                    throw new ArgumentNullException("menuItems");
+                Argument.EnsureNotNull(parent, "parent");
+                Argument.EnsureNotNull(menuItems, "menuItems");
 
                 owner = parent;
 
@@ -404,8 +395,7 @@
             /// </exception>
             private ToolStripMenuItem CreateItemWithSubitems(ISimpleContextMenuItem menuItem)
             {
-                if (menuItem == null)
-                    throw new ArgumentNullException("menuItem");
+                Argument.EnsureNotNull(menuItem, "menuItems");
                 if (menuItem.SubItems == null || menuItem.SubItems.Count == 0)
                     throw new ArgumentException("menuItem.SubItems must not be null or empty.");
 
@@ -953,9 +943,7 @@
         /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
         private BitmapFrame BitmapFrameFromFile(string fileName)
         {
-            BitmapFrame frame = new BitmapFrame(fileName);
-            AlterBitmapForTransparency(fileName, frame.Image);
-            return frame;
+            return new BitmapFrame(fileName).SetupSafely(frame => AlterBitmapForTransparency(fileName, frame.Image));
         }
 
         /// <summary>
@@ -975,9 +963,8 @@
         private BitmapFrame BitmapFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
             int stride, int width, int height, int depth, int hashCode, string fileName)
         {
-            BitmapFrame frame = BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
-            AlterBitmapForTransparency(fileName, frame.Image);
-            return frame;
+            return BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode).SetupSafely(
+                frame => AlterBitmapForTransparency(fileName, frame.Image));
         }
 
         /// <summary>
@@ -1081,8 +1068,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
         public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
         {
-            if (imageFilePaths == null)
-                throw new ArgumentNullException("imageFilePaths");
+            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
 
             foreach (string imageFilePath in imageFilePaths)
                 images.Add(imageFilePath);
@@ -1216,8 +1202,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
         public void Draw(AsyncLinkedList<ISprite> sprites)
         {
-            if (sprites == null)
-                throw new ArgumentNullException("sprites");
+            Argument.EnsureNotNull(sprites, "sprites");
 
             if (paused)
                 return;

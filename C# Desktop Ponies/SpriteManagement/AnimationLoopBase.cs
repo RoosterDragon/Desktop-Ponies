@@ -661,8 +661,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="spriteViewer"/> is null.</exception>
         protected AnimationLoopBase(ISpriteCollectionView spriteViewer, IEnumerable<ISprite> spriteCollection)
         {
-            if (spriteViewer == null)
-                throw new ArgumentNullException("spriteViewer");
+            Argument.EnsureNotNull(spriteViewer, "spriteViewer");
 
             Viewer = spriteViewer;
 

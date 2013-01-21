@@ -72,8 +72,7 @@
             Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
         public void SetBitmap(Bitmap bitmap, byte opacity)
         {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
+            Argument.EnsureNotNull(bitmap, "bitmap");
 
             if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
                 throw new ArgumentException("The PixelFormat of bitmap must be Format32bppArgb.");

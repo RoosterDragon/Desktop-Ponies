@@ -45,8 +45,7 @@
         public static void Raise<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, Func<TEventArgs> argsFactory)
             where TEventArgs : EventArgs
         {
-            if (argsFactory == null)
-                throw new ArgumentNullException("argsFactory");
+            Argument.EnsureNotNull(argsFactory, "argsFactory");
 
             EventHandler<TEventArgs> handler = eventHandler;
             if (handler != null)

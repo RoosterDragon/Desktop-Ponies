@@ -75,11 +75,11 @@
     /// </summary>
     public static class GifImage
     {
-        #region bitmapImageFactory function
+        #region BufferToImageOfBitmap function
         /// <summary>
         /// Represents the method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
-        private static BufferToImage<Bitmap> bitmapImageFactory = 
+        public static readonly BufferToImage<Bitmap> BufferToImageOfBitmap = 
             (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
             {
                 PixelFormat targetFormat;
@@ -92,34 +92,40 @@
                 else
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 1, 4 or 8.");
 
-                // Create the bitmap and lock it.
-                Bitmap bitmap = new Bitmap(width, height, targetFormat);
-                BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                // Create the bitmap.
+                return new Bitmap(width, height, targetFormat).SetupSafely(bitmap =>
+                {
+                    // Lock the data into memory for fast marshaled access.
+                    BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-                // Copy the frame buffer to the bitmap. To account for stride padding, copy row by row. Then unlock it.
-                for (int row = 0; row < data.Height; row++)
-                    Marshal.Copy(
-                        buffer,
-                        row * stride,
-                        IntPtr.Add(data.Scan0, row * data.Stride),
-                        stride);
-                bitmap.UnlockBits(data);
+                    // Copy the frame buffer to the bitmap. To account for stride padding, copy row by row. Then unlock it.
+                    for (int row = 0; row < data.Height; row++)
+                        Marshal.Copy(
+                            buffer,
+                            row * stride,
+                            IntPtr.Add(data.Scan0, row * data.Stride),
+                            stride);
+                    bitmap.UnlockBits(data);
 
-                // Fill in the color palette from the current table.
-                ColorPalette bitmapPalette = bitmap.Palette;
-                for (int i = 0; i < palette.Length; i++)
-                    bitmapPalette.Entries[i] = Color.FromArgb(palette[i].ToArgb());
+                    // Fill in the color palette from the current table.
+                    ColorPalette bitmapPalette = bitmap.Palette;
+                    for (int i = 0; i < palette.Length; i++)
+                        bitmapPalette.Entries[i] = Color.FromArgb(palette[i].ToArgb());
 
-                // Apply transparency.
-                if (transparentIndex != -1)
-                    bitmapPalette.Entries[transparentIndex] = Color.Transparent;
+                    // Apply transparency.
+                    if (transparentIndex != -1)
+                        bitmapPalette.Entries[transparentIndex] = Color.Transparent;
 
-                // Set palette on bitmap.
-                bitmap.Palette = bitmapPalette;
-
-                return bitmap;
+                    // Set palette on bitmap.
+                    bitmap.Palette = bitmapPalette;
+                });
             };
         #endregion
+
+        /// <summary>
+        /// Represents the allowable set of depths that can be used when generating a <see cref="T:System.Drawing.Bitmap"/>.
+        /// </summary>
+        public const BitDepths AllowableDepthsForBitmap = BitDepths.Indexed1Bpp | BitDepths.Indexed4Bpp | BitDepths.Indexed8Bpp;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GifImage`1"/> class of type
@@ -136,7 +142,7 @@
         /// file.</exception>
         public static GifImage<Bitmap> OfBitmap(Stream stream)
         {
-            return new GifImage<Bitmap>(stream, bitmapImageFactory, BitDepths.Indexed1Bpp | BitDepths.Indexed4Bpp | BitDepths.Indexed8Bpp);
+            return new GifImage<Bitmap>(stream, BufferToImageOfBitmap, AllowableDepthsForBitmap);
         }
     }
 
@@ -852,10 +858,8 @@
         /// file.</exception>
         public GifImage(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-            if (imageFactory == null)
-                throw new ArgumentNullException("imageFactory");
+            Argument.EnsureNotNull(stream, "stream");
+            Argument.EnsureNotNull(imageFactory, "imageFactory");
             Argument.EnsureEnumIsValid(allowableDepths, "allowableDepths");
             if (!stream.CanRead)
                 throw new ArgumentException("stream must support reading.", "stream");

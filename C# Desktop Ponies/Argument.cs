@@ -10,6 +10,26 @@
     public static class Argument
     {
         /// <summary>
+        /// Identifies a parameter as having been validated to ensure it was not null to static analysis tools.
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+        private sealed class ValidatedNotNullAttribute : Attribute
+        {
+        }
+
+        /// <summary>
+        /// Checks that an argument is not null.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
+        public static void EnsureNotNull([ValidatedNotNull] object arg, string paramName)
+        {
+            if (arg == null)
+                throw new ArgumentNullException(paramName);
+        }
+
+        /// <summary>
         /// Checks that an argument is greater than or equal to zero.
         /// </summary>
         /// <param name="arg">The argument to validate.</param>

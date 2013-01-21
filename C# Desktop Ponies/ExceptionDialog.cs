@@ -51,8 +51,7 @@
         /// </param>
         public ExceptionDialog(Exception ex, string destinationEmailAddress)
         {
-            if (ex == null)
-                throw new ArgumentNullException("ex");
+            Argument.EnsureNotNull(ex, "ex");
 
             exception = ex;
             recipientEmail = destinationEmailAddress;

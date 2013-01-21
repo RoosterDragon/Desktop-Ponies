@@ -218,8 +218,7 @@
         /// <param name="arrayIndex"></param>
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            if (array == null)
-                throw new ArgumentNullException("array");
+            Argument.EnsureNotNull(array, "array");
             Argument.EnsureNonnegative(arrayIndex, "arrayIndex");
             if (array.Length < arrayIndex)
                 throw new ArgumentException("The length of array must be greater than or equal to arrayIndex.");

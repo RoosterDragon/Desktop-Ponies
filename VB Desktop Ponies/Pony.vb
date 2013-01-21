@@ -86,7 +86,7 @@ Class PonyBase
     End Property
 
     Public Sub New(directory As String)
-        If directory Is Nothing Then Throw New ArgumentNullException("directory")
+        Argument.EnsureNotNull(directory, "directory")
 
         Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
         If lastSeparator <> -1 Then
@@ -1141,7 +1141,7 @@ Class Pony
     End Enum
 
     Public Sub New(base As PonyBase)
-        If base Is Nothing Then Throw New ArgumentNullException("base")
+        Argument.EnsureNotNull(base, "base")
         _base = base
     End Sub
 
@@ -3163,17 +3163,13 @@ Class Effect
     End Sub
 
     Friend Sub SetRightImagePath(path As String)
-        If IsNothing(path) Then
-            Throw New ArgumentNullException("path")
-        End If
+        Argument.EnsureNotNull(path, "path")
         right_image_path = path
         right_image_size = ImageSize.GetSize(right_image_path)
     End Sub
 
     Friend Sub SetLeftImagePath(path As String)
-        If IsNothing(path) Then
-            Throw New ArgumentNullException("path")
-        End If
+        Argument.EnsureNotNull(path, "path")
         left_image_path = path
         left_image_size = ImageSize.GetSize(left_image_path)
     End Sub
@@ -3401,7 +3397,7 @@ Class HouseBase
     End Property
 
     Public Sub New(directory As String)
-        If directory Is Nothing Then Throw New ArgumentNullException("directory")
+        Argument.EnsureNotNull(directory, "directory")
 
         Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
         If lastSeparator <> -1 Then

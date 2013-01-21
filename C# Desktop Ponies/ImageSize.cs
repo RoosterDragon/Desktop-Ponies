@@ -78,8 +78,7 @@
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>    
         public static Size GetSize(BinaryReader reader)
         {
-            if (reader == null)
-                throw new ArgumentNullException("reader");
+            Argument.EnsureNotNull(reader, "reader");
             
             byte[] magicBytes = new byte[MaxMagicBytesLength];
 

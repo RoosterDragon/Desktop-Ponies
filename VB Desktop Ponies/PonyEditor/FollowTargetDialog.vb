@@ -88,10 +88,7 @@
     End Sub
 
     Friend Sub Change_Behavior(ByVal behavior As PonyBase.Behavior)
-
-        If IsNothing(behavior) Then
-            Throw New ArgumentNullException("behavior", "Passed behavior is empty when trying to update follow settings.")
-        End If
+        Argument.EnsureNotNull(behavior, "behavior")
 
         behavior_to_change = behavior
 

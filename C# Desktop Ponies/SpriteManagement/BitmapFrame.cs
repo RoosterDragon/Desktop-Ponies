@@ -12,74 +12,20 @@
     public sealed class BitmapFrame : SpriteFrame<Bitmap>, IDisposable
     {
         /// <summary>
-        /// Gets the method for creating a <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> from a buffer.
+        /// Represents the method that converts a buffer into an <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
-        public static BufferToImage<BitmapFrame> FromBuffer
-        {
-            get { return FromBufferMethod; }
-        }
+        public static readonly BufferToImage<BitmapFrame> FromBuffer =
+            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
+            {
+                Bitmap bitmap = GifImage.BufferToImageOfBitmap(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
+                return new BitmapFrame(bitmap, hashCode);
+            };
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> from the raw buffer.
+        /// Represents the allowable set of depths that can be used when generating a
+        /// <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
-        /// <param name="buffer">The raw buffer.</param>
-        /// <param name="palette">The color palette.</param>
-        /// <param name="transparentIndex">The index of the transparent color.</param>
-        /// <param name="stride">The stride width of the buffer.</param>
-        /// <param name="width">The logical width of the buffer.</param>
-        /// <param name="height">The logical height of the buffer.</param>
-        /// <param name="depth">The bit depth of the buffer.</param>
-        /// <param name="hashCode">The hash code of the frame.</param>
-        /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> for the frame held in the raw buffer.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 1, 4 or 8.</exception>
-        private static BitmapFrame FromBufferMethod(
-            byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode)
-        {
-            PixelFormat targetFormat;
-            if (depth == 1)
-                targetFormat = PixelFormat.Format1bppIndexed;
-            else if (depth == 4)
-                targetFormat = PixelFormat.Format4bppIndexed;
-            else if (depth == 8)
-                targetFormat = PixelFormat.Format8bppIndexed;
-            else
-                throw new ArgumentOutOfRangeException("depth", depth, "depth must be 1, 4 or 8.");
-
-            // Create the bitmap and lock it.
-            Bitmap bitmap = new Bitmap(width, height, targetFormat);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-
-            // Copy the frame buffer to the bitmap. To account for stride padding, copy row by row. Then unlock it.
-            for (int row = 0; row < data.Height; row++)
-                Marshal.Copy(
-                    buffer,
-                    row * stride,
-                    IntPtr.Add(data.Scan0, row * data.Stride),
-                    stride);
-            bitmap.UnlockBits(data);
-
-            // Fill in the color palette from the current table.
-            ColorPalette bitmapPalette = bitmap.Palette;
-            for (int i = 0; i < palette.Length; i++)
-                bitmapPalette.Entries[i] = Color.FromArgb(palette[i].R, palette[i].G, palette[i].B);
-
-            // Apply transparency.
-            if (transparentIndex != -1)
-                bitmapPalette.Entries[transparentIndex] = Color.Transparent;
-
-            // Set palette on bitmap.
-            bitmap.Palette = bitmapPalette;
-
-            return new BitmapFrame(bitmap, hashCode);
-        }
-
-        /// <summary>
-        /// Gets the set of allowable bit depths for a <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
-        /// </summary>
-        public static BitDepths AllowableBitDepths
-        {
-            get { return BitDepths.Indexed1Bpp | BitDepths.Indexed4Bpp | BitDepths.Indexed8Bpp; }
-        }
+        public const BitDepths AllowableBitDepths =  GifImage.AllowableDepthsForBitmap;
 
         /// <summary>
         /// The hash code of the frame image.

@@ -334,6 +334,7 @@ Public Class Main
         End If
     End Sub
 
+    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
     Private Shared Function GetProgramVersion() As String
         Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
         Dim fileVersion = New Version(fileVersionInfo.FileVersion)
@@ -353,7 +354,7 @@ Public Class Main
         UnhandledException(DirectCast(e.ExceptionObject, Exception))
     End Sub
 
-    Sub ThreadException_Catch(sender As Object, e As System.Threading.ThreadExceptionEventArgs)
+    Private Sub ThreadException_Catch(sender As Object, e As System.Threading.ThreadExceptionEventArgs)
         UnhandledException(e.Exception)
     End Sub
 
@@ -1081,16 +1082,17 @@ Public Class Main
     Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles MyBase.KeyPress
         If ProfileComboBox.Focused Then Exit Sub
 
-        Dim character = e.KeyChar
-        If Char.IsLetter(character) Then
+        If Char.IsLetter(e.KeyChar) Then
+            e.Handled = True
             For Each selectionControl In selectionControlsFilteredVisible
-                Dim compare = String.Compare(selectionControl.PonyName.Text(0), character, StringComparison.OrdinalIgnoreCase)
-                If compare = 0 Then
-                    PonySelectionPanel.ScrollControlIntoView(selectionControl)
-                    selectionControl.PonyCount.Focus()
-                    e.Handled = True
+                If selectionControl.PonyName.Text.Length > 0 Then
+                    Dim compare = String.Compare(selectionControl.PonyName.Text(0), e.KeyChar, StringComparison.OrdinalIgnoreCase)
+                    If compare = 0 Then
+                        PonySelectionPanel.ScrollControlIntoView(selectionControl)
+                        selectionControl.PonyCount.Focus()
+                    End If
+                    If compare >= 0 Then Exit For
                 End If
-                If compare >= 0 Then Exit Sub
             Next
         End If
     End Sub

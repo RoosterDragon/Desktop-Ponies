@@ -208,8 +208,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="nodes"/> is null.</exception>
         private void AddRange(Action<LinkedListNode<T>> addMethod, IEnumerable<LinkedListNode<T>> nodes)
         {
-            if (nodes == null)
-                throw new ArgumentNullException("nodes");
+            Argument.EnsureNotNull(nodes, "nodes");
 
             ThreadPool.QueueUserWorkItem(o =>
             {
@@ -249,8 +248,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="values"/> is null.</exception>
         private void AddRange(Func<T, LinkedListNode<T>> addMethod, IEnumerable<T> values)
         {
-            if (values == null)
-                throw new ArgumentNullException("values");
+            Argument.EnsureNotNull(values, "values");
             
             ThreadPool.QueueUserWorkItem(o =>
             {
@@ -460,10 +458,8 @@
         /// <returns>Returns the destination array produced by <paramref name="arrayFactory"/> to which elements were copied.</returns>
         public T[] CopyTo(Func<int, T[]> arrayFactory, Func<int, int> indexFactory)
         {
-            if (arrayFactory == null)
-                throw new ArgumentNullException("arrayFactory");
-            if (indexFactory == null)
-                throw new ArgumentNullException("indexFactory");
+            Argument.EnsureNotNull(arrayFactory, "arrayFactory");
+            Argument.EnsureNotNull(indexFactory, "indexFactory");
 
             lock (syncObject)
             {

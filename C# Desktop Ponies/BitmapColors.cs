@@ -22,10 +22,8 @@
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void RemapColors(this Bitmap bitmap, IDictionary<Color, Color> map)
         {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
-            if (map == null)
-                throw new ArgumentNullException("map");
+            Argument.EnsureNotNull(bitmap, "bitmap");
+            Argument.EnsureNotNull(map, "map");
 
             if (map.Count == 0)
                 return;
@@ -87,8 +85,7 @@
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void PreMultiplyAlpha(this Bitmap bitmap)
         {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
+            Argument.EnsureNotNull(bitmap, "bitmap");
 
             if (bitmap.PixelFormat == PixelFormat.Format32bppArgb)
             {

@@ -245,10 +245,12 @@
                 location.X += swatchSize + 1;
             }
             location.Y = 0;
-            ImageSourcePalette.Controls.Add(
-                new Panel() { Size = ImageSourcePalette.Size, Location = location, BackColor = SystemColors.Control });
-            ImageDesiredPalette.Controls.Add(
-                new Panel() { Size = ImageDesiredPalette.Size, Location = location, BackColor = SystemColors.Control });
+            Panel blankSourcePanel = 
+                new Panel() { Size = ImageSourcePalette.Size, Location = location, BackColor = SystemColors.Control };
+            ImageSourcePalette.Controls.Add(blankSourcePanel);
+            Panel blankDesiredPanel = 
+                new Panel() { Size = ImageDesiredPalette.Size, Location = location, BackColor = SystemColors.Control };
+            ImageDesiredPalette.Controls.Add(blankDesiredPanel);
             ImageSourcePalette.ResumeLayout();
             ImageDesiredPalette.ResumeLayout();
             ImageSourcePalette.BackColor = ImageComparison.BackColor;
