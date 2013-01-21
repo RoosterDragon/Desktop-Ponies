@@ -20,13 +20,16 @@
         /// <summary>
         /// Checks that an argument is not null.
         /// </summary>
+        /// <typeparam name="T">The type of the argument to validate.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>A reference to <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
-        public static void EnsureNotNull([ValidatedNotNull] object arg, string paramName)
+        public static T EnsureNotNull<T>([ValidatedNotNull] T arg, string paramName)
         {
             if (arg == null)
                 throw new ArgumentNullException(paramName);
+            return arg;
         }
 
         /// <summary>
@@ -35,10 +38,11 @@
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
-        public static void EnsureNonnegative(int arg, string paramName)
+        public static int EnsureNonnegative(int arg, string paramName)
         {
             if (arg < 0)
                 throw new ArgumentOutOfRangeException(paramName, arg, paramName + " must be non-negative.");
+            return arg;
         }
 
         /// <summary>
@@ -47,10 +51,11 @@
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
-        public static void EnsurePositive(int arg, string paramName)
+        public static int EnsurePositive(int arg, string paramName)
         {
             if (arg <= 0)
                 throw new ArgumentOutOfRangeException(paramName, arg, paramName + " must be positive.");
+            return arg;
         }
 
         /// <summary>
@@ -64,7 +69,7 @@
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="arg"/> is not a valid member of its
         /// enumeration. That is, the enumeration is non-flagged and the value is not a defined member, or the enumeration is flagged and
         /// the value contains a flag that is not a defined member.</exception>
-        public static void EnsureEnumIsValid<TEnum>(TEnum arg, string paramName) where TEnum : struct
+        public static TEnum EnsureEnumIsValid<TEnum>(TEnum arg, string paramName) where TEnum : struct
         {
             Type enumType = typeof(TEnum);
             if (!enumType.IsEnum)
@@ -102,6 +107,8 @@
                     checkFlag <<= 1;
                 }
             }
+
+            return arg;
         }
 
         /// <summary>

@@ -5,6 +5,8 @@
     /// <summary>
     /// Defines Raise methods for <see cref="T:System.EventHandler"/> and <see cref="T:System.EventHandler`1"/>.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate",
+        Justification="This class provides event related functionality, but no actual events.")]
     public static class Event
     {
         /// <summary>

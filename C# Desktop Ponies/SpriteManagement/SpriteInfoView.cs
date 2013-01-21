@@ -71,6 +71,7 @@
 
         public void Draw(AsyncLinkedList<ISprite> sprites)
         {
+            Argument.EnsureNotNull(sprites, "sprites");
             view.Draw(sprites);
             IList<IList<string>> details = new string[sprites.Count][];
             int i = 0;

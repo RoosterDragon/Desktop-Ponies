@@ -350,7 +350,7 @@ Public Class Main
         Return fileVersion.ToString(versionFields)
     End Function
 
-    Sub Unhandled_Exception_Catch(sender As Object, e As UnhandledExceptionEventArgs)
+    Private Sub Unhandled_Exception_Catch(sender As Object, e As UnhandledExceptionEventArgs)
         UnhandledException(DirectCast(e.ExceptionObject, Exception))
     End Sub
 

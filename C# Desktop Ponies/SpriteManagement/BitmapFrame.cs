@@ -58,7 +58,7 @@
         /// <param name="fileName">The path to a static image file from which to create a new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </param>
         public BitmapFrame(string fileName)
-            : this(new Bitmap(fileName), fileName.GetHashCode())
+            : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, "fileName").GetHashCode())
         {
         }
 

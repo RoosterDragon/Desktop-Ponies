@@ -239,6 +239,8 @@
             /// <returns>Returns true to stop other handlers being invoked; otherwise, false.</returns>
             protected override bool OnConfigureEvent(EventConfigure evnt)
             {
+                Argument.EnsureNotNull(evnt, "evnt");
+
                 //return base.OnConfigureEvent(evnt);
                 int newWidth = evnt.Width;
                 int newHeight = evnt.Height;

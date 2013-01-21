@@ -214,6 +214,7 @@ Public Class DesktopControlForm
     End Sub
 
     Public Sub SmartInvoke(method As MethodInvoker)
+        Argument.EnsureNotNull(method, "method")
         If InvokeRequired Then
             Invoke(method)
         Else
