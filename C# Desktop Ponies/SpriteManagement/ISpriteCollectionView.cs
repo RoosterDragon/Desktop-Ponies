@@ -1,13 +1,13 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using CsDesktopPonies.Collections;
+    using CSDesktopPonies.Collections;
 
     /// <summary>
     /// Defines a visual interface capable of displaying a collection of objects which implement
-    /// <see cref="T:CsDesktopPonies.SpriteManagement.ISprite"/>.
+    /// <see cref="T:CSDesktopPonies.SpriteManagement.ISprite"/>.
     /// </summary>
     public interface ISpriteCollectionView : IDisposable
     {
@@ -111,7 +111,7 @@
         event EventHandler<SimpleMouseEventArgs> MouseUp;
         /// <summary>
         /// Occurs when the interface is closed, either via the
-        /// <see cref="M:CsDesktopPonies.SpriteManagement.ISpriteCollectionView.Close"/> method or by other means such as user request.
+        /// <see cref="M:CSDesktopPonies.SpriteManagement.ISpriteCollectionView.Close"/> method or by other means such as user request.
         /// </summary>
         event EventHandler InterfaceClosed;
     }
@@ -127,7 +127,7 @@
         public char KeyChar { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/> class.
         /// </summary>
         /// <param name="keyChar">The character of the key that was pressed.</param>
         public SimpleKeyEventArgs(char keyChar)
@@ -136,9 +136,9 @@
         }
 
         /// <summary>
-        /// Returns a string instance that represents the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/>.
+        /// Returns a string instance that represents the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/>.
         /// </summary>
-        /// <returns>A string instance that represents the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/>.</returns>
+        /// <returns>A string instance that represents the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleKeyEventArgs"/>.</returns>
         public override string ToString()
         {
             return "{KeyChar=" + KeyChar + "}";
@@ -171,7 +171,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/> class.
         /// </summary>
         /// <param name="buttons">The buttons that were pressed.</param>
         /// <param name="x">The x co-ordinate of the point that was clicked, in relation to the screen.</param>
@@ -184,9 +184,9 @@
         }
 
         /// <summary>
-        /// Returns a string instance that represents the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/>.
+        /// Returns a string instance that represents the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/>.
         /// </summary>
-        /// <returns>A string instance that represents the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/>.</returns>
+        /// <returns>A string instance that represents the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseEventArgs"/>.</returns>
         public override string ToString()
         {
             return "{X=" + X + ",Y=" + Y + ",Buttons=" + Buttons.ToString() + "}";

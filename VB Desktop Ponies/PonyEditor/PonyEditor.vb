@@ -1,6 +1,6 @@
 ﻿Imports System.Globalization
 Imports System.IO
-Imports CsDesktopPonies.SpriteManagement
+Imports CSDesktopPonies.SpriteManagement
 
 Public Class PonyEditor
     ''' <summary>

@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -88,7 +88,7 @@
         private List<int> frameIndexes;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.AnimatedImage`1"/> class from a given file.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> class from a given file.
         /// </summary>
         /// <param name="path">The path to the file which contains the image to be loaded.</param>
         /// <param name="staticImageFactory">The method that creates a TFrame object for a non-gif file.</param>
@@ -107,7 +107,7 @@
         }
 
         /// <summary>
-        /// Creates an <see cref="T:CsDesktopPonies.SpriteManagement.AnimatedImage`1"/> from a gif file.
+        /// Creates an <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> from a gif file.
         /// </summary>
         /// <param name="frameFactory">The method used to construct a TFrame object for each frame in a gif animation.</param>
         /// <param name="allowableDepths">The allowable set of depths for the raw buffer. Use as many as your output format permits. The
@@ -213,7 +213,7 @@
         }
 
         /// <summary>
-        /// Creates an <see cref="T:CsDesktopPonies.SpriteManagement.AnimatedImage`1"/> from a static image file.
+        /// Creates an <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> from a static image file.
         /// </summary>
         /// <param name="staticImageFactory">The method the creates a <typeparamref name="T"/> object for a non-gif file.</param>
         private void AnimatedImageFromStaticFormat(Func<string, T> staticImageFactory)

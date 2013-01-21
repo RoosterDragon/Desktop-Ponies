@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System.Drawing;
 
@@ -45,7 +45,7 @@
         public TImage Image { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.Frame`1"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.Frame`1"/> class.
         /// </summary>
         /// <param name="image">The image that displays this frame.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="image"/> is null.</exception>
@@ -69,7 +69,7 @@
         protected bool Flipped { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SpriteFrame`1"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SpriteFrame`1"/> class.
         /// </summary>
         /// <param name="image">The image that displays this frame.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="image"/> is null.</exception>

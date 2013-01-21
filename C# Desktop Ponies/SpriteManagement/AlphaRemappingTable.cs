@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -25,7 +25,7 @@
         /// <param name="path">The path to the file to load.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="path"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The file extension of <paramref name="path"/> does not match
-        /// <see cref="F:CsDesktopPonies.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
+        /// <see cref="F:CSDesktopPonies.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
         /// <exception cref="T:System.IO.InvalidDataException">The length of the file was not valid.</exception>
         public void LoadMap(string path)
         {
@@ -55,7 +55,7 @@
         /// <returns>Returns true if the mapping was saved; returns false if the file was deleted due to an empty map.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="path"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The file extension of <paramref name="path"/> does not match
-        /// <see cref="F:CsDesktopPonies.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
+        /// <see cref="F:CSDesktopPonies.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
         public bool SaveMap(string path)
         {
             Argument.EnsureNotNull(path, "path");

@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Globalization;
     using System.IO;
     using System.Xml;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.SpriteManagement;
 
     // TODO: Fix documentation.
 
@@ -203,11 +203,11 @@
         public IEnumerable<PonyInstance> AvailableTargets { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.InteractionManager"/> class. Interactions are
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.InteractionManager"/> class. Interactions are
         /// loaded from the file expected in the given directory, and are then applied to the given templates.
         /// </summary>
         /// <param name="directory">The directory containing the interactions file.</param>
-        /// <param name="templates">The set of <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> to which the interactions should
+        /// <param name="templates">The set of <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> to which the interactions should
         /// be linked.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="directory"/> is null.-or-<paramref name="templates"/> is null.
         /// </exception>
@@ -220,7 +220,7 @@
         /// Loads the interactions from the ini file in the given directory, and attempts to link them to the given templates.
         /// </summary>
         /// <param name="directory">The directory containing the interactions file.</param>
-        /// <param name="templates">The set of <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> to which the interactions should
+        /// <param name="templates">The set of <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> to which the interactions should
         /// be linked.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="directory"/> is null.-or-<paramref name="templates"/> is null.
         /// </exception>
@@ -407,7 +407,7 @@
     }
 
     /// <summary>
-    /// Runs a specific <see cref="T:CsDesktopPonies.DesktopPonies.InteractionTemplate"/> for its duration.
+    /// Runs a specific <see cref="T:CSDesktopPonies.DesktopPonies.InteractionTemplate"/> for its duration.
     /// </summary>
     public class InteractionInstance
     {
@@ -425,9 +425,9 @@
         public TimeSpan InteractionEndTime { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.InteractionInstance"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.InteractionInstance"/> class.
         /// </summary>
-        /// <param name="template">The <see cref="T:CsDesktopPonies.DesktopPonies.InteractionTemplate"/> on which this instance is based.
+        /// <param name="template">The <see cref="T:CSDesktopPonies.DesktopPonies.InteractionTemplate"/> on which this instance is based.
         /// </param>
         /// <param name="currentTime">The current instant in time, used to measure the duration of this interaction.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="template"/> is null.</exception>
@@ -476,7 +476,7 @@
         public IList<PonyTemplate> Targets { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.InteractionTemplate"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.InteractionTemplate"/> class.
         /// </summary>
         /// <param name="name">The name of the interaction.</param>
         /// <param name="minRepeatDuration">The minimum time to wait, in milliseconds, before repeating this interaction.</param>
@@ -485,7 +485,7 @@
         /// A value of 0 indicates this value should be ignored, that is, the interaction may be triggered at any distance.</param>
         /// <param name="behaviorName">The name of the behavior that will be initiated on all targets when this interaction triggers.
         /// </param>
-        /// <param name="targets">The collection of <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> which are involved in this
+        /// <param name="targets">The collection of <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> which are involved in this
         /// interaction.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="targets"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="targets"/> contains less than two targets.</exception>
@@ -549,7 +549,7 @@
     }
 
     /// <summary>
-    /// Realizes a single instance of a <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/>.
+    /// Realizes a single instance of a <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/>.
     /// </summary>
     public sealed class PonyInstance : ISpeakingSprite
     {
@@ -674,9 +674,9 @@
         public LinkedList<EffectInstance> ActiveEffects { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> class based on a template.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> class based on a template.
         /// </summary>
-        /// <param name="template">The <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> on which this pony is to be based.
+        /// <param name="template">The <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> on which this pony is to be based.
         /// </param>
         public PonyInstance(PonyTemplate template)
         {
@@ -1025,7 +1025,7 @@
     }
 
     /// <summary>
-    /// Represents a basis for a pony, which can be realized by a <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/>.
+    /// Represents a basis for a pony, which can be realized by a <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/>.
     /// </summary>
     public class PonyTemplate
     {
@@ -1112,7 +1112,7 @@
         public IList<EffectTemplate> Effects { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> class using configuration and
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> class using configuration and
         /// images files in the given directory.
         /// </summary>
         /// <param name="directory">The directory in which the files are located. The directory must contain a configuration file and any
@@ -2316,7 +2316,7 @@
         public SpeechTriggers Trigger { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.Speech"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.Speech"/> class.
         /// </summary>
         /// <param name="name">The name of the speech, used as an identifier.</param>
         /// <param name="characterName">The name of the character who says this speech.</param>
@@ -2338,7 +2338,7 @@
     {
         /// <summary>
         /// Gets the group number of the behavior. Only behaviors in this group or group 0 may follow on from this behavior unless
-        /// overridden by <see cref="P:CsDesktopPonies.DesktopPonies.Behavior.NextBehavior"/>.
+        /// overridden by <see cref="P:CSDesktopPonies.DesktopPonies.Behavior.NextBehavior"/>.
         /// </summary>
         public int Group { get; private set; }
         /// <summary>
@@ -2421,7 +2421,7 @@
         public ICollection<string> EffectNames { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.Behavior"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.Behavior"/> class.
         /// </summary>
         /// <param name="group">The group number to which this behavior belongs. Only behaviors the same group or group 0 may become the
         /// next behavior.</param>
@@ -2558,7 +2558,7 @@
     }
 
     /// <summary>
-    /// Realizes a single instance of an <see cref="T:CsDesktopPonies.DesktopPonies.EffectTemplate"/>.
+    /// Realizes a single instance of an <see cref="T:CSDesktopPonies.DesktopPonies.EffectTemplate"/>.
     /// </summary>
     public sealed class EffectInstance : ISprite
     {
@@ -2797,7 +2797,7 @@
 
     /// <summary>
     /// Represents an effect that behaviors can activate for a pony, which can be realized be an
-    /// <see cref="T:CsDesktopPonies.DesktopPonies.EffectInstance"/>.
+    /// <see cref="T:CSDesktopPonies.DesktopPonies.EffectInstance"/>.
     /// </summary>
     public class EffectTemplate
     {
@@ -2827,7 +2827,7 @@
         public ContentAlignment AlignmentToParentLeft { get; private set; }
         /// <summary>
         /// Gets a value specifying which part of the image is to be drawn from the offset given by
-        /// <see cref="P:CsDesktopPonies.DesktopPonies.EffectTemplate.AlignmentToParentLeft"/>.
+        /// <see cref="P:CSDesktopPonies.DesktopPonies.EffectTemplate.AlignmentToParentLeft"/>.
         /// </summary>
         public ContentAlignment AlignmentAtOffsetLeft { get; private set; }
         /// <summary>
@@ -2836,7 +2836,7 @@
         public ContentAlignment AlignmentToParentRight { get; private set; }
         /// <summary>
         /// Gets a value specifying which part of the image is to be drawn from the offset given by
-        /// <see cref="P:CsDesktopPonies.DesktopPonies.EffectTemplate.AlignmentToParentRight"/>.
+        /// <see cref="P:CSDesktopPonies.DesktopPonies.EffectTemplate.AlignmentToParentRight"/>.
         /// </summary>
         public ContentAlignment AlignmentAtOffsetRight { get; private set; }
         /// <summary>
@@ -2859,7 +2859,7 @@
         public bool FollowParent { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.EffectTemplate"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.EffectTemplate"/> class.
         /// </summary>
         /// <param name="name">The name of the effect.</param>
         /// <param name="leftImageName">The filename of the image to be used when the effect is facing left.</param>

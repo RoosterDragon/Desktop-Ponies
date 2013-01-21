@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
 
@@ -9,25 +9,25 @@
     public struct RgbColor
     {
         /// <summary>
-        /// Gets the red component value of this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure.
+        /// Gets the red component value of this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure.
         /// </summary>
         public byte R { get; private set; }
         /// <summary>
-        /// Gets the green component value of this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure.
+        /// Gets the green component value of this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure.
         /// </summary>
         public byte G { get; private set; }
         /// <summary>
-        /// Gets the blue component value of this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure.
+        /// Gets the blue component value of this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure.
         /// </summary>
         public byte B { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure from the specified color
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure from the specified color
         /// values (red, green, and blue).
         /// </summary>
-        /// <param name="r">The red component value for the new <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.</param>
-        /// <param name="g">The green component value for the new <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.</param>
-        /// <param name="b">The blue component value for the new <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.</param>
+        /// <param name="r">The red component value for the new <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/>.</param>
+        /// <param name="g">The green component value for the new <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/>.</param>
+        /// <param name="b">The blue component value for the new <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/>.</param>
         public RgbColor(byte r, byte g, byte b)
             : this()
         {
@@ -37,24 +37,24 @@
         }
 
         /// <summary>
-        /// Implicitly converts a <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> to an
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.ArgbColor"/>.
+        /// Implicitly converts a <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> to an
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.ArgbColor"/>.
         /// </summary>
-        /// <param name="rgbColor">The <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> to convert.</param>
-        /// <returns>Returns a new <see cref="T:CsDesktopPonies.SpriteManagement.ArgbColor"/> with an alpha value of 255.</returns>
+        /// <param name="rgbColor">The <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> to convert.</param>
+        /// <returns>Returns a new <see cref="T:CSDesktopPonies.SpriteManagement.ArgbColor"/> with an alpha value of 255.</returns>
         public static implicit operator ArgbColor(RgbColor rgbColor)
         {
             return new ArgbColor(255, rgbColor);
         }
 
         /// <summary>
-        /// Tests whether two specified <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structures are equivalent.
+        /// Tests whether two specified <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structures are equivalent.
         /// </summary>
-        /// <param name="left">The <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> that is to the left of the equality operator.
+        /// <param name="left">The <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> that is to the left of the equality operator.
         /// </param>
-        /// <param name="right">The <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> that is to the right of the equality
+        /// <param name="right">The <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> that is to the right of the equality
         /// operator.</param>
-        /// <returns>Returns true if the two <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structures are equal; otherwise,
+        /// <returns>Returns true if the two <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structures are equal; otherwise,
         /// false.</returns>
         public static bool operator ==(RgbColor left, RgbColor right)
         {
@@ -62,13 +62,13 @@
         }
 
         /// <summary>
-        /// Tests whether two specified <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structures are different.
+        /// Tests whether two specified <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structures are different.
         /// </summary>
-        /// <param name="left">The <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> that is to the left of the inequality
+        /// <param name="left">The <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> that is to the left of the inequality
         /// operator.</param>
-        /// <param name="right">The <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> that is to the right of the inequality
+        /// <param name="right">The <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> that is to the right of the inequality
         /// operator.</param>
-        /// <returns>Returns true if the two <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structures are different; otherwise,
+        /// <returns>Returns true if the two <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structures are different; otherwise,
         /// false.</returns>
         public static bool operator !=(RgbColor left, RgbColor right)
         {
@@ -76,12 +76,12 @@
         }
 
         /// <summary>
-        /// Tests whether the specified object is a <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure and is equivalent
-        /// to this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure.
+        /// Tests whether the specified object is a <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure and is equivalent
+        /// to this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure.
         /// </summary>
         /// <param name="obj">The object to test.</param>
-        /// <returns>Returns true if <paramref name="obj"/> is a <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure
-        /// equivalent to this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure; otherwise, false.</returns>
+        /// <returns>Returns true if <paramref name="obj"/> is a <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure
+        /// equivalent to this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || !(obj is RgbColor))
@@ -91,19 +91,19 @@
         }
 
         /// <summary>
-        /// Gets the 32-bit ARGB value of this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure. The alpha component is
+        /// Gets the 32-bit ARGB value of this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure. The alpha component is
         /// implicitly opaque (255).
         /// </summary>
-        /// <returns>The 32-bit ARGB value of this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.</returns>
+        /// <returns>The 32-bit ARGB value of this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/>.</returns>
         public int ToArgb()
         {
             return (255 << 24) | (R << 16) | (G << 8) | B;
         }
 
         /// <summary>
-        /// Returns a hash code for this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure.
+        /// Returns a hash code for this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure.
         /// </summary>
-        /// <returns>An integer value that specifies the hash code for this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.
+        /// <returns>An integer value that specifies the hash code for this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/>.
         /// </returns>
         public override int GetHashCode()
         {
@@ -111,7 +111,7 @@
         }
 
         /// <summary>
-        /// Converts this <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/> structure to a human-readable string.
+        /// Converts this <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor"/> structure to a human-readable string.
         /// </summary>
         /// <returns>A string that consists of the RGB component names and their values.</returns>
         public override string ToString()

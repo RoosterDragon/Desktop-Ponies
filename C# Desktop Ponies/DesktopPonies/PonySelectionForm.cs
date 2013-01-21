@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
@@ -7,8 +7,8 @@
     using System.IO;
     using System.Linq;
     using System.Windows.Forms;
-    using CsDesktopPonies.Collections;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.Collections;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Form that allows the user to select the ponies they want to run.
@@ -31,14 +31,14 @@
         private int totalTemplates;
 
         /// <summary>
-        /// The <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> that handles the set of pony images.
+        /// The <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> that handles the set of pony images.
         /// </summary>
         private LazyDictionary<string, AnimatedImage<BitmapFrame>> imageManager =
             new LazyDictionary<string, AnimatedImage<BitmapFrame>>(fileName => new AnimatedImage<BitmapFrame>(
                 fileName, file => new BitmapFrame(file), BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths));
 
         /// <summary>
-        /// The <see cref="T:CsDesktopPonies.SpriteManagement.ISpriteCollectionView"/> handling the display of sprites.
+        /// The <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/> handling the display of sprites.
         /// </summary>
         private ISpriteCollectionView spriteInterface;
         /// <summary>
@@ -46,7 +46,7 @@
         /// </summary>
         private LinkedList<PonyInstance> ponyInstances = new LinkedList<PonyInstance>();
         /// <summary>
-        /// The <see cref="T:CsDesktopPonies.DesktopPonies.InteractionManager"/> the handles interaction between ponies.
+        /// The <see cref="T:CSDesktopPonies.DesktopPonies.InteractionManager"/> the handles interaction between ponies.
         /// </summary>
         private InteractionManager interactionManager;
 
@@ -84,12 +84,12 @@
             /// </summary>
             public PonyTemplate Template { get; set; }
             /// <summary>
-            /// Gets the <see cref="T:CsDesktopPonies.DesktopPonies.PonySelectionControl"/> used to display this pony.
+            /// Gets the <see cref="T:CSDesktopPonies.DesktopPonies.PonySelectionControl"/> used to display this pony.
             /// </summary>
             public PonySelectionControl SelectionControl { get; private set; }
             
             /// <summary>
-            /// The <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> handling display images on the SelectionControl.
+            /// The <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> handling display images on the SelectionControl.
             /// </summary>
             private LazyDictionary<string, AnimatedImage<BitmapFrame>> manager;
             /// <summary>
@@ -98,12 +98,12 @@
             private AnimatedImage<BitmapFrame> selectionImage;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonySelectionForm.PonyDisplay"/> class to hold
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonySelectionForm.PonyDisplay"/> class to hold
             /// details for the given template and provide a selection control to display it.
             /// </summary>
-            /// <param name="template">The <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> that represents this pony.</param>
+            /// <param name="template">The <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> that represents this pony.</param>
             /// <param name="countChangedHandler">The method handling the
-            /// <see cref="E:CsDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.</param>
+            /// <see cref="E:CSDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.</param>
             /// <param name="displayImageManager">Images displayed on the selection control will be managed by this collection.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="template"/> is null.-or-
             /// <paramref name="displayImageManager"/> is null.</exception>
@@ -126,7 +126,7 @@
             }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.DesktopPonies.PonySelectionForm.PonyDisplay"/> object.
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.DesktopPonies.PonySelectionForm.PonyDisplay"/> object.
             /// </summary>
             public void Dispose()
             {
@@ -139,7 +139,7 @@
 
         #region Creation and Loading
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonySelectionForm"/> class that loads and presents
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonySelectionForm"/> class that loads and presents
         /// available pony templates to the user. Any number of each template can be selected to be run.
         /// </summary>
         public PonySelectionForm()
@@ -678,7 +678,7 @@
         /// <param name="node">The node whose image names should be returned, along with the names for subsequent nodes in the linked list
         /// to which it belongs.</param>
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerable`1"/> that returns all the image file paths for the current
-        /// behavior of each <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> contained in the given node and subsequent nodes in
+        /// behavior of each <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> contained in the given node and subsequent nodes in
         /// the list.</returns>
         private IEnumerable<string> GetCurrentBehaviorImageNamesForNodeSequence(LinkedListNode<PonyInstance> node)
         {
@@ -832,9 +832,8 @@
             foreach (PonyDisplay display in ponyDisplays)
                 ponyTemplates.Add(display.Template);
 
-            using (var editor = new PonyEditorForm())
+            using (var editor = new PonyEditorForm(ponyTemplates))
             {
-                editor.Templates = ponyTemplates;
                 editor.Disposed += (dSender, dE) => Show();
                 editor.Show();
                 Hide();

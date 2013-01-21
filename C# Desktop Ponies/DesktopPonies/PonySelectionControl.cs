@@ -1,8 +1,8 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Windows.Forms;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Custom control that displays one pony template and allows the user to choose the number of them to have.
@@ -14,11 +14,11 @@
         /// </summary>
         public string PonyName { get; private set; }
         /// <summary>
-        /// Gets the <see cref="T:CsDesktopPonies.SpriteManagement.AnimatedImage`1"/> that displays the pony selection image.
+        /// Gets the <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> that displays the pony selection image.
         /// </summary>
         public AnimatedImage<BitmapFrame> PonyImage { get; private set; }
         /// <summary>
-        /// Gets a value indicating whether the <see cref="P:CsDesktopPonies.DesktopPonies.PonySelectionControl.PonyImage"/> should be
+        /// Gets a value indicating whether the <see cref="P:CSDesktopPonies.DesktopPonies.PonySelectionControl.PonyImage"/> should be
         /// flipped to display in the desired direction.
         /// </summary>
         public bool FlipImage { get; private set; }
@@ -42,7 +42,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonySelectionControl"/> class, displaying the pony
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonySelectionControl"/> class, displaying the pony
         /// to the user.
         /// </summary>
         /// <param name="name">The name of the pony, which will be displayed to the user.</param>
@@ -168,9 +168,9 @@
         public event EventHandler<CountChangedEventArgs> CountChanged;
 
         /// <summary>
-        /// Raises the <see cref="E:CsDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.
+        /// Raises the <see cref="E:CSDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.
         /// </summary>
-        /// <param name="e">The <see cref="T:CsDesktopPonies.DesktopPonies.CountChangedEventArgs"/> that contains the event data.</param>
+        /// <param name="e">The <see cref="T:CSDesktopPonies.DesktopPonies.CountChangedEventArgs"/> that contains the event data.</param>
         protected virtual void OnCountChanged(CountChangedEventArgs e)
         {
             CountChanged.Raise(this, e);
@@ -179,7 +179,7 @@
 
     #region CountChangedEventArgs class
     /// <summary>
-    /// Provides data for the <see cref="E:CsDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.
+    /// Provides data for the <see cref="E:CSDesktopPonies.DesktopPonies.PonySelectionControl.CountChanged"/> event.
     /// </summary>
     public class CountChangedEventArgs : EventArgs
     {
@@ -193,7 +193,7 @@
         public int Change { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.CountChangedEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.CountChangedEventArgs"/> class.
         /// </summary>
         /// <param name="count">The new count for the control.</param>
         /// <param name="change">The change in the count for the control.</param>

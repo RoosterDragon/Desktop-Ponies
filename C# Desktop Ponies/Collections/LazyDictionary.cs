@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.Collections
+﻿namespace CSDesktopPonies.Collections
 {
     using System;
     using System.Collections.Generic;
@@ -19,7 +19,7 @@
 
         #region Constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// default initial capacity, uses the default equality comparer for the key type, and uses the default constructor of
         /// <typeparamref name="TValue"/> for initialization.
         /// </summary>
@@ -28,11 +28,11 @@
             dictionary = new Dictionary<TKey, Lazy<TValue>>();
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// specified initial capacity, uses the default equality comparer for the key type, and uses the default constructor of
         /// <typeparamref name="TValue"/> for initialization.
         /// </summary>
-        /// <param name="capacity">The initial number of elements that the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> can
+        /// <param name="capacity">The initial number of elements that the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> can
         /// contain.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
         public LazyDictionary(int capacity)
@@ -40,7 +40,7 @@
             dictionary = new Dictionary<TKey, Lazy<TValue>>(capacity);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// default initial capacity, uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>, and uses the
         /// default constructor of <typeparamref name="TValue"/> for initialization.
         /// </summary>
@@ -52,11 +52,11 @@
             dictionary = new Dictionary<TKey, Lazy<TValue>>(comparer);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// specified initial capacity, uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>, and uses the
         /// default constructor of <typeparamref name="TValue"/> for initialization.
         /// </summary>
-        /// <param name="capacity">The initial number of elements that the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> can
+        /// <param name="capacity">The initial number of elements that the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> can
         /// contain.</param>
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> implementation to use when comparing
         /// keys, or null to use the default <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> for the type of the key.
@@ -66,7 +66,7 @@
             dictionary = new Dictionary<TKey, Lazy<TValue>>(capacity, comparer);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// default initial capacity, uses the default equality comparer for the key type, and uses the specified initialization function
         /// for initialization of <typeparamref name="TValue"/>.
         /// </summary>
@@ -78,11 +78,11 @@
             ValueFactory = valueFactory;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// specified initial capacity, uses the default equality comparer for the key type, and uses the specified initialization function
         /// for initialization of <typeparamref name="TValue"/>.
         /// </summary>
-        /// <param name="capacity">The initial number of elements that the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> can
+        /// <param name="capacity">The initial number of elements that the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> can
         /// contain.</param>
         /// <param name="valueFactory">The delegate that is invoked to produce the lazily initialized value, based on the key, when the
         /// value is needed, or null to invoke the default constructor for the type of value.</param>
@@ -93,7 +93,7 @@
             ValueFactory = valueFactory;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// default initial capacity, uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>, and uses the
         /// specified initialization function for initialization of <typeparamref name="TValue"/>.
         /// </summary>
@@ -108,11 +108,11 @@
             ValueFactory = valueFactory;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> class that is empty, has the
         /// specified initial capacity, uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>, and uses the
         /// specified initialization function for initialization of <typeparamref name="TValue"/>.
         /// </summary>
-        /// <param name="capacity">The initial number of elements that the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> can
+        /// <param name="capacity">The initial number of elements that the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> can
         /// contain.</param>
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> implementation to use when comparing
         /// keys, or null to use the default <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> for the type of the key.
@@ -137,7 +137,7 @@
             get { return dictionary.Comparer; }
         }
         /// <summary>
-        /// Gets the number of key/value pairs contained in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Gets the number of key/value pairs contained in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public int Count
         {
@@ -145,11 +145,11 @@
         }
         /// <summary>
         /// Gets the number of key/value pairs, whose values are initialized, in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public int InitializedCount { get; private set; }
         /// <summary>
-        /// Gets an enumerator which iterates over only key/value pairs in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>
+        /// Gets an enumerator which iterates over only key/value pairs in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>
         /// whose values are initialized. If any items are initialized during the enumeration, the enumerator is invalidated.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
@@ -160,7 +160,7 @@
         }
         /// <summary>
         /// Gets a collection containing the only the initialized values in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public ICollection<TValue> InitializedValues
         {
@@ -176,14 +176,14 @@
             }
         }
         /// <summary>
-        /// Gets a value indicating whether the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> is read-only. Returns false.
+        /// Gets a value indicating whether the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> is read-only. Returns false.
         /// </summary>
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
         {
             get { return false; }
         }
         /// <summary>
-        /// Gets a collection containing the keys in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Gets a collection containing the keys in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public ICollection<TKey> Keys
         {
@@ -191,14 +191,14 @@
         }
         /// <summary>
         /// Gets the number of key/value pairs, whose values are uninitialized, in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public int UninitializedCount
         {
             get { return Count - InitializedCount; }
         }
         /// <summary>
-        /// Gets an enumerator which iterates over only keys in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> whose
+        /// Gets an enumerator which iterates over only keys in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> whose
         /// values are uninitialized. If any items are initialized during the enumeration, the enumerator is invalidated.
         /// </summary>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
@@ -212,7 +212,7 @@
         /// </summary>
         public Func<TKey, TValue> ValueFactory { get; private set; }
         /// <summary>
-        /// Gets a collection containing the values in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Gets a collection containing the values in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public ICollection<TValue> Values
         {
@@ -267,7 +267,7 @@
 
         #region Methods
         /// <summary>
-        /// Adds the specified key to the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Adds the specified key to the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="key">The key of the element to add. If the key already exists, this method does nothing.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
@@ -294,7 +294,7 @@
             dictionary.Add(key, lazy);
         }
         /// <summary>
-        /// Removes all keys and values from the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Removes all keys and values from the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public void Clear()
         {
@@ -302,10 +302,10 @@
             dictionary.Clear();
         }
         /// <summary>
-        /// Determines whether the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> contains a specific value.
+        /// Determines whether the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains a specific value.
         /// </summary>
-        /// <param name="item">The object to locate in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.</param>
-        /// <returns>Returns true if item is found in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>; otherwise, false.
+        /// <param name="item">The object to locate in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.</param>
+        /// <returns>Returns true if item is found in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>; otherwise, false.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="item"/> is null.</exception>
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
@@ -315,10 +315,10 @@
             return found ? EqualityComparer<TValue>.Default.Equals(item.Value, lazy.Value) : false;
         }
         /// <summary>
-        /// Determines whether the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> contains the specified key.
+        /// Determines whether the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains the specified key.
         /// </summary>
-        /// <param name="key">The key to locate in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.</param>
-        /// <returns>Returns true if the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
+        /// <param name="key">The key to locate in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.</param>
+        /// <returns>Returns true if the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key; otherwise, false.</returns>
         /// <exception cref="System.ArgumentException"><paramref name="key"/> is null.</exception>
         public bool ContainsKey(TKey key)
@@ -326,30 +326,30 @@
             return dictionary.ContainsKey(key);
         }
         /// <summary>
-        /// Copies the elements of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> to an <see cref="T:System.Array"/>,
+        /// Copies the elements of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> to an <see cref="T:System.Array"/>,
         /// starting at a particular <see cref="T:System.Array"/> index. Values will be initialized if they have not yet been created.
         /// </summary>
         /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>. The <see cref="T:System.Array"/> must have zero-based indexing.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>. The <see cref="T:System.Array"/> must have zero-based indexing.
         /// </param>
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0 or greater than or equal to
         /// the size of the array.</exception>
         /// <exception cref="T:System.ArgumentException">The number of elements in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> is greater than the available space from
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> is greater than the available space from
         /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             CopyTo(array, arrayIndex, true);
         }
         /// <summary>
-        /// Copies the elements of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> to an <see cref="T:System.Array"/>,
+        /// Copies the elements of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> to an <see cref="T:System.Array"/>,
         /// starting at a particular <see cref="T:System.Array"/> index. Uninitialized values will either be created or skipped, in
         /// accordance with the initialize parameter.
         /// </summary>
         /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>. The <see cref="T:System.Array"/> must have zero-based indexing.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>. The <see cref="T:System.Array"/> must have zero-based indexing.
         /// </param>
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         /// <param name="initialize">Specifies whether values should be initialized if they have not yet been created. If true, this method
@@ -359,7 +359,7 @@
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0 or greater than or equal to
         /// the size of the array.</exception>
         /// <exception cref="T:System.ArgumentException">The number of elements to be copied from the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> is greater than the available space from
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> is greater than the available space from
         /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex, bool initialize)
         {
@@ -375,11 +375,11 @@
                 array[arrayIndex++] = kvp;
         }
         /// <summary>
-        /// Returns an enumerator that iterates through the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>. Uninitialized
+        /// Returns an enumerator that iterates through the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>. Uninitialized
         /// values will be created as required.
         /// </summary>
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </returns>
         /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.</exception>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -393,11 +393,11 @@
             }
         }
         /// <summary>
-        /// Returns an enumerator that iterates through the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>. Uninitialized
+        /// Returns an enumerator that iterates through the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>. Uninitialized
         /// values will be created as required.
         /// </summary>
         /// <returns>An <see cref="T:System.Collections.IEnumerator"/> for the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </returns>
         /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.</exception>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -406,10 +406,10 @@
         }
         /// <summary>
         /// Returns an enumerator that iterates through only the initialized items in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for initialized items in the the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
         /// during the enumeration.</exception>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetInitializedEnumerator()
@@ -426,10 +426,10 @@
         }
         /// <summary>
         /// Returns an enumerator that iterates through only the uninitialized keys in the
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for uninitialized keys in the the 
-        /// <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
+        /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
         /// during the enumeration.</exception>
         public IEnumerator<TKey> GetUninitializedEnumerator()
@@ -445,7 +445,7 @@
             }
         }
         /// <summary>
-        /// Initializes all of the uninitialized items in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Initializes all of the uninitialized items in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="parallelize">Indicates if initialization may be done in parallel on worker threads. Pass true for faster loading,
         /// or pass false to load on the current thread.</param>
@@ -455,7 +455,7 @@
             InitializeAll(parallelize, null);
         }
         /// <summary>
-        /// Initializes all of the uninitialized items in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Initializes all of the uninitialized items in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="parallelize">Indicates if initialization may be done in parallel on worker threads. Pass true for faster loading,
         /// or pass false to load on the current thread.</param>
@@ -521,14 +521,14 @@
                 throw new AggregateException(initializeExceptions);
         }
         /// <summary>
-        /// Removes the value with the specified key from the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Removes the value with the specified key from the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="key">The key of the element to remove.</param>
         /// <returns>Returns true if the element is successfully found and removed; otherwise, false. This method returns false if key is
-        /// not found in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
+        /// not found in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified whilst attempting to remove the item. The
-        /// internal state of the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> is now unreliable.</exception>
+        /// internal state of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> is now unreliable.</exception>
         public bool Remove(TKey key)
         {
             Lazy<TValue> lazy;
@@ -541,7 +541,7 @@
             return removed;
         }
         /// <summary>
-        /// Removes all of the uninitialized items in the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Removes all of the uninitialized items in the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         public void RemoveUninitialized()
         {
@@ -560,7 +560,7 @@
         /// <param name="value">When this method returns, contains the value, which is initialized if it has not yet been created,
         /// associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This
         /// parameter is passed uninitialized.</param>
-        /// <returns>Returns true if the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
+        /// <returns>Returns true if the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key; otherwise, false.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is null.</exception>
         bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
@@ -577,7 +577,7 @@
         /// <param name="initialize">Specifies whether the value should be initialized if it has not yet been created. If true, this method
         /// will initialize the value. If false, this method will return false even if the key is located, and the value will remain
         /// uninitialized.</param>
-        /// <returns>Returns true if the <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
+        /// <returns>Returns true if the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key whose value is already initialized or was made to initialize by setting initialize to true; otherwise, false.
         /// </returns>
         public bool TryGetValue(TKey key, out TValue value, bool initialize)
@@ -597,7 +597,7 @@
 
         #region Unsupported Methods
         /// <summary>
-        /// Not supported by <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Not supported by <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="key">The parameter is not used.</param>
         /// <param name="value">The parameter is not used.</param>
@@ -607,7 +607,7 @@
             throw new NotSupportedException("Not supported by " + GetType().Name);
         }
         /// <summary>
-        /// Not supported by <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Not supported by <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="item">The parameter is not used.</param>
         /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
@@ -616,7 +616,7 @@
             throw new NotSupportedException("Not supported by " + GetType().Name);
         }
         /// <summary>
-        /// Not supported by <see cref="T:CsDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// Not supported by <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
         /// <param name="item">The parameter is not used.</param>
         /// <returns>The method does not return.</returns>

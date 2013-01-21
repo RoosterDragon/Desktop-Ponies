@@ -252,7 +252,7 @@
     End Sub
 
 
-    Private Function string_to_effectname(ByVal name As String) As String
+    Private Shared Function string_to_effectname(ByVal name As String) As String
         For Each effect In PonyEditor.get_effect_list()
 
             If (effect.Pony_Name & "'s " & effect.Name) = name Then

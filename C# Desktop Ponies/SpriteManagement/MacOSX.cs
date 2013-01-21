@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement.MacOSX
+﻿namespace CSDesktopPonies.SpriteManagement.MacOSX
 {
     using System;
     using System.Runtime.InteropServices;

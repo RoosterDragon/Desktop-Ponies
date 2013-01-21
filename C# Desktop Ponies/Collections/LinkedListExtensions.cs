@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.Collections
+﻿namespace CSDesktopPonies.Collections
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -28,7 +28,7 @@
     }
 
     /// <summary>
-    /// Provides a minimal implementation of the <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface that
+    /// Provides a minimal implementation of the <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface that
     /// does not have an underlying UI.
     /// </summary>
     public class SimpleContextMenuItem : ISimpleContextMenuItem
@@ -51,7 +51,7 @@
         public ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
         /// a separator.
         /// </summary>
         public SimpleContextMenuItem()
@@ -60,7 +60,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
         /// an activatable item.
         /// </summary>
         /// <param name="text">The text to be displayed that represents this item.</param>
@@ -72,7 +72,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
         /// an item with a sub-menu of items.
         /// </summary>
         /// <param name="text">The text to be displayed that represents this item.</param>

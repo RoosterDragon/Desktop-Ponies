@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
@@ -19,29 +19,19 @@
         private IList<PonyTemplate> templates;
 
         /// <summary>
-        /// Gets or sets the list of templates that can be edited.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.PonyEditorForm"/> class.
         /// </summary>
-        public IList<PonyTemplate> Templates
+        /// <param name="templates">The list of templates that this editor will make available for editing.</param>
+        public PonyEditorForm(IList<PonyTemplate> templates)
         {
-            get
-            {
-                return templates;
-            }
-            set
-            {
-                templates = value;
-                PonyDirectorySelector.DataSource = templates;
-                PonyDirectorySelector.DisplayMember = "Directory";
-            }
-        }
+            Argument.EnsureNotNull(templates, "templates");
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.PonyEditorForm"/> class.
-        /// </summary>
-        public PonyEditorForm()
-        {
             InitializeComponent();
             Icon = Properties.Resources.Twilight;
+
+            this.templates = templates;
+            PonyDirectorySelector.DataSource = templates;
+            PonyDirectorySelector.DisplayMember = "Directory";
 
             foreach (Directions direction in Enum.GetValues(typeof(Directions)))
                 BehaviorMovementColumn.Items.Add(direction);

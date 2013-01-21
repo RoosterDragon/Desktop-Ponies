@@ -1,11 +1,11 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
-    using CsDesktopPonies.Collections;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.Collections;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Animates a collection of ponies on the desktop.
@@ -14,7 +14,7 @@
     {
         #region InstanceCountChangedEventArgs class
         /// <summary>
-        /// Provides data for the <see cref="E:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChanged"/> event.
+        /// Provides data for the <see cref="E:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChanged"/> event.
         /// </summary>
         public class InstanceCountChangedEventArgs : EventArgs
         {
@@ -29,7 +29,7 @@
 
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChangedEventArgs"/> class.
+            /// <see cref="T:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChangedEventArgs"/> class.
             /// </summary>
             /// <param name="template">The template of the affected ponies.</param>
             /// <param name="change">The signed number of ponies that were added or removed.</param>
@@ -60,9 +60,9 @@
         private Comparison<ISprite> zOrder = new Comparison<ISprite>((a, b) => a.Region.Bottom - b.Region.Bottom);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator"/> class.
         /// </summary>
-        /// <param name="spriteViewer">The <see cref="T:CsDesktopPonies.SpriteManagement.ISpriteCollectionView"/> that will display the
+        /// <param name="spriteViewer">The <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/> that will display the
         /// ponies.</param>
         /// <param name="spriteCollection">The collection of ponies to animate.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="spriteViewer"/> is null.</exception>
@@ -246,7 +246,7 @@
         }
 
         /// <summary>
-        /// Stops animation and raises the <see cref="E:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.AnimatorClosed"/> event.
+        /// Stops animation and raises the <see cref="E:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.AnimatorClosed"/> event.
         /// </summary>
         private void ReturnToMenu()
         {
@@ -255,7 +255,7 @@
         }
 
         /// <summary>
-        /// Stops animation and raises the <see cref="E:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.ProgramExitRequested"/> event.
+        /// Stops animation and raises the <see cref="E:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.ProgramExitRequested"/> event.
         /// </summary>
         private void ExitProgram()
         {
@@ -264,9 +264,9 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> from the given template and adds it to the collection.
+        /// Creates a new <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> from the given template and adds it to the collection.
         /// </summary>
-        /// <param name="template">The <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> from which to create a new instance.
+        /// <param name="template">The <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> from which to create a new instance.
         /// </param>
         private void AddNewPony(PonyTemplate template)
         {
@@ -274,10 +274,10 @@
         }
 
         /// <summary>
-        /// Removes the given <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> from the collection, along with any effects it
+        /// Removes the given <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> from the collection, along with any effects it
         /// owns.
         /// </summary>
-        /// <param name="instance">The existing <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> to remove.</param>
+        /// <param name="instance">The existing <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> to remove.</param>
         private void RemovePony(PonyInstance instance)
         {
             Sprites.RemoveAll(sprite =>
@@ -290,10 +290,10 @@
         }
 
         /// <summary>
-        /// Removes every <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> in the collection which is based on the given
-        /// <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/>, along with any effects they own.
+        /// Removes every <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> in the collection which is based on the given
+        /// <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/>, along with any effects they own.
         /// </summary>
-        /// <param name="template">The <see cref="T:CsDesktopPonies.DesktopPonies.PonyTemplate"/> whose instances should be removed.
+        /// <param name="template">The <see cref="T:CSDesktopPonies.DesktopPonies.PonyTemplate"/> whose instances should be removed.
         /// </param>
         private void RemovePonies(PonyTemplate template)
         {
@@ -308,11 +308,11 @@
         }
 
         /// <summary>
-        /// Gets the <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> closest to the given point, which also has mouseover, from
+        /// Gets the <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> closest to the given point, which also has mouseover, from
         /// the collection of sprites.
         /// </summary>
         /// <param name="location">The <see cref="T:System.Drawing.Point"/> to which the closest pony instance is to be found.</param>
-        /// <returns>The <see cref="T:CsDesktopPonies.DesktopPonies.PonyInstance"/> that is closest to the given point which also has
+        /// <returns>The <see cref="T:CSDesktopPonies.DesktopPonies.PonyInstance"/> that is closest to the given point which also has
         /// mouseover, or null if no instance has mouseover.</returns>
         private PonyInstance GetSelectedInstance(Point location)
         {
@@ -395,9 +395,9 @@
         }
 
         /// <summary>
-        /// Raises the <see cref="E:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChanged"/> event.
+        /// Raises the <see cref="E:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChanged"/> event.
         /// </summary>
-        /// <param name="e">The <see cref="T:CsDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChangedEventArgs"/> that
+        /// <param name="e">The <see cref="T:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator.InstanceCountChangedEventArgs"/> that
         /// contains the event data.</param>
         protected virtual void OnInstanceCountChange(InstanceCountChangedEventArgs e)
         {

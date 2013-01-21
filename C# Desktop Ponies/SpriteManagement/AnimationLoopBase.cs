@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Globalization;
     using System.Text;
     using System.Threading;
-    using CsDesktopPonies.Collections;
+    using CSDesktopPonies.Collections;
 
     /// <summary>
     /// Defines a base class for animators. Provides a timing loop and monitors the frame rate.
@@ -52,7 +52,7 @@
 
                 /// <summary>
                 /// Initializes a new instance of the
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> struct with the
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> struct with the
                 /// given frame target, time and interval, and records the current garbage collection counts.
                 /// </summary>
                 /// <param name="target">The target frame time, in milliseconds.</param>
@@ -70,13 +70,13 @@
 
                 /// <summary>
                 /// Determines the highest, if any, generation of garbage collection that was performed between two
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> structures.
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> structures.
                 /// </summary>
                 /// <param name="a">First
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
                 /// garbage collections.</param>
                 /// <param name="b">Second
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
                 /// garbage collections.</param>
                 /// <returns>An integer indicating the highest garbage generation collected, or -1 if no collections occurred.</returns>
                 public static int CollectionGenerationPerformed(FrameRecord a, FrameRecord b)
@@ -96,10 +96,10 @@
                 /// performed between two FrameInfo structures.
                 /// </summary>
                 /// <param name="a">First
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
                 /// garbage collections.</param>
                 /// <param name="b">Second
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.FrameRecord"/> to compare for
                 /// garbage collections.</param>
                 /// <returns>A <see cref="T:System.Drawing.Brush"/> whose color is determined by the garbage collection performed, if any.
                 /// The color matches those used in the CLR Profiler.</returns>
@@ -147,7 +147,7 @@
             private Brush graphBackgroundBrush = new SolidBrush(Color.FromArgb(1, 1, 1));
 
             /// <summary>
-            /// Gets the number of records this <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/> can
+            /// Gets the number of records this <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/> can
             /// hold.
             /// </summary>
             public int Capacity
@@ -155,7 +155,7 @@
                 get { return frameRecords.Length; }
             }
             /// <summary>
-            /// Gets the number of records in this <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>.
+            /// Gets the number of records in this <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>.
             /// </summary>
             public int Count { get; private set; }
 
@@ -312,7 +312,7 @@
             }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>
             /// class to hold data about the given number of frames.
             /// </summary>
             /// <param name="count">The number of frames to hold data on.</param>
@@ -354,7 +354,7 @@
 
             /// <summary>
             /// Sets up the desired position and bar sizes for the graph drawn by the
-            /// <see cref="M:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.DrawGraph"/> method. Returns the
+            /// <see cref="M:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector.DrawGraph"/> method. Returns the
             /// resulting <see cref="T:System.Drawing.Rectangle"/> drawing this graph will occupy.
             /// </summary>
             /// <param name="location">The top-left corner the graph should be drawn from.</param>
@@ -552,7 +552,7 @@
                 context.Restore();
             }
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>
             /// object.
             /// </summary>
             public void Dispose()
@@ -651,12 +651,12 @@
         #endregion
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.AnimationLoopBase"/> class handling the given
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase"/> class handling the given
         /// collection of sprites.
         /// </summary>
-        /// <param name="spriteViewer">The <see cref="T:CsDesktopPonies.SpriteManagement.ISpriteCollectionView"/> used to display the
+        /// <param name="spriteViewer">The <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/> used to display the
         /// sprites.</param>
-        /// <param name="spriteCollection">The initial collection of <see cref="T:CsDesktopPonies.SpriteManagement.ISprite"/> to be
+        /// <param name="spriteCollection">The initial collection of <see cref="T:CSDesktopPonies.SpriteManagement.ISprite"/> to be
         /// displayed by the animator, which may be null.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="spriteViewer"/> is null.</exception>
         protected AnimationLoopBase(ISpriteCollectionView spriteViewer, IEnumerable<ISprite> spriteCollection)

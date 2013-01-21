@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     partial class PonyEditorForm
     {

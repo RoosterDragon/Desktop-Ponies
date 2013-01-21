@@ -1,11 +1,11 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.ComponentModel;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Windows.Forms;
-    using CsDesktopPonies.SpriteManagement.Win32;
+    using CSDesktopPonies.SpriteManagement.Win32;
 
     /// <summary>
     /// Extends a <see cref="T:System.Windows.Forms.Form"/> to provide the ability to use alpha blending.
@@ -13,7 +13,7 @@
     internal class AlphaForm : Form
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.AlphaForm"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AlphaForm"/> class.
         /// </summary>
         /// <exception cref="T:System.PlatformNotSupportedException">The operating system is not Windows.</exception>
         public AlphaForm()

@@ -1,6 +1,6 @@
 ﻿Imports System.Globalization
 Imports System.IO
-Imports CsDesktopPonies.SpriteManagement
+Imports CSDesktopPonies.SpriteManagement
 
 ''' <summary>
 ''' This is the Main form that handles startup and pony selection.
@@ -105,28 +105,28 @@ Public Class Main
 #End Region
 
     Enum BehaviorOption
-        name = 1
-        probability = 2
-        max_duration = 3
-        min_duration = 4
-        speed = 5 'specified in pixels per tick of the timer
-        right_image_path = 6
-        left_image_path = 7
-        movement_type = 8
-        linked_behavior = 9
-        speaking_start = 10
-        speaking_end = 11
-        skip = 12 'Should we skip this behavior when considering ones to randomly choose (part of an interaction/chain?)
-        xcoord = 13  'used when following/moving to a point on the screen.
-        ycoord = 14
-        object_to_follow = 15
-        auto_select_images = 16
-        follow_stopped_behavior = 17
-        follow_moving_behavior = 18
-        right_image_center = 19
-        left_image_center = 20
-        dont_repeat_image_animations = 21
-        group = 22
+        Name = 1
+        Probability = 2
+        MaxDuration = 3
+        MinDuration = 4
+        Speed = 5 'specified in pixels per tick of the timer
+        RightImagePath = 6
+        LeftImagePath = 7
+        MovementType = 8
+        LinkedBehavior = 9
+        SpeakingStart = 10
+        SpeakingEnd = 11
+        Skip = 12 'Should we skip this behavior when considering ones to randomly choose (part of an interaction/chain?)
+        XCoord = 13  'used when following/moving to a point on the screen.
+        YCoord = 14
+        ObjectToFollow = 15
+        AutoSelectImages = 16
+        FollowStoppedBehavior = 17
+        FollowMovingBehavior = 18
+        RightImageCenter = 19
+        LeftImageCenter = 20
+        DoNotRepeatImageAnimations = 21
+        Group = 22
     End Enum
 
     Enum InteractionParameter
@@ -134,10 +134,10 @@ Public Class Main
         Initiator = 1  'which pony triggers the interaction?
         Probability = 2
         Proximity = 3
-        Target_List = 4
-        Target_Selection_Option = 5  'do we interact with only the pony we ran into, or all of them on the list (even multiple instances)
-        Behavior_List = 6
-        Repeat_Delay = 7
+        TargetList = 4
+        TargetSelectionOption = 5  'do we interact with only the pony we ran into, or all of them on the list (even multiple instances)
+        BehaviorList = 6
+        RepeatDelay = 7
     End Enum
 
 #Region "Initialization"
@@ -219,7 +219,7 @@ Public Class Main
 
                         'windows is telling us "start as a screensaver"
                     Case "/s"
-                        Get_ScreenSaver_Path()
+                        GetScreensaverPath()
                         If screen_saver_path = "" Then Me.Close()
                         Options.InstallLocation = screen_saver_path
                         screen_saver_mode = True
@@ -387,7 +387,7 @@ Public Class Main
         End Try
     End Sub
 
-    Sub Get_ScreenSaver_Path()
+    Sub GetScreensaverPath()
         Try
             'We can't use isolated storage as windows uses 8 character names when starting as a screensaver for some reason, and then
             'gets confused when it can't find the assembly name "DESKTO~1"...
@@ -694,15 +694,15 @@ Public Class Main
 
                             Dim repeat_delay = 60
 
-                            If UBound(columns) >= InteractionParameter.Repeat_Delay Then
-                                repeat_delay = Integer.Parse(columns(InteractionParameter.Repeat_Delay), CultureInfo.InvariantCulture)
+                            If UBound(columns) >= InteractionParameter.RepeatDelay Then
+                                repeat_delay = Integer.Parse(columns(InteractionParameter.RepeatDelay), CultureInfo.InvariantCulture)
                             End If
 
                             Dim targetsActivated As PonyBase.Interaction.TargetActivation
-                            If Not [Enum].TryParse(Trim(columns(InteractionParameter.Target_Selection_Option)), targetsActivated) Then
+                            If Not [Enum].TryParse(Trim(columns(InteractionParameter.TargetSelectionOption)), targetsActivated) Then
                                 If Not Main.Instance.screen_saver_mode Then
                                     Throw New InvalidDataException("Invalid option for target selection. Use either 'One', 'Any' or 'All'." _
-                                                        & ControlChars.NewLine & " Interaction file specified: " & columns(InteractionParameter.Target_Selection_Option) & _
+                                                        & ControlChars.NewLine & " Interaction file specified: " & columns(InteractionParameter.TargetSelectionOption) & _
                                                         " for interaction named: " & columns(InteractionParameter.Name))
                                 End If
                             End If
@@ -711,9 +711,9 @@ Public Class Main
                                             ponyname, _
                                             Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
                                             columns(InteractionParameter.Proximity), _
-                                            columns(InteractionParameter.Target_List), _
+                                            columns(InteractionParameter.TargetList), _
                                             targetsActivated, _
-                                            columns(InteractionParameter.Behavior_List), _
+                                            columns(InteractionParameter.BehaviorList), _
                                             repeat_delay, _
                                             displayWarnings)
 
@@ -1334,16 +1334,16 @@ Public Class Main
                     Dim screensaver_background As New ScreensaverBackgroundForm
                     screensaver_background.Show()
 
-                    If IsNothing(Options.ScreenSaverBackgroundColor) Then
+                    If IsNothing(Options.ScreensaverBackgroundColor) Then
                         screensaver_background.BackColor = Color.Black
                     Else
-                        screensaver_background.BackColor = Options.ScreenSaverBackgroundColor
+                        screensaver_background.BackColor = Options.ScreensaverBackgroundColor
                     End If
 
-                    If Options.ScreenSaverBackgroundImagePath <> "" AndAlso
-                        Options.ScreenSaverStyle = Options.ScreenSaverBackgroundStyle.BackgroundImage Then
+                    If Options.ScreensaverBackgroundImagePath <> "" AndAlso
+                        Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
                         Try
-                            screensaver_background.BackgroundImage = Image.FromFile(Options.ScreenSaverBackgroundImagePath)
+                            screensaver_background.BackgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
                         Catch ex As Exception
                             'could not load the image
                         End Try

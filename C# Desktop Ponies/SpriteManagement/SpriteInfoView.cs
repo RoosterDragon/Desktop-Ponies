@@ -1,13 +1,13 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using CsDesktopPonies.Collections;
+    using CSDesktopPonies.Collections;
 
 #pragma warning disable 1591
     /// <summary>
-    /// Provides a wrapper around an existing <see cref="T:CsDesktopPonies.SpriteManagement.ISpriteCollectionView"/> that allows sprite
+    /// Provides a wrapper around an existing <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/> that allows sprite
     /// information to be displayed.
     /// </summary>
     public class SpriteInfoView : Disposable, ISpriteCollectionView

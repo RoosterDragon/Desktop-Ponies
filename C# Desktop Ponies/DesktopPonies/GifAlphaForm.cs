@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
@@ -7,7 +7,7 @@
     using System.Globalization;
     using System.IO;
     using System.Windows.Forms;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Allows an ARGB color table to be defined for gif files.
@@ -35,7 +35,7 @@
         /// </summary>
         private List<Panel> desiredSwatches = new List<Panel>(0);
         /// <summary>
-        /// The frames of <see cref="F:CsDesktopPonies.DesktopPonies.GifAlphaForm.gifImage"/>, altered to use the modified palette.
+        /// The frames of <see cref="F:CSDesktopPonies.DesktopPonies.GifAlphaForm.gifImage"/>, altered to use the modified palette.
         /// </summary>
         private Bitmap[] desiredFrames;
         /// <summary>
@@ -77,7 +77,7 @@
         private Brush sectionHighlightBrush = Brushes.Red;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.GifAlphaForm"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.GifAlphaForm"/> class.
         /// </summary>
         public GifAlphaForm()
         {
@@ -97,7 +97,7 @@
 
         /// <summary>
         /// Raised when the form has loaded.
-        /// Gets a list of all gif files in <see cref="P:CsDesktopPonies.DesktopPonies.Program.PonyDirectory"/>, and sets up form controls.
+        /// Gets a list of all gif files in <see cref="P:CSDesktopPonies.DesktopPonies.Program.PonyDirectory"/>, and sets up form controls.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>

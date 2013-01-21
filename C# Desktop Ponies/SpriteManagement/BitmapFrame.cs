@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Drawing;
@@ -6,15 +6,20 @@
     using System.Runtime.InteropServices;
 
     /// <summary>
-    /// Defines a <see cref="T:CsDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
+    /// Defines a <see cref="T:CSDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
     /// <see cref="T:System.Drawing.Bitmap"/>.
     /// </summary>
     public sealed class BitmapFrame : SpriteFrame<Bitmap>, IDisposable
     {
         /// <summary>
-        /// Represents the method that converts a buffer into an <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// Represents the method that converts a buffer into an <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
-        public static readonly BufferToImage<BitmapFrame> FromBuffer =
+        public static BufferToImage<BitmapFrame> FromBuffer
+        {
+            get { return FromBufferInternal; }
+        }
+
+        private static readonly BufferToImage<BitmapFrame> FromBufferInternal =
             (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
             {
                 Bitmap bitmap = GifImage.BufferToImageOfBitmap(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
@@ -23,7 +28,7 @@
 
         /// <summary>
         /// Represents the allowable set of depths that can be used when generating a
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
         public const BitDepths AllowableBitDepths =  GifImage.AllowableDepthsForBitmap;
 
@@ -41,7 +46,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> class from the given
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> class from the given
         /// <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
         /// <param name="bitmap">The <see cref="T:System.Drawing.Bitmap"/> to use in the frame.</param>
@@ -53,9 +58,9 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> class from the given file.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> class from the given file.
         /// </summary>
-        /// <param name="fileName">The path to a static image file from which to create a new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// <param name="fileName">The path to a static image file from which to create a new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </param>
         public BitmapFrame(string fileName)
             : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, "fileName").GetHashCode())
@@ -86,7 +91,7 @@
         }
 
         /// <summary>
-        /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> object.
+        /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> object.
         /// </summary>
         public void Dispose()
         {

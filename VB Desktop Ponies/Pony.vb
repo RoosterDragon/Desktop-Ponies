@@ -1,6 +1,6 @@
 ﻿Imports System.Globalization
 Imports System.IO
-Imports CsDesktopPonies.SpriteManagement
+Imports CSDesktopPonies.SpriteManagement
 
 Class PonyBase
     Public Const RootDirectory = "Ponies"
@@ -229,7 +229,7 @@ Class PonyBase
                     'movements are bytes so that they can be composite:
                     '"diagonal" means vertical AND horizontal at the same time.
                     'See the definition in the pony class for more information.
-                    Select Case Trim(LCase(columns(Main.BehaviorOption.movement_type)))
+                    Select Case Trim(LCase(columns(Main.BehaviorOption.MovementType)))
 
                         Case "none"
                             movement = Pony.Allowed_Moves.None
@@ -254,8 +254,8 @@ Class PonyBase
                         Case "dragged"
                             movement = Pony.Allowed_Moves.Dragged
                         Case Else
-                            MsgBox("Unknown movement type: " & columns(Main.BehaviorOption.movement_type) _
-                                   & ControlChars.NewLine & "Skipping behavior " & columns(Main.BehaviorOption.name) & " for " & Name)
+                            MsgBox("Unknown movement type: " & columns(Main.BehaviorOption.MovementType) _
+                                   & ControlChars.NewLine & "Skipping behavior " & columns(Main.BehaviorOption.Name) & " for " & Name)
                             Continue For
                     End Select
 
@@ -276,52 +276,52 @@ Class PonyBase
                     Dim dont_repeat_image_animations As Boolean = False
                     Dim group As Integer = 0
 
-                    If UBound(columns) > Main.BehaviorOption.movement_type Then
+                    If UBound(columns) > Main.BehaviorOption.MovementType Then
 
-                        linked_behavior = Trim(columns(Main.BehaviorOption.linked_behavior))
-                        speak_start = Trim(columns(Main.BehaviorOption.speaking_start))
-                        speak_end = Trim(columns(Main.BehaviorOption.speaking_end))
-                        skip = Boolean.Parse(Trim(columns(Main.BehaviorOption.skip)))
-                        xcoord = Integer.Parse(columns(Main.BehaviorOption.xcoord), CultureInfo.InvariantCulture)
-                        ycoord = Integer.Parse(columns(Main.BehaviorOption.ycoord), CultureInfo.InvariantCulture)
-                        follow = LCase(Trim(columns(Main.BehaviorOption.object_to_follow)))
-                        If UBound(columns) >= Main.BehaviorOption.auto_select_images Then
-                            auto_select_images = Boolean.Parse(Trim(columns(Main.BehaviorOption.auto_select_images)))
+                        linked_behavior = Trim(columns(Main.BehaviorOption.LinkedBehavior))
+                        speak_start = Trim(columns(Main.BehaviorOption.SpeakingStart))
+                        speak_end = Trim(columns(Main.BehaviorOption.SpeakingEnd))
+                        skip = Boolean.Parse(Trim(columns(Main.BehaviorOption.Skip)))
+                        xcoord = Integer.Parse(columns(Main.BehaviorOption.XCoord), CultureInfo.InvariantCulture)
+                        ycoord = Integer.Parse(columns(Main.BehaviorOption.YCoord), CultureInfo.InvariantCulture)
+                        follow = LCase(Trim(columns(Main.BehaviorOption.ObjectToFollow)))
+                        If UBound(columns) >= Main.BehaviorOption.AutoSelectImages Then
+                            auto_select_images = Boolean.Parse(Trim(columns(Main.BehaviorOption.AutoSelectImages)))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.follow_stopped_behavior Then
-                            follow_stopped_behavior = Trim(columns(Main.BehaviorOption.follow_stopped_behavior))
+                        If UBound(columns) >= Main.BehaviorOption.FollowStoppedBehavior Then
+                            follow_stopped_behavior = Trim(columns(Main.BehaviorOption.FollowStoppedBehavior))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.follow_moving_behavior Then
-                            follow_moving_behavior = Trim(columns(Main.BehaviorOption.follow_moving_behavior))
+                        If UBound(columns) >= Main.BehaviorOption.FollowMovingBehavior Then
+                            follow_moving_behavior = Trim(columns(Main.BehaviorOption.FollowMovingBehavior))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.left_image_center Then
-                            Dim center = Split(Trim(columns(Main.BehaviorOption.right_image_center)), ",")
+                        If UBound(columns) >= Main.BehaviorOption.LeftImageCenter Then
+                            Dim center = Split(Trim(columns(Main.BehaviorOption.RightImageCenter)), ",")
                             right_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
                                                            Integer.Parse(center(1), CultureInfo.InvariantCulture))
-                            center = Split(Trim(columns(Main.BehaviorOption.left_image_center)), ",")
+                            center = Split(Trim(columns(Main.BehaviorOption.LeftImageCenter)), ",")
                             left_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
                                                           Integer.Parse(center(1), CultureInfo.InvariantCulture))
                         End If
 
-                        If UBound(columns) >= Main.BehaviorOption.dont_repeat_image_animations Then
-                            dont_repeat_image_animations = Boolean.Parse(Trim(columns(Main.BehaviorOption.dont_repeat_image_animations)))
+                        If UBound(columns) >= Main.BehaviorOption.DoNotRepeatImageAnimations Then
+                            dont_repeat_image_animations = Boolean.Parse(Trim(columns(Main.BehaviorOption.DoNotRepeatImageAnimations)))
                         End If
 
-                        If UBound(columns) >= Main.BehaviorOption.group Then
-                            group = Integer.Parse(columns(Main.BehaviorOption.group), CultureInfo.InvariantCulture)
+                        If UBound(columns) >= Main.BehaviorOption.Group Then
+                            group = Integer.Parse(columns(Main.BehaviorOption.Group), CultureInfo.InvariantCulture)
                         End If
 
                     End If
 
 
                     '                    Load images now?,  name,     , Probability, Max_Secs  , Min_Secs  , Speed     , image path, left image path, move_type, Linked behavior, speaking line_start, speaking line_end , skip normally unless processing links, x coord, ycoord, object to follow
-                    AddBehavior(columns(Main.BehaviorOption.name),
-                                         Double.Parse(columns(Main.BehaviorOption.probability), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.max_duration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.min_duration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.speed), CultureInfo.InvariantCulture),
-                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.right_image_path))),
-                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.left_image_path))),
+                    AddBehavior(columns(Main.BehaviorOption.Name),
+                                         Double.Parse(columns(Main.BehaviorOption.Probability), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(Main.BehaviorOption.MaxDuration), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(Main.BehaviorOption.MinDuration), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(Main.BehaviorOption.Speed), CultureInfo.InvariantCulture),
+                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.RightImagePath))),
+                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.LeftImagePath))),
                                          movement, linked_behavior, speak_start, speak_end, skip, xcoord, ycoord,
                                          follow, auto_select_images, follow_stopped_behavior, follow_moving_behavior,
                                          right_image_center, left_image_center, dont_repeat_image_animations, group)
@@ -1187,7 +1187,7 @@ Class Pony
 
             If Not Options.SoundEnabled Then Exit Sub
 
-            If Main.Instance.screen_saver_mode AndAlso Not Options.ScreenSaverSoundEnabled Then
+            If Main.Instance.screen_saver_mode AndAlso Not Options.ScreensaverSoundEnabled Then
                 Exit Sub
             End If
 
@@ -2044,8 +2044,8 @@ Class Pony
         'appropriate graphics to how we are moving instead of using what the behavior specifies.
         If Not Destination = Vector2.Zero AndAlso Not ManualControl_P1 AndAlso Not ManualControl_P2 Then ' AndAlso Not Playing_Game Then
 
-            Dim horizontal = Math.Abs(Destination.X - Center.X)
-            Dim vertical = Math.Abs(Destination.Y - Center.Y)
+            Dim horizontalDistance = Math.Abs(Destination.X - Center.X)
+            Dim verticalDistance = Math.Abs(Destination.Y - Center.Y)
             Dim appropriate_behavior As PonyBase.Behavior = Nothing
 
             'We are supposed to be following, so say we can move any direction to do that.
@@ -2054,7 +2054,7 @@ Class Pony
             'if the distance to the destination is mostly horizontal, or mostly vertical, set the movement to either of those
             'This allows pegasi to fly up to reach their target instead of walking straight up.
             'This is weighted more on the vertical side for better effect
-            If horizontal * 0.75 > vertical Then
+            If horizontalDistance * 0.75 > verticalDistance Then
                 allowed_movement = allowed_movement And Allowed_Moves.Horizontal_Only
             Else
                 allowed_movement = allowed_movement And Allowed_Moves.Vertical_Only

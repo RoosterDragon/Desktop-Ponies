@@ -4,10 +4,9 @@
 
     Friend SoundVolume As Integer
     Friend TimeScaleFactor As Double = 1.0
-    Friend ScreenSaverBackgroundColor As Color
-    Friend ScreenSaverBackgroundImagePath As String = ""
+    Friend ScreensaverBackgroundColor As Color
+    Friend ScreensaverBackgroundImagePath As String = ""
 
-    Private settingsFileLines As New List(Of String)
     Private selectingMonitors As Boolean
     Private avoidanceZonePreviewGraphics As Graphics
 
@@ -136,12 +135,12 @@
         AvoidanceZoneHeight.Value = CDec(Options.ExclusionZone.Height * 100)
         ScreensaverSounds.Checked = Options.SoundEnabled
 
-        Select Case Options.ScreenSaverStyle
-            Case Options.ScreenSaverBackgroundStyle.Transparent
+        Select Case Options.ScreensaverStyle
+            Case Options.ScreensaverBackgroundStyle.Transparent
                 ScreensaverTransparent.Checked = True
-            Case Options.ScreenSaverBackgroundStyle.SolidColor
+            Case Options.ScreensaverBackgroundStyle.SolidColor
                 ScreensaverColor.Checked = True
-            Case Options.ScreenSaverBackgroundStyle.BackgroundImage
+            Case Options.ScreensaverBackgroundStyle.BackgroundImage
                 ScreensaverImage.Checked = True
         End Select
 
@@ -331,7 +330,7 @@
     Private Sub ScreensaverColorButton_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
         Using dialog As New ColorDialog
             If dialog.ShowDialog() = DialogResult.OK Then
-                ScreenSaverBackgroundColor = dialog.Color
+                ScreensaverBackgroundColor = dialog.Color
                 ScreensaverColorNeededLabel.Visible = False
             End If
         End Using
@@ -339,11 +338,11 @@
 
     Private Sub ScreensaverColor_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverColor.CheckedChanged
         If ScreensaverColor.Checked Then
-            If IsNothing(ScreenSaverBackgroundColor) OrElse ScreenSaverBackgroundColor = New Color Then
+            If IsNothing(ScreensaverBackgroundColor) OrElse ScreensaverBackgroundColor = New Color Then
                 ScreensaverColorNeededLabel.Visible = True
             End If
-            Options.ScreenSaverBackgroundColor = ScreenSaverBackgroundColor
-            Options.ScreenSaverStyle = Options.ScreenSaverBackgroundStyle.SolidColor
+            Options.ScreensaverBackgroundColor = ScreensaverBackgroundColor
+            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor
         Else
             ScreensaverColorNeededLabel.Visible = False
         End If
@@ -351,11 +350,11 @@
 
     Private Sub ScreensaverImage_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverImage.CheckedChanged
         If ScreensaverImage.Checked Then
-            If ScreenSaverBackgroundImagePath = "" OrElse Not IO.File.Exists(ScreenSaverBackgroundImagePath) Then
+            If ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(ScreensaverBackgroundImagePath) Then
                 ScreensaverImageNeededLabel.Visible = True
             End If
-            Options.ScreenSaverBackgroundImagePath = ScreenSaverBackgroundImagePath
-            Options.ScreenSaverStyle = Options.ScreenSaverBackgroundStyle.BackgroundImage
+            Options.ScreensaverBackgroundImagePath = ScreensaverBackgroundImagePath
+            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage
         Else
             ScreensaverImageNeededLabel.Visible = False
         End If
@@ -377,7 +376,7 @@
                         Exit Sub
                     End Try
 
-                    ScreenSaverBackgroundImagePath = dialog.FileName
+                    ScreensaverBackgroundImagePath = dialog.FileName
                     ScreensaverImageNeededLabel.Visible = False
                 End If
             End If
@@ -467,7 +466,7 @@
 
     Private Sub ScreensaverTransparent_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverTransparent.CheckedChanged
         If ScreensaverTransparent.Checked Then
-            Options.ScreenSaverStyle = Options.ScreenSaverBackgroundStyle.Transparent
+            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.Transparent
         End If
     End Sub
 

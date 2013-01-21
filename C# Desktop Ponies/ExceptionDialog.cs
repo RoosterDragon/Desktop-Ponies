@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
     using System.Globalization;
@@ -44,7 +44,7 @@
         private Assembly sourceAssembly;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.ExceptionDialog"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.ExceptionDialog"/> class.
         /// </summary>
         /// <param name="ex">The exception on which information should be displayed.</param>
         /// <param name="destinationEmailAddress">The e-mail address where an error report should be sent, or null to prevent reporting.

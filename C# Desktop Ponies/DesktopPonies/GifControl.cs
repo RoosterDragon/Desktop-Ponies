@@ -1,9 +1,9 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Drawing;
     using System.Windows.Forms;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Displays one frame bitmap and information about it.
@@ -16,7 +16,7 @@
         private GifFrame<BitmapFrame> frame;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.GifControl"/> class to display the given frame.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.GifControl"/> class to display the given frame.
         /// </summary>
         /// <param name="frame">The frame to be displayed.</param>
         /// <param name="info">The information string to be displayed.</param>

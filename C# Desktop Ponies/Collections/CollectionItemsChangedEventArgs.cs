@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.Collections
+﻿namespace CSDesktopPonies.Collections
 {
     using System;
     using System.Collections.Generic;
@@ -15,7 +15,7 @@
         public ICollection<T> Items { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.CollectionItemsChangedEventArgs`1"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.CollectionItemsChangedEventArgs`1"/> class.
         /// </summary>
         /// <param name="items">The items that were added or removed from the collection.</param>
         public CollectionItemsChangedEventArgs(ICollection<T> items)

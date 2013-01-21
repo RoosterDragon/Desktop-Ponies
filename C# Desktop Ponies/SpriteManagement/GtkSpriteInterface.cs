@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -7,7 +7,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using Cairo;
-    using CsDesktopPonies.Collections;
+    using CSDesktopPonies.Collections;
     using Gdk;
     using Gtk;
     using SD = System.Drawing;
@@ -106,7 +106,7 @@
 
                 /// <summary>
                 /// Initializes a new instance of the
-                /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow.SpeechWindow"/> class.
+                /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow.SpeechWindow"/> class.
                 /// </summary>
                 public SpeechWindow()
                     : base(Gtk.WindowType.Popup)
@@ -145,13 +145,13 @@
             /// </summary>
             private bool updatingMask = false;
             /// <summary>
-            /// The <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow.SpeechWindow"/> that provides the
+            /// The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow.SpeechWindow"/> that provides the
             /// ability to display speech bubbles for this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
             /// </summary>
             private SpeechWindow speechBubble;
             /// <summary>
-            /// Gets or sets the current <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> that will be used
+            /// Gets or sets the current <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> that will be used
             /// for clipping and drawing a sprite.
             /// </summary>
             public ClippedImage CurrentImage { get; set; }
@@ -177,13 +177,13 @@
             private int lastHeight;
 
             /// <summary>
-            /// Gets or sets the <see cref="T:CsDesktopPonies.SpriteManagement.ISprite"/> that this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> is responsible for drawing.
+            /// Gets or sets the <see cref="T:CSDesktopPonies.SpriteManagement.ISprite"/> that this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> is responsible for drawing.
             /// </summary>
             public ISprite Sprite { get; set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> class.
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> class.
             /// </summary>
             public GraphicsWindow()
                 : base(Gtk.WindowType.Popup)
@@ -466,18 +466,18 @@
             public Pixmap Clip { get; set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> class.
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> class.
             /// </summary>
             public ClippedImage()
             {
             }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> class
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> class
             /// from the given file.
             /// </summary>
             /// <param name="fileName">The path to a static image file from which to create a new
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.</param>
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.</param>
             public ClippedImage(string fileName)
             {
                 // These operations must be invoked on the application thread to work.
@@ -501,7 +501,7 @@
             }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> object.
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> object.
             /// </summary>
             public void Dispose()
             {
@@ -514,13 +514,13 @@
 
         #region GtkFrame class
         /// <summary>
-        /// Defines a <see cref="T:CsDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.
+        /// Defines a <see cref="T:CSDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.
         /// </summary>
         private class GtkFrame : SpriteFrame<ClippedImage>, IDisposable
         {
             /// <summary>
-            /// Gets the method for creating a <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> frame from a
+            /// Gets the method for creating a <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> frame from a
             /// buffer.
             /// </summary>
             public static BufferToImage<GtkFrame> FromBuffer
@@ -534,7 +534,7 @@
             public static GtkSpriteInterface Interface { get; set; }
 
             /// <summary>
-            /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the raw buffer.
+            /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the raw buffer.
             /// </summary>
             /// <param name="buffer">The raw buffer.</param>
             /// <param name="palette">The color palette.</param>
@@ -544,7 +544,7 @@
             /// <param name="height">The logical height of the buffer.</param>
             /// <param name="depth">The bit depth of the buffer.</param>
             /// <param name="hashCode">The hash code of the frame.</param>
-            /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
+            /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
             /// buffer.</returns>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 8.</exception>
             private static GtkFrame FromBufferMethod(
@@ -602,7 +602,7 @@
             }
 
             /// <summary>
-            /// Gets the set of allowable bit depths for a <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.
+            /// Gets the set of allowable bit depths for a <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.
             /// </summary>
             public static BitDepths AllowableBitDepths
             {
@@ -627,10 +627,10 @@
             }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> class from
-            /// the given <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> class from
+            /// the given <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.
             /// </summary>
-            /// <param name="clippedImage">The <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> to use in
+            /// <param name="clippedImage">The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.ClippedImage"/> to use in
             /// the frame.</param>
             /// <param name="hash">The hash code of the frame.</param>
             public GtkFrame(ClippedImage clippedImage, int hash)
@@ -640,11 +640,11 @@
             }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> class from
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> class from
             /// the given file.
             /// </summary>
             /// <param name="fileName">The path to a static image file from which to create a new
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.</param>
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.</param>
             public GtkFrame(string fileName)
                 : this(new ClippedImage(fileName), fileName.GetHashCode())
             {
@@ -698,7 +698,7 @@
             }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> object.
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> object.
             /// </summary>
             public void Dispose()
             {
@@ -710,7 +710,7 @@
         #region GtkContextMenuItem class
         /// <summary>
         /// Wraps a <see cref="T:Gtk.MenuItem"/> in order to expose the
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface.
         /// </summary>
         private class GtkContextMenuItem : ISimpleContextMenuItem, IDisposable
         {
@@ -728,7 +728,7 @@
             private EventHandler queuedActivatedMethod;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
             /// class for the given <see cref="T:Gtk.SeparatorMenuItem"/>.
             /// </summary>
             /// <param name="separatorItem">The underlying <see cref="T:Gtk.SeparatorMenuItem"/> that this class wraps.</param>
@@ -740,7 +740,7 @@
                 item = separatorItem;
             }
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
             /// class for the given <see cref="T:Gtk.MenuItem"/>, and links up the given activation method.
             /// </summary>
             /// <param name="menuItem">The underlying <see cref="T:Gtk.MenuItem"/> that this class wraps.</param>
@@ -754,15 +754,15 @@
                 Activated = activated;
             }
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
             /// class for the given <see cref="T:Gtk.MenuItem"/>, and links up the activation method to display a new sub-menu.
             /// </summary>
             /// <param name="menuItem">The underlying <see cref="T:Gtk.MenuItem"/> that this class wraps.</param>
             /// <param name="subItems">The items to appear in the sub-menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.-or-<paramref name="subItems"/> is
             /// null.-or-<paramref name="parent"/> is null.</exception>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>.</param>
             /// <exception cref="T:System.ArgumentException"><paramref name="subItems"/> is empty.</exception>
             public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent)
             {
@@ -851,7 +851,7 @@
             public ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; private set; }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
             /// object.
             /// </summary>
             public void Dispose()
@@ -867,14 +867,14 @@
 
         #region GtkContextMenu class
         /// <summary>
-        /// Extends a <see cref="T:Gtk.Menu"/> in order to expose the <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenu"/>
+        /// Extends a <see cref="T:Gtk.Menu"/> in order to expose the <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenu"/>
         /// interface.
         /// </summary>
         private class GtkContextMenu : Menu, ISimpleContextMenu, IDisposable
         {
             /// <summary>
-            /// The <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that owns this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.
+            /// The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that owns this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.
             /// </summary>
             private GtkSpriteInterface owner;
             /// <summary>
@@ -887,11 +887,11 @@
             public ReadOnlyCollection<ISimpleContextMenuItem> Items { get; private set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> class
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> class
             /// to display the given menu items.
             /// </summary>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.</param>
             /// <param name="menuItems">The items which should be displayed in this menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItems"/> is 
             /// null.</exception>
@@ -938,7 +938,7 @@
             }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> object.
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> object.
             /// </summary>
             public override void Dispose()
             {
@@ -950,7 +950,7 @@
 
         #region Fields and Properties
         /// <summary>
-        /// Indicates if we have disposed of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Indicates if we have disposed of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         private static bool disposed = true;
         /// <summary>
@@ -958,12 +958,12 @@
         /// </summary>
         private static bool exceptionsRaised;
         /// <summary>
-        /// Stores the images for each sprite as a series of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>,
+        /// Stores the images for each sprite as a series of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>,
         /// indexed by filename.
         /// </summary>
         private LazyDictionary<string, AnimatedImage<GtkFrame>> images;
         /// <summary>
-        /// List of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> which have been created by the
+        /// List of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> which have been created by the
         /// interface.
         /// </summary>
         private readonly LinkedList<GtkContextMenu> contextMenus = new LinkedList<GtkContextMenu>();
@@ -980,34 +980,34 @@
         /// </summary>
         private readonly object drawSync = new object();
         /// <summary>
-        /// Links a <see cref="T:CsDesktopPonies.SpriteManagement.ISprite"/> to the
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> responsible for drawing it.
+        /// Links a <see cref="T:CSDesktopPonies.SpriteManagement.ISprite"/> to the
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> responsible for drawing it.
         /// </summary>
         private readonly Dictionary<ISprite, GraphicsWindow> spriteWindows = new Dictionary<ISprite, GraphicsWindow>();
         /// <summary>
-        /// Maintains the list of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> in the desired draw
+        /// Maintains the list of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> in the desired draw
         /// order.
         /// </summary>
         private readonly List<GraphicsWindow> drawOrderedWindows = new List<GraphicsWindow>(0);
         /// <summary>
-        /// Maintains the list of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> that were removed
+        /// Maintains the list of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> that were removed
         /// since last draw.
         /// </summary>
         private readonly List<ISprite> removedSprites = new List<ISprite>();
         /// <summary>
-        /// Title for instances of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
+        /// Title for instances of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
         /// </summary>
         private string windowTitle = "Gtk# Sprite Window";
         /// <summary>
-        /// Path to the icon for instances of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
+        /// Path to the icon for instances of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
         /// </summary>
         private string windowIconFilePath = null;
         /// <summary>
-        /// Icon for instances of <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
+        /// Icon for instances of <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.
         /// </summary>
         private Pixbuf windowIcon = null;
         /// <summary>
-        /// Indicates if each <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> should act as a topmost
+        /// Indicates if each <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> should act as a topmost
         /// window.
         /// </summary>
         private bool windowTopmost = true;
@@ -1121,11 +1121,11 @@
 
         #region Events
         /// <summary>
-        /// Gets the equivalent <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration from the native button
+        /// Gets the equivalent <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration from the native button
         /// code.
         /// </summary>
         /// <param name="button">The code of the mouse button that was pressed.</param>
-        /// <returns>The equivalent <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration for this button.
+        /// <returns>The equivalent <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration for this button.
         /// </returns>
         private static SimpleMouseButtons GetButtonsFromNative(uint button)
         {
@@ -1205,7 +1205,7 @@
         #endregion
 
         /// <summary>
-        /// Gets a value indicating whether a <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can be used in the
+        /// Gets a value indicating whether a <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can be used in the
         /// current environment.
         /// </summary>
         public static bool IsRunable
@@ -1236,7 +1236,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> class.
         /// </summary>
         /// <param name="useAlphaBlending">Indicates if alpha blending should be supported. If true, the transparency value in images is
         /// respected, and the color is blended with the color behind it. If false, semi-transparent values will appear opaque. Only fully
@@ -1308,12 +1308,12 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the given file, loading extra
+        /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the given file, loading extra
         /// transparency information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="fileName">The path to a static image file from which to create a new
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.</param>
-        /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> created from the given file.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.</param>
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> created from the given file.
         /// </returns>
         private GtkFrame GtkFrameFromFile(string fileName)
         {
@@ -1321,7 +1321,7 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the raw buffer, loading extra
+        /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the raw buffer, loading extra
         /// transparency information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="buffer">The raw buffer.</param>
@@ -1333,7 +1333,7 @@
         /// <param name="depth">The bit depth of the buffer.</param>
         /// <param name="hashCode">The hash code of the frame.</param>
         /// <param name="fileName">The path to the GIF file being loaded.</param>
-        /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
         /// buffer.</returns>
         private GtkFrame GtkFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
             int stride, int width, int height, int depth, int hashCode, string fileName)
@@ -1388,7 +1388,7 @@
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can display.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can display.
         /// </summary>
         /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand. This method can be called asynchronously to ensure all images become loaded but
@@ -1402,7 +1402,7 @@
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can display.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> can display.
         /// </summary>
         /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
@@ -1422,11 +1422,11 @@
         }
 
         /// <summary>
-        /// Creates an <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> specific context menu for the given set of menu
+        /// Creates an <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> specific context menu for the given set of menu
         /// items.
         /// </summary>
         /// <param name="menuItems">The collections of items to be displayed in the menu.</param>
-        /// <returns>An <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> specific context menu.</returns>
+        /// <returns>An <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> specific context menu.</returns>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItems"/> is null.</exception>
         public ISimpleContextMenu CreateContextMenu(IEnumerable<ISimpleContextMenuItem> menuItems)
@@ -1441,14 +1441,14 @@
         }
 
         /// <summary>
-        /// Opens the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Opens the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         public void Open()
         {
         }
 
         /// <summary>
-        /// Hides the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Hides the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Hide()
@@ -1464,7 +1464,7 @@
         }
 
         /// <summary>
-        /// Shows the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Shows the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Show()
@@ -1480,7 +1480,7 @@
         }
 
         /// <summary>
-        /// Freezes the display of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Freezes the display of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         public void Pause()
         {
@@ -1488,7 +1488,7 @@
         }
 
         /// <summary>
-        /// Resumes display of the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> from a paused state.
+        /// Resumes display of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> from a paused state.
         /// </summary>
         public void Unpause()
         {
@@ -1496,11 +1496,11 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> for the given sprite with the
+        /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> for the given sprite with the
         /// current window settings, attaches the appropriate event handlers and realizes the window.
         /// </summary>
-        /// <param name="sprite">The <see cref="T:CsDesktopPonies.SpriteManagement.ISprite"/> that should be drawn by this window.</param>
-        /// <returns>The new <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.</returns>
+        /// <param name="sprite">The <see cref="T:CSDesktopPonies.SpriteManagement.ISprite"/> that should be drawn by this window.</param>
+        /// <returns>The new <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/>.</returns>
         private GraphicsWindow CreateWindow(ISprite sprite)
         {
             GraphicsWindow window = null;
@@ -1753,7 +1753,7 @@
         */
 
         /// <summary>
-        /// Closes the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
+        /// Closes the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
         public void Close()
         {
@@ -1762,7 +1762,7 @@
         }
 
         /// <summary>
-        /// Releases all resources used by the <see cref="T:CsDesktopPonies.SpriteManagement.GtkSpriteInterface"/> object.
+        /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> object.
         /// </summary>
         public void Dispose()
         {

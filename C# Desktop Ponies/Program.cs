@@ -1,6 +1,6 @@
 ﻿// Desktop Ponies in C# - Tom Roostan (troostan@gmail.com)
 
-namespace CsDesktopPonies
+namespace CSDesktopPonies
 {
     using System;
     using System.Threading;
@@ -59,7 +59,7 @@ namespace CsDesktopPonies
             // Start application.
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CsDesktopPonies.DesktopPonies.PonySelectionForm());
+            Application.Run(new CSDesktopPonies.DesktopPonies.PonySelectionForm());
         }
 
         /// <summary>

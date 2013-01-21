@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +13,7 @@
         private const int MaxItems = 30;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.SpriteAnimationDetailsForm"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SpriteAnimationDetailsForm"/> class.
         /// </summary>
         public SpriteInfoForm()
         {

@@ -1,11 +1,11 @@
-﻿namespace CsDesktopPonies.DesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Windows.Forms;
-    using CsDesktopPonies.SpriteManagement;
+    using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
     /// Displays the individual frames and other information about gif files.
@@ -13,7 +13,7 @@
     public partial class GifForm : Form
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.DesktopPonies.GifForm"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.GifForm"/> class.
         /// </summary>
         public GifForm()
         {
@@ -23,7 +23,7 @@
 
         /// <summary>
         /// Raised when the form has loaded.
-        /// Gets a list of all gif files in <see cref="P:CsDesktopPonies.DesktopPonies.Program.PonyDirectory"/>.
+        /// Gets a list of all gif files in <see cref="P:CSDesktopPonies.DesktopPonies.Program.PonyDirectory"/>.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>

@@ -1,7 +1,6 @@
-﻿Imports CsDesktopPonies.SpriteManagement
+﻿Imports CSDesktopPonies.SpriteManagement
 
 Public Class PonySelectionControl
-    Private ReadOnly initialDetailPanelHeight As Integer
     Friend PonyBase As PonyBase
     Friend PonyImage As AnimatedImage(Of BitmapFrame)
     Dim timeIndex As TimeSpan
@@ -14,7 +13,6 @@ Public Class PonySelectionControl
         PonyImage = image
         flip = flipImage
 
-        initialDetailPanelHeight = DetailPanel.Height
         ResizeToFit()
         Invalidate(New Rectangle(0, 0, CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor)))
     End Sub

@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
     using System.Runtime.InteropServices;
@@ -27,7 +27,7 @@
         private static extern int uname(IntPtr name);
 
         /// <summary>
-        /// Initializes static members of the <see cref="T:CsDesktopPonies.OperatingSystemInfo"/> class.
+        /// Initializes static members of the <see cref="T:CSDesktopPonies.OperatingSystemInfo"/> class.
         /// </summary>
         static OperatingSystemInfo()
         {

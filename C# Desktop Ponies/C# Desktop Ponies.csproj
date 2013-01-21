@@ -8,7 +8,7 @@
     <ProjectGuid>{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CsDesktopPonies</RootNamespace>
+    <RootNamespace>CSDesktopPonies</RootNamespace>
     <AssemblyName>C# Desktop Ponies</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

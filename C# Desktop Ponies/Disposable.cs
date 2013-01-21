@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
     using System.Threading;
@@ -25,7 +25,7 @@
         }
 
         /// <summary>
-        /// Releases all resources used by the <see cref="CsDesktopPonies.Disposable"/>.
+        /// Releases all resources used by the <see cref="CSDesktopPonies.Disposable"/>.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly",
             Justification = "Implementation is correct, but not an exact match which misleads analysis.")]

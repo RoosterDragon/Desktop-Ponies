@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     partial class SpriteInfoForm
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SpriteListView = new CsDesktopPonies.SpriteManagement.BufferedListView();
+            this.SpriteListView = new CSDesktopPonies.SpriteManagement.BufferedListView();
             this.GeneralLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -72,7 +72,7 @@
 
         #endregion
 
-        private CsDesktopPonies.SpriteManagement.BufferedListView SpriteListView;
+        private CSDesktopPonies.SpriteManagement.BufferedListView SpriteListView;
         private System.Windows.Forms.Label GeneralLabel;
     }
 }

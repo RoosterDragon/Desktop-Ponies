@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System.Windows.Forms;
 
@@ -9,7 +9,7 @@
     public class BufferedListView : ListView
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CsDesktopPonies.SpriteManagement.BufferedListView"/> class.
+        /// Initializes a new instance of the <see cref="CSDesktopPonies.SpriteManagement.BufferedListView"/> class.
         /// </summary>
         public BufferedListView()
         {

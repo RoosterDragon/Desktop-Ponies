@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.Collections
+﻿namespace CSDesktopPonies.Collections
 {
     using System.Collections.Generic;
 
@@ -13,7 +13,7 @@
         /// </summary>
         private IEnumerator<T> enumerator;
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> struct from the given enumerator.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> struct from the given enumerator.
         /// </summary>
         /// <param name="enumerator">An <see cref="T:System.Collections.Generic.IEnumerator`1"/> that enumerates the elements of a generic
         /// collection.</param>
@@ -38,38 +38,38 @@
             return GetEnumerator();
         }
         /// <summary>
-        /// Tests whether two specified <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structures are equivalent.
+        /// Tests whether two specified <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structures are equivalent.
         /// </summary>
-        /// <param name="left">The <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> that is to the left of the equality operator.
+        /// <param name="left">The <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> that is to the left of the equality operator.
         /// </param>
-        /// <param name="right">The <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> that is to the right of the equality operator.
+        /// <param name="right">The <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> that is to the right of the equality operator.
         /// </param>
-        /// <returns>Returns true if the two <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structures are equal; otherwise,
+        /// <returns>Returns true if the two <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structures are equal; otherwise,
         /// false.</returns>
         public static bool operator ==(Enumerator<T> left, Enumerator<T> right)
         {
             return left.enumerator == right.enumerator;
         }
         /// <summary>
-        /// Tests whether two specified <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structures are different.
+        /// Tests whether two specified <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structures are different.
         /// </summary>
-        /// <param name="left">The <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> that is to the left of the inequality operator.
+        /// <param name="left">The <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> that is to the left of the inequality operator.
         /// </param>
-        /// <param name="right">The <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> that is to the right of the inequality
+        /// <param name="right">The <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> that is to the right of the inequality
         /// operator.</param>
-        /// <returns>Returns true if the two <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structures are different; otherwise,
+        /// <returns>Returns true if the two <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structures are different; otherwise,
         /// false.</returns>
         public static bool operator !=(Enumerator<T> left, Enumerator<T> right)
         {
             return !(left == right);
         }
         /// <summary>
-        /// Tests whether the specified object is a <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structure and is equivalent
-        /// to this <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structure.
+        /// Tests whether the specified object is a <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structure and is equivalent
+        /// to this <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structure.
         /// </summary>
         /// <param name="obj">The object to test.</param>
-        /// <returns>Returns true if <paramref name="obj"/> is a <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structure
-        /// equivalent to this <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structure; otherwise, false.</returns>
+        /// <returns>Returns true if <paramref name="obj"/> is a <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structure
+        /// equivalent to this <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structure; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || !(obj is Enumerator<T>))
@@ -78,9 +78,9 @@
             return this == (Enumerator<T>)obj;
         }
         /// <summary>
-        /// Returns a hash code for this <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/> structure.
+        /// Returns a hash code for this <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/> structure.
         /// </summary>
-        /// <returns>An integer value that specifies the hash code for this <see cref="T:CsDesktopPonies.Collections.Enumerator`1"/>.
+        /// <returns>An integer value that specifies the hash code for this <see cref="T:CSDesktopPonies.Collections.Enumerator`1"/>.
         /// </returns>
         public override int GetHashCode()
         {

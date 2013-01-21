@@ -1,12 +1,10 @@
-﻿namespace CsDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
 
     /// <summary>
     /// Defines Raise methods for <see cref="T:System.EventHandler"/> and <see cref="T:System.EventHandler`1"/>.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate",
-        Justification="This class provides event related functionality, but no actual events.")]
     public static class Event
     {
         /// <summary>
@@ -14,6 +12,8 @@
         /// </summary>
         /// <param name="eventHandler">The event to raise.</param>
         /// <param name="sender">The source of the event.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate",
+            Justification = "This method provides event related functionality, but is not an event.")]
         public static void Raise(this EventHandler eventHandler, object sender)
         {
             EventHandler handler = eventHandler;
@@ -28,6 +28,8 @@
         /// <param name="eventHandler">The event to raise.</param>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate",
+            Justification = "This method provides event related functionality, but is not an event.")]
         public static void Raise<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, TEventArgs e)
             where TEventArgs : EventArgs
         {
@@ -44,6 +46,8 @@
         /// <param name="sender">The source of the event.</param>
         /// <param name="argsFactory">Function to generate event data if the event handler is not null.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="argsFactory"/> is null.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate",
+            Justification = "This method provides event related functionality, but is not an event.")]
         public static void Raise<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, Func<TEventArgs> argsFactory)
             where TEventArgs : EventArgs
         {

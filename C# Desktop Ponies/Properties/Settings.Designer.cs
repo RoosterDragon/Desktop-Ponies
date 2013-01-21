@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CsDesktopPonies.Properties {
+namespace CSDesktopPonies.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

@@ -1,5 +1,5 @@
 ﻿Imports System.Collections.ObjectModel
-Imports CsDesktopPonies.SpriteManagement
+Imports CSDesktopPonies.SpriteManagement
 
 Public Class DesktopControlForm
     Private allowClose As Boolean
@@ -59,7 +59,7 @@ Public Class DesktopControlForm
         End Sub
 
         Private _handler As EventHandler
-        Public Property Activated As System.EventHandler Implements CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Activated
+        Public Property Activated As System.EventHandler Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Activated
             Get
                 Return _handler
             End Get
@@ -70,7 +70,7 @@ Public Class DesktopControlForm
             End Set
         End Property
 
-        Public Property IsSeparator As Boolean Implements CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem.IsSeparator
+        Public Property IsSeparator As Boolean Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.IsSeparator
             Get
                 Return _separatorItem IsNot Nothing
             End Get
@@ -85,14 +85,14 @@ Public Class DesktopControlForm
             End Set
         End Property
 
-        Public _subItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem)
-        Public ReadOnly Property SubItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem) Implements CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem.SubItems
+        Public _subItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem)
+        Public ReadOnly Property SubItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem) Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.SubItems
             Get
                 Return _subItems
             End Get
         End Property
 
-        Public Property ISimpleContextMenuItemText As String Implements CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Text
+        Public Property ISimpleContextMenuItemText As String Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Text
             Get
                 Return _menuItem.Text
             End Get

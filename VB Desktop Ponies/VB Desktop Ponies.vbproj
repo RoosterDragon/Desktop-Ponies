@@ -104,8 +104,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Import Include="CsDesktopPonies" />
-    <Import Include="CsDesktopPonies.Collections" />
+    <Import Include="CSDesktopPonies" />
+    <Import Include="CSDesktopPonies.Collections" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections.Generic" />

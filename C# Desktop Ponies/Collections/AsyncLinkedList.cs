@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.Collections
+﻿namespace CSDesktopPonies.Collections
 {
     using System;
     using System.Collections.Generic;
@@ -22,7 +22,7 @@
     {
         #region Enumerator struct
         /// <summary>
-        /// Enumerates the elements of a <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// Enumerates the elements of a <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
         public struct Enumerator : IEnumerator<T>
         {
@@ -36,10 +36,10 @@
             private object syncObject;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/> struct
-            /// for the given <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/> struct
+            /// for the given <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
             /// </summary>
-            /// <param name="collection">The <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> to enumerate.</param>
+            /// <param name="collection">The <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> to enumerate.</param>
             internal Enumerator(AsyncLinkedList<T> collection)
             {
                 syncObject = collection.syncObject;
@@ -78,7 +78,7 @@
                 get { return Current; }
             }
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/>
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/>
             /// object.
             /// </summary>
             public void Dispose()
@@ -99,19 +99,19 @@
         private object syncObject = new object();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> class that is empty.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> class that is empty.
         /// </summary>
         public AsyncLinkedList()
         {
             list = new LinkedList<T>();
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> class that contains elements
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> class that contains elements
         /// copied from the specified <see cref="T:System.Collections.Generic.IEnumerable`1"/> and has sufficient capacity to accommodate
         /// the number of elements copied.
         /// </summary>
         /// <param name="collection">The <see cref="T:System.Collections.Generic.IEnumerable`1"/> whose elements are copied to the new
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
         public AsyncLinkedList(IEnumerable<T> collection)
         {
@@ -136,7 +136,7 @@
         public event EventHandler<CollectionItemsChangedEventArgs<T>> ItemsRemoved;
 
         /// <summary>
-        /// Gets the number of nodes actually contained in the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// Gets the number of nodes actually contained in the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
         public int Count
         {
@@ -147,14 +147,14 @@
             }
         }
         /// <summary>
-        /// Gets a value indicating whether the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> is read-only.
+        /// Gets a value indicating whether the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> is read-only.
         /// </summary>
         bool ICollection<T>.IsReadOnly
         {
             get { return false; }
         }
         /// <summary>
-        /// Gets the first node of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// Gets the first node of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
         public LinkedListNode<T> First
         {
@@ -165,7 +165,7 @@
             }
         }
         /// <summary>
-        /// Gets the last node of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// Gets the last node of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
         public LinkedListNode<T> Last
         {
@@ -178,7 +178,7 @@
 
         /// <summary>
         /// Runs <paramref name="addMethod"/> to add an item to the collection, and raises the
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event using <paramref name="value"/>.
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event using <paramref name="value"/>.
         /// </summary>
         /// <param name="addMethod">The method which adds an item to the underlying collection.</param>
         /// <param name="value">The value that will be added to the collection.</param>
@@ -188,7 +188,7 @@
         }
         /// <summary>
         /// Runs <paramref name="addMethod"/> to add an item to the collection synchronously, and raises the
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event using <paramref name="value"/>.
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event using <paramref name="value"/>.
         /// </summary>
         /// <param name="addMethod">The method which adds an item to the underlying collection.</param>
         /// <param name="value">The value that will be added to the collection.</param>
@@ -200,7 +200,7 @@
         }
         /// <summary>
         /// Runs <paramref name="addMethod"/> on the first node in <paramref name="nodes"/> and then inserts remaining nodes after that in
-        /// order to add a range of items to the collection. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/>
+        /// order to add a range of items to the collection. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/>
         /// event is then raised.
         /// </summary>
         /// <param name="addMethod">The method which adds an item to the underlying collection.</param>
@@ -241,7 +241,7 @@
         /// <summary>
         /// Runs <paramref name="addMethod"/> on the first value in <paramref name="values"/> and then inserts remaining values after that
         /// in order to add a range of items to the collection. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event is then raised.
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event is then raised.
         /// </summary>
         /// <param name="addMethod">The method which adds an item to the underlying collection.</param>
         /// <param name="values">The values that will be added to the collection.</param>
@@ -273,7 +273,7 @@
         }
         /// <summary>
         /// Runs <paramref name="removeMethod"/> to remove an item from the collection, and raises the
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event using <paramref name="value"/>.
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event using <paramref name="value"/>.
         /// </summary>
         /// <param name="removeMethod">The method which removes an item from the underlying collection.</param>
         /// <param name="value">The value that will be removed from the collection.</param>
@@ -288,16 +288,16 @@
         }
         /// <summary>
         /// Removes the first occurrence of the specified value from the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
         /// removed. The event will not be raised if the value was not removed, or if the value was not found in the original
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
-        /// <param name="item">The object to remove from the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <param name="item">The object to remove from the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </param>
         /// <returns>Return true if <paramref name="item"/> was successfully removed from the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false. This method also returns false if
-        /// <paramref name="item"/> is not found in the original <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false. This method also returns false if
+        /// <paramref name="item"/> is not found in the original <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </returns>
         private bool RemoveSync(T item)
         {
@@ -310,7 +310,7 @@
         }
         /// <summary>
         /// Removes the all the elements that match the conditions defined by the specified predicate synchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the elements are
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the elements are
         /// removed.
         /// </summary>
         /// <param name="match">The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the elements to remove.
@@ -340,85 +340,85 @@
 
         /// <summary>
         /// Adds a new node containing the specified value at the start of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will be raised once the value is added.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will be raised once the value is added.
         /// </summary>
-        /// <param name="value">The value to add at the start of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <param name="value">The value to add at the start of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         public void AddFirst(T value)
         {
             Add(() => list.AddFirst(value), value);
         }
         /// <summary>
-        /// Adds a new node containing the specified value at the end of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
-        /// This method is performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will
+        /// Adds a new node containing the specified value at the end of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// This method is performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will
         /// be raised once the value is added.
         /// </summary>
-        /// <param name="value">The value to add at the end of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <param name="value">The value to add at the end of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         public void AddLast(T value)
         {
             Add(() => list.AddLast(value), value);
         }
         /// <summary>
-        /// Adds the specified nodes at the start of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
-        /// performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised
+        /// Adds the specified nodes at the start of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
+        /// performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised
         /// once the nodes are added.
         /// </summary>
         /// <param name="nodes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> of the new
         /// <see cref="T:System.Collections.Generic.LinkedListNode`1"/> to add at the start of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="nodes"/> is null.-or-Any node in <paramref name="nodes"/> is
         /// null.</exception>
         /// <exception cref="T:System.InvalidOperationException">A node in <paramref name="nodes"/> belongs to another
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</exception>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</exception>
         public void AddRangeFirst(IEnumerable<LinkedListNode<T>> nodes)
         {
             AddRange(list.AddFirst, nodes);
         }
         /// <summary>
         /// Adds new nodes containing the specified values at the start of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised once the values are
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised once the values are
         /// added.
         /// </summary>
         /// <param name="values">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> of the values to add at the start of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="values"/> is null.</exception>
         public void AddRangeFirst(IEnumerable<T> values)
         {
             AddRange(list.AddFirst, values);
         }
         /// <summary>
-        /// Adds the specified new nodes at the end of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This
-        /// method is performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/>
+        /// Adds the specified new nodes at the end of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This
+        /// method is performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/>
         /// event will be raised once the nodes are added.
         /// </summary>
         /// <param name="nodes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> of the new
         /// <see cref="T:System.Collections.Generic.LinkedListNode`1"/> to add at the end of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="nodes"/> is null.-or-Any node in <paramref name="nodes"/> is
         /// null.</exception>
         /// <exception cref="T:System.InvalidOperationException">A node in <paramref name="nodes"/> belongs to another
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</exception>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</exception>
         public void AddRangeLast(IEnumerable<LinkedListNode<T>> nodes)
         {
             AddRange(list.AddLast, nodes);
         }
         /// <summary>
         /// Adds new nodes containing the specified values at the end of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised once the values are
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsAdded"/> event will be raised once the values are
         /// added.
         /// </summary>
         /// <param name="values">The values to add at the end of the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="values"/> is null.</exception>
         public void AddRangeLast(IEnumerable<T> values)
         {
             AddRange(list.AddLast, values);
         }
         /// <summary>
-        /// Removes all nodes from the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> asynchronously. This method
-        /// is performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event
+        /// Removes all nodes from the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> asynchronously. This method
+        /// is performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event
         /// will be raised once the collection is cleared.
         /// </summary>
         public void Clear()
@@ -426,23 +426,23 @@
             RemoveAll(value => true);
         }
         /// <summary>
-        /// Determines whether a value is in the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// Determines whether a value is in the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
-        /// <param name="value">The value to locate in the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. The
+        /// <param name="value">The value to locate in the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. The
         /// value can be null for reference types.</param>
         /// <returns>Returns true if <paramref name="value"/> is found in the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false.</returns>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false.</returns>
         public bool Contains(T value)
         {
             lock (syncObject)
                 return list.Contains(value);
         }
         /// <summary>
-        /// Copies the entire <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> to a compatible one-dimensional
+        /// Copies the entire <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> to a compatible one-dimensional
         /// <see cref="T:System.Array"/>, starting at the specified index of the target array.
         /// </summary>
         /// <param name="arrayFactory">A <see cref="T:System.Func`2"/> that specifies the one-dimensional <see cref="T:System.Array"/>
-        /// that is the destination of the elements copied from <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. The
+        /// that is the destination of the elements copied from <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. The
         /// <see cref="T:System.Array"/> must have zero-based indexing. The input parameter is the count of elements in the collection.
         /// This is to prevent a time-of-check to time-of-use problem they may result by checking the count outside locking the collection.
         /// </param>
@@ -453,7 +453,7 @@
         /// <exception cref="T:System.ArgumentOutOfRangeException">The index produced by <paramref name="indexFactory"/> is less than zero.
         /// </exception>
         /// <exception cref="T:System.ArgumentException">The number of elements in the source
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> is greater than the available space from the index produced by 
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> is greater than the available space from the index produced by 
         /// <paramref name="indexFactory"/> to the end of the destination array produced by <paramref name="arrayFactory"/>.</exception>
         /// <returns>Returns the destination array produced by <paramref name="arrayFactory"/> to which elements were copied.</returns>
         public T[] CopyTo(Func<int, T[]> arrayFactory, Func<int, int> indexFactory)
@@ -472,7 +472,7 @@
         /// <summary>
         /// Finds the first node that contains the specified value.
         /// </summary>
-        /// <param name="value">The value to locate in the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <param name="value">The value to locate in the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <returns>The first <see cref="T:System.Collections.Generic.LinkedListNode`1"/> that contains the specified value, if found;
         /// otherwise, null.</returns>
         public LinkedListNode<T> Find(T value)
@@ -483,7 +483,7 @@
         /// <summary>
         /// Finds the last node that contains the specified value.
         /// </summary>
-        /// <param name="value">The value to locate in the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <param name="value">The value to locate in the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         /// <returns>The last <see cref="T:System.Collections.Generic.LinkedListNode`1"/> that contains the specified value, if found;
         /// otherwise, null.</returns>
         public LinkedListNode<T> FindLast(T value)
@@ -501,12 +501,12 @@
         }
         /// <summary>
         /// Removes the first occurrence of the specified value from the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is performed asynchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
         /// removed. The event will not be raised if the value was not removed, or if the value was not found in the original
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
-        /// <param name="value">The value to remove from the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <param name="value">The value to remove from the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </param>
         public void Remove(T value)
         {
@@ -514,7 +514,7 @@
         }
         /// <summary>
         /// Removes all the elements that match the conditions defined by the specified predicate. This method is performed asynchronously.
-        /// The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the elements are
+        /// The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the elements are
         /// removed. The event will be raised with an empty collection if no items were removed.
         /// </summary>
         /// <param name="match">The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the elements to remove.
@@ -524,29 +524,29 @@
             ThreadPool.QueueUserWorkItem(o => RemoveAllSync(match));
         }
         /// <summary>
-        /// Removes the node at the start of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
-        /// performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be
+        /// Removes the node at the start of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
+        /// performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be
         /// raised once the node is removed.
         /// </summary>
         /// <exception cref="T:System.InvalidOperationException">The
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> is empty.</exception>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> is empty.</exception>
         public void RemoveFirst()
         {
             Remove(list.RemoveFirst, list.First.Value);
         }
         /// <summary>
-        /// Removes the node at the end of the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
-        /// performed asynchronously. The <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be
+        /// Removes the node at the end of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>. This method is
+        /// performed asynchronously. The <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be
         /// raised once the node is removed.
         /// </summary>
         /// <exception cref="T:System.InvalidOperationException">The
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> is empty.</exception>
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> is empty.</exception>
         public void RemoveLast()
         {
             Remove(list.RemoveLast, list.Last.Value);
         }
         /// <summary>
-        /// Sorts the elements in the entire <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> using the default
+        /// Sorts the elements in the entire <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> using the default
         /// comparer.
         /// </summary>
         public void Sort()
@@ -555,7 +555,7 @@
                 list.Sort();
         }
         /// <summary>
-        /// Sorts the elements in the entire <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> using the specified
+        /// Sorts the elements in the entire <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> using the specified
         /// <see cref="T:System.Comparison"/>.
         /// </summary>
         /// <param name="comparison">The <see cref="T:System.Comparison"/> to use when comparing elements.</param>
@@ -565,7 +565,7 @@
                 list.Sort(comparison);
         }
         /// <summary>
-        /// Sorts the elements in the entire <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> using the specified
+        /// Sorts the elements in the entire <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> using the specified
         /// comparer.
         /// </summary>
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IComparer"/> implementation to use when comparing elements,
@@ -578,17 +578,17 @@
         }
 
         /// <summary>
-        /// Adds an item to the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will be raised once the item is added.
+        /// Adds an item to the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemAdded"/> event will be raised once the item is added.
         /// </summary>
-        /// <param name="item">The object to add to the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
+        /// <param name="item">The object to add to the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.</param>
         void ICollection<T>.Add(T item)
         {
             AddSync(() => ((ICollection<T>)list).Add(item), item);
         }
         /// <summary>
-        /// Removes all nodes from the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the collection
+        /// Removes all nodes from the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemsRemoved"/> event will be raised once the collection
         /// is cleared.
         /// </summary>
         void ICollection<T>.Clear()
@@ -596,18 +596,18 @@
             RemoveAllSync(value => true);
         }
         /// <summary>
-        /// Copies the entire <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> to a compatible one-dimensional
+        /// Copies the entire <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> to a compatible one-dimensional
         /// <see cref="T:System.Array"/>, starting at the specified index of the target array.
         /// </summary>
         /// <param name="array">The one-dimensional <see cref="T:System.Array"/>
-        /// that is the destination of the elements copied from <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// that is the destination of the elements copied from <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// The
         /// <see cref="T:System.Array"/> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than zero.</exception>
         /// <exception cref="T:System.ArgumentException">The number of elements in the source
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> is greater than the available space from
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> is greater than the available space from
         /// <paramref name="index"/> to the end of the destination array.</exception>
         void ICollection<T>.CopyTo(T[] array, int index)
         {
@@ -616,16 +616,16 @@
         }
         /// <summary>
         /// Removes the first occurrence of the specified value from the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
-        /// <see cref="E:CsDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/> synchronously. The
+        /// <see cref="E:CSDesktopPonies.Collections.AsyncLinkedList`1.ItemRemoved"/> event will be raised once the value is
         /// removed. The event will not be raised if the value was not removed, or if the value was not found in the original
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </summary>
-        /// <param name="item">The object to remove from the <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <param name="item">The object to remove from the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </param>
         /// <returns>Return true if <paramref name="item"/> was successfully removed from the
-        /// <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false. This method also returns false if
-        /// <paramref name="item"/> is not found in the original <see cref="T:CsDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>; otherwise, false. This method also returns false if
+        /// <paramref name="item"/> is not found in the original <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
         /// </returns>
         bool ICollection<T>.Remove(T item)
         {

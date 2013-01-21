@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
     using System.ComponentModel;

@@ -39,10 +39,10 @@ Public NotInheritable Class Options
     Public Shared PonyInteractionsEnabled As Boolean
     Public Shared DisplayPonyInteractionsErrors As Boolean
 
-    Public Shared ScreenSaverSoundEnabled As Boolean
-    Public Shared ScreenSaverStyle As ScreenSaverBackgroundStyle
-    Public Shared ScreenSaverBackgroundColor As Color
-    Public Shared ScreenSaverBackgroundImagePath As String = ""
+    Public Shared ScreensaverSoundEnabled As Boolean
+    Public Shared ScreensaverStyle As ScreensaverBackgroundStyle
+    Public Shared ScreensaverBackgroundColor As Color
+    Public Shared ScreensaverBackgroundImagePath As String = ""
 
     Public Shared MaxPonyCount As Integer
     Public Shared TimeFactor As Single
@@ -59,7 +59,7 @@ Public NotInheritable Class Options
         End Get
     End Property
 
-    Public Enum ScreenSaverBackgroundStyle
+    Public Enum ScreensaverBackgroundStyle
         Transparent
         SolidColor
         BackgroundImage
@@ -133,11 +133,11 @@ Public NotInheritable Class Options
                             SoundVolume = Single.Parse(columns(23), CultureInfo.InvariantCulture)
                             AlwaysOnTop = Boolean.Parse(columns(24))
                             SuspendForFullscreenApplication = Boolean.Parse(columns(25))
-                            ScreenSaverSoundEnabled = Boolean.Parse(columns(26))
-                            ScreenSaverStyle = CType([Enum].Parse(GetType(ScreenSaverBackgroundStyle), columns(27)), 
-                                ScreenSaverBackgroundStyle)
-                            ScreenSaverBackgroundColor = Color.FromArgb(Integer.Parse(columns(28), CultureInfo.InvariantCulture))
-                            ScreenSaverBackgroundImagePath = columns(29)
+                            ScreensaverSoundEnabled = Boolean.Parse(columns(26))
+                            ScreensaverStyle = CType([Enum].Parse(GetType(ScreensaverBackgroundStyle), columns(27)), 
+                                ScreensaverBackgroundStyle)
+                            ScreensaverBackgroundColor = Color.FromArgb(Integer.Parse(columns(28), CultureInfo.InvariantCulture))
+                            ScreensaverBackgroundImagePath = columns(29)
                             Main.Instance.NoRandomDuplicates = Boolean.Parse(columns(30))
                         Case "monitor"
                             If columns.Length - 1 <> 1 Then Throw New InvalidDataException("Expected a monitor name on the monitor line.")
@@ -185,10 +185,10 @@ Public NotInheritable Class Options
         PonyInteractionsEnabled = True
         DisplayPonyInteractionsErrors = False
 
-        ScreenSaverSoundEnabled = True
-        ScreenSaverStyle = ScreenSaverBackgroundStyle.Transparent
-        ScreenSaverBackgroundColor = Color.Black
-        ScreenSaverBackgroundImagePath = ""
+        ScreensaverSoundEnabled = True
+        ScreensaverStyle = ScreensaverBackgroundStyle.Transparent
+        ScreensaverBackgroundColor = Color.Black
+        ScreensaverBackgroundImagePath = ""
 
         MaxPonyCount = 300
         TimeFactor = 1
@@ -261,10 +261,10 @@ Public NotInheritable Class Options
                                      SoundVolume.ToString(CultureInfo.InvariantCulture),
                                      AlwaysOnTop,
                                      SuspendForFullscreenApplication,
-                                     ScreenSaverSoundEnabled,
-                                     ScreenSaverStyle,
-                                     ScreenSaverBackgroundColor.ToArgb().ToString(CultureInfo.InvariantCulture),
-                                     ScreenSaverBackgroundImagePath,
+                                     ScreensaverSoundEnabled,
+                                     ScreensaverStyle,
+                                     ScreensaverBackgroundColor.ToArgb().ToString(CultureInfo.InvariantCulture),
+                                     ScreensaverBackgroundImagePath,
                                      Main.Instance.NoRandomDuplicates)
             file.WriteLine(optionsLine)
 

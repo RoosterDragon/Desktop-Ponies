@@ -1,4 +1,4 @@
-﻿Imports CsDesktopPonies.SpriteManagement
+﻿Imports CSDesktopPonies.SpriteManagement
 
 Public Class DesktopPonyAnimator
     Inherits AnimationLoopBase

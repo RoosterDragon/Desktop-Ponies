@@ -1,4 +1,4 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     using System.IO;
     using System.Threading;
     using System.Windows.Forms;
-    using CsDesktopPonies.Collections;
+    using CSDesktopPonies.Collections;
 
     /// <summary>
     /// Creates a single Windows Form that is used as a canvas to display sprites.
@@ -36,7 +36,7 @@
         private class GraphicsForm : AlphaForm
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.GraphicsForm"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.GraphicsForm"/>
             /// class.
             /// </summary>
             /// <param name="useTransparencyKey">Pass true to set a transparency key; otherwise pass false.</param>
@@ -86,13 +86,13 @@
         #region WinFormContextMenuItem class
         /// <summary>
         /// Wraps a <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> or <see cref="T:System.Windows.Forms.ToolStripSeparator"/> in
-        /// order to expose the <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface.
+        /// order to expose the <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> interface.
         /// </summary>
         private class WinFormContextMenuItem : ISimpleContextMenuItem, IDisposable
         {
             /// <summary>
-            /// The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that owns this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.
+            /// The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that owns this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.
             /// </summary>
             private WinFormSpriteInterface owner;
             /// <summary>
@@ -114,11 +114,11 @@
 
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
             /// <see cref="T:System.Windows.Forms.ToolStripSeparator"/>.
             /// </summary>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
             /// <param name="separatorItem">The underlying <see cref="T:System.Windows.Forms.ToolStripSeparator"/> that this class wraps.
             /// </param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="separatorItem"/> is
@@ -133,11 +133,11 @@
             }
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
             /// <see cref="T:System.Windows.Forms.ToolStripMenuItem"/>, and links up the given activation method.
             /// </summary>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
             /// <param name="menuItem">The underlying <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> that this class wraps.</param>
             /// <param name="activated">The method to be run when the item is activated.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItem"/> is null.
@@ -153,11 +153,11 @@
             }
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> class for the given
             /// <see cref="T:System.Windows.Forms.ToolStripMenuItem"/>, which is assumed to produce a sub-menu of the given sub-items.
             /// </summary>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.</param>
             /// <param name="menuItem">The underlying <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> that this class wraps.</param>
             /// <param name="subItems">The items to appear in the sub-menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItem"/> is null.
@@ -291,7 +291,7 @@
 
             /// <summary>
             /// Releases all resources used by the
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> object.
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/> object.
             /// </summary>
             public void Dispose()
             {
@@ -311,13 +311,13 @@
         #region WinFormContextMenu class
         /// <summary>
         /// Extends a <see cref="T:System.Windows.Forms.ContextMenuStrip"/> in order to expose the
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenu"/> interface.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenu"/> interface.
         /// </summary>
         private class WinFormContextMenu : ContextMenuStrip, ISimpleContextMenu
         {
             /// <summary>
-            /// The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that owns this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/>.
+            /// The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that owns this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/>.
             /// </summary>
             private WinFormSpriteInterface owner;
             /// <summary>
@@ -331,11 +331,11 @@
 
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> class to display the given menu
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> class to display the given menu
             /// items.
             /// </summary>
-            /// <param name="parent">The <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/>.</param>
+            /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> that will own this
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/>.</param>
             /// <param name="menuItems">The items which should be displayed in this menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItems"/> is
             /// null.</exception>
@@ -384,10 +384,10 @@
 
             /// <summary>
             /// Creates a <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> from a specified
-            /// <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> that has sub items. If necessary, recursively calls
+            /// <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem"/> that has sub items. If necessary, recursively calls
             /// itself to create another sub-menu for a sub-item that itself has sub-items.
             /// </summary>
-            /// <param name="menuItem">The <see cref="T:CsDesktopPonies.SpriteManagement.ISimpleContextMenu"/> for which to create a
+            /// <param name="menuItem">The <see cref="T:CSDesktopPonies.SpriteManagement.ISimpleContextMenu"/> for which to create a
             /// <see cref="T:System.Windows.Forms.ToolStripMenuItem"/>.</param>
             /// <returns>A <see cref="T:System.Windows.Forms.ToolStripMenuItem"/> whose tree of sub-menus is fully initialized.</returns>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.</exception>
@@ -456,7 +456,7 @@
         /// </summary>
         private bool closing;
         /// <summary>
-        /// Stores the images for each sprite as a series of <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>, indexed by
+        /// Stores the images for each sprite as a series of <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>, indexed by
         /// filename.
         /// </summary>
         private LazyDictionary<string, AnimatedImage<BitmapFrame>> images;
@@ -517,7 +517,7 @@
         private readonly Region postUpdateInvalidRegion = new Region();
 
         /// <summary>
-        /// List of <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
+        /// List of <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
         /// the interface.
         /// </summary>
         private readonly LinkedList<WinFormContextMenu> contextMenus = new LinkedList<WinFormContextMenu>();
@@ -682,12 +682,12 @@
 
         #region Events
         /// <summary>
-        /// Gets the equivalent <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration from the native button
+        /// Gets the equivalent <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration from the native button
         /// enumeration.
         /// </summary>
         /// <param name="buttons">The <see cref="T:System.Windows.Forms.MouseButtons"/> enumeration of the mouse button that was pressed.
         /// </param>
-        /// <returns>The equivalent <see cref="T:CsDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration for this button.
+        /// <returns>The equivalent <see cref="T:CSDesktopPonies.SpriteManagement.SimpleMouseButtons"/> enumeration for this button.
         /// </returns>
         private static SimpleMouseButtons GetButtonsFromNative(MouseButtons buttons)
         {
@@ -764,7 +764,7 @@
         #endregion
 
         /// <summary>
-        /// Gets a value indicating whether a <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can be used in the
+        /// Gets a value indicating whether a <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can be used in the
         /// current environment.
         /// </summary>
         public static bool IsRunable
@@ -791,7 +791,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> class.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> class.
         /// </summary>
         /// <param name="displayBounds">The initial display boundary the interface should cover. Sprites outside this area will not be
         /// drawn.</param>
@@ -934,20 +934,20 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> from the given file, loading extra transparency
+        /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> from the given file, loading extra transparency
         /// information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="fileName">The path to a static image file from which to create a new
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </param>
-        /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
         private BitmapFrame BitmapFrameFromFile(string fileName)
         {
             return new BitmapFrame(fileName).SetupSafely(frame => AlterBitmapForTransparency(fileName, frame.Image));
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> from the raw buffer, loading extra transparency
+        /// Creates a new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> from the raw buffer, loading extra transparency
         /// information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="buffer">The raw buffer.</param>
@@ -959,7 +959,7 @@
         /// <param name="depth">The bit depth of the buffer.</param>
         /// <param name="hashCode">The hash code of the frame.</param>
         /// <param name="fileName">The path to the GIF file being loaded.</param>
-        /// <returns>A new <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/> for the frame held in the raw buffer.</returns>
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> for the frame held in the raw buffer.</returns>
         private BitmapFrame BitmapFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
             int stride, int width, int height, int depth, int hashCode, string fileName)
         {
@@ -1048,7 +1048,7 @@
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can display.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can display.
         /// </summary>
         /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
@@ -1060,7 +1060,7 @@
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
-        /// <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can display.
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> can display.
         /// </summary>
         /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
@@ -1076,11 +1076,11 @@
         }
 
         /// <summary>
-        /// Creates an <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> specific context menu for the given set of
+        /// Creates an <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> specific context menu for the given set of
         /// menu items.
         /// </summary>
         /// <param name="menuItems">The collections of items to be displayed in the menu.</param>
-        /// <returns>An <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> specific context menu.</returns>
+        /// <returns>An <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> specific context menu.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItems"/> is null.</exception>
         public ISimpleContextMenu CreateContextMenu(IEnumerable<ISimpleContextMenuItem> menuItems)
         {
@@ -1091,7 +1091,7 @@
         }
 
         /// <summary>
-        /// Opens the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
+        /// Opens the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
         public void Open()
         {
@@ -1145,7 +1145,7 @@
         }
 
         /// <summary>
-        /// Hides the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
+        /// Hides the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
         public void Hide()
         {
@@ -1153,7 +1153,7 @@
         }
 
         /// <summary>
-        /// Shows the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
+        /// Shows the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
         public void Show()
         {
@@ -1161,7 +1161,7 @@
         }
 
         /// <summary>
-        /// Freezes the display of the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
+        /// Freezes the display of the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
         public void Pause()
         {
@@ -1169,7 +1169,7 @@
         }
 
         /// <summary>
-        /// Resumes display of the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> from a paused state.
+        /// Resumes display of the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> from a paused state.
         /// </summary>
         public void Unpause()
         {
@@ -1402,7 +1402,7 @@
         }
 
         /// <summary>
-        /// Closes the <see cref="T:CsDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
+        /// Closes the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
         public void Close()
         {

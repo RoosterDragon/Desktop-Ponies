@@ -1,8 +1,8 @@
-﻿namespace CsDesktopPonies.SpriteManagement
+﻿namespace CSDesktopPonies.SpriteManagement
 {
     /// <summary>
     /// Defines a class the controls a collection of sprites and displays them using a
-    /// <see cref="T:CsDesktopPonies.SpriteManagement.ISpriteCollectionView"/>.
+    /// <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/>.
     /// </summary>
     public interface ISpriteCollectionController
     {
