@@ -22,7 +22,7 @@ Partial Class HouseOptionsForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.Visitors_CheckedListBox = New VbDesktopPonies.BufferedCheckedListBox()
+        Me.Visitors_CheckedListBox = New VBDesktopPonies.BufferedCheckedListBox()
         Me.Save_Button = New System.Windows.Forms.Button()
         Me.lvlVisitors = New System.Windows.Forms.Label()
         Me.Cycle_Counter = New System.Windows.Forms.NumericUpDown()
@@ -233,7 +233,7 @@ Partial Class HouseOptionsForm
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents Visitors_CheckedListBox As VbDesktopPonies.BufferedCheckedListBox
+    Friend WithEvents Visitors_CheckedListBox As VBDesktopPonies.BufferedCheckedListBox
     Friend WithEvents Save_Button As System.Windows.Forms.Button
     Friend WithEvents lvlVisitors As System.Windows.Forms.Label
     Friend WithEvents Cycle_Counter As System.Windows.Forms.NumericUpDown

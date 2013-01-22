@@ -6,7 +6,7 @@ Public Class BufferedCheckedListBox
     Inherits CheckedListBox
 
     ''' <summary>
-    ''' Initializes a new instance of the <see cref="VbDesktopPonies.BufferedCheckedListBox"/> class.
+    ''' Initializes a new instance of the <see cref="VBDesktopPonies.BufferedCheckedListBox"/> class.
     ''' </summary>
     Public Sub New()
         DoubleBuffered = True

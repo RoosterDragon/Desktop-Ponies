@@ -8,8 +8,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7C08ADD7-DEC4-40C3-8BBD-27ACE4414BF7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>VbDesktopPonies.My.MyApplication</StartupObject>
-    <RootNamespace>VbDesktopPonies</RootNamespace>
+    <StartupObject>VBDesktopPonies.My.MyApplication</StartupObject>
+    <RootNamespace>VBDesktopPonies</RootNamespace>
     <AssemblyName>Desktop Ponies</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>

@@ -61,10 +61,10 @@ Namespace My
      Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute()>  _
     Friend Module MySettingsProperty
         
-        <Global.System.ComponentModel.Design.HelpKeywordAttribute("My.Settings")>  _
-        Friend ReadOnly Property Settings() As Global.VbDesktopPonies.MySettings
+        <Global.System.ComponentModel.Design.HelpKeywordAttribute("My.Settings")> _
+        Friend ReadOnly Property Settings() As Global.VBDesktopPonies.MySettings
             Get
-                Return Global.VbDesktopPonies.MySettings.Default
+                Return Global.VBDesktopPonies.MySettings.Default
             End Get
         End Property
     End Module
