@@ -94,6 +94,7 @@ AppPackages/
 sql
 TestResults
 [Tt]est[Rr]esult*
+CodeAnalysis
 *.Cache
 ClientBin
 [Ss]tyle[Cc]op.*

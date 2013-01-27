@@ -944,7 +944,7 @@
             bool found = false;
             for (int i = colorTable.Length - 1; i >= 1 && !found; i--)
                 for (int j = i - 1; j >= 0 && !found; j--)
-                    if (i != j && colorTable[i] == colorTable[j])
+                    if (colorTable[i] == colorTable[j])
                     {
                         imageTransparentIndex = (byte)i;
                         imageTransparentIndexRemap = (byte)j;
