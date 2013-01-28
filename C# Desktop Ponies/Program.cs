@@ -1,6 +1,4 @@
-﻿// Desktop Ponies in C# - Tom Roostan (troostan@gmail.com)
-
-namespace CSDesktopPonies
+﻿namespace CSDesktopPonies
 {
     using System;
     using System.Threading;

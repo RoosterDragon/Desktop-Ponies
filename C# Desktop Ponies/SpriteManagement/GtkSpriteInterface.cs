@@ -1148,7 +1148,7 @@
             //Console.WriteLine("GraphicsWindow_ButtonPressEvent raised. Button: " +
             //    GetButtonsFromNative(args.Event.Button) + "(" + args.Event.Button + ")");
             mouseDownTime = DateTime.UtcNow;
-            MouseDown.Raise(o, () => new SimpleMouseEventArgs(
+            MouseDown.Raise(this, () => new SimpleMouseEventArgs(
                 GetButtonsFromNative(args.Event.Button), (int)args.Event.XRoot, (int)args.Event.YRoot));
             //Console.WriteLine("GraphicsWindow_ButtonPressEvent finished.");
         }
@@ -1160,14 +1160,11 @@
         /// <param name="args">Data about the event.</param>
         private void GraphicsWindow_ButtonReleaseEvent(object o, ButtonReleaseEventArgs args)
         {
-            //Console.WriteLine("GraphicsWindow_ButtonReleaseEvent raised. Button: " +
-            //    GetButtonsFromNative(args.Event.Button) + "(" + args.Event.Button + ")");
             SimpleMouseEventArgs e = new SimpleMouseEventArgs(
                 GetButtonsFromNative(args.Event.Button), (int)args.Event.XRoot, (int)args.Event.YRoot);
             if (DateTime.UtcNow - mouseDownTime <= TimeSpan.FromMilliseconds(SWF.SystemInformation.DoubleClickTime))
-                MouseClick.Raise(o, e);
-            MouseUp.Raise(o, e);
-            //Console.WriteLine("GraphicsWindow_ButtonReleaseEvent finished.");
+                MouseClick.Raise(this, e);
+            MouseUp.Raise(this, e);
         }
         /// <summary>
         /// Raised when a key has been pressed.
@@ -1177,9 +1174,7 @@
         /// <param name="args">Data about the event.</param>
         private void GraphicsWindow_KeyPressEvent(object o, KeyPressEventArgs args)
         {
-            //Console.WriteLine("GraphicsWindow_KeyPressEvent raised. Key: " + (char)args.Event.KeyValue);
-            KeyPress.Raise(o, () => new SimpleKeyEventArgs((char)args.Event.KeyValue));
-            //Console.WriteLine("GraphicsWindow_KeyPressEvent finished.");
+            KeyPress.Raise(this, () => new SimpleKeyEventArgs((char)args.Event.KeyValue));
         }
 
         /// <summary>
@@ -1418,7 +1413,7 @@
 
             foreach (string imageFilePath in imageFilePaths)
                 images.Add(imageFilePath);
-            images.InitializeAll(false, (sender, e) => imageLoadedHandler(sender, e));
+            images.InitializeAll(false, (sender, e) => imageLoadedHandler.Raise(this));
         }
 
         /// <summary>

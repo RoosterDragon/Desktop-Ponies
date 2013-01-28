@@ -37,6 +37,7 @@
         /// </summary>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
         public static int EnsureNonnegative(int arg, string paramName)
         {
@@ -50,6 +51,7 @@
         /// </summary>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
         public static int EnsurePositive(int arg, string paramName)
         {
@@ -65,6 +67,7 @@
         /// <typeparam name="TEnum">The type of the enumeration, which may be flagged.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentException"><typeparamref name="TEnum"/> is not an <see cref="System.Enum"/> type.</exception>
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="arg"/> is not a valid member of its
         /// enumeration. That is, the enumeration is non-flagged and the value is not a defined member, or the enumeration is flagged and

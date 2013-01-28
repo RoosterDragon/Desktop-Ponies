@@ -708,7 +708,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseDown(object sender, MouseEventArgs e)
         {
-            MouseDown.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
+            MouseDown.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a mouse button has been clicked.
@@ -718,7 +718,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseClick(object sender, MouseEventArgs e)
         {
-            MouseClick.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
+            MouseClick.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a mouse button has been released.
@@ -728,7 +728,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseUp(object sender, MouseEventArgs e)
         {
-            MouseUp.Raise(sender, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
+            MouseUp.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a key has been pressed.
@@ -738,7 +738,7 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_KeyPress(object sender, KeyPressEventArgs e)
         {
-            KeyPress.Raise(sender, () => new SimpleKeyEventArgs(e.KeyChar));
+            KeyPress.Raise(this, () => new SimpleKeyEventArgs(e.KeyChar));
         }
 
         /// <summary>
@@ -1072,7 +1072,7 @@
 
             foreach (string imageFilePath in imageFilePaths)
                 images.Add(imageFilePath);
-            images.InitializeAll(true, (sender, e) => imageLoadedHandler(sender, e));
+            images.InitializeAll(true, (sender, e) => imageLoadedHandler.Raise(this));
         }
 
         /// <summary>

@@ -212,7 +212,7 @@
 
             ThreadPool.QueueUserWorkItem(o =>
             {
-                EventHandler<CollectionItemsChangedEventArgs<T>> itemsAdded = ItemsAdded;
+                var itemsAdded = ItemsAdded;
                 LinkedList<T> valuesAdded = null;
                 if (itemsAdded != null)
                     valuesAdded = new LinkedList<T>();
@@ -252,7 +252,7 @@
             
             ThreadPool.QueueUserWorkItem(o =>
             {
-                EventHandler<CollectionItemsChangedEventArgs<T>> itemsAdded = ItemsAdded;
+                var itemsAdded = ItemsAdded;
                 LinkedList<T> valuesAdded = itemsAdded != null ? new LinkedList<T>() : null;
                 lock (syncObject)
                 {
@@ -317,7 +317,7 @@
         /// </param>
         private void RemoveAllSync(Predicate<T> match)
         {
-            EventHandler<CollectionItemsChangedEventArgs<T>> itemsRemoved = ItemsRemoved;
+            var itemsRemoved = ItemsRemoved;
             LinkedList<T> valuesRemoved = itemsRemoved != null ? new LinkedList<T>() : null;
             lock (syncObject)
             {

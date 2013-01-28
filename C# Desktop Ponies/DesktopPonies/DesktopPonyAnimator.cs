@@ -360,7 +360,7 @@
             PonyInstance pony = e.Item as PonyInstance;
             if (pony != null)
                 OnInstanceCountChange(new InstanceCountChangedEventArgs(pony.Template, -1));
-
+            
             if (Sprites.Count == 0)
                 ReturnToMenu();
         }

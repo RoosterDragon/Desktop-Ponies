@@ -60,8 +60,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> class from the given file.
         /// </summary>
-        /// <param name="fileName">The path to a static image file from which to create a new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
-        /// </param>
+        /// <param name="fileName">The path to a static image file from which to create a new
+        /// <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.</param>
         public BitmapFrame(string fileName)
             : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, "fileName").GetHashCode())
         {

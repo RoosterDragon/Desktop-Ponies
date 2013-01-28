@@ -1383,10 +1383,10 @@ Public Class Main
                        LoadingProgressBar.Maximum = imagesToLoad.Count
                    End Sub)
             Dim imagesLoaded = 0
-            Dim loaded = New EventHandler(Sub(ilSender As Object, ilE As EventArgs)
-                                              imagesLoaded += 1
-                                              PonyLoader.ReportProgress(imagesLoaded)
-                                          End Sub)
+            Dim loaded = Sub(sender As Object, e As EventArgs)
+                             imagesLoaded += 1
+                             PonyLoader.ReportProgress(imagesLoaded)
+                         End Sub
             PonyViewer.LoadImages(imagesToLoad, loaded)
         End If
 

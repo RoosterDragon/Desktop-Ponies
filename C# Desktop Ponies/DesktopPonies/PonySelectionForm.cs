@@ -775,8 +775,8 @@
                     ponyDisplays.Find(display => display.Template == iccE.Template).SelectionControl;
                 templateControl.Invoke(new MethodInvoker(() => templateControl.PonyCount += iccE.Change));
             };
-            animator.AnimatorClosed += (acSender, acE) => Invoke(new MethodInvoker(() => Show()));
-            animator.ProgramExitRequested += (perSender, perE) => Invoke(new MethodInvoker(() => Close()));
+            animator.AnimatorClosed += (acSender, acE) => Invoke(new MethodInvoker(Show));
+            animator.ProgramExitRequested += (perSender, perE) => Invoke(new MethodInvoker(Close));
             animator.Begin();
 
             Hide();

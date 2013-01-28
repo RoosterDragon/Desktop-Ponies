@@ -91,7 +91,7 @@
             int merges;
             LinkedListNode<T> leftHead;
             LinkedListNode<T> rightHead;
-            LinkedListNode<T> nextRightHeadPrevious = list.First;
+            LinkedListNode<T> preNextRightHead = list.First;
             // Perform a series of passes, in which all the pairs of lists are individually merged.
             do
             {
@@ -100,7 +100,7 @@
 
                 // Set the initial positions of the list sections to sort.
                 leftHead = list.First;
-                rightHead = nextRightHeadPrevious.Next;
+                rightHead = preNextRightHead.Next;
 
                 // Perform a series of merges considering mergeSize elements from each side, do this whilst a second list exists.
                 while (rightHead != null)
@@ -143,13 +143,15 @@
                     for (int i = 0; i < mergeSize && rightHead != null; i++)
                         rightHead = rightHead.Next;
 
-                    // If we just completed the first merge, we can save the position of the end of the last list, and advance from there
-                    // on the next pass to get the starting point for the right without having to go through the list to find it.
+                    // After the first merge, the left head will be positioned at the index where the right head for the next pass should
+                    // begin. We'll note the previous element so when the next pass begins it can simply use the next element for the head 
+                    // of the right list, as opposed to enumerating over mergeSize elements to get to the same location. We must note down
+                    // the previous element, as the current marker the the left head may get swapped and thus would change index.
                     if (merges == 1)
                         if (leftHead != null)
-                            nextRightHeadPrevious = leftHead.Previous;
+                            preNextRightHead = leftHead.Previous;
                         else
-                            nextRightHeadPrevious = list.Last;
+                            preNextRightHead = list.Last;
                 }
                 // Double the size of the lists we are merging.
                 mergeSize *= 2;
