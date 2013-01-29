@@ -10,7 +10,7 @@
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of the lazily-initialized values in the dictionary.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Count = {Count} InitializedCount = {InitializedCount}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(LazyDictionary<,>.LazyDictionaryDebugView))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(LazyDictionary<,>.DebugView))]
     public sealed class LazyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         /// <summary>
@@ -626,10 +626,11 @@
         }
         #endregion
 
+        #region DebugView class
         /// <summary>
         /// Provides a debugger view for a <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
         /// </summary>
-        private sealed class LazyDictionaryDebugView
+        private sealed class DebugView
         {
             /// <summary>
             /// The dictionary for which an alternate view is being provided.
@@ -637,11 +638,11 @@
             private LazyDictionary<TKey, TValue> lazyDictionary;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2.LazyDictionaryDebugView"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2.DebugView"/>
             /// class.
             /// </summary>
             /// <param name="lazyDictionary">The dictionary to proxy.</param>
-            public LazyDictionaryDebugView(LazyDictionary<TKey, TValue> lazyDictionary)
+            public DebugView(LazyDictionary<TKey, TValue> lazyDictionary)
             {
                 Argument.EnsureNotNull(lazyDictionary, "lazyDictionary");
                 this.lazyDictionary = lazyDictionary;
@@ -664,7 +665,7 @@
             {
                 get
                 {
-                    var array = new object[this.lazyDictionary.dictionary.Count];
+                    var array = new object[lazyDictionary.dictionary.Count];
                     int i = 0;
                     foreach (var kvp in lazyDictionary.dictionary)
                         if (kvp.Value.IsValueCreated)
@@ -675,5 +676,6 @@
                 }
             }
         }
+        #endregion
     }
 }

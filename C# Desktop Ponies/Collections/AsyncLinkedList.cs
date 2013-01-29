@@ -18,6 +18,7 @@
     /// </remarks>
     /// <typeparam name="T">The type of items in the linked list.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(AsyncLinkedList<>.DebugView))]
     public sealed class AsyncLinkedList<T> : ICollection<T>
     {
         #region Enumerator struct
@@ -647,5 +648,43 @@
         {
             return GetEnumerator();
         }
+
+        #region DebugView class
+        /// <summary>
+        /// Provides a debugger view for an <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1"/>.
+        /// </summary>
+        private sealed class DebugView
+        {
+            /// <summary>
+            /// The list for which an alternate view is being provided.
+            /// </summary>
+            private AsyncLinkedList<T> asyncLinkedList;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1.DebugView"/>
+            /// class.
+            /// </summary>
+            /// <param name="asyncLinkedList">The list to proxy.</param>
+            public DebugView(AsyncLinkedList<T> asyncLinkedList)
+            {
+                Argument.EnsureNotNull(asyncLinkedList, "asyncLinkedList");
+                this.asyncLinkedList = asyncLinkedList;
+            }
+
+            /// <summary>
+            /// Provides a view of the items in the list.
+            /// </summary>
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            public T[] Items
+            {
+                get
+                {
+                    var array = new T[asyncLinkedList.list.Count];
+                    asyncLinkedList.list.CopyTo(array, 0);
+                    return array;
+                }
+            }
+        }
+        #endregion
     }
 }
