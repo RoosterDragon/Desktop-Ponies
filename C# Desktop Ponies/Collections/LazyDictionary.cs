@@ -10,6 +10,7 @@
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of the lazily-initialized values in the dictionary.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Count = {Count} InitializedCount = {InitializedCount}")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(LazyDictionary<,>.LazyDictionaryDebugView))]
     public sealed class LazyDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         /// <summary>
@@ -356,16 +357,14 @@
         /// will initialize the values before adding the item to the array. If false, uninitialized items will not be copied to the array,
         /// and their values will remain uninitialized.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0 or greater than or equal to
-        /// the size of the array.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception>
         /// <exception cref="T:System.ArgumentException">The number of elements to be copied from the
         /// <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> is greater than the available space from
         /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex, bool initialize)
         {
             Argument.EnsureNotNull(array, "array");
-            if (arrayIndex < 0 || arrayIndex >= array.Length)
-                throw new ArgumentOutOfRangeException("arrayIndex");
+            Argument.EnsureNonnegative(arrayIndex, "arrayIndex");
             int count = initialize ? Count : InitializedCount;
             if (array.Length - arrayIndex < count)
                 throw new ArgumentException("The size of the collection to copy is too small for the given array and arrayIndex.");
@@ -626,5 +625,55 @@
             throw new NotSupportedException("Not supported by " + GetType().Name);
         }
         #endregion
+
+        /// <summary>
+        /// Provides a debugger view for a <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
+        /// </summary>
+        private sealed class LazyDictionaryDebugView
+        {
+            /// <summary>
+            /// The dictionary for which an alternate view is being provided.
+            /// </summary>
+            private LazyDictionary<TKey, TValue> lazyDictionary;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2.LazyDictionaryDebugView"/>
+            /// class.
+            /// </summary>
+            /// <param name="lazyDictionary">The dictionary to proxy.</param>
+            public LazyDictionaryDebugView(LazyDictionary<TKey, TValue> lazyDictionary)
+            {
+                Argument.EnsureNotNull(lazyDictionary, "lazyDictionary");
+                this.lazyDictionary = lazyDictionary;
+            }
+
+            /// <summary>
+            /// Provides for display of an uninitialized item by displaying only its key.
+            /// </summary>
+            [System.Diagnostics.DebuggerDisplay("\\{{Key,nq}\\} (Value uninitialized)")]
+            public struct KeyUnit
+            {
+                public TKey Key { get; set; }
+            }
+
+            /// <summary>
+            /// Provides a view of the items in the dictionary.
+            /// </summary>
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            public object[] Items
+            {
+                get
+                {
+                    var array = new object[this.lazyDictionary.dictionary.Count];
+                    int i = 0;
+                    foreach (var kvp in lazyDictionary.dictionary)
+                        if (kvp.Value.IsValueCreated)
+                            array[i++] = new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value);
+                        else
+                            array[i++] = new KeyUnit() { Key = kvp.Key };
+                    return array;
+                }
+            }
+        }
     }
 }

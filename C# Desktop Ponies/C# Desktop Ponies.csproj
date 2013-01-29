@@ -88,7 +88,6 @@
   <ItemGroup>
     <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
-    <Compile Include="Collections\ConcurrentLazyDictionary.cs" />
     <Compile Include="Collections\Enumerator.cs" />
     <Compile Include="Disposable.cs" />
     <Compile Include="ExceptionDialog.cs">
