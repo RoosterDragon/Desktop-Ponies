@@ -25,7 +25,7 @@ Public Class Main
     Friend Startup_Ponies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
     Friend Dead_Effects As New List(Of Effect)
-    Friend Active_Sounds As New List(Of Object)
+    Friend ActiveSounds As New List(Of Object)
     Friend HouseBases As New List(Of HouseBase)
 
     'Variables used for displaying the pony selection menu
@@ -1547,26 +1547,29 @@ Public Class Main
     End Sub
 
     Friend Sub SetVolumeOnAllSounds(volume As Integer)
-        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In Active_Sounds
+        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
             activeSound.Volume = volume
         Next
     End Sub
 
     Friend Sub Cleanup_Sounds()
+        Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
 
-        Dim sounds_to_remove As New List(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
-
-        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In Active_Sounds
-            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse sound.Duration = sound.CurrentPosition Then
-                sound.Dispose()
-                sounds_to_remove.Add(sound)
+        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
+            If sound.Disposed OrElse
+                sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
+                sound.CurrentPosition >= sound.Duration Then
+                If Not sound.Disposed Then sound.Dispose()
+                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
+                soundsToRemove.AddLast(sound)
             End If
         Next
 
-        For Each sound In sounds_to_remove
-            Active_Sounds.Remove(sound)
-        Next
-
+        If soundsToRemove IsNot Nothing Then
+            For Each sound In soundsToRemove
+                ActiveSounds.Remove(sound)
+            Next
+        End If
     End Sub
 
     ''' <summary>

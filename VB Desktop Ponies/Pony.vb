@@ -1207,7 +1207,7 @@ Class Pony
                 'volume is between -10000 and 0, with 0 being the loudest.
                 audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
 
-                Main.Instance.Active_Sounds.Add(audio)
+                Main.Instance.ActiveSounds.Add(audio)
 
                 audio.Play()
 
