@@ -114,6 +114,7 @@
     <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationEvents.vb" />
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>

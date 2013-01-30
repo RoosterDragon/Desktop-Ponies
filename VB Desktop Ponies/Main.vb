@@ -151,17 +151,10 @@ Public Class Main
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Instance = Me
 
-        Text = "Desktop Ponies v" & GetProgramVersion()
+        Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
         Me.Icon = My.Resources.Twilight
 
         Application.DoEvents()
-
-        'Unfortunately, some things like tooltips and windows graphics can cause exceptions that are not
-        'handled in any try() block.  Catch these and try to show a helpful message to the user.
-#If Not Debug Then
-        AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf Unhandled_Exception_Catch
-        AddHandler Application.ThreadException, AddressOf ThreadException_Catch
-#End If
 
         'DesktopHandle = DetectFulLScreen_m.GetDesktopWindow()
         'ShellHandle = DetectFulLScreen_m.GetShellWindow()
@@ -332,59 +325,6 @@ Public Class Main
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
         End If
-    End Sub
-
-    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
-    Private Shared Function GetProgramVersion() As String
-        Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
-        Dim fileVersion = New Version(fileVersionInfo.FileVersion)
-        Dim versionFields As Integer = 1
-        If fileVersion.Revision <> 0 Then
-            versionFields = 4
-        ElseIf fileVersion.Build <> 0 Then
-            versionFields = 3
-        ElseIf fileVersion.Minor <> 0 Then
-            versionFields = 2
-        End If
-
-        Return fileVersion.ToString(versionFields)
-    End Function
-
-    Private Sub Unhandled_Exception_Catch(sender As Object, e As UnhandledExceptionEventArgs)
-        UnhandledException(DirectCast(e.ExceptionObject, Exception))
-    End Sub
-
-    Private Sub ThreadException_Catch(sender As Object, e As System.Threading.ThreadExceptionEventArgs)
-        UnhandledException(e.Exception)
-    End Sub
-
-    Private Sub UnhandledException(ex As Exception)
-        Try
-            Dim exceptionString = ex.ToString()
-            Dim version = GetProgramVersion()
-            Try
-                ' Attempt to log error.
-                Using errorFile As New IO.StreamWriter(
-                    IO.Path.Combine(Options.InstallLocation, "error.txt"), False, System.Text.Encoding.UTF8)
-                    errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version &
-                                        " occurred " & DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) & " UTC")
-                    errorFile.WriteLine()
-                    errorFile.WriteLine(exceptionString)
-                End Using
-            Catch
-                ' Ignore any logging errors, it's too late now.
-            End Try
-            ' Attempt to notify user of error.
-            MessageBox.Show("An unexpected error occurred and Desktop Ponies must close. Please report this error so it can be fixed." &
-                            vbNewLine & vbNewLine & exceptionString,
-                            "Unhandled Error - Desktop Ponies v" & version,
-                            MessageBoxButtons.OK, MessageBoxIcon.Error)
-        Catch
-            ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
-        Finally
-            loading = False
-            Application.Exit()
-        End Try
     End Sub
 
     Sub GetScreensaverPath()
@@ -1626,7 +1566,7 @@ Public Class Main
     End Sub
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        e.Cancel = loading
+        e.Cancel = loading AndAlso Not My.Application.IsFaulted
     End Sub
 
     Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
