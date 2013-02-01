@@ -642,10 +642,11 @@ Public Class Main
                             Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
                             If Not [Enum].TryParse(activationValue, targetsActivated) Then
                                 ' If direct parsing failed, assume we've got some old definitions instead.
-                                ' That old code accepted the following values irrespective of case.
+                                ' The old code accepted the following values irrespective of case.
                                 ' It should be noted that title-cased "All" will be recognized as a new value which has stricter semantics.
-                                ' However, the old code would serialize a Boolean value and thus wrote "True" or "False". The chances of
-                                ' encountering "random" or "all" in practice are therefore almost nil.
+                                ' However, the old code used to serialize a Boolean value and thus wrote "True" or "False". The chances of
+                                ' encountering "random" or "all" in practice are therefore almost nil, as they would have to be manually
+                                ' edited in.
                                 If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
                                     String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
                                     targetsActivated = PonyBase.Interaction.TargetActivation.One
