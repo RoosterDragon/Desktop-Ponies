@@ -2337,10 +2337,10 @@ Class Pony
 
             Dim scale = GetScale()
 
-            Dim current_window_1 = WindowFromPoint(current_location)
-            Dim current_window_2 = WindowFromPoint(New Point(CInt(current_location.X + (scale * CurrentImageSize.X)), CInt(current_location.Y + (scale * CurrentImageSize.Y))))
-            Dim current_window_3 = WindowFromPoint(New Point(CInt(current_location.X + (scale * CurrentImageSize.X)), current_location.Y))
-            Dim current_window_4 = WindowFromPoint(New Point(current_location.X, CInt(current_location.Y + (scale * CurrentImageSize.Y))))
+            Dim current_window_1 = Win32.WindowFromPoint(New Win32.POINT(current_location.X, current_location.Y))
+            Dim current_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(current_location.X + (scale * CurrentImageSize.X)), CInt(current_location.Y + (scale * CurrentImageSize.Y))))
+            Dim current_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(current_location.X + (scale * CurrentImageSize.X)), current_location.Y))
+            Dim current_window_4 = Win32.WindowFromPoint(New Win32.POINT(current_location.X, CInt(current_location.Y + (scale * CurrentImageSize.Y))))
 
             'the current position is already half-way between windows.  don't worry about it
             If current_window_1 <> current_window_2 OrElse current_window_1 <> current_window_3 OrElse current_window_1 <> current_window_4 Then
@@ -2355,20 +2355,20 @@ Class Pony
 
             Select Case movement.Width
                 Case Is > 0
-                    new_window_2 = WindowFromPoint(New Point(CInt(new_location.X + (scale * CurrentImageSize.X)), CInt(new_location.Y + (scale * CurrentImageSize.Y))))
-                    new_window_3 = WindowFromPoint(New Point(CInt(new_location.X + (scale * CurrentImageSize.X)), new_location.Y))
+                    new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (scale * CurrentImageSize.X)), CInt(new_location.Y + (scale * CurrentImageSize.Y))))
+                    new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (scale * CurrentImageSize.X)), new_location.Y))
                 Case Is < 0
-                    new_window_1 = WindowFromPoint(new_location)
-                    new_window_4 = WindowFromPoint(New Point(new_location.X, CInt(new_location.Y + (scale * CurrentImageSize.Y))))
+                    new_window_1 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, new_location.Y))
+                    new_window_4 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, CInt(new_location.Y + (scale * CurrentImageSize.Y))))
             End Select
 
             Select Case movement.Height
                 Case Is > 0
-                    If (new_window_2) = IntPtr.Zero Then new_window_2 = WindowFromPoint(New Point(CInt(new_location.X + (scale * CurrentImageSize.X)), CInt(new_location.Y + (scale * CurrentImageSize.Y))))
-                    If (new_window_4) = IntPtr.Zero Then new_window_4 = WindowFromPoint(New Point(new_location.X, CInt(new_location.Y + (scale * CurrentImageSize.Y))))
+                    If (new_window_2) = IntPtr.Zero Then new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (scale * CurrentImageSize.X)), CInt(new_location.Y + (scale * CurrentImageSize.Y))))
+                    If (new_window_4) = IntPtr.Zero Then new_window_4 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, CInt(new_location.Y + (scale * CurrentImageSize.Y))))
                 Case Is < 0
-                    If (new_window_1) = IntPtr.Zero Then new_window_1 = WindowFromPoint(new_location)
-                    If (new_window_3) = IntPtr.Zero Then new_window_3 = WindowFromPoint(New Point(CInt(new_location.X + (scale * CurrentImageSize.X)), new_location.Y))
+                    If (new_window_1) = IntPtr.Zero Then new_window_1 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, new_location.Y))
+                    If (new_window_3) = IntPtr.Zero Then new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (scale * CurrentImageSize.X)), new_location.Y))
             End Select
 
 
@@ -2391,7 +2391,7 @@ Class Pony
                     End If
 
                     Dim process_id As Integer = 0
-                    GetWindowThreadProcessId(collision, process_id)
+                    Win32.GetWindowThreadProcessId(collision, process_id)
 
                     'ignore collisions with other ponies or effects
                     If Options.PonyAvoidsPonies AndAlso process_id = Main.Instance.process_id Then
@@ -2404,7 +2404,7 @@ Class Pony
 
                         If Options.PonyStaysInBox Then Continue For
 
-                        Dim collisionArea As New RECT
+                        Dim collisionArea As New Win32.RECT
                         Win32.GetWindowRect(collision, collisionArea)
                         If IsPonyInBox(current_location, Rectangle.FromLTRB(
                                        collisionArea.Left, collisionArea.Top, collisionArea.Right, collisionArea.Bottom)) Then

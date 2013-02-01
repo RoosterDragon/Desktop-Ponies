@@ -639,23 +639,36 @@ Public Class Main
                             End If
 
                             Dim targetsActivated As PonyBase.Interaction.TargetActivation
-                            If Not [Enum].TryParse(Trim(columns(InteractionParameter.TargetSelectionOption)), targetsActivated) Then
-                                If Not Main.Instance.screen_saver_mode Then
-                                    Throw New InvalidDataException("Invalid option for target selection. Use either 'One', 'Any' or 'All'." _
-                                                        & ControlChars.NewLine & " Interaction file specified: " & columns(InteractionParameter.TargetSelectionOption) & _
-                                                        " for interaction named: " & columns(InteractionParameter.Name))
+                            Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
+                            If Not [Enum].TryParse(activationValue, targetsActivated) Then
+                                ' If direct parsing failed, assume we've got some old definitions instead.
+                                ' That old code accepted the following values irrespective of case.
+                                ' It should be noted that title-cased "All" will be recognized as a new value which has stricter semantics.
+                                ' However, the old code would serialize a Boolean value and thus wrote "True" or "False". The chances of
+                                ' encountering "random" or "all" in practice are therefore almost nil.
+                                If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
+                                    String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
+                                    targetsActivated = PonyBase.Interaction.TargetActivation.One
+                                ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
+                                    String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
+                                    targetsActivated = PonyBase.Interaction.TargetActivation.Any
+                                ElseIf Not Main.Instance.screen_saver_mode Then
+                                    Throw New InvalidDataException(
+                                        "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
+                                        "Interaction file specified '" & columns(InteractionParameter.TargetSelectionOption) &
+                                        "' for interaction named: " & columns(InteractionParameter.Name))
                                 End If
                             End If
 
-                            Pony.AddInteraction(columns(InteractionParameter.Name), _
-                                            ponyname, _
-                                            Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
-                                            columns(InteractionParameter.Proximity), _
-                                            columns(InteractionParameter.TargetList), _
-                                            targetsActivated, _
-                                            columns(InteractionParameter.BehaviorList), _
-                                            repeat_delay, _
-                                            displayWarnings)
+                        Pony.AddInteraction(columns(InteractionParameter.Name), _
+                                        ponyname, _
+                                        Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
+                                        columns(InteractionParameter.Proximity), _
+                                        columns(InteractionParameter.TargetList), _
+                                        targetsActivated, _
+                                        columns(InteractionParameter.BehaviorList), _
+                                        repeat_delay, _
+                                        displayWarnings)
 
                         End If
                     Catch ex As Exception

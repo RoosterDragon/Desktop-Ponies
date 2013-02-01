@@ -131,31 +131,6 @@ Public Class DesktopPonyAnimator
                     .Invoke(Sub() Main.Instance.Close())
                     Exit Sub
                 End If
-            Else
-                If Options.SuspendForFullscreenApplication Then
-                    'See if there are any full screen application running.
-                    'If so, minimize and suspend.
-
-                    If DetectFullScreenWindow() Then
-
-                        If .Suspended_For_FullScreenApp = False Then
-                            .Suspended_For_FullScreenApp = True
-
-                            Pause(True)
-                        End If
-
-                        Exit Sub
-
-                    Else
-
-                        If .Suspended_For_FullScreenApp Then
-                            .Suspended_For_FullScreenApp = False
-
-                            Unpause()
-                        End If
-
-                    End If
-                End If
             End If
 
             poniesToRemove.Clear()

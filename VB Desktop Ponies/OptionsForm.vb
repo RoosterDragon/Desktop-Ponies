@@ -56,13 +56,10 @@
         ' Set initial volume value, event handler will update values as needed.
         Volume.Value = 650
 
-        ' This option is only available on windows. (And actually broken on Windows at the moment...)
-        ' TODO: See if function can be restored, or else removed entirely.
-        If True OrElse Not OperatingSystemInfo.IsWindows Then
-            SuspendForFullscreenApp.Visible = False
-            SuspendForFullscreenApp.Enabled = False
-            Options.SuspendForFullscreenApplication = False
-        End If
+        ' This option is no longer available as there is no code to reliably determine if a fullscreen window is active at the moment.
+        SuspendForFullscreenApp.Visible = False
+        SuspendForFullscreenApp.Enabled = False
+        Options.SuspendForFullscreenApplication = False
 
         ' This option causes random crashes on Mac.
         ' TODO: Determine cause of errors - appears to be threading related.
