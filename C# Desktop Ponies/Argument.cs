@@ -9,6 +9,7 @@
     /// </summary>
     public static class Argument
     {
+        #region ValidatedNotNullAttribute class
         /// <summary>
         /// Identifies a parameter as having been validated to ensure it was not null to static analysis tools.
         /// </summary>
@@ -16,6 +17,7 @@
         private sealed class ValidatedNotNullAttribute : Attribute
         {
         }
+        #endregion
 
         /// <summary>
         /// Checks that an argument is not null.

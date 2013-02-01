@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
 
     /// <summary>
@@ -23,9 +24,11 @@
         /// substrings do not retain their enclosing qualifiers.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="options"/> is invalid.</exception>
-        /// <exception cref="T:System.ArgumentException">The dimensions of the <paramref name="qualifiers"/> array are invalid.-or-There is
-        /// a conflict between separator and qualifier characters.-or-<paramref name="source"/> contains an opening qualifier character
-        /// with no matching closing qualifier.</exception>
+        /// <exception cref="T:System.ArgumentException">The dimensions of the <paramref name="qualifiers"/> array are invalid.-or-The
+        /// characters used as separators and opening qualifiers as a combined group are not unique from each other.-or-
+        /// <paramref name="source"/> contains an opening qualifier character with no matching closing qualifier.</exception>
+        /// <remarks>This method is not suitable for parsing CSV files, which generally require that two consecutive instances of a
+        /// qualifying character be treated as a literal of that character, which this method does not support.</remarks>
         public static string[] SplitQualified(this string source, char[] separators, char[,] qualifiers, StringSplitOptions options)
         {
             Argument.EnsureNotNull(source, "source");
@@ -40,11 +43,14 @@
             if (qualifiers.GetLength(1) != 2)
                 throw new ArgumentException("The dimensions of the qualifiers array must be [n,2]. " +
                     "The two characters are the opening and closing qualifier pair. You may have n pairs of qualifiers.", "qualifiers");
+            
+            char[] openingQualifiers = new char[qualifiers.GetLength(0)];
+            for (int i = 0; i < qualifiers.GetLength(0); i++)
+                openingQualifiers[i] = qualifiers[i, 0];
 
-            foreach (char seperator in separators)
-                foreach (char qualifier in qualifiers)
-                    if (seperator == qualifier)
-                        throw new ArgumentException("Separator characters must be distinct from qualifier characters.");
+            var seperatorsAndOpeningQualifiers = separators.Concat(openingQualifiers);
+            if (seperatorsAndOpeningQualifiers.Count() != seperatorsAndOpeningQualifiers.Distinct().Count())
+                throw new ArgumentException("Separator and opening qualifier characters must all be distinct from each other.");
 
             // Handle the empty string (as a StringBuilder cannot be initialized with zero capacity).
             if (source.Length == 0)
@@ -52,14 +58,6 @@
                     return new string[1] { source };
                 else
                     return new string[0];
-
-            char[] openingQualifiers = new char[qualifiers.GetLength(0)];
-            char[] closingQualifiers = new char[qualifiers.GetLength(0)];
-            for (int i = 0; i < qualifiers.GetLength(0); i++)
-            {
-                openingQualifiers[i] = qualifiers[i, 0];
-                closingQualifiers[i] = qualifiers[i, 1];
-            }
 
             // Default capacity is the larger of 16 or 1/8th of the source length, but no more than the source length.
             int capacity = Math.Min(source.Length, Math.Max(16, (int)Math.Ceiling(source.Length / 8f)));
@@ -72,7 +70,7 @@
                 // Determine the positions of the next separator and qualifier.
                 int seperatorIndex = source.IndexOfAny(separators, index);
                 int qualifierIndex = source.IndexOfAny(openingQualifiers, index);
-                // If not found, set value to the maximum so that located values are less than un-located values.
+                // Specify the index of characters that could be located to be the end of the source string.
                 if (seperatorIndex == -1)
                     seperatorIndex = source.Length;
                 if (qualifierIndex == -1)
@@ -82,7 +80,8 @@
                 {
                     // If seperatorIndex < qualifierIndex, we encountered a separator in the source.
                     // If seperatorIndex == qualifierIndex, we reached the end of the source.
-                    // In either case, complete the segment and advance the index.
+                    // We can complete the next segment by taking the substring from our last position up to seperatorIndex, which is the
+                    // location of the next separator or else the end of the string.
                     segment.Append(source, index, seperatorIndex - index);
                     index = seperatorIndex + 1;
 
@@ -96,12 +95,12 @@
                 {
                     // We encountered a qualifier, we need to find the matching closing qualifier.
                     char openingQualifier = source[qualifierIndex];
-                    char closingQualifier = ' ';
+                    char closingQualifier = '\0';
                     // Get the qualifier that closes this pair.
-                    for (int i = 0; i < openingQualifiers.Length; i++)
-                        if (openingQualifier == openingQualifiers[i])
+                    for (int i = 0; i < qualifiers.Length; i++)
+                        if (openingQualifier == qualifiers[i, 0])
                         {
-                            closingQualifier = closingQualifiers[i];
+                            closingQualifier = qualifiers[i, 1];
                             break;
                         }
 
@@ -112,7 +111,10 @@
                     // Find closing qualifier.
                     qualifierIndex = source.IndexOf(closingQualifier, index);
                     if (qualifierIndex == -1)
-                        throw new ArgumentException("Source string contains qualified text with no closing qualifier");
+                        throw new ArgumentException(
+                            "Source string contains qualified text with no closing qualifier. The opening qualifier '" + openingQualifier +
+                            "' was encountered at position " + (index - 1) + ", but the closing qualifier '" + closingQualifier + 
+                            "' could not found at a subsequent position.");
                     // Append the text up to the closing qualifier.
                     segment.Append(source, index, qualifierIndex - index);
                     // Skip over closing qualifier character.
