@@ -1829,7 +1829,8 @@ Class Pony
             Location = new_location
             LastMovement = movement
 
-            Paint(False)
+            Dim useVisualOverride = AtDestination AndAlso CurrentBehavior.FollowStoppedBehavior IsNot Nothing
+            Paint(useVisualOverride)
 
             'check to see if we should interact at all
 
@@ -2071,7 +2072,7 @@ Class Pony
                 If paint_stop_now Then
 
                     If Destination.X >= CurrentBehavior.LeftImageCenter.X + Location.X AndAlso
-                        Destination.X <= CurrentBehavior.RightImageCenter.X + Location.X Then
+                        Destination.X < CurrentBehavior.RightImageCenter.X + Location.X Then
                         '  Console.WriteLine(Me.Name & " paint stopped")
                         Exit Sub
                     End If
