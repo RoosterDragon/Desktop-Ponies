@@ -777,7 +777,7 @@ Partial Class OptionsForm
         Me.Volume.TabIndex = 6
         Me.Volume.TickFrequency = 100
         Me.Volume.TickStyle = System.Windows.Forms.TickStyle.TopLeft
-        Me.Volume.Value = 650
+        Me.Volume.Value = 750
         '
         'VolumeLabel
         '
@@ -795,7 +795,7 @@ Partial Class OptionsForm
         Me.VolumeValueLabel.Name = "VolumeValueLabel"
         Me.VolumeValueLabel.Size = New System.Drawing.Size(22, 13)
         Me.VolumeValueLabel.TabIndex = 5
-        Me.VolumeValueLabel.Text = "6.5"
+        Me.VolumeValueLabel.Text = "7.5"
         '
         'TimeScaleValueLabel
         '

@@ -174,7 +174,7 @@ Public NotInheritable Class Options
         CursorAvoidanceEnabled = True
         CursorAvoidanceSize = 100
         SoundEnabled = True
-        SoundVolume = 0.65
+        SoundVolume = 0.75
         SoundSingleChannelOnly = False
 
         PonyAvoidsPonies = False

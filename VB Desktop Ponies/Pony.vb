@@ -1225,8 +1225,6 @@ Class Pony
                     MsgBox("Error playing sound " & filename & " for " & Me.Directory & ControlChars.NewLine _
                            & "Further sound errors will be suppressed." & ControlChars.NewLine & ex.Message)
                 End If
-            Finally
-                audio.Dispose()
             End Try
         End If
     End Sub

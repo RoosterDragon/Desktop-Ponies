@@ -120,7 +120,7 @@
         Teleport.Checked = Options.PonyTeleportEnabled
         TimeScale.Value = CInt(Options.TimeFactor * 10)
         Sound.Checked = Options.SoundEnabled
-        'Sounds_Disabled_Label.Visible = False
+        'SoundDisabledLabel.Visible = False
         SoundLimitOneGlobally.Checked = Options.SoundSingleChannelOnly
         SoundLimitOnePerPony.Checked = Not Options.SoundSingleChannelOnly
         Volume.Value = CInt(Options.SoundVolume * 1000)
@@ -314,10 +314,6 @@
         Options.SoundVolume = CSng(Volume.Value / 1000)
 
         VolumeValueLabel.Text = CStr(Volume.Value / 100)
-
-        If Main.Instance.DirectXSoundAvailable Then
-            Main.Instance.SetVolumeOnAllSounds(SoundVolume)
-        End If
     End Sub
 
     Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click

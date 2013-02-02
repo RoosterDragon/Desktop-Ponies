@@ -189,7 +189,7 @@ Public Class DesktopPonyAnimator
             Next
 
             If .DirectXSoundAvailable Then
-                .Cleanup_Sounds()
+                .CleanupSounds()
             End If
 
             For Each house In Houses()

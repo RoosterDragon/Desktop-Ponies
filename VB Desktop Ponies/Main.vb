@@ -1500,20 +1500,13 @@ Public Class Main
         PonySelectionPanel.Controls.Clear()
     End Sub
 
-    Friend Sub SetVolumeOnAllSounds(volume As Integer)
-        For Each activeSound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
-            activeSound.Volume = volume
-        Next
-    End Sub
-
-    Friend Sub Cleanup_Sounds()
+    Friend Sub CleanupSounds()
         Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
 
         For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
-            If sound.Disposed OrElse
-                sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
+            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
                 sound.CurrentPosition >= sound.Duration Then
-                If Not sound.Disposed Then sound.Dispose()
+                sound.Dispose()
                 If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
                 soundsToRemove.AddLast(sound)
             End If
