@@ -777,7 +777,7 @@
             };
             animator.AnimatorClosed += (acSender, acE) => Invoke(new MethodInvoker(Show));
             animator.ProgramExitRequested += (perSender, perE) => Invoke(new MethodInvoker(Close));
-            animator.Begin();
+            animator.Start();
 
             Hide();
         }

@@ -48,8 +48,7 @@
             for (int i = 0; i < qualifiers.GetLength(0); i++)
                 openingQualifiers[i] = qualifiers[i, 0];
 
-            var seperatorsAndOpeningQualifiers = separators.Concat(openingQualifiers);
-            if (seperatorsAndOpeningQualifiers.Count() != seperatorsAndOpeningQualifiers.Distinct().Count())
+            if (separators.Concat(openingQualifiers).Count() != separators.Union(openingQualifiers).Count())
                 throw new ArgumentException("Separator and opening qualifier characters must all be distinct from each other.");
 
             // Handle the empty string (as a StringBuilder cannot be initialized with zero capacity).

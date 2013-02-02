@@ -13,7 +13,7 @@
         /// <summary>
         /// Starts actively updating the sprites in the collection.
         /// </summary>
-        void Begin();
+        void Start();
         /// <summary>
         /// Stops updating sprites in the collection.
         /// </summary>

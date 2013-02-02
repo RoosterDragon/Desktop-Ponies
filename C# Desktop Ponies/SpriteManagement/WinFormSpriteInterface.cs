@@ -1171,7 +1171,7 @@
         /// <summary>
         /// Resumes display of the <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface"/> from a paused state.
         /// </summary>
-        public void Unpause()
+        public void Resume()
         {
             if (opened && paused)
             {

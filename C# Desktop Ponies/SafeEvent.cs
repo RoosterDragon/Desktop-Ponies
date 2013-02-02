@@ -3,9 +3,9 @@
     using System;
 
     /// <summary>
-    /// Defines Raise methods for <see cref="T:System.EventHandler"/> and <see cref="T:System.EventHandler`1"/>.
+    /// Defines thread-safe Raise methods for <see cref="T:System.EventHandler"/> and <see cref="T:System.EventHandler`1"/>.
     /// </summary>
-    public static class Event
+    public static class SafeEvent
     {
         /// <summary>
         /// Raises the event with no event data.

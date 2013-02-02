@@ -3,7 +3,7 @@
   <EnableSearchGAC Override="false" Value="true" />
   <IgnoreGeneratedCode Override="false" Value="true" />
   <Timeout Override="false" Value="60" />
-  <RuleSet Override="false" Value="Bundled;ExtendedDesignGuidelineRules.ruleset" />
+  <RuleSet Override="false" Value="Bundled;AllRules.ruleset" />
   <FilterPatterns Override="inherit">
     <FilterPattern Value="^.+\.[Dd]esigner\.[^\.]+$" />
     <FilterPattern Value="^.+\.[Gg]enerated\.[^\.]+$" />

@@ -131,7 +131,7 @@
       <DependentUpon>GifForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SpriteManagement\Frame.cs" />
-    <Compile Include="Event.cs" />
+    <Compile Include="SafeEvent.cs" />
     <Compile Include="Argument.cs" />
     <Compile Include="ImageSize.cs" />
     <Compile Include="SpriteManagement\GtkSpriteInterface.cs" />

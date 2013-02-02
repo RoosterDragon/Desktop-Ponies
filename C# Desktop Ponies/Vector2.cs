@@ -15,13 +15,13 @@
         public static readonly Vector2 Zero;
 
         /// <summary>
-        /// The x component of the vector.
+        /// Gets or sets the x component of the vector.
         /// </summary>
-        public int X;
+        public int X { get; set; }
         /// <summary>
-        /// The y component of the vector.
+        /// Gets or sets the y component of the vector.
         /// </summary>
-        public int Y;
+        public int Y { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Vector2"/> structure.
@@ -29,6 +29,7 @@
         /// <param name='x'>The x component of the vector.</param>
         /// <param name='y'>The y component of the vector.</param>
         public Vector2(int x, int y)
+            : this()
         {
             X = x;
             Y = y;
@@ -38,6 +39,7 @@
         /// </summary>
         /// <param name='point'>The point whose x- and y-coordinates are used to initialize the vector.</param>
         public Vector2(Point point)
+            : this()
         {
             X = point.X;
             Y = point.Y;
@@ -47,6 +49,7 @@
         /// </summary>
         /// <param name='size'>The size whose width and height values are used to initialize the vector.</param>
         public Vector2(Size size)
+            : this()
         {
             X = size.Width;
             Y = size.Height;
@@ -259,7 +262,7 @@
             return Distance(this, Zero);
         }
     }
-    
+
     /// <summary>
     /// Represents an ordered pair of floating-point x- and y-coordinates that defines a point in a two-dimensional plane.
     /// </summary>
@@ -272,13 +275,13 @@
         public static readonly Vector2F Zero;
 
         /// <summary>
-        /// The x component of the vector.
+        /// Gets or sets the x component of the vector.
         /// </summary>
-        public float X;
+        public float X { get; set; }
         /// <summary>
-        /// The y component of the vector.
+        /// Gets or sets the y component of the vector.
         /// </summary>
-        public float Y;
+        public float Y { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Vector2F"/> structure.
@@ -286,6 +289,7 @@
         /// <param name='x'>The x component of the vector.</param>
         /// <param name='y'>The y component of the vector.</param>
         public Vector2F(float x, float y)
+            : this()
         {
             X = x;
             Y = y;
@@ -295,6 +299,7 @@
         /// </summary>
         /// <param name='point'>The point whose x- and y-coordinates are used to initialize the vector.</param>
         public Vector2F(PointF point)
+            : this()
         {
             X = point.X;
             Y = point.Y;
@@ -304,6 +309,7 @@
         /// </summary>
         /// <param name='size'>The size whose width and height values are used to initialize the vector.</param>
         public Vector2F(SizeF size)
+            : this()
         {
             X = size.Width;
             Y = size.Height;

@@ -99,8 +99,8 @@ Public Class DesktopPonyAnimator
                                 End Sub)
     End Sub
 
-    Public Overrides Sub Begin()
-        MyBase.Begin()
+    Public Overrides Sub Start()
+        MyBase.Start()
         If controlForm IsNot Nothing Then controlForm.SmartInvoke(AddressOf controlForm.Show)
 #If DEBUG Then
         If Not Main.Instance.Preview_Mode Then
@@ -257,11 +257,7 @@ Public Class DesktopPonyAnimator
                                                                  If selectedPony Is Nothing Then Return
                                                                  selectedPony.should_be_sleeping = Not selectedPony.should_be_sleeping
                                                              End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 Main.Instance.Invoke(Sub()
-                                                                                          Main.Instance.sleep_all()
-                                                                                      End Sub)
-                                                             End Sub))
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.Invoke(Sub() Main.Instance.sleep_all())))
         menuItems.AddLast(New SimpleContextMenuItem())
         Dim ponies As IEnumerable(Of ISimpleContextMenuItem) = Nothing
         Main.Instance.Invoke(Sub()
@@ -303,18 +299,11 @@ Public Class DesktopPonyAnimator
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
 
-        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub()
-                                                                        Main.Instance.Invoke(Sub()
-                                                                                                 OptionsForm.Instance.Show()
-                                                                                             End Sub)
-
-                                                                    End Sub))
+        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.Invoke(Sub() OptionsForm.Instance.Show())))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
                                                                 Finish()
-                                                                Main.Instance.Invoke(Sub()
-                                                                                         Main.Instance.Close()
-                                                                                     End Sub)
+                                                                Main.Instance.Invoke(Sub() Main.Instance.Close())
                                                             End Sub))
         If controlForm Is Nothing Then
             ponyMenu = Viewer.CreateContextMenu(menuItems)

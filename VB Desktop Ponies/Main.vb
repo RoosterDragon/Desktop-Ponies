@@ -849,7 +849,7 @@ Public Class Main
                 Startup_Ponies.Clear()
                 Pony_Startup()
                 current_game.Setup()
-                Animator.Begin()
+                Animator.Start()
             Else
                 If Me.IsDisposed = False Then
                     Me.Visible = True
@@ -1414,7 +1414,7 @@ Public Class Main
 
         If Not e.Cancelled Then
             Ponies_Have_Launched = True
-            Animator.Begin()
+            Animator.Start()
 
             ' Hide the menu form now.
             Me.Visible = False

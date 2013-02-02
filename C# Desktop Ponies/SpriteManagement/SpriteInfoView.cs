@@ -64,9 +64,9 @@
             view.Pause();
         }
 
-        public void Unpause()
+        public void Resume()
         {
-            view.Unpause();
+            view.Resume();
         }
 
         public void Draw(AsyncLinkedList<ISprite> sprites)

@@ -593,13 +593,16 @@
                 if (value)
                     Pause(false);
                 else
-                    Unpause();
+                    Resume();
             }
         }
         /// <summary>
         /// Gets a value indicating whether animation has been stopped.
         /// </summary>
-        public bool Stopped { get; private set; }
+        public bool Stopped
+        {
+            get { return Disposed; }
+        }
         /// <summary>
         /// Used to pause the thread running the main loop. Signals false whilst paused, otherwise signals true.
         /// </summary>
@@ -702,10 +705,14 @@
         /// <summary>
         /// Shows the animator and begins animating. Start is called on behalf of all sprites currently in the collection.
         /// </summary>
-        public virtual void Begin()
+        /// <exception cref="T:System.InvalidOperationException">The animator has already been started.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
+        public virtual void Start()
         {
             if (Started)
                 throw new InvalidOperationException("Cannot start an animator that has already been started.");
+            if (Disposed)
+                throw new ObjectDisposedException(GetType().FullName);
 
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Started = true;
@@ -726,16 +733,17 @@
         }
 
         /// <summary>
-        /// Pauses animation, and optionally hides the animator while paused.
+        /// Pauses animation, and optionally hides the animator while paused. If animation is already paused, this has no effect.
         /// </summary>
         /// <param name="hide">True to hide the animator, false to leave the animator visible in the paused state.</param>
+        /// <exception cref="T:System.InvalidOperationException">The animator has not been started.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         public virtual void Pause(bool hide)
         {
             if (!Started)
                 throw new InvalidOperationException("Cannot pause an animator that has not been started.");
-
-            if (Stopped)
-                throw new InvalidOperationException("Cannot pause an animator that has been stopped.");
+            if (Disposed)
+                throw new ObjectDisposedException(GetType().FullName);
 
             if (!Paused)
             {
@@ -751,15 +759,16 @@
         }
 
         /// <summary>
-        /// Resumes animation, and shows the animator if it was hidden while paused.
+        /// Resumes animation, and shows the animator if it was hidden while paused. If animation is not paused, this has no effect.
         /// </summary>
-        public virtual void Unpause()
+        /// <exception cref="T:System.InvalidOperationException">The animator has not been started.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
+        public virtual void Resume()
         {
             if (!Started)
                 throw new InvalidOperationException("Cannot resume an animator that has not been started.");
-
-            if (Stopped)
-                throw new InvalidOperationException("Cannot resume an animator that has been stopped.");
+            if (Disposed)
+                throw new ObjectDisposedException(GetType().FullName);
 
             if (Paused)
             {
@@ -767,7 +776,7 @@
                 intervalWatch.Start();
 
                 Viewer.Show();
-                Viewer.Unpause();
+                Viewer.Resume();
 
                 running.Set();
             }
@@ -878,11 +887,8 @@
         /// unmanaged resources should be disposed.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !Stopped)
+            if (disposing)
             {
-                // Signal that animation has ended.
-                Stopped = true;
-
                 if (runner != null)
                 {
                     // Un-pause so the main thread can gracefully exit now the signal to stop has been issued.

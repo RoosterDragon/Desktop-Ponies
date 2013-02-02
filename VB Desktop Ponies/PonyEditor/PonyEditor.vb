@@ -202,7 +202,7 @@ Public Class PonyEditor
         Pony.CurrentViewer = pe_interface
         Pony.CurrentAnimator = pe_animator
         If Not pe_animator.Started Then
-            pe_animator.Begin()
+            pe_animator.Start()
             PausePonyButton.Enabled = True
         Else
             pe_animator.Pause(True)
@@ -213,7 +213,7 @@ Public Class PonyEditor
         Load_Parameters(PreviewPony)
 
         PausePonyButton.Text = "Pause Pony"
-        pe_animator.Unpause()
+        pe_animator.Resume()
 
         Enabled = True
 
@@ -1600,7 +1600,7 @@ Public Class PonyEditor
                 pe_animator.Pause(False)
                 PausePonyButton.Text = "Resume Pony"
             Else
-                pe_animator.Unpause()
+                pe_animator.Resume()
                 PausePonyButton.Text = "Pause Pony"
             End If
         Catch ex As Exception
@@ -1628,7 +1628,7 @@ Public Class PonyEditor
         PausePonyButton.Text = "Pause Pony"
 
         If pe_animator.Started Then
-            pe_animator.Unpause()
+            pe_animator.Resume()
         End If
 
         If Not IsNothing(PreviewPony) Then
@@ -2187,7 +2187,7 @@ Public Class PonyEditor
 
         RefreshButton_Click(Nothing, Nothing)
 
-        pe_animator.Unpause()
+        pe_animator.Resume()
         PausePonyButton.Enabled = True
 
     End Sub

@@ -54,7 +54,7 @@
         /// <summary>
         /// Resumes display of the interface from a paused state.
         /// </summary>
-        void Unpause();
+        void Resume();
         /// <summary>
         /// Draws the given collection of sprites.
         /// </summary>
