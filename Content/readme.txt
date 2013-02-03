@@ -63,8 +63,12 @@ Change Log
 
 Latest changes:
 
+v1.42.x:
+- Added crystallized Twilight Sparkle by supersaiyanmikito
+
 v1.42.1.1:
 - Added Ace & Big Lebowski ponies by Bot-chan
+- Added crystallized Rainbow Dash by supersaiyanmikito
 - Fixed not being able to use keyboard to jump to ponies on the main menu after making changes in the editor.
 
 v1.42.1:
