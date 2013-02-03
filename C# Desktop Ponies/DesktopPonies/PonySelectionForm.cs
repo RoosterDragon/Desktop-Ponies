@@ -832,12 +832,10 @@
             foreach (PonyDisplay display in ponyDisplays)
                 ponyTemplates.Add(display.Template);
 
-            using (var editor = new PonyEditorForm(ponyTemplates))
-            {
-                editor.Disposed += (dSender, dE) => Show();
-                editor.Show();
-                Hide();
-            }
+            var editor = new PonyEditorForm(ponyTemplates);
+            editor.Disposed += (dSender, dE) => Show();
+            editor.Show();
+            Hide();
         }
 
         /// <summary>
@@ -846,12 +844,10 @@
         /// <typeparam name="TForm">The type of the form to show.</typeparam>
         private void SwitchToForm<TForm>() where TForm : Form, new()
         {
-            using (Form form = new TForm())
-            {
-                form.Disposed += (sender, e) => Show();
-                form.Show();
-                Hide();
-            }
+            Form form = new TForm();
+            form.Disposed += (sender, e) => Show();
+            form.Show();
+            Hide();
         }
 
         /// <summary>
