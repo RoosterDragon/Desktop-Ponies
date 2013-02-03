@@ -251,9 +251,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy "$(SolutionDir)Content" "$(TargetDir)\" /XO /E
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>robocopy "$(SolutionDir)Content" "$(TargetDir)\" /XO /MIR
 IF errorlevel 4 exit /b %25errorlevel%25
-exit /b 0</PostBuildEvent>
+exit /b 0</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -147,6 +147,7 @@
                     gifImage.Frames[sourceFrame] = null;
                     System.Threading.Interlocked.Increment(ref framesDropped);
                     HadZeroDurationFrames = true;
+                    Console.WriteLine(string.Format("Dropped frame of zero duration: Frame {0} in {1}", sourceFrame, FilePath));
                     continue;
                 }
 
