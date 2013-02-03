@@ -1494,6 +1494,7 @@ Public Class Main
     ''' <remarks></remarks>
     Sub DisposeMenu()
         SelectionControlsPanel.Enabled = False
+        selectionControlFilter.Clear()
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.Dispose()
         Next
