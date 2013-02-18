@@ -193,7 +193,7 @@ Public Class PonyEditor
         PreviewPony = New Pony(Main.Instance.SelectablePonies(index))
 
         If PreviewPony.Behaviors.Count = 0 Then
-            PreviewPony.Base.AddBehavior("Default", 1, 60, 60, 0, Pony.Allowed_Moves.None, "", "", "")
+            PreviewPony.Base.AddBehavior("Default", 1, 60, 60, 0, Pony.AllowedMoves.None, "", "", "")
         End If
 
         SaveSortOrder()
@@ -367,8 +367,8 @@ Public Class PonyEditor
             For Each behavior In pony.Behaviors
 
                 Dim follow_name As String = ""
-                If behavior.original_follow_object_name <> "" Then
-                    follow_name = behavior.original_follow_object_name
+                If behavior.originalFollowObjectName <> "" Then
+                    follow_name = behavior.originalFollowObjectName
                 Else
                     If behavior.original_destination_xcoord <> 0 AndAlso behavior.original_destination_ycoord <> 0 Then
                         follow_name = behavior.original_destination_xcoord & " , " & behavior.original_destination_ycoord
@@ -391,7 +391,7 @@ Public Class PonyEditor
 
                 Dim chance = "N/A"
                 If behavior.Skip = False Then
-                    chance = behavior.chance_of_occurance.ToString("P", CultureInfo.CurrentCulture)
+                    chance = behavior.ChanceOfOccurance.ToString("P", CultureInfo.CurrentCulture)
                 End If
 
                 With behavior
@@ -402,7 +402,7 @@ Public Class PonyEditor
                                         .Speed, _
                                         Get_Filename(.RightImagePath), _
                                         Get_Filename(.LeftImagePath), _
-                                        Movement_ToString(.Allowed_Movement), _
+                                        Movement_ToString(.AllowedMovement), _
                                         LCase(.StartLineName), _
                                         LCase(.EndLineName), _
                                         follow_name, _
@@ -417,7 +417,7 @@ Public Class PonyEditor
                 With effect
                     PonyEffectsGrid.Rows.Add(.Name, _
                                                  .Name, _
-                                                 .behavior_name, _
+                                                 .BehaviorName, _
                                                  Get_Filename(.right_image_path), _
                                                  Get_Filename(.left_image_path), _
                                                  .Duration, _
@@ -440,7 +440,7 @@ Public Class PonyEditor
                                                    "Select...",
                                                    Interaction.Targets_Activated.ToString(),
                                                    "Select...",
-                                                   .Reactivation_Delay)
+                                                   .ReactivationDelay)
 
                 End With
 
@@ -547,59 +547,59 @@ Public Class PonyEditor
 
     End Function
 
-    Private Shared Function Movement_ToString(movement As Pony.Allowed_Moves) As String
+    Private Shared Function Movement_ToString(movement As Pony.AllowedMoves) As String
         Select Case movement
-            Case Pony.Allowed_Moves.None
+            Case Pony.AllowedMoves.None
                 Return "None"
-            Case Pony.Allowed_Moves.Horizontal_Only
+            Case Pony.AllowedMoves.HorizontalOnly
                 Return "Horizontal Only"
-            Case Pony.Allowed_Moves.Vertical_Only
+            Case Pony.AllowedMoves.VerticalOnly
                 Return "Vertical Only"
-            Case Pony.Allowed_Moves.Horizontal_Vertical
+            Case Pony.AllowedMoves.HorizontalVertical
                 Return "Horizontal Vertical"
-            Case Pony.Allowed_Moves.Diagonal_Only
+            Case Pony.AllowedMoves.DiagonalOnly
                 Return "Diagonal Only"
-            Case Pony.Allowed_Moves.Diagonal_Horizontal
+            Case Pony.AllowedMoves.DiagonalHorizontal
                 Return "Diagonal/horizontal"
-            Case Pony.Allowed_Moves.Diagonal_Vertical
+            Case Pony.AllowedMoves.DiagonalVertical
                 Return "Diagonal/Vertical"
-            Case Pony.Allowed_Moves.All
+            Case Pony.AllowedMoves.All
                 Return "All"
-            Case Pony.Allowed_Moves.MouseOver
+            Case Pony.AllowedMoves.MouseOver
                 Return "MouseOver"
-            Case Pony.Allowed_Moves.Sleep
+            Case Pony.AllowedMoves.Sleep
                 Return "Sleep"
-            Case Pony.Allowed_Moves.Dragged
+            Case Pony.AllowedMoves.Dragged
                 Return "Dragged"
             Case Else
                 Throw New ArgumentException("Invalid movement option: " & movement, "movement")
         End Select
     End Function
 
-    Friend Shared Function String_ToMovement(movement As String) As Pony.Allowed_Moves
+    Friend Shared Function String_ToMovement(movement As String) As Pony.AllowedMoves
         Select Case movement
             Case "None"
-                Return Pony.Allowed_Moves.None
+                Return Pony.AllowedMoves.None
             Case "Horizontal Only"
-                Return Pony.Allowed_Moves.Horizontal_Only
+                Return Pony.AllowedMoves.HorizontalOnly
             Case "Vertical Only"
-                Return Pony.Allowed_Moves.Vertical_Only
+                Return Pony.AllowedMoves.VerticalOnly
             Case "Horizontal Vertical"
-                Return Pony.Allowed_Moves.Horizontal_Vertical
+                Return Pony.AllowedMoves.HorizontalVertical
             Case "Diagonal Only"
-                Return Pony.Allowed_Moves.Diagonal_Only
+                Return Pony.AllowedMoves.DiagonalOnly
             Case "Diagonal/horizontal"
-                Return Pony.Allowed_Moves.Diagonal_Horizontal
+                Return Pony.AllowedMoves.DiagonalHorizontal
             Case "Diagonal/Vertical"
-                Return Pony.Allowed_Moves.Diagonal_Vertical
+                Return Pony.AllowedMoves.DiagonalVertical
             Case "All"
-                Return Pony.Allowed_Moves.All
+                Return Pony.AllowedMoves.All
             Case "MouseOver"
-                Return Pony.Allowed_Moves.MouseOver
+                Return Pony.AllowedMoves.MouseOver
             Case "Sleep"
-                Return Pony.Allowed_Moves.Sleep
+                Return Pony.AllowedMoves.Sleep
             Case "Dragged"
-                Return Pony.Allowed_Moves.Dragged
+                Return Pony.AllowedMoves.Dragged
             Case Else
                 Throw New ArgumentException("Invalid movement string:" & movement, "movement")
         End Select
@@ -725,13 +725,13 @@ Public Class PonyEditor
 
             effect.follow = effect.follow
             effect.Name = effect.Name
-            effect.behavior_name = "none"
+            effect.BehaviorName = "none"
 
             Dim rect = GetPreviewWindowScreenRectangle()
             effect.Location = New Point(CInt(rect.X + rect.Width * Rng.NextDouble), CInt(rect.Y + rect.Height * Rng.NextDouble))
 
             pe_animator.AddEffect(effect)
-            PreviewPony.Active_Effects.Add(effect)
+            PreviewPony.ActiveEffects.Add(effect)
 
             Return effect
 
@@ -849,18 +849,18 @@ Public Class PonyEditor
                         pe_animator.RemovePony(Pony)
                     Next
 
-                    PreviewPony.Active_Effects.Clear()
+                    PreviewPony.ActiveEffects.Clear()
 
                     Dim follow_sprite As ISprite = Nothing
-                    If changed_behavior.original_follow_object_name <> "" Then
-                        follow_sprite = AddPony(changed_behavior.original_follow_object_name)
+                    If changed_behavior.originalFollowObjectName <> "" Then
+                        follow_sprite = AddPony(changed_behavior.originalFollowObjectName)
 
                         If IsNothing(follow_sprite) Then
-                            follow_sprite = AddEffect(changed_behavior.original_follow_object_name)
+                            follow_sprite = AddEffect(changed_behavior.originalFollowObjectName)
                         End If
 
                         If IsNothing(follow_sprite) Then
-                            MessageBox.Show("The specified pony or effect to follow (" & changed_behavior.original_follow_object_name &
+                            MessageBox.Show("The specified pony or effect to follow (" & changed_behavior.originalFollowObjectName &
                                             ") for this behavior (" & changed_behavior_name &
                                             ") does not exist. Please review this setting.",
                                             "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -869,7 +869,7 @@ Public Class PonyEditor
                     End If
 
                     PreviewPony.SelectBehavior(changed_behavior)
-                    PreviewPony.follow_object = follow_sprite
+                    PreviewPony.followObject = follow_sprite
 
                 Case colBehaviorRightImage.Index
                     HidePony()
@@ -1049,12 +1049,11 @@ Public Class PonyEditor
 
 
             Select Case e.ColumnIndex
-                Case colInteractionTargets.Index
-                Case colInteractionBehaviors.Index
+                Case colInteractionTargets.Index, colInteractionBehaviors.Index
                     HidePony()
                     Using form = New NewInteractionDialog(Me)
                         form.Change_Interaction(changed_interaction)
-                        form.ShowDialog()
+                        form.ShowDialog(Me)
                     End Using
                     changes_made_now = True
                     ShowPony()
@@ -1124,7 +1123,7 @@ Public Class PonyEditor
                         changed_behavior.Name = new_value
                         PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
                     Case colBehaviorChance.Index
-                        changed_behavior.chance_of_occurance = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
+                        changed_behavior.ChanceOfOccurance = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
                     Case colBehaviorMaxDuration.Index
                         Dim maxDuration = Double.Parse(new_value, CultureInfo.CurrentCulture)
                         If maxDuration > 0 Then
@@ -1142,7 +1141,7 @@ Public Class PonyEditor
                     Case colBehaviorSpeed.Index
                         changed_behavior.SetSpeed(Double.Parse(new_value, CultureInfo.CurrentCulture))
                     Case colBehaviorMovement.Index
-                        changed_behavior.Allowed_Movement = String_ToMovement(new_value)
+                        changed_behavior.AllowedMovement = String_ToMovement(new_value)
                     Case colBehaviorStartSpeech.Index
                         If new_value = "None" Then
                             changed_behavior.StartLineName = ""
@@ -1166,13 +1165,14 @@ Public Class PonyEditor
                     Case colBehaviorGroup.Index
                         Dim new_group_value = Integer.Parse(new_value, CultureInfo.CurrentCulture)
                         If new_group_value < 0 Then
-                            MsgBox("You can't have a group ID less than 0.  Note that 0 is reserved and means that the behavior ignores groups and can run at any time.")
+                            MsgBox("You can't have a group ID less than 0.")
                             Exit Sub
                         End If
                         changed_behavior.Group = new_group_value
                     Case colBehaviorGroupName.Index
-                        If changed_behavior.Group = 0 Then
-                            MsgBox("You can't change the name of the 'Any' group.")
+                        If changed_behavior.Group = PonyBase.Behavior.AnyGroup Then
+                            MsgBox("You can't change the name of the 'Any' group. This is reserved. " &
+                                   "It means the behavior can run at any time, regardless of the current group that is running.")
                             Exit Sub
                         End If
 
@@ -1268,14 +1268,14 @@ Public Class PonyEditor
                         PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = new_value
                     Case colEffectBehavior.Index
                         For Each behavior In PreviewPony.Behaviors
-                            If behavior.Name = changed_effect.behavior_name Then
+                            If behavior.Name = changed_effect.BehaviorName Then
                                 behavior.Effects.Remove(changed_effect)
                                 Exit For
                             End If
                         Next
-                        changed_effect.behavior_name = new_value
+                        changed_effect.BehaviorName = new_value
                         For Each behavior In PreviewPony.Behaviors
-                            If behavior.Name = changed_effect.behavior_name Then
+                            If behavior.Name = changed_effect.BehaviorName Then
                                 behavior.Effects.Add(changed_effect)
                                 Exit For
                             End If
@@ -1453,7 +1453,7 @@ Public Class PonyEditor
                         changed_interaction.Targets_Activated =
                             CType([Enum].Parse(GetType(PonyBase.Interaction.TargetActivation), new_value), PonyBase.Interaction.TargetActivation)
                     Case colInteractionReactivationDelay.Index
-                        changed_interaction.Reactivation_Delay = Integer.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_interaction.ReactivationDelay = Integer.Parse(new_value, CultureInfo.InvariantCulture)
                 End Select
 
             Catch ex As Exception
@@ -2039,20 +2039,20 @@ Public Class PonyEditor
                     newPonyIniFile.WriteLine(String.Join(
                                       ",", "Behavior",
                                       Quoted(behavior.Name),
-                                      behavior.chance_of_occurance.ToString(CultureInfo.InvariantCulture),
+                                      behavior.ChanceOfOccurance.ToString(CultureInfo.InvariantCulture),
                                       behavior.MaxDuration.ToString(CultureInfo.InvariantCulture),
                                       behavior.MinDuration.ToString(CultureInfo.InvariantCulture),
                                       behavior.Speed.ToString(CultureInfo.InvariantCulture),
                                       Quoted(Get_Filename(behavior.RightImagePath)),
                                       Quoted(Get_Filename(behavior.LeftImagePath)),
-                                      Space_To_Under(Movement_ToString(behavior.Allowed_Movement)),
+                                      Space_To_Under(Movement_ToString(behavior.AllowedMovement)),
                                       Quoted(behavior.LinkedBehaviorName),
                                       Quoted(behavior.StartLineName),
                                       Quoted(behavior.EndLineName),
                                       behavior.Skip,
                                       behavior.original_destination_xcoord.ToString(CultureInfo.InvariantCulture),
                                       behavior.original_destination_ycoord.ToString(CultureInfo.InvariantCulture),
-                                      Quoted(behavior.original_follow_object_name),
+                                      Quoted(behavior.originalFollowObjectName),
                                       behavior.Auto_Select_Images_On_Follow,
                                       behavior.FollowStoppedBehaviorName,
                                       behavior.FollowMovingBehaviorName,
@@ -2069,7 +2069,7 @@ Public Class PonyEditor
                     newPonyIniFile.WriteLine(String.Join(
                                       ",", "Effect",
                                       Quoted(effect.Name),
-                                      Quoted(effect.behavior_name),
+                                      Quoted(effect.BehaviorName),
                                       Quoted(Get_Filename(effect.right_image_path)),
                                       Quoted(Get_Filename(effect.left_image_path)),
                                       effect.Duration.ToString(CultureInfo.InvariantCulture),
@@ -2147,7 +2147,7 @@ Public Class PonyEditor
                             Braced(interaction.Targets_String),
                             interaction.Targets_Activated.ToString(),
                             Braced(behaviors_list),
-                            interaction.Reactivation_Delay.ToString(CultureInfo.InvariantCulture))
+                            interaction.ReactivationDelay.ToString(CultureInfo.InvariantCulture))
                         writer.WriteLine(interactionLine)
                     Next
                 End Using

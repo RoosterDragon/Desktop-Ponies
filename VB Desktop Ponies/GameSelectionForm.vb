@@ -15,7 +15,7 @@ Public Class GameSelectionForm
 
         For Each monitor In Screen.AllScreens
             ScreenSelection_Box.Items.Add(monitor.DeviceName)
-            Main.Instance.screens_to_use.Add(monitor)
+            Main.Instance.ScreensToUse.Add(monitor)
         Next
 
         If ScreenSelection_Box.Items.Count <> 0 Then
@@ -305,7 +305,7 @@ Public Class GameSelectionForm
         game.GameScreen = Screen.AllScreens(ScreenSelection_Box.SelectedIndex)
 
         Me.DialogResult = DialogResult.OK
-        Main.Instance.current_game = game
+        Main.Instance.CurrentGame = game
     End Sub
 
     Private Sub Info_Click(sender As Object, e As EventArgs) Handles Info_Button.Click

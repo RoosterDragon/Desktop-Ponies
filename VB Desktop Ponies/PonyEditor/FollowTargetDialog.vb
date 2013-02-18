@@ -101,7 +101,7 @@
         Next
 
         For Each effect In effects_list
-            Follow_ComboBox.Items.Add(effect.Pony_Name & "'s " & effect.Name)
+            Follow_ComboBox.Items.Add(effect.Owning_Pony.Name & "'s " & effect.Name)
         Next
 
         moving_behavior_box.Items.Clear()
@@ -125,10 +125,10 @@
             point = True
         End If
 
-        If (Not IsNothing(behavior.original_follow_object_name) AndAlso behavior.original_follow_object_name <> "") Then
+        If (Not IsNothing(behavior.originalFollowObjectName) AndAlso behavior.originalFollowObjectName <> "") Then
             pony = True
             For Each item As String In Follow_ComboBox.Items
-                If String.Equals(string_to_effectname(item), behavior_to_change.original_follow_object_name, StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(string_to_effectname(item), behavior_to_change.originalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
                     Follow_ComboBox.SelectedItem = item
                 End If
             Next
@@ -248,19 +248,15 @@
                 Exit Sub
             End If
         Next
-
     End Sub
 
 
     Private Shared Function string_to_effectname(ByVal name As String) As String
         For Each effect In PonyEditor.get_effect_list()
-
-            If (effect.Pony_Name & "'s " & effect.Name) = name Then
+            If (effect.Owning_Pony.Name & "'s " & effect.Name) = name Then
                 Return effect.Name
             End If
-
         Next
-
         Return name
     End Function
 
@@ -285,9 +281,9 @@
         End If
 
         If Pony_Radio.Checked Then
-            behavior_to_change.original_follow_object_name = string_to_effectname(CStr(Follow_ComboBox.SelectedItem))
+            behavior_to_change.originalFollowObjectName = string_to_effectname(CStr(Follow_ComboBox.SelectedItem))
         Else
-            behavior_to_change.original_follow_object_name = ""
+            behavior_to_change.originalFollowObjectName = ""
         End If
 
         If Auto_Select_Images_Checkbox.Checked = True Then

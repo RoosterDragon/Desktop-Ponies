@@ -103,7 +103,7 @@ Public Class DesktopPonyAnimator
         MyBase.Start()
         If controlForm IsNot Nothing Then controlForm.SmartInvoke(AddressOf controlForm.Show)
 #If DEBUG Then
-        If Not Main.Instance.Preview_Mode Then
+        If Not Main.Instance.InPreviewMode Then
             Main.Instance.Invoke(Sub()
                                      spriteDebugForm = New SpriteDebugForm()
                                      spriteDebugForm.Show()
@@ -120,7 +120,7 @@ Public Class DesktopPonyAnimator
         Pony.CursorLocation = Viewer.CursorPosition
         ManualControl()
         With Main.Instance
-            If .screen_saver_mode Then
+            If .ScreensaverMode Then
                 'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
                 If .cursor_position.IsEmpty Then
                     .cursor_position = Cursor.Position
@@ -138,7 +138,7 @@ Public Class DesktopPonyAnimator
             For Each sprite In Sprites
                 Dim pony = TryCast(sprite, Pony)
                 If pony Is Nothing Then Continue For
-                If pony.AtDestination AndAlso pony.Going_Home AndAlso pony.Opening_Door AndAlso pony.CurrentBehavior.delay <= 0 Then
+                If pony.AtDestination AndAlso pony.Going_Home AndAlso pony.Opening_Door AndAlso pony.Delay <= 0 Then
                     poniesToRemove.Add(pony)
                 End If
             Next
@@ -147,8 +147,8 @@ Public Class DesktopPonyAnimator
                 RemovePony(Pony)
             Next
 
-            If Not IsNothing(.current_game) Then
-                .current_game.Update()
+            If Not IsNothing(.CurrentGame) Then
+                .CurrentGame.Update()
             End If
 
             Dim effects_to_remove As New List(Of Effect)
@@ -156,7 +156,7 @@ Public Class DesktopPonyAnimator
             For Each sprite In Sprites
                 Dim effect = TryCast(sprite, Effect)
                 If effect Is Nothing Then Continue For
-                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) AndAlso effect.Pony_Name <> "N/A" Then
+                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) AndAlso effect.Owning_Pony.Name <> "N/A" Then
                     effects_to_remove.Add(effect)
                     Sprites.Remove(effect)
                 End If
@@ -167,25 +167,25 @@ Public Class DesktopPonyAnimator
             '-If the pony that created it was closed, this loop will clean up the now orphaned effects.
             For Each effect In effects_to_remove
                 If Not IsNothing(effect.Owning_Pony) Then
-                    effect.Owning_Pony.Active_Effects.Remove(effect)
+                    effect.Owning_Pony.ActiveEffects.Remove(effect)
                     ' effect.Owning_Pony = Nothing
                 End If
                 Sprites.Remove(effect)
-                .Dead_Effects.Add(effect)
+                .DeadEffects.Add(effect)
             Next
 
             'cleanup dead effects separately - we can't do this immediately as they are needed to clear the graphics they leave behind
 
             effects_to_remove.Clear()
 
-            For Each effect In .Dead_Effects
+            For Each effect In .DeadEffects
                 If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
                     effects_to_remove.Add(effect)
                 End If
             Next
 
             For Each effect In effects_to_remove
-                .Dead_Effects.Remove(effect)
+                .DeadEffects.Remove(effect)
             Next
 
             If .DirectXSoundAvailable Then
@@ -196,7 +196,7 @@ Public Class DesktopPonyAnimator
                 house.Cycle(ElapsedTime)
             Next
 
-            If Main.Instance.Preview_Mode Then
+            If Main.Instance.InPreviewMode Then
                 Pony.PreviewWindowRectangle = Main.Instance.GetPreviewWindowRectangle()
             End If
 
@@ -255,7 +255,7 @@ Public Class DesktopPonyAnimator
         menuItems.AddLast(New SimpleContextMenuItem())
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  If selectedPony Is Nothing Then Return
-                                                                 selectedPony.should_be_sleeping = Not selectedPony.should_be_sleeping
+                                                                 selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
                                                              End Sub))
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.Invoke(Sub() Main.Instance.sleep_all())))
         menuItems.AddLast(New SimpleContextMenuItem())
@@ -274,8 +274,8 @@ Public Class DesktopPonyAnimator
         If Not OperatingSystemInfo.IsMacOSX Then
             menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                      If selectedPony Is Nothing Then Return
-                                                                     selectedPony.ManualControl_P1 = Not selectedPony.ManualControl_P1
-                                                                     If selectedPony.ManualControl_P1 Then selectedPony.ManualControl_P2 = False
+                                                                     selectedPony.ManualControlPlayerOne = Not selectedPony.ManualControlPlayerOne
+                                                                     If selectedPony.ManualControlPlayerOne Then selectedPony.ManualControlPlayerTwo = False
                                                                      Main.Instance.Invoke(Sub()
                                                                                               If Main.Instance.controlled_pony <> "" Then
                                                                                                   Main.Instance.controlled_pony = selectedPony.Directory
@@ -286,8 +286,8 @@ Public Class DesktopPonyAnimator
                                                                  End Sub))
             menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                      If selectedPony Is Nothing Then Return
-                                                                     selectedPony.ManualControl_P2 = Not selectedPony.ManualControl_P2
-                                                                     If selectedPony.ManualControl_P2 Then selectedPony.ManualControl_P1 = False
+                                                                     selectedPony.ManualControlPlayerTwo = Not selectedPony.ManualControlPlayerTwo
+                                                                     If selectedPony.ManualControlPlayerTwo Then selectedPony.ManualControlPlayerOne = False
                                                                      Main.Instance.Invoke(Sub()
                                                                                               If Main.Instance.controlled_pony <> "" Then
                                                                                                   Main.Instance.controlled_pony = selectedPony.Directory
@@ -365,7 +365,7 @@ Public Class DesktopPonyAnimator
                     If String.Equals(tag, ponyTag, StringComparison.OrdinalIgnoreCase) OrElse
                         (pony.Tags.Count = 0 AndAlso tag = "Not Tagged") Then
                         ponyList.Add(New SimpleContextMenuItem(pony.Directory, Sub(sender, e)
-                                                                                   AddPony_Selection(pony.Directory)
+                                                                                   AddPonySelection(pony.Directory)
                                                                                End Sub))
                     End If
                 Next
@@ -391,7 +391,7 @@ Public Class DesktopPonyAnimator
         Return houseBaseList
     End Function
 
-    Friend Sub AddPony_Selection(ponyName As String)
+    Friend Sub AddPonySelection(ponyName As String)
         Main.Instance.Invoke(Sub()
                                  Dim pony_to_add = ponyName
 
@@ -497,7 +497,7 @@ Public Class DesktopPonyAnimator
                 If Not IsNothing(draggedPony) Then
                     draggedPony.BeingDragged = False
                     If draggedPonyWasSleeping = False Then
-                        draggedPony.should_be_sleeping = False
+                        draggedPony.ShouldBeSleeping = False
                     End If
                 End If
                 If Not IsNothing(draggedEffect) Then
@@ -538,8 +538,8 @@ Public Class DesktopPonyAnimator
             draggingPonyOrEffect = True
             If Not Paused Then
                 selectedForDragPony.BeingDragged = True
-                If selectedForDragPony.sleeping = False Then
-                    selectedForDragPony.should_be_sleeping = True
+                If selectedForDragPony.Sleeping = False Then
+                    selectedForDragPony.ShouldBeSleeping = True
                     draggedPonyWasSleeping = False
                 Else
                     draggedPonyWasSleeping = True
@@ -553,12 +553,12 @@ Public Class DesktopPonyAnimator
                 Exit Sub
             End If
 
-            If Main.Instance.screen_saver_mode Then Main.Instance.Close()
+            If Main.Instance.ScreensaverMode Then Main.Instance.Close()
 
             Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
-            Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.should_be_sleeping)
-            Dim manualControlP1 = If(selectedPony Is Nothing, False, selectedPony.ManualControl_P1)
-            Dim manualControlP2 = If(selectedPony Is Nothing, False, selectedPony.ManualControl_P2)
+            Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.ShouldBeSleeping)
+            Dim manualControlP1 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerOne)
+            Dim manualControlP2 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerTwo)
 
             Dim i = 0
             ponyMenu.Items(i).Text = "Remove " & directory

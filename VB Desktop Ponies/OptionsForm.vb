@@ -31,7 +31,7 @@
         'get monitor names
         For Each monitor In Screen.AllScreens
             MonitorsSelection.Items.Add(monitor.DeviceName)
-            Main.Instance.screens_to_use.Add(monitor)
+            Main.Instance.ScreensToUse.Add(monitor)
         Next
 
         For i = 0 To MonitorsSelection.Items.Count - 1
@@ -154,9 +154,9 @@
             For i = 0 To MonitorsSelection.Items.Count - 1
                 If CStr(MonitorsSelection.Items(i)) = monitor Then
                     MonitorsSelection.SetSelected(i, True)
-                    Main.Instance.screens_to_use.Add(Array.Find(Screen.AllScreens, Function(screen As Screen)
-                                                                                       Return screen.DeviceName = monitor
-                                                                                   End Function))
+                    Main.Instance.ScreensToUse.Add(Array.Find(Screen.AllScreens, Function(screen As Screen)
+                                                                                     Return screen.DeviceName = monitor
+                                                                                 End Function))
                 End If
             Next
         Next
@@ -254,13 +254,13 @@
         End If
 
 
-        Main.Instance.screens_to_use.Clear()
+        Main.Instance.ScreensToUse.Clear()
         Options.MonitorNames.Clear()
 
         For i = 0 To MonitorsSelection.SelectedItems.Count - 1
             For Each monitor In Screen.AllScreens
                 If monitor.DeviceName = CStr(MonitorsSelection.SelectedItems(i)) Then
-                    Main.Instance.screens_to_use.Add(monitor)
+                    Main.Instance.ScreensToUse.Add(monitor)
                     Options.MonitorNames.Add(monitor.DeviceName)
                 End If
             Next
@@ -271,7 +271,7 @@
             Exit Sub
         ElseIf TypeOf Pony.CurrentViewer Is SpriteManagement.WinFormSpriteInterface Then
             Dim area As Rectangle = Rectangle.Empty
-            For Each screen In Main.Instance.screens_to_use
+            For Each screen In Main.Instance.ScreensToUse
                 area = Rectangle.Union(area, screen.WorkingArea)
             Next
             DirectCast(Pony.CurrentViewer, SpriteManagement.WinFormSpriteInterface).DisplayBounds = area

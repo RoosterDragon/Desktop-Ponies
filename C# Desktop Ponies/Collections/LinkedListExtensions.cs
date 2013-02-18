@@ -146,7 +146,7 @@
                     // After the first merge, the left head will be positioned at the index where the right head for the next pass should
                     // begin. We'll note the previous element so when the next pass begins it can simply use the next element for the head 
                     // of the right list, as opposed to enumerating over mergeSize elements to get to the same location. We must note down
-                    // the previous element, as the current marker the the left head may get swapped and thus would change index.
+                    // the previous element, as the current marker to the left head may get swapped and thus would change index.
                     if (merges == 1)
                         if (leftHead != null)
                             preNextRightHead = leftHead.Previous;

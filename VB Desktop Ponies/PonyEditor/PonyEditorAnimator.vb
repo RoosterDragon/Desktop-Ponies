@@ -20,8 +20,8 @@ Public Class PonyEditorAnimator
                                          m_editor.CurrentBehaviorValueLabel.Text = m_editor.PreviewPony.CurrentBehavior.Name
                                      End If
                                      m_editor.GroupValueLabel.Text =
-                                         m_editor.PreviewPony.Current_BehaviorGroup & " - " &
-                                         m_editor.PreviewPony.GetBehaviorGroupName(m_editor.PreviewPony.Current_BehaviorGroup)
+                                         m_editor.PreviewPony.CurrentBehaviorGroup & " - " &
+                                         m_editor.PreviewPony.GetBehaviorGroupName(m_editor.PreviewPony.CurrentBehaviorGroup)
                                      m_editor.TimeLeftValueLabel.Text =
                                          (m_editor.PreviewPony.BehaviorDesiredDuration - m_editor.PreviewPony.CurrentTime).
                                          TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)

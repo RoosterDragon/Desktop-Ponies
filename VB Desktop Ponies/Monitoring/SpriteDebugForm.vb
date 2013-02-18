@@ -15,10 +15,10 @@ Public Class SpriteDebugForm
         For Each sprite In sprites
             Dim pony = TryCast(sprite, Pony)
             If pony IsNot Nothing Then
-                PonyDataGridView.Rows(i).SetValues(pony.Name, pony.Location, pony.CurrentBehavior.Name,
+                PonyDataGridView.Rows(i).SetValues(pony.Name, pony.TopLeftLocation, pony.CurrentBehavior.Name,
                                           ((pony.BehaviorStartTime + pony.BehaviorDesiredDuration) - pony.internalTime).TotalSeconds.ToString("0.00s"),
-                                          pony.destination_coords, pony.Destination,
-                                          pony.CurrentBehavior.original_follow_object_name, pony.follow_object_name,
+                                          pony.destinationCoords, pony.Destination,
+                                          pony.CurrentBehavior.originalFollowObjectName, pony.followObjectName,
                                           If(pony.visual_override_behavior IsNot Nothing, pony.visual_override_behavior.Name, Nothing))
                 i += 1
             End If

@@ -235,8 +235,8 @@ Public Class NewBehaviorDialog
             form.ShowDialog()
         End Using
 
-        If new_behavior.original_follow_object_name <> "" Then
-            follow_name = new_behavior.original_follow_object_name
+        If new_behavior.originalFollowObjectName <> "" Then
+            follow_name = new_behavior.originalFollowObjectName
             'MsgBox("Note:  If you wish to have this behavior follow another pony, you should change the movement type to 'All'."
         Else
             If new_behavior.original_destination_xcoord <> 0 AndAlso new_behavior.original_destination_ycoord <> 0 Then
@@ -245,7 +245,7 @@ Public Class NewBehaviorDialog
         End If
 
         Follow_Box.Text = follow_name
-        follow_name = new_behavior.original_follow_object_name
+        follow_name = new_behavior.originalFollowObjectName
         follow_x = new_behavior.original_destination_xcoord
         follow_y = new_behavior.original_destination_ycoord
 

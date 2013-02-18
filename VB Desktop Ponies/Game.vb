@@ -279,7 +279,7 @@ Module Games
                     Position.Initialize(GameScreen)
                     If Not IsNothing(Position.Player) Then
 
-                        Position.Player.Playing_Game = True
+                        Position.Player.PlayingGame = True
                         Pony.CurrentAnimator.AddPony(Position.Player)
                         AllPlayers.Add(Position)
                     Else
@@ -297,8 +297,8 @@ Module Games
             Next
 
             Dim monitor = GameScreen
-            Main.Instance.screens_to_use.Clear()
-            Main.Instance.screens_to_use.Add(monitor)
+            Main.Instance.ScreensToUse.Clear()
+            Main.Instance.ScreensToUse.Add(monitor)
 
             If Options.ScaleFactor <> 1 Then
                 MsgBox("Note:  Games may not work properly with the scale option set to values other than 1...  You are currently playing with scale " & Options.ScaleFactor & "x.")
@@ -318,7 +318,7 @@ Module Games
                         For Each Position As Position In Team.Positions
 
                             If IsNothing(Position.Current_Action) OrElse Position.Current_Action <> PlayerActionType.Return_To_Start _
-                                OrElse Position.Player.CurrentBehavior.Allowed_Movement = Pony.Allowed_Moves.None Then
+                                OrElse Position.Player.CurrentBehavior.AllowedMovement = Pony.AllowedMoves.None Then
                                 Position.SetFollowBehavior(Nothing, Nothing, True) 'go to starting position
                             End If
 
@@ -348,8 +348,8 @@ Module Games
 
                     For Each Ball In Balls
                         Active_Balls.Add(Ball)
-                        Ball.Handler.CurrentBehavior = Ball.Handler.GetAppropriateBehavior(Pony.Allowed_Moves.None, False)
-                        Ball.Handler.Location = Ball.StartPosition
+                        Ball.Handler.CurrentBehavior = Ball.Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.None, False)
+                        Ball.Handler.TopLeftLocation = Ball.StartPosition
                         'Ball.Handler.Visible = True
                         Pony.CurrentAnimator.AddPony(Ball.Handler)
                         Ball.Update()
@@ -365,7 +365,7 @@ Module Games
 
                     For Each Team As Team In Teams
                         For Each Position As Position In Team.Positions
-                            Position.Decide_On_Action(Main.Instance.current_game)
+                            Position.Decide_On_Action(Main.Instance.CurrentGame)
                             Position.PushBackOverlappingPonies(AllPlayers)
                             'Position.Player.Update(Pony.CurrentAnimator.ElapsedTime)
                         Next
@@ -428,18 +428,18 @@ Module Games
 
         Function CheckForScore() As Boolean
 
-            For Each ScoreStyle As ScoreStyle In Main.Instance.current_game.ScoringStyles
+            For Each ScoreStyle As ScoreStyle In Main.Instance.CurrentGame.ScoringStyles
 
                 For Each Ball In Balls
 
                     Select Case ScoreStyle
                         Case ScoreStyle.Ball_At_Sides
-                            If Ball.Handler.Location.X < GameScreen.WorkingArea.X + (GameScreen.WorkingArea.Width * 0.02) Then
+                            If Ball.Handler.TopLeftLocation.X < GameScreen.WorkingArea.X + (GameScreen.WorkingArea.Width * 0.02) Then
                                 Teams(1).Score += 1
                                 ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
                                 Return True
                             Else
-                                If Ball.Handler.Location.X + Ball.Handler.CurrentImageSize.X > (GameScreen.WorkingArea.X + GameScreen.WorkingArea.Width) - (GameScreen.WorkingArea.Width * 0.02) Then
+                                If Ball.Handler.TopLeftLocation.X + Ball.Handler.CurrentImageSize.X > (GameScreen.WorkingArea.X + GameScreen.WorkingArea.Width) - (GameScreen.WorkingArea.Width * 0.02) Then
                                     Teams(0).Score += 1
                                     ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
                                     Return True
@@ -450,7 +450,7 @@ Module Games
 
                             For Each goal In Goals
                                 Dim goalArea As New Rectangle(goal.form.Location, goal.form.CurrentImageSize())
-                                If Pony.IsPonyInBox(Ball.Handler.Center, goalArea) Then
+                                If Pony.IsPonyInBox(Ball.Handler.CenterLocation, goalArea) Then
                                     For Each Team In Teams
                                         If ReferenceEquals(Team.Goal, goal) AndAlso Not ReferenceEquals(Team, Ball.Last_Handled_By.Team) Then
                                             For Each OtherTeam In Teams
@@ -496,15 +496,15 @@ Module Games
                 handlerBase.AddBehavior("idle", 100, 99, 99, 0,
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
-                                        Pony.Allowed_Moves.None, "", "", "")
+                                        Pony.AllowedMoves.None, "", "", "")
                 handlerBase.AddBehavior("slow", 100, 99, 99, 3,
                                         files_path & Replace(slow_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(slow_left_image_filename, ControlChars.Quote, ""),
-                                        Pony.Allowed_Moves.All, "", "", "")
+                                        Pony.AllowedMoves.All, "", "", "")
                 handlerBase.AddBehavior("fast", 100, 99, 99, 5,
                                         files_path & Replace(fast_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
-                                        Pony.Allowed_Moves.All, "", "", "")
+                                        Pony.AllowedMoves.All, "", "", "")
 
                 Initial_Position = New Point(x_location, y_location)
 
@@ -528,12 +528,12 @@ Module Games
                 StartPosition = New Point(CInt(Initial_Position.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
                                    CInt(Initial_Position.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
 
-                Handler.Location = StartPosition
+                Handler.TopLeftLocation = StartPosition
             End Sub
 
             Friend Function Center() As Point
-                Return New Point(CInt(Me.Handler.Location.X + Me.Handler.CurrentImageSize.X / 2),
-                                 CInt(Me.Handler.Location.Y + Me.Handler.CurrentImageSize.Y / 2))
+                Return New Point(CInt(Me.Handler.TopLeftLocation.X + Me.Handler.CurrentImageSize.X / 2),
+                                 CInt(Me.Handler.TopLeftLocation.Y + Me.Handler.CurrentImageSize.Y / 2))
             End Function
 
             Sub Update()
@@ -548,8 +548,8 @@ Module Games
                         m_speed = Handler.CurrentBehavior.Speed
                 End Select
 
-                up = Handler.up
-                right = Handler.right
+                up = Handler.facingUp
+                right = Handler.facingRight
                 angle = Handler.diagonal
 
                 Select Case Handler.CurrentBehavior.Speed
@@ -563,8 +563,8 @@ Module Games
                 End Select
 
                 m_speed = Handler.CurrentBehavior.Speed
-                Handler.up = up
-                Handler.right = right
+                Handler.facingUp = up
+                Handler.facingRight = right
                 Handler.diagonal = angle
                 Handler.Move()
             End Sub
@@ -572,7 +572,7 @@ Module Games
             Friend Sub Kick(_speed As Double, _angle As Double, kicker As Position)
                 Last_Handled_By = kicker
 
-                Handler.CurrentBehavior = Handler.GetAppropriateBehavior(Pony.Allowed_Moves.All, True)
+                Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
                 m_speed = _speed
                 Handler.diagonal = _angle
             End Sub
@@ -831,7 +831,7 @@ Module Games
                         'if we recently kicked the ball, don't do it for 2 seconds.
                         If ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
                             If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) <= 2 Then
-                                If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) > 1 AndAlso (Player.ManualControl_P1 OrElse Player.ManualControl_P2) Then
+                                If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) > 1 AndAlso (Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo) Then
                                     Speak("Can't kick again so soon!")
                                 End If
 
@@ -868,8 +868,8 @@ Module Games
                             Exit Sub
                         End If
                         'If ponies are being controlled, don't kick unless the action key (control - left or right) is being pushed
-                        If Player.ManualControl_P1 AndAlso Not Main.Instance.PonyAction Then Exit Sub
-                        If Player.ManualControl_P2 AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
+                        If Player.ManualControlPlayerOne AndAlso Not Main.Instance.PonyAction Then Exit Sub
+                        If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
                         Kick_Ball(ball, 10, Get_OtherTeam_Goal(), Nothing, Me, "*Kick*!")
                         Last_Kick_Time = DateTime.UtcNow
                     Case PlayerActionType.Throw_Ball_ToTeammate
@@ -879,13 +879,13 @@ Module Games
                         End If
 
                         'don't pass if we are under control - kick instead.
-                        If Player.ManualControl_P1 Then Exit Sub
-                        If Player.ManualControl_P2 Then Exit Sub
+                        If Player.ManualControlPlayerOne Then Exit Sub
+                        If Player.ManualControlPlayerTwo Then Exit Sub
 
                         Dim open_teammate = Get_Open_Teammate(Me.Team, Get_OtherTeam_Goal())
                         If IsNothing(open_teammate) Then
                             'no teammates to pass to, kick to goal instead, unless a player controlled pony.
-                            If Player.ManualControl_P1 OrElse Player.ManualControl_P2 Then Exit Sub
+                            If Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo Then Exit Sub
                             Kick_Ball(ball, 10, Get_OtherTeam_Goal(), Nothing, Me, "*Kick*!")
                             Last_Kick_Time = DateTime.UtcNow
                             Exit Sub
@@ -900,8 +900,8 @@ Module Games
                             Exit Sub
                         End If
 
-                        If Player.ManualControl_P1 AndAlso Not Main.Instance.PonyAction Then Exit Sub
-                        If Player.ManualControl_P2 AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
+                        If Player.ManualControlPlayerOne AndAlso Not Main.Instance.PonyAction Then Exit Sub
+                        If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
 
                         Bounce_Ball(ball, 7, Me, "*Ping*!")
                         Last_Kick_Time = DateTime.UtcNow
@@ -916,11 +916,11 @@ Module Games
 
                     Case PlayerActionType.Idle
                         If Current_Action = PlayerActionType.Idle Then Exit Sub
-                        Player.follow_object = Nothing
-                        Player.follow_object_name = ""
+                        Player.followObject = Nothing
+                        Player.followObjectName = ""
 
-                        If Player.ManualControl_P1 Then Exit Sub
-                        If Player.ManualControl_P2 Then Exit Sub
+                        If Player.ManualControlPlayerOne Then Exit Sub
+                        If Player.ManualControlPlayerTwo Then Exit Sub
 
                         Player.SelectBehavior()
                         SetSpeed()
@@ -941,7 +941,7 @@ Module Games
                 Dim nearest_ball_distance As Double = Double.MaxValue
 
                 For Each Ball In balls
-                    Dim distance = Vector.Distance(Player.Center, Ball.Center)
+                    Dim distance = Vector.Distance(Player.CenterLocation, Ball.Center)
                     If distance < nearest_ball_distance Then
                         nearest_ball_distance = distance
                         nearest_ball = Ball
@@ -957,7 +957,7 @@ Module Games
 
             Function Get_OtherTeam_Goal() As Goal_Area
 
-                For Each goal In Main.Instance.current_game.Goals
+                For Each goal In Main.Instance.CurrentGame.Goals
                     If goal.team_number <> Me.Team_Number Then
                         Return goal
                     End If
@@ -969,7 +969,7 @@ Module Games
 
             Function Get_Team_Goal() As Goal_Area
 
-                For Each goal In Main.Instance.current_game.Goals
+                For Each goal In Main.Instance.CurrentGame.Goals
                     If goal.team_number = Me.Team_Number Then
                         Return goal
                     End If
@@ -983,20 +983,20 @@ Module Games
 
                 SetSpeed()
 
-                Player.CurrentBehavior = Player.GetAppropriateBehavior(Pony.Allowed_Moves.All, True)
+                Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
                 'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
-                Player.follow_object = Nothing
-                Player.follow_object_name = ""
+                Player.followObject = Nothing
+                Player.followObjectName = ""
 
                 If return_to_start Then
-                    Player.destination_coords = Start_Location
+                    Player.destinationCoords = Start_Location
                     Exit Sub
                 Else
-                    Player.follow_object_name = target_name
-                    Player.follow_object = target
-                    Player.destination_coords = Point.Empty
+                    Player.followObjectName = target_name
+                    Player.followObject = target
+                    Player.destinationCoords = Point.Empty
                     If lead_target Then
-                        Player.lead_target = True
+                        Player.leadTarget = True
                     End If
 
                     'If Main.Instance.current_game.Name = "Ping Pong Pony" Then
@@ -1012,14 +1012,14 @@ Module Games
                     Exit Sub
                 End If
 
-                speed = kicker.Player.GetScale() * speed
+                speed = kicker.Player.Scale * speed
 
                 Speak(line)
 
                 Dim angle As Double = Nothing
 
                 If IsNothing(target_goal) Then
-                    angle = Get_Angle_To_Object(target_pony.Center)
+                    angle = Get_Angle_To_Object(target_pony.CenterLocation)
                 Else
                     angle = Get_Angle_To_Object(target_goal.Center)
                 End If
@@ -1038,7 +1038,7 @@ Module Games
 
             Sub Bounce_Ball(ball As Ball, speed As Double, kicker As Position, line As String)
 
-                If Main.Instance.current_game.Name = "Ping Pong Pony" Then
+                If Main.Instance.CurrentGame.Name = "Ping Pong Pony" Then
                     'avoid boucing the ball back into our own goal.
                     If Not IsNothing(ball.Last_Handled_By) AndAlso ReferenceEquals(ball.Last_Handled_By, Me) Then
                         Exit Sub
@@ -1048,7 +1048,7 @@ Module Games
                 Speak(line)
 
                 Dim angle As Double
-                Dim gamescreen = Main.Instance.current_game.GameScreen
+                Dim gamescreen = Main.Instance.CurrentGame.GameScreen
 
                 If ball.Handler.diagonal < (Math.PI / 2) OrElse ball.Handler.diagonal > (3 / 2) * Math.PI Then
                     'ball is going to the right, it will 'bounce' to the left.
@@ -1058,14 +1058,14 @@ Module Games
                     angle = 0
                 End If
 
-                Dim ball_center As Point = ball.Handler.Center
-                Dim kicker_center As Point = kicker.Player.Center
+                Dim ball_center As Point = ball.Handler.CenterLocation
+                Dim kicker_center As Point = kicker.Player.CenterLocation
 
                 Dim y_difference = kicker_center.Y - ball_center.Y
 
                 Dim kicker_height = kicker.Player.CurrentImageSize.Y / 1.5
 
-                If kicker.Player.Center.X < (gamescreen.WorkingArea.Width * 0.5) Then
+                If kicker.Player.CenterLocation.X < (gamescreen.WorkingArea.Width * 0.5) Then
 
                     If y_difference > 0 Then
                         angle += (Math.PI / 4) * (Math.Abs(y_difference) / kicker_height)
@@ -1102,7 +1102,7 @@ Module Games
                     angle = Math.PI * (5 / 3)
                 End If
 
-                ball.Kick(speed * kicker.Player.GetScale(), angle, kicker)
+                ball.Kick(speed * kicker.Player.Scale, angle, kicker)
 
             End Sub
 
@@ -1110,10 +1110,10 @@ Module Games
             Function Get_Angle_To_Object(target As Point) As Double
 
                 'opposite = y_distance
-                Dim opposite = Player.Center.Y - target.Y
+                Dim opposite = Player.CenterLocation.Y - target.Y
 
                 'adjacent = x_distance
-                Dim adjacent = Player.Center.X - target.X
+                Dim adjacent = Player.CenterLocation.X - target.X
 
                 Dim hypotenuse As Double = Math.Sqrt(opposite ^ 2 + adjacent ^ 2)
 
@@ -1123,15 +1123,15 @@ Module Games
                 Dim angle = Math.Asin(Math.Abs(opposite) / hypotenuse)
 
                 ' if the target is below, flip the angle to the 4th quadrant
-                If target.Y > Player.Center.Y Then
+                If target.Y > Player.CenterLocation.Y Then
                     angle = (2 * Math.PI) - angle
                     'if the target is to the left, flip the angle to 3rd quadrant
-                    If target.X < Player.Center.X Then
+                    If target.X < Player.CenterLocation.X Then
                         angle = Math.PI - angle
                     End If
                 Else
                     ' If the tartget is above and to the left, flip the angle to the 2nd quadrant.
-                    If target.X < Player.Center.X Then
+                    If target.X < Player.CenterLocation.X Then
                         angle = Math.PI - angle
                     End If
                 End If
@@ -1165,14 +1165,14 @@ Module Games
 
             Shared Function DoesPonyOverlap(pony As Pony, otherpony As Pony) As Boolean
 
-                Dim otherpony_area As New Rectangle(otherpony.Location.X, _
-                                                 otherpony.Location.Y, _
-                                                 CInt(otherpony.CurrentImageSize.X * otherpony.GetScale),
-                                                 CInt(otherpony.CurrentImageSize.Y * otherpony.GetScale))
+                Dim otherpony_area As New Rectangle(otherpony.TopLeftLocation.X, _
+                                                 otherpony.TopLeftLocation.Y, _
+                                                 CInt(otherpony.CurrentImageSize.X * otherpony.Scale),
+                                                 CInt(otherpony.CurrentImageSize.Y * otherpony.Scale))
 
 
-                If otherpony_area.IntersectsWith(New Rectangle(pony.Location, New Size(CInt(pony.GetScale * pony.CurrentImageSize.X), _
-                                                                                        CInt(pony.GetScale * pony.CurrentImageSize.Y)))) Then
+                If otherpony_area.IntersectsWith(New Rectangle(pony.TopLeftLocation, New Size(CInt(pony.Scale * pony.CurrentImageSize.X), _
+                                                                                        CInt(pony.Scale * pony.CurrentImageSize.Y)))) Then
                     Return True
                 Else
                     Return False
@@ -1185,7 +1185,7 @@ Module Games
                 Dim xchange = 1
                 Dim ychange = 2
 
-                Dim direction = pony1.GetDestinationDirections(pony2.Center)
+                Dim direction = pony1.GetDestinationDirections(pony2.CenterLocation)
 
                 If direction(0) = Directions.left Then
                     xchange = -1
@@ -1195,14 +1195,14 @@ Module Games
                 End If
 
                 Dim change = New Size(xchange, ychange)
-                Dim new_location = pony1.Location + change
+                Dim new_location = pony1.TopLeftLocation + change
 
                 Dim screenlist As New List(Of Screen)
-                screenlist.Add(Main.Instance.current_game.GameScreen)
+                screenlist.Add(Main.Instance.CurrentGame.GameScreen)
 
                 If pony1.IsPonyOnScreen(new_location, screenlist) AndAlso
                     (Not allowed_area.HasValue OrElse Pony.IsPonyInBox(new_location, allowed_area.Value)) Then
-                    pony1.Location = new_location
+                    pony1.TopLeftLocation = new_location
                 End If
 
             End Sub
@@ -1212,7 +1212,7 @@ Module Games
                 Dim ponies As New List(Of Pony)
 
                 For Each Position In team.Positions
-                    Dim distance = Vector.Distance(Position.Player.Center, ball.Center)
+                    Dim distance = Vector.Distance(Position.Player.CenterLocation, ball.Center)
                     If distance <= min_distance Then
                         ponies.Add(Position.Player)
                     End If
@@ -1233,19 +1233,19 @@ Module Games
                     End If
 
                     Dim open = True
-                    For Each other_position As Position In Main.Instance.current_game.AllPlayers
+                    For Each other_position As Position In Main.Instance.CurrentGame.AllPlayers
                         If other_position.Team.Name = Me.Team.Name Then
                             Continue For
                         End If
 
-                        Dim distance = Vector.Distance(Position.Player.Center, other_position.Player.Center)
+                        Dim distance = Vector.Distance(Position.Player.CenterLocation, other_position.Player.CenterLocation)
                         If distance <= 200 Then
                             open = False
                         End If
                     Next
 
-                    Dim me_distance_to_goal = Vector.Distance(Player.Center, goal.Center)
-                    Dim teammate_distance_to_goal = Vector.Distance(Position.Player.Center, goal.Center)
+                    Dim me_distance_to_goal = Vector.Distance(Player.CenterLocation, goal.Center)
+                    Dim teammate_distance_to_goal = Vector.Distance(Position.Player.CenterLocation, goal.Center)
 
                     If open = True AndAlso teammate_distance_to_goal <= me_distance_to_goal Then
                         open_teammates.Add(Position.Player)
@@ -1259,7 +1259,7 @@ Module Games
             End Function
 
             Sub SetSpeed()
-                Dim speed = If(Main.Instance.current_game.Name = "Ping Pong Pony", 8 * Player.GetScale(), 5 * Player.GetScale())
+                Dim speed = If(Main.Instance.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
                 If Player.AtDestination Then speed = 0
                 Player.CurrentBehavior.SetSpeed(speed)
             End Sub

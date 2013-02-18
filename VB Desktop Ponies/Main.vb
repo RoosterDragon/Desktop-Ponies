@@ -17,14 +17,14 @@ Public Class Main
 
     Friend DesktopHandle As IntPtr
     Friend ShellHandle As IntPtr
-    Friend process_id As Integer = 0
+    Friend process_id As IntPtr
     Friend Suspended_For_FullScreenApp As Boolean = False
 
     Private Animator As DesktopPonyAnimator
     Private PonyViewer As ISpriteCollectionView
     Friend Startup_Ponies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
-    Friend Dead_Effects As New List(Of Effect)
+    Friend DeadEffects As New List(Of Effect)
     Friend ActiveSounds As New List(Of Object)
     Friend HouseBases As New List(Of HouseBase)
 
@@ -41,7 +41,7 @@ Public Class Main
     Friend cursor_position As New Point
 
     'A list of monitors the user has selected to use, from the options screen.
-    Friend screens_to_use As New List(Of Screen) From {Screen.PrimaryScreen}
+    Friend ScreensToUse As New List(Of Screen) From {Screen.PrimaryScreen}
 
     'Are ponies currently walking around the desktop?
     Friend Ponies_Have_Launched As Boolean = False
@@ -54,17 +54,17 @@ Public Class Main
     Friend Last_Audio_Length As Integer = 0 'milliseconds
 
     'Used in the editor.
-    Friend Preview_Mode As Boolean = False
+    Friend InPreviewMode As Boolean = False
 
     'Were we told to auto-start from the command line?
     Friend auto_started As Boolean = False
 
-    Friend screen_saver_mode As Boolean = False
+    Friend ScreensaverMode As Boolean = False
     Friend screen_saver_path As String = ""
     Dim screensaver_settings_file_path As String = Path.Combine(Path.GetTempPath, "DesktopPonies_ScreenSaver_Settings.ini")
 
     Friend games As New List(Of Game)
-    Friend current_game As Game = Nothing
+    Friend CurrentGame As Game = Nothing
 
     'the following are used when in manual control mode
     Friend PonyUp As Boolean = False
@@ -88,7 +88,7 @@ Public Class Main
 
     Dim all_sleeping As Boolean = False
 
-    Friend Audio_Error_Shown As Boolean = False
+    Friend AudioErrorShown As Boolean = False
 
     'A temporary list of selected filter settings.
     Dim Temp_Filters As New List(Of String)
@@ -160,7 +160,7 @@ Public Class Main
         'ShellHandle = DetectFulLScreen_m.GetShellWindow()
 
         'need our own PID for window avoidance (ignoring collisions with other ponies)
-        process_id = System.Diagnostics.Process.GetCurrentProcess().Id
+        process_id = System.Diagnostics.Process.GetCurrentProcess().Handle
 
         'Try to determine our dependencies and if all are available on this system.
         'Primarily to check to see if the right version of DirectX is installed for sounds.
@@ -215,7 +215,7 @@ Public Class Main
                         GetScreensaverPath()
                         If screen_saver_path = "" Then Me.Close()
                         Options.InstallLocation = screen_saver_path
-                        screen_saver_mode = True
+                        ScreensaverMode = True
                         auto_started = True
                         ShowInTaskbar = False
                         WindowState = FormWindowState.Minimized
@@ -507,7 +507,7 @@ Public Class Main
             Try
                 If Options.PonyInteractionsEnabled Then
                     Dim displaywarnings =
-                        Options.DisplayPonyInteractionsErrors AndAlso Not auto_started AndAlso Not screen_saver_mode
+                        Options.DisplayPonyInteractionsErrors AndAlso Not auto_started AndAlso Not ScreensaverMode
                     Main.Instance.Invoke(Sub()
                                              LoadInteractions(displaywarnings)
                                          End Sub)
@@ -653,7 +653,7 @@ Public Class Main
                                 ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
                                     String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
                                     targetsActivated = PonyBase.Interaction.TargetActivation.Any
-                                ElseIf Not Main.Instance.screen_saver_mode Then
+                                ElseIf Not Main.Instance.ScreensaverMode Then
                                     Throw New InvalidDataException(
                                         "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
                                         "Interaction file specified '" & columns(InteractionParameter.TargetSelectionOption) &
@@ -661,15 +661,15 @@ Public Class Main
                                 End If
                             End If
 
-                        Pony.AddInteraction(columns(InteractionParameter.Name), _
-                                        ponyname, _
-                                        Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
-                                        columns(InteractionParameter.Proximity), _
-                                        columns(InteractionParameter.TargetList), _
-                                        targetsActivated, _
-                                        columns(InteractionParameter.BehaviorList), _
-                                        repeat_delay, _
-                                        displayWarnings)
+                            Pony.AddInteraction(columns(InteractionParameter.Name), _
+                                            ponyname, _
+                                            Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
+                                            columns(InteractionParameter.Proximity), _
+                                            columns(InteractionParameter.TargetList), _
+                                            targetsActivated, _
+                                            columns(InteractionParameter.BehaviorList), _
+                                            repeat_delay, _
+                                            displayWarnings)
 
                         End If
                     Catch ex As Exception
@@ -760,7 +760,8 @@ Public Class Main
         End If
 
         If String.Equals(profileToSave, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile")
+            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile. " &
+                   "To create a new profile, type a new name for the profile into the box. You will then be able to save the profile.")
             Exit Sub
         End If
 
@@ -793,7 +794,7 @@ Public Class Main
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
 
-        Preview_Mode = True
+        InPreviewMode = True
         Me.Visible = False
         Using form = New PonyEditor()
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
@@ -801,7 +802,7 @@ Public Class Main
 
             Pony_Shutdown()
 
-            Preview_Mode = False
+            InPreviewMode = False
             If Not Me.IsDisposed Then
                 Me.Visible = True
             End If
@@ -848,7 +849,7 @@ Public Class Main
             If GameSelectionForm.ShowDialog() = DialogResult.OK Then
                 Startup_Ponies.Clear()
                 Pony_Startup()
-                current_game.Setup()
+                CurrentGame.Setup()
                 Animator.Start()
             Else
                 If Me.IsDisposed = False Then
@@ -1156,7 +1157,7 @@ Public Class Main
             Next
 
             If Total_Ponies = 0 Then
-                If screen_saver_mode Then
+                If ScreensaverMode Then
                     Total_Ponies = 1
                     random_ponies = 1
                 Else
@@ -1282,7 +1283,7 @@ Public Class Main
     End Sub
 
     Friend Sub Pony_Startup()
-        If screen_saver_mode Then
+        If ScreensaverMode Then
             If OptionsForm.Instance.ScreensaverTransparent.Checked = False Then
                 For Each monitor In Screen.AllScreens
                     Dim screensaver_background As New ScreensaverBackgroundForm
@@ -1313,7 +1314,7 @@ Public Class Main
         PonyViewer = GetInterface()
         PonyViewer.Topmost = Options.AlwaysOnTop
 
-        If Not Preview_Mode Then
+        If Not InPreviewMode Then
             ' Get a collection of all images to be loaded.
             Dim images As LinkedList(Of String) = New LinkedList(Of String)()
             For Each pony In Startup_Ponies
@@ -1359,16 +1360,16 @@ Public Class Main
         End If
 
         'This should already be set in the options, but in case it isn't, use all monitors.
-        If screens_to_use.Count = 0 Then
+        If ScreensToUse.Count = 0 Then
             For Each monitor In Screen.AllScreens
-                screens_to_use.Add(monitor)
+                ScreensToUse.Add(monitor)
                 cursor_zone_size = CInt(0.03 * monitor.WorkingArea.Height)
             Next
         End If
 
         ' Begin Glue Code
         Dim area As Rectangle = Rectangle.Empty
-        For Each screen In screens_to_use
+        For Each screen In ScreensToUse
             If area = Rectangle.Empty Then
                 area = screen.WorkingArea
             Else
@@ -1455,9 +1456,9 @@ Public Class Main
         Ponies_Have_Launched = False
         If Not IsNothing(Animator) Then Animator.Clear()
 
-        If Not IsNothing(current_game) Then
-            current_game.CleanUp()
-            current_game = Nothing
+        If Not IsNothing(CurrentGame) Then
+            CurrentGame.CleanUp()
+            CurrentGame = Nothing
         End If
 
         If Object.ReferenceEquals(Animator, Pony.CurrentAnimator) Then
@@ -1532,7 +1533,7 @@ Public Class Main
 
             For Each pony In Animator.Ponies()
                 'Pony.sleep()
-                pony.should_be_sleeping = True
+                pony.ShouldBeSleeping = True
             Next
 
         Else
@@ -1541,7 +1542,7 @@ Public Class Main
 
             For Each pony In Animator.Ponies()
                 'Pony.wake_up()
-                pony.should_be_sleeping = False
+                pony.ShouldBeSleeping = False
             Next
         End If
 

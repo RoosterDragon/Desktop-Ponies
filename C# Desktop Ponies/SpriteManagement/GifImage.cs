@@ -1719,25 +1719,6 @@
             //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Width))
             //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)));
 
-            //// Hash the ARGB color code for every lookup value, and also the dimensions of the image.
-            //const int transparentBlackArgb = 0;
-            //var inputSequence = frameBuffer.EnumerateValues()
-            //    .Select(colorIndex => colorIndex == transparentIndex ? transparentBlackArgb : colors[colorIndex].ToArgb())
-            //    .Concat(new int[] { frameBuffer.Size.Width, frameBuffer.Size.Height });
-            //int hash = 0x411C9DC5;
-            //foreach (int input in inputSequence)
-            //{
-            //    // Mixing function lifted from the internet.
-            //    int i = input;
-            //    i = ~i + (i << 15); // key = (key << 15) - key - 1;
-            //    i = i ^ (i >> 12);
-            //    i = i + (i << 2);
-            //    i = i ^ (i >> 4);
-            //    i = i * 2057; // key = (key + (key << 3)) + (key << 11);
-            //    i = i ^ (i >> 16);
-            //    hash ^= i;
-            //}
-
             return hash;
         }
         /// <summary>
