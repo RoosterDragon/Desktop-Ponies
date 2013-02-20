@@ -112,7 +112,7 @@
             stopped_behavior_box.Items.Add(otherbehavior.Name)
         Next
 
-        If behavior.Auto_Select_Images_On_Follow = False Then
+        If behavior.AutoSelectImagesOnFollow = False Then
             Auto_Select_Images_Checkbox.Checked = False
         Else
             Auto_Select_Images_Checkbox.Checked = True
@@ -287,9 +287,9 @@
         End If
 
         If Auto_Select_Images_Checkbox.Checked = True Then
-            behavior_to_change.Auto_Select_Images_On_Follow = True
+            behavior_to_change.AutoSelectImagesOnFollow = True
         Else
-            behavior_to_change.Auto_Select_Images_On_Follow = False
+            behavior_to_change.AutoSelectImagesOnFollow = False
             behavior_to_change.FollowMovingBehaviorName = CStr(moving_behavior_box.SelectedItem)
             behavior_to_change.FollowStoppedBehaviorName = CStr(stopped_behavior_box.SelectedItem)
         End If

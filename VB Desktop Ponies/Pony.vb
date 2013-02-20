@@ -567,7 +567,7 @@ Class PonyBase
 
         'These coordinates are either a position on the screen to go to, if no object to follow is specified,
         'or, the offset from the center of the object to go to (upper left, below, etc)
-        new_behavior.Auto_Select_Images_On_Follow = _auto_select_images_on_follow
+        new_behavior.AutoSelectImagesOnFollow = _auto_select_images_on_follow
 
         'When the pony if off-screen we overwrite the follow parameters to get them onscreen again.
         'we save the original parameters here.
@@ -830,7 +830,7 @@ Class PonyBase
         Friend FollowMovingBehaviorName As String = ""
         Friend FollowStoppedBehavior As Behavior = Nothing
         Friend FollowMovingBehavior As Behavior = Nothing
-        Friend Auto_Select_Images_On_Follow As Boolean = True
+        Friend AutoSelectImagesOnFollow As Boolean = True
         Friend Group As Integer = AnyGroup
 
         Friend Effects As New List(Of Effect)
@@ -946,6 +946,56 @@ Class Pony
     Friend Shared CurrentViewer As ISpriteCollectionView
     Friend Shared PreviewWindowRectangle As Rectangle
 
+#Region "DEBUG conditional code"
+#If DEBUG Then
+    Friend UpdateRecord As New List(Of Record)
+
+    Private Enum RecordKind
+        Unspecified
+        ShouldBeSleeping
+        SelectedNewRandomBehavior
+        RepeatedCurrentBehavior
+        SelectedChainedBehavior
+        MouseOverToggle
+        StoppedReturningToScreenArea
+        TruncateBehavior
+        UnspecifiedPaint
+        UnspecifiedBounce
+        Teleport
+    End Enum
+
+    Friend Structure Record
+        Public Time As TimeSpan
+        Public Info As String
+        Public Sub New(time As TimeSpan, info As String)
+            Me.Time = time
+            Me.Info = info
+        End Sub
+        Public Overrides Function ToString() As String
+            Return String.Format(CultureInfo.CurrentCulture, "{0:000.000} {1}", Time.TotalSeconds, Info)
+        End Function
+    End Structure
+#End If
+
+    <Diagnostics.Conditional("DEBUG")>
+    Private Sub AddUpdateRecord(info As String)
+#If DEBUG Then
+        SyncLock UpdateRecord
+            UpdateRecord.Add(New Record(internalTime, info))
+        End SyncLock
+#End If
+    End Sub
+
+    <Diagnostics.Conditional("DEBUG")>
+    Private Sub AddUpdateRecord(info As String, info2 As String)
+#If DEBUG Then
+        SyncLock UpdateRecord
+            UpdateRecord.Add(New Record(internalTime, info + info2))
+        End SyncLock
+#End If
+    End Sub
+#End Region
+
 #Region "Fields"
     Private _base As PonyBase
     Public ReadOnly Property Base() As PonyBase
@@ -1023,7 +1073,7 @@ Class Pony
     Friend facingUp As Boolean = False
     Friend facingRight As Boolean = True
     ''' <summary>
-    '''The angle to travel in, if moving diagonally (in radians)
+    ''' The angle to travel in, if moving diagonally (in radians).
     ''' </summary>
     Friend diagonal As Double = 0
 
@@ -1145,6 +1195,11 @@ Class Pony
         End Set
     End Property
     Private blocked As Boolean
+
+    Private lastSpeakTime As TimeSpan = TimeSpan.FromDays(-1)
+    Private lastSpeakLine As String
+    Friend internalTime As TimeSpan
+    Private lastUpdateTime As TimeSpan
 #End Region
 
     Public ReadOnly Property Scale() As Double
@@ -1244,6 +1299,7 @@ Class Pony
             Else
                 Sleep()
             End If
+            AddUpdateRecord("Pony should be sleeping.")
             Exit Sub
         Else
             If Sleeping Then WakeUp()
@@ -1258,6 +1314,7 @@ Class Pony
                 ' If a current behavior has yet to be specified, we need to pick something to do.
                 CancelInteraction()
                 SelectBehavior()
+                AddUpdateRecord("Selected a new behavior at random (UpdateOnce). Behavior: ", CurrentBehavior.Name)
             ElseIf internalTime > (BehaviorStartTime + BehaviorDesiredDuration) AndAlso
                 Not ManualControlPlayerOne AndAlso
                 Not ManualControlPlayerTwo Then
@@ -1267,10 +1324,13 @@ Class Pony
                 ' be ended and a new one selected.
                 If CursorOverPony Then
                     SelectBehavior(CurrentBehavior)
+                    AddUpdateRecord("Repeating current behavior; cursor is over the pony. Behavior: ", CurrentBehavior.Name)
                 Else
                     ' Speak the end line for the behavior, if one is specified.
                     If CurrentBehavior.EndLine IsNot Nothing Then PonySpeak(CurrentBehavior.EndLine)
                     ' Use the next behavior in the chain if one is specified, else select one at random.
+                    AddUpdateRecord("Switching to the next behavior in the chain. Linked: ",
+                                    If(CurrentBehavior.LinkedBehavior IsNot Nothing, CurrentBehavior.LinkedBehavior.Name, "<null>"))
                     SelectBehavior(CurrentBehavior.LinkedBehavior)
                 End If
             End If
@@ -1364,6 +1424,7 @@ Class Pony
         If specifiedBehavior Is Nothing Then
             ' Pick a behavior at random. If a valid behavior cannot be selected after an arbitrary number of tries, just continue using the
             ' current behavior for now.
+            Dim foundAtRandom As Boolean
             For i = 0 To 200
                 Dim potentialBehavior = Behaviors(Rng.Next(Behaviors.Count))
 
@@ -1386,9 +1447,19 @@ Class Pony
 
                     ' We managed to decide on a behavior at random.
                     CurrentBehavior = potentialBehavior
+                    foundAtRandom = True
+                    AddUpdateRecord("Selected a new behavior at random (SelectBehavior). Behavior: ", CurrentBehavior.Name)
                     Exit For
                 End If
             Next
+
+            ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
+            ' suitable to repeat.
+            If Not foundAtRandom AndAlso IsInteracting AndAlso specifiedBehavior Is Nothing Then
+                CurrentBehavior = Behaviors(0)
+                AddUpdateRecord(
+                    "Selected the default behavior as random selection failed (SelectBehavior). Behavior: ", CurrentBehavior.Name)
+            End If
         Else
             followObjectName = specifiedBehavior.originalFollowObjectName
             Destination = Get_Destination()
@@ -1401,6 +1472,7 @@ Class Pony
                 Exit Sub
             End If
             CurrentBehavior = specifiedBehavior
+            AddUpdateRecord("Selected a specified behavior (SelectBehavior). Behavior: ", CurrentBehavior.Name)
         End If
 
         CurrentBehaviorGroup = CurrentBehavior.Group
@@ -1578,7 +1650,7 @@ Class Pony
     ''' <summary>
     ''' Checks the current mouseover state of the pony and toggles between mouseover modes accordingly.
     ''' </summary>
-    Sub ChangeMouseOverMode()
+    Private Sub ChangeMouseOverMode()
         If CursorOverPony AndAlso Not HaltedForCursor Then
             ' The cursor has moved over us and we should halt.
             HaltedForCursor = True
@@ -1597,11 +1669,13 @@ Class Pony
                 End If
             Next
             Paint()
+            AddUpdateRecord("Changed into mouseover state.")
         ElseIf Not CursorOverPony And HaltedForCursor Then
             ' The cursor has moved away from us and we no longer need to be halted.
             HaltedForCursor = False
             CurrentBehavior = previousBehavior
             Paint()
+            AddUpdateRecord("Changed out of mouseover state.")
         End If
     End Sub
 
@@ -1614,6 +1688,7 @@ Class Pony
 
         If ReturningToScreenArea AndAlso Options.PonyTeleportEnabled Then
             StopReturningToScreenArea()
+            AddUpdateRecord("Stopped returning to screen area: Teleport option is enabled.")
             Exit Sub
         End If
 
@@ -1671,10 +1746,9 @@ Class Pony
                 AtDestination = True
                 If ReturningToScreenArea Then
                     StopReturningToScreenArea()
+                    AddUpdateRecord("Stopped returning to screen area; reached onscreen destination.")
                     Exit Sub
                 End If
-
-                ' Reached destination.
 
                 If Going_Home Then
                     ' Don't disappear immediately when reaching a "house" - wait a bit.
@@ -1690,6 +1764,7 @@ Class Pony
                         BehaviorDesiredDuration = TimeSpan.Zero
                         Destination = Point.Empty
                     End If
+                    AddUpdateRecord("Reached destination, prepping to switch behaviors.")
                 End If
 
             Else
@@ -1706,6 +1781,7 @@ Class Pony
                     AtDestination = False
                     Delay -= 1
                     Paint()
+                    AddUpdateRecord("Delay finished (destination). Terminating move function.")
                     Exit Sub
                 End If
 
@@ -1717,6 +1793,7 @@ Class Pony
             If Delay > 0 Then
                 Delay -= 1
                 Paint()
+                AddUpdateRecord("Delay finished (no destination). Terminating move function.")
                 Exit Sub
             End If
 
@@ -1778,14 +1855,17 @@ Class Pony
         If NearCursor_Now Then
             If ReturningToScreenArea Then
                 StopReturningToScreenArea() 'clear destination if moving_onscreen, otherwise we will get confused later.
+                AddUpdateRecord("Stopped returning to screen area; pony is near the cursor now.")
             End If
             Paint() 'enable effects on mouseover.
             PonySpeak()
+            AddUpdateRecord("Painted and terminated move; pony is near the cursor now.")
             Exit Sub
         ElseIf HaltedForCursor Then
             'if we're not in the cursor's way, but still flagged that we are, exit mouseover mode.
             CursorOverPony = False
             Cursor_Immunity = 30
+            AddUpdateRecord("Exiting mouseover mode state.")
             Exit Sub
         End If
 
@@ -1803,6 +1883,7 @@ Class Pony
             Else
                 CurrentBehavior = GetAppropriateBehaviorOrCurrent(CurrentBehavior.AllowedMovement, False)
             End If
+            AddUpdateRecord("Avoiding cursor.")
             Exit Sub
         End If
 
@@ -1815,6 +1896,7 @@ Class Pony
                 Else
                     CurrentBehavior = Nothing
                 End If
+                AddUpdateRecord("Avoiding window.")
                 Exit Sub
             End If
 
@@ -1823,8 +1905,8 @@ Class Pony
             TopLeftLocation = new_location
             LastMovement = movement
 
-            Dim useVisualOverride = AtDestination AndAlso CurrentBehavior.FollowStoppedBehavior IsNot Nothing
-            Paint(useVisualOverride)
+            Paint(AtDestination)
+            AddUpdateRecord("Standard paint. AtDestination: ", AtDestination.ToString())
 
             'check to see if we should interact at all
 
@@ -1839,6 +1921,7 @@ Class Pony
             'If we were trying to get out of a bad spot, and we find ourselves in a good area, continue on as normal...
             If ReturningToScreenArea AndAlso OnScreen_Now AndAlso Not InAvoidanceZone_Future AndAlso Not playing_game_and_outofbounds Then
                 StopReturningToScreenArea()
+                AddUpdateRecord("Stopped returning to screen area; made it out of disallowed region.")
             Else
 
                 'except if the user made changes to the avoidance area to include our current safe spot (we were already trying to avoid the area),
@@ -1855,6 +1938,7 @@ Class Pony
             'if we were trying to get out of a bad area, but we are not moving, then continue on as normal.
             If ReturningToScreenArea AndAlso CurrentBehavior.Speed = 0 Then
                 StopReturningToScreenArea()
+                AddUpdateRecord("Stopped returning to screen area; current behavior has speed of zero.")
             End If
 
             'We are done.
@@ -1867,6 +1951,7 @@ Class Pony
 
                 If Main.Instance.InPreviewMode OrElse Options.PonyTeleportEnabled Then
                     Teleport()
+                    AddUpdateRecord("Teleporting back onscreen.")
                     Exit Sub
                 End If
 
@@ -1883,6 +1968,7 @@ Class Pony
                 destinationCoords = safespot
 
                 Paint(False)
+                AddUpdateRecord("Walking back onscreen.")
 
                 ' TODO: DO NOT update the start time, this prevents the time resetting when out-of-bounds. (Second) Need checking.
                 'BehaviorStartTime = internalTime
@@ -1899,6 +1985,7 @@ Class Pony
             Bounce(Me, TopLeftLocation, new_location, movement)
             'we need to paint to reset the image centers
             Paint()
+            AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
         Else
             If IsNothing(followObject) Then
                 'CurrentBehavior = Nothing
@@ -1907,6 +1994,7 @@ Class Pony
                 'do nothing but stare longingly in the direction of the object we want to follow...
                 blocked = True
                 Paint()
+                AddUpdateRecord("Painted; but currently blocked from following target.")
             End If
         End If
     End Sub
@@ -1994,7 +2082,7 @@ Class Pony
 
     End Sub
 
-    Sub StopReturningToScreenArea()
+    Private Sub StopReturningToScreenArea()
         ReturningToScreenArea = False
         destinationCoords = New Point(CurrentBehavior.original_destination_xcoord, CurrentBehavior.original_destination_ycoord)
         followObjectName = CurrentBehavior.originalFollowObjectName
@@ -2109,7 +2197,7 @@ Class Pony
         Return Point.Round(CType(TopLeftLocation, PointF) + LastMovement * Number_Of_Interations)
     End Function
 
-    Friend Sub Paint(Optional useOverrideBehavior As Boolean = True)
+    Private Sub Paint(Optional useOverrideBehavior As Boolean = True)
         visual_override_behavior = Nothing
 
         'If we are going to a particular point or following something, we need to pick the 
@@ -2118,7 +2206,6 @@ Class Pony
 
             Dim horizontalDistance = Math.Abs(Destination.X - CenterLocation.X)
             Dim verticalDistance = Math.Abs(Destination.Y - CenterLocation.Y)
-            Dim appropriate_behavior As PonyBase.Behavior = Nothing
 
             'We are supposed to be following, so say we can move any direction to do that.
             Dim allowed_movement = AllowedMoves.All
@@ -2154,19 +2241,20 @@ Class Pony
                 Paint_stop = False
             End If
 
-            If CurrentBehavior.Auto_Select_Images_On_Follow = True OrElse IsNothing(CurrentBehavior.FollowStoppedBehavior) OrElse IsNothing(CurrentBehavior.FollowMovingBehavior) Then
-                appropriate_behavior = GetAppropriateBehaviorOrCurrent(allowed_movement, True, Nothing)
-            Else
+            If useOverrideBehavior Then
+                ' Chosen an appropriate behavior to use for visual override.
+                ' Use the specified behaviors for following if possible, otherwise find a suitable one given our movement requirements.
+                Dim appropriateBehavior As PonyBase.Behavior = Nothing
                 If allowed_movement = AllowedMoves.None Then
-                    appropriate_behavior = CurrentBehavior.FollowStoppedBehavior
+                    appropriateBehavior = CurrentBehavior.FollowStoppedBehavior
                 Else
-                    appropriate_behavior = CurrentBehavior.FollowMovingBehavior
+                    appropriateBehavior = CurrentBehavior.FollowMovingBehavior
                 End If
+                If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
+                    appropriateBehavior = GetAppropriateBehaviorOrCurrent(allowed_movement, True, Nothing)
+                End If
+                visual_override_behavior = appropriateBehavior
             End If
-
-            If IsNothing(appropriate_behavior) Then Throw New Exception("Couldn't find appropriate behavior for Paint() method on follow.")
-
-            If useOverrideBehavior Then visual_override_behavior = appropriate_behavior
         Else
             Paint_stop = False
         End If
@@ -2258,8 +2346,8 @@ Class Pony
 
     End Function
 
-    Private Function GetAppropriateBehavior(ByRef movement As AllowedMoves, ByRef speed As Boolean,
-                                           Optional ByRef suggestedBehavior As PonyBase.Behavior = Nothing) As PonyBase.Behavior
+    Private Function GetAppropriateBehavior(movement As AllowedMoves, speed As Boolean,
+                                           Optional suggestedBehavior As PonyBase.Behavior = Nothing) As PonyBase.Behavior
         'does the current behavior work?
         If CurrentBehavior IsNot Nothing Then
             If movement = AllowedMoves.All OrElse (CurrentBehavior.AllowedMovement And movement) = movement Then
@@ -2321,17 +2409,17 @@ Class Pony
     'Pick a behavior that matches the speed (fast or slow) and direction we want to go in.
     'Use the specified behavior if it works.
     ''' <summary>
-    ''' Returns a behavior that best matches the desired allowable movement and speed.
+    ''' Returns a behavior that best matches the desired allowable movement and speed, or else the current behavior.
     ''' </summary>
     ''' <param name="movement">The movement to match (as best as possible).</param>
-    ''' <param name="speed">The speed to match (as best as possible).</param>
+    ''' <param name="speed">Is the user pressing the "speed" override key.</param>
     ''' <param name="suggestedBehavior">A suggested behavior to test first. This will be returned if it meets the requirements
     ''' sufficiently.</param>
     ''' <returns>The suggested behavior, if it meets the requirements, otherwise any behavior with meets the requirements sufficiently. If 
     ''' no behavior matches sufficiently the current behavior is returned.
     ''' </returns>
-    Friend Function GetAppropriateBehaviorOrCurrent(ByRef movement As AllowedMoves, ByRef speed As Boolean,
-                                           Optional ByRef suggestedBehavior As PonyBase.Behavior = Nothing) As PonyBase.Behavior
+    Friend Function GetAppropriateBehaviorOrCurrent(movement As AllowedMoves, speed As Boolean,
+                                           Optional suggestedBehavior As PonyBase.Behavior = Nothing) As PonyBase.Behavior
         Return If(GetAppropriateBehavior(movement, speed, suggestedBehavior), CurrentBehavior)
     End Function
 
@@ -2775,11 +2863,6 @@ Class Pony
             Return Size.Empty
         End If
     End Function
-
-    Private lastSpeakTime As TimeSpan = TimeSpan.FromDays(-1)
-    Private lastSpeakLine As String
-    Friend internalTime As TimeSpan
-    Private lastUpdateTime As TimeSpan
 
     Public ReadOnly Property IsSpeaking As Boolean Implements ISpeakingSprite.IsSpeaking
         Get

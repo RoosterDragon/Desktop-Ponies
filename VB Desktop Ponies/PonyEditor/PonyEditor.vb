@@ -2053,7 +2053,7 @@ Public Class PonyEditor
                                       behavior.original_destination_xcoord.ToString(CultureInfo.InvariantCulture),
                                       behavior.original_destination_ycoord.ToString(CultureInfo.InvariantCulture),
                                       Quoted(behavior.originalFollowObjectName),
-                                      behavior.Auto_Select_Images_On_Follow,
+                                      behavior.AutoSelectImagesOnFollow,
                                       behavior.FollowStoppedBehaviorName,
                                       behavior.FollowMovingBehaviorName,
                                       Quoted(behavior.RightImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &

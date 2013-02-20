@@ -124,6 +124,12 @@
     <Compile Include="DesktopControlForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Monitoring\PonyLogForm.Designer.vb">
+      <DependentUpon>PonyLogForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Monitoring\PonyLogForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -275,6 +281,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopControlForm.resx">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitoring\PonyLogForm.resx">
+      <DependentUpon>PonyLogForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonySelectionControl.resx">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
