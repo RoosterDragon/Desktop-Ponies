@@ -367,11 +367,11 @@ Public Class PonyEditor
             For Each behavior In pony.Behaviors
 
                 Dim follow_name As String = ""
-                If behavior.originalFollowObjectName <> "" Then
-                    follow_name = behavior.originalFollowObjectName
+                If behavior.OriginalFollowObjectName <> "" Then
+                    follow_name = behavior.OriginalFollowObjectName
                 Else
-                    If behavior.original_destination_xcoord <> 0 AndAlso behavior.original_destination_ycoord <> 0 Then
-                        follow_name = behavior.original_destination_xcoord & " , " & behavior.original_destination_ycoord
+                    If behavior.OriginalDestinationXCoord <> 0 AndAlso behavior.OriginalDestinationYCoord <> 0 Then
+                        follow_name = behavior.OriginalDestinationXCoord & " , " & behavior.OriginalDestinationYCoord
                     Else
                         follow_name = "Select..."
                     End If
@@ -717,7 +717,7 @@ Public Class PonyEditor
 
             If effect.Duration <> 0 Then
                 effect.DesiredDuration = effect.Duration
-                effect.Close_On_New_Behavior = False
+                effect.CloseOnNewBehavior = False
             End If
 
             effect.direction = effect.placement_direction_right
@@ -852,15 +852,15 @@ Public Class PonyEditor
                     PreviewPony.ActiveEffects.Clear()
 
                     Dim follow_sprite As ISprite = Nothing
-                    If changed_behavior.originalFollowObjectName <> "" Then
-                        follow_sprite = AddPony(changed_behavior.originalFollowObjectName)
+                    If changed_behavior.OriginalFollowObjectName <> "" Then
+                        follow_sprite = AddPony(changed_behavior.OriginalFollowObjectName)
 
                         If IsNothing(follow_sprite) Then
-                            follow_sprite = AddEffect(changed_behavior.originalFollowObjectName)
+                            follow_sprite = AddEffect(changed_behavior.OriginalFollowObjectName)
                         End If
 
                         If IsNothing(follow_sprite) Then
-                            MessageBox.Show("The specified pony or effect to follow (" & changed_behavior.originalFollowObjectName &
+                            MessageBox.Show("The specified pony or effect to follow (" & changed_behavior.OriginalFollowObjectName &
                                             ") for this behavior (" & changed_behavior_name &
                                             ") does not exist. Please review this setting.",
                                             "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -2050,9 +2050,9 @@ Public Class PonyEditor
                                       Quoted(behavior.StartLineName),
                                       Quoted(behavior.EndLineName),
                                       behavior.Skip,
-                                      behavior.original_destination_xcoord.ToString(CultureInfo.InvariantCulture),
-                                      behavior.original_destination_ycoord.ToString(CultureInfo.InvariantCulture),
-                                      Quoted(behavior.originalFollowObjectName),
+                                      behavior.OriginalDestinationXCoord.ToString(CultureInfo.InvariantCulture),
+                                      behavior.OriginalDestinationYCoord.ToString(CultureInfo.InvariantCulture),
+                                      Quoted(behavior.OriginalFollowObjectName),
                                       behavior.AutoSelectImagesOnFollow,
                                       behavior.FollowStoppedBehaviorName,
                                       behavior.FollowMovingBehaviorName,

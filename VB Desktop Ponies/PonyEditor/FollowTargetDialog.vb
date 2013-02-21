@@ -121,14 +121,14 @@
         Dim point As Boolean = False
         Dim pony As Boolean = False
 
-        If (behavior.original_destination_xcoord <> 0 OrElse behavior.original_destination_ycoord <> 0) Then
+        If (behavior.OriginalDestinationXCoord <> 0 OrElse behavior.OriginalDestinationYCoord <> 0) Then
             point = True
         End If
 
-        If (Not IsNothing(behavior.originalFollowObjectName) AndAlso behavior.originalFollowObjectName <> "") Then
+        If (Not IsNothing(behavior.OriginalFollowObjectName) AndAlso behavior.OriginalFollowObjectName <> "") Then
             pony = True
             For Each item As String In Follow_ComboBox.Items
-                If String.Equals(string_to_effectname(item), behavior_to_change.originalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(string_to_effectname(item), behavior_to_change.OriginalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
                     Follow_ComboBox.SelectedItem = item
                 End If
             Next
@@ -157,14 +157,14 @@
 
         If point AndAlso Not pony Then
             Point_Radio.Checked = True
-            Point_Loc_X.Value = behavior.original_destination_xcoord
-            Point_Loc_Y.Value = behavior.original_destination_ycoord
+            Point_Loc_X.Value = behavior.OriginalDestinationXCoord
+            Point_Loc_Y.Value = behavior.OriginalDestinationYCoord
         End If
 
         If pony AndAlso point Then
             Pony_Radio.Checked = True
-            Point_Loc_X.Value = behavior.original_destination_xcoord
-            Point_Loc_Y.Value = behavior.original_destination_ycoord
+            Point_Loc_X.Value = behavior.OriginalDestinationXCoord
+            Point_Loc_Y.Value = behavior.OriginalDestinationYCoord
         End If
 
         If Not pony AndAlso Not point Then
@@ -273,17 +273,17 @@
         End If
 
         If Not DisableRadio.Checked Then
-            behavior_to_change.original_destination_xcoord = CInt(Point_Loc_X.Value)
-            behavior_to_change.original_destination_ycoord = CInt(Point_Loc_Y.Value)
+            behavior_to_change.OriginalDestinationXCoord = CInt(Point_Loc_X.Value)
+            behavior_to_change.OriginalDestinationYCoord = CInt(Point_Loc_Y.Value)
         Else
-            behavior_to_change.original_destination_xcoord = 0
-            behavior_to_change.original_destination_ycoord = 0
+            behavior_to_change.OriginalDestinationXCoord = 0
+            behavior_to_change.OriginalDestinationYCoord = 0
         End If
 
         If Pony_Radio.Checked Then
-            behavior_to_change.originalFollowObjectName = string_to_effectname(CStr(Follow_ComboBox.SelectedItem))
+            behavior_to_change.OriginalFollowObjectName = string_to_effectname(CStr(Follow_ComboBox.SelectedItem))
         Else
-            behavior_to_change.originalFollowObjectName = ""
+            behavior_to_change.OriginalFollowObjectName = ""
         End If
 
         If Auto_Select_Images_Checkbox.Checked = True Then

@@ -138,7 +138,7 @@ Public Class DesktopPonyAnimator
             For Each sprite In Sprites
                 Dim pony = TryCast(sprite, Pony)
                 If pony Is Nothing Then Continue For
-                If pony.AtDestination AndAlso pony.Going_Home AndAlso pony.Opening_Door AndAlso pony.Delay <= 0 Then
+                If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
                     poniesToRemove.Add(pony)
                 End If
             Next

@@ -571,9 +571,9 @@ Class PonyBase
 
         'When the pony if off-screen we overwrite the follow parameters to get them onscreen again.
         'we save the original parameters here.
-        new_behavior.original_destination_xcoord = _xcoord
-        new_behavior.original_destination_ycoord = _ycoord
-        new_behavior.originalFollowObjectName = _object_to_follow
+        new_behavior.OriginalDestinationXCoord = _xcoord
+        new_behavior.OriginalDestinationYCoord = _ycoord
+        new_behavior.OriginalFollowObjectName = _object_to_follow
 
         new_behavior.FollowMovingBehaviorName = _follow_moving_behavior
         new_behavior.FollowStoppedBehaviorName = _follow_stopped_behavior
@@ -822,9 +822,9 @@ Class PonyBase
         'Friend follow_object_name As String = ""
         'Friend follow_object As ISprite
 
-        Friend original_destination_xcoord As Integer = 0
-        Friend original_destination_ycoord As Integer = 0
-        Friend originalFollowObjectName As String = ""
+        Friend OriginalDestinationXCoord As Integer = 0
+        Friend OriginalDestinationYCoord As Integer = 0
+        Friend OriginalFollowObjectName As String = ""
 
         Friend FollowStoppedBehaviorName As String = ""
         Friend FollowMovingBehaviorName As String = ""
@@ -1127,11 +1127,11 @@ Class Pony
     ''' <summary>
     ''' Used when going back "in" houses.
     ''' </summary>
-    Friend Going_Home As Boolean = False
+    Friend GoingHome As Boolean = False
     ''' <summary>
     ''' Used when a pony has been recalled and is just about to "enter" a house
     ''' </summary>
-    Friend Opening_Door As Boolean = False
+    Friend OpeningDoor As Boolean = False
 
     ''' <summary>
     ''' Should we stop because the cursor is hovered over?
@@ -1142,7 +1142,10 @@ Class Pony
     ''' Are we actually halted now?
     ''' </summary>
     Private HaltedForCursor As Boolean = False
-    Private Cursor_Immunity As Integer = 0
+    ''' <summary>
+    ''' Number of ticks for which the pony is immune to cursor interaction.
+    ''' </summary>
+    Private CursorImmunity As Integer = 0
 
     Friend Destination As Vector2
     Friend AtDestination As Boolean = False
@@ -1150,7 +1153,7 @@ Class Pony
     ''' <summary>
     ''' Used in the Paint() sub to help stop flickering between left and right images under certain circumstances.
     ''' </summary>
-    Private Paint_stop As Boolean = False
+    Private paintStop As Boolean = False
 
     ''' <summary>
     ''' The location on the screen.
@@ -1435,12 +1438,12 @@ Class Pony
                     Rng.NextDouble() <= potentialBehavior.ChanceOfOccurance Then
 
                     ' See if the behavior specifies that we follow another object.
-                    followObjectName = potentialBehavior.originalFollowObjectName
-                    Destination = Get_Destination()
+                    followObjectName = potentialBehavior.OriginalFollowObjectName
+                    Destination = DetermineDestination()
 
                     ' The behavior specifies an object to follow, but no instance of that object is present.
                     ' We can't use this behavior, so we'll have to choose another.
-                    If Destination = Vector2.Zero AndAlso potentialBehavior.originalFollowObjectName <> "" Then
+                    If Destination = Vector2.Zero AndAlso potentialBehavior.OriginalFollowObjectName <> "" Then
                         followObjectName = ""
                         Continue For
                     End If
@@ -1461,12 +1464,12 @@ Class Pony
                     "Selected the default behavior as random selection failed (SelectBehavior). Behavior: ", CurrentBehavior.Name)
             End If
         Else
-            followObjectName = specifiedBehavior.originalFollowObjectName
-            Destination = Get_Destination()
+            followObjectName = specifiedBehavior.OriginalFollowObjectName
+            Destination = DetermineDestination()
 
             ' The behavior specifies an object to follow, but no instance of that object is present.
             ' We can't use this behavior, so we'll have to choose another at random.
-            If Destination = Vector2.Zero AndAlso specifiedBehavior.originalFollowObjectName <> "" AndAlso
+            If Destination = Vector2.Zero AndAlso specifiedBehavior.OriginalFollowObjectName <> "" AndAlso
                 Not Main.Instance.InPreviewMode Then
                 SelectBehavior()
                 Exit Sub
@@ -1684,7 +1687,7 @@ Class Pony
 
         blocked = False
 
-        If Cursor_Immunity > 0 Then Cursor_Immunity -= 1
+        If CursorImmunity > 0 Then CursorImmunity -= 1
 
         If ReturningToScreenArea AndAlso Options.PonyTeleportEnabled Then
             StopReturningToScreenArea()
@@ -1708,16 +1711,15 @@ Class Pony
         End If
 
         'If the behavior specified a follow object, or a point to go to, figure out where that is.
-        Destination = Get_Destination()
+        Destination = DetermineDestination()
 
         Dim movement As Vector2F
 
-        'don't follow a destination if we are under player control
-        'unless, there is a game playing and it is in setup mode (the only time in a game we should ignore the player input).
+        ' Don't follow a destination if we are under player control unless there is a game playing and it is in setup mode.
         If (Not Destination = Vector2.Zero AndAlso
             Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
             (Not Destination = Vector2.Zero AndAlso
-             Not IsNothing(Main.Instance.CurrentGame) AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup) Then
+             Main.Instance.CurrentGame IsNot Nothing AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup) Then
             ' A destination has been specified and the pony should head there.
             Dim distance = Vector.Distance(CenterLocation, Destination)
             ' Avoid division by zero.
@@ -1750,11 +1752,11 @@ Class Pony
                     Exit Sub
                 End If
 
-                If Going_Home Then
+                If GoingHome Then
                     ' Don't disappear immediately when reaching a "house" - wait a bit.
-                    If Not Opening_Door Then
+                    If Not OpeningDoor Then
                         Delay = 90
-                        Opening_Door = True
+                        OpeningDoor = True
                     Else
                         Delay -= 1
                     End If
@@ -1810,49 +1812,41 @@ Class Pony
                 movement.X = If(horizontalMovementAllowed, CSng(speed), 0)
                 movement.Y = If(verticalMovementAllowed, CSng(speed), 0)
 
-                If Not facingRight Then
-                    movement.X = -movement.X
-                End If
+                If Not facingRight Then movement.X = -movement.X
 
-                If facingUp Then
-                    If movement.Y > 0 Then
-                        movement.Y = -movement.Y
-                    End If
-                Else
-                    If movement.Y < 0 Then
-                        movement.Y = -movement.Y
-                    End If
+                If (facingUp AndAlso movement.Y > 0) OrElse
+                    (Not facingUp AndAlso movement.Y < 0) Then
+                    movement.Y = -movement.Y
                 End If
             End If
         End If
 
-        Dim new_location = Point.Round(CType(TopLeftLocation, PointF) + movement)
+        Dim newTopLeftLocation = Point.Round(CType(TopLeftLocation, PointF) + movement)
 
-        Dim NearCursor_Now = IsPonyNearMouseCursor(TopLeftLocation)
-        ' Dim NearCursor_Now_all_Forms = IsPonyNearMouseCursor(current_location)
-        Dim NearCursor_Future = IsPonyNearMouseCursor(new_location)
-        '  Dim NearCursor_Future_All_Forms = IsPonyNearMouseCursor(new_location)
+        Dim isNearCursorNow = IsPonyNearMouseCursor(TopLeftLocation)
+        Dim isNearCursorFuture = IsPonyNearMouseCursor(newTopLeftLocation)
 
-        Dim OnScreen_Now = IsPonyOnScreen(TopLeftLocation, Main.Instance.ScreensToUse)
-        Dim OnScreen_Future = IsPonyOnScreen(new_location, Main.Instance.ScreensToUse)
+        Dim isOnscreenNow = IsPonyOnScreen(TopLeftLocation, Main.Instance.ScreensToUse)
+        Dim isOnscreenFuture = IsPonyOnScreen(newTopLeftLocation, Main.Instance.ScreensToUse)
 
-        'Dim Playing_Game_And_OutofBounds = ((Playing_Game AndAlso Main.Instance.current_game.Status <> Game.GameStatus.Setup) AndAlso Not IsPonyInBox(new_location, Position.Allowed_Area))
-        Dim playing_game_and_outofbounds = False
+        ' TODO: Refactor and extract.
+        'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
+        '    Main.Instance.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
+        '    Not IsPonyInBox(newTopLeftLocation, Game.Position.Allowed_Area)
+        Dim playingGameAndOutOfBounds = False
 
-        Dim EnteringWindow_Now = False
-        ' Dim EnteringWindow_Future = False
-
-        If Options.WindowAvoidanceEnabled AndAlso ReturningToScreenArea = False Then
-            EnteringWindow_Now = IsPonyEnteringWindow(TopLeftLocation, new_location, movement)
+        Dim isEnteringWindowNow = False
+        If Options.WindowAvoidanceEnabled AndAlso Not ReturningToScreenArea Then
+            isEnteringWindowNow = IsPonyEnteringWindow(TopLeftLocation, newTopLeftLocation, movement)
         End If
 
-        Dim InAvoidanceZone_Now = InAvoidanceArea(TopLeftLocation)
-        Dim InAvoidanceZone_Future = InAvoidanceArea(new_location)
+        Dim isInAvoidanceZoneNow = InAvoidanceArea(TopLeftLocation)
+        Dim isInAvoidanceZoneFuture = InAvoidanceArea(newTopLeftLocation)
 
         'if we ARE currently in the cursor's zone, then say that we should be halted (cursor_halt), save our current behavior so we 
         'can continue later, and set the current behavior to nothing so it will be changed.
-        CursorOverPony = NearCursor_Now
-        If NearCursor_Now Then
+        CursorOverPony = isNearCursorNow
+        If isNearCursorNow Then
             If ReturningToScreenArea Then
                 StopReturningToScreenArea() 'clear destination if moving_onscreen, otherwise we will get confused later.
                 AddUpdateRecord("Stopped returning to screen area; pony is near the cursor now.")
@@ -1864,22 +1858,21 @@ Class Pony
         ElseIf HaltedForCursor Then
             'if we're not in the cursor's way, but still flagged that we are, exit mouseover mode.
             CursorOverPony = False
-            Cursor_Immunity = 30
+            CursorImmunity = 30
             AddUpdateRecord("Exiting mouseover mode state.")
             Exit Sub
         End If
 
         ' if we are heading into the cursor, change directions
-        If NearCursor_Future Then
+        If isNearCursorFuture Then
             CursorOverPony = False
+            CursorImmunity = 60
 
-            Cursor_Immunity = 60
-
-            'if we are moving to a destination, our path is blocked, and we need to abort the behavior
-            'if we are just moving normally, just "bounce" off of the barrier.
-
+            ' For normal movement, simply bounce to move away from the cursor.
+            ' If we have a destination, then the cursor is blocking the way and the behavior should be aborted.
+            ' TODO: Review abortion.
             If Destination = Vector2.Zero Then
-                Bounce(Me, TopLeftLocation, new_location, movement)
+                Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             Else
                 CurrentBehavior = GetAppropriateBehaviorOrCurrent(CurrentBehavior.AllowedMovement, False)
             End If
@@ -1887,12 +1880,14 @@ Class Pony
             Exit Sub
         End If
 
-        ''Check to see that we are moving off the screen, or into a zone we shouldn't (the zone set in the options or outside of our area when playing a game)
-        If ReturningToScreenArea OrElse (OnScreen_Future AndAlso Not InAvoidanceZone_Future AndAlso Not playing_game_and_outofbounds) Then
+        ' Check whether movement leaves in us an allowable area.
+        If ReturningToScreenArea OrElse (isOnscreenFuture AndAlso Not isInAvoidanceZoneFuture AndAlso Not playingGameAndOutOfBounds) Then
+            ' We are in and will remain in an allowable area, or at least moving towards an allowable area.
 
-            If EnteringWindow_Now Then
+            ' Check if we need to rebound off a window.
+            If isEnteringWindowNow Then
                 If Destination = Vector2.Zero Then
-                    Bounce(Me, TopLeftLocation, new_location, movement)
+                    Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
                 Else
                     CurrentBehavior = Nothing
                 End If
@@ -1900,38 +1895,29 @@ Class Pony
                 Exit Sub
             End If
 
-            'everything's cool.  Move and repaint.
-
-            TopLeftLocation = new_location
+            ' Everything's cool. Move and repaint.
+            TopLeftLocation = newTopLeftLocation
             LastMovement = movement
 
             Paint(AtDestination)
             AddUpdateRecord("Standard paint. AtDestination: ", AtDestination.ToString())
 
-            'check to see if we should interact at all
-
-            If Options.PonyInteractionsEnabled AndAlso IsInteracting = False AndAlso ReturningToScreenArea = False Then
+            ' If we can, we should try and start an interaction.
+            If Options.PonyInteractionsEnabled AndAlso Not IsInteracting AndAlso Not ReturningToScreenArea Then
                 Dim interact As PonyBase.Interaction = GetReadiedInteraction()
-
-                If Not IsNothing(interact) Then
-                    StartInteraction(interact)
-                End If
+                If interact IsNot Nothing Then StartInteraction(interact)
             End If
 
-            'If we were trying to get out of a bad spot, and we find ourselves in a good area, continue on as normal...
-            If ReturningToScreenArea AndAlso OnScreen_Now AndAlso Not InAvoidanceZone_Future AndAlso Not playing_game_and_outofbounds Then
+            ' If we were trying to get out of a bad spot, and we find ourselves in a good area, continue on as normal...
+            If ReturningToScreenArea AndAlso isOnscreenNow AndAlso Not isInAvoidanceZoneFuture AndAlso Not playingGameAndOutOfBounds Then
                 StopReturningToScreenArea()
                 AddUpdateRecord("Stopped returning to screen area; made it out of disallowed region.")
             Else
-
                 'except if the user made changes to the avoidance area to include our current safe spot (we were already trying to avoid the area),
                 'then get a new safe spot.
-
-                If ReturningToScreenArea Then
-                    If InAvoidanceArea(Destination) OrElse Not IsPonyOnScreen(Destination, Main.Instance.ScreensToUse) Then
-                        Dim safespot = FindSafeDestination()
-                        destinationCoords = safespot
-                    End If
+                If ReturningToScreenArea AndAlso
+                    (InAvoidanceArea(Destination) OrElse Not IsPonyOnScreen(Destination, Main.Instance.ScreensToUse)) Then
+                    destinationCoords = FindSafeDestination()
                 End If
             End If
 
@@ -1944,11 +1930,10 @@ Class Pony
             'We are done.
             Exit Sub
         Else
-            'The new move puts us off screen or into a bad area!
-            'Sanity check time - are we even on screen now?
-            If InAvoidanceZone_Now OrElse Not OnScreen_Now Then
+            ' The anticipated move puts us in a disallowed area.
+            ' Sanity check time - are we even on screen now?
+            If isInAvoidanceZoneNow OrElse Not isOnscreenNow Then
                 'we are no where! Find out where it is safe to be and run!
-
                 If Main.Instance.InPreviewMode OrElse Options.PonyTeleportEnabled Then
                     Teleport()
                     AddUpdateRecord("Teleporting back onscreen.")
@@ -1956,7 +1941,6 @@ Class Pony
                 End If
 
                 Dim safespot = FindSafeDestination()
-
                 ReturningToScreenArea = True
 
                 If CurrentBehavior.Speed = 0 Then
@@ -1969,10 +1953,6 @@ Class Pony
 
                 Paint(False)
                 AddUpdateRecord("Walking back onscreen.")
-
-                ' TODO: DO NOT update the start time, this prevents the time resetting when out-of-bounds. (Second) Need checking.
-                'BehaviorStartTime = internalTime
-
                 Exit Sub
             End If
         End If
@@ -1982,7 +1962,7 @@ Class Pony
         ' If we are moving to a destination, our path is blocked: we'll wait for a bit.
         ' If we are just moving normally, just "bounce" off of the barrier.
         If Destination = Vector2.Zero Then
-            Bounce(Me, TopLeftLocation, new_location, movement)
+            Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             'we need to paint to reset the image centers
             Paint()
             AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
@@ -1997,6 +1977,96 @@ Class Pony
                 AddUpdateRecord("Painted; but currently blocked from following target.")
             End If
         End If
+    End Sub
+
+    Private Function DetermineDestination() As Point
+        ' If we are off-screen and trying to get back on, just return the pre-calculated coordinates.
+        If ReturningToScreenArea Then Return destinationCoords
+
+        ' If being recalled to a house.
+        If GoingHome Then Return Destination
+
+        ' If we should be following something, but we don't know what yet, select a pony/effect to follow.
+        If (followObjectName <> "" AndAlso IsNothing(followObject)) Then
+            ' If we are interacting, and the name of the pony we should be following matches that of the trigger, follow that one.
+            ' Otherwise, we may end up following the wrong copy if there are more than one.
+            If IsInteracting AndAlso
+                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Trigger.Directory), StringComparison.OrdinalIgnoreCase) Then
+                followObject = CurrentInteraction.Trigger
+                Return New Point(CurrentInteraction.Trigger.CenterLocation.X + destinationCoords.X,
+                                 CurrentInteraction.Trigger.CenterLocation.Y + destinationCoords.Y)
+            End If
+            ' For the reverse case of a trigger pony trying to find out which initiator to follow when interacting.
+            If IsInteracting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
+                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Initiator.Directory), StringComparison.OrdinalIgnoreCase) Then
+                followObject = CurrentInteraction.Initiator
+                Return New Point(CurrentInteraction.Initiator.TopLeftLocation.X + destinationCoords.X,
+                                 CurrentInteraction.Initiator.TopLeftLocation.Y + destinationCoords.Y)
+            End If
+
+            ' If not interacting, or following a different pony, we need to figure out which ones and follow one at random.
+            Dim poniesToFollow As New List(Of Pony)
+            For Each ponyToFollow In CurrentAnimator.Ponies()
+                If String.Equals(ponyToFollow.Directory, followObjectName, StringComparison.OrdinalIgnoreCase) Then
+                    poniesToFollow.Add(ponyToFollow)
+                End If
+            Next
+            If poniesToFollow.Count <> 0 Then
+                Dim ponyToFollow = poniesToFollow(Rng.Next(poniesToFollow.Count))
+                followObject = ponyToFollow
+                Return New Point(ponyToFollow.TopLeftLocation.X + destinationCoords.X,
+                                 ponyToFollow.TopLeftLocation.Y + destinationCoords.Y)
+            End If
+
+
+            ' We may be following an effect instead.
+            Dim effectsToFollow As New List(Of Effect)
+            For Each effect In CurrentAnimator.Effects()
+                If String.Equals(effect.Name, followObjectName, StringComparison.OrdinalIgnoreCase) Then
+                    effectsToFollow.Add(effect)
+                End If
+            Next
+            If effectsToFollow.Count <> 0 Then
+                Dim dice = Rng.Next(effectsToFollow.Count)
+                followObject = effectsToFollow(dice)
+                Return New Point(effectsToFollow(dice).Location.X + destinationCoords.X,
+                                 effectsToFollow(dice).Location.Y + destinationCoords.Y)
+            End If
+
+            ' We can't find the object to follow, so specify no destination.
+            Return Point.Empty
+        End If
+
+        If followObject IsNot Nothing Then
+            ' We've already selected an object to follow previously.
+            Dim followPony = TryCast(followObject, Pony)
+            If followPony IsNot Nothing Then
+                If leadTarget Then
+                    Return followPony.FutureLocation()
+                Else
+                    Return New Point(CInt(followPony.CenterLocation.X + (followPony.Scale * destinationCoords.X)), _
+                                     CInt(followPony.CenterLocation.Y + (followPony.Scale * destinationCoords.Y)))
+                End If
+            Else
+                Dim followEffect As Effect = DirectCast(followObject, Effect)
+                Return New Point(followEffect.Center.X + destinationCoords.X, followEffect.Center.Y + destinationCoords.Y)
+            End If
+        End If
+
+        ' We are not following an object, but going to a point on the screen.
+        If destinationCoords.X <> 0 AndAlso destinationCoords.Y <> 0 Then
+            Return New Point(CInt(0.01 * destinationCoords.X), CInt(0.01 * destinationCoords.Y))
+        End If
+
+        ' We have no given destination.
+        Return Point.Empty
+    End Function
+
+    Private Sub StopReturningToScreenArea()
+        ReturningToScreenArea = False
+        destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord, CurrentBehavior.OriginalDestinationYCoord)
+        followObjectName = CurrentBehavior.OriginalFollowObjectName
+        Paint()
     End Sub
 
     Friend Sub ActivateEffects(currentTime As TimeSpan)
@@ -2020,14 +2090,14 @@ Class Pony
 
                     If new_effect.Duration <> 0 Then
                         new_effect.DesiredDuration = new_effect.Duration
-                        new_effect.Close_On_New_Behavior = False
+                        new_effect.CloseOnNewBehavior = False
                     Else
                         If Me.HaltedForCursor Then
                             new_effect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration).TotalSeconds
                         Else
                             new_effect.DesiredDuration = (BehaviorDesiredDuration - Me.CurrentTime).TotalSeconds
                         End If
-                        new_effect.Close_On_New_Behavior = True
+                        new_effect.CloseOnNewBehavior = True
                     End If
 
                     'new_effect.Text = Name & "'s " & new_effect.name
@@ -2080,16 +2150,6 @@ Class Pony
             Next
         End If
 
-    End Sub
-
-    Private Sub StopReturningToScreenArea()
-        ReturningToScreenArea = False
-        destinationCoords = New Point(CurrentBehavior.original_destination_xcoord, CurrentBehavior.original_destination_ycoord)
-        followObjectName = CurrentBehavior.originalFollowObjectName
-        ' TODO: DO NOT update the start time, this prevents the behavior time resetting when returning from out-of-bounds. Needs checking
-        ' for side effects, though.
-        'BehaviorStartTime = internalTime
-        Paint()
     End Sub
 
     'reverse directions as if we were bouncing off a boundary.
@@ -2221,8 +2281,8 @@ Class Pony
 
             If AtDestination OrElse blocked OrElse CurrentBehavior.Speed = 0 OrElse Delay > 0 Then
                 allowed_movement = AllowedMoves.None
-                Dim paint_stop_now = Paint_stop
-                Paint_stop = True
+                Dim paint_stop_now = paintStop
+                paintStop = True
 
                 'If at our destination, we want to allow one final animation change.  
                 'However after that, we want to stop painting as we may be stuck in a left-right loop
@@ -2238,7 +2298,7 @@ Class Pony
                 End If
 
             Else
-                Paint_stop = False
+                paintStop = False
             End If
 
             If useOverrideBehavior Then
@@ -2256,26 +2316,26 @@ Class Pony
                 visual_override_behavior = appropriateBehavior
             End If
         Else
-            Paint_stop = False
+            paintStop = False
         End If
 
-        Dim new_center = Size.Round(If(facingRight, CurrentBehavior.RightImageCenter, CurrentBehavior.LeftImageCenter) * CSng(Scale))
+        Dim newCenter = Size.Round(If(facingRight, CurrentBehavior.RightImageCenter, CurrentBehavior.LeftImageCenter) * CSng(Scale))
 
         If Not isCustomImageCenterDefined Then
-            currentCustomImageCenter = new_center
+            currentCustomImageCenter = newCenter
         End If
 
         'reposition the form based on the new image center, if different:
-        If isCustomImageCenterDefined AndAlso currentCustomImageCenter <> new_center Then
-            TopLeftLocation = New Point(TopLeftLocation.X - new_center.Width + currentCustomImageCenter.Width,
-                                 TopLeftLocation.Y - new_center.Height + currentCustomImageCenter.Height)
-            currentCustomImageCenter = new_center
+        If isCustomImageCenterDefined AndAlso currentCustomImageCenter <> newCenter Then
+            TopLeftLocation = New Point(TopLeftLocation.X - newCenter.Width + currentCustomImageCenter.Width,
+                                 TopLeftLocation.Y - newCenter.Height + currentCustomImageCenter.Height)
+            currentCustomImageCenter = newCenter
         End If
 
         effectsToRemove.Clear()
 
         For Each effect As Effect In Me.ActiveEffects
-            If effect.Close_On_New_Behavior Then
+            If effect.CloseOnNewBehavior Then
                 If CurrentBehavior.Name <> effect.BehaviorName Then
                     effectsToRemove.Add(effect)
                 End If
@@ -2634,7 +2694,7 @@ Class Pony
         If Not Options.CursorAvoidanceEnabled Then Return False
         If Main.Instance.ScreensaverMode Then Return False
 
-        If Cursor_Immunity > 0 Then Return False
+        If CursorImmunity > 0 Then Return False
 
         'ignore this if we are interacting - we don't want to cancel it.
         If Me.IsInteracting Then Return False
@@ -2680,39 +2740,24 @@ Class Pony
 
     End Function
 
-    'Find a spot on the screen that the pony is allowed to be (similar to teleport, but just reports the point found).
+    ''' <summary>
+    ''' Returns a random location that is within the allowable regions to be in.
+    ''' </summary>
+    ''' <returns>The center of the preview area in preview mode, otherwise a random location within the allowable region, if one can be
+    ''' found; otherwise Point.Empty.</returns>
     Friend Function FindSafeDestination() As Point
+        If Main.Instance.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
 
-        If Main.Instance.InPreviewMode Then
-            Dim preview_center = Pony.PreviewWindowRectangle.Location
-            Return New Point(preview_center.X + 10, preview_center.Y + 10)
-        End If
+        Dim usableScreens = Main.Instance.ScreensToUse
+        For i = 0 To 300
+            Dim randomScreen = usableScreens(Rng.Next(usableScreens.Count))
+            Dim teleportLocation = New Point(
+                CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
+                CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
+            If Not InAvoidanceArea(teleportLocation) Then Return teleportLocation
+        Next
 
-        Dim UsableScreens = Main.Instance.ScreensToUse
-
-        Dim teleport_location As Point = Nothing
-
-        If teleport_location = Nothing Then
-
-            Dim dice = 0
-            Dim random_screen As Screen = Nothing
-            teleport_location = Point.Empty
-
-
-            For tries = 0 To 300
-                dice = Rng.Next(UsableScreens.Count)
-
-                random_screen = UsableScreens(dice)
-                teleport_location = New Point(
-                    CInt(random_screen.WorkingArea.X + Math.Round(Rng.NextDouble() * random_screen.WorkingArea.Width, 0)),
-                    CInt(random_screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * random_screen.WorkingArea.Height, 0)))
-
-                If InAvoidanceArea(teleport_location) = False Then Exit For
-            Next
-        End If
-
-        Return teleport_location
-
+        Return Point.Empty
     End Function
 
     Friend Function GetDestinationDirections(ByRef destination As Point) As IList(Of Directions)
@@ -2952,112 +2997,6 @@ Class Pony
         Dim speedupFactor = If(ponySpeed, 2, 1)
         Return If(appropriateMovement = AllowedMoves.None, 0, CurrentBehavior.Speed * Scale * speedupFactor)
     End Function
-
-    Friend Function Get_Destination() As Point
-
-        'if we are off-screen and trying to get back on, just return the pre-calculated coordinates.
-        If ReturningToScreenArea Then
-            Return destinationCoords
-        End If
-
-        'If being recalled to a house
-        If Going_Home Then
-            Return Destination
-        End If
-
-        'If we should be following something, but we don't know what yet, select a pony/effect to follow
-        If (followObjectName <> "" AndAlso IsNothing(followObject)) Then
-
-            'If we are interacting, and the name of the pony we should be following matches that of the trigger, follow that one.
-            'Otherwise, we may end up following the wrong copy if there are more than one.
-            If IsInteracting AndAlso
-                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Trigger.Directory), StringComparison.OrdinalIgnoreCase) Then
-                followObject = CurrentInteraction.Trigger
-                Return New Point(CurrentInteraction.Trigger.CenterLocation.X + destinationCoords.X,
-                                 CurrentInteraction.Trigger.CenterLocation.Y + destinationCoords.Y)
-            End If
-            'For the reverse case of a trigger pony trying to find out which initiator to follow when interacting.
-            If IsInteracting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
-                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Initiator.Directory), StringComparison.OrdinalIgnoreCase) Then
-                followObject = CurrentInteraction.Initiator
-                Return New Point(CurrentInteraction.Initiator.TopLeftLocation.X + destinationCoords.X,
-                                 CurrentInteraction.Initiator.TopLeftLocation.Y + destinationCoords.Y)
-            End If
-
-            'If not interacting, or following a different pony, we need to figure out which one.
-
-            Dim poniesToFollow As New List(Of Pony)
-
-            Dim found = False
-
-            For Each ponyToFollow In CurrentAnimator.Ponies()
-                If String.Equals(ponyToFollow.Directory, followObjectName, StringComparison.OrdinalIgnoreCase) Then
-                    poniesToFollow.Add(ponyToFollow)
-                    found = True
-                End If
-            Next
-
-            If poniesToFollow.Count <> 0 Then
-                'pick a random copy if there is more than one.
-                Dim ponyToFollow = poniesToFollow(Rng.Next(poniesToFollow.Count))
-                followObject = ponyToFollow
-                Return New Point(ponyToFollow.TopLeftLocation.X + destinationCoords.X,
-                                 ponyToFollow.TopLeftLocation.Y + destinationCoords.Y)
-            End If
-
-            'Apparently we are not following a pony, but an effect...
-
-            Dim effects_to_follow As New List(Of Effect)
-
-            For Each effect In CurrentAnimator.Effects()
-                If LCase(effect.Name) = followObjectName Then
-                    effects_to_follow.Add(effect)
-                    found = True
-                End If
-            Next
-
-            If found = False Then
-                'We didn't find a match, so stop.
-                Return New Point()
-            End If
-
-            If effects_to_follow.Count <> 0 Then
-                Dim dice = Rng.Next(effects_to_follow.Count)
-                followObject = effects_to_follow(dice)
-                Return New Point(effects_to_follow(dice).Location.X + destinationCoords.X,
-                                 effects_to_follow(dice).Location.Y + destinationCoords.Y)
-            End If
-        End If
-
-        If Not IsNothing(followObject) Then
-            'We've already selected an object to follow previously.
-            If followObject.GetType() Is GetType(Pony) Then
-                Dim follow_pony As Pony = DirectCast(followObject, Pony)
-                If leadTarget Then
-                    Return follow_pony.FutureLocation()
-                Else
-                    Return New Point(CInt(follow_pony.CenterLocation.X + (follow_pony.Scale * destinationCoords.X)), _
-                                     CInt(follow_pony.CenterLocation.Y + (follow_pony.Scale * destinationCoords.Y)))
-                End If
-            Else
-                Dim follow_effect As Effect = DirectCast(followObject, Effect)
-                Return New Point(follow_effect.Center.X + destinationCoords.X, follow_effect.Center.Y + destinationCoords.Y)
-            End If
-        End If
-
-        ''We are not following an object, but going to a point on the screen.
-        'If Not IsNothing(screen) AndAlso destination_xcoord <> 0 AndAlso destination_ycoord <> 0 Then
-        '    Return New Point(0.01 * destination_xcoord * screen.WorkingArea.Width + screen.WorkingArea.X, _
-        '                     0.01 * destination_ycoord * screen.WorkingArea.Height + screen.WorkingArea.Y)
-        'End If
-        If destinationCoords.X <> 0 AndAlso destinationCoords.Y <> 0 Then
-            Return New Point(CInt(0.01 * destinationCoords.X), CInt(0.01 * destinationCoords.Y))
-        End If
-
-        'no destination
-        Return New Point()
-
-    End Function
 End Class
 
 Class Effect
@@ -3095,7 +3034,7 @@ Class Effect
     Friend Facing_Left As Boolean = False
 
     Private start_time As TimeSpan
-    Friend Close_On_New_Behavior As Boolean = False
+    Friend CloseOnNewBehavior As Boolean = False
 
     Friend follow As Boolean = False
 
@@ -3570,7 +3509,7 @@ Class House
                 If pony.Sleeping Then pony.WakeUp()
 
                 pony.Destination = instance.Location + New Size(Base.DoorPosition)
-                pony.Going_Home = True
+                pony.GoingHome = True
                 pony.CurrentBehavior = pony.GetAppropriateBehaviorOrCurrent(pony.AllowedMoves.All, False)
                 pony.BehaviorDesiredDuration = TimeSpan.FromMinutes(5)
 
