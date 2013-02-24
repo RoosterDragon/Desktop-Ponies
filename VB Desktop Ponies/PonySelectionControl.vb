@@ -3,26 +3,51 @@
 Public Class PonySelectionControl
     Friend PonyBase As PonyBase
     Friend PonyImage As AnimatedImage(Of BitmapFrame)
-    Dim timeIndex As TimeSpan
-    Dim flip As Boolean
+    Private imageSize As Size
+    Private timeIndex As TimeSpan
+    Private flip As Boolean
 
-    Friend Sub New(ponyTemplate As PonyBase, image As AnimatedImage(Of BitmapFrame), flipImage As Boolean)
+    Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         InitializeComponent()
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
-        PonyImage = image
+        imageSize = CSDesktopPonies.ImageSize.GetSize(imagePath)
         flip = flipImage
+        Threading.ThreadPool.QueueUserWorkItem(Sub(o)
+                                                   PonyImage = New AnimatedImage(Of BitmapFrame)(
+                                                   imagePath, Function(file As String) New BitmapFrame(file),
+                                                   BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+                                                   If Disposing OrElse IsDisposed Then
+                                                       PonyImage.Dispose()
+                                                   Else
+                                                       Try
+                                                           If IsHandleCreated Then
+                                                               Invoke(Sub()
+                                                                          ResizeToFit()
+                                                                          InvalidatePonyImageArea()
+                                                                      End Sub)
+                                                           End If
+                                                       Catch ex As ObjectDisposedException
+                                                           If ex.ObjectName <> PonyImage.GetType().Name Then Throw
+                                                       End Try
+                                                   End If
+                                               End Sub)
 
         ResizeToFit()
-        Invalidate(New Rectangle(0, 0, CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor)))
+        InvalidatePonyImageArea()
     End Sub
 
     Public Sub AdvanceTimeIndex(amount As TimeSpan)
+        If PonyImage Is Nothing Then
+            timeIndex += amount
+            Return
+        End If
+
         Dim oldImage = PonyImage(timeIndex)
         timeIndex += amount
         Dim newImage = PonyImage(timeIndex)
         If Not Object.ReferenceEquals(oldImage, newImage) Then
-            Invalidate(New Rectangle(0, 0, CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor)))
+            InvalidatePonyImageArea()
         End If
     End Sub
 
@@ -35,8 +60,7 @@ Public Class PonySelectionControl
                 borderWidth = SystemInformation.Border3DSize.Width
         End Select
 
-        Dim imageSize = Size.Empty
-        If Not IsNothing(PonyImage) Then imageSize =
+        If PonyImage IsNot Nothing Then imageSize =
             New Size(CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor))
 
         Dim nameWidth = TextRenderer.MeasureText(PonyName.Text, PonyName.Font).Width + PonyName.Margin.Horizontal
@@ -50,10 +74,16 @@ Public Class PonySelectionControl
         ResizeToFit()
     End Sub
 
+    Private Sub InvalidatePonyImageArea()
+        Invalidate(New Rectangle(0, 0, CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor)))
+    End Sub
+
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
-        e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
-        PonyImage(timeIndex).Flip(flip)
-        e.Graphics.DrawImage(PonyImage(timeIndex).Image, 0, 0, PonyImage.Width * Options.ScaleFactor, PonyImage.Height * Options.ScaleFactor)
+        If PonyImage IsNot Nothing Then
+            e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
+            PonyImage(timeIndex).Flip(flip)
+            e.Graphics.DrawImage(PonyImage(timeIndex).Image, 0, 0, PonyImage.Width * Options.ScaleFactor, PonyImage.Height * Options.ScaleFactor)
+        End If
     End Sub
 
     Private Sub MinusButton_Click(sender As Object, e As EventArgs) Handles MinusButton.Click
@@ -94,5 +124,9 @@ Public Class PonySelectionControl
                 NoDuplicates.Visible = False
             End If
         End If
+    End Sub
+
+    Private Sub PonySelectionControl_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
+        If PonyImage IsNot Nothing Then PonyImage.Dispose()
     End Sub
 End Class

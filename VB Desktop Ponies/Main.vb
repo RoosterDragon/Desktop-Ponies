@@ -28,13 +28,6 @@ Public Class Main
     Friend ActiveSounds As New List(Of Object)
     Friend HouseBases As New List(Of HouseBase)
 
-    'Variables used for displaying the pony selection menu
-    Private ReadOnly ponyImages As New LazyDictionary(Of String, AnimatedImage(Of BitmapFrame))(
-        Function(fileName As String)
-            Return New AnimatedImage(Of BitmapFrame)(fileName, Function(file As String) New BitmapFrame(file),
-                                                     BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
-        End Function)
-
     'How big the area around the cursor used for cursor detection should be, in pixels.
     Friend cursor_zone_size As Integer = 100
     'used to tell when we should come out of screensaver mode
@@ -480,7 +473,6 @@ Public Class Main
                 foldersLoaded += 1
                 TemplateLoader.ReportProgress(foldersLoaded)
             Next
-
             ' Sort loaded ponies and add them to the panel.
             'Ponies_to_add.Sort(Function(a, b) a.Name.CompareTo(b.Name))
             'For Each loopPony In Ponies_to_add
@@ -588,10 +580,7 @@ Public Class Main
             SelectablePonies.Add(ponyBase)
         End If
 
-        Dim ponyImageName = ponyBase.Behaviors(0).RightImagePath
-        ponyImages.Add(ponyImageName)
-
-        Dim ponySelection As New PonySelectionControl(ponyBase, ponyImages(ponyImageName), False)
+        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImagePath, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
@@ -1576,15 +1565,5 @@ Public Class Main
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = loading AndAlso Not My.Application.IsFaulted
-    End Sub
-
-    Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        For Each kvp In ponyImages.InitializedItems
-            If kvp.Value IsNot Nothing Then
-                kvp.Value.Dispose()
-            Else
-                Console.WriteLine("Main_Disposed encountered a null image. Key: " & kvp.Key)
-            End If
-        Next
     End Sub
 End Class

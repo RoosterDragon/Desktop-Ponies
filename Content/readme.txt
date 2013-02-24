@@ -63,8 +63,10 @@ Change Log
 
 Latest changes:
 
-v1.42.x:
+v1.42.1.2:
 - Added crystallized Twilight Sparkle by supersaiyanmikito
+- Add Screw Loose by Bot-chan
+- Much more solid fix for ponies not using the idle animations during interactions when they stop moving.
 
 v1.42.1.1:
 - Added Ace & Big Lebowski ponies by Bot-chan
