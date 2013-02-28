@@ -156,7 +156,7 @@ Public Class DesktopPonyAnimator
             For Each sprite In Sprites
                 Dim effect = TryCast(sprite, Effect)
                 If effect Is Nothing Then Continue For
-                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) AndAlso effect.Owning_Pony.Name <> "N/A" Then
+                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) AndAlso effect.OwningPony.Name <> "N/A" Then
                     effects_to_remove.Add(effect)
                     Sprites.Remove(effect)
                 End If
@@ -166,8 +166,8 @@ Public Class DesktopPonyAnimator
             '-The pony that created it keeps a list so they can be removed when they should.
             '-If the pony that created it was closed, this loop will clean up the now orphaned effects.
             For Each effect In effects_to_remove
-                If Not IsNothing(effect.Owning_Pony) Then
-                    effect.Owning_Pony.ActiveEffects.Remove(effect)
+                If effect.OwningPony IsNot Nothing Then
+                    effect.OwningPony.ActiveEffects.Remove(effect)
                     ' effect.Owning_Pony = Nothing
                 End If
                 Sprites.Remove(effect)
@@ -192,7 +192,9 @@ Public Class DesktopPonyAnimator
                 .CleanupSounds()
             End If
 
-            For Each house In Houses()
+            For Each sprite In Sprites
+                Dim house = TryCast(sprite, House)
+                If house Is Nothing Then Continue For
                 house.Cycle(ElapsedTime)
             Next
 
@@ -451,10 +453,6 @@ Public Class DesktopPonyAnimator
 
     Friend Function Effects() As IEnumerable(Of Effect)
         Return Sprites.OfType(Of Effect)()
-    End Function
-
-    Friend Function Houses() As IEnumerable(Of House)
-        Return Sprites.OfType(Of House)()
     End Function
 
     Private Sub AddHouseSelection(houseBase As HouseBase)

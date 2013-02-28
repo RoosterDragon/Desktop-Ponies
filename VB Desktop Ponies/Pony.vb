@@ -397,7 +397,7 @@ Class PonyBase
                                                Double.Parse(columns(5), CultureInfo.InvariantCulture),
                                                Double.Parse(columns(6), CultureInfo.InvariantCulture),
                                                direction_right, centering_right, direction_left, centering_left,
-                                               Boolean.Parse(Trim(columns(11))), dont_repeat_image_animations)
+                                               Boolean.Parse(Trim(columns(11))), dont_repeat_image_animations, Me)
                             found_behavior = True
                             Exit For
 
@@ -868,7 +868,7 @@ Class PonyBase
         Friend Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
                              direction_right As Directions, centering_right As Directions,
                              direction_left As Directions, centering_left As Directions,
-                             follow As Boolean, _dont_repeat_image_animations As Boolean)
+                             follow As Boolean, _dont_repeat_image_animations As Boolean, owner As PonyBase)
 
             Dim new_effect As New Effect(right_path, left_path)
 
@@ -882,6 +882,7 @@ Class PonyBase
             new_effect.centering_left = centering_left
             new_effect.follow = follow
             new_effect.dont_repeat_image_animations = _dont_repeat_image_animations
+            new_effect.OwnerPony = owner
 
             Effects.Add(new_effect)
 
@@ -1112,7 +1113,7 @@ Class Pony
     ''' <summary>
     ''' When set, specifics the alternate set of images that should replace those of the current behavior.
     ''' </summary>
-    Friend visual_override_behavior As PonyBase.Behavior
+    Friend visualOverrideBehavior As PonyBase.Behavior
 
     Private _returningToScreenArea As Boolean = False
     Public Property ReturningToScreenArea As Boolean
@@ -1149,6 +1150,11 @@ Class Pony
 
     Friend Destination As Vector2
     Friend AtDestination As Boolean = False
+    Private ReadOnly Property hasDestination As Boolean
+        Get
+            Return Destination <> Vector2.Zero
+        End Get
+    End Property
 
     ''' <summary>
     ''' Used in the Paint() sub to help stop flickering between left and right images under certain circumstances.
@@ -1443,7 +1449,7 @@ Class Pony
 
                     ' The behavior specifies an object to follow, but no instance of that object is present.
                     ' We can't use this behavior, so we'll have to choose another.
-                    If Destination = Vector2.Zero AndAlso potentialBehavior.OriginalFollowObjectName <> "" Then
+                    If Not hasDestination AndAlso potentialBehavior.OriginalFollowObjectName <> "" Then
                         followObjectName = ""
                         Continue For
                     End If
@@ -1469,7 +1475,7 @@ Class Pony
 
             ' The behavior specifies an object to follow, but no instance of that object is present.
             ' We can't use this behavior, so we'll have to choose another at random.
-            If Destination = Vector2.Zero AndAlso specifiedBehavior.OriginalFollowObjectName <> "" AndAlso
+            If Not hasDestination AndAlso specifiedBehavior.OriginalFollowObjectName <> "" AndAlso
                 Not Main.Instance.InPreviewMode Then
                 SelectBehavior()
                 Exit Sub
@@ -1581,7 +1587,7 @@ Class Pony
                 Exit Sub
             Else
                 Dim randomGroupLines = Base.SpeakingLinesRandom.Where(
-                    Function(lineByGroup) lineByGroup.Group = CurrentBehavior.Group).ToArray()
+                    Function(l) l.Group = 0 OrElse l.Group = CurrentBehavior.Group).ToArray()
                 If randomGroupLines.Length = 0 Then Exit Sub
                 line = randomGroupLines(Rng.Next(randomGroupLines.Count))
             End If
@@ -1616,7 +1622,7 @@ Class Pony
         End If
 
         ' Quick sanity check that the file exists on disk.
-        If My.Computer.FileSystem.FileExists(filePath) Then Exit Sub
+        If Not My.Computer.FileSystem.FileExists(filePath) Then Exit Sub
 
         ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
         ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
@@ -1716,12 +1722,12 @@ Class Pony
         Dim movement As Vector2F
 
         ' Don't follow a destination if we are under player control unless there is a game playing and it is in setup mode.
-        If (Not Destination = Vector2.Zero AndAlso
-            Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
-            (Not Destination = Vector2.Zero AndAlso
-             Main.Instance.CurrentGame IsNot Nothing AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup) Then
+        Dim distance As Double
+        If hasDestination AndAlso
+            ((Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
+             (Main.Instance.CurrentGame IsNot Nothing AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup)) Then
             ' A destination has been specified and the pony should head there.
-            Dim distance = Vector.Distance(CenterLocation, Destination)
+            distance = Vector.Distance(CenterLocation, Destination)
             ' Avoid division by zero.
             If distance = 0 Then distance = 1
 
@@ -1764,9 +1770,9 @@ Class Pony
                     'If this behavior links to another, we should end this one so we can move on to the next link.
                     If Not IsNothing(CurrentBehavior.LinkedBehavior) AndAlso speed <> 0 Then
                         BehaviorDesiredDuration = TimeSpan.Zero
-                        Destination = Point.Empty
+                        Destination = Vector2.Zero
+                        AddUpdateRecord("Reached destination, readying to switch to next behavior in sequence.")
                     End If
-                    AddUpdateRecord("Reached destination, prepping to switch behaviors.")
                 End If
 
             Else
@@ -1871,7 +1877,7 @@ Class Pony
             ' For normal movement, simply bounce to move away from the cursor.
             ' If we have a destination, then the cursor is blocking the way and the behavior should be aborted.
             ' TODO: Review abortion.
-            If Destination = Vector2.Zero Then
+            If Not hasDestination Then
                 Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             Else
                 CurrentBehavior = GetAppropriateBehaviorOrCurrent(CurrentBehavior.AllowedMovement, False)
@@ -1886,7 +1892,7 @@ Class Pony
 
             ' Check if we need to rebound off a window.
             If isEnteringWindowNow Then
-                If Destination = Vector2.Zero Then
+                If Not hasDestination Then
                     Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
                 Else
                     CurrentBehavior = Nothing
@@ -1899,8 +1905,12 @@ Class Pony
             TopLeftLocation = newTopLeftLocation
             LastMovement = movement
 
-            Paint(AtDestination)
-            AddUpdateRecord("Standard paint. AtDestination: ", AtDestination.ToString())
+            Dim useVisualOverride = followObject IsNot Nothing AndAlso
+                (CurrentBehavior.AutoSelectImagesOnFollow OrElse
+                 CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
+                 CurrentBehavior.FollowStoppedBehavior IsNot Nothing)
+            Paint(useVisualOverride)
+            AddUpdateRecord("Standard paint. VisualOverride: ", useVisualOverride.ToString())
 
             ' If we can, we should try and start an interaction.
             If Options.PonyInteractionsEnabled AndAlso Not IsInteracting AndAlso Not ReturningToScreenArea Then
@@ -1961,7 +1971,7 @@ Class Pony
         ' else.
         ' If we are moving to a destination, our path is blocked: we'll wait for a bit.
         ' If we are just moving normally, just "bounce" off of the barrier.
-        If Destination = Vector2.Zero Then
+        If Not hasDestination Then
             Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             'we need to paint to reset the image centers
             Paint()
@@ -2086,7 +2096,7 @@ Class Pony
 
                     effect.already_played_for_currentbehavior = True
 
-                    Dim new_effect As Effect = effect.duplicate()
+                    Dim new_effect As Effect = effect.Clone()
 
                     If new_effect.Duration <> 0 Then
                         new_effect.DesiredDuration = new_effect.Duration
@@ -2139,7 +2149,7 @@ Class Pony
 
                     new_effect.BehaviorName = CurrentBehavior.Name
 
-                    new_effect.Owning_Pony = Me
+                    new_effect.OwningPony = Me
 
                     Pony.CurrentAnimator.AddEffect(new_effect)
                     Me.ActiveEffects.Add(new_effect)
@@ -2258,11 +2268,11 @@ Class Pony
     End Function
 
     Private Sub Paint(Optional useOverrideBehavior As Boolean = True)
-        visual_override_behavior = Nothing
+        visualOverrideBehavior = Nothing
 
         'If we are going to a particular point or following something, we need to pick the 
         'appropriate graphics to how we are moving instead of using what the behavior specifies.
-        If Not Destination = Vector2.Zero AndAlso Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo Then ' AndAlso Not Playing_Game Then
+        If hasDestination AndAlso Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo Then ' AndAlso Not Playing_Game Then
 
             Dim horizontalDistance = Math.Abs(Destination.X - CenterLocation.X)
             Dim verticalDistance = Math.Abs(Destination.Y - CenterLocation.Y)
@@ -2313,7 +2323,7 @@ Class Pony
                 If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
                     appropriateBehavior = GetAppropriateBehaviorOrCurrent(allowed_movement, True, Nothing)
                 End If
-                visual_override_behavior = appropriateBehavior
+                visualOverrideBehavior = appropriateBehavior
             End If
         Else
             paintStop = False
@@ -2440,7 +2450,7 @@ Class Pony
                 'see if the specified behavior works.  If not, we'll find another.
                 If suggestedBehavior IsNot Nothing Then
                     If movement = AllowedMoves.All OrElse (suggestedBehavior.AllowedMovement And movement) = movement Then
-                        If Destination <> Vector2.Zero Then
+                        If hasDestination Then
                             facingRight = (GetDestinationDirections(Destination)(0) = Directions.right)
                         End If
                         Return suggestedBehavior
@@ -2791,7 +2801,7 @@ Class Pony
 
     Friend ReadOnly Property CurrentImageSize As Vector2
         Get
-            Dim behavior = If(visual_override_behavior, CurrentBehavior)
+            Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
             Return If(facingRight, behavior.RightImageSize, behavior.LeftImageSize)
         End Get
     End Property
@@ -2935,7 +2945,7 @@ Class Pony
 
     Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
         Get
-            Dim behavior = If(visual_override_behavior, CurrentBehavior)
+            Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
             Dim path = If(facingRight, behavior.RightImagePath, behavior.LeftImagePath)
             Diagnostics.Debug.Assert(Not String.IsNullOrEmpty(path))
             Return path
@@ -3011,7 +3021,9 @@ Class Effect
     Friend dont_repeat_image_animations As Boolean = False
 
     Friend BehaviorName As String
-    Friend Owning_Pony As Pony
+
+    Friend OwnerPony As PonyBase
+    Friend OwningPony As Pony
 
     Friend right_image_path As String
     Friend right_image_size As Size
@@ -3065,8 +3077,7 @@ Class Effect
             CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - left_image_size.Height), 0)))
     End Sub
 
-    Overridable Function duplicate() As Effect
-
+    Public Function Clone() As Effect
         Dim new_effect As New Effect(right_image_path, left_image_path)
 
         new_effect.Name = Name
@@ -3084,16 +3095,16 @@ Class Effect
         new_effect.follow = follow
 
         new_effect.already_played_for_currentbehavior = already_played_for_currentbehavior
+        new_effect.OwnerPony = OwnerPony
 
         Return new_effect
-
     End Function
 
     Friend Function Center() As Point
         Dim scale As Double
 
-        If Not IsNothing(Owning_Pony) Then
-            scale = Owning_Pony.Scale
+        If OwningPony IsNot Nothing Then
+            scale = OwningPony.Scale
         Else
             scale = 1
         End If

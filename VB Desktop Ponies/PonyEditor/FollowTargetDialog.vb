@@ -101,7 +101,7 @@
         Next
 
         For Each effect In effects_list
-            Follow_ComboBox.Items.Add(effect.Owning_Pony.Name & "'s " & effect.Name)
+            Follow_ComboBox.Items.Add(effect.OwnerPony.Name & "'s " & effect.Name)
         Next
 
         moving_behavior_box.Items.Clear()
@@ -253,7 +253,7 @@
 
     Private Shared Function string_to_effectname(ByVal name As String) As String
         For Each effect In PonyEditor.get_effect_list()
-            If (effect.Owning_Pony.Name & "'s " & effect.Name) = name Then
+            If (effect.OwnerPony.Name & "'s " & effect.Name) = name Then
                 Return effect.Name
             End If
         Next

@@ -18,8 +18,8 @@ Public Class SpriteDebugForm
                 PonyDataGridView.Rows(i).SetValues(pony.Name, pony.TopLeftLocation, pony.CurrentBehavior.Name,
                                           ((pony.BehaviorStartTime + pony.BehaviorDesiredDuration) - pony.internalTime).TotalSeconds.ToString("0.00s"),
                                           pony.destinationCoords, pony.Destination,
-                                          pony.CurrentBehavior.originalFollowObjectName, pony.followObjectName,
-                                          If(pony.visual_override_behavior IsNot Nothing, pony.visual_override_behavior.Name, Nothing))
+                                          pony.CurrentBehavior.OriginalFollowObjectName, pony.followObjectName,
+                                          If(pony.visualOverrideBehavior IsNot Nothing, pony.visualOverrideBehavior.Name, Nothing))
                 i += 1
             End If
         Next

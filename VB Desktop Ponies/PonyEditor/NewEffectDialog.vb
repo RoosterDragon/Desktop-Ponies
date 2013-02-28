@@ -87,7 +87,7 @@ Public Class NewEffectDialog
                            PonyEditor.String_ToLocation(CStr(R_Centering_Box.SelectedItem)), _
                            PonyEditor.String_ToLocation(CStr(L_Placement_Box.SelectedItem)), _
                            PonyEditor.String_ToLocation(CStr(L_Centering_Box.SelectedItem)), _
-                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked)
+                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPony.Base)
 
         Me.Close()
     End Sub
