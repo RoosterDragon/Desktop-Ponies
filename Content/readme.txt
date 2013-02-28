@@ -63,10 +63,21 @@ Change Log
 
 Latest changes:
 
+v1.42.1.3:
+- Added updated Changling by Bot-chan
+- Added Princess Twilight Sparkle by Bot-chan
+- Changed config files for Spitfire and Trixie to allow them to switch between behavior groups (suggested by Anon).
+- Changed random speeches so those in group 0 may play regardless of the current group.
+- Fixed sounds not working in v1.42.1.2.
+- Hopefully the final fix for ponies and idle animations during animations.
+- Fixed an error in the editor where you the dialog to change an interaction target would fail to open.
+- Loading times should be somewhat faster.
+
 v1.42.1.2:
 - Added crystallized Twilight Sparkle by supersaiyanmikito
 - Add Screw Loose by Bot-chan
 - Much more solid fix for ponies not using the idle animations during interactions when they stop moving.
+- Initial loading time should be a few seconds faster.
 
 v1.42.1.1:
 - Added Ace & Big Lebowski ponies by Bot-chan
