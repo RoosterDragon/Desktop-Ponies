@@ -703,6 +703,8 @@
             public void Dispose()
             {
                 Image.Dispose();
+                if (flippedImage != null)
+                    flippedImage.Dispose();
             }
         }
         #endregion

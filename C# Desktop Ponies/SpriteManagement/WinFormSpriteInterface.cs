@@ -943,7 +943,13 @@
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
         private BitmapFrame BitmapFrameFromFile(string fileName)
         {
-            return new BitmapFrame(fileName).SetupSafely(frame => AlterBitmapForTransparency(fileName, frame.Image));
+            return new BitmapFrame(fileName).SetupSafely(frame =>
+            {
+                if (IsAlphaBlended)
+                    frame.Image.PreMultiplyAlpha();
+                else
+                    frame.Image.RemapColors(paletteMapping);
+            });
         }
 
         /// <summary>
@@ -964,40 +970,34 @@
             int stride, int width, int height, int depth, int hashCode, string fileName)
         {
             return BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode).SetupSafely(
-                frame => AlterBitmapForTransparency(fileName, frame.Image));
-        }
-
-        /// <summary>
-        /// Alters a bitmap to account for transparency settings.
-        /// </summary>
-        /// <param name="fileName">The path to the GIF file from which the image was loaded, in case an alpha color table exists.</param>
-        /// <param name="bitmap">The <see cref="T:System.Drawing.Bitmap"/> to be altered.</param>
-        private void AlterBitmapForTransparency(string fileName, Bitmap bitmap)
-        {
-            if (IsAlphaBlended)
-            {
-                string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
-                if (File.Exists(mapFilePath))
+                frame => 
                 {
-                    AlphaRemappingTable map = new AlphaRemappingTable();
-                    map.LoadMap(mapFilePath);
-                    ColorPalette palette = bitmap.Palette;
-                    for (int i = 0; i < palette.Entries.Length; i++)
+                    if (IsAlphaBlended)
                     {
-                        Color color = palette.Entries[i];
-                        ArgbColor argbColor;
-                        if (map.TryGetMapping(new RgbColor(color.R, color.G, color.B), out argbColor))
-                            palette.Entries[i] = Color.FromArgb(argbColor.ToArgb());
+                        // Check for an alpha remapping table, and apply it if one exists.
+                        string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+                        if (File.Exists(mapFilePath))
+                        {
+                            AlphaRemappingTable map = new AlphaRemappingTable();
+                            map.LoadMap(mapFilePath);
+                            ColorPalette colorPalette = frame.Image.Palette;
+                            for (int i = 0; i < colorPalette.Entries.Length; i++)
+                            {
+                                Color color = colorPalette.Entries[i];
+                                ArgbColor argbColor;
+                                if (map.TryGetMapping(new RgbColor(color.R, color.G, color.B), out argbColor))
+                                    colorPalette.Entries[i] = Color.FromArgb(argbColor.ToArgb());
+                            }
+                            frame.Image.Palette = colorPalette;
+                            // We only need to pre-multiply when we add an alpha channel ourselves, as GIFs only support 1 bit transparency.
+                            frame.Image.PreMultiplyAlpha();
+                        }
                     }
-                    bitmap.Palette = palette;
-                }
-
-                bitmap.PreMultiplyAlpha();
-            }
-            else
-            {
-                bitmap.RemapColors(paletteMapping);
-            }
+                    else
+                    {
+                        frame.Image.RemapColors(paletteMapping);
+                    }
+                });
         }
 
         /// <summary>

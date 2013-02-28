@@ -6,7 +6,6 @@
     using System.Drawing.Imaging;
     using System.Globalization;
     using System.IO;
-    using System.Linq;
     using System.Runtime.InteropServices;
 
     #region BufferToImage delegate
@@ -222,30 +221,57 @@
             /// </summary>
             public byte BitsPerValue
             {
-                get { return bitsPerValue; }
+                get
+                {
+                    return bitsPerValue;
+                }
+                private set
+                {
+                    bitsPerValue = value;
+                    UpdateSeekMultiplier();
+                }
             }
             /// <summary>
             /// Gets the number of values that are stored in each byte of the buffer.
             /// </summary>
             public byte ValuesPerByte
             {
-                get { return (byte)(8 / bitsPerValue); }
+                get { return (byte)(8 / BitsPerValue); }
             }
             /// <summary>
             /// Gets the maximum value that may be stored given the current BitsPerValue of the buffer.
             /// </summary>
             public byte MaxValue
             {
-                get { return (byte)((1 << bitsPerValue) - 1); }
+                get { return (byte)((1 << BitsPerValue) - 1); }
             }
             /// <summary>
             /// Gets the logical dimensions of the buffer.
             /// </summary>
             public Size Size { get; private set; }
             /// <summary>
+            /// The stride width of the buffer.
+            /// </summary>
+            private int stride;
+            /// <summary>
             /// Gets the stride width of the buffer.
             /// </summary>
-            public int Stride { get; private set; }
+            public int Stride
+            {
+                get
+                {
+                    return stride;
+                }
+                private set
+                {
+                    stride = value;
+                    UpdateSeekMultiplier();
+                }
+            }
+            /// <summary>
+            /// Cache of the value Stride * ValuesPerByte. Helps speed up the Seek(int, int) method which is used in tight loops.
+            /// </summary>
+            private int seekMultiplier;
             /// <summary>
             /// Gets the underlying array of bytes for this buffer.
             /// </summary>
@@ -267,7 +293,7 @@
                 if (bitsPerValue != 1 && bitsPerValue != 2 && bitsPerValue != 4 && bitsPerValue != 8)
                     throw new ArgumentOutOfRangeException("bitsPerValue", bitsPerValue, "bitsPerValue may only be 1, 2, 4 or 8.");
 
-                this.bitsPerValue = bitsPerValue;
+                BitsPerValue = bitsPerValue;
 
                 if (initialValue > MaxValue)
                     throw new ArgumentOutOfRangeException("initialValue", initialValue,
@@ -280,6 +306,13 @@
 
                 if (initialValue != 0)
                     FillBuffer(initialValue);
+            }
+            /// <summary>
+            /// Refreshes the value of the seekMultipler field.
+            /// </summary>
+            private void UpdateSeekMultiplier()
+            {
+                seekMultiplier = Stride * ValuesPerByte;
             }
             /// <summary>
             /// Efficiently sets all values in the buffer to the given value.
@@ -392,7 +425,7 @@
             /// <returns>The logical index to seek, along the single dimension of the buffer.</returns>
             private int Seek(int x, int y)
             {
-                return Stride * y * ValuesPerByte + x;
+                return seekMultiplier * y + x;
             }
             /// <summary>
             /// Gets the value from the given location in the buffer.
@@ -434,7 +467,7 @@
                     int index = seek / ValuesPerByte;
                     int shift = 8 - BitsPerValue - BitsPerValue * (seek % ValuesPerByte);
                     int vout = value << shift;
-                    int mask = ((0xFF >> 8 - BitsPerValue) << shift) ^ 0xFF;
+                    int mask = ~((0xFF >> 8 - BitsPerValue) << shift);
                     Buffer[index] &= (byte)mask;
                     Buffer[index] |= (byte)vout;
                 }
@@ -457,7 +490,7 @@
                     for (int x = 0; x < Size.Width; x++)
                         newDataBuffer.SetValue(x, y, GetValue(x, y));
 
-                bitsPerValue = newBitsPerValue;
+                BitsPerValue = newBitsPerValue;
                 Stride = newDataBuffer.Stride;
                 Buffer = newDataBuffer.Buffer;
             }
@@ -468,7 +501,7 @@
             /// into this buffer.</param>
             public void MakeEqual(DataBuffer buffer)
             {
-                while (buffer.BitsPerValue > bitsPerValue)
+                while (buffer.BitsPerValue > BitsPerValue)
                     UpsizeBuffer();
 
                 Array.Copy(buffer.Buffer, Buffer, Buffer.Length);
@@ -1698,12 +1731,12 @@
         {
             // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
             // the underlying buffer and color table conspire sufficiently.
-            int hash = Fnv1AHash32(
-                frameBuffer.Buffer
-                .Concat(colors.SelectMany(color => BitConverter.GetBytes(color.ToArgb())))
-                .Concat(BitConverter.GetBytes(transparentIndex))
-                .Concat(BitConverter.GetBytes(frameBuffer.Size.Width))
-                .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)));
+            int hash = Fnv1AHash32(frameBuffer.Buffer);
+            foreach (var color in colors)
+                Fnv1AHash32Continue(GetColorBytes(color), hash);
+            Fnv1AHash32Continue(BitConverter.GetBytes(transparentIndex), hash);
+            Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Width), hash);
+            Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Height), hash);
 
             //// Generate a hash code based on the resulting visual. Images which look the same will have the same code, even if their
             //// underlying buffers and lookup indexes are different.
@@ -1728,16 +1761,35 @@
         /// <returns>A 32-bit integer that is the hash code for the input bytes.</returns>
         private static int Fnv1AHash32(IEnumerable<byte> input)
         {
-            const uint OffsetBasis32 = 2166136261;
-            const uint FnvPrime32 = 16777619;
-
-            uint hash = OffsetBasis32;
+            const int OffsetBasis32 = unchecked((int)2166136261);
+            return Fnv1AHash32Continue(input, OffsetBasis32);
+        }
+        /// <summary>
+        /// Gets the 32-bit FNV-1a hash code for a sequence of bytes, starting from a hash value generated from a previous sequence.
+        /// </summary>
+        /// <param name="input">The sequence of bytes which should be hashed.</param>
+        /// <param name="hash">A 32-bit FNV-1a hash which should be hashed further.</param>
+        /// <returns>A 32-bit integer that is the hash code for the input bytes, plus those of the previous sequences.</returns>
+        private static int Fnv1AHash32Continue(IEnumerable<byte> input, int hash)
+        {
+            const int FnvPrime32 = 16777619;
             foreach (byte octet in input)
             {
                 hash ^= octet;
                 hash *= FnvPrime32;
             }
-            return (int)hash;
+            return hash;
+        }
+        /// <summary>
+        /// Iterates over the three color components of an <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.
+        /// </summary>
+        /// <param name="color">The color whose components are to be iterated.</param>
+        /// <returns>An iterator for the components of the color in RGB order.</returns>
+        private static IEnumerable<byte> GetColorBytes(RgbColor color)
+        {
+            yield return color.R;
+            yield return color.G;
+            yield return color.B;
         }
     }
 
