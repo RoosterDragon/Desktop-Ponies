@@ -389,10 +389,9 @@
   <ItemGroup>
     <None Include="Resources\Twilight.ico" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\C# Desktop Ponies\C# Desktop Ponies.csproj">
-      <Project>{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}</Project>
+      <Project>{52d75211-12bf-4f07-a5c6-32e5d8f8d0b7}</Project>
       <Name>C# Desktop Ponies</Name>
     </ProjectReference>
   </ItemGroup>

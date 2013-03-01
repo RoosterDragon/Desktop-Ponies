@@ -12,6 +12,7 @@ Public Class PonySelectionControl
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
         imageSize = CSDesktopPonies.ImageSize.GetSize(imagePath)
+        imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
         flip = flipImage
         Threading.ThreadPool.QueueUserWorkItem(Sub(o)
                                                    PonyImage = New AnimatedImage(Of BitmapFrame)(
@@ -34,7 +35,6 @@ Public Class PonySelectionControl
                                                End Sub)
 
         ResizeToFit()
-        InvalidatePonyImageArea()
     End Sub
 
     Public Sub AdvanceTimeIndex(amount As TimeSpan)

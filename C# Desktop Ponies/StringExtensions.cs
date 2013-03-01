@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Text;
 
@@ -32,7 +33,8 @@
         public static string[] SplitQualified(this string source, char[] separators, char[,] qualifiers, StringSplitOptions options)
         {
             Argument.EnsureNotNull(source, "source");
-            Argument.EnsureEnumIsValid(options, "options");
+            if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
+                throw new InvalidEnumArgumentException("options", (int)options, typeof(StringSplitOptions));
 
             if (separators == null)
                 separators = new char[0];

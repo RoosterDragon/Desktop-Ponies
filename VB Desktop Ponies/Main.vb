@@ -441,7 +441,7 @@ Public Class Main
                     Dim pony = New PonyBase(folder)
                     ponyBasesToAdd.Add(pony)
                     Invoke(Sub()
-                               Add_to_Menu(pony, False)
+                               AddToMenu(pony)
                            End Sub)
                 Catch ex As InvalidDataException
                     If skipLoadingErrors = False Then
@@ -574,11 +574,8 @@ Public Class Main
 
     End Function
 
-    Private Sub Add_to_Menu(ponyBase As PonyBase, redraw As Boolean)
-
-        If Not redraw Then
-            SelectablePonies.Add(ponyBase)
-        End If
+    Private Sub AddToMenu(ponyBase As PonyBase)
+        SelectablePonies.Add(ponyBase)
 
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImagePath, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange

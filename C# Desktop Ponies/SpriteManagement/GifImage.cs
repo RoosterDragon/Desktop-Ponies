@@ -6,7 +6,6 @@
     using System.Drawing.Imaging;
     using System.Globalization;
     using System.IO;
-    using System.Runtime.InteropServices;
 
     #region BufferToImage delegate
     /// <summary>
@@ -104,7 +103,7 @@
 
                     // Copy the frame buffer to the bitmap. To account for stride padding, copy row by row. Then unlock it.
                     for (int row = 0; row < data.Height; row++)
-                        Marshal.Copy(
+                        System.Runtime.InteropServices.Marshal.Copy(
                             buffer,
                             row * stride,
                             IntPtr.Add(data.Scan0, row * data.Stride),
@@ -212,6 +211,138 @@
         /// </summary>
         private class DataBuffer
         {
+            #region Iterator class
+            /// <summary>
+            /// Provides the ability to iterate over the rows of a <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/>
+            /// efficiently.
+            /// </summary>
+            public class Iterator
+            {
+                /// <summary>
+                /// Gets the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/> being iterated over.
+                /// </summary>
+                public DataBuffer DataBuffer { get; private set; }
+
+                /// <summary>
+                /// Reference the the underlying buffer in the data buffer.
+                /// </summary>
+                private byte[] buffer;
+                /// <summary>
+                /// Number of bits per value in the data buffer.
+                /// </summary>
+                private byte bitsPerValue;
+                /// <summary>
+                /// Number of values per byte in the data buffer.
+                /// </summary>
+                private byte valuesPerByte;
+
+                /// <summary>
+                /// Index into the buffer.
+                /// </summary>
+                private int index;
+                /// <summary>
+                /// A mask with the lowest n bits set where n is the number of bits per value.
+                /// </summary>
+                private byte lowMask = byte.MaxValue;
+                /// <summary>
+                /// A mask with the highest n bits set where n is the number of bits per value.
+                /// </summary>
+                private byte highMask = byte.MaxValue;
+                /// <summary>
+                /// The current mask with the n set bits shifted into the current position.
+                /// </summary>
+                private byte currentMask = byte.MaxValue;
+                /// <summary>
+                /// The initial shift to use when reading from the first value in a byte.
+                /// </summary>
+                private int startShift = 0;
+                /// <summary>
+                /// The current shift which would bring the current value into the low bits.
+                /// </summary>
+                private int shift = 0;
+
+                /// <summary>
+                /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer.Iterator"/>
+                /// class.
+                /// </summary>
+                /// <param name="dataBuffer">The data buffer to be iterated over.</param>
+                /// <param name="x">The initial x co-ordinate position.</param>
+                /// <param name="y">The initial y co-ordinate position.</param>
+                public Iterator(DataBuffer dataBuffer, int x, int y)
+                {
+                    DataBuffer = dataBuffer;
+                    buffer = DataBuffer.Buffer;
+                    bitsPerValue = DataBuffer.BitsPerValue;
+                    valuesPerByte = DataBuffer.ValuesPerByte;
+                    SetPosition(x, y);
+                }
+
+                /// <summary>
+                /// Increments the x co-ordinate. This is efficient and allows for quick row traversal.
+                /// </summary>
+                public void IncrementX()
+                {
+                    shift -= bitsPerValue;
+                    if (shift >= 0)
+                    {
+                        currentMask >>= bitsPerValue;
+                    }
+                    else
+                    {
+                        index++;
+                        shift = startShift;
+                        currentMask = highMask;
+                    }
+                }
+
+                /// <summary>
+                /// Sets the position in the buffer to be iterated from. This is slow and should only be used change to the start of new
+                /// rows if possible.
+                /// </summary>
+                /// <param name="x">The x co-ordinate to set.</param>
+                /// <param name="y">The y co-ordinate to set.</param>
+                public void SetPosition(int x, int y)
+                {
+                    int seek = DataBuffer.Seek(x, y);
+                    if (valuesPerByte == 1)
+                    {
+                        index = seek;
+                        // Initial values of the other fields are set for the case where values are simply retrieved from the buffer
+                        // without modification, since they need not change with position.
+                    }
+                    else
+                    {
+                        index = seek / valuesPerByte;
+                        startShift = 8 - bitsPerValue;
+                        shift = startShift - bitsPerValue * (seek % valuesPerByte);
+                        lowMask = (byte)(byte.MaxValue >> startShift);
+                        highMask = (byte)(lowMask << startShift);
+                        currentMask = highMask;
+                    }
+                }
+
+                /// <summary>
+                /// Gets the value at the current position of the iterator.
+                /// </summary>
+                /// <returns>The value located in the current logical position of the data buffer that is being iterated over.</returns>
+                public byte GetValue()
+                {
+                    return (byte)((buffer[index] >> shift) & lowMask);
+                }
+
+                /// <summary>
+                /// Sets the value at the current position of the iterator.
+                /// </summary>
+                /// <param name="value">The value to set in the current logical position of the data buffer that is being iterated over.
+                /// </param>
+                public void SetValue(byte value)
+                {
+                    buffer[index] &= (byte)(~currentMask);
+                    buffer[index] |= (byte)(value << shift);
+                }
+            }
+            #endregion
+
             /// <summary>
             /// The number of bits used per value in the buffer.
             /// </summary>
@@ -436,16 +567,18 @@
             public byte GetValue(int x, int y)
             {
                 int seek = Seek(x, y);
-                if (BitsPerValue == 8)
+                if (ValuesPerByte == 1)
                 {
                     return Buffer[seek];
                 }
                 else
                 {
                     int index = seek / ValuesPerByte;
-                    int vin = Buffer[index] >> (8 - BitsPerValue - BitsPerValue * (seek % ValuesPerByte));
-                    int mask = 0xFF >> 8 - BitsPerValue;
-                    return (byte)(vin & mask);
+                    int shiftToEdge = 8 - BitsPerValue;
+                    int shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
+                    int lowMask = byte.MaxValue >> shiftToEdge;
+                    int valueShifted = Buffer[index] >> shift;
+                    return (byte)(valueShifted & lowMask);
                 }
             }
             /// <summary>
@@ -458,19 +591,31 @@
             public void SetValue(int x, int y, byte value)
             {
                 int seek = Seek(x, y);
-                if (BitsPerValue == 8)
+                if (ValuesPerByte == 1)
                 {
                     Buffer[seek] = value;
                 }
                 else
                 {
                     int index = seek / ValuesPerByte;
-                    int shift = 8 - BitsPerValue - BitsPerValue * (seek % ValuesPerByte);
-                    int vout = value << shift;
-                    int mask = ~((0xFF >> 8 - BitsPerValue) << shift);
+                    int shiftToEdge = 8 - BitsPerValue;
+                    int shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
+                    int lowMask = byte.MaxValue >> shiftToEdge;
+                    int mask = ~(lowMask << shift);
+                    int valueShifted = value << shift;
                     Buffer[index] &= (byte)mask;
-                    Buffer[index] |= (byte)vout;
+                    Buffer[index] |= (byte)valueShifted;
                 }
+            }
+            /// <summary>
+            /// Gets an iterator that can be used to efficiently set values in this buffer.
+            /// </summary>
+            /// <param name="x">The initial x co-ordinate of the iterator.</param>
+            /// <param name="y">The initial y co-ordinate of the iterator.</param>
+            /// <returns>An iterator that can be used to efficiently set values in this buffer.</returns>
+            public Iterator GetIterator(int x, int y)
+            {
+                return new Iterator(this, x, y);
             }
             /// <summary>
             /// Doubles the current <see cref="P:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer.BitPerValue"/>, thus doubling the
@@ -1440,12 +1585,16 @@
 
             #region Initialize decoder.
             // Image pixel position data.
-            int width = imageDescriptor.Subframe.Width;
-            int height = imageDescriptor.Subframe.Height;
-            int x = 0;
-            int y = 0;
+            int left = imageDescriptor.Subframe.Left;
+            int top = imageDescriptor.Subframe.Top;
+            int right = imageDescriptor.Subframe.Right;
+            int bottom = imageDescriptor.Subframe.Bottom;
+            // Iterator that will allow the subframe region to be traversed efficiently.
+            DataBuffer.Iterator iterator = frameBuffer.GetIterator(left, top);
+            // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
+            
 
             // Indicates a null codeword.
             const int NullCode = -1;
@@ -1482,7 +1631,7 @@
 
             #region Decode GIF pixel stream.
             bool skipDataSubBlocks = true;
-            for (int pixelIndex = 0; pixelIndex < width * height; )
+            for (int pixelIndex = 0; pixelIndex < right * bottom; )
             {
                 // Read some values into the pixel stack as it is empty.
                 if (stackIndex == 0)
@@ -1593,20 +1742,22 @@
 
                 #region Pop a pixel off the pixel stack.
                 // Apply pixel to our buffers.
-                ApplyPixelToFrame(x, y, pixelStack[--stackIndex], imageDescriptor, graphicControl);
+                ApplyPixelToFrame(iterator, pixelStack[--stackIndex], graphicControl);
                 pixelIndex++;
 
                 // Move right one pixel.
-                x++;
-                if (x >= width)
+                left++;
+                iterator.IncrementX();
+                if (left >= right)
                 {
                     // Move to next row. If we're not interlacing this just means the next row.
                     // If interlacing, we must fill in every 8th row, then every 4th, then every 2nd then every other row.
-                    x = 0;
-                    y += yIncrement;
+                    left = imageDescriptor.Subframe.Left;
+                    top += yIncrement;
+                    iterator.SetPosition(left, top);
 
                     // If we reached the end of this interlacing pass, go back to the top and fill in every row between the current rows.
-                    if (imageDescriptor.Interlaced && y >= height)
+                    if (imageDescriptor.Interlaced && top >= bottom)
                     {
                         #region Choose next interlacing line.
                         do
@@ -1615,19 +1766,19 @@
                             switch (interlacePass)
                             {
                                 case 2:
-                                    y = 4;
+                                    top = 4;
                                     break;
                                 case 3:
-                                    y = 2;
+                                    top = 2;
                                     yIncrement = 4;
                                     break;
                                 case 4:
-                                    y = 1;
+                                    top = 1;
                                     yIncrement = 2;
                                     break;
                             }
                         }
-                        while (y >= height);
+                        while (top >= bottom);
                         #endregion
                     }
                 }
@@ -1642,15 +1793,12 @@
         /// <summary>
         /// Uses a value from the subframe and applies it onto the frame buffer.
         /// </summary>
-        /// <param name="x">The x co-ordinate, relative to the subframe bounds, where the pixel is to be applied.</param>
-        /// <param name="y">The y co-ordinate, relative to the subframe bounds, where the pixel is to be applied.</param>
+        /// <param name="iterator">An iterator for the frameBuffer via which the value will be set.</param>
         /// <param name="pixel">The value to be applied, in accordance with the <paramref name="graphicControl"/> parameters if specified.
         /// </param>
-        /// <param name="imageDescriptor">An <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the
-        /// subframe.</param>
         /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
-        private void ApplyPixelToFrame(int x, int y, byte pixel, ImageDescriptor imageDescriptor, GraphicControlExtension graphicControl)
+        private void ApplyPixelToFrame(DataBuffer.Iterator iterator, byte pixel, GraphicControlExtension graphicControl)
         {
             // Do not set a transparent pixel.
             if (graphicControl != null && graphicControl.TransparencyUsed && pixel == graphicControl.TransparentIndex)
@@ -1661,12 +1809,12 @@
             {
                 // No conflict, so check the value is in range and set the pixel.
                 CheckValueInRange(pixel);
-                frameBuffer.SetValue(imageDescriptor.Subframe.X + x, imageDescriptor.Subframe.Y + y, pixel);
+                iterator.SetValue(pixel);
             }
             else if (imageTransparentIndex != imageTransparentIndexRemap)
             {
                 // Use the backup index (whose color value is the same) if one exists.
-                frameBuffer.SetValue(imageDescriptor.Subframe.X + x, imageDescriptor.Subframe.Y + y, imageTransparentIndexRemap);
+                iterator.SetValue(imageTransparentIndexRemap);
             }
             else
             {
@@ -1732,8 +1880,15 @@
             // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
             // the underlying buffer and color table conspire sufficiently.
             int hash = Fnv1AHash32(frameBuffer.Buffer);
+            byte[] colorValues = new byte[colors.Length * 3];
+            int i = 0;
             foreach (var color in colors)
-                Fnv1AHash32Continue(GetColorBytes(color), hash);
+            {
+                colorValues[i++] = color.R;
+                colorValues[i++] = color.G;
+                colorValues[i++] = color.B;
+            }
+            Fnv1AHash32Continue(colorValues, hash);
             Fnv1AHash32Continue(BitConverter.GetBytes(transparentIndex), hash);
             Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Width), hash);
             Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Height), hash);
@@ -1750,7 +1905,7 @@
             //        return BitConverter.GetBytes(value);
             //    })
             //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Width))
-            //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)));
+            //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)).ToArray());
 
             return hash;
         }
@@ -1759,7 +1914,7 @@
         /// </summary>
         /// <param name="input">The sequence of bytes which should be hashed.</param>
         /// <returns>A 32-bit integer that is the hash code for the input bytes.</returns>
-        private static int Fnv1AHash32(IEnumerable<byte> input)
+        private static int Fnv1AHash32(byte[] input)
         {
             const int OffsetBasis32 = unchecked((int)2166136261);
             return Fnv1AHash32Continue(input, OffsetBasis32);
@@ -1770,7 +1925,7 @@
         /// <param name="input">The sequence of bytes which should be hashed.</param>
         /// <param name="hash">A 32-bit FNV-1a hash which should be hashed further.</param>
         /// <returns>A 32-bit integer that is the hash code for the input bytes, plus those of the previous sequences.</returns>
-        private static int Fnv1AHash32Continue(IEnumerable<byte> input, int hash)
+        private static int Fnv1AHash32Continue(byte[] input, int hash)
         {
             const int FnvPrime32 = 16777619;
             foreach (byte octet in input)
@@ -1779,17 +1934,6 @@
                 hash *= FnvPrime32;
             }
             return hash;
-        }
-        /// <summary>
-        /// Iterates over the three color components of an <see cref="T:CsDesktopPonies.SpriteManagement.RgbColor"/>.
-        /// </summary>
-        /// <param name="color">The color whose components are to be iterated.</param>
-        /// <returns>An iterator for the components of the color in RGB order.</returns>
-        private static IEnumerable<byte> GetColorBytes(RgbColor color)
-        {
-            yield return color.R;
-            yield return color.G;
-            yield return color.B;
         }
     }
 
