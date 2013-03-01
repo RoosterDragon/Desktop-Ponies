@@ -502,21 +502,20 @@
                 for (int y = bounds.Top; y < bounds.Bottom; y++)
                 {
                     int x = bounds.Left;
-                    int i = Seek(x, y);
                     // Set values until we are aligned on a byte
-                    while (i % ValuesPerByte != 0 && x < bounds.Right)
+                    while (x % ValuesPerByte != 0 && x < bounds.Right)
                     {
                         SetValue(x, y, valueFactory(x, y));
                         x++;
-                        i++;
                     }
-                    // Set all the bytes we can on this row.
+                    // Set whole bytes along this row.
                     if (x < bounds.Right)
                     {
-                        int rowAlignmentEnd = (bounds.Right + bounds.Width * y) / ValuesPerByte;
-                        for (int j = i / ValuesPerByte; j < rowAlignmentEnd; j++)
+                        int rowAlignmentStart = Seek(x, y) / ValuesPerByte;
+                        int rowAlignmentEnd = Seek(bounds.Right, y) / ValuesPerByte - 1;
+                        for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
                         {
-                            Buffer[j] = bufferValueFactory(j);
+                            Buffer[i] = bufferValueFactory(i);
                             x += ValuesPerByte;
                         }
                     }
