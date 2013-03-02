@@ -1,7 +1,7 @@
 ﻿namespace CSDesktopPonies
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.ComponentModel;
     using System.Globalization;
 
@@ -66,7 +66,7 @@
         /// <summary>
         /// Cache that remembers whether a type has the <see cref="T:System.FlagsAttribute"/>.
         /// </summary>
-        private static Dictionary<Type, bool> typeFlagged = new Dictionary<Type, bool>();
+        private static readonly ConcurrentDictionary<Type, bool> typeFlagged = new ConcurrentDictionary<Type, bool>();
 
         /// <summary>
         /// Checks that an argument is a valid member of its enumeration. A value is valid if it is a defined member of a non-flagged
@@ -86,12 +86,7 @@
             if (!enumType.IsEnum)
                 throw new ArgumentException("TEnum must be an Enum type.", "TEnum");
 
-            bool flagged;
-            if (!typeFlagged.TryGetValue(enumType, out flagged))
-            {
-                flagged = enumType.IsDefined(typeof(FlagsAttribute), false);
-                typeFlagged.Add(enumType, flagged);
-            }
+            bool flagged = typeFlagged.GetOrAdd(enumType, type => type.IsDefined(typeof(FlagsAttribute), false));
             TEnum[] enumValues = (TEnum[])Enum.GetValues(enumType);
             if (!flagged)
             {

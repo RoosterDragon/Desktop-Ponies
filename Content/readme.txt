@@ -69,8 +69,8 @@ v1.42.1.3:
 - Changed config files for Spitfire and Trixie to allow them to switch between behavior groups (suggested by Anon).
 - Changed random speeches so those in group 0 may play regardless of the current group.
 - Fixed sounds not working in v1.42.1.2.
-- Hopefully the final fix for ponies and idle animations during animations.
-- Fixed an error in the editor where you the dialog to change an interaction target would fail to open.
+- Hopefully the final fix for ponies and idle animations during interactions.
+- Fixed an error in the editor where the dialog to change an interaction target would fail to open.
 - Loading times significantly improved.
 
 v1.42.1.2:
