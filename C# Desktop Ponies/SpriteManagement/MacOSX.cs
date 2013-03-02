@@ -21,7 +21,7 @@
         /// <remarks>You must register a method name with the Objective-C runtime system to obtain the method’s selector before you can add
         /// the method to a class definition. If the method name has already been registered, this function simply returns the selector.
         /// </remarks>
-        [DllImport(objc, BestFitMapping=false, ThrowOnUnmappableChar=true)]
+        [DllImport(objc, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         public static extern IntPtr sel_registerName([MarshalAs(UnmanagedType.LPStr)] string str);
 
         /// <summary>

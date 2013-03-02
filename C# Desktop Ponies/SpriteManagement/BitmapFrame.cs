@@ -2,8 +2,6 @@
 {
     using System;
     using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Defines a <see cref="T:CSDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
@@ -12,7 +10,7 @@
     public sealed class BitmapFrame : SpriteFrame<Bitmap>, IDisposable
     {
         /// <summary>
-        /// Represents the method that converts a buffer into an <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// Gets the method that converts a buffer into an <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
         public static BufferToImage<BitmapFrame> FromBuffer
         {
@@ -30,7 +28,7 @@
         /// Represents the allowable set of depths that can be used when generating a
         /// <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
-        public const BitDepths AllowableBitDepths =  GifImage.AllowableDepthsForBitmap;
+        public const BitDepths AllowableBitDepths = GifImage.AllowableDepthsForBitmap;
 
         /// <summary>
         /// The hash code of the frame image.

@@ -75,7 +75,7 @@
     {
         #region BufferToImageOfBitmap function
         /// <summary>
-        /// Represents the method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
+        /// Gets the method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
         public static BufferToImage<Bitmap> BufferToImageOfBitmap
         {
@@ -276,7 +276,6 @@
                     valuesPerByte = DataBuffer.ValuesPerByte;
                     SetPosition(x, y);
                 }
-
                 /// <summary>
                 /// Increments the x co-ordinate. This is efficient and allows for quick row traversal.
                 /// </summary>
@@ -294,7 +293,6 @@
                         currentMask = highMask;
                     }
                 }
-
                 /// <summary>
                 /// Sets the position in the buffer to be iterated from. This is slow and should only be used change to the start of new
                 /// rows if possible.
@@ -317,10 +315,9 @@
                         shift = startShift - bitsPerValue * (seek % valuesPerByte);
                         lowMask = (byte)(byte.MaxValue >> startShift);
                         highMask = (byte)(lowMask << startShift);
-                        currentMask = highMask;
+                        currentMask = (byte)(lowMask << shift);
                     }
                 }
-
                 /// <summary>
                 /// Gets the value at the current position of the iterator.
                 /// </summary>
@@ -329,7 +326,6 @@
                 {
                     return (byte)((buffer[index] >> shift) & lowMask);
                 }
-
                 /// <summary>
                 /// Sets the value at the current position of the iterator.
                 /// </summary>
@@ -1594,7 +1590,6 @@
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
             
-
             // Indicates a null codeword.
             const int NullCode = -1;
             // The clear code is the first available unused code. We will use values below this as root characters in the dictionary.

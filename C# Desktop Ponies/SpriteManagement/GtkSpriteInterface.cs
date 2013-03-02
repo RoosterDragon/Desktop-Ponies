@@ -137,7 +137,7 @@
             #endregion
 
             /// <summary>
-            /// Indicates if the current windowing system supports RGBA (instead of RGB) for the surface of the window.
+            /// Gets a value indicating whether the current windowing system supports RGBA (instead of RGB) for the surface of the window.
             /// </summary>
             public bool SupportsRgba { get; private set; }
             /// <summary>

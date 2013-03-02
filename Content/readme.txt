@@ -71,7 +71,7 @@ v1.42.1.3:
 - Fixed sounds not working in v1.42.1.2.
 - Hopefully the final fix for ponies and idle animations during animations.
 - Fixed an error in the editor where you the dialog to change an interaction target would fail to open.
-- Loading times should be somewhat faster.
+- Loading times significantly improved.
 
 v1.42.1.2:
 - Added crystallized Twilight Sparkle by supersaiyanmikito

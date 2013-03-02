@@ -654,11 +654,14 @@
             [System.Diagnostics.DebuggerDisplay("\\{{Key,nq}\\} (Value uninitialized)")]
             public struct KeyUnit
             {
+                /// <summary>
+                /// Gets or sets the key in the key unit.
+                /// </summary>
                 public TKey Key { get; set; }
             }
 
             /// <summary>
-            /// Provides a view of the items in the dictionary.
+            /// Gets a view of the items in the dictionary.
             /// </summary>
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
             public object[] Items

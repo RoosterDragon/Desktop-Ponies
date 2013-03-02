@@ -11,6 +11,7 @@ Public Class Main
 #Region "Fields and Properties"
     Private initialized As Boolean = False
     Private loading As Boolean = False
+    Private loadWatch As New Diagnostics.Stopwatch()
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -142,6 +143,7 @@ Public Class Main
 
     'Read all configuration files and pony folders.
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        loadWatch.Start()
         Instance = Me
 
         Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
@@ -708,6 +710,9 @@ Public Class Main
         AnimationTimer.Enabled = True
         loading = False
         GC.Collect()
+
+        loadWatch.Stop()
+        Console.WriteLine("Loaded in {0:0.00s} ({1} templates)", loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
     End Sub
 
     Private Sub HandleCountChange(sender As Object, e As EventArgs)
@@ -1100,6 +1105,7 @@ Public Class Main
             loading = True
             SelectionControlsPanel.Enabled = False
             LoadingProgressBar.Visible = True
+            loadWatch.Start()
             PonyLoader.RunWorkerAsync()
         End If
     End Sub
@@ -1302,33 +1308,31 @@ Public Class Main
 
         If Not InPreviewMode Then
             ' Get a collection of all images to be loaded.
-            Dim images As LinkedList(Of String) = New LinkedList(Of String)()
+            Dim images As New HashSet(Of String)(StringComparer.Ordinal)
             For Each pony In Startup_Ponies
                 For Each behavior In pony.Behaviors
-                    images.AddLast(behavior.LeftImagePath)
-                    images.AddLast(behavior.RightImagePath)
+                    images.Add(behavior.LeftImagePath)
+                    images.Add(behavior.RightImagePath)
                     For Each effect In behavior.Effects
-                        images.AddLast(effect.left_image_path)
-                        images.AddLast(effect.right_image_path)
+                        images.Add(effect.left_image_path)
+                        images.Add(effect.right_image_path)
                     Next
                 Next
             Next
             For Each house In HouseBases
-                images.AddLast(house.ImageFilename)
+                images.Add(house.ImageFilename)
             Next
-
-            Dim imagesToLoad = images.Distinct(StringComparer.Ordinal)
 
             Invoke(Sub()
                        LoadingProgressBar.Value = 0
-                       LoadingProgressBar.Maximum = imagesToLoad.Count
+                       LoadingProgressBar.Maximum = images.Count
                    End Sub)
             Dim imagesLoaded = 0
             Dim loaded = Sub(sender As Object, e As EventArgs)
                              imagesLoaded += 1
                              PonyLoader.ReportProgress(imagesLoaded)
                          End Sub
-            PonyViewer.LoadImages(imagesToLoad, loaded)
+            PonyViewer.LoadImages(images, loaded)
         End If
 
         Animator = New DesktopPonyAnimator(PonyViewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
@@ -1385,6 +1389,7 @@ Public Class Main
 
     Private Sub PonyLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles PonyLoader.RunWorkerCompleted
         loading = False
+        Dim totalImages = LoadingProgressBar.Maximum
 
         LoadingProgressBar.Value = 0
         LoadingProgressBar.Maximum = 1
@@ -1408,6 +1413,8 @@ Public Class Main
             Temp_Save_Counts()
 
             GC.Collect()
+            loadWatch.Stop()
+            Console.WriteLine("Loaded in {0:0.00s} ({1} images)", loadWatch.Elapsed.TotalSeconds, totalImages)
         End If
     End Sub
 #End Region

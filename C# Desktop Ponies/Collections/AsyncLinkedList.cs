@@ -672,7 +672,7 @@
             }
 
             /// <summary>
-            /// Provides a view of the items in the list.
+            /// Gets a view of the items in the list.
             /// </summary>
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
             public T[] Items
