@@ -605,61 +605,61 @@ Public Class PonyEditor
         End Select
     End Function
 
-    Private Shared Function Location_ToString(location As Directions) As String
+    Private Shared Function Location_ToString(location As Direction) As String
 
         Select Case location
 
-            Case Directions.top
+            Case Direction.Top
                 Return "Top"
-            Case Directions.bottom
+            Case Direction.Bottom
                 Return "Bottom"
-            Case Directions.left
+            Case Direction.Left
                 Return "Left"
-            Case Directions.right
+            Case Direction.Right
                 Return "Right"
-            Case Directions.bottom_right
+            Case Direction.BottomRight
                 Return "Bottom Right"
-            Case Directions.bottom_left
+            Case Direction.BottomLeft
                 Return "Bottom Left"
-            Case Directions.top_right
+            Case Direction.TopRight
                 Return "Top Right"
-            Case Directions.top_left
+            Case Direction.TopLeft
                 Return "Top Left"
-            Case Directions.center
+            Case Direction.Center
                 Return "Center"
-            Case Directions.random
+            Case Direction.Random
                 Return "Any"
-            Case Directions.random_not_center
+            Case Direction.RandomNotCenter
                 Return "Any-Not Center"
             Case Else
                 Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
         End Select
     End Function
 
-    Friend Shared Function String_ToLocation(location As String) As Directions
+    Friend Shared Function String_ToLocation(location As String) As Direction
         Select Case location
             Case "Top"
-                Return Directions.top
+                Return Direction.Top
             Case "Bottom"
-                Return Directions.bottom
+                Return Direction.Bottom
             Case "Left"
-                Return Directions.left
+                Return Direction.Left
             Case "Right"
-                Return Directions.right
+                Return Direction.Right
             Case "Bottom Right"
-                Return Directions.bottom_right
+                Return Direction.BottomRight
             Case "Bottom Left"
-                Return Directions.bottom_left
+                Return Direction.BottomLeft
             Case "Top Right"
-                Return Directions.top_right
+                Return Direction.TopRight
             Case "Top Left"
-                Return Directions.top_left
+                Return Direction.TopLeft
             Case "Center"
-                Return Directions.center
+                Return Direction.Center
             Case "Any"
-                Return Directions.random
+                Return Direction.Random
             Case "Any-Not Center"
-                Return Directions.random_not_center
+                Return Direction.RandomNotCenter
             Case Else
                 Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
         End Select

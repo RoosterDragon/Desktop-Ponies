@@ -366,10 +366,10 @@ Class PonyBase
 
                         If behavior.Name = Trim(columns(2)) Then
 
-                            Dim direction_right = Directions.center
-                            Dim centering_right = Directions.center
-                            Dim direction_left = Directions.center
-                            Dim centering_left = Directions.center
+                            Dim direction_right = Direction.Center
+                            Dim centering_right = Direction.Center
+                            Dim direction_left = Direction.Center
+                            Dim centering_left = Direction.Center
                             Dim dont_repeat_image_animations As Boolean = False
 
                             Try
@@ -866,8 +866,8 @@ Class PonyBase
         End Sub
 
         Friend Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
-                             direction_right As Directions, centering_right As Directions,
-                             direction_left As Directions, centering_left As Directions,
+                             direction_right As Direction, centering_right As Direction,
+                             direction_left As Direction, centering_left As Direction,
                              follow As Boolean, _dont_repeat_image_animations As Boolean, owner As PonyBase)
 
             Dim new_effect As New Effect(right_path, left_path)
@@ -1731,9 +1731,7 @@ Class Pony
             ' Avoid division by zero.
             If distance = 0 Then distance = 1
 
-            Dim direction = GetDestinationDirections(Destination)
-
-            If direction(0) = Directions.left Then
+            If GetDestinationDirectionHorizontal(Destination) = Direction.Left Then
                 facingRight = False
                 movement.X = CSng(((CenterLocation.X - Destination.X) / (distance)) * -speed)
             Else
@@ -2122,20 +2120,20 @@ Class Pony
                         new_effect.current_image_path = new_effect.left_image_path
                     End If
 
-                    Dim directionsCount = [Enum].GetValues(GetType(Directions)).Length
+                    Dim directionsCount = [Enum].GetValues(GetType(Direction)).Length
 
-                    If new_effect.direction = Directions.random Then
-                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Directions)
+                    If new_effect.direction = Direction.Random Then
+                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Direction)
                     End If
-                    If new_effect.centering = Directions.random Then
-                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Directions)
+                    If new_effect.centering = Direction.Random Then
+                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Direction)
                     End If
 
-                    If new_effect.direction = Directions.random_not_center Then
-                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Directions)
+                    If new_effect.direction = Direction.RandomNotCenter Then
+                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Direction)
                     End If
-                    If new_effect.centering = Directions.random_not_center Then
-                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Directions)
+                    If new_effect.centering = Direction.RandomNotCenter Then
+                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Direction)
                     End If
 
                     If (facingRight) Then
@@ -2360,30 +2358,30 @@ Class Pony
     End Sub
 
     'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
-    Friend Function GetEffectLocation(ByRef EffectImageSize As Size, ByRef direction As Directions,
-                                      ByRef ParentLocation As Point, ByRef ParentSize As Vector2, ByRef centering As Directions) As Point
+    Friend Function GetEffectLocation(ByRef EffectImageSize As Size, ByRef direction As Direction,
+                                      ByRef ParentLocation As Point, ByRef ParentSize As Vector2, ByRef centering As Direction) As Point
 
         Dim point As Point
 
         With ParentSize * CSng(Scale)
             Select Case direction
-                Case Directions.bottom
+                Case Direction.Bottom
                     point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y))
-                Case Directions.bottom_left
+                Case Direction.BottomLeft
                     point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y))
-                Case Directions.bottom_right
+                Case Direction.BottomRight
                     point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y))
-                Case Directions.center
+                Case Direction.Center
                     point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y / 2))
-                Case Directions.left
+                Case Direction.Left
                     point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y / 2))
-                Case Directions.right
+                Case Direction.Right
                     point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y / 2))
-                Case Directions.top
+                Case Direction.Top
                     point = New Point(CInt(ParentLocation.X + .X / 2), ParentLocation.Y)
-                Case Directions.top_left
+                Case Direction.TopLeft
                     point = New Point(ParentLocation.X, ParentLocation.Y)
-                Case Directions.top_right
+                Case Direction.TopRight
                     point = New Point(CInt(ParentLocation.X + .X), ParentLocation.Y)
             End Select
 
@@ -2392,23 +2390,23 @@ Class Pony
         Dim effectscaling = Options.ScaleFactor
 
         Select Case centering
-            Case Directions.bottom
+            Case Direction.Bottom
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Directions.bottom_left
+            Case Direction.BottomLeft
                 point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Directions.bottom_right
+            Case Direction.BottomRight
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Directions.center
+            Case Direction.Center
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Directions.left
+            Case Direction.Left
                 point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Directions.right
+            Case Direction.Right
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Directions.top
+            Case Direction.Top
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), point.Y)
-            Case Directions.top_left
+            Case Direction.TopLeft
                 'no change
-            Case Directions.top_right
+            Case Direction.TopRight
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), point.Y)
         End Select
 
@@ -2451,7 +2449,7 @@ Class Pony
                 If suggestedBehavior IsNot Nothing Then
                     If movement = AllowedMoves.All OrElse (suggestedBehavior.AllowedMovement And movement) = movement Then
                         If hasDestination Then
-                            facingRight = (GetDestinationDirections(Destination)(0) = Directions.right)
+                            facingRight = (GetDestinationDirectionHorizontal(Destination) = Direction.Right)
                         End If
                         Return suggestedBehavior
                     End If
@@ -2770,33 +2768,27 @@ Class Pony
         Return Point.Empty
     End Function
 
-    Friend Function GetDestinationDirections(ByRef destination As Point) As IList(Of Directions)
-
-        Dim direction(2) As Directions
-
-        Dim right_image_center = New Point(
-                                 CInt(TopLeftLocation.X + (Scale * CurrentBehavior.RightImageCenter.X)),
-                                 CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.RightImageCenter.Y)))
-        Dim left_image_center = New Point(
-                                CInt(TopLeftLocation.X + (Scale * CurrentBehavior.LeftImageCenter.X)),
-                                CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImageCenter.Y)))
-
-        If right_image_center.X > destination.X AndAlso left_image_center.X < destination.X OrElse
+    Friend Function GetDestinationDirectionHorizontal(destination As Vector2) As Direction
+        Dim rightImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.RightImageCenter.X))
+        Dim leftImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.LeftImageCenter.X))
+        If (rightImageCenterX > destination.X AndAlso leftImageCenterX < destination.X) OrElse
             destination.X - CenterLocation.X <= 0 Then
-            direction(0) = Directions.left
+            Return Direction.Left
         Else
-            direction(0) = Directions.right
+            Return Direction.Right
         End If
+    End Function
 
-        If (right_image_center.Y > destination.Y AndAlso left_image_center.Y < destination.Y) OrElse
-           (right_image_center.Y < destination.Y AndAlso left_image_center.Y > destination.Y) OrElse
+    Friend Function GetDestinationDirectionVertical(destination As Vector2) As Direction
+        Dim rightImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.RightImageCenter.Y))
+        Dim leftImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImageCenter.Y))
+        If (rightImageCenterY > destination.Y AndAlso leftImageCenterY < destination.Y) OrElse
+           (rightImageCenterY < destination.Y AndAlso leftImageCenterY > destination.Y) OrElse
            destination.Y - CenterLocation.Y <= 0 Then
-            direction(1) = Directions.top
+            Return Direction.Top
         Else
-            direction(1) = Directions.bottom
+            Return Direction.Bottom
         End If
-        Return direction
-
     End Function
 
     Friend ReadOnly Property CurrentImageSize As Vector2
@@ -3035,13 +3027,13 @@ Class Effect
 
     Friend Repeat_Delay As Double
 
-    Friend placement_direction_right As Directions
-    Friend centering_right As Directions
-    Friend placement_direction_left As Directions
-    Friend centering_left As Directions
+    Friend placement_direction_right As Direction
+    Friend centering_right As Direction
+    Friend placement_direction_left As Direction
+    Friend centering_left As Direction
 
-    Friend centering As Directions
-    Friend direction As Directions
+    Friend centering As Direction
+    Friend direction As Direction
 
     Friend Facing_Left As Boolean = False
 
@@ -3536,18 +3528,16 @@ Class House
 
 End Class
 
-Friend Enum Directions
-
-    top = 0
-    bottom = 1
-    left = 2
-    right = 3
-    bottom_right = 4
-    bottom_left = 5
-    top_right = 6
-    top_left = 7
-    center = 8
-    random = 9
-    random_not_center = 10
-
+Friend Enum Direction
+    Top = 0
+    Bottom = 1
+    Left = 2
+    Right = 3
+    BottomRight = 4
+    BottomLeft = 5
+    TopRight = 6
+    TopLeft = 7
+    Center = 8
+    Random = 9
+    RandomNotCenter = 10
 End Enum

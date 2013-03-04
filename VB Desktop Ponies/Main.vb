@@ -544,32 +544,32 @@ Public Class Main
         End Try
     End Function
 
-    Friend Shared Function GetDirection(setting As String) As Directions
+    Friend Shared Function GetDirection(setting As String) As Direction
 
         Select Case setting
 
             Case "top"
-                Return Directions.top
+                Return Direction.Top
             Case "bottom"
-                Return Directions.bottom
+                Return Direction.Bottom
             Case "left"
-                Return Directions.left
+                Return Direction.Left
             Case "right"
-                Return Directions.right
+                Return Direction.Right
             Case "bottom_right"
-                Return Directions.bottom_right
+                Return Direction.BottomRight
             Case "bottom_left"
-                Return Directions.bottom_left
+                Return Direction.BottomLeft
             Case "top_right"
-                Return Directions.top_right
+                Return Direction.TopRight
             Case "top_left"
-                Return Directions.top_left
+                Return Direction.TopLeft
             Case "center"
-                Return Directions.center
+                Return Direction.Center
             Case "any"
-                Return Directions.random
+                Return Direction.Random
             Case "any-not_center"
-                Return Directions.random_not_center
+                Return Direction.RandomNotCenter
             Case Else
                 Throw New ArgumentException("Invalid placement direction or centering for effect.", "setting")
         End Select

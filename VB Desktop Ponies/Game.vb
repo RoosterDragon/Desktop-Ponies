@@ -1184,13 +1184,10 @@ Module Games
 
                 Dim xchange = 1
                 Dim ychange = 2
-
-                Dim direction = pony1.GetDestinationDirections(pony2.CenterLocation)
-
-                If direction(0) = Directions.left Then
+                If pony1.GetDestinationDirectionHorizontal(pony2.CenterLocation) = Direction.Left Then
                     xchange = -1
                 End If
-                If direction(1) = Directions.top Then
+                If pony1.GetDestinationDirectionVertical(pony2.CenterLocation) = Direction.Top Then
                     ychange = -2
                 End If
 

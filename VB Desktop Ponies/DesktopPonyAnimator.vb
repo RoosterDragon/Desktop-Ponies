@@ -151,42 +151,27 @@ Public Class DesktopPonyAnimator
                 .CurrentGame.Update()
             End If
 
-            Dim effects_to_remove As New List(Of Effect)
-
             For Each sprite In Sprites
                 Dim effect = TryCast(sprite, Effect)
                 If effect Is Nothing Then Continue For
-                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) AndAlso effect.OwningPony.Name <> "N/A" Then
-                    effects_to_remove.Add(effect)
-                    Sprites.Remove(effect)
-                End If
-            Next
-
-            'We keep track of active_effects in two places:
-            '-The pony that created it keeps a list so they can be removed when they should.
-            '-If the pony that created it was closed, this loop will clean up the now orphaned effects.
-            For Each effect In effects_to_remove
-                If effect.OwningPony IsNot Nothing Then
-                    effect.OwningPony.ActiveEffects.Remove(effect)
-                    ' effect.Owning_Pony = Nothing
-                End If
-                Sprites.Remove(effect)
-                .DeadEffects.Add(effect)
-            Next
-
-            'cleanup dead effects separately - we can't do this immediately as they are needed to clear the graphics they leave behind
-
-            effects_to_remove.Clear()
-
-            For Each effect In .DeadEffects
                 If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
-                    effects_to_remove.Add(effect)
+                    effect.OwningPony.ActiveEffects.Remove(effect)
+                    Sprites.Remove(effect)
+                    .DeadEffects.Add(effect)
                 End If
             Next
 
-            For Each effect In effects_to_remove
-                .DeadEffects.Remove(effect)
-            Next
+            If .DeadEffects.Count > 0 Then
+                Dim toRemove As New List(Of Effect)(.DeadEffects.Count)
+                For Each effect In .DeadEffects
+                    If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
+                        toRemove.Add(effect)
+                    End If
+                Next
+                For Each effect In toRemove
+                    .DeadEffects.Remove(effect)
+                Next
+            End If
 
             If .DirectXSoundAvailable Then
                 .CleanupSounds()
@@ -236,21 +221,38 @@ Public Class DesktopPonyAnimator
         Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  Main.Instance.Invoke(Sub()
-                                                                                          If selectedPony IsNot Nothing Then RemovePony(selectedPony)
+                                                                                          Sprites.RemoveAll(Function(sprite)
+                                                                                                                If Object.ReferenceEquals(sprite, selectedPony) Then Return True
+                                                                                                                Dim effect = TryCast(sprite, Effect)
+                                                                                                                If effect IsNot Nothing AndAlso Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
+                                                                                                                    Return True
+                                                                                                                End If
+                                                                                                                Return False
+                                                                                                            End Function)
+                                                                                          For Each other_pony In Sprites.OfType(Of Pony)()
+                                                                                              'we need to set up interactions again to account for removed ponies.
+                                                                                              other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
+                                                                                          Next
                                                                                       End Sub)
                                                                  If Sprites.Count = 0 Then ReturnToMenu()
                                                              End Sub))
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  Main.Instance.Invoke(Sub()
-                                                                                          If selectedPony Is Nothing Then Return
-                                                                                          Sprites.RemoveAll(Function(sprite As ISprite)
-
+                                                                                          Sprites.RemoveAll(Function(sprite)
                                                                                                                 Dim pony = TryCast(sprite, Pony)
-                                                                                                                If Not IsNothing(pony) AndAlso pony.Directory = selectedPony.Directory Then
+                                                                                                                If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
+                                                                                                                    Return True
+                                                                                                                End If
+                                                                                                                Dim effect = TryCast(sprite, Effect)
+                                                                                                                If effect IsNot Nothing AndAlso effect.OwningPony.Directory = selectedPony.Directory Then
                                                                                                                     Return True
                                                                                                                 End If
                                                                                                                 Return False
                                                                                                             End Function)
+                                                                                          For Each other_pony In Sprites.OfType(Of Pony)()
+                                                                                              'we need to set up interactions again to account for removed ponies.
+                                                                                              other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
+                                                                                          Next
                                                                                       End Sub)
                                                                  If Sprites.Count = 0 Then ReturnToMenu()
                                                              End Sub))
@@ -432,6 +434,9 @@ Public Class DesktopPonyAnimator
         For Each other_pony In Sprites.OfType(Of Pony)()
             'we need to set up interactions again to account for removed ponies.
             other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
+        Next
+        For Each effect In pony.ActiveEffects
+            Sprites.Remove(effect)
         Next
     End Sub
 
