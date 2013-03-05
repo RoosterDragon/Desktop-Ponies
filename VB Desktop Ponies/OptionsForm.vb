@@ -270,10 +270,7 @@
             'done
             Exit Sub
         ElseIf TypeOf Pony.CurrentViewer Is SpriteManagement.WinFormSpriteInterface Then
-            Dim area As Rectangle = Rectangle.Empty
-            For Each screen In Main.Instance.ScreensToUse
-                area = Rectangle.Union(area, screen.WorkingArea)
-            Next
+            Dim area = Main.Instance.GetCombinedScreenArea()
             DirectCast(Pony.CurrentViewer, SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
         End If
 

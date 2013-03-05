@@ -791,7 +791,7 @@ Public Class Main
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
-            Pony_Shutdown()
+            PonyShutdown()
 
             InPreviewMode = False
             If Not Me.IsDisposed Then
@@ -819,20 +819,18 @@ Public Class Main
                 games.Clear()
             End If
 
-            Dim Install_Folder = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
+            Dim gameDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
 
-            For Each folder In Install_Folder
-
+            For Each gameDirectory In gameDirectories
                 Try
-                    'some languages don't use \ as a separator between folders
-                    Dim config_file_name = Path.Combine(folder, Game.ConfigFilename)
+                    Dim config_file_name = Path.Combine(gameDirectory, Game.ConfigFilename)
 
-                    Dim new_game As New Game(config_file_name, folder & Path.DirectorySeparatorChar)
+                    Dim new_game As New Game(gameDirectory)
 
                     games.Add(new_game)
 
                 Catch ex As Exception
-                    MsgBox("Error loading game: " & folder & ex.Message & ex.StackTrace)
+                    MsgBox("Error loading game: " & gameDirectory & ex.Message & ex.StackTrace)
                 End Try
             Next
 
@@ -1315,7 +1313,7 @@ Public Class Main
                     images.Add(behavior.RightImagePath)
                     For Each effect In behavior.Effects
                         images.Add(effect.left_image_path)
-                        images.Add(effect.right_image_path)
+                        images.Add(effect.RightImagePath)
                     Next
                 Next
             Next
@@ -1358,14 +1356,7 @@ Public Class Main
         End If
 
         ' Begin Glue Code
-        Dim area As Rectangle = Rectangle.Empty
-        For Each screen In ScreensToUse
-            If area = Rectangle.Empty Then
-                area = screen.WorkingArea
-            Else
-                area = Rectangle.Union(area, screen.WorkingArea)
-            End If
-        Next
+        Dim area = GetCombinedScreenArea()
 
         Dim viewer As ISpriteCollectionView
         Dim alphaBlending As Boolean = Options.AlphaBlendingEnabled
@@ -1444,7 +1435,7 @@ Public Class Main
         End If
     End Sub
 
-    Friend Sub Pony_Shutdown()
+    Friend Sub PonyShutdown()
         If Not IsNothing(Animator) Then Animator.Finish()
         Ponies_Have_Launched = False
         If Not IsNothing(Animator) Then Animator.Clear()
@@ -1540,6 +1531,18 @@ Public Class Main
         End If
 
     End Sub
+
+    Friend Function GetCombinedScreenArea() As Rectangle
+        Dim area As Rectangle = Rectangle.Empty
+        For Each screen In ScreensToUse
+            If area = Rectangle.Empty Then
+                area = screen.WorkingArea
+            Else
+                area = Rectangle.Union(area, screen.WorkingArea)
+            End If
+        Next
+        Return area
+    End Function
 
     Private Sub Main_LocationChanged(sender As Object, e As EventArgs) Handles MyBase.LocationChanged
         ' If we have just returned from the minimized state, the flow panel will have an incorrect scrollbar.

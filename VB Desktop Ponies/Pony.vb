@@ -798,7 +798,7 @@ Class PonyBase
             End Get
         End Property
 
-        Friend Sub SetSpeed(speed As Double)
+        Public Sub SetSpeed(speed As Double)
             m_speed = speed
         End Sub
 
@@ -1701,7 +1701,7 @@ Class Pony
             Exit Sub
         End If
 
-        Dim speed As Double = CurrentBehavior.Speed * Scale
+        Dim speed As Double = ScaledSpeed()
 
         If Main.Instance.CurrentGame Is Nothing OrElse
             (Main.Instance.CurrentGame IsNot Nothing AndAlso
@@ -1903,10 +1903,11 @@ Class Pony
             TopLeftLocation = newTopLeftLocation
             LastMovement = movement
 
-            Dim useVisualOverride = followObject IsNot Nothing AndAlso
-                (CurrentBehavior.AutoSelectImagesOnFollow OrElse
-                 CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
-                 CurrentBehavior.FollowStoppedBehavior IsNot Nothing)
+            Dim useVisualOverride = (followObject IsNot Nothing AndAlso
+                                     (CurrentBehavior.AutoSelectImagesOnFollow OrElse
+                                      CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
+                                      CurrentBehavior.FollowStoppedBehavior IsNot Nothing)) OrElse
+                              (Main.Instance.CurrentGame IsNot Nothing AndAlso AtDestination)
             Paint(useVisualOverride)
             AddUpdateRecord("Standard paint. VisualOverride: ", useVisualOverride.ToString())
 
@@ -2063,7 +2064,8 @@ Class Pony
 
         ' We are not following an object, but going to a point on the screen.
         If destinationCoords.X <> 0 AndAlso destinationCoords.Y <> 0 Then
-            Return New Point(CInt(0.01 * destinationCoords.X), CInt(0.01 * destinationCoords.Y))
+            Return New Point(CInt(0.01 * destinationCoords.X * Main.Instance.GetCombinedScreenArea().Width),
+                             CInt(0.01 * destinationCoords.Y * Main.Instance.GetCombinedScreenArea().Height))
         End If
 
         ' We have no given destination.
@@ -2113,11 +2115,11 @@ Class Pony
                     If facingRight Then
                         new_effect.direction = new_effect.placement_direction_right
                         new_effect.centering = new_effect.centering_right
-                        new_effect.current_image_path = new_effect.right_image_path
+                        new_effect.CurrentImagePath = new_effect.RightImagePath
                     Else
                         new_effect.direction = new_effect.placement_direction_left
                         new_effect.centering = new_effect.centering_left
-                        new_effect.current_image_path = new_effect.left_image_path
+                        new_effect.CurrentImagePath = new_effect.left_image_path
                     End If
 
                     Dim directionsCount = [Enum].GetValues(GetType(Direction)).Length
@@ -2276,19 +2278,19 @@ Class Pony
             Dim verticalDistance = Math.Abs(Destination.Y - CenterLocation.Y)
 
             'We are supposed to be following, so say we can move any direction to do that.
-            Dim allowed_movement = AllowedMoves.All
+            Dim allowedMovement = AllowedMoves.All
 
             'if the distance to the destination is mostly horizontal, or mostly vertical, set the movement to either of those
             'This allows pegasi to fly up to reach their target instead of walking straight up.
             'This is weighted more on the vertical side for better effect
             If horizontalDistance * 0.75 > verticalDistance Then
-                allowed_movement = allowed_movement And AllowedMoves.HorizontalOnly
+                allowedMovement = allowedMovement And AllowedMoves.HorizontalOnly
             Else
-                allowed_movement = allowed_movement And AllowedMoves.VerticalOnly
+                allowedMovement = allowedMovement And AllowedMoves.VerticalOnly
             End If
 
             If AtDestination OrElse blocked OrElse CurrentBehavior.Speed = 0 OrElse Delay > 0 Then
-                allowed_movement = AllowedMoves.None
+                allowedMovement = AllowedMoves.None
                 Dim paint_stop_now = paintStop
                 paintStop = True
 
@@ -2313,13 +2315,13 @@ Class Pony
                 ' Chosen an appropriate behavior to use for visual override.
                 ' Use the specified behaviors for following if possible, otherwise find a suitable one given our movement requirements.
                 Dim appropriateBehavior As PonyBase.Behavior = Nothing
-                If allowed_movement = AllowedMoves.None Then
+                If allowedMovement = AllowedMoves.None Then
                     appropriateBehavior = CurrentBehavior.FollowStoppedBehavior
                 Else
                     appropriateBehavior = CurrentBehavior.FollowMovingBehavior
                 End If
                 If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
-                    appropriateBehavior = GetAppropriateBehaviorOrCurrent(allowed_movement, True, Nothing)
+                    appropriateBehavior = GetAppropriateBehaviorOrCurrent(allowedMovement, True)
                 End If
                 visualOverrideBehavior = appropriateBehavior
             End If
@@ -2960,12 +2962,12 @@ Class Pony
         If Not PlayingGame AndAlso ponyAction Then
             CursorOverPony = True
             Paint() 'enable effects on mouseover.
-            Return CurrentBehavior.Speed * Scale
+            Return ScaledSpeed()
         Else
             'if we're not in the cursor's way, but still flagged that we are, exit mouseover mode.
             If HaltedForCursor Then
                 CursorOverPony = False
-                Return CurrentBehavior.Speed * Scale
+                Return ScaledSpeed()
             End If
         End If
 
@@ -2997,7 +2999,13 @@ Class Pony
         End If
         CurrentBehavior = GetAppropriateBehaviorOrCurrent(appropriateMovement, ponySpeed)
         Dim speedupFactor = If(ponySpeed, 2, 1)
-        Return If(appropriateMovement = AllowedMoves.None, 0, CurrentBehavior.Speed * Scale * speedupFactor)
+        Return If(appropriateMovement = AllowedMoves.None, 0, ScaledSpeed() * speedupFactor)
+    End Function
+
+    Public Property SpeedOverride As Double?
+
+    Private Function ScaledSpeed() As Double
+        Return If(SpeedOverride Is Nothing, CurrentBehavior.Speed * Scale, SpeedOverride.Value)
     End Function
 End Class
 
@@ -3017,11 +3025,11 @@ Class Effect
     Friend OwnerPony As PonyBase
     Friend OwningPony As Pony
 
-    Friend right_image_path As String
+    Friend RightImagePath As String
     Friend right_image_size As Size
     Friend left_image_path As String
     Friend left_image_size As Size
-    Friend current_image_path As String
+    Friend CurrentImagePath As String
     Friend Duration As Double
     Friend DesiredDuration As Double
 
@@ -3051,8 +3059,8 @@ Class Effect
 
     Friend Sub SetRightImagePath(path As String)
         Argument.EnsureNotNull(path, "path")
-        right_image_path = path
-        right_image_size = ImageSize.GetSize(right_image_path)
+        RightImagePath = path
+        right_image_size = ImageSize.GetSize(RightImagePath)
     End Sub
 
     Friend Sub SetLeftImagePath(path As String)
@@ -3070,7 +3078,7 @@ Class Effect
     End Sub
 
     Public Function Clone() As Effect
-        Dim new_effect As New Effect(right_image_path, left_image_path)
+        Dim new_effect As New Effect(RightImagePath, left_image_path)
 
         new_effect.Name = Name
         new_effect.BehaviorName = BehaviorName
@@ -3101,25 +3109,23 @@ Class Effect
             scale = 1
         End If
 
-        If IsNothing(current_image_path) Then
-
+        If IsNothing(CurrentImagePath) Then
             If Not IsNothing(left_image_path) Then
                 Return New Point(CInt(Me.Location.X + ((scale * left_image_size.Width) / 2)), CInt(Me.Location.Y + ((scale * left_image_size.Height) / 2)))
             End If
 
-            If Not IsNothing(right_image_path) Then
+            If Not IsNothing(RightImagePath) Then
                 Return New Point(CInt(Me.Location.X + ((scale * right_image_size.Width) / 2)), CInt(Me.Location.Y + ((scale * right_image_size.Height) / 2)))
             End If
 
             Return Location
         End If
 
-
         Return New Point(CInt(Me.Location.X + ((scale * CurrentImageSize().Width) / 2)), CInt(Me.Location.Y + ((scale * CurrentImageSize().Height) / 2)))
     End Function
 
     Friend Function CurrentImageSize() As Size
-        If current_image_path = right_image_path Then
+        If CurrentImagePath = RightImagePath Then
             Return right_image_size
         Else
             Return left_image_size
@@ -3129,14 +3135,14 @@ Class Effect
     Private internalTime As TimeSpan
 
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        current_image_path = If(Facing_Left, left_image_path, right_image_path)
+        CurrentImagePath = If(Facing_Left, left_image_path, RightImagePath)
         start_time = startTime
         internalTime = startTime
     End Sub
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
-        current_image_path = If(Facing_Left, left_image_path, right_image_path)
+        CurrentImagePath = If(Facing_Left, left_image_path, RightImagePath)
         If beingDragged Then
             Location = Pony.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
@@ -3158,7 +3164,7 @@ Class Effect
 
     Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
         Get
-            Return current_image_path
+            Return CurrentImagePath
         End Get
     End Property
 

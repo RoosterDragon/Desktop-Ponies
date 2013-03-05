@@ -240,7 +240,7 @@
         For Each effect In PonyEditor.get_effect_list()
             If effect.Name = string_to_effectname(CStr(Follow_ComboBox.SelectedItem)) Then
                 Try
-                    pony_thumbnail = Image.FromFile(effect.right_image_path)
+                    pony_thumbnail = Image.FromFile(effect.RightImagePath)
                 Catch ex As Exception
                     MsgBox("Note:  Failed to load image for effect " & effect.Name)
                 End Try

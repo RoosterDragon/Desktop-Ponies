@@ -106,7 +106,7 @@ Public Class GameSelectionForm
 
                 Dim picturebox As New PictureBox
 
-                Position.Selection_Menu_Picturebox = picturebox
+                Position.SelectionMenuPictureBox = picturebox
 
                 picturebox.SizeMode = PictureBoxSizeMode.StretchImage
                 picturebox.Name = "NotSet"
@@ -118,7 +118,7 @@ Public Class GameSelectionForm
                 Dim new_label As New Label
                 new_label.Text = Position.Name
 
-                Select Case Position.Team_Number
+                Select Case Position.TeamNumber
                     Case 1
                         Team1_Panel.Controls.Add(picturebox)
                         Team1_Panel.Controls.Add(new_label)
@@ -144,14 +144,14 @@ Public Class GameSelectionForm
     End Sub
 
     Private Sub Add_To_Team1_Button_Click(sender As Object, e As EventArgs) Handles Add_Team1_Button.Click
-        Add_to_panel(Team1_Panel, 1)
+        AddToPanel(Team1_Panel, 1)
     End Sub
 
     Private Sub Add_To_Team2_Button_Click(sender As Object, e As EventArgs) Handles Add_Team2_Button.Click
-        Add_to_panel(Team2_Panel, 2)
+        AddToPanel(Team2_Panel, 2)
     End Sub
 
-    Private Sub Add_to_panel(panel As Panel, team As Integer)
+    Private Sub AddToPanel(panel As Panel, team As Integer)
 
         If Pony_Selection_View.SelectedIndices.Count = 0 Then
             MsgBox("Select a pony by clicking on its picture first.")
@@ -201,7 +201,7 @@ Public Class GameSelectionForm
             Select Case team
                 Case 1
                     For Each position In team1.Positions
-                        If ReferenceEquals(position.Selection_Menu_Picturebox, position_picturebox) Then
+                        If ReferenceEquals(position.SelectionMenuPictureBox, position_picturebox) Then
                             position.Player = pony
                             position.Team = team1
                             Exit For
@@ -209,7 +209,7 @@ Public Class GameSelectionForm
                     Next
                 Case 2
                     For Each position In team2.Positions
-                        If ReferenceEquals(position.Selection_Menu_Picturebox, position_picturebox) Then
+                        If ReferenceEquals(position.SelectionMenuPictureBox, position_picturebox) Then
                             position.Player = pony
                             position.Team = team2
                             Exit For
@@ -229,13 +229,13 @@ Public Class GameSelectionForm
         pony_picturebox.Image = My.Resources.MysteryThumb
 
         For Each position As Game.Position In team1.Positions
-            If ReferenceEquals(position.Selection_Menu_Picturebox, pony_picturebox) Then
+            If ReferenceEquals(position.SelectionMenuPictureBox, pony_picturebox) Then
                 position.Player = Nothing
                 Exit For
             End If
         Next
         For Each position As Game.Position In team2.Positions
-            If ReferenceEquals(position.Selection_Menu_Picturebox, pony_picturebox) Then
+            If ReferenceEquals(position.SelectionMenuPictureBox, pony_picturebox) Then
                 position.Player = Nothing
                 Exit For
             End If
@@ -314,6 +314,5 @@ Public Class GameSelectionForm
         Else
             MsgBox(game.Description)
         End If
-
     End Sub
 End Class

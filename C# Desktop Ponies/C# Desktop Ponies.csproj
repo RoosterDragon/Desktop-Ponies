@@ -80,6 +80,7 @@
       <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Mono.Cairo" />
@@ -89,6 +90,12 @@
     <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
     <Compile Include="Collections\Enumerator.cs" />
+    <Compile Include="DesktopPonies\AnimatedImageIndexer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DesktopPonies\AnimatedImageIndexer.Designer.cs">
+      <DependentUpon>AnimatedImageIndexer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Disposable.cs" />
     <Compile Include="ExceptionDialog.cs">
       <SubType>Form</SubType>
@@ -186,6 +193,9 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="SpriteManagement\Win32.cs" />
     <Compile Include="SpriteManagement\WinFormSpriteInterface.cs" />
+    <EmbeddedResource Include="DesktopPonies\AnimatedImageIndexer.resx">
+      <DependentUpon>AnimatedImageIndexer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\GifAlphaForm.resx">
       <DependentUpon>GifAlphaForm.cs</DependentUpon>
     </EmbeddedResource>

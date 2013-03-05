@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.ImageSelector = new System.Windows.Forms.ComboBox();
             this.ColorDialog = new System.Windows.Forms.ColorDialog();
             this.ImageComparison = new System.Windows.Forms.SplitContainer();
@@ -37,17 +36,11 @@
             this.ImageDesiredPalette = new System.Windows.Forms.Panel();
             this.DesiredColorCode = new System.Windows.Forms.TextBox();
             this.DesiredAlphaCode = new System.Windows.Forms.TextBox();
-            this.FrameSelector = new System.Windows.Forms.TrackBar();
             this.SaveCommand = new System.Windows.Forms.Button();
             this.FrameControls = new System.Windows.Forms.GroupBox();
-            this.PreviousCommand = new System.Windows.Forms.Button();
-            this.NextCommand = new System.Windows.Forms.Button();
-            this.PlayCommand = new System.Windows.Forms.Button();
-            this.TimeSelectorSections = new System.Windows.Forms.Panel();
-            this.TimeSelector = new System.Windows.Forms.TrackBar();
-            this.FrameLabel = new System.Windows.Forms.Label();
             this.ImageNameLabel = new System.Windows.Forms.Label();
             this.ColorControls = new System.Windows.Forms.GroupBox();
+            this.ResetCommand = new System.Windows.Forms.Button();
             this.ImageColors = new System.Windows.Forms.Panel();
             this.ImageSourceColor = new System.Windows.Forms.Panel();
             this.ImageDesiredColor = new System.Windows.Forms.Panel();
@@ -57,8 +50,8 @@
             this.DesiredPaletteLabel = new System.Windows.Forms.Label();
             this.SourcePaletteLabel = new System.Windows.Forms.Label();
             this.ErrorLabel = new System.Windows.Forms.Label();
-            this.AnimationTimer = new System.Windows.Forms.Timer(this.components);
-            this.ResetCommand = new System.Windows.Forms.Button();
+            this.Indexer = new CSDesktopPonies.DesktopPonies.AnimatedImageIndexer();
+            ((System.ComponentModel.ISupportInitialize)(this.ImageComparison)).BeginInit();
             this.ImageComparison.SuspendLayout();
             this.FrameControls.SuspendLayout();
             this.ColorControls.SuspendLayout();
@@ -164,18 +157,6 @@
             this.DesiredAlphaCode.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.DesiredAlphaCode.TextChanged += new System.EventHandler(this.DesiredAlphaCode_TextChanged);
             // 
-            // FrameSelector
-            // 
-            this.FrameSelector.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.FrameSelector.Location = new System.Drawing.Point(6, 19);
-            this.FrameSelector.Maximum = 0;
-            this.FrameSelector.Name = "FrameSelector";
-            this.FrameSelector.Size = new System.Drawing.Size(208, 45);
-            this.FrameSelector.TabIndex = 0;
-            this.FrameSelector.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
-            this.FrameSelector.ValueChanged += new System.EventHandler(this.FrameSelector_ValueChanged);
-            // 
             // SaveCommand
             // 
             this.SaveCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -189,96 +170,13 @@
             // 
             // FrameControls
             // 
-            this.FrameControls.Controls.Add(this.PreviousCommand);
-            this.FrameControls.Controls.Add(this.NextCommand);
-            this.FrameControls.Controls.Add(this.PlayCommand);
-            this.FrameControls.Controls.Add(this.TimeSelectorSections);
-            this.FrameControls.Controls.Add(this.TimeSelector);
-            this.FrameControls.Controls.Add(this.FrameLabel);
-            this.FrameControls.Controls.Add(this.FrameSelector);
+            this.FrameControls.Controls.Add(this.Indexer);
             this.FrameControls.Location = new System.Drawing.Point(12, 39);
             this.FrameControls.Name = "FrameControls";
             this.FrameControls.Size = new System.Drawing.Size(220, 133);
             this.FrameControls.TabIndex = 2;
             this.FrameControls.TabStop = false;
             this.FrameControls.Text = "Frame";
-            // 
-            // PreviousCommand
-            // 
-            this.PreviousCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PreviousCommand.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PreviousCommand.Location = new System.Drawing.Point(54, 68);
-            this.PreviousCommand.Name = "PreviousCommand";
-            this.PreviousCommand.Size = new System.Drawing.Size(25, 16);
-            this.PreviousCommand.TabIndex = 2;
-            this.PreviousCommand.Text = "<";
-            this.PreviousCommand.UseVisualStyleBackColor = true;
-            this.PreviousCommand.Click += new System.EventHandler(this.PreviousCommand_Click);
-            // 
-            // NextCommand
-            // 
-            this.NextCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.NextCommand.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.NextCommand.Location = new System.Drawing.Point(141, 68);
-            this.NextCommand.Name = "NextCommand";
-            this.NextCommand.Size = new System.Drawing.Size(25, 16);
-            this.NextCommand.TabIndex = 4;
-            this.NextCommand.Text = ">";
-            this.NextCommand.UseVisualStyleBackColor = true;
-            this.NextCommand.Click += new System.EventHandler(this.NextCommand_Click);
-            // 
-            // PlayCommand
-            // 
-            this.PlayCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PlayCommand.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PlayCommand.Location = new System.Drawing.Point(85, 68);
-            this.PlayCommand.Name = "PlayCommand";
-            this.PlayCommand.Size = new System.Drawing.Size(50, 16);
-            this.PlayCommand.TabIndex = 3;
-            this.PlayCommand.Text = "Play";
-            this.PlayCommand.UseVisualStyleBackColor = true;
-            this.PlayCommand.Click += new System.EventHandler(this.PlayCommand_Click);
-            // 
-            // TimeSelectorSections
-            // 
-            this.TimeSelectorSections.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TimeSelectorSections.Location = new System.Drawing.Point(20, 104);
-            this.TimeSelectorSections.Name = "TimeSelectorSections";
-            this.TimeSelectorSections.Size = new System.Drawing.Size(180, 4);
-            this.TimeSelectorSections.TabIndex = 6;
-            this.TimeSelectorSections.Paint += new System.Windows.Forms.PaintEventHandler(this.TimeSelectorSections_Paint);
-            // 
-            // TimeSelector
-            // 
-            this.TimeSelector.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TimeSelector.LargeChange = 5000;
-            this.TimeSelector.Location = new System.Drawing.Point(6, 82);
-            this.TimeSelector.Maximum = 0;
-            this.TimeSelector.Name = "TimeSelector";
-            this.TimeSelector.Size = new System.Drawing.Size(208, 45);
-            this.TimeSelector.SmallChange = 1000;
-            this.TimeSelector.TabIndex = 5;
-            this.TimeSelector.TickFrequency = 0;
-            this.TimeSelector.ValueChanged += new System.EventHandler(this.TimeSelector_ValueChanged);
-            // 
-            // FrameLabel
-            // 
-            this.FrameLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.FrameLabel.Location = new System.Drawing.Point(6, 49);
-            this.FrameLabel.Name = "FrameLabel";
-            this.FrameLabel.Size = new System.Drawing.Size(208, 16);
-            this.FrameLabel.TabIndex = 1;
-            this.FrameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ImageNameLabel
             // 
@@ -309,6 +207,17 @@
             this.ColorControls.TabIndex = 4;
             this.ColorControls.TabStop = false;
             this.ColorControls.Text = "Color";
+            // 
+            // ResetCommand
+            // 
+            this.ResetCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ResetCommand.Location = new System.Drawing.Point(380, 13);
+            this.ResetCommand.Name = "ResetCommand";
+            this.ResetCommand.Size = new System.Drawing.Size(98, 23);
+            this.ResetCommand.TabIndex = 7;
+            this.ResetCommand.Text = "Reset Mapping";
+            this.ResetCommand.UseVisualStyleBackColor = true;
+            this.ResetCommand.Click += new System.EventHandler(this.ResetCommand_Click);
             // 
             // ImageColors
             // 
@@ -413,21 +322,15 @@
             this.ErrorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.ErrorLabel.Visible = false;
             // 
-            // AnimationTimer
+            // Indexer
             // 
-            this.AnimationTimer.Interval = 50;
-            this.AnimationTimer.Tick += new System.EventHandler(this.AnimationTimer_Tick);
-            // 
-            // ResetCommand
-            // 
-            this.ResetCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ResetCommand.Location = new System.Drawing.Point(380, 13);
-            this.ResetCommand.Name = "ResetCommand";
-            this.ResetCommand.Size = new System.Drawing.Size(98, 23);
-            this.ResetCommand.TabIndex = 7;
-            this.ResetCommand.Text = "Reset Mapping";
-            this.ResetCommand.UseVisualStyleBackColor = true;
-            this.ResetCommand.Click += new System.EventHandler(this.ResetCommand_Click);
+            this.Indexer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Indexer.Enabled = false;
+            this.Indexer.Location = new System.Drawing.Point(3, 16);
+            this.Indexer.Name = "Indexer";
+            this.Indexer.Size = new System.Drawing.Size(214, 114);
+            this.Indexer.TabIndex = 0;
+            this.Indexer.IndexChanged += new System.EventHandler(this.Indexer_IndexChanged);
             // 
             // GifAlphaForm
             // 
@@ -447,9 +350,9 @@
             this.Text = "Gif with Alpha - C# Desktop Ponies";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GifAlphaForm_FormClosing);
             this.Load += new System.EventHandler(this.GifAlphaForm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.ImageComparison)).EndInit();
             this.ImageComparison.ResumeLayout(false);
             this.FrameControls.ResumeLayout(false);
-            this.FrameControls.PerformLayout();
             this.ColorControls.ResumeLayout(false);
             this.ColorControls.PerformLayout();
             this.ImageColors.ResumeLayout(false);
@@ -470,10 +373,8 @@
         private System.Windows.Forms.Panel ImageDesiredPalette;
         private System.Windows.Forms.TextBox DesiredColorCode;
         private System.Windows.Forms.TextBox DesiredAlphaCode;
-        private System.Windows.Forms.TrackBar FrameSelector;
         private System.Windows.Forms.Button SaveCommand;
         private System.Windows.Forms.GroupBox FrameControls;
-        private System.Windows.Forms.Label FrameLabel;
         private System.Windows.Forms.Label ImageNameLabel;
         private System.Windows.Forms.GroupBox ColorControls;
         private System.Windows.Forms.GroupBox PaletteControls;
@@ -484,13 +385,8 @@
         private System.Windows.Forms.TextBox SourceAlphaCode;
         private System.Windows.Forms.Panel ImageDesiredColor;
         private System.Windows.Forms.Panel ImageColors;
-        private System.Windows.Forms.TrackBar TimeSelector;
-        private System.Windows.Forms.Panel TimeSelectorSections;
         private System.Windows.Forms.Label ErrorLabel;
-        private System.Windows.Forms.Button PreviousCommand;
-        private System.Windows.Forms.Button NextCommand;
-        private System.Windows.Forms.Button PlayCommand;
-        private System.Windows.Forms.Timer AnimationTimer;
         private System.Windows.Forms.Button ResetCommand;
+        private AnimatedImageIndexer Indexer;
     }
 }

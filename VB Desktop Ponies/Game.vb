@@ -2,235 +2,204 @@
 Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
-Module Games
-    Class Game
+Friend Module Games
+    Public Class Game
         Public Const RootDirectory = "Games"
         Public Const ConfigFilename = "game.ini"
 
-        Enum BallType
-
+        Public Enum BallType
             Soccer = 0 'Is pushed around and slows to a stop.  No Gravity
             Baseball = 1 'Is thrown and arcs, then slows if not caught.
             PingPong = 2 'Bounces around and doesn't stop/slow
             Dodge = 3 'Travels in a straight line and is destroyed when impacting barriers
-
         End Enum
 
-        Enum GameStatus
-
+        Public Enum GameStatus
             Setup = 0
             Ready = 1
             InProgress = 2
-            '   Round_Finishing = 3
-            'next_Round_Setup = 4
+            'RoundFinishing = 3
+            'NextRoundSetup = 4
             'Finishing = 5
             Completed = 6
-
         End Enum
 
-        Enum ScoreStyle
-
-            Ball_at_Goal = 0
-            Ball_Hits_Other_Team = 1
-            Ball_Destroyed = 2
-            Ball_At_Sides = 3
-
+        Private Enum ScoreStyle
+            BallAtGoal = 0
+            BallHitsOtherTeam = 1
+            BallDestroyed = 2
+            BallAtSides = 3
         End Enum
 
-        Enum PlayerActionType
-
-            Not_Set = 0
-            Return_To_Start = 1
-            Chase_Ball = 2
-            Avoid_Ball = 3
-            Throw_Ball_ToGoal = 4
-            Throw_Ball_ToTeammate = 5
-            Throw_Ball_AtTarget = 6
-            Throw_Ball_Reflect = 7 'ball bounces off
-            Approach_Own_Goal = 8
-            Approach_Target_Goal = 9
-            Lead_Ball = 10
-            Approach_Target = 12
+        Public Enum PlayerActionType
+            NotSet = 0
+            ReturnToStart = 1
+            ChaseBall = 2
+            AvoidBall = 3
+            ThrowBallToGoal = 4
+            ThrowBallToTeammate = 5
+            ThrowBallAtTarget = 6
+            ThrowBallReflect = 7 'ball bounces off
+            ApproachOwnGoal = 8
+            ApproachTargetGoal = 9
+            LeadBall = 10
+            ApproachTarget = 12
             Idle = 13
-
         End Enum
 
         Public Name As String = ""
-        Friend Description As String = ""
+        Public Description As String = ""
 
-        Const MinTeams As Integer = 2
-        Friend Teams As New List(Of Team)
-        Dim AllPlayers As New List(Of Position)
+        Private Const MinTeams As Integer = 2
+        Friend ReadOnly Teams As New List(Of Team)
+        Private ReadOnly allPlayers As New List(Of Position)
 
-        Friend Balls As New List(Of Ball)
+        Friend ReadOnly Balls As New List(Of Ball)
+        Friend ReadOnly ActiveBalls As New List(Of Ball)
 
-        Friend Active_Balls As New List(Of Ball)
+        Private ReadOnly goals As New List(Of GoalArea)
 
-        Dim MinBalls As Integer
-        Dim MaxBalls As Integer
+        Private minBalls As Integer
+        Private maxBalls As Integer
 
         Friend Status As GameStatus
-        Friend MaxScore As Integer
+        Private maxScore As Integer
 
-        Dim WinningTeam As Team
+        Private scoreboard As GameScoreboard
+        Private scoreboardLocation As Point
+        Private ReadOnly scoringStyles As New List(Of ScoreStyle)
 
-        Friend ScoreBoard As Game_ScoreBoard
-        Dim ScoreBoard_Location As Point
-        Dim ScoringStyles As New List(Of ScoreStyle)
+        Friend GameScreen As Screen
 
-        Friend GameScreen As Screen = Nothing
+        Public Sub New(directory As String)
+            Dim gameData As String = Nothing
+            Dim descriptionData As String
+            Dim positionData As New List(Of String)
+            Dim ballData As New List(Of String)
+            Dim goalData As New List(Of String)
 
-        Friend Goals As New List(Of Goal_Area)
+            Using configFile As New StreamReader(Path.Combine(directory, Game.ConfigFilename))
+                Do Until configFile.EndOfStream
+                    Dim line = configFile.ReadLine
 
-        Sub New(config_file_path As String, files_path As String)
-
-            Dim position_data As New List(Of String)
-            Dim game_data As String = Nothing
-            Dim description_data As String = Nothing
-            Dim ball_data As New List(Of String)
-            Dim goal_data As New List(Of String)
-
-            Using config_file As New System.IO.StreamReader(config_file_path)
-                Do Until config_file.EndOfStream
-                    Dim line = config_file.ReadLine
-
-                    'ignore blank or 'commented out' lines.
-                    If line = "" OrElse line(0) = "'" Then
-                        Continue Do
-                    End If
+                    ' Ignore blank lines, or lines commented out with the single quote character.
+                    If line = "" OrElse line(0) = "'" Then Continue Do
 
                     Dim columns = CommaSplitQuoteQualified(line)
 
-                    If UBound(columns) < 1 Then
-                        Continue Do
-                    End If
+                    If UBound(columns) < 1 Then Continue Do
 
-                    Select Case LCase(columns(0))
-
+                    Select Case columns(0).ToLowerInvariant()
                         Case "game"
-                            game_data = line
+                            gameData = line
                         Case "description"
-                            description_data = line
+                            descriptionData = line
                         Case "position"
-                            position_data.Add(line)
+                            positionData.Add(line)
                         Case "ball"
-                            ball_data.Add(line)
+                            ballData.Add(line)
                         Case "goal"
-                            goal_data.Add(line)
+                            goalData.Add(line)
                         Case "scoreboard"
-                            ScoreBoard = New Game_ScoreBoard(columns(1) & "," & columns(2),
-                                                             files_path & Trim(columns(3).Replace(ControlChars.Quote, "")))
+                            scoreboard = New GameScoreboard(columns(1), columns(2),
+                                                            Path.Combine(directory, Trim(columns(3).Replace(ControlChars.Quote, ""))))
                         Case Else
                             Throw New InvalidDataException("Invalid line in config file: " & line)
                     End Select
-
                 Loop
             End Using
 
-            If IsNothing(game_data) OrElse position_data.Count = 0 OrElse ball_data.Count = 0 Then
-                Throw New InvalidDataException("Game ini file does not define Game, Position, or Ball data.  It must contain all 3.")
+            If gameData Is Nothing OrElse positionData.Count = 0 OrElse ballData.Count = 0 Then
+                Throw New InvalidDataException("Game ini file does not define Game, Position, or Ball data. It must contain all 3.")
             End If
 
-            'process game data
+            Dim gameColumns = CommaSplitBraceQualified(gameData)
+            Name = gameColumns(1).Replace(ControlChars.Quote, "")
 
-            Dim game_columns = CommaSplitBraceQualified(game_data)
+            Dim descriptionColumns = CommaSplitQuoteQualified(gameData)
+            If descriptionColumns.Length >= 2 Then
+                Description = descriptionColumns(1)
+            Else
+                MessageBox.Show("Invalid description line for game: " & Name & ". Are you missing quotes around the text?",
+                                "Invalid Description", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End If
 
-            Name = game_columns(1).Replace(ControlChars.Quote, "")
-
-            Dim description_columns = CommaSplitQuoteQualified(game_data)
-
-            Try
-                Description = description_columns(1)
-            Catch ex As Exception
-                MsgBox("Invalid description line for game: " & Name & " . Are you missing quotes around the text?")
-            End Try
-
-            MinBalls = Integer.Parse(game_columns(3), CultureInfo.InvariantCulture)
-            MaxBalls = Integer.Parse(game_columns(4), CultureInfo.InvariantCulture)
-            MaxScore = Integer.Parse(game_columns(5), CultureInfo.InvariantCulture)
-            If MaxScore < 1 Then
+            minBalls = Integer.Parse(gameColumns(3), CultureInfo.InvariantCulture)
+            maxBalls = Integer.Parse(gameColumns(4), CultureInfo.InvariantCulture)
+            maxScore = Integer.Parse(gameColumns(5), CultureInfo.InvariantCulture)
+            If maxScore < 1 Then
                 Throw New InvalidDataException("The maximum score must be at least 1 - error loading name " & Name)
             End If
-            If MaxBalls < MinBalls Then Throw New InvalidDataException(
+            If maxBalls < minBalls Then Throw New InvalidDataException(
                 "Minimum number of balls in play is larger than the Maximum setting defined for game: " & Name)
 
             If MinTeams < 2 Then Throw New InvalidDataException(
                 "You must have at least two teams for a game.  The minimum setting is too low for game: " & Name)
-            'maybe later we can have them play tag or a zombie game... but for now:
-            If MinBalls < 1 Then Throw New InvalidDataException(
+            ' Maybe later we can have them play tag or a zombie game... but for now:
+            If minBalls < 1 Then Throw New InvalidDataException(
                 "You must have at least one ball for the ponies to play with.  The minimum setting is too low for game: " & Name)
 
-            'do scoring styles
-            Dim ScoringStyles_list = Split(game_columns(6), ",")
-            For Each style In ScoringStyles_list
-                Select Case Trim(LCase(style))
+            Dim scoringStylesList = Split(gameColumns(6), ",")
+            For Each style In scoringStylesList
+                Select Case style.ToLowerInvariant().Trim()
                     Case "ball_at_goal"
-                        ScoringStyles.Add(ScoreStyle.Ball_at_Goal)
+                        scoringStyles.Add(ScoreStyle.BallAtGoal)
                     Case "ball_hits_other_team"
-                        ScoringStyles.Add(ScoreStyle.Ball_Hits_Other_Team)
+                        scoringStyles.Add(ScoreStyle.BallHitsOtherTeam)
                     Case "ball_destroyed"
-                        ScoringStyles.Add(ScoreStyle.Ball_Destroyed)
+                        scoringStyles.Add(ScoreStyle.BallDestroyed)
                     Case "ball_at_sides"
-                        ScoringStyles.Add(ScoreStyle.Ball_At_Sides)
+                        scoringStyles.Add(ScoreStyle.BallAtSides)
                     Case Else
                         Throw New InvalidDataException("Invalid scoring style: " & style)
                 End Select
             Next
 
-            'do teamnames
-            Dim TeamNames = CommaSplitQuoteQualified(game_columns(2))
-
-            Dim number = 1
-            For Each line In TeamNames
-                Dim new_team As New Team(line, number)
-                Teams.Add(new_team)
-                number += 1
+            Dim teamNames = CommaSplitQuoteQualified(gameColumns(2))
+            Dim teamNumber = 1
+            For Each teamName In teamNames
+                Teams.Add(New Team(teamName, teamNumber))
+                teamNumber += 1
             Next
 
-            'do goals
-            For Each line In goal_data
+            For Each line In goalData
                 Dim columns = CommaSplitBraceQualified(line)
-                Dim new_goal As New Goal_Area(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
-                                              files_path & Trim(columns(2).Replace(ControlChars.Quote, "")), columns(3))
-                Goals.Add(new_goal)
+                Dim newGoal As New GoalArea(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
+                                            Path.Combine(directory, Trim(columns(2).Replace(ControlChars.Quote, ""))),
+                                            columns(3))
+                goals.Add(newGoal)
             Next
 
-            For Each goal As Goal_Area In Goals
-                If goal.team_number <> 0 Then
-                    Teams(goal.team_number - 1).Goal = goal
+            For Each goal In goals
+                If goal.TeamNumber <> 0 Then
+                    Teams(goal.TeamNumber - 1).Goal = goal
                 End If
             Next
 
-            'do positions
-            For Each line In position_data
+            For Each line In positionData
                 Dim columns = CommaSplitBraceQualified(line)
-
-                Dim new_position As New Position(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture), columns(3),
+                Dim newPosition As New Position(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture), columns(3),
                                                  columns(4), columns(5), columns(6), columns(7), columns(8), columns(9), columns(10),
                                                  columns(11))
-
-                Teams(Integer.Parse(columns(2), CultureInfo.InvariantCulture) - 1).Positions.Add(new_position)
+                Teams(Integer.Parse(columns(2), CultureInfo.InvariantCulture) - 1).Positions.Add(newPosition)
             Next
 
-            For Each line In ball_data
+            For Each line In ballData
                 Dim columns = CommaSplitQuoteQualified(line)
-
-                Dim new_ball As New Ball(columns(1),
+                Dim newBall As New Ball(columns(1),
                                          Trim(columns(2)), Trim(columns(3)), Trim(columns(4)), Trim(columns(5)), Trim(columns(6)),
                                          Integer.Parse(columns(7), CultureInfo.InvariantCulture),
-                                         Integer.Parse(columns(8), CultureInfo.InvariantCulture), files_path)
-                Balls.Add(new_ball)
+                                         Integer.Parse(columns(8), CultureInfo.InvariantCulture), directory & Path.DirectorySeparatorChar)
+                Balls.Add(newBall)
             Next
 
             Status = GameStatus.Setup
-
         End Sub
 
         Friend Sub CleanUp()
-
             For Each Ball In Balls
-                '  Ball.Handler.Close()
-                Active_Balls.Remove(Ball)
+                'Ball.Handler.Close()
+                ActiveBalls.Remove(Ball)
             Next
 
             Pony.CurrentAnimator.Clear()
@@ -244,171 +213,178 @@ Module Games
             Teams(0).Score = 0
             Teams(1).Score = 0
 
-            'For Each position As Position In AllPlayers
-            '    '  position.Player.Close()
+            'For Each position In AllPlayers
+            '    position.Player.Close()
             'Next
 
-            AllPlayers.Clear()
-
+            allPlayers.Clear()
         End Sub
 
         Friend Sub Setup()
-
-
             If Options.WindowAvoidanceEnabled OrElse Options.CursorAvoidanceEnabled Then
                 Options.WindowAvoidanceEnabled = False
                 Options.CursorAvoidanceEnabled = False
-                '  MsgBox("Note:  Window avoidance and cursor avoidance have been disabled as they may interfere with the game.")
+                '  MsgBox("Note: Window avoidance and cursor avoidance have been disabled as they may interfere with the game.")
             End If
 
-
-            For Each Goal As Goal_Area In Goals
-                Goal.Initialize(GameScreen)
-                Goal.form.DesiredDuration = 60 * 60 * 24 * 365
-                Pony.CurrentAnimator.AddEffect(Goal.form)
+            For Each goal In goals
+                goal.Initialize(GameScreen)
+                goal.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
+                Pony.CurrentAnimator.AddEffect(goal.HostEffect)
             Next
 
-            ScoreBoard.Initialize(GameScreen)
-            ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
-            ScoreBoard.form.DesiredDuration = 60 * 60 * 24 * 365
-            Pony.CurrentAnimator.AddEffect(ScoreBoard.form)
+            scoreboard.Initialize(GameScreen)
+            scoreboard.SetScores(Teams(0), Teams(1))
+            scoreboard.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
+            Pony.CurrentAnimator.AddEffect(scoreboard.HostEffect)
+            Pony.CurrentAnimator.AddSprites(scoreboard.ScoreDisplays)
 
-            For Each Team As Team In Teams
-                Dim positions_to_remove As New List(Of Position)
-                For Each Position As Position In Team.Positions
-                    Position.Initialize(GameScreen)
-                    If Not IsNothing(Position.Player) Then
-
-                        Position.Player.PlayingGame = True
-                        Pony.CurrentAnimator.AddPony(Position.Player)
-                        AllPlayers.Add(Position)
+            For Each team In Teams
+                Dim positionsToRemove As New List(Of Position)
+                For Each position In team.Positions
+                    position.Initialize(GameScreen)
+                    If position.Player IsNot Nothing Then
+                        position.Player.PlayingGame = True
+                        Pony.CurrentAnimator.AddPony(position.Player)
+                        allPlayers.Add(position)
                     Else
-                        positions_to_remove.Add(Position)
+                        positionsToRemove.Add(position)
                     End If
                 Next
-                For Each entry In positions_to_remove
-                    Team.Positions.Remove(entry)
+                For Each entry In positionsToRemove
+                    team.Positions.Remove(entry)
                 Next
             Next
 
-            For Each Ball In Balls
-                Ball.Initialize(GameScreen)
-                Pony.CurrentAnimator.AddPony(Ball.Handler)
+            For Each ball In Balls
+                ball.Initialize(GameScreen)
             Next
 
-            Dim monitor = GameScreen
             Main.Instance.ScreensToUse.Clear()
-            Main.Instance.ScreensToUse.Add(monitor)
+            Main.Instance.ScreensToUse.Add(GameScreen)
 
             If Options.ScaleFactor <> 1 Then
-                MsgBox("Note:  Games may not work properly with the scale option set to values other than 1...  You are currently playing with scale " & Options.ScaleFactor & "x.")
+                MessageBox.Show(String.Format("Note: Games may not work properly if you use a scale factor other than 1." &
+                                              " You are currently using a scale factor of {0:0.00}x.", Options.ScaleFactor))
             End If
-
         End Sub
 
         Friend Sub Update()
-
             Select Case Status
-
                 Case GameStatus.Setup
-
-                    Dim all_in_position = True
-
-                    For Each Team As Team In Teams
-                        For Each Position As Position In Team.Positions
-
-                            If IsNothing(Position.Current_Action) OrElse Position.Current_Action <> PlayerActionType.Return_To_Start _
-                                OrElse Position.Player.CurrentBehavior.AllowedMovement = Pony.AllowedMoves.None Then
-                                Position.SetFollowBehavior(Nothing, Nothing, True) 'go to starting position
+                    Dim allInPosition = True
+                    For Each team In Teams
+                        For Each position In team.Positions
+                            If position.CurrentAction <> PlayerActionType.ReturnToStart OrElse
+                                position.Player.CurrentBehavior.AllowedMovement = Pony.AllowedMoves.None Then
+                                ' Go to starting position.
+                                position.SetFollowBehavior(Nothing, Nothing, True)
                             End If
-
-                            If Position.Player.AtDestination = False Then
-                                all_in_position = False
-                            End If
-
-                            'Position.Player.Start(Pony.CurrentAnimator.ElapsedTime)
-
+                            If Not position.Player.AtDestination Then allInPosition = False
                         Next
                     Next
-
-                    If all_in_position Then
-                        Status = GameStatus.Ready
-                    End If
-
+                    If allInPosition Then Status = GameStatus.Ready
                 Case GameStatus.Ready
-
-                    'For Each Ball In Balls
-                    '    Ball.Handler.Visible = False
-                    'Next
-
-                    For Each position As Position In AllPlayers
-                        position.Current_Action = Nothing
-                        position.Current_Action_Group = Nothing
+                    For Each position In allPlayers
+                        position.CurrentAction = PlayerActionType.NotSet
+                        position.CurrentActionGroup = Nothing
                     Next
 
-                    For Each Ball In Balls
-                        Active_Balls.Add(Ball)
-                        Ball.Handler.CurrentBehavior = Ball.Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.None, False)
-                        Ball.Handler.TopLeftLocation = Ball.StartPosition
-                        'Ball.Handler.Visible = True
-                        Pony.CurrentAnimator.AddPony(Ball.Handler)
-                        Ball.Update()
-                        If Ball.Type = BallType.PingPong Then
-                            Ball.Kick(5, Rng.NextDouble() * (2 * Math.PI), Nothing)
+                    For Each ball In Balls
+                        ActiveBalls.Add(ball)
+                        Pony.CurrentAnimator.AddPony(ball.Handler)
+                        ball.Handler.CurrentBehavior = ball.Handler.Behaviors(1)
+                        ball.Handler.TopLeftLocation = ball.StartPosition
+                        ball.Update()
+                        If ball.Type = BallType.PingPong Then
+                            ball.Kick(5, Rng.NextDouble() * (2 * Math.PI), Nothing)
                         End If
-                        If Active_Balls.Count >= MinBalls Then Exit For
+                        If ActiveBalls.Count >= minBalls Then Exit For
                     Next
 
                     Status = GameStatus.InProgress
-
                 Case GameStatus.InProgress
-
-                    For Each Team As Team In Teams
-                        For Each Position As Position In Team.Positions
-                            Position.Decide_On_Action(Main.Instance.CurrentGame)
-                            Position.PushBackOverlappingPonies(AllPlayers)
+                    For Each team In Teams
+                        For Each position In team.Positions
+                            position.DecideOnAction(Main.Instance.CurrentGame)
+                            position.PushBackOverlappingPonies(allPlayers)
                             'Position.Player.Update(Pony.CurrentAnimator.ElapsedTime)
                         Next
                     Next
 
-                    For Each Ball In Active_Balls
-                        Ball.Update()
+                    For Each ball In ActiveBalls
+                        ball.Update()
                     Next
 
                     If CheckForScore() Then
-
-                        For Each Ball In Balls
-                            Active_Balls.Remove(Ball)
-                            Pony.CurrentAnimator.RemovePony(Ball.Handler)
+                        For Each ball In Balls
+                            ActiveBalls.Remove(ball)
+                            Pony.CurrentAnimator.RemovePony(ball.Handler)
                         Next
 
-                        For Each Team In Teams
-                            If Team.Score >= MaxScore Then
+                        For Each team In Teams
+                            If team.Score >= maxScore Then
                                 Status = GameStatus.Completed
                                 Pony.CurrentAnimator.Pause(False)
-                                MsgBox(Team.Name & " won!")
-                                Main.Instance.Pony_Shutdown()
+                                MessageBox.Show(team.Name & " won!", "Winner", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                Main.Instance.PonyShutdown()
                                 Main.Instance.Visible = True
                                 Exit Sub
                             End If
                         Next
-
                         Status = GameStatus.Setup
                     End If
-
-
                 Case Else
                     Throw New NotImplementedException("State not implemented: " & Status)
-
             End Select
-
         End Sub
+
+        Function CheckForScore() As Boolean
+            For Each ball In Balls
+                If scoringStyles.Contains(ScoreStyle.BallAtSides) Then
+                    If ball.Handler.TopLeftLocation.X <
+                        GameScreen.WorkingArea.X + (GameScreen.WorkingArea.Width * 0.02) Then
+                        Teams(1).Score += 1
+                        scoreboard.SetScores(Teams(0), Teams(1))
+                        Return True
+                    Else
+                        If ball.Handler.TopLeftLocation.X + ball.Handler.CurrentImageSize.X >
+                            (GameScreen.WorkingArea.X + GameScreen.WorkingArea.Width) - (GameScreen.WorkingArea.Width * 0.02) Then
+                            Teams(0).Score += 1
+                            scoreboard.SetScores(Teams(0), Teams(1))
+                            Return True
+                        End If
+                    End If
+                End If
+                If scoringStyles.Contains(ScoreStyle.BallAtGoal) Then
+                    For Each goal In goals
+                        Dim goalArea As New Rectangle(goal.HostEffect.Location, goal.HostEffect.CurrentImageSize())
+                        If Pony.IsPonyInBox(ball.Handler.CenterLocation, goalArea) Then
+                            For Each team In Teams
+                                If ReferenceEquals(team.Goal, goal) AndAlso
+                                    ball.LastHandledBy IsNot Nothing AndAlso
+                                    Not ReferenceEquals(team, ball.LastHandledBy.Team) Then
+                                    For Each otherTeam In Teams
+                                        If Not ReferenceEquals(otherTeam, team) Then
+                                            otherTeam.Score += 1
+                                            scoreboard.SetScores(Teams(0), Teams(1))
+                                            Return True
+                                        End If
+                                    Next
+                                End If
+                            Next
+                        End If
+                    Next
+                End If
+            Next
+            Return False
+        End Function
 
         Shared Function Get_Ball_LastHandler_Team(ball As Ball) As Team
 
-            If IsNothing(ball.Last_Handled_By) Then Return Nothing
+            If IsNothing(ball.LastHandledBy) Then Return Nothing
 
-            Return ball.Last_Handled_By.Team
+            Return ball.LastHandledBy.Team
 
         End Function
 
@@ -426,61 +402,12 @@ Module Games
 
         End Function
 
-        Function CheckForScore() As Boolean
-
-            For Each ScoreStyle As ScoreStyle In Main.Instance.CurrentGame.ScoringStyles
-
-                For Each Ball In Balls
-
-                    Select Case ScoreStyle
-                        Case ScoreStyle.Ball_At_Sides
-                            If Ball.Handler.TopLeftLocation.X < GameScreen.WorkingArea.X + (GameScreen.WorkingArea.Width * 0.02) Then
-                                Teams(1).Score += 1
-                                ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
-                                Return True
-                            Else
-                                If Ball.Handler.TopLeftLocation.X + Ball.Handler.CurrentImageSize.X > (GameScreen.WorkingArea.X + GameScreen.WorkingArea.Width) - (GameScreen.WorkingArea.Width * 0.02) Then
-                                    Teams(0).Score += 1
-                                    ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
-                                    Return True
-                                End If
-                            End If
-
-                        Case ScoreStyle.Ball_at_Goal
-
-                            For Each goal In Goals
-                                Dim goalArea As New Rectangle(goal.form.Location, goal.form.CurrentImageSize())
-                                If Pony.IsPonyInBox(Ball.Handler.CenterLocation, goalArea) Then
-                                    For Each Team In Teams
-                                        If ReferenceEquals(Team.Goal, goal) AndAlso Not ReferenceEquals(Team, Ball.Last_Handled_By.Team) Then
-                                            For Each OtherTeam In Teams
-                                                If Not ReferenceEquals(OtherTeam, Team) Then
-                                                    OtherTeam.Score += 1
-                                                    ScoreBoard.SetScore(Teams(0).Name, Teams(0).Score, Teams(1).Name, Teams(1).Score)
-                                                    Return True
-                                                End If
-                                            Next
-                                        End If
-                                    Next
-                                End If
-                            Next
-
-                    End Select
-                Next
-            Next
-
-            Return False
-
-
-        End Function
-
-        Class Ball
-
+        Public Class Ball
             Friend Type As BallType
             Friend StartPosition As Point
-            Dim Initial_Position As Point
+            Private initialPosition As Point
             Friend friction As Double = 0.992
-            Friend Last_Handled_By As Position = Nothing
+            Friend LastHandledBy As Position
             Private m_speed As Double
 
             Friend Handler As Pony 'the ball is a pony type that move like a pony
@@ -506,7 +433,7 @@ Module Games
                                         files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
                                         Pony.AllowedMoves.All, "", "", "")
 
-                Initial_Position = New Point(x_location, y_location)
+                initialPosition = New Point(x_location, y_location)
 
                 Select Case LCase(Trim(_type))
 
@@ -524,9 +451,9 @@ Module Games
             End Sub
 
             Sub Initialize(gamescreen As Screen)
-
-                StartPosition = New Point(CInt(Initial_Position.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
-                                   CInt(Initial_Position.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
+                StartPosition = New Point(
+                    CInt(initialPosition.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
+                    CInt(initialPosition.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
 
                 Handler.TopLeftLocation = StartPosition
             End Sub
@@ -570,7 +497,7 @@ Module Games
             End Sub
 
             Friend Sub Kick(_speed As Double, _angle As Double, kicker As Position)
-                Last_Handled_By = kicker
+                LastHandledBy = kicker
 
                 Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
                 m_speed = _speed
@@ -578,13 +505,12 @@ Module Games
             End Sub
         End Class
 
-        Class Team
-
+        Public Class Team
             Friend Name As String
             Friend Number As Integer
             Friend Positions As New List(Of Position)
             Friend Score As Integer = 0
-            Friend Goal As Goal_Area = Nothing
+            Friend Goal As GoalArea = Nothing
 
             Sub New(_name As String, _number As Integer)
                 Name = _name
@@ -593,138 +519,197 @@ Module Games
 
         End Class
 
-        Class Goal_Area
+        Public Class GoalArea
+            Friend HostEffect As Effect
+            Friend TeamNumber As Integer ' 0 = a score any team
+            Private startPoint As Point
 
-            Friend form As Effect
-            Friend team_number As Integer ' 0 = a score any team
-            Dim start_point As Point = New Point
-            Dim image As Image
+            Public Sub New(_teamNumber As Integer, imageFilename As String, location As String)
+                If Not My.Computer.FileSystem.FileExists(imageFilename) Then
+                    Throw New FileNotFoundException("File does not exist: " & imageFilename)
+                End If
 
-            Sub New(_team_number As Integer, image_filename As String, location As String)
+                TeamNumber = _teamNumber
+                HostEffect = New Effect(imageFilename, imageFilename)
+                HostEffect.Name = "Team " & TeamNumber & "'s Goal"
 
-                team_number = _team_number
-                form = New Effect(image_filename, image_filename)
-                form.Name = "Team " & team_number & "'s Goal"
-                If Not My.Computer.FileSystem.FileExists(image_filename) Then Throw New FileNotFoundException("File does not exist: " & image_filename)
-
-                Dim location_parts = Split(location, ",")
-                start_point = New Point(Integer.Parse(location_parts(0), CultureInfo.InvariantCulture), Integer.Parse(location_parts(1), CultureInfo.InvariantCulture))
-
-                image = image.FromFile(image_filename)
-
-                'form.Size = form.Effect_Image.Image.Size
-                'form.Effect_Image.Size = form.Effect_Image.Image.Size
-
+                Dim locationParts = Split(location, ",")
+                startPoint = New Point(
+                    Integer.Parse(locationParts(0), CultureInfo.InvariantCulture),
+                    Integer.Parse(locationParts(1), CultureInfo.InvariantCulture))
             End Sub
 
-            Sub Initialize(gamescreen As Screen)
-                form.Location = New Point(CInt(start_point.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
-                                   CInt(start_point.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
-                form.current_image_path = form.right_image_path
+            Public Sub Initialize(gamescreen As Screen)
+                HostEffect.Location = New Point(
+                    CInt(startPoint.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
+                    CInt(startPoint.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
+                HostEffect.CurrentImagePath = HostEffect.RightImagePath
             End Sub
 
-            Function Center() As Point
-                Return New Point(CInt(form.Location.X + (form.CurrentImageSize().Width / 2)), CInt(Me.form.Location.Y + (Me.form.CurrentImageSize().Height) / 2))
+            Public Function Center() As Point
+                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize().Width / 2)),
+                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize().Height) / 2))
             End Function
-
         End Class
 
-        Class Game_ScoreBoard
-            Friend form As Effect
-            Dim graphics As Graphics
-            Dim start_point As Point = New Point
-            Dim original_image As Image
-            Friend Image As Image
+        Public Class GameScoreboard
+            Friend HostEffect As Effect
+            Private startPoint As Point
 
-            Dim team1 As String = ""
-            Dim team2 As String = ""
-            Dim team1_score As Integer = 0
-            Dim team2_score As Integer = 0
+            Private teamOneNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(66, 107)}
+            Private teamTwoNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(66, 150)}
+            Private teamOneScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(130, 113)}
+            Private teamTwoScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(135, 156)}
 
-            Sub New(location As String, image_filename As String)
-                If Not My.Computer.FileSystem.FileExists(image_filename) Then Throw New FileNotFoundException("File does not exist: " & image_filename)
+            Public ReadOnly Iterator Property ScoreDisplays As IEnumerable(Of ScoreDisplay)
+                Get
+                    Yield teamOneNameDisplay
+                    Yield teamTwoNameDisplay
+                    Yield teamOneScoreDisplay
+                    Yield teamTwoScoreDisplay
+                End Get
+            End Property
 
-                form = New Effect(image_filename, image_filename)
-                form.Name = "Scoreboard"
+            Public Sub New(x As String, y As String, imageFilename As String)
+                If Not My.Computer.FileSystem.FileExists(imageFilename) Then
+                    Throw New FileNotFoundException("File does not exist: " & imageFilename)
+                End If
 
-                Dim location_parts = Split(location, ",")
-                start_point = New Point(Integer.Parse(location_parts(0), CultureInfo.InvariantCulture), Integer.Parse(location_parts(1), CultureInfo.InvariantCulture))
+                HostEffect = New Effect(imageFilename, imageFilename)
+                HostEffect.Name = "Scoreboard"
 
-                original_image = Image.FromFile(image_filename)
-
+                startPoint = New Point(
+                    Integer.Parse(x, CultureInfo.InvariantCulture),
+                    Integer.Parse(y, CultureInfo.InvariantCulture))
             End Sub
 
-            Sub Initialize(gamescreen As Screen)
-                form.Location = New Point(CInt(start_point.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X), _
-                                   CInt(start_point.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
+            Public Sub Initialize(gamescreen As Screen)
+                HostEffect.Location = New Point(
+                    CInt(startPoint.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
+                    CInt(startPoint.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
             End Sub
 
-            Function Center() As Point
-                Return New Point(CInt(Me.form.Location.X + (form.CurrentImageSize().Width / 2)), CInt(Me.form.Location.Y + (form.CurrentImageSize().Height) / 2))
+            Public Function Center() As Point
+                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize().Width / 2)),
+                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize().Height) / 2))
             End Function
 
-            Sub SetScore(_team1 As String, _team1_score As Integer, _team2 As String, _team2_score As Integer)
-                team1 = _team1
-                team1_score = _team1_score
-                team2 = _team2
-                team2_score = _team2_score
+            Public Sub SetScores(teamOne As Team, teamTwo As Team)
+                teamOneNameDisplay.Text = teamOne.Name
+                teamOneScoreDisplay.Text = teamOne.Score.ToString(CultureInfo.CurrentCulture)
+                teamTwoNameDisplay.Text = teamTwo.Name
+                teamTwoScoreDisplay.Text = teamTwo.Score.ToString(CultureInfo.CurrentCulture)
             End Sub
 
-            Sub Paint(screengraphics As Graphics)
+            Private Sub Paint(screengraphics As Graphics)
+                'Using font As New Font("Arial", 8)
+                '    TextRenderer.DrawText(Graphics, team1, font,
+                '                          New Rectangle(New Point(30, 82), New Size(75, 35)), Color.White)
+                '    TextRenderer.DrawText(Graphics, team2, font,
+                '                          New Rectangle(New Point(30, 126), New Size(75, 35)), Color.White)
+                'End Using
+                'Using font As New Font("Arial", 8, FontStyle.Bold)
+                '    TextRenderer.DrawText(Graphics, CStr(team1_score), font,
+                '                          New Rectangle(New Point(95, 85), New Size(75, 35)), Color.White)
+                '    TextRenderer.DrawText(Graphics, CStr(team2_score), font,
+                '                          New Rectangle(New Point(95, 130), New Size(75, 35)), Color.White)
+                'End Using
 
-                Image = CType(original_image.Clone(), Image)
-                graphics = graphics.FromImage(Image)
-
-                Using font As New Font("Arial", 8)
-                    TextRenderer.DrawText(graphics, team1, font, New Rectangle(New Point(30, 82), New Size(75, 35)), Color.White)
-                    TextRenderer.DrawText(graphics, team2, font, New Rectangle(New Point(30, 126), New Size(75, 35)), Color.White)
-                End Using
-                Using font As New Font("Arial", 8, FontStyle.Bold)
-                    TextRenderer.DrawText(graphics, CStr(team1_score), font, New Rectangle(New Point(95, 85), New Size(75, 35)), Color.White)
-                    TextRenderer.DrawText(graphics, CStr(team2_score), font, New Rectangle(New Point(95, 130), New Size(75, 35)), Color.White)
-                End Using
-
-                Dim translated_location = Point.Empty
-
-                screengraphics.DrawImageUnscaled(Image, translated_location.X, translated_location.Y)
-
+                'Dim translated_location = Point.Empty
+                'screengraphics.DrawImageUnscaled(Image, translated_location.X, translated_location.Y)
             End Sub
+
+            Public Class ScoreDisplay
+                Implements ISpeakingSprite
+
+                Public Text As String
+                Private parent As GameScoreboard
+                Public LocalPosition As Size
+
+                Public Sub New(parentBoard As GameScoreboard)
+                    parent = parentBoard
+                End Sub
+
+                Public ReadOnly Property IsSpeaking As Boolean Implements ISpeakingSprite.IsSpeaking
+                    Get
+                        Return True
+                    End Get
+                End Property
+
+                Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
+                    Get
+                        Return Text
+                    End Get
+                End Property
+
+                Public ReadOnly Property CurrentTime As TimeSpan Implements ISprite.CurrentTime
+                    Get
+                        Return TimeSpan.Zero
+                    End Get
+                End Property
+
+                Public ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
+                    Get
+                        Return False
+                    End Get
+                End Property
+
+                Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
+                    Get
+                        Return parent.HostEffect.CurrentImagePath
+                    End Get
+                End Property
+
+                Public ReadOnly Property Region As Rectangle Implements ISprite.Region
+                    Get
+                        Return New Rectangle(parent.HostEffect.Location + LocalPosition, Size.Empty)
+                    End Get
+                End Property
+
+                Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
+
+                End Sub
+
+                Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
+
+                End Sub
+            End Class
         End Class
 
-        Class Position
+        Public Class Position
             Friend Name As String
-            Friend Team_Number As Integer
+            Friend TeamNumber As Integer
             Friend Team As Team
             Friend Player As Pony = Nothing
-            Friend Allowed_Area As Rectangle? = Nothing  'nothing means allowed anywhere
-            Friend Start_Location As Point
-            Friend Current_Action As PlayerActionType = Nothing
-            Friend Current_Action_Group As List(Of PlayerActionType) = Nothing
+            Friend AllowedArea As Rectangle? = Nothing  'nothing means allowed anywhere
+            Friend StartLocation As Point
+            Friend CurrentAction As PlayerActionType
+            Friend CurrentActionGroup As List(Of PlayerActionType)
             Friend Required As Boolean
 
-            Dim area_points As String() = Nothing
+            Private areaPoints As String()
 
-            Friend Last_Kick_Time As DateTime = DateTime.MinValue
+            Friend LastKickTime As DateTime = DateTime.MinValue
 
-            Friend Hasball As Ball = Nothing
+            Friend HasBall As Ball
 
-            Friend nearest_ball_distance As Integer = 0
+            Friend NearestBallDistance As Integer
 
-            Friend Selection_Menu_Picturebox As PictureBox = Nothing
+            Friend SelectionMenuPictureBox As PictureBox
 
-            Friend Have_Ball_Actions As New List(Of PlayerActionType)
-            Friend Hostile_Ball_Actions As New List(Of PlayerActionType)
-            Friend Friendly_Ball_Actions As New List(Of PlayerActionType)
-            Friend Neutral_Ball_Actions As New List(Of PlayerActionType)
-            Friend Distant_Ball_Actions As New List(Of PlayerActionType)
-            Friend No_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly Have_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly Hostile_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly Friendly_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly Neutral_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly Distant_Ball_Actions As New List(Of PlayerActionType)
+            Friend ReadOnly No_Ball_Actions As New List(Of PlayerActionType)
 
             Sub New(_Name As String, _team_number As Integer, _start_location As String, _Allowed_area As String,
                     _Have_Ball_Actions As String, _Hostile_Ball_Actions As String, _Friendly_Ball_Actions As String, _
                     _Neutral_Ball_Actions As String, _Distance_Ball_Actions As String, _No_Ball_Actions As String, _required As String)
 
                 Name = Trim(_Name.Replace(ControlChars.Quote, ""))
-                Team_Number = _team_number
+                TeamNumber = _team_number
 
                 Select Case LCase(Trim(_required))
                     Case "required"
@@ -736,14 +721,14 @@ Module Games
                 End Select
 
                 Dim start_points = Split(_start_location, ",")
-                Start_Location = New Point(
+                StartLocation = New Point(
                     Integer.Parse(start_points(0), CultureInfo.InvariantCulture),
                     Integer.Parse(start_points(1), CultureInfo.InvariantCulture))
 
                 If LCase(Trim(_Allowed_area)) <> "any" Then
-                    area_points = Split(_Allowed_area, ",")
+                    areaPoints = Split(_Allowed_area, ",")
                 Else
-                    Allowed_Area = Nothing
+                    AllowedArea = Nothing
                 End If
 
                 Dim Action_Lists As New List(Of List(Of PlayerActionType))
@@ -776,18 +761,18 @@ Module Games
             End Sub
 
             Sub Initialize(gamescreen As Screen)
-                If Not IsNothing(area_points) Then
-                    Allowed_Area = New Rectangle(
-                        CInt(Double.Parse(area_points(0), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
-                        CInt(Double.Parse(area_points(1), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y),
-                        CInt(Double.Parse(area_points(2), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Width),
-                        CInt(Double.Parse(area_points(3), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Height))
+                If Not IsNothing(areaPoints) Then
+                    AllowedArea = New Rectangle(
+                        CInt(Double.Parse(areaPoints(0), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
+                        CInt(Double.Parse(areaPoints(1), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y),
+                        CInt(Double.Parse(areaPoints(2), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Width),
+                        CInt(Double.Parse(areaPoints(3), CultureInfo.InvariantCulture) * 0.01 * gamescreen.WorkingArea.Height))
                 End If
             End Sub
 
-            Sub Decide_On_Action(game As Game)
+            Sub DecideOnAction(game As Game)
 
-                Dim nearest_ball = get_nearest_ball(game.Active_Balls)
+                Dim nearest_ball = get_nearest_ball(game.ActiveBalls)
 
                 If IsNothing(nearest_ball) Then
                     PerformAction(No_Ball_Actions, Nothing)
@@ -795,12 +780,12 @@ Module Games
                 End If
 
                 Dim screen_diagonal = Math.Sqrt((game.GameScreen.WorkingArea.Height) ^ 2 + (game.GameScreen.WorkingArea.Width) ^ 2)
-                If nearest_ball_distance > screen_diagonal * (1 / 2) Then 'AndAlso _
+                If NearestBallDistance > screen_diagonal * (1 / 2) Then 'AndAlso _
                     PerformAction(Distant_Ball_Actions, nearest_ball)
                     Exit Sub
                 End If
 
-                If nearest_ball_distance <= (Player.CurrentImageSize.X / 2) + 50 Then ' / 2 Then
+                If NearestBallDistance <= (Player.CurrentImageSize.X / 2) + 50 Then ' / 2 Then
                     PerformAction(Have_Ball_Actions, nearest_ball)
                     Exit Sub
                 End If
@@ -812,7 +797,7 @@ Module Games
                     Exit Sub
                 End If
 
-                If BallOwner_Team.Number = Me.Team_Number Then
+                If BallOwner_Team.Number = TeamNumber Then
                     PerformAction(Friendly_Ball_Actions, nearest_ball)
                     Exit Sub
                 Else
@@ -824,14 +809,14 @@ Module Games
 
             Sub PerformAction(action_list As List(Of PlayerActionType), ball As Ball)
 
-                If Not IsNothing(Current_Action_Group) Then ' AndAlso Not ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
-                    If ReferenceEquals(action_list, Current_Action_Group) Then
+                If Not IsNothing(CurrentActionGroup) Then ' AndAlso Not ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
+                    If ReferenceEquals(action_list, CurrentActionGroup) Then
                         'we are already doing an action from this list
 
                         'if we recently kicked the ball, don't do it for 2 seconds.
-                        If ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
-                            If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) <= 2 Then
-                                If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) > 1 AndAlso (Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo) Then
+                        If ReferenceEquals(CurrentActionGroup, Have_Ball_Actions) Then
+                            If DateDiff(DateInterval.Second, LastKickTime, DateTime.UtcNow) <= 2 Then
+                                If DateDiff(DateInterval.Second, LastKickTime, DateTime.UtcNow) > 1 AndAlso (Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo) Then
                                     Speak("Can't kick again so soon!")
                                 End If
 
@@ -842,7 +827,7 @@ Module Games
                             Exit Sub
                         End If
                     Else
-                        Current_Action_Group = Nothing
+                        CurrentActionGroup = Nothing
                     End If
                 End If
 
@@ -852,18 +837,18 @@ Module Games
 
                 Select Case selected_action
 
-                    Case PlayerActionType.Not_Set
+                    Case PlayerActionType.NotSet
                         Throw New Exception("Can't do this action (reserved): " & selected_action)
-                    Case PlayerActionType.Return_To_Start
+                    Case PlayerActionType.ReturnToStart
                         SetFollowBehavior(Nothing, Nothing, True)
-                    Case PlayerActionType.Chase_Ball
+                    Case PlayerActionType.ChaseBall
                         SetFollowBehavior(ball.Handler.Directory, ball.Handler)
-                    Case PlayerActionType.Lead_Ball
+                    Case PlayerActionType.LeadBall
                         SetFollowBehavior(ball.Handler.Directory, ball.Handler, False, True)
-                    Case PlayerActionType.Avoid_Ball
+                    Case PlayerActionType.AvoidBall
                         Throw New NotImplementedException("Not implemented yet: action type " & selected_action)
-                    Case PlayerActionType.Throw_Ball_ToGoal
-                        If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) <= 2 Then
+                    Case PlayerActionType.ThrowBallToGoal
+                        If DateDiff(DateInterval.Second, LastKickTime, DateTime.UtcNow) <= 2 Then
                             'can't kick again so soon
                             Exit Sub
                         End If
@@ -871,9 +856,9 @@ Module Games
                         If Player.ManualControlPlayerOne AndAlso Not Main.Instance.PonyAction Then Exit Sub
                         If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
                         Kick_Ball(ball, 10, Get_OtherTeam_Goal(), Nothing, Me, "*Kick*!")
-                        Last_Kick_Time = DateTime.UtcNow
-                    Case PlayerActionType.Throw_Ball_ToTeammate
-                        If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) <= 2 Then
+                        LastKickTime = DateTime.UtcNow
+                    Case PlayerActionType.ThrowBallToTeammate
+                        If DateDiff(DateInterval.Second, LastKickTime, DateTime.UtcNow) <= 2 Then
                             'can't kick again so soon
                             Exit Sub
                         End If
@@ -887,15 +872,15 @@ Module Games
                             'no teammates to pass to, kick to goal instead, unless a player controlled pony.
                             If Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo Then Exit Sub
                             Kick_Ball(ball, 10, Get_OtherTeam_Goal(), Nothing, Me, "*Kick*!")
-                            Last_Kick_Time = DateTime.UtcNow
+                            LastKickTime = DateTime.UtcNow
                             Exit Sub
                         End If
 
                         Kick_Ball(ball, 10, Nothing, open_teammate, Me, "*Pass*!")
-                        Last_Kick_Time = DateTime.UtcNow
+                        LastKickTime = DateTime.UtcNow
 
-                    Case PlayerActionType.Throw_Ball_Reflect
-                        If DateDiff(DateInterval.Second, Last_Kick_Time, DateTime.UtcNow) <= 2 Then
+                    Case PlayerActionType.ThrowBallReflect
+                        If DateDiff(DateInterval.Second, LastKickTime, DateTime.UtcNow) <= 2 Then
                             'can't kick again so soon
                             Exit Sub
                         End If
@@ -904,18 +889,18 @@ Module Games
                         If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
 
                         Bounce_Ball(ball, 7, Me, "*Ping*!")
-                        Last_Kick_Time = DateTime.UtcNow
+                        LastKickTime = DateTime.UtcNow
 
-                    Case PlayerActionType.Approach_Own_Goal
+                    Case PlayerActionType.ApproachOwnGoal
                         Dim goal = Get_Team_Goal()
-                        SetFollowBehavior(goal.form.Name, goal.form)
+                        SetFollowBehavior(goal.HostEffect.Name, goal.HostEffect)
 
-                    Case PlayerActionType.Approach_Target_Goal
+                    Case PlayerActionType.ApproachTargetGoal
                         Dim goal = Get_OtherTeam_Goal()
-                        SetFollowBehavior(goal.form.Name, goal.form)
+                        SetFollowBehavior(goal.HostEffect.Name, goal.HostEffect)
 
                     Case PlayerActionType.Idle
-                        If Current_Action = PlayerActionType.Idle Then Exit Sub
+                        If CurrentAction = PlayerActionType.Idle Then Exit Sub
                         Player.followObject = Nothing
                         Player.followObjectName = ""
 
@@ -923,7 +908,7 @@ Module Games
                         If Player.ManualControlPlayerTwo Then Exit Sub
 
                         Player.SelectBehavior()
-                        SetSpeed()
+                        SpeedOverride(True)
 
                     Case Else
                         Pony.CurrentAnimator.Pause(False)
@@ -931,8 +916,8 @@ Module Games
                         Throw New Exception("Invalid action type: " & selected_action)
                 End Select
 
-                Current_Action = selected_action
-                Current_Action_Group = action_list
+                CurrentAction = selected_action
+                CurrentActionGroup = action_list
 
             End Sub
 
@@ -950,15 +935,15 @@ Module Games
 
                 If IsNothing(nearest_ball) Then Throw New Exception("No available balls found when checking distance!")
 
-                Me.nearest_ball_distance = CInt(nearest_ball_distance)
+                Me.NearestBallDistance = CInt(nearest_ball_distance)
                 Return nearest_ball
 
             End Function
 
-            Function Get_OtherTeam_Goal() As Goal_Area
+            Function Get_OtherTeam_Goal() As GoalArea
 
-                For Each goal In Main.Instance.CurrentGame.Goals
-                    If goal.team_number <> Me.Team_Number Then
+                For Each goal In Main.Instance.CurrentGame.goals
+                    If goal.TeamNumber <> TeamNumber Then
                         Return goal
                     End If
                 Next
@@ -967,10 +952,10 @@ Module Games
 
             End Function
 
-            Function Get_Team_Goal() As Goal_Area
+            Function Get_Team_Goal() As GoalArea
 
-                For Each goal In Main.Instance.CurrentGame.Goals
-                    If goal.team_number = Me.Team_Number Then
+                For Each goal In Main.Instance.CurrentGame.goals
+                    If goal.TeamNumber = TeamNumber Then
                         Return goal
                     End If
                 Next
@@ -981,7 +966,7 @@ Module Games
 
             Sub SetFollowBehavior(target_name As String, target As ISprite, Optional return_to_start As Boolean = False, Optional lead_target As Boolean = False)
 
-                SetSpeed()
+                SpeedOverride(True)
 
                 Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
                 'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
@@ -989,7 +974,7 @@ Module Games
                 Player.followObjectName = ""
 
                 If return_to_start Then
-                    Player.destinationCoords = Start_Location
+                    Player.destinationCoords = StartLocation
                     Exit Sub
                 Else
                     Player.followObjectName = target_name
@@ -1005,7 +990,7 @@ Module Games
                 End If
             End Sub
 
-            Sub Kick_Ball(ball As Ball, speed As Double, target_goal As Goal_Area, target_pony As Pony, kicker As Position, line As String)
+            Sub Kick_Ball(ball As Ball, speed As Double, target_goal As GoalArea, target_pony As Pony, kicker As Position, line As String)
 
                 If Rng.NextDouble() < 0.05 Then
                     Speak("Missed!")
@@ -1040,7 +1025,7 @@ Module Games
 
                 If Main.Instance.CurrentGame.Name = "Ping Pong Pony" Then
                     'avoid boucing the ball back into our own goal.
-                    If Not IsNothing(ball.Last_Handled_By) AndAlso ReferenceEquals(ball.Last_Handled_By, Me) Then
+                    If Not IsNothing(ball.LastHandledBy) AndAlso ReferenceEquals(ball.LastHandledBy, Me) Then
                         Exit Sub
                     End If
                 End If
@@ -1154,7 +1139,7 @@ Module Games
 
                     If DoesPonyOverlap(Me.Player, otherpony) Then
                         'Push overlapping ponies a bit apart
-                        PonyPush(Me.Player, otherpony, Allowed_Area)
+                        PonyPush(Me.Player, otherpony, AllowedArea)
                         Exit Sub
                     End If
 
@@ -1219,7 +1204,7 @@ Module Games
             End Function
 
             'get a teammate that is not near any enemy players and is closer to the goal than we are.
-            Function Get_Open_Teammate(team As Team, goal As Goal_Area) As Pony
+            Function Get_Open_Teammate(team As Team, goal As GoalArea) As Pony
 
                 Dim open_teammates As New List(Of Pony)
 
@@ -1230,7 +1215,7 @@ Module Games
                     End If
 
                     Dim open = True
-                    For Each other_position As Position In Main.Instance.CurrentGame.AllPlayers
+                    For Each other_position As Position In Main.Instance.CurrentGame.allPlayers
                         If other_position.Team.Name = Me.Team.Name Then
                             Continue For
                         End If
@@ -1255,10 +1240,12 @@ Module Games
 
             End Function
 
-            Sub SetSpeed()
-                Dim speed = If(Main.Instance.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
-                If Player.AtDestination Then speed = 0
-                Player.CurrentBehavior.SetSpeed(speed)
+            Sub SpeedOverride(enable As Boolean)
+                If enable Then
+                    Player.SpeedOverride = If(Main.Instance.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
+                Else
+                    Player.SpeedOverride = Nothing
+                End If
             End Sub
 
         End Class

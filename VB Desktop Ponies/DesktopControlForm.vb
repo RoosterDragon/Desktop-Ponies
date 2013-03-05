@@ -232,7 +232,7 @@ Public Class DesktopControlForm
     Private Sub ReturnButton_Click(sender As Object, e As EventArgs) Handles ReturnButton.Click
         Pony.CurrentAnimator.Finish()
         Main.Instance.Invoke(Sub()
-                                 Main.Instance.Pony_Shutdown()
+                                 Main.Instance.PonyShutdown()
                                  Main.Instance.Opacity = 100 'for when autostarted
                                  Main.Instance.Show()
                              End Sub)

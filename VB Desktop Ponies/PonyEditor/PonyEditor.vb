@@ -418,7 +418,7 @@ Public Class PonyEditor
                     PonyEffectsGrid.Rows.Add(.Name, _
                                                  .Name, _
                                                  .BehaviorName, _
-                                                 Get_Filename(.right_image_path), _
+                                                 Get_Filename(.RightImagePath), _
                                                  Get_Filename(.left_image_path), _
                                                  .Duration, _
                                                  .Repeat_Delay, _
@@ -2070,7 +2070,7 @@ Public Class PonyEditor
                                       ",", "Effect",
                                       Quoted(effect.Name),
                                       Quoted(effect.BehaviorName),
-                                      Quoted(Get_Filename(effect.right_image_path)),
+                                      Quoted(Get_Filename(effect.RightImagePath)),
                                       Quoted(Get_Filename(effect.left_image_path)),
                                       effect.Duration.ToString(CultureInfo.InvariantCulture),
                                       effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),

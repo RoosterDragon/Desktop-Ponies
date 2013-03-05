@@ -24,6 +24,11 @@ Public Class DesktopPonyAnimator
     ''' </summary>
     Private zOrder As Comparison(Of ISprite) = New Comparison(Of ISprite)(
                                                                Function(a, b)
+                                                                   If Main.Instance.CurrentGame IsNot Nothing Then
+                                                                       Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
+                                                                       Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
+                                                                       If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
+                                                                   End If
                                                                    Dim aIsHouse = TypeOf a Is House
                                                                    Dim bIsHouse = TypeOf b Is House
                                                                    If aIsHouse Xor bIsHouse Then Return If(aIsHouse, -1, 1)
@@ -323,7 +328,7 @@ Public Class DesktopPonyAnimator
     Private Sub ReturnToMenu()
         Finish()
         Main.Instance.Invoke(Sub()
-                                 Main.Instance.Pony_Shutdown()
+                                 Main.Instance.PonyShutdown()
                                  Main.Instance.Opacity = 100 'for when autostarted
                                  Main.Instance.Show()
                              End Sub)
@@ -446,6 +451,10 @@ Public Class DesktopPonyAnimator
 
     Friend Sub RemoveEffect(effect As Effect)
         Sprites.Remove(effect)
+    End Sub
+
+    Friend Sub AddSprites(_sprites As IEnumerable(Of ISprite))
+        Sprites.AddRangeLast(_sprites)
     End Sub
 
     Friend Sub Clear()

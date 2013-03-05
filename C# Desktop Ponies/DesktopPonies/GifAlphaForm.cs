@@ -23,6 +23,10 @@
         /// </summary>
         private GifImage<Bitmap> gifImage;
         /// <summary>
+        /// The frame index currently being displayed.
+        /// </summary>
+        private int frameIndex;
+        /// <summary>
         /// Maintains the mapping table between source RGB colors and desired ARGB colors.
         /// </summary>
         private Dictionary<Color, Color> colorMappingTable = new Dictionary<Color, Color>();
@@ -43,38 +47,13 @@
         /// </summary>
         private bool loaded;
         /// <summary>
-        /// Indicates if the frame to be displayed is currently being changed. Controls need only set their values and not trigger further
-        /// update events.
-        /// </summary>
-        private bool updating;
-        /// <summary>
         /// Indicates if a change has been made, and thus saving is required.
         /// </summary>
         private bool changed;
         /// <summary>
-        /// The index of the frame currently being displayed.
-        /// </summary>
-        private int frameIndex;
-        /// <summary>
-        /// The time index into the animation, in milliseconds.
-        /// </summary>
-        private int timeIndex;
-        /// <summary>
         /// The current color in the source image that is currently being edited or otherwise modified.
         /// </summary>
         private Color sourceColor;
-        /// <summary>
-        /// A list of timings in the animation that mark the start and end of frames over the duration of the animation.
-        /// </summary>
-        private List<int> sectionValues = new List<int>();
-        /// <summary>
-        /// Brushes used to draw sections for each frame.
-        /// </summary>
-        private Brush[] sectionBrushes = new Brush[] { Brushes.DarkGray, Brushes.LightGray };
-        /// <summary>
-        /// Brush used to draw the section of the currently selected frame.
-        /// </summary>
-        private Brush sectionHighlightBrush = Brushes.Red;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.GifAlphaForm"/> class.
@@ -110,13 +89,6 @@
                 MessageBox.Show(this,
                     string.Format(CultureInfo.CurrentCulture, "No .gif files found in {0} or its subdirectories.", Program.PonyDirectory),
                     "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            //System.Threading.ThreadPool.QueueUserWorkItem(o =>
-            //    ImageSelector.Invoke(new MethodInvoker(() =>
-            //    {
-            //        for (int i = 0; i < ImageSelector.Items.Count; i++)
-            //            ImageSelector.SelectedIndex = i;
-            //    })));
         }
 
         /// <summary>
@@ -143,6 +115,7 @@
                     frame.Dispose();
 
             gifImage = null;
+            frameIndex = -1;
             desiredFrames = null;
             ImageComparison.Panel1.BackgroundImage = null;
             ImageComparison.Panel2.BackgroundImage = null;
@@ -165,14 +138,8 @@
             FrameControls.Enabled = false;
             PaletteControls.Enabled = false;
             ColorControls.Enabled = false;
-            FrameSelector.Maximum = 0;
-            TimeSelector.Maximum = 0;
-            TimeSelectorSections.Invalidate();
-            FrameLabel.ResetText();
             ErrorLabel.Visible = false;
             sourceColor = Color.Empty;
-            frameIndex = -1;
-            timeIndex = 0;
 
             FileStream gifStream = null;
             try
@@ -191,18 +158,7 @@
                 if (gifStream != null)
                     gifStream.Dispose();
             }
-
-            sectionValues.Clear();
-            int runningDuration = 0;
-            sectionValues.Add(runningDuration);
-            foreach (var frame in gifImage.Frames)
-            {
-                runningDuration += frame.Duration;
-                sectionValues.Add(runningDuration);
-            }
-
-            FrameSelector.Maximum = gifImage.Frames.Count - 1;
-            TimeSelector.Maximum = gifImage.Duration;
+            Indexer.UseTimingsFrom(gifImage);
 
             AlphaRemappingTable map = new AlphaRemappingTable();
             string mapFile = Path.ChangeExtension(filePath, AlphaRemappingTable.FileExtension);
@@ -265,10 +221,6 @@
             PaletteControls.Enabled = true;
             ColorControls.Enabled = true;
 
-            FrameSelector.Value = 0;
-            TimeSelector.Value = 0;
-
-            TimeSelectorSections.Invalidate();
             UpdateSelectedFrame(0);
             UpdateColorHex();
             UpdateColorDisplay();
@@ -310,182 +262,28 @@
         }
 
         /// <summary>
-        /// Raised when the value of the FrameSelector is changed.
-        /// Displays the frame of that index.
+        /// Raised when the image index changes.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void FrameSelector_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The source of the event</param>
+        /// <param name="e">Data about the event.</param>
+        private void Indexer_IndexChanged(object sender, EventArgs e)
         {
-            if (!loaded || updating)
-                return;
-
-            updating = true;
-            timeIndex = 0;
-            int newFrameIndex = FrameSelector.Value;
-
-            for (int i = 0; i < newFrameIndex; i++)
-                timeIndex += gifImage.Frames[i].Duration;
-            timeIndex += gifImage.Frames[newFrameIndex].Duration / 2;
-            TimeSelector.Value = timeIndex;
-
-            UpdateSelectedFrame(newFrameIndex);
-            updating = false;
-        }
-
-        /// <summary>
-        /// Raised when the value of TimeSelector is changed.
-        /// Displays the frame for that time.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void TimeSelector_ValueChanged(object sender, EventArgs e)
-        {
-            TimeSelectorSections.Invalidate();
-
-            if (!loaded || updating)
-                return;
-
-            updating = true;
-            int newFrameIndex = 0;
-            timeIndex = TimeSelector.Value;
-
-            int seekTime = gifImage.Frames[newFrameIndex].Duration;
-            while (seekTime <= timeIndex && ++newFrameIndex < gifImage.Frames.Count - 1)
-                seekTime += gifImage.Frames[newFrameIndex].Duration;
-            FrameSelector.Value = newFrameIndex;
-
-            UpdateSelectedFrame(newFrameIndex);
-            updating = false;
-        }
-
-        /// <summary>
-        /// Raised when TimeSelectorSections is painted.
-        /// Draws sections along the bar to mark the durations of each frame in sequence.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void TimeSelectorSections_Paint(object sender, PaintEventArgs e)
-        {
-            Graphics graphics = e.Graphics;
-
-            int colorIndex = 0;
-            float currentValue = GetRelativeTime(TimeSelector.Value);
-            for (int section = 0; section < sectionValues.Count - 1; section++)
-            {
-                float min = GetRelativeTime(sectionValues[section]);
-                float max = GetRelativeTime(sectionValues[section + 1]);
-
-                Brush brush = sectionBrushes[colorIndex];
-                if (currentValue >= min && (currentValue < max || (currentValue == 1 && currentValue == max)))
-                    brush = sectionHighlightBrush;
-
-                int width = TimeSelectorSections.Width;
-                int height = TimeSelectorSections.Height;
-                graphics.FillRectangle(brush, min * width, 0, (max - min) * width, height);
-
-                if (++colorIndex >= sectionBrushes.Length)
-                    colorIndex = 0;
-            }
-        }
-
-        /// <summary>
-        /// Gets the normalized value of the time into the animation.
-        /// </summary>
-        /// <param name="time">Absolute time into the animation, in milliseconds.</param>
-        /// <returns>A value between 0 and 1 representing the time into the animation.</returns>
-        private float GetRelativeTime(int time)
-        {
-            return (float)(time - TimeSelector.Minimum) / (TimeSelector.Maximum - TimeSelector.Minimum);
+            UpdateSelectedFrame(Indexer.FrameIndex);
         }
 
         /// <summary>
         /// Updates the display to a new frame.
         /// </summary>
-        /// <param name="newFrameIndex">The index of the frame that should be displayed.</param>
+        /// <param name="newFrameIndex">The index of the frame that should be displayed.</param>]
         private void UpdateSelectedFrame(int newFrameIndex)
         {
             if (frameIndex != newFrameIndex)
             {
                 frameIndex = newFrameIndex;
-                ImageComparison.Panel1.BackgroundImage = gifImage.Frames[frameIndex].Image;
-                ImageComparison.Panel2.BackgroundImage = desiredFrames[frameIndex];
+                ImageComparison.Panel1.BackgroundImage = gifImage.Frames[newFrameIndex].Image;
+                ImageComparison.Panel2.BackgroundImage = desiredFrames[newFrameIndex];
                 ImageComparison.Panel1.Invalidate();
                 ImageComparison.Panel2.Invalidate();
-            }
-
-            FrameLabel.Text = string.Format(CultureInfo.CurrentCulture,
-                "Frame: {0:00} of {1:00}  Time: {2:00.00} of {3:00.00} seconds",
-                frameIndex + 1, gifImage.Frames.Count, timeIndex / 1000f, gifImage.Duration / 1000f);
-        }
-
-        /// <summary>
-        /// Raised when PreviousCommand is clicked.
-        /// Moves back one frame.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void PreviousCommand_Click(object sender, EventArgs e)
-        {
-            int value = FrameSelector.Value;
-            if (--value < FrameSelector.Minimum)
-                value = FrameSelector.Maximum;
-            FrameSelector.Value = value;
-        }
-
-        /// <summary>
-        /// Raised when NextCommand is clicked.
-        /// Moves forward one frame.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void NextCommand_Click(object sender, EventArgs e)
-        {
-            int value = FrameSelector.Value;
-            if (++value > FrameSelector.Maximum)
-                value = FrameSelector.Minimum;
-            FrameSelector.Value = value;
-        }
-
-        /// <summary>
-        /// Raised when PlayCommand is clicked.
-        /// Toggles playback of the animation.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void PlayCommand_Click(object sender, EventArgs e)
-        {
-            AnimationTimer.Enabled = !AnimationTimer.Enabled;
-
-            FrameSelector.Enabled = !AnimationTimer.Enabled;
-            TimeSelector.Enabled = !AnimationTimer.Enabled;
-            NextCommand.Enabled = !AnimationTimer.Enabled;
-            PreviousCommand.Enabled = !AnimationTimer.Enabled;
-            PlayCommand.Text = AnimationTimer.Enabled ? "Pause" : "Play";
-        }
-
-        /// <summary>
-        /// Raised when AnimationTimer ticks.
-        /// Advances the current time index of the animation being played.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void AnimationTimer_Tick(object sender, EventArgs e)
-        {
-            if (!loaded)
-                return;
-
-            int range = TimeSelector.Maximum - TimeSelector.Minimum;
-            if (range != 0)
-            {
-                int value = TimeSelector.Value + AnimationTimer.Interval;
-                while (value >= TimeSelector.Maximum)
-                    value -= range;
-                TimeSelector.Value = value;
-            }
-            else
-            {
-                TimeSelector.Value = TimeSelector.Minimum;
             }
         }
 
@@ -752,8 +550,8 @@
 
             Panel panel = (Panel)sender;
 
-            int imageWidth = gifImage.Frames[frameIndex].Image.Width;
-            int imageHeight = gifImage.Frames[frameIndex].Image.Height;
+            int imageWidth = gifImage.Frames[Indexer.FrameIndex].Image.Width;
+            int imageHeight = gifImage.Frames[Indexer.FrameIndex].Image.Height;
             Point location = e.Location;
             location -= new Size(panel.Width / 2, panel.Height / 2);
             location += new Size(imageWidth / 2, imageHeight / 2);
@@ -766,7 +564,7 @@
                 else
                     colors = colorMappingTable.Values;
 
-                Color pixel = gifImage.Frames[frameIndex].Image.GetPixel(location.X, location.Y);
+                Color pixel = gifImage.Frames[Indexer.FrameIndex].Image.GetPixel(location.X, location.Y);
                 foreach (Color color in colors)
                     // GetPixel always returns a color with binary alpha. This comparison relaxes the alpha comparison to work around this,
                     // but can lead to incorrect picks when two desired colors have the same RGB values but different alpha.
