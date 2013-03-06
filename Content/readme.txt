@@ -63,6 +63,12 @@ Change Log
 
 Latest changes:
 
+v1.42.2:
+- Games are now working again.
+- If a pony is removed, any effects the spawned are now removed immediately.
+- Fixed a bug using multiple monitors where ponies would bounce off all edges instead of moving across screens.
+- Fixed a bug from v1.42.1.3 that could occasionally crash the program on startup.
+
 v1.42.1.3:
 - Added updated Changling by Bot-chan
 - Added Princess Twilight Sparkle by Bot-chan

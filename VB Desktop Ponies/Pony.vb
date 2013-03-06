@@ -1830,8 +1830,8 @@ Class Pony
         Dim isNearCursorNow = IsPonyNearMouseCursor(TopLeftLocation)
         Dim isNearCursorFuture = IsPonyNearMouseCursor(newTopLeftLocation)
 
-        Dim isOnscreenNow = IsPonyOnScreen(TopLeftLocation, Main.Instance.ScreensToUse)
-        Dim isOnscreenFuture = IsPonyOnScreen(newTopLeftLocation, Main.Instance.ScreensToUse)
+        Dim isOnscreenNow = IsPonyOnScreen(TopLeftLocation)
+        Dim isOnscreenFuture = IsPonyOnScreen(newTopLeftLocation)
 
         ' TODO: Refactor and extract.
         'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
@@ -1925,7 +1925,7 @@ Class Pony
                 'except if the user made changes to the avoidance area to include our current safe spot (we were already trying to avoid the area),
                 'then get a new safe spot.
                 If ReturningToScreenArea AndAlso
-                    (InAvoidanceArea(Destination) OrElse Not IsPonyOnScreen(Destination, Main.Instance.ScreensToUse)) Then
+                    (InAvoidanceArea(Destination) OrElse Not IsPonyOnScreen(Destination)) Then
                     destinationCoords = FindSafeDestination()
                 End If
             End If
@@ -2197,12 +2197,12 @@ Class Pony
 
         If movement.Width <> 0 AndAlso movement.Height <> 0 Then
 
-            If Not pony.IsPonyOnScreen(new_location_x, Main.Instance.ScreensToUse) OrElse pony.InAvoidanceArea(new_location_x) _
+            If Not pony.IsPonyOnScreen(new_location_x) OrElse pony.InAvoidanceArea(new_location_x) _
                 OrElse pony.IsPonyEnteringWindow(current_location, new_location_x, New SizeF(movement.Width, 0)) Then
                 x_bad = True
             End If
 
-            If Not pony.IsPonyOnScreen(new_location_y, Main.Instance.ScreensToUse) OrElse pony.InAvoidanceArea(new_location_y) _
+            If Not pony.IsPonyOnScreen(new_location_y) OrElse pony.InAvoidanceArea(new_location_y) _
                 OrElse pony.IsPonyEnteringWindow(current_location, new_location_y, New SizeF(0, movement.Height)) Then
                 y_bad = True
             End If
@@ -2603,15 +2603,16 @@ Class Pony
 
     End Function
 
-    'Is the pony at least partially on any of the supplied screens?
-    Friend Function IsPonyOnScreen(location As Point, screenList As List(Of Screen)) As Boolean
+    'Is the pony at least partially on any of the main screens?
+    Friend Function IsPonyOnScreen(location As Point) As Boolean
         If Main.Instance.InPreviewMode Then Return True
+        Return Main.Instance.GetCombinedScreenArea().Contains(Region)
+    End Function
 
-        For Each screen In screenList
-            If EveryLocationPointContainedInBounds(location, screen.WorkingArea) Then Return True
-        Next
-
-        Return False
+    'Is the pony at least partially on the supplied screens?
+    Friend Function IsPonyOnScreen(location As Point, screen As Screen) As Boolean
+        If Main.Instance.InPreviewMode Then Return True
+        Return EveryLocationPointContainedInBounds(location, screen.WorkingArea)
     End Function
 
     Function EveryLocationPointContainedInBounds(location As Point, bounds As Rectangle) As Boolean

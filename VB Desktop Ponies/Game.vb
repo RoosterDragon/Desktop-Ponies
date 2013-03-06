@@ -1181,10 +1181,7 @@ Friend Module Games
                 Dim change = New Size(xchange, ychange)
                 Dim new_location = pony1.TopLeftLocation + change
 
-                Dim screenlist As New List(Of Screen)
-                screenlist.Add(Main.Instance.CurrentGame.GameScreen)
-
-                If pony1.IsPonyOnScreen(new_location, screenlist) AndAlso
+                If pony1.IsPonyOnScreen(new_location, Main.Instance.CurrentGame.GameScreen) AndAlso
                     (Not allowed_area.HasValue OrElse Pony.IsPonyInBox(new_location, allowed_area.Value)) Then
                     pony1.TopLeftLocation = new_location
                 End If

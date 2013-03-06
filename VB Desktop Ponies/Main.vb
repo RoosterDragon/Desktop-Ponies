@@ -837,7 +837,7 @@ Public Class Main
             Me.Visible = False
             If New GameSelectionForm().ShowDialog() = DialogResult.OK Then
                 Startup_Ponies.Clear()
-                Pony_Startup()
+                PonyStartup()
                 CurrentGame.Setup()
                 Animator.Start()
             Else
@@ -1238,7 +1238,7 @@ Public Class Main
                 MsgBox("Unable to initialize interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
             End Try
 
-            Pony_Startup()
+            PonyStartup()
         Catch ex As Exception
 #If Not Debug Then
             MsgBox("Error launching ponies... Details: " & ex.Message & ControlChars.NewLine _
@@ -1272,7 +1272,7 @@ Public Class Main
         Next
     End Sub
 
-    Friend Sub Pony_Startup()
+    Friend Sub PonyStartup()
         If ScreensaverMode Then
             If OptionsForm.Instance.ScreensaverTransparent.Checked = False Then
                 For Each monitor In Screen.AllScreens
@@ -1301,6 +1301,7 @@ Public Class Main
             Cursor.Hide()
         End If
 
+        AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
         PonyViewer = GetInterface()
         PonyViewer.Topmost = Options.AlwaysOnTop
 
@@ -1370,6 +1371,15 @@ Public Class Main
 
         Return viewer
     End Function
+
+    Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
+        PonyShutdown()
+        Main.Instance.Invoke(Sub()
+                                 MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
+                                                 "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                 Main.Instance.Show()
+                             End Sub)
+    End Sub
 
     Private Sub PonyLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles PonyLoader.ProgressChanged
         ' Lazy solution to invoking issues and deadlocking the main thread.
@@ -1453,6 +1463,8 @@ Public Class Main
         If Not IsNothing(PonyViewer) Then
             PonyViewer.Close()
         End If
+
+        RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
     End Sub
 
     ''' <summary>
@@ -1572,5 +1584,9 @@ Public Class Main
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = loading AndAlso Not My.Application.IsFaulted
+    End Sub
+
+    Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
+        RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
     End Sub
 End Class
