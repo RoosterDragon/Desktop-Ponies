@@ -65,7 +65,7 @@ Latest changes:
 
 v1.42.2:
 - Games are now working again.
-- If a pony is removed, any effects the spawned are now removed immediately.
+- If a pony is removed, any effects it spawned are now removed immediately.
 - Fixed a bug using multiple monitors where ponies would bounce off all edges instead of moving across screens.
 - Fixed a bug from v1.42.1.3 that could occasionally crash the program on startup.
 

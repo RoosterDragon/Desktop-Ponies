@@ -399,6 +399,8 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(TargetDir)$(TargetName).scr"
 IF errorlevel 1 exit /b %25errorlevel%25
+copy "$(TargetPath).config" "$(TargetDir)$(TargetName).scr.config"
+IF errorlevel 1 exit /b %25errorlevel%25
 exit /b 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
