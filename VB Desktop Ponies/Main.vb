@@ -835,7 +835,7 @@ Public Class Main
             Next
 
             Me.Visible = False
-            If GameSelectionForm.ShowDialog() = DialogResult.OK Then
+            If New GameSelectionForm().ShowDialog() = DialogResult.OK Then
                 Startup_Ponies.Clear()
                 Pony_Startup()
                 CurrentGame.Setup()

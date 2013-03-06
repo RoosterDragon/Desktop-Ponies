@@ -328,7 +328,9 @@ Friend Module Games
                                 Pony.CurrentAnimator.Pause(False)
                                 MessageBox.Show(team.Name & " won!", "Winner", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                 Main.Instance.PonyShutdown()
-                                Main.Instance.Visible = True
+                                Main.Instance.Invoke(Sub()
+                                                         Main.Instance.Visible = True
+                                                     End Sub)
                                 Exit Sub
                             End If
                         Next

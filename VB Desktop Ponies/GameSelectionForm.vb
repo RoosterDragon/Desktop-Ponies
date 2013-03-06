@@ -31,7 +31,7 @@ Public Class GameSelectionForm
         pony_image_list.ImageSize = New Size(75, 75)
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-            pony_image_list.Images.Add(CType(ponyPanel.PonyImage(0).Image.Clone(), Bitmap))
+            pony_image_list.Images.Add(CType(ponyPanel.GetPonyImage(0).Clone(), Bitmap))
         Next
 
         Pony_Selection_View.LargeImageList = pony_image_list

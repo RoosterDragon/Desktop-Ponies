@@ -6,6 +6,7 @@ Public Class PonySelectionControl
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
+    Private imageLoader As New Threading.Thread(AddressOf LoadImage)
 
     Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         InitializeComponent()
@@ -14,28 +15,37 @@ Public Class PonySelectionControl
         imageSize = CSDesktopPonies.ImageSize.GetSize(imagePath)
         imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
         flip = flipImage
-        Threading.ThreadPool.QueueUserWorkItem(Sub(o)
-                                                   PonyImage = New AnimatedImage(Of BitmapFrame)(
-                                                   imagePath, Function(file As String) New BitmapFrame(file),
-                                                   BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
-                                                   If Disposing OrElse IsDisposed Then
-                                                       PonyImage.Dispose()
-                                                   Else
-                                                       Try
-                                                           If IsHandleCreated Then
-                                                               Invoke(Sub()
-                                                                          ResizeToFit()
-                                                                          InvalidatePonyImageArea()
-                                                                      End Sub)
-                                                           End If
-                                                       Catch ex As ObjectDisposedException
-                                                           If ex.ObjectName <> PonyImage.GetType().Name Then Throw
-                                                       End Try
-                                                   End If
-                                               End Sub)
+
+        imageLoader.SetApartmentState(Threading.ApartmentState.STA)
+        imageLoader.Start(imagePath)
 
         ResizeToFit()
     End Sub
+
+    Private Sub LoadImage(imagePath As Object)
+        PonyImage = New AnimatedImage(Of BitmapFrame)(
+                                                   imagePath.ToString(), Function(file As String) New BitmapFrame(file),
+                                                   BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+        If Disposing OrElse IsDisposed Then
+            PonyImage.Dispose()
+        Else
+            Try
+                If IsHandleCreated Then
+                    Invoke(Sub()
+                               ResizeToFit()
+                               InvalidatePonyImageArea()
+                           End Sub)
+                End If
+            Catch ex As ObjectDisposedException
+                If ex.ObjectName <> PonyImage.GetType().Name Then Throw
+            End Try
+        End If
+    End Sub
+
+    Public Function GetPonyImage(milliseconds As Double) As Bitmap
+        imageLoader.Join()
+        Return PonyImage(milliseconds).Image
+    End Function
 
     Public Sub AdvanceTimeIndex(amount As TimeSpan)
         If PonyImage Is Nothing Then
