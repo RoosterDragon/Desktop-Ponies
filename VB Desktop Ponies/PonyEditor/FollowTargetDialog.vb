@@ -11,7 +11,7 @@
         m_editor = editor
     End Sub
 
-    Private Sub Loc_X_ValueChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Point_Loc_X.ValueChanged
+    Private Sub Loc_X_ValueChanged(sender As Object, e As EventArgs) Handles Point_Loc_X.ValueChanged
         If IsNothing(Point_Preview_Image.Image) Then Exit Sub
 
         SetPreviewPoint()
@@ -19,7 +19,7 @@
         RedrawFollowPoint()
     End Sub
 
-    Private Sub Loc_Y_ValueChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Point_Loc_Y.ValueChanged
+    Private Sub Loc_Y_ValueChanged(sender As Object, e As EventArgs) Handles Point_Loc_Y.ValueChanged
         If IsNothing(Point_Preview_Image.Image) Then Exit Sub
 
         SetPreviewPoint()
@@ -71,7 +71,7 @@
     End Sub
 
 
-    Private Sub Form_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+    Private Sub Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         If IsNothing(behavior_to_change) Then
             Throw New InvalidOperationException("Behavior to modify is not set.  Call Change_Behavior() first before loading this form.")
@@ -87,7 +87,7 @@
 
     End Sub
 
-    Friend Sub Change_Behavior(ByVal behavior As PonyBase.Behavior)
+    Friend Sub Change_Behavior(behavior As PonyBase.Behavior)
         Argument.EnsureNotNull(behavior, "behavior")
 
         behavior_to_change = behavior
@@ -180,7 +180,7 @@
     End Sub
 
 
-    Private Sub Pony_Radio_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Pony_Radio.CheckedChanged, Point_Radio.CheckedChanged
+    Private Sub Pony_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles Pony_Radio.CheckedChanged, Point_Radio.CheckedChanged
 
         Point_Loc_X.Enabled = True
         Point_Loc_Y.Enabled = True
@@ -222,7 +222,7 @@
     End Sub
 
 
-    Private Sub Follow_ComboBox_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Follow_ComboBox.SelectedIndexChanged
+    Private Sub Follow_ComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Follow_ComboBox.SelectedIndexChanged
 
         For Each Pony In Main.Instance.SelectablePonies
             If Pony.Directory = CStr(Follow_ComboBox.SelectedItem) Then
@@ -251,7 +251,7 @@
     End Sub
 
 
-    Private Shared Function string_to_effectname(ByVal name As String) As String
+    Private Shared Function string_to_effectname(name As String) As String
         For Each effect In PonyEditor.get_effect_list()
             If (effect.OwnerPony.Name & "'s " & effect.Name) = name Then
                 Return effect.Name
@@ -260,11 +260,11 @@
         Return name
     End Function
 
-    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
         Me.Close()
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If Auto_Select_Images_Checkbox.Checked = False AndAlso (CStr(moving_behavior_box.SelectedItem) = "" OrElse CStr(stopped_behavior_box.SelectedItem) = "") Then
             MsgBox("If you disable auto-selection of images, then you must specifiy a moving behavior and a stopped behavior to get the images from." _
@@ -298,7 +298,7 @@
 
     End Sub
 
-    Private Sub Auto_Select_Images_Checkbox_CheckedChanged(ByVal sender As Object, ByVal e As EventArgs) Handles Auto_Select_Images_Checkbox.CheckedChanged
+    Private Sub Auto_Select_Images_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles Auto_Select_Images_Checkbox.CheckedChanged
         If Auto_Select_Images_Checkbox.Checked = True Then
             moving_behavior_box.Enabled = False
             stopped_behavior_box.Enabled = False

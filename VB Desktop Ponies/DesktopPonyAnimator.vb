@@ -122,6 +122,8 @@ Public Class DesktopPonyAnimator
     ''' Updates the ponies and effect. Cycles houses.
     ''' </summary>
     Protected Overrides Sub Update()
+        If Sprites.Count = 0 Then ReturnToMenu()
+
         Pony.CursorLocation = Viewer.CursorPosition
         ManualControl()
         With Main.Instance
@@ -239,7 +241,6 @@ Public Class DesktopPonyAnimator
                                                                                               other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
                                                                                           Next
                                                                                       End Sub)
-                                                                 If Sprites.Count = 0 Then ReturnToMenu()
                                                              End Sub))
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  Main.Instance.Invoke(Sub()
@@ -259,7 +260,6 @@ Public Class DesktopPonyAnimator
                                                                                               other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
                                                                                           Next
                                                                                       End Sub)
-                                                                 If Sprites.Count = 0 Then ReturnToMenu()
                                                              End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()

@@ -157,24 +157,14 @@ Public Class Main
         'need our own PID for window avoidance (ignoring collisions with other ponies)
         process_id = System.Diagnostics.Process.GetCurrentProcess().Handle
 
-        'Try to determine our dependencies and if all are available on this system.
-        'Primarily to check to see if the right version of DirectX is installed for sounds.
-        Dim self As System.Reflection.Assembly = System.Reflection.Assembly.GetEntryAssembly()
-
-        For Each dependency As System.Reflection.AssemblyName In self.GetReferencedAssemblies()
-
-            If InStr(dependency.ToString, "DirectX") <> 0 Then
-                Try
-                    System.Reflection.Assembly.Load(dependency)
-                    DirectXSoundAvailable = True
-                Catch ex As Exception
-                    ' If we can't load the assembly, just don't enable sound.
-                End Try
-            End If
-        Next
-
-        'Fix errors for cultures that don't use , as separator (Russian, others).
-        'Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture
+        ' Check to see if the right version of DirectX is installed for sounds.
+        Try
+            System.Reflection.Assembly.Load(
+                "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
+            DirectXSoundAvailable = True
+        Catch ex As Exception
+            ' If we can't load the assembly, just don't enable sound.
+        End Try
 
         Try
             Dim Arguments = My.Application.CommandLineArgs
@@ -1103,7 +1093,7 @@ Public Class Main
             loading = True
             SelectionControlsPanel.Enabled = False
             LoadingProgressBar.Visible = True
-            loadWatch.Start()
+            loadWatch.Restart()
             PonyLoader.RunWorkerAsync()
         End If
     End Sub

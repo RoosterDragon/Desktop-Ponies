@@ -1044,7 +1044,7 @@ Class Pony
         Get
             Return _sleeping
         End Get
-        Private Set(ByVal value As Boolean)
+        Private Set(value As Boolean)
             _sleeping = value
         End Set
     End Property
@@ -1076,7 +1076,7 @@ Class Pony
     ''' <summary>
     ''' The angle to travel in, if moving diagonally (in radians).
     ''' </summary>
-    Friend diagonal As Double = 0
+    Friend Diagonal As Double
 
     ''' <summary>
     ''' Time until interactions should be disabled.
@@ -1094,7 +1094,9 @@ Class Pony
         Friend Set(value As PonyBase.Behavior)
             Diagnostics.Debug.Assert(value IsNot Nothing)
             _currentBehavior = value
-            SetAllowableDirections()
+            If Main.Instance.CurrentGame Is Nothing Then
+                SetAllowableDirections()
+            End If
         End Set
     End Property
 
@@ -1549,25 +1551,25 @@ Class Pony
             Case AllowedMoves.None
                 verticalMovementAllowed = False
                 horizontalMovementAllowed = False
-                diagonal = 0
+                Diagonal = 0
             Case AllowedMoves.HorizontalOnly
                 horizontalMovementAllowed = True
                 verticalMovementAllowed = False
-                diagonal = 0
+                Diagonal = 0
             Case AllowedMoves.VerticalOnly
                 horizontalMovementAllowed = False
                 verticalMovementAllowed = True
-                diagonal = 0
+                Diagonal = 0
             Case AllowedMoves.DiagonalOnly
                 horizontalMovementAllowed = True
                 verticalMovementAllowed = True
                 ' Pick a random angle to travel at.
                 If facingUp Then
-                    diagonal = ((Rng.NextDouble() * 35) + 15) * (Math.PI / 180)
+                    Diagonal = ((Rng.NextDouble() * 35) + 15) * (Math.PI / 180)
                 Else
-                    diagonal = ((Rng.NextDouble() * 35) + 310) * (Math.PI / 180)
+                    Diagonal = ((Rng.NextDouble() * 35) + 310) * (Math.PI / 180)
                 End If
-                If Not facingRight Then diagonal = Math.PI - diagonal
+                If Not facingRight Then Diagonal = Math.PI - Diagonal
         End Select
     End Sub
 
@@ -1804,12 +1806,12 @@ Class Pony
             End If
 
             ' If moving diagonally.
-            If diagonal <> 0 Then
+            If Diagonal <> 0 Then
                 'Opposite = Hypotenuse * cosine of the angle
-                movement.X = CSng(Math.Sqrt((speed ^ 2) * 2) * Math.Cos(diagonal))
+                movement.X = CSng(Math.Sqrt((speed ^ 2) * 2) * Math.Cos(Diagonal))
                 'Adjacent = Hypotenuse * cosine of the angle
                 '(negative because we are using pixel coordinates - down is positive)
-                movement.Y = CSng(-Math.Sqrt((speed ^ 2) * 2) * Math.Sin(diagonal))
+                movement.Y = CSng(-Math.Sqrt((speed ^ 2) * 2) * Math.Sin(Diagonal))
                 facingRight = (movement.X >= 0)
             Else
                 ' Not moving diagonally.
@@ -2163,25 +2165,18 @@ Class Pony
     End Sub
 
     'reverse directions as if we were bouncing off a boundary.
-    Friend Sub Bounce(ByRef pony As Pony, ByRef current_location As Point, ByRef new_location As Point, movement As SizeF)
-
-        If movement = SizeF.Empty Then
-            Exit Sub
-        End If
+    Friend Sub Bounce(pony As Pony, currentLocation As Point, newLocation As Point, movement As SizeF)
+        If movement = SizeF.Empty Then Exit Sub
 
         'if we are moving in a simple direction (up/down, left/right) just reverse direction
         If movement.Width = 0 AndAlso movement.Height <> 0 Then
             facingUp = Not facingUp
-            If diagonal <> 0 Then
-                diagonal = 2 * Math.PI - diagonal
-            End If
+            If Diagonal <> 0 Then Diagonal = 2 * Math.PI - Diagonal
             Exit Sub
         End If
         If movement.Width <> 0 AndAlso movement.Height = 0 Then
             facingRight = Not facingRight
-            If diagonal <> 0 Then
-                diagonal = Math.PI - diagonal
-            End If
+            If Diagonal <> 0 Then Diagonal = Math.PI - Diagonal
             Exit Sub
         End If
 
@@ -2190,31 +2185,28 @@ Class Pony
         Dim x_bad = False
         Dim y_bad = False
 
-
-        Dim new_location_x As New Point(new_location.X, current_location.Y)
-        Dim new_location_y As New Point(current_location.X, new_location.Y)
-
+        Dim new_location_x As New Point(newLocation.X, currentLocation.Y)
+        Dim new_location_y As New Point(currentLocation.X, newLocation.Y)
 
         If movement.Width <> 0 AndAlso movement.Height <> 0 Then
-
-            If Not pony.IsPonyOnScreen(new_location_x) OrElse pony.InAvoidanceArea(new_location_x) _
-                OrElse pony.IsPonyEnteringWindow(current_location, new_location_x, New SizeF(movement.Width, 0)) Then
+            If Not pony.IsPonyOnScreen(new_location_x) OrElse
+                pony.InAvoidanceArea(new_location_x) OrElse
+                pony.IsPonyEnteringWindow(currentLocation, new_location_x, New SizeF(movement.Width, 0)) Then
                 x_bad = True
             End If
-
-            If Not pony.IsPonyOnScreen(new_location_y) OrElse pony.InAvoidanceArea(new_location_y) _
-                OrElse pony.IsPonyEnteringWindow(current_location, new_location_y, New SizeF(0, movement.Height)) Then
+            If Not pony.IsPonyOnScreen(new_location_y) OrElse
+                pony.InAvoidanceArea(new_location_y) OrElse
+                pony.IsPonyEnteringWindow(currentLocation, new_location_y, New SizeF(0, movement.Height)) Then
                 y_bad = True
             End If
-
         End If
 
         If Not x_bad AndAlso Not y_bad Then
             facingUp = Not facingUp
             facingRight = Not facingRight
-            If diagonal <> 0 Then
-                diagonal = Math.PI - diagonal
-                diagonal = 2 * Math.PI - diagonal
+            If Diagonal <> 0 Then
+                Diagonal = Math.PI - Diagonal
+                Diagonal = 2 * Math.PI - Diagonal
             End If
             Exit Sub
         End If
@@ -2222,24 +2214,24 @@ Class Pony
         If x_bad AndAlso y_bad Then
             facingUp = Not facingUp
             facingRight = Not facingRight
-            If diagonal <> 0 Then
-                diagonal = Math.PI - diagonal
-                diagonal = 2 * Math.PI - diagonal
+            If Diagonal <> 0 Then
+                Diagonal = Math.PI - Diagonal
+                Diagonal = 2 * Math.PI - Diagonal
             End If
             Exit Sub
         End If
 
         If x_bad Then
             facingRight = Not facingRight
-            If diagonal <> 0 Then
-                diagonal = Math.PI - diagonal
+            If Diagonal <> 0 Then
+                Diagonal = Math.PI - Diagonal
             End If
             Exit Sub
         End If
         If y_bad Then
             facingUp = Not facingUp
-            If diagonal <> 0 Then
-                diagonal = 2 * Math.PI - diagonal
+            If Diagonal <> 0 Then
+                Diagonal = 2 * Math.PI - Diagonal
             End If
         End If
 
@@ -2360,30 +2352,30 @@ Class Pony
     End Sub
 
     'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
-    Friend Function GetEffectLocation(ByRef EffectImageSize As Size, ByRef direction As Direction,
-                                      ByRef ParentLocation As Point, ByRef ParentSize As Vector2, ByRef centering As Direction) As Point
+    Friend Function GetEffectLocation(EffectImageSize As Size, direction As Direction,
+                                      ParentLocation As Point, ParentSize As Vector2, centering As Direction) As Point
 
         Dim point As Point
 
         With ParentSize * CSng(Scale)
             Select Case direction
-                Case Direction.Bottom
+                Case direction.Bottom
                     point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y))
-                Case Direction.BottomLeft
+                Case direction.BottomLeft
                     point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y))
-                Case Direction.BottomRight
+                Case direction.BottomRight
                     point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y))
-                Case Direction.Center
+                Case direction.Center
                     point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.Left
+                Case direction.Left
                     point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.Right
+                Case direction.Right
                     point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.Top
+                Case direction.Top
                     point = New Point(CInt(ParentLocation.X + .X / 2), ParentLocation.Y)
-                Case Direction.TopLeft
+                Case direction.TopLeft
                     point = New Point(ParentLocation.X, ParentLocation.Y)
-                Case Direction.TopRight
+                Case direction.TopRight
                     point = New Point(CInt(ParentLocation.X + .X), ParentLocation.Y)
             End Select
 
@@ -2392,23 +2384,23 @@ Class Pony
         Dim effectscaling = Options.ScaleFactor
 
         Select Case centering
-            Case Direction.Bottom
+            Case direction.Bottom
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.BottomLeft
+            Case direction.BottomLeft
                 point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.BottomRight
+            Case direction.BottomRight
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.Center
+            Case direction.Center
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.Left
+            Case direction.Left
                 point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.Right
+            Case direction.Right
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.Top
+            Case direction.Top
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), point.Y)
-            Case Direction.TopLeft
+            Case direction.TopLeft
                 'no change
-            Case Direction.TopRight
+            Case direction.TopRight
                 point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), point.Y)
         End Select
 
@@ -2501,7 +2493,7 @@ Class Pony
     End Function
 
     'Test to see if we overlap with another application's window.
-    Function IsPonyEnteringWindow(ByRef current_location As Point, ByRef new_location As Point, movement As SizeF) As Boolean
+    Function IsPonyEnteringWindow(current_location As Point, new_location As Point, movement As SizeF) As Boolean
         If Not OperatingSystemInfo.IsWindows Then Return False
 
         Try
@@ -2606,7 +2598,8 @@ Class Pony
     'Is the pony at least partially on any of the main screens?
     Friend Function IsPonyOnScreen(location As Point) As Boolean
         If Main.Instance.InPreviewMode Then Return True
-        Return Main.Instance.GetCombinedScreenArea().Contains(Region)
+        Return Main.Instance.GetCombinedScreenArea().Contains(
+            New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
     End Function
 
     'Is the pony at least partially on the supplied screens?
@@ -2644,12 +2637,12 @@ Class Pony
         Return True
     End Function
 
-    Shared Function IsPonyInBox(ByRef location As Point, ByRef box As Rectangle) As Boolean
+    Shared Function IsPonyInBox(location As Point, box As Rectangle) As Boolean
         Return box.IsEmpty OrElse box.Contains(location)
     End Function
 
     ''are we inside the user specified "Everfree Forest"?
-    Function InAvoidanceArea(ByRef new_location As System.Drawing.Point) As Boolean
+    Function InAvoidanceArea(new_location As Point) As Boolean
 
         If Main.Instance.InPreviewMode Then
             Dim previewArea = Pony.PreviewWindowRectangle
@@ -2700,7 +2693,7 @@ Class Pony
         Return False
     End Function
 
-    Function IsPonyNearMouseCursor(ByRef location As System.Drawing.Point) As Boolean
+    Function IsPonyNearMouseCursor(location As System.Drawing.Point) As Boolean
 
         If Not Options.CursorAvoidanceEnabled Then Return False
         If Main.Instance.ScreensaverMode Then Return False
@@ -2835,7 +2828,7 @@ Class Pony
 
     End Sub
 
-    Friend Sub StartInteraction(ByRef interaction As PonyBase.Interaction)
+    Friend Sub StartInteraction(interaction As PonyBase.Interaction)
 
         IsInteractionInitiator = True
         CurrentInteraction = interaction
@@ -2855,9 +2848,9 @@ Class Pony
 
     End Sub
 
-    Friend Sub StartInteractionAsTarget(ByRef BehaviorName As String, ByRef initiator As Pony, interaction As PonyBase.Interaction)
+    Friend Sub StartInteractionAsTarget(behaviorName As String, initiator As Pony, interaction As PonyBase.Interaction)
         For Each behavior In Behaviors
-            If BehaviorName = behavior.Name Then
+            If behaviorName = behavior.Name Then
                 SelectBehavior(behavior)
                 Exit For
             End If
@@ -2959,7 +2952,7 @@ Class Pony
     Private Function ManualControl(ponyAction As Boolean,
                               ponyUp As Boolean, ponyDown As Boolean, ponyLeft As Boolean, ponyRight As Boolean,
                               ponySpeed As Boolean) As Double
-        diagonal = 0
+        Diagonal = 0
         If Not PlayingGame AndAlso ponyAction Then
             CursorOverPony = True
             Paint() 'enable effects on mouseover.

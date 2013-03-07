@@ -265,7 +265,7 @@ Public Class PonyEditor
         Dim series As Integer
     End Structure
 
-    Friend Sub Load_Parameters(ByRef pony As Pony)
+    Friend Sub Load_Parameters(pony As Pony)
         Try
             If already_updating Then Exit Sub
 
@@ -348,7 +348,7 @@ Public Class PonyEditor
 
                     Dim no_more = False
                     Do Until no_more = True OrElse next_link = "None"
-                        link_order = Find_Next_Link(next_link, depth, link_series, pony, link_order)
+                        Append_Next_Link(next_link, depth, link_series, pony, link_order)
                         depth = depth + 1
                         If (link_order(link_order.Count - 1).behavior.LinkedBehaviorName) = "" OrElse link_order.Count <> depth Then
                             no_more = True
@@ -526,7 +526,8 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Shared Function Find_Next_Link(link_name As String, depth As Integer, series As Integer, ByRef pony As Pony, ByRef chain_list As List(Of ChainLink)) As List(Of ChainLink)
+    Private Shared Sub Append_Next_Link(link_name As String, depth As Integer, series As Integer,
+                                           pony As Pony, chain_list As List(Of ChainLink))
 
         For Each behavior In pony.Behaviors
             If behavior.Name = link_name Then
@@ -543,9 +544,7 @@ Public Class PonyEditor
             End If
         Next
 
-        Return chain_list
-
-    End Function
+    End Sub
 
     Private Shared Function Movement_ToString(movement As Pony.AllowedMoves) As String
         Select Case movement
@@ -1906,7 +1905,7 @@ Public Class PonyEditor
         MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
     End Sub
 
-    Private Sub Set_Behavior_Follow_Parameters(ByRef behavior As PonyBase.Behavior)
+    Private Sub Set_Behavior_Follow_Parameters(behavior As PonyBase.Behavior)
         Try
 
             HidePony()

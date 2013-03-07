@@ -479,7 +479,7 @@ Friend Module Games
 
                 up = Handler.facingUp
                 right = Handler.facingRight
-                angle = Handler.diagonal
+                angle = Handler.Diagonal
 
                 Select Case Handler.CurrentBehavior.Speed
                     Case Is < 0.1
@@ -494,7 +494,7 @@ Friend Module Games
                 m_speed = Handler.CurrentBehavior.Speed
                 Handler.facingUp = up
                 Handler.facingRight = right
-                Handler.diagonal = angle
+                Handler.Diagonal = angle
                 Handler.Move()
             End Sub
 
@@ -503,7 +503,7 @@ Friend Module Games
 
                 Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
                 m_speed = _speed
-                Handler.diagonal = _angle
+                Handler.Diagonal = _angle
             End Sub
         End Class
 
@@ -1037,7 +1037,7 @@ Friend Module Games
                 Dim angle As Double
                 Dim gamescreen = Main.Instance.CurrentGame.GameScreen
 
-                If ball.Handler.diagonal < (Math.PI / 2) OrElse ball.Handler.diagonal > (3 / 2) * Math.PI Then
+                If ball.Handler.Diagonal < (Math.PI / 2) OrElse ball.Handler.Diagonal > (3 / 2) * Math.PI Then
                     'ball is going to the right, it will 'bounce' to the left.
                     angle = Math.PI
                 Else

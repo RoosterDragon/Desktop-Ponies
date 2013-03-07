@@ -63,6 +63,11 @@ Change Log
 
 Latest changes:
 
+v1.42.2.1:
+- Fixed bug in v1.42.2 where ponies would freak out near screen edges.
+- Fixed manual control during games.
+- Fixed bug where removing all poines did not always return you to the main menu.
+
 v1.42.2:
 - Games are now working again.
 - If a pony is removed, any effects it spawned are now removed immediately.
