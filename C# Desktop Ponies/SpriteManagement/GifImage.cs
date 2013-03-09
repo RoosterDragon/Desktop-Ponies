@@ -150,14 +150,85 @@
     }
 
     /// <summary>
-    /// Decodes a GIF file into its component frames.
+    /// Describes a GIF file as a series of frames.
     /// </summary>
     /// <typeparam name="T">The type of the frame images.</typeparam>
     /// <remarks>
     /// This class provides easy access to the frames of an animated GIF file, as well as allowing the type of the image used for each
     /// frame to be specified so different graphics formats can make use of the class.
     /// </remarks>
-    public sealed class GifImage<T>
+    public class GifImage<T>
+    {
+        /// <summary>
+        /// Gets the total duration of the image, in milliseconds.
+        /// </summary>
+        public int Duration { get; private set; }
+        /// <summary>
+        /// Gets the number of times this image plays. If 0, it loops indefinitely.
+        /// </summary>
+        public int Iterations { get; private set; }
+        /// <summary>
+        /// Gets the frames that make up this GIF image.
+        /// </summary>
+        public IList<GifFrame<T>> Frames { get; private set; }
+        /// <summary>
+        /// Gets the size of the image.
+        /// </summary>
+        public Size Size { get; private set; }
+        /// <summary>
+        /// Gets the width of the image.
+        /// </summary>
+        public int Width
+        {
+            get { return Size.Width; }
+        }
+        /// <summary>
+        /// Gets the height of the image.
+        /// </summary>
+        public int Height
+        {
+            get { return Size.Height; }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1"/> class by decoding a GIF from the
+        /// given stream.
+        /// </summary>
+        /// <param name="stream">A <see cref="T:System.IO.Stream"/> ready to read a GIF file.</param>
+        /// <param name="imageFactory">The method used to construct an image of type <typeparamref name="T"/> from the decoded buffer.
+        /// </param>
+        /// <param name="allowableDepths">The allowable set of bit depths for the decoded buffer. Specify as many indexed formats as are
+        /// supported by <typeparamref name="T"/>. If no such formats are supported, it is suggested you specify only the
+        /// <see cref="F:CSDesktopPonies.SpriteManagement.BitDepths.Indexed8Bpp"/> format to make conversion easier. The
+        /// <see cref="F:CSDesktopPonies.SpriteManagement.BitDepths.Indexed8Bpp"/> format must be specified.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="stream"/> is null.-or-<paramref name="imageFactory"/> is null.
+        /// </exception>
+        /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="allowableDepths"/> is invalid.
+        /// </exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="stream"/> does not support reading.-or-
+        /// <paramref name="allowableDepths"/> does not specify <see cref="F:CSDesktopPonies.SpriteManagement.BitDepths.Indexed8Bpp"/>.
+        /// </exception>
+        /// <exception cref="T:System.NotSupportedException">The file uses a feature of GIF that is not supported by the decoder.
+        /// </exception>
+        /// <exception cref="T:System.IO.InvalidDataException"><paramref name="stream"/> was not a GIF file, or was a badly formed GIF
+        /// file.</exception>
+        public GifImage(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
+        {
+            var decoder = new GifDecoder<T>(stream, imageFactory, allowableDepths);
+            Duration = decoder.Duration;
+            Iterations = decoder.Iterations;
+            Frames = decoder.Frames;
+            Size = decoder.Size;
+        }
+    }
+
+    /// <summary>
+    /// Decodes a GIF file into its component frames.
+    /// </summary>
+    /// <typeparam name="T">The type of the frame images.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", 
+        Justification="Field is disposed within constructor and so will never need disposing by consumers.")]
+    internal sealed class GifDecoder<T>
     {
         #region BlockCode enum
         /// <summary>
@@ -942,6 +1013,10 @@
         }
 
         /// <summary>
+        /// Accesses the input stream being decoded.
+        /// </summary>
+        private BinaryReader reader;
+        /// <summary>
         /// Creates a frame of the desired type from the raw buffer.
         /// </summary>
         private BufferToImage<T> createFrame;
@@ -1013,8 +1088,8 @@
         #endregion
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1"/> class by decoding a GIF from the
-        /// given stream.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1"/> class by decoding a GIF from
+        /// the given stream.
         /// </summary>
         /// <param name="stream">A <see cref="T:System.IO.Stream"/> ready to read a GIF file.</param>
         /// <param name="imageFactory">The method used to construct an image of type <typeparamref name="T"/> from the decoded buffer.
@@ -1034,7 +1109,7 @@
         /// </exception>
         /// <exception cref="T:System.IO.InvalidDataException"><paramref name="stream"/> was not a GIF file, or was a badly formed GIF
         /// file.</exception>
-        public GifImage(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
+        public GifDecoder(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
         {
             Argument.EnsureNotNull(stream, "stream");
             Argument.EnsureNotNull(imageFactory, "imageFactory");
@@ -1046,38 +1121,24 @@
 
             createFrame = imageFactory;
             validDepths = allowableDepths;
-            BinaryReader input = null;
             try
             {
-                input = new BinaryReader(new BufferedStream(stream));
-                DecodeGif(input);
+                reader = new BinaryReader(new BufferedStream(stream));
+                DecodeGif();
             }
             finally
             {
-                if (input != null)
-                    input.Close();
-
-                // Remove references to decoding fields so their memory can be reclaimed.
-                createFrame = null;
-                screenDescriptor = null;
-                frameBuffer = null;
-                previousFrameBuffer = null;
-                globalColorTable = null;
-                colorTable = null;
-                prefix = null;
-                suffix = null;
-                pixelStack = null;
-                block = null;
+                reader.Dispose();
+                reader = null;
             }
         }
         /// <summary>
         /// Reads the color table and sets up the buffer and transparent indexes.
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <param name="tableSize">The size of the color table to read.</param>
-        private void SetupColorTable(BinaryReader input, int tableSize)
+        private void SetupColorTable(int tableSize)
         {
-            colorTable = ReadColorTable(input, tableSize);
+            colorTable = ReadColorTable(tableSize);
             if (frameBuffer == null)
             {
                 // Create the initial buffers.
@@ -1095,15 +1156,14 @@
         /// Reads a color table block containing the given number of colors. These are optional blocks. Up to one global table may exist
         /// per data stream. Up to one local table may exist per image.
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <param name="colorCount">The number of colors in the table.</param>
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.RgbColor[]"/> containing the colors read in from the block.
         /// </returns>
-        private static RgbColor[] ReadColorTable(BinaryReader input, int colorCount)
+        private RgbColor[] ReadColorTable(int colorCount)
         {
             RgbColor[] colors = new RgbColor[colorCount];
             for (int i = 0; i < colors.Length; i++)
-                colors[i] = new RgbColor(input.ReadByte(), input.ReadByte(), input.ReadByte());
+                colors[i] = new RgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
             return colors;
         }
         /// <summary>
@@ -1190,32 +1250,29 @@
         /// <summary>
         /// Decodes a GIF file from an input stream.
         /// </summary>
-        /// <param name="input">The stream that is positioned to read the GIF file.</param>
-        private void DecodeGif(BinaryReader input)
+        private void DecodeGif()
         {
             Iterations = 1;
             Frames = new List<GifFrame<T>>();
-            ReadGifDataStream(input);
+            ReadGifDataStream();
         }
         /// <summary>
         /// Reads the GIF data stream. This contains the header block, logical screen section, data sections, and trailer.
         /// </summary>
-        /// <param name="input">The stream that is positioned to read the GIF file.</param>
-        private void ReadGifDataStream(BinaryReader input)
+        private void ReadGifDataStream()
         {
             // <GIF Data Stream> ::= Header <Logical Screen> <Data>* Trailer
-            ReadHeader(input);
-            ReadLogicalScreen(input);
-            ReadDataAndTrailer(input);
+            ReadHeader();
+            ReadLogicalScreen();
+            ReadDataAndTrailer();
         }
         /// <summary>
         /// Reads the header block (required - one per stream).
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private static void ReadHeader(BinaryReader input)
+        private void ReadHeader()
         {
             const string SignatureExpected = "GIF";
-            string signature = new string(input.ReadChars(3));
+            string signature = new string(reader.ReadChars(3));
             if (signature != SignatureExpected)
                 throw new InvalidDataException(
                     string.Format(CultureInfo.CurrentCulture, "Invalid signature in header. Expected '{0}'. Read '{1}'.",
@@ -1223,7 +1280,7 @@
 
             const string Version87a = "87a";
             const string Version89a = "89a";
-            string version = new string(input.ReadChars(3));
+            string version = new string(reader.ReadChars(3));
             if (version != Version87a && version != Version89a)
                 throw new InvalidDataException(
                     string.Format(CultureInfo.CurrentCulture,  "Invalid version in header. Expected '{0}' or '{1}'. Read '{2}'.",
@@ -1232,32 +1289,30 @@
         /// <summary>
         /// Reads the logical screen section. This contains the logical screen descriptor and global color table.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadLogicalScreen(BinaryReader input)
+        private void ReadLogicalScreen()
         {
             // <Logical Screen> ::= Logical Screen Descriptor [Global Color Table]
-            screenDescriptor = ReadLogicalScreenDescriptor(input);
+            screenDescriptor = ReadLogicalScreenDescriptor();
             Size = screenDescriptor.Size;
-            ReadGlobalColorTable(input);
+            ReadGlobalColorTable();
         }
         /// <summary>
         /// Reads the logical screen descriptor block. (required - one per stream).
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifLogicalScreenDescriptor"/> describing the logical screen.</returns>
-        private static LogicalScreenDescriptor ReadLogicalScreenDescriptor(BinaryReader input)
+        private LogicalScreenDescriptor ReadLogicalScreenDescriptor()
         {
-            ushort logicalScreenWidth = input.ReadUInt16();
-            ushort logicalScreenHeight = input.ReadUInt16();
+            ushort logicalScreenWidth = reader.ReadUInt16();
+            ushort logicalScreenHeight = reader.ReadUInt16();
 
-            byte packedFields = input.ReadByte();
+            byte packedFields = reader.ReadByte();
             bool globalColorTableFlag = (packedFields & 0x80) != 0;
             byte colorResolution = (byte)(((packedFields & 0x70) >> 4) + 1);
             bool sortFlag = (packedFields & 0x08) >> 3 == 1;
             int globalBitsPerPixel = (packedFields & 0x07) + 1;
             int sizeOfGlobalColorTable = 1 << globalBitsPerPixel;
-            byte backgroundColorIndex = input.ReadByte();
-            byte pixelAspectRatio = input.ReadByte();
+            byte backgroundColorIndex = reader.ReadByte();
+            byte pixelAspectRatio = reader.ReadByte();
 
             return new LogicalScreenDescriptor(logicalScreenWidth, logicalScreenHeight, globalColorTableFlag, colorResolution,
                 sortFlag, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio);
@@ -1265,20 +1320,18 @@
         /// <summary>
         /// Reads the global color table block. (optional - max one per stream).
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadGlobalColorTable(BinaryReader input)
+        private void ReadGlobalColorTable()
         {
             if (screenDescriptor.GlobalTableExists)
             {
-                SetupColorTable(input, screenDescriptor.GlobalTableSize);
+                SetupColorTable(screenDescriptor.GlobalTableSize);
                 globalColorTable = colorTable;
             }
         }
         /// <summary>
         /// Reads the data sections (optional - no limits) and the trailer (required - one per stream).
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadDataAndTrailer(BinaryReader input)
+        private void ReadDataAndTrailer()
         {
             // <GIF Data Stream> ::= Header <Logical Screen> <Data>* Trailer
             // <Data> ::= <Graphic Block> | <Special-Purpose Block>
@@ -1292,24 +1345,24 @@
 
             do
             {
-                blockCode = (BlockCode)input.ReadByte();
+                blockCode = (BlockCode)reader.ReadByte();
                 switch (blockCode)
                 {
                     case BlockCode.ImageDescriptor:
-                        ReadTableBasedImage(input, null);
+                        ReadTableBasedImage(null);
                         break;
                     case BlockCode.Extension:
-                        ExtensionLabel extensionLabel = (ExtensionLabel)input.ReadByte();
+                        ExtensionLabel extensionLabel = (ExtensionLabel)reader.ReadByte();
                         switch (extensionLabel)
                         {
                             case ExtensionLabel.GraphicControl:
-                                ReadGraphicBlock(input);
+                                ReadGraphicBlock();
                                 break;
                             case ExtensionLabel.Application:
-                                ReadApplicationExtension(input);
+                                ReadApplicationExtension();
                                 break;
                             default:
-                                SkipExtensionBlock(input);
+                                SkipExtensionBlock();
                                 break;
                         }
                         break;
@@ -1325,19 +1378,18 @@
         /// <summary>
         /// Reads a graphic block section. This contains a graphic control extension and a graphic-rendering block.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadGraphicBlock(BinaryReader input)
+        private void ReadGraphicBlock()
         {
             // <Graphic Block> ::= [Graphic Control Extension] <Graphic-Rendering Block>
             // <Graphic-Rendering Block> ::= <Table-Based Image> | Plain Text Extension
             // <Table-Based Image> ::= Image Descriptor [Local Color Table] Image Data
-            GraphicControlExtension graphicControl = ReadGraphicControlExtension(input);
+            GraphicControlExtension graphicControl = ReadGraphicControlExtension();
 
-            BlockCode blockCode = (BlockCode)input.ReadByte();
+            BlockCode blockCode = (BlockCode)reader.ReadByte();
             ExtensionLabel extensionLabel = ExtensionLabel.GraphicControl;
             if (blockCode == BlockCode.Extension)
             {
-                extensionLabel = (ExtensionLabel)input.ReadByte();
+                extensionLabel = (ExtensionLabel)reader.ReadByte();
                 if (extensionLabel != ExtensionLabel.PlainText)
                 {
                     // We have some other extension here, we need to skip them until we meet something valid.
@@ -1345,14 +1397,14 @@
                     {
                         // Read block.
                         if (extensionLabel == ExtensionLabel.Application)
-                            ReadApplicationExtension(input);
+                            ReadApplicationExtension();
                         else
-                            SkipExtensionBlock(input);
+                            SkipExtensionBlock();
 
                         // Determine next block.
-                        blockCode = (BlockCode)input.ReadByte();
+                        blockCode = (BlockCode)reader.ReadByte();
                         if (blockCode == BlockCode.Extension)
-                            extensionLabel = (ExtensionLabel)input.ReadByte();
+                            extensionLabel = (ExtensionLabel)reader.ReadByte();
 
                         // Continue until we have a valid start for a graphic-rendering block.
                     }
@@ -1364,12 +1416,12 @@
             if (blockCode == BlockCode.ImageDescriptor)
             {
                 // Read table based image data to finish the block.
-                ReadTableBasedImage(input, graphicControl);
+                ReadTableBasedImage(graphicControl);
             }
             else if (extensionLabel == ExtensionLabel.PlainText)
             {
                 // "Read" a plain text extension to finish the block.
-                SkipExtensionBlock(input);
+                SkipExtensionBlock();
             }
             else
             {
@@ -1380,110 +1432,104 @@
         /// <summary>
         /// Reads a graphic control extension block (optional - max one preceding a graphic-rendering block).
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> describing how a
         /// graphic-rendering block section is to be modified.</returns>
-        private static GraphicControlExtension ReadGraphicControlExtension(BinaryReader input)
+        private GraphicControlExtension ReadGraphicControlExtension()
         {
             // Read block size.
-            if (input.ReadByte() != 4)
+            if (reader.ReadByte() != 4)
                 throw new InvalidDataException("Unexpected block length for a graphic control extension.");
 
-            byte packedFields = input.ReadByte();
+            byte packedFields = reader.ReadByte();
             DisposalMethod disposalMethod = (DisposalMethod)((packedFields & 0x1C) >> 2);
             bool userInputFlag = (packedFields & 0x02) != 0;
             bool transparencyFlag = (packedFields & 0x01) != 0;
 
-            ushort delayTime = input.ReadUInt16();
-            byte transparentColorIndex = input.ReadByte();
+            ushort delayTime = reader.ReadUInt16();
+            byte transparentColorIndex = reader.ReadByte();
 
             // Read block terminator.
-            input.ReadByte();
+            reader.ReadByte();
 
             return new GraphicControlExtension(disposalMethod, userInputFlag, transparencyFlag, delayTime, transparentColorIndex);
         }
         /// <summary>
         /// Reads an application extension block.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadApplicationExtension(BinaryReader input)
+        private void ReadApplicationExtension()
         {
             // Read block size.
-            if (input.ReadByte() != 11)
+            if (reader.ReadByte() != 11)
                 throw new InvalidDataException("Unexpected block length for an application extension.");
 
-            string applicationIdentifier = new string(input.ReadChars(8));
-            string applicationAuthenticationCode = new string(input.ReadChars(3));
+            string applicationIdentifier = new string(reader.ReadChars(8));
+            string applicationAuthenticationCode = new string(reader.ReadChars(3));
 
             if (applicationIdentifier == "NETSCAPE" && applicationAuthenticationCode == "2.0")
-                ReadNetscapeApplicationExtension(input);
+                ReadNetscapeApplicationExtension();
             else
-                SkipDataSubBlocks(input);
+                SkipDataSubBlocks();
         }
         /// <summary>
         /// Reads the Netscape application extension sub-block, which defines an iteration count for the file.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private void ReadNetscapeApplicationExtension(BinaryReader input)
+        private void ReadNetscapeApplicationExtension()
         {
             // Read block size.
-            if (input.ReadByte() != 3)
+            if (reader.ReadByte() != 3)
                 throw new InvalidDataException("Unexpected block length for the Netscape application extension.");
 
             // Read empty byte.
-            input.ReadByte();
+            reader.ReadByte();
 
             // Read iteration count.
-            Iterations = input.ReadUInt16();
+            Iterations = reader.ReadUInt16();
 
             // Read sub-block terminator.
-            input.ReadByte();
+            reader.ReadByte();
         }
         /// <summary>
         /// Reads a series of data sub blocks until a terminator is encountered.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private static void SkipDataSubBlocks(BinaryReader input)
+        private void SkipDataSubBlocks()
         {
             byte blockSize;
             do
             {
-                blockSize = input.ReadByte();
-                input.ReadBytes(blockSize);
+                blockSize = reader.ReadByte();
+                reader.ReadBytes(blockSize);
             }
             while (blockSize > 0);
         }
         /// <summary>
         /// Reads an extension block.
         /// </summary>
-        /// <param name="input">The input stream.</param>
-        private static void SkipExtensionBlock(BinaryReader input)
+        private void SkipExtensionBlock()
         {
             // Read block size.
-            byte blockSize = input.ReadByte();
+            byte blockSize = reader.ReadByte();
 
             if (blockSize == 0)
                 return;
 
             // Read block data.
-            input.ReadBytes(blockSize);
+            reader.ReadBytes(blockSize);
 
             // Skip data sub blocks.
-            SkipDataSubBlocks(input);
+            SkipDataSubBlocks();
         }
         /// <summary>
         /// Reads the image descriptor block (required - one per image in the stream).
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the subframe.</returns>
-        private static ImageDescriptor ReadImageDescriptor(BinaryReader input)
+        private ImageDescriptor ReadImageDescriptor()
         {
-            ushort imageLeftPosition = input.ReadUInt16();
-            ushort imageTopPosition = input.ReadUInt16();
-            ushort imageWidth = input.ReadUInt16();
-            ushort imageHeight = input.ReadUInt16();
+            ushort imageLeftPosition = reader.ReadUInt16();
+            ushort imageTopPosition = reader.ReadUInt16();
+            ushort imageWidth = reader.ReadUInt16();
+            ushort imageHeight = reader.ReadUInt16();
 
-            byte packedFields = input.ReadByte();
+            byte packedFields = reader.ReadByte();
             bool localColorTableFlag = (packedFields & 0x80) != 0;
             bool interlaceFlag = (packedFields & 0x40) != 0;
             bool sortFlag = (packedFields & 0x20) != 0;
@@ -1496,13 +1542,12 @@
         /// <summary>
         /// Reads a table based image section. This contains an image descriptor, local color table and image data.
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
-        private void ReadTableBasedImage(BinaryReader input, GraphicControlExtension graphicControl)
+        private void ReadTableBasedImage(GraphicControlExtension graphicControl)
         {
             // <Table-Based Image> ::= Image Descriptor [Local Color Table] Image Data
-            ImageDescriptor imageDescriptor = ReadImageDescriptor(input);
+            ImageDescriptor imageDescriptor = ReadImageDescriptor();
             Rectangle frame = new Rectangle(Point.Empty, Size);
             if (!frame.Contains(imageDescriptor.Subframe))
                 throw new InvalidDataException("Subframe area extends outside the logical screen area.");
@@ -1512,7 +1557,7 @@
             if (imageDescriptor.LocalTableExists)
             {
                 // Use the local color table.
-                ReadLocalColorTable(input, imageDescriptor);
+                ReadLocalColorTable(imageDescriptor);
             }
             else if (globalColorTable != null && colorTable != globalColorTable)
             {
@@ -1531,7 +1576,7 @@
             }
 
             // Read the image data onto the frame buffer, then create the resulting image.
-            ReadImageData(input, imageDescriptor, graphicControl);
+            ReadImageData(imageDescriptor, graphicControl);
             CreateFrame(graphicControl);
 
             // Apply the disposal method.
@@ -1558,25 +1603,23 @@
         /// <summary>
         /// Reads a local color table block. (optional - max one per image descriptor).
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <param name="imageDescriptor">The <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> which describes
         /// the table, and to which any table will belong.</param>
-        private void ReadLocalColorTable(BinaryReader input, ImageDescriptor imageDescriptor)
+        private void ReadLocalColorTable(ImageDescriptor imageDescriptor)
         {
             if (imageDescriptor.LocalTableExists)
-                SetupColorTable(input, imageDescriptor.LocalTableSize);
+                SetupColorTable(imageDescriptor.LocalTableSize);
         }
         /// <summary>
         /// Reads image data onto the frame buffer. This is the LZW compressed information about the pixels in the subframe.
         /// </summary>
-        /// <param name="input">The input stream.</param>
         /// <param name="imageDescriptor">An <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the
         /// subframe.</param>
         /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
-        private void ReadImageData(BinaryReader input, ImageDescriptor imageDescriptor, GraphicControlExtension graphicControl)
+        private void ReadImageData(ImageDescriptor imageDescriptor, GraphicControlExtension graphicControl)
         {
-            byte lzwMinimumCodeSize = input.ReadByte();
+            byte lzwMinimumCodeSize = reader.ReadByte();
 
             #region Initialize decoder.
             // Image pixel position data.
@@ -1637,8 +1680,8 @@
                         if (bytesLeftInBlock == 0)
                         {
                             // Read a new data block.
-                            bytesLeftInBlock = input.ReadByte();
-                            block = input.ReadBytes(bytesLeftInBlock);
+                            bytesLeftInBlock = reader.ReadByte();
+                            block = reader.ReadBytes(bytesLeftInBlock);
                             blockIndex = 0;
 
                             // If we happen to read the block terminator, we are done reading image data.
@@ -1782,7 +1825,7 @@
 
             // Read block terminator (and any trailing sub-blocks, though there should not be any).
             if (skipDataSubBlocks)
-                SkipDataSubBlocks(input);
+                SkipDataSubBlocks();
         }
         /// <summary>
         /// Uses a value from the subframe and applies it onto the frame buffer.

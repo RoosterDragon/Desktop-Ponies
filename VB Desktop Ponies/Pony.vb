@@ -1094,7 +1094,7 @@ Class Pony
         Friend Set(value As PonyBase.Behavior)
             Diagnostics.Debug.Assert(value IsNot Nothing)
             _currentBehavior = value
-            If Main.Instance.CurrentGame Is Nothing Then
+            If Not (ManualControlPlayerOne OrElse ManualControlPlayerTwo) Then
                 SetAllowableDirections()
             End If
         End Set

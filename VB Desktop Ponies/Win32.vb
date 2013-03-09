@@ -32,5 +32,8 @@ Namespace Win32
         <DllImport("user32.dll", SetLastError:=True)>
         Public Function GetWindowRect(<[In]()> hWnd As IntPtr, <Out()> ByRef lpRect As RECT) As <MarshalAs(UnmanagedType.Bool)> Boolean
         End Function
+        <System.Runtime.InteropServices.DllImport("user32")>
+        Public Function GetKeyState(vKey As Integer) As Short
+        End Function
     End Module
 End Namespace
