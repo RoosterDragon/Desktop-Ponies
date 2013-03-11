@@ -18,7 +18,7 @@ Public Class Main
 
     Friend DesktopHandle As IntPtr
     Friend ShellHandle As IntPtr
-    Friend process_id As IntPtr
+    Friend processId As IntPtr
     Friend Suspended_For_FullScreenApp As Boolean = False
 
     Private Animator As DesktopPonyAnimator
@@ -51,7 +51,7 @@ Public Class Main
     Friend InPreviewMode As Boolean = False
 
     'Were we told to auto-start from the command line?
-    Friend auto_started As Boolean = False
+    Friend AutoStarted As Boolean = False
 
     Friend ScreensaverMode As Boolean = False
     Friend screen_saver_path As String = ""
@@ -155,7 +155,9 @@ Public Class Main
         'ShellHandle = DetectFulLScreen_m.GetShellWindow()
 
         'need our own PID for window avoidance (ignoring collisions with other ponies)
-        process_id = System.Diagnostics.Process.GetCurrentProcess().Handle
+        Using currentProcess = Diagnostics.Process.GetCurrentProcess()
+            processId = currentProcess.Handle
+        End Using
 
         ' Check to see if the right version of DirectX is installed for sounds.
         Try
@@ -185,7 +187,7 @@ Public Class Main
             If Arguments.Count > 0 Then
                 Select Case Split(LCase(Trim(Arguments(0))), ":")(0)
                     Case "autostart"
-                        auto_started = True
+                        AutoStarted = True
                         Me.ShowInTaskbar = False
                         ShowInTaskbar = False
 
@@ -201,7 +203,7 @@ Public Class Main
                         If screen_saver_path = "" Then Me.Close()
                         Options.InstallLocation = screen_saver_path
                         ScreensaverMode = True
-                        auto_started = True
+                        AutoStarted = True
                         ShowInTaskbar = False
                         WindowState = FormWindowState.Minimized
 
@@ -237,7 +239,7 @@ Public Class Main
 
         loading = True
 
-        If Not auto_started Then
+        If Not AutoStarted Then
             WindowState = FormWindowState.Normal
         End If
 
@@ -306,6 +308,7 @@ Public Class Main
         ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
         ' fully drawn.
         Application.DoEvents()
+        Console.WriteLine("Main Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
@@ -411,18 +414,16 @@ Public Class Main
     Private Sub TemplateLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
         Try
             Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
+            Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
             Dim skipLoadingErrors As Boolean = False
 
             Dim ponyBasesToAdd As New List(Of PonyBase)
 
-            Dim foldersLoaded = 0
             While Not IsHandleCreated
             End While
 
-            Invoke(Sub()
-                       LoadingProgressBar.Maximum = ponyBaseDirectories.Count
-                   End Sub)
+            BeginInvoke(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
 
             For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
                 skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
@@ -432,9 +433,10 @@ Public Class Main
                 Try
                     Dim pony = New PonyBase(folder)
                     ponyBasesToAdd.Add(pony)
-                    Invoke(Sub()
-                               AddToMenu(pony)
-                           End Sub)
+                    BeginInvoke(Sub()
+                                    AddToMenu(pony)
+                                    LoadingProgressBar.Value += 1
+                                End Sub)
                 Catch ex As InvalidDataException
                     If skipLoadingErrors = False Then
                         Select Case MsgBox("Error: Invalid data in " & PonyBase.ConfigFilename & " configuration file in " & folder _
@@ -462,17 +464,7 @@ Public Class Main
                         End Select
                     End If
                 End Try
-                foldersLoaded += 1
-                TemplateLoader.ReportProgress(foldersLoaded)
             Next
-            ' Sort loaded ponies and add them to the panel.
-            'Ponies_to_add.Sort(Function(a, b) a.Name.CompareTo(b.Name))
-            'For Each loopPony In Ponies_to_add
-            '    Dim pony = loopPony
-            '    Invoke(Sub()
-            '               Add_to_Menu(pony, False)
-            '           End Sub)
-            'Next
 
             If SelectablePonies.Count = 0 Then
                 MsgBox("Sorry, but you don't seem to have any ponies installed.  There should have at least been a 'Derpy' folder in the same spot as this program.")
@@ -480,9 +472,7 @@ Public Class Main
             End If
 
             'Load pony counts.
-            Main.Instance.Invoke(Sub()
-                                     Options.LoadPonyCounts()
-                                 End Sub)
+            BeginInvoke(Sub() Options.LoadPonyCounts())
 
             'We first load interactions to get a list of names 
             'that each pony should interact with.
@@ -491,10 +481,8 @@ Public Class Main
             Try
                 If Options.PonyInteractionsEnabled Then
                     Dim displaywarnings =
-                        Options.DisplayPonyInteractionsErrors AndAlso Not auto_started AndAlso Not ScreensaverMode
-                    Main.Instance.Invoke(Sub()
-                                             LoadInteractions(displaywarnings)
-                                         End Sub)
+                        Options.DisplayPonyInteractionsErrors AndAlso Not AutoStarted AndAlso Not ScreensaverMode
+                    Invoke(Sub() LoadInteractions(displaywarnings))
                 End If
             Catch ex As Exception
                 MsgBox("Unable to load interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
@@ -574,14 +562,13 @@ Public Class Main
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = NoRandomDuplicates
-            AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub()
-                                                                      NoRandomDuplicates = ponySelection.NoDuplicates.Checked
-                                                                  End Sub
+            AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() NoRandomDuplicates = ponySelection.NoDuplicates.Checked
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
         selectionControlFilter.Add(ponySelection, ponySelection.Visible)
         PonySelectionPanel.Controls.Add(ponySelection)
+        ponySelection.Update()
     End Sub
 
     Sub LoadInteractions(Optional displayWarnings As Boolean = True)
@@ -670,14 +657,11 @@ Public Class Main
         End Using
     End Sub
 
-    Private Sub TemplateLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles TemplateLoader.ProgressChanged
-        LoadingProgressBar.Value = e.ProgressPercentage
-    End Sub
-
     Private Sub TemplateLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles TemplateLoader.RunWorkerCompleted
+        Console.WriteLine("Templates Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
         TemplateLoader.Dispose()
 
-        If auto_started = True Then
+        If AutoStarted = True Then
             'Me.Opacity = 0
             GoButton_Click(Nothing, Nothing)
         Else

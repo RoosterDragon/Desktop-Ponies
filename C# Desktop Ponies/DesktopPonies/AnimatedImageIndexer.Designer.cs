@@ -37,8 +37,6 @@
             this.FrameLabel = new System.Windows.Forms.Label();
             this.FrameSelector = new System.Windows.Forms.TrackBar();
             this.PlaybackTimer = new System.Windows.Forms.Timer(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.TimeSelector)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FrameSelector)).BeginInit();
             this.SuspendLayout();
             // 
             // PreviousCommand
@@ -142,8 +140,6 @@
             this.Enabled = false;
             this.Name = "AnimatedImageIndexer";
             this.Size = new System.Drawing.Size(214, 114);
-            ((System.ComponentModel.ISupportInitialize)(this.TimeSelector)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FrameSelector)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

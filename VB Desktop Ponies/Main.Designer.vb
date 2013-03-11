@@ -93,7 +93,6 @@ Partial Class Main
         '
         'TemplateLoader
         '
-        Me.TemplateLoader.WorkerReportsProgress = True
         '
         'PonyLoader
         '

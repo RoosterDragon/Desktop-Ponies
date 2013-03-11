@@ -2,12 +2,9 @@
 Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
-Class PonyBase
+Friend Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
-
-    Sub New()
-    End Sub
 
     Private _directory As String
     Public Property Directory() As String
@@ -85,6 +82,9 @@ Class PonyBase
         End Get
     End Property
 
+    Public Sub New()
+    End Sub
+
     Public Sub New(directory As String)
         Argument.EnsureNotNull(directory, "directory")
 
@@ -101,11 +101,10 @@ Class PonyBase
     Private Sub LoadFromIni()
         Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, Directory)
         Using configFile As New StreamReader(Path.Combine(fullDirectory, ConfigFilename))
-            Dim behaviorNames As New List(Of String)
-            Dim effectNames As New List(Of String)
+            Dim behaviorLines As New List(Of String)
+            Dim effectLines As New List(Of String)
 
             Do Until configFile.EndOfStream
-
                 Dim line = configFile.ReadLine
 
                 ' Ignore blank lines, and those commented out with a single quote.
@@ -123,7 +122,7 @@ Class PonyBase
                     Case "behaviorgroup"
                         BehaviorGroups.Add(New PonyBase.BehaviorGroup(columns(2), Integer.Parse(columns(1), CultureInfo.InvariantCulture)))
                     Case "behavior"
-                        behaviorNames.Add(line)
+                        behaviorLines.Add(line)
                     Case "categories"
                         For i = 1 To columns.Count - 1
                             For Each item As String In Main.Instance.FilterOptionsBox.Items
@@ -192,45 +191,38 @@ Class PonyBase
                                 Case Else
                                     MsgBox("Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name & ":" &
                                            ControlChars.NewLine & line & ControlChars.NewLine &
-                                           "Line must contain a name for the entry, the text to be displayed, optional: soundfile, true if entry is for a specific behavior and should be skipped normally")
+                                           "Line must contain a name for the entry, the text to be displayed," &
+                                           " optional: soundfile, true if entry is for a specific behavior and should be skipped normally")
                             End Select
                             SpeakingLines.Add(newLine)
                         Catch ex As Exception
-                            MsgBox("Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name & ":" & ControlChars.NewLine _
-                             & line & ControlChars.NewLine & "Error: " & ex.Message)
+                            MsgBox("Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name & ":" &
+                                   ControlChars.NewLine & line & ControlChars.NewLine & "Error: " & ex.Message)
                         End Try
-
                     Case "effect"
-                        effectNames.Add(line)
-
+                        effectLines.Add(line)
                     Case Else
                         MsgBox("Unknown command in " & ConfigFilename & " for pony " & Name & ": " & columns(0) _
                                & ControlChars.NewLine & "Skipping line: " & _
                                ControlChars.NewLine & line)
-
-
                 End Select
             Loop
 
-            If Name = "" Then
-                MsgBox("Couldn't find pony name in configuration file, poni.ini.  Skipping " & Directory)
-            End If
+            ' Use the directory name as a fallback if a name was not specified in the configuration file.
+            If Name Is Nothing Then Name = Directory
 
             SetLines(SpeakingLines)
 
             'Now that we have a list of all the behaviors, process them
-            For Each behaviorName In behaviorNames
+            For Each behaviorLine In behaviorLines
                 Try
-
-                    Dim columns = CommaSplitQuoteQualified(behaviorName)
-
+                    Dim columns = CommaSplitQuoteQualified(behaviorLine)
                     Dim movement As Pony.AllowedMoves
 
                     'movements are bytes so that they can be composite:
                     '"diagonal" means vertical AND horizontal at the same time.
                     'See the definition in the pony class for more information.
                     Select Case Trim(LCase(columns(Main.BehaviorOption.MovementType)))
-
                         Case "none"
                             movement = Pony.AllowedMoves.None
                         Case "horizontal_only"
@@ -277,7 +269,6 @@ Class PonyBase
                     Dim group As Integer = 0
 
                     If UBound(columns) > Main.BehaviorOption.MovementType Then
-
                         linked_behavior = Trim(columns(Main.BehaviorOption.LinkedBehavior))
                         speak_start = Trim(columns(Main.BehaviorOption.SpeakingStart))
                         speak_end = Trim(columns(Main.BehaviorOption.SpeakingEnd))
@@ -310,11 +301,8 @@ Class PonyBase
                         If UBound(columns) >= Main.BehaviorOption.Group Then
                             group = Integer.Parse(columns(Main.BehaviorOption.Group), CultureInfo.InvariantCulture)
                         End If
-
                     End If
 
-
-                    '                    Load images now?,  name,     , Probability, Max_Secs  , Min_Secs  , Speed     , image path, left image path, move_type, Linked behavior, speaking line_start, speaking line_end , skip normally unless processing links, x coord, ycoord, object to follow
                     AddBehavior(columns(Main.BehaviorOption.Name),
                                          Double.Parse(columns(Main.BehaviorOption.Probability), CultureInfo.InvariantCulture),
                                          Double.Parse(columns(Main.BehaviorOption.MaxDuration), CultureInfo.InvariantCulture),
@@ -327,26 +315,22 @@ Class PonyBase
                                          right_image_center, left_image_center, dont_repeat_image_animations, group)
 
                 Catch ex As Exception
-                    If Main.Instance.auto_started = False Then
+                    If Not Main.Instance.AutoStarted Then
                         If TypeOf ex Is IndexOutOfRangeException Then
-                            MsgBox("Warning:  You are missing a required parameter for pony " & Name & " in behavior:" & ControlChars.NewLine _
-                            & behaviorName)
+                            MsgBox("Warning:  You are missing a required parameter for pony " & Name & " in behavior:" &
+                                   ControlChars.NewLine & behaviorLine)
                         Else
-                            MsgBox("Invalid behavior line in configuration file for pony " & Name & ":" & ControlChars.NewLine _
-                           & behaviorName & ControlChars.NewLine & _
-                           "Details: " & ex.Message)
+                            MsgBox("Invalid behavior line in configuration file for pony " & Name & ":" &
+                                   ControlChars.NewLine & behaviorLine & ControlChars.NewLine & "Details: " & ex.Message)
                         End If
                     End If
                     Exit For
-
                 End Try
             Next
 
-            For Each effectName In effectNames
-
+            For Each effectLine In effectLines
                 Try
-
-                    Dim columns = CommaSplitQuoteQualified(effectName)
+                    Dim columns = CommaSplitQuoteQualified(effectLine)
 
                     '1 = effect name
                     '2 = behavior name
@@ -363,9 +347,7 @@ Class PonyBase
 
                     Dim found_behavior As Boolean = False
                     For Each behavior In Behaviors
-
                         If behavior.Name = Trim(columns(2)) Then
-
                             Dim direction_right = Direction.Center
                             Dim centering_right = Direction.Center
                             Dim direction_left = Direction.Center
@@ -377,18 +359,14 @@ Class PonyBase
                                 centering_right = Main.GetDirection(Trim(LCase(columns(8))))
                                 direction_left = Main.GetDirection(Trim(LCase(columns(9))))
                                 centering_left = Main.GetDirection(Trim(LCase(columns(10))))
-
                             Catch ex As Exception
-                                MsgBox("Invalid placement direction or centering for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine & effectName)
+                                MsgBox("Invalid placement direction or centering for effect " & columns(1) & " for pony " &
+                                       Name & ":" & ControlChars.NewLine & effectLine)
                             End Try
 
                             If UBound(columns) >= 12 Then
                                 dont_repeat_image_animations = Boolean.Parse(Trim(columns(12)))
-
-                            Else
-                                dont_repeat_image_animations = False
                             End If
-
 
                             Dim right_imagepath = Path.Combine(fullDirectory, Trim(columns(3)))
                             Dim left_imagepath = Path.Combine(fullDirectory, Trim(columns(4)))
@@ -400,19 +378,17 @@ Class PonyBase
                                                Boolean.Parse(Trim(columns(11))), dont_repeat_image_animations, Me)
                             found_behavior = True
                             Exit For
-
                         End If
-
                     Next
 
                     If Not found_behavior Then
                         MsgBox("Could not find behavior for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine _
-                           & effectName)
+                           & effectLine)
                     End If
 
                 Catch ex As Exception
                     MsgBox("Invalid effect in configuration file for pony " & Name & ":" & ControlChars.NewLine _
-                           & effectName & ControlChars.NewLine & _
+                           & effectLine & ControlChars.NewLine & _
                           "Details: " & ex.Message)
                 End Try
             Next
@@ -950,20 +926,6 @@ Class Pony
 #Region "DEBUG conditional code"
 #If DEBUG Then
     Friend UpdateRecord As New List(Of Record)
-
-    Private Enum RecordKind
-        Unspecified
-        ShouldBeSleeping
-        SelectedNewRandomBehavior
-        RepeatedCurrentBehavior
-        SelectedChainedBehavior
-        MouseOverToggle
-        StoppedReturningToScreenArea
-        TruncateBehavior
-        UnspecifiedPaint
-        UnspecifiedBounce
-        Teleport
-    End Enum
 
     Friend Structure Record
         Public Time As TimeSpan
@@ -1894,10 +1856,10 @@ Class Pony
             If isEnteringWindowNow Then
                 If Not hasDestination Then
                     Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
+                    AddUpdateRecord("Avoiding window.")
                 Else
-                    CurrentBehavior = Nothing
+                    AddUpdateRecord("Wanted to avoid window, but instead pressing to destination.")
                 End If
-                AddUpdateRecord("Avoiding window.")
                 Exit Sub
             End If
 
@@ -1979,7 +1941,6 @@ Class Pony
             AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
         Else
             If IsNothing(followObject) Then
-                'CurrentBehavior = Nothing
                 speed = 0
             Else
                 'do nothing but stare longingly in the direction of the object we want to follow...
@@ -2537,29 +2498,29 @@ Class Pony
             End Select
 
 
-            Dim collision_windows As New List(Of IntPtr)
+            Dim collisionWindows As New List(Of IntPtr)
 
-            If (new_window_1 <> IntPtr.Zero AndAlso new_window_1 <> current_window_1) Then collision_windows.Add(new_window_1)
-            If (new_window_2 <> IntPtr.Zero AndAlso new_window_2 <> current_window_2) Then collision_windows.Add(new_window_2)
-            If (new_window_3 <> IntPtr.Zero AndAlso new_window_3 <> current_window_3) Then collision_windows.Add(new_window_3)
-            If (new_window_4 <> IntPtr.Zero AndAlso new_window_4 <> current_window_4) Then collision_windows.Add(new_window_4)
+            If (new_window_1 <> IntPtr.Zero AndAlso new_window_1 <> current_window_1) Then collisionWindows.Add(new_window_1)
+            If (new_window_2 <> IntPtr.Zero AndAlso new_window_2 <> current_window_2) Then collisionWindows.Add(new_window_2)
+            If (new_window_3 <> IntPtr.Zero AndAlso new_window_3 <> current_window_3) Then collisionWindows.Add(new_window_3)
+            If (new_window_4 <> IntPtr.Zero AndAlso new_window_4 <> current_window_4) Then collisionWindows.Add(new_window_4)
 
-            If collision_windows.Count <> 0 Then
+            If collisionWindows.Count <> 0 Then
 
                 Dim pony_collision_count = 0
                 Dim ignored_collision_count = 0
 
-                For Each collision In collision_windows
+                For Each collisionWindow In collisionWindows
 
                     If Options.PonyAvoidsPonies AndAlso Options.PonyStaysInBox Then
                         Exit For
                     End If
 
-                    Dim process_id As IntPtr
-                    Win32.GetWindowThreadProcessId(collision, process_id)
+                    Dim processId As IntPtr
+                    Win32.GetWindowThreadProcessId(collisionWindow, processId)
 
                     'ignore collisions with other ponies or effects
-                    If Options.PonyAvoidsPonies AndAlso process_id = Main.Instance.process_id Then
+                    If Options.PonyAvoidsPonies AndAlso processId = Main.Instance.processId Then
                         pony_collision_count += 1
                     Else
 
@@ -2570,7 +2531,7 @@ Class Pony
                         If Options.PonyStaysInBox Then Continue For
 
                         Dim collisionArea As New Win32.RECT
-                        Win32.GetWindowRect(collision, collisionArea)
+                        Win32.GetWindowRect(collisionWindow, collisionArea)
                         If IsPonyInBox(current_location, Rectangle.FromLTRB(
                                        collisionArea.Left, collisionArea.Top, collisionArea.Right, collisionArea.Bottom)) Then
                             ignored_collision_count += 1
@@ -2578,7 +2539,7 @@ Class Pony
                     End If
                 Next
 
-                If pony_collision_count + ignored_collision_count = collision_windows.Count Then
+                If pony_collision_count + ignored_collision_count = collisionWindows.Count Then
                     Return False
                 End If
 
@@ -2597,44 +2558,17 @@ Class Pony
 
     'Is the pony at least partially on any of the main screens?
     Friend Function IsPonyOnScreen(location As Point) As Boolean
-        If Main.Instance.InPreviewMode Then Return True
-        Return Main.Instance.GetCombinedScreenArea().Contains(
-            New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
+        Return IsLocationInRect(location, Main.Instance.GetCombinedScreenArea())
     End Function
 
     'Is the pony at least partially on the supplied screens?
     Friend Function IsPonyOnScreen(location As Point, screen As Screen) As Boolean
-        If Main.Instance.InPreviewMode Then Return True
-        Return EveryLocationPointContainedInBounds(location, screen.WorkingArea)
+        Return IsLocationInRect(location, screen.WorkingArea)
     End Function
 
-    Function EveryLocationPointContainedInBounds(location As Point, bounds As Rectangle) As Boolean
-        'test center (or upper right if no center is defined)
-        If Not bounds.Contains(location.X + currentCustomImageCenter.Width,
-                               location.Y + currentCustomImageCenter.Height) Then Return False
-
-        If facingUp AndAlso facingRight Then
-            'test upper right corner
-            If Not bounds.Contains(CInt(location.X + (Scale * CurrentImageSize.X)), location.Y) Then Return False
-        End If
-
-        If facingUp AndAlso Not facingRight Then
-            'top left
-            If Not bounds.Contains(location) Then Return False
-        End If
-
-        If Not facingUp AndAlso facingRight Then
-            'bottom right
-            If Not bounds.Contains(CInt(location.X + (Scale * CurrentImageSize.X)),
-                               CInt(location.Y + (Scale * CurrentImageSize.Y))) Then Return False
-        End If
-
-        If Not facingUp AndAlso Not facingRight Then
-            'bottom left
-            If Not bounds.Contains(location.X, CInt(location.Y + (Scale * CurrentImageSize.Y))) Then Return False
-        End If
-
-        Return True
+    Private Function IsLocationInRect(location As Point, rect As Rectangle) As Boolean
+        If Main.Instance.InPreviewMode Then Return True
+        Return rect.Contains(New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
     End Function
 
     Shared Function IsPonyInBox(location As Point, box As Rectangle) As Boolean

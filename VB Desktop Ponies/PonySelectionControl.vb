@@ -6,7 +6,7 @@ Public Class PonySelectionControl
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
-    Private imageLoader As New Threading.Thread(AddressOf LoadImage)
+    Private imageLoaded As New Threading.ManualResetEvent(False)
 
     Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         InitializeComponent()
@@ -16,8 +16,7 @@ Public Class PonySelectionControl
         imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
         flip = flipImage
 
-        imageLoader.SetApartmentState(Threading.ApartmentState.STA)
-        imageLoader.Start(imagePath)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadImage, imagePath)
 
         ResizeToFit()
     End Sub
@@ -29,6 +28,7 @@ Public Class PonySelectionControl
         If Disposing OrElse IsDisposed Then
             PonyImage.Dispose()
         Else
+            imageLoaded.Set()
             Try
                 If IsHandleCreated Then
                     Invoke(Sub()
@@ -43,7 +43,8 @@ Public Class PonySelectionControl
     End Sub
 
     Public Function GetPonyImage(milliseconds As Double) As Bitmap
-        imageLoader.Join()
+        If Disposing OrElse IsDisposed Then Throw New ObjectDisposedException(Me.GetType().FullName)
+        imageLoaded.WaitOne()
         Return PonyImage(milliseconds).Image
     End Function
 
@@ -138,5 +139,6 @@ Public Class PonySelectionControl
 
     Private Sub PonySelectionControl_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
         If PonyImage IsNot Nothing Then PonyImage.Dispose()
+        imageLoaded.Dispose()
     End Sub
 End Class

@@ -51,7 +51,6 @@
             this.SourcePaletteLabel = new System.Windows.Forms.Label();
             this.ErrorLabel = new System.Windows.Forms.Label();
             this.Indexer = new CSDesktopPonies.DesktopPonies.AnimatedImageIndexer();
-            ((System.ComponentModel.ISupportInitialize)(this.ImageComparison)).BeginInit();
             this.ImageComparison.SuspendLayout();
             this.FrameControls.SuspendLayout();
             this.ColorControls.SuspendLayout();
@@ -350,7 +349,6 @@
             this.Text = "Gif with Alpha - C# Desktop Ponies";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GifAlphaForm_FormClosing);
             this.Load += new System.EventHandler(this.GifAlphaForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.ImageComparison)).EndInit();
             this.ImageComparison.ResumeLayout(false);
             this.FrameControls.ResumeLayout(false);
             this.ColorControls.ResumeLayout(false);

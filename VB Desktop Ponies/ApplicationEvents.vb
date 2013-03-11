@@ -63,8 +63,7 @@
                 Try
                     Using errorFile As New IO.StreamWriter(
                         IO.Path.Combine(Options.InstallLocation, "error.txt"), False, System.Text.Encoding.UTF8)
-                        errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " &
-                                            DateTime.UtcNow.ToString(Globalization.CultureInfo.InvariantCulture) & " UTC")
+                        errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
                         errorFile.WriteLine()
                         errorFile.WriteLine(exceptionString)
                     End Using
