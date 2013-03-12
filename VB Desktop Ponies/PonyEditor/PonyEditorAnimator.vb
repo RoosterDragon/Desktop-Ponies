@@ -1,14 +1,16 @@
 ﻿Imports System.Globalization
+Imports CSDesktopPonies.SpriteManagement
 
 Public Class PonyEditorAnimator
     Inherits DesktopPonyAnimator
 
     Private m_editor As PonyEditor
 
-    Public Sub New(editor As PonyEditor, spriteViewer As SpriteManagement.ISpriteCollectionView, spriteCollection As IEnumerable(Of SpriteManagement.ISprite))
+    Public Sub New(editor As PonyEditor, spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite))
         MyBase.New(spriteViewer, spriteCollection, False)
+        ExitWhenNoSprites = False
         m_editor = editor
-
+        AddHandler Viewer.InterfaceClosed, Sub(sender As Object, e As EventArgs) Finish()
     End Sub
 
     Protected Overrides Sub Update()

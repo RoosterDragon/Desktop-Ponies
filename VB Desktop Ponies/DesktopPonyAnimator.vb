@@ -3,6 +3,8 @@
 Public Class DesktopPonyAnimator
     Inherits AnimationLoopBase
 
+    Protected Property ExitWhenNoSprites As Boolean = True
+
     Private ponyMenu As ISimpleContextMenu
     Private houseMenu As ISimpleContextMenu
     Private selectedHouse As House
@@ -50,6 +52,7 @@ Public Class DesktopPonyAnimator
         Viewer.WindowIconFilePath = IO.Path.Combine(Options.InstallLocation, "Twilight.ico")
         AddHandler Viewer.MouseUp, AddressOf Viewer_MouseUp
         AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
+        AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 
         If createDesktopControlForm Then
             Main.Instance.Invoke(Sub() controlForm = New DesktopControlForm(Me))
@@ -122,7 +125,7 @@ Public Class DesktopPonyAnimator
     ''' Updates the ponies and effect. Cycles houses.
     ''' </summary>
     Protected Overrides Sub Update()
-        If Sprites.Count = 0 Then ReturnToMenu()
+        If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then ReturnToMenu()
 
         Pony.CursorLocation = Viewer.CursorPosition
         ManualControl()
@@ -351,10 +354,7 @@ Public Class DesktopPonyAnimator
                                                                             End If
                                                                         End Sub)
                                                End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 RemoveEffect(selectedHouse)
-                                                                 If Sprites.Count = 0 Then ReturnToMenu()
-                                                             End Sub))
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() RemoveEffect(selectedHouse)))
         If controlForm Is Nothing Then
             houseMenu = Viewer.CreateContextMenu(menuItems)
         Else

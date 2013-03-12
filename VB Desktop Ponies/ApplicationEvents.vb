@@ -71,12 +71,25 @@
                     ' Logging might fail, but we'll just have to live with that.
                 End Try
 
-                ' Attempt to notify user of error.
-                MessageBox.Show("An unexpected error occurred and Desktop Ponies must close." &
-                                " Please report this error so it can be fixed." &
-                                vbNewLine & vbNewLine & exceptionString,
-                                "Unhandled Error - Desktop Ponies v" & version,
+                If TypeOf ex Is InvalidOperationException Then
+                    If ex.InnerException IsNot Nothing AndAlso
+                        TypeOf ex.InnerException Is ArgumentException AndAlso
+                        ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" Then
+                        ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
+                        MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
+                                        "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
+                                        vbNewLine & "The program will now exit.",
+                                "Font Not Found - Desktop Ponies v" & version,
                                 MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    End If
+                Else
+                    ' Attempt to notify user of an unknown error.
+                    MessageBox.Show("An unexpected error occurred and Desktop Ponies must close." &
+                                    " Please report this error so it can be fixed." &
+                                    vbNewLine & vbNewLine & exceptionString,
+                                    "Unhandled Error - Desktop Ponies v" & version,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End If
             Catch
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
             Finally

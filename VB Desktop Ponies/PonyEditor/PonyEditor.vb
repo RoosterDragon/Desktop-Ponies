@@ -134,6 +134,7 @@ Public Class PonyEditor
         pe_interface = Main.Instance.GetInterface()
         pe_interface.Topmost = True
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing)
+        AddHandler pe_animator.AnimationFinished, Sub() Invoke(Sub() Close())
     End Sub
 
     ''' <summary>
@@ -161,7 +162,6 @@ Public Class PonyEditor
     Private Sub PonySelectionView_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonySelectionView.SelectedIndexChanged
 
         Try
-
             If PonySelectionView.SelectedItems.Count = 0 Then Exit Sub
 
             If has_saved = False Then
@@ -175,12 +175,10 @@ Public Class PonyEditor
             LoadPony(PonySelectionView.SelectedIndices(0))
 
             has_saved = True
-
         Catch ex As Exception
             MsgBox("Error selecting pony..." & ex.Message & ControlChars.NewLine & ex.StackTrace)
             Exit Sub
         End Try
-
     End Sub
 
     Private Sub LoadPony(menu_index As Integer)
@@ -227,14 +225,16 @@ Public Class PonyEditor
             End If
         End If
         IsClosing = True
-        If pe_animator.Started Then pe_animator.Pause(True)
+        If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed AndAlso pe_animator.Started Then pe_animator.Pause(True)
     End Sub
 
     Private Sub PonyEditor_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
-        pe_animator.Finish()
-        pe_animator.Dispose()
-        If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
-            Pony.CurrentAnimator = Nothing
+        If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
+            pe_animator.Finish()
+            pe_animator.Dispose()
+            If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
+                Pony.CurrentAnimator = Nothing
+            End If
         End If
     End Sub
 

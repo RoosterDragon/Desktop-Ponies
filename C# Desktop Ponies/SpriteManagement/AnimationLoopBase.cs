@@ -17,7 +17,7 @@
         /// <summary>
         /// Holds information about render times, frame rate and garbage collections. Provides methods to output and display this data.
         /// </summary>
-        internal class FrameRecordCollector : IDisposable
+        internal class FrameRecordCollector
         {
             #region FrameRecord struct
             /// <summary>
@@ -141,10 +141,6 @@
             /// The scale factor for the height of bars, where a factor of 1 results in 1 pixel per millisecond.
             /// </summary>
             private float barHeightFactor;
-            /// <summary>
-            /// The brush used to paint the background of the graph area.
-            /// </summary>
-            private Brush graphBackgroundBrush = new SolidBrush(Color.FromArgb(1, 1, 1));
 
             /// <summary>
             /// Gets the number of records this <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/> can
@@ -389,7 +385,8 @@
 
                 // Fill the graph area.
                 // We are leaving a 1 pixel padding on all sides, so the component parts of the graph are often offset by 1.
-                surface.FillRectangle(graphBackgroundBrush, graphArea);
+                using (var graphBackgroundBrush = new SolidBrush(Color.FromArgb(1, 1, 1)))
+                    surface.FillRectangle(graphBackgroundBrush, graphArea);
 
                 // Start at the oldest record.
                 int barOffset = frameRecords.Length - Count;
@@ -551,14 +548,6 @@
 
                 context.Restore();
             }
-            /// <summary>
-            /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.AnimationLoopBase.FrameRecordCollector"/>
-            /// object.
-            /// </summary>
-            public void Dispose()
-            {
-                graphBackgroundBrush.Dispose();
-            }
         }
         #endregion
 
@@ -606,7 +595,7 @@
         /// <summary>
         /// Used to pause the thread running the main loop. Signals false whilst paused, otherwise signals true.
         /// </summary>
-        private ManualResetEvent running = new ManualResetEvent(true);
+        private readonly ManualResetEvent running = new ManualResetEvent(true);
         /// <summary>
         /// Gets the total elapsed time that animation has been running.
         /// </summary>
@@ -624,11 +613,11 @@
         /// <summary>
         /// Holds information about the performance of the animator.
         /// </summary>
-        private FrameRecordCollector performanceRecorder = new FrameRecordCollector(300);
+        private readonly FrameRecordCollector performanceRecorder = new FrameRecordCollector(300);
         /// <summary>
         /// Output of performance summary information.
         /// </summary>
-        private StringBuilder performanceSummary = new StringBuilder(100);
+        private readonly StringBuilder performanceSummary = new StringBuilder(100);
         /// <summary>
         /// The minimum value for the interval of the timer.
         /// </summary>
@@ -651,6 +640,17 @@
                 minimumTickInterval = 1000f / value;
             }
         }
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Occurs when animation has started.
+        /// </summary>
+        public event EventHandler AnimationStarted;
+        /// <summary>
+        /// Occurs when animation has finished.
+        /// </summary>
+        public event EventHandler AnimationFinished;
         #endregion
 
         /// <summary>
@@ -721,8 +721,8 @@
                 sprite.Start(ElapsedTime);
 
             runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
-
             Viewer.Open();
+            AnimationStarted.Raise(this);
 
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
@@ -896,11 +896,10 @@
                     if (Thread.CurrentThread != runner)
                         runner.Join();
                     runner = null;
+                    AnimationFinished.Raise(this);
                 }
                 Viewer.Close();
-
                 running.Dispose();
-                performanceRecorder.Dispose();
             }
         }
     }

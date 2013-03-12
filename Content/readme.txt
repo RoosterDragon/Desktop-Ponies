@@ -33,6 +33,8 @@ Installation
     You will need mono version 3.0.2 or better. At the time of writing this is currently a beta version.
     Choose the "Mono MRE Installer" from: http://www.go-mono.com/mono-downloads/download.html
     Once installed, you can run the "RunOnMac.command" file to launch the program.
+    (If the program immediately errors when you attempt to run it, you may be missing some required fonts.
+    Try installing XQuartz, and this should resolve your issue: http://xquartz.macosforge.org)
 
 ---------------------------------------
 
@@ -62,6 +64,11 @@ Screensaver
 Change Log
 
 Latest changes:
+
+v1.42.2.2:
+- Fixed manual control outside of games.
+- Fixed an error that could occur when the "Ponies attempt to avoid other windows" option was active.
+- Fixed error that was crashing the pony editor since 1.42.2.1
 
 v1.42.2.1:
 - Fixed bug in v1.42.2 where ponies would freak out near screen edges.
