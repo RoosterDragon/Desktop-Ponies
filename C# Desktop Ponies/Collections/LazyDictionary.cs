@@ -157,7 +157,7 @@
         /// during the enumeration.</exception>
         public IEnumerable<KeyValuePair<TKey, TValue>> InitializedItems
         {
-            get { return new Enumerator<KeyValuePair<TKey, TValue>>(GetInitializedEnumerator()); }
+            get { return Enumerable.For(GetInitializedEnumerator()); }
         }
         /// <summary>
         /// Gets a collection containing the only the initialized values in the
@@ -206,7 +206,7 @@
         /// during the enumeration.</exception>
         public IEnumerable<TKey> UninitializedKeys
         {
-            get { return new Enumerator<TKey>(GetUninitializedEnumerator()); }
+            get { return Enumerable.For(GetUninitializedEnumerator()); }
         }
         /// <summary>
         /// Gets the <see cref="T:System.Func`2"/> delegate that is used to lazily initialize values based on their key.
@@ -241,9 +241,7 @@
         {
             get
             {
-                if (!dictionary.ContainsKey(key))
-                    CreateEntry(key);
-
+                Add(key);
                 Lazy<TValue> lazy = dictionary[key];
                 if (!lazy.IsValueCreated)
                     InitializedCount++;
@@ -274,25 +272,16 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
         public void Add(TKey key)
         {
-            if (dictionary.ContainsKey(key))
-                return;
+            if (!dictionary.ContainsKey(key))
+            {
+                Lazy<TValue> lazy;
+                if (ValueFactory == null)
+                    lazy = new Lazy<TValue>(LazyThreadSafetyMode.None);
+                else
+                    lazy = new Lazy<TValue>(() => ValueFactory(key), LazyThreadSafetyMode.None);
 
-            CreateEntry(key);
-        }
-        /// <summary>
-        /// Creates an entry for the internal dictionary.
-        /// </summary>
-        /// <param name="key">The key of the element to add, for which a lazily initialized value will be created. The key should not yet
-        /// exist.</param>
-        private void CreateEntry(TKey key)
-        {
-            Lazy<TValue> lazy;
-            if (ValueFactory == null)
-                lazy = new Lazy<TValue>(LazyThreadSafetyMode.None);
-            else
-                lazy = new Lazy<TValue>(() => ValueFactory(key), LazyThreadSafetyMode.None);
-
-            dictionary.Add(key, lazy);
+                dictionary.Add(key, lazy);
+            }
         }
         /// <summary>
         /// Removes all keys and values from the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.
@@ -579,6 +568,7 @@
         /// <returns>Returns true if the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key whose value is already initialized or was made to initialize by setting initialize to true; otherwise, false.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is null.</exception>
         public bool TryGetValue(TKey key, out TValue value, bool initialize)
         {
             Lazy<TValue> lazy;

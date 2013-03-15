@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies.SpriteManagement.MacOSX
+﻿namespace CSDesktopPonies.MacOSX
 {
     using System;
     using System.Runtime.InteropServices;
@@ -12,6 +12,11 @@
         /// Location of the OS X Objective-C 2.0 runtime library.
         /// </summary>
         private const string objc = "/usr/lib/libobjc.dylib";
+
+        /// <summary>
+        /// Location of the OS X GTK Quartz 2.0 library.
+        /// </summary>
+        private const string gtkQuartz = "libgtk-quartz-2.0.dylib";
 
         /// <summary>
         /// Registers a method with the Objective-C runtime system, maps the method name to a selector, and returns the selector value.
@@ -32,5 +37,13 @@
         /// <param name="arg">A Boolean argument to the method.</param>
         [DllImport(objc)]
         public static extern void objc_msgSend(IntPtr theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
+
+        /// <summary>
+        /// Gets the native NSWindow given the pointer to a <see cref="T:Gdk.Window"/> instance.
+        /// </summary>
+        /// <param name="window">The pointer to a <see cref="T:Gdk.Window"/>.</param>
+        /// <returns>A pointer to the native NSWindow for the GDK window instance.</returns>
+        [DllImport(gtkQuartz)]
+        public static extern IntPtr gdk_quartz_window_get_nswindow(IntPtr window);
     }
 }

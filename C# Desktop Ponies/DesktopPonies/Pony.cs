@@ -379,8 +379,8 @@
 
                 if (foundAllTargets)
                 {
-                    int distance = (int)Vector.Distance(topLeft, bottomRight);
-                    if (Vector.Distance(topLeft, bottomRight) < interaction.Proximity)
+                    int distance = (int)Vector2.Distance(topLeft, bottomRight);
+                    if (distance < interaction.Proximity)
                     {
                         if (interaction.Run(targets))
                         {

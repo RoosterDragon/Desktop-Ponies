@@ -1444,7 +1444,7 @@
         /// unmanaged resources should be disposed.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!form.Disposing && !form.IsDisposed)
+            if (disposing && !form.Disposing && !form.IsDisposed)
             {
                 ApplicationInvoke(() =>
                 {

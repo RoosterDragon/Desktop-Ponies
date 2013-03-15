@@ -55,14 +55,6 @@
             private static IntPtr setHasShadowSelector;
 
             /// <summary>
-            /// Gets the native NSWindow given the pointer to a <see cref="T:Gdk.Window"/> instance.
-            /// </summary>
-            /// <param name="window">The pointer to a <see cref="T:Gdk.Window"/>.</param>
-            /// <returns>A pointer to the native NSWindow for the GDK window instance.</returns>
-            [DllImport("libgtk-quartz-2.0.dylib")]
-            private static extern IntPtr gdk_quartz_window_get_nswindow(IntPtr window);
-
-            /// <summary>
             /// Sets a value indicating whether to apply a drop shadow to the window.
             /// </summary>
             /// <param name="window">An instance of <see cref="T:Gdk.Window"/> whose underlying native window must be a MacOSX NSWindow.
@@ -71,7 +63,7 @@
             public static void SetHasShadow(Gdk.Window window, bool hasShadow)
             {
                 // Get the native window handle.
-                IntPtr nsWindow = gdk_quartz_window_get_nswindow(window.Handle);
+                IntPtr nsWindow = MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
 
                 // Register the method with the runtime, if it has not yet been.
                 if (setHasShadowSelector == IntPtr.Zero)
@@ -241,7 +233,6 @@
             {
                 Argument.EnsureNotNull(evnt, "evnt");
 
-                //return base.OnConfigureEvent(evnt);
                 int newWidth = evnt.Width;
                 int newHeight = evnt.Height;
 
@@ -311,7 +302,6 @@
             /// <returns>Returns true to stop other handlers being invoked; otherwise, false.</returns>
             protected override bool OnEnterNotifyEvent(EventCrossing evnt)
             {
-                //return base.OnEnterNotifyEvent(evnt);
                 if (SupportsRgba)
                 {
                     // Start actively updating the input mask for RGBA supported windows.
@@ -1147,12 +1137,9 @@
         /// <param name="args">Data about the event.</param>
         private void GraphicsWindow_ButtonPressEvent(object o, ButtonPressEventArgs args)
         {
-            //Console.WriteLine("GraphicsWindow_ButtonPressEvent raised. Button: " +
-            //    GetButtonsFromNative(args.Event.Button) + "(" + args.Event.Button + ")");
             mouseDownTime = DateTime.UtcNow;
             MouseDown.Raise(this, () => new SimpleMouseEventArgs(
                 GetButtonsFromNative(args.Event.Button), (int)args.Event.XRoot, (int)args.Event.YRoot));
-            //Console.WriteLine("GraphicsWindow_ButtonPressEvent finished.");
         }
         /// <summary>
         /// Raised when a mouse button has been released.

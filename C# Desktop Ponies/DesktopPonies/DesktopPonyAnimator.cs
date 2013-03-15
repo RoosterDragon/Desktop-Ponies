@@ -324,7 +324,7 @@
                 PonyInstance instance = sprite as PonyInstance;
                 if (instance != null && instance.HasMouseover)
                 {
-                    int currentDistance = Vector.DistanceSquared(instance.Position, location);
+                    int currentDistance = Vector2.DistanceSquared(instance.Position, location);
                     if (currentDistance < smallestDistance)
                     {
                         smallestDistance = currentDistance;

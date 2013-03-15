@@ -82,6 +82,9 @@
             get { return BufferToImageOfBitmapInternal; }
         }
 
+        /// <summary>
+        /// The method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
+        /// </summary>
         private static readonly BufferToImage<Bitmap> BufferToImageOfBitmapInternal = 
             (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
             {
@@ -226,8 +229,8 @@
     /// Decodes a GIF file into its component frames.
     /// </summary>
     /// <typeparam name="T">The type of the frame images.</typeparam>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", 
-        Justification="Field is disposed within constructor and so will never need disposing by consumers.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
+        Justification = "Field is disposed within constructor and so will never need disposing by consumers.")]
     internal sealed class GifDecoder<T>
     {
         #region BlockCode enum
@@ -284,13 +287,13 @@
         {
             #region Iterator class
             /// <summary>
-            /// Provides the ability to iterate over the rows of a <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/>
+            /// Provides the ability to iterate over the rows of a <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer"/>
             /// efficiently.
             /// </summary>
             public class Iterator
             {
                 /// <summary>
-                /// Gets the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/> being iterated over.
+                /// Gets the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer"/> being iterated over.
                 /// </summary>
                 public DataBuffer DataBuffer { get; private set; }
 
@@ -333,7 +336,7 @@
                 private int shift = 0;
 
                 /// <summary>
-                /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer.Iterator"/>
+                /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer.Iterator"/>
                 /// class.
                 /// </summary>
                 /// <param name="dataBuffer">The data buffer to be iterated over.</param>
@@ -476,7 +479,7 @@
             public byte[] Buffer { get; private set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/> class capable of
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer"/> class capable of
             /// holding enough values for the specified dimensions, using the given number of bits to store each value.
             /// </summary>
             /// <param name="dimensions">The dimensions of the buffer to create.</param>
@@ -706,10 +709,11 @@
                 Buffer = newDataBuffer.Buffer;
             }
             /// <summary>
-            /// Makes this <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/> equivalent to <paramref name="buffer"/>.
+            /// Makes this <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer"/> equivalent to
+            /// <paramref name="buffer"/>.
             /// </summary>
-            /// <param name="buffer">The <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DataBuffer"/> whose data should be copied
-            /// into this buffer.</param>
+            /// <param name="buffer">The <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DataBuffer"/> whose data should be
+            /// copied into this buffer.</param>
             public void MakeEqual(DataBuffer buffer)
             {
                 while (buffer.BitsPerValue > BitsPerValue)
@@ -817,7 +821,7 @@
             public float? ApproximateAspectRatio { get; private set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.LogicalScreenDescriptor"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.LogicalScreenDescriptor"/>
             /// class.
             /// </summary>
             /// <param name="logicalScreenWidth">The width of the logical screen.</param>
@@ -877,10 +881,10 @@
             public byte TransparentIndex { get; private set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/>
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/>
             /// class.
             /// </summary>
-            /// <param name="disposalMethod">The <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.DisposalMethod"/> to be used
+            /// <param name="disposalMethod">The <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.DisposalMethod"/> to be used
             /// after this subframe is rendered.</param>
             /// <param name="userInputFlag">Indicates if user input is expected.</param>
             /// <param name="transparencyFlag">Indicates if transparency is used. If true the <paramref name="transparentColorIndex"/>
@@ -933,7 +937,7 @@
             public int LocalTableSize { get; private set; }
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> class.
+            /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.ImageDescriptor"/> class.
             /// </summary>
             /// <param name="imageLeftPosition">The left position of the subframe.</param>
             /// <param name="imageTopPosition">The top position of the subframe.</param>
@@ -1283,7 +1287,7 @@
             string version = new string(reader.ReadChars(3));
             if (version != Version87a && version != Version89a)
                 throw new InvalidDataException(
-                    string.Format(CultureInfo.CurrentCulture,  "Invalid version in header. Expected '{0}' or '{1}'. Read '{2}'.",
+                    string.Format(CultureInfo.CurrentCulture, "Invalid version in header. Expected '{0}' or '{1}'. Read '{2}'.",
                     Version87a, Version89a, version));
         }
         /// <summary>
@@ -1432,7 +1436,7 @@
         /// <summary>
         /// Reads a graphic control extension block (optional - max one preceding a graphic-rendering block).
         /// </summary>
-        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> describing how a
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> describing how a
         /// graphic-rendering block section is to be modified.</returns>
         private GraphicControlExtension ReadGraphicControlExtension()
         {
@@ -1521,7 +1525,7 @@
         /// <summary>
         /// Reads the image descriptor block (required - one per image in the stream).
         /// </summary>
-        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the subframe.</returns>
+        /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.ImageDescriptor"/> describing the subframe.</returns>
         private ImageDescriptor ReadImageDescriptor()
         {
             ushort imageLeftPosition = reader.ReadUInt16();
@@ -1542,7 +1546,7 @@
         /// <summary>
         /// Reads a table based image section. This contains an image descriptor, local color table and image data.
         /// </summary>
-        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
+        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
         private void ReadTableBasedImage(GraphicControlExtension graphicControl)
         {
@@ -1603,7 +1607,7 @@
         /// <summary>
         /// Reads a local color table block. (optional - max one per image descriptor).
         /// </summary>
-        /// <param name="imageDescriptor">The <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> which describes
+        /// <param name="imageDescriptor">The <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.ImageDescriptor"/> which describes
         /// the table, and to which any table will belong.</param>
         private void ReadLocalColorTable(ImageDescriptor imageDescriptor)
         {
@@ -1613,9 +1617,9 @@
         /// <summary>
         /// Reads image data onto the frame buffer. This is the LZW compressed information about the pixels in the subframe.
         /// </summary>
-        /// <param name="imageDescriptor">An <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.ImageDescriptor"/> describing the
+        /// <param name="imageDescriptor">An <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.ImageDescriptor"/> describing the
         /// subframe.</param>
-        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
+        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
         private void ReadImageData(ImageDescriptor imageDescriptor, GraphicControlExtension graphicControl)
         {
@@ -1632,7 +1636,7 @@
             // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
-            
+
             // Indicates a null codeword.
             const int NullCode = -1;
             // The clear code is the first available unused code. We will use values below this as root characters in the dictionary.
@@ -1833,7 +1837,7 @@
         /// <param name="iterator">An iterator for the frameBuffer via which the value will be set.</param>
         /// <param name="pixel">The value to be applied, in accordance with the <paramref name="graphicControl"/> parameters if specified.
         /// </param>
-        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
+        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
         private void ApplyPixelToFrame(DataBuffer.Iterator iterator, byte pixel, GraphicControlExtension graphicControl)
         {
@@ -1877,7 +1881,7 @@
         /// <summary>
         /// Creates the frame image using the current buffer.
         /// </summary>
-        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifImage`1.GraphicControlExtension"/> specifying
+        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> specifying
         /// how the value from the subframe is to be applied. This is optional.</param>
         private void CreateFrame(GraphicControlExtension graphicControl)
         {

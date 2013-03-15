@@ -16,7 +16,9 @@
         {
             get { return FromBufferInternal; }
         }
-
+        /// <summary>
+        /// The method that converts a buffer into an <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// </summary>
         private static readonly BufferToImage<BitmapFrame> FromBufferInternal =
             (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
             {

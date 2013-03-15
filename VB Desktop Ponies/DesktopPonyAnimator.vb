@@ -480,13 +480,13 @@ Public Class DesktopPonyAnimator
 
     Private Function GetClosestUnderPoint(Of T)(location As Point) As T
         Dim selected As T = Nothing
-        Dim smallestDistance As Double = Double.MaxValue
+        Dim smallestDistance = Single.MaxValue
 
         For Each sprite In Sprites
             If Not TypeOf sprite Is T Then
                 Continue For
             End If
-            Dim currentDistance = Vector.DistanceSquared(sprite.Region.Center(), location)
+            Dim currentDistance = Vector2F.DistanceSquared(sprite.Region.Center(), CType(location, Vector2))
             If currentDistance < smallestDistance AndAlso sprite.Region.Contains(location) Then
                 smallestDistance = currentDistance
                 selected = CType(sprite, T)

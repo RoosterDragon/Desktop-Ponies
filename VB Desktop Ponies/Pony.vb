@@ -1691,7 +1691,7 @@ Class Pony
             ((Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
              (Main.Instance.CurrentGame IsNot Nothing AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup)) Then
             ' A destination has been specified and the pony should head there.
-            distance = Vector.Distance(CenterLocation, Destination)
+            distance = Vector2.Distance(CenterLocation, Destination)
             ' Avoid division by zero.
             If distance = 0 Then distance = 1
 
@@ -1789,7 +1789,7 @@ Class Pony
             End If
         End If
 
-        Dim newTopLeftLocation = Point.Round(CType(TopLeftLocation, PointF) + movement)
+        Dim newTopLeftLocation = Point.Round(CType(TopLeftLocation, Vector2) + movement)
 
         Dim isNearCursorNow = IsPonyNearMouseCursor(TopLeftLocation)
         Dim isNearCursorFuture = IsPonyNearMouseCursor(newTopLeftLocation)
@@ -2082,7 +2082,7 @@ Class Pony
                     Else
                         new_effect.direction = new_effect.placement_direction_left
                         new_effect.centering = new_effect.centering_left
-                        new_effect.CurrentImagePath = new_effect.left_image_path
+                        new_effect.CurrentImagePath = new_effect.LeftImagePath
                     End If
 
                     Dim directionsCount = [Enum].GetValues(GetType(Direction)).Length
@@ -2217,7 +2217,7 @@ Class Pony
     'Return our future location in one second if we go straight in the current direction
     Friend Function FutureLocation(Optional ticks As Integer = 1000) As Point
         Dim Number_Of_Interations = ticks / (1000.0F / Pony.CurrentAnimator.MaximumFramesPerSecond)  'get the # of intervals in one second
-        Return Point.Round(CType(TopLeftLocation, PointF) + LastMovement * Number_Of_Interations)
+        Return Point.Round(CType(TopLeftLocation, Vector2) + LastMovement * Number_Of_Interations)
     End Function
 
     Private Sub Paint(Optional useOverrideBehavior As Boolean = True)
@@ -2665,7 +2665,7 @@ Class Pony
                             pony_location = leftCenter
                         End If
 
-                        Dim distance = Vector.Distance(pony_location, CursorLocation)
+                        Dim distance = Vector2.Distance(pony_location, CursorLocation)
                         If distance <= .cursor_zone_size Then
                             Return True
                         End If
@@ -2814,7 +2814,7 @@ Class Pony
                 End If
 
                 ' Get distance between the pony and the possible target.
-                Dim distance = Vector.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
+                Dim distance = Vector2.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
                                                                    CInt(CurrentImageSize.Y / 2)),
                                                target.TopLeftLocation + New Size(CInt(target.CurrentImageSize.X / 2),
                                                                           CInt(target.CurrentImageSize.Y / 2)))
@@ -2955,7 +2955,7 @@ Class Effect
 
     Friend RightImagePath As String
     Friend right_image_size As Size
-    Friend left_image_path As String
+    Friend LeftImagePath As String
     Friend left_image_size As Size
     Friend CurrentImagePath As String
     Friend Duration As Double
@@ -2993,8 +2993,8 @@ Class Effect
 
     Friend Sub SetLeftImagePath(path As String)
         Argument.EnsureNotNull(path, "path")
-        left_image_path = path
-        left_image_size = ImageSize.GetSize(left_image_path)
+        LeftImagePath = path
+        left_image_size = ImageSize.GetSize(LeftImagePath)
     End Sub
 
     Sub Teleport()
@@ -3006,7 +3006,7 @@ Class Effect
     End Sub
 
     Public Function Clone() As Effect
-        Dim new_effect As New Effect(RightImagePath, left_image_path)
+        Dim new_effect As New Effect(RightImagePath, LeftImagePath)
 
         new_effect.Name = Name
         new_effect.BehaviorName = BehaviorName
@@ -3038,7 +3038,7 @@ Class Effect
         End If
 
         If IsNothing(CurrentImagePath) Then
-            If Not IsNothing(left_image_path) Then
+            If Not IsNothing(LeftImagePath) Then
                 Return New Point(CInt(Me.Location.X + ((scale * left_image_size.Width) / 2)), CInt(Me.Location.Y + ((scale * left_image_size.Height) / 2)))
             End If
 
@@ -3063,14 +3063,14 @@ Class Effect
     Private internalTime As TimeSpan
 
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentImagePath = If(Facing_Left, left_image_path, RightImagePath)
+        CurrentImagePath = If(Facing_Left, LeftImagePath, RightImagePath)
         start_time = startTime
         internalTime = startTime
     End Sub
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
-        CurrentImagePath = If(Facing_Left, left_image_path, RightImagePath)
+        CurrentImagePath = If(Facing_Left, LeftImagePath, RightImagePath)
         If beingDragged Then
             Location = Pony.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If

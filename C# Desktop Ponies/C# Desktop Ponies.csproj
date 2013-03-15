@@ -88,7 +88,8 @@
   <ItemGroup>
     <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
-    <Compile Include="Collections\Enumerator.cs" />
+    <Compile Include="Collections\DictionaryExtensions.cs" />
+    <Compile Include="Collections\Enumerable.cs" />
     <Compile Include="DesktopPonies\AnimatedImageIndexer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -178,20 +179,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SpriteManagement\ArgbColor.cs" />
-    <Compile Include="SpriteManagement\MacOSX.cs" />
+    <Compile Include="MacOSX.cs" />
     <Compile Include="SpriteManagement\RgbColor.cs" />
+    <Compile Include="SpriteManagement\SpriteFrame.cs" />
+    <Compile Include="Unix.cs" />
     <Compile Include="Vector2.cs" />
-    <Compile Include="Vector.cs" />
-    <Compile Include="SpriteManagement\SpriteInfoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SpriteManagement\SpriteInfoForm.Designer.cs">
-      <DependentUpon>SpriteInfoForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SpriteManagement\SpriteInfoView.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="SpriteManagement\Win32.cs" />
+    <Compile Include="Win32.cs" />
     <Compile Include="SpriteManagement\WinFormSpriteInterface.cs" />
+    <Compile Include="Vector2F.cs" />
     <EmbeddedResource Include="DesktopPonies\AnimatedImageIndexer.resx">
       <DependentUpon>AnimatedImageIndexer.cs</DependentUpon>
     </EmbeddedResource>
@@ -219,9 +215,6 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SpriteManagement\SpriteInfoForm.resx">
-      <DependentUpon>SpriteInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

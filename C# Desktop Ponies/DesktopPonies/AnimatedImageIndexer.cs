@@ -27,7 +27,7 @@
         /// <summary>
         /// Brushes used to draw sections for each frame.
         /// </summary>
-        private static readonly Brush[] sectionBrushes = new Brush[] { Brushes.DarkGray, Brushes.LightGray };
+        private static readonly Brush[] SectionBrushes = new Brush[] { Brushes.DarkGray, Brushes.LightGray };
         /// <summary>
         /// Brush used to draw the section of the currently selected frame.
         /// </summary>
@@ -59,7 +59,7 @@
 
                 if (value < FrameSelector.Minimum || value > FrameSelector.Maximum)
                     throw new ArgumentOutOfRangeException("value", value,
-                        string.Format("value must be between {0} and {1} inclusive.", FrameSelector.Minimum,FrameSelector.Maximum));
+                        string.Format("value must be between {0} and {1} inclusive.", FrameSelector.Minimum, FrameSelector.Maximum));
 
                 updating = true;
                 FrameSelector.Value = value;
@@ -123,7 +123,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.AnimatedImageIndexer"/>
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.AnimatedImageIndexer"/> class.
         /// </summary>
         public AnimatedImageIndexer()
         {
@@ -302,7 +302,7 @@
                 float min = GetRelativeTime(sectionValues[section]);
                 float max = GetRelativeTime(sectionValues[section + 1]);
 
-                Brush brush = sectionBrushes[colorIndex];
+                Brush brush = SectionBrushes[colorIndex];
                 if (currentValue >= min && (currentValue < max || (currentValue == 1 && currentValue == max)))
                     brush = sectionHighlightBrush;
 
@@ -310,7 +310,7 @@
                 int height = TimeSelectorSections.Height;
                 graphics.FillRectangle(brush, min * width, 0, (max - min) * width, height);
 
-                if (++colorIndex >= sectionBrushes.Length)
+                if (++colorIndex >= SectionBrushes.Length)
                     colorIndex = 0;
             }
         }

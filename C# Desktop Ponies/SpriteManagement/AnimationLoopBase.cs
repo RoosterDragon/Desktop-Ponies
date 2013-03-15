@@ -838,9 +838,6 @@
                     performanceDelayCount = 0;
                     performanceRecorder.OutputSummaryTo(performanceSummary);
                     Console.WriteLine(performanceSummary.ToString());
-                    //Console.WriteLine(performanceRecorder.FrameRates + " " +
-                    //                  performanceRecorder.FrameTimings + " " +
-                    //                  performanceRecorder.FrameIntervals);
                 }
             }
         }

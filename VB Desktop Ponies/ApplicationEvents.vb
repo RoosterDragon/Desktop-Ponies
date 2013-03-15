@@ -9,13 +9,13 @@
     ' NetworkAvailabilityChanged: Raised when the network connection is connected or disconnected.
     Partial Friend Class MyApplication
         ''' <summary>
-        ''' Returns the file version of the executing assembly, excluding the minor, build or revision components if they are zero.
+        ''' Returns the file version of the calling assembly, excluding the minor, build or revision components if they are zero.
         ''' </summary>
-        ''' <returns>Returns the file version of the executing assembly, excluding the minor, build or revision components if they are
+        ''' <returns>Returns the file version of the calling assembly, excluding the minor, build or revision components if they are
         ''' zero.</returns>
         <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
         Public Shared Function GetProgramVersion() As String
-            Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetExecutingAssembly().Location)
+            Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetCallingAssembly().Location)
             Dim fileVersion = New Version(fileVersionInfo.FileVersion)
             Dim versionFields As Integer = 1
             If fileVersion.Revision <> 0 Then
@@ -74,7 +74,8 @@
                 If TypeOf ex Is InvalidOperationException Then
                     If ex.InnerException IsNot Nothing AndAlso
                         TypeOf ex.InnerException Is ArgumentException AndAlso
-                        ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" Then
+                        ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
+                        Not OperatingSystemInfo.IsWindows Then
                         ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
                         MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
                                         "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
@@ -100,4 +101,3 @@
         End Sub
     End Class
 End Namespace
-

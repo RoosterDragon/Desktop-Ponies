@@ -928,7 +928,7 @@ Friend Module Games
                 Dim nearest_ball_distance As Double = Double.MaxValue
 
                 For Each Ball In balls
-                    Dim distance = Vector.Distance(Player.CenterLocation, Ball.Center)
+                    Dim distance = Vector2.Distance(Player.CenterLocation, Ball.Center)
                     If distance < nearest_ball_distance Then
                         nearest_ball_distance = distance
                         nearest_ball = Ball
@@ -1193,7 +1193,7 @@ Friend Module Games
                 Dim ponies As New List(Of Pony)
 
                 For Each Position In team.Positions
-                    Dim distance = Vector.Distance(Position.Player.CenterLocation, ball.Center)
+                    Dim distance = Vector2.Distance(Position.Player.CenterLocation, ball.Center)
                     If distance <= min_distance Then
                         ponies.Add(Position.Player)
                     End If
@@ -1219,14 +1219,14 @@ Friend Module Games
                             Continue For
                         End If
 
-                        Dim distance = Vector.Distance(Position.Player.CenterLocation, other_position.Player.CenterLocation)
+                        Dim distance = Vector2.Distance(Position.Player.CenterLocation, other_position.Player.CenterLocation)
                         If distance <= 200 Then
                             open = False
                         End If
                     Next
 
-                    Dim me_distance_to_goal = Vector.Distance(Player.CenterLocation, goal.Center)
-                    Dim teammate_distance_to_goal = Vector.Distance(Position.Player.CenterLocation, goal.Center)
+                    Dim me_distance_to_goal = Vector2.Distance(Player.CenterLocation, goal.Center)
+                    Dim teammate_distance_to_goal = Vector2.Distance(Position.Player.CenterLocation, goal.Center)
 
                     If open = True AndAlso teammate_distance_to_goal <= me_distance_to_goal Then
                         open_teammates.Add(Position.Player)

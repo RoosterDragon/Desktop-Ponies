@@ -18,15 +18,6 @@
         private static bool isMacOSX;
 
         /// <summary>
-        /// Stores null-terminated strings of information identifying the current system into the structure referenced by
-        /// <paramref name="name"/>.
-        /// </summary>
-        /// <param name="name">Pointer to a structure into which system information is stored.</param>
-        /// <returns>Returns the value 0 if successful; otherwise the value -1 is returned.</returns>
-        [DllImport("libc")]
-        private static extern int uname(IntPtr name);
-
-        /// <summary>
         /// Initializes static members of the <see cref="T:CSDesktopPonies.OperatingSystemInfo"/> class.
         /// </summary>
         static OperatingSystemInfo()
@@ -36,9 +27,9 @@
             try
             {
                 buffer = Marshal.AllocHGlobal(8196);
-                if (uname(buffer) == 0)
+                if (Unix.NativeMethods.uname(buffer) == 0)
                 {
-                    // The buffer contains 5 null-terminated strings, we will marshal the first one, containing the system name.
+                    // The buffer contains 5 or 6 null-terminated char arrays, we will marshal the first one, containing the system name.
                     string osName = Marshal.PtrToStringAnsi(buffer);
                     isMacOSX = osName == "Darwin";
                 }

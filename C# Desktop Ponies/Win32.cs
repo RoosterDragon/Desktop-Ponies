@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies.SpriteManagement.Win32
+﻿namespace CSDesktopPonies.Win32
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

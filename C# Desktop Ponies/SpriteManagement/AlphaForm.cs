@@ -5,7 +5,7 @@
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Windows.Forms;
-    using CSDesktopPonies.SpriteManagement.Win32;
+    using CSDesktopPonies.Win32;
 
     /// <summary>
     /// Extends a <see cref="T:System.Windows.Forms.Form"/> to provide the ability to use alpha blending.

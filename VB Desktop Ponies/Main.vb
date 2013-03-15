@@ -1287,7 +1287,7 @@ Public Class Main
                     images.Add(behavior.LeftImagePath)
                     images.Add(behavior.RightImagePath)
                     For Each effect In behavior.Effects
-                        images.Add(effect.left_image_path)
+                        images.Add(effect.LeftImagePath)
                         images.Add(effect.RightImagePath)
                     Next
                 Next

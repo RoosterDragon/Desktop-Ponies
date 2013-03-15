@@ -29,10 +29,10 @@ Namespace Win32
         Public Declare Function WindowFromPoint Lib "user32.dll" (<[In]()> point As POINT) As IntPtr
         Public Declare Function GetWindowThreadProcessId Lib "user32.dll" _
             (<[In]()> hWnd As IntPtr, <[Out](), [Optional]()> ByRef lpdwProcessId As IntPtr) As UInteger
-        <DllImport("user32.dll", SetLastError:=True)>
+        <DllImport("user32", SetLastError:=True)>
         Public Function GetWindowRect(<[In]()> hWnd As IntPtr, <Out()> ByRef lpRect As RECT) As <MarshalAs(UnmanagedType.Bool)> Boolean
         End Function
-        <System.Runtime.InteropServices.DllImport("user32")>
+        <DllImport("user32")>
         Public Function GetKeyState(vKey As Integer) As Short
         End Function
     End Module

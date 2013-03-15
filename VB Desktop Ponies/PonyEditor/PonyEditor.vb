@@ -419,7 +419,7 @@ Public Class PonyEditor
                                                  .Name, _
                                                  .BehaviorName, _
                                                  Get_Filename(.RightImagePath), _
-                                                 Get_Filename(.left_image_path), _
+                                                 Get_Filename(.LeftImagePath), _
                                                  .Duration, _
                                                  .Repeat_Delay, _
                                                  Location_ToString(.placement_direction_right), _
@@ -2070,7 +2070,7 @@ Public Class PonyEditor
                                       Quoted(effect.Name),
                                       Quoted(effect.BehaviorName),
                                       Quoted(Get_Filename(effect.RightImagePath)),
-                                      Quoted(Get_Filename(effect.left_image_path)),
+                                      Quoted(Get_Filename(effect.LeftImagePath)),
                                       effect.Duration.ToString(CultureInfo.InvariantCulture),
                                       effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),
                                       Space_To_Under(Location_ToString(effect.placement_direction_right)),
