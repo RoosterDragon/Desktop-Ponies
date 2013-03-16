@@ -864,39 +864,37 @@
         }
 
         /// <summary>
-        /// Raised when the form has been closed.
-        /// Releases outstanding resources and performs a garbage collection.
+        /// Raised when the form is being closed.
+        /// Prevents closing if loading is in progress.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
-        private void PonySelectionForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void PonySelectionForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Prevent closing while a background load is in progress.
-            if (LoadTemplatesWorker.IsBusy)
-                return;
+            e.Cancel = LoadTemplatesWorker.IsBusy;
+        }
 
-            if (spriteInterface != null)
-                spriteInterface.Dispose();
-
-            Invoke(new MethodInvoker(() =>
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                // Hide the form and let cleanup happen without the user having to watch.
-                Hide();
-
-                // Dispose of resources.
-                Dispose(true);
-                if (ponyDisplays != null)
-                    foreach (PonyDisplay display in ponyDisplays)
-                        display.Dispose();
+                if (components != null)
+                    components.Dispose();
+                if (spriteInterface != null)
+                    spriteInterface.Dispose();
+            }
+            base.Dispose(disposing);
+            if (disposing)
                 foreach (AnimatedImage<BitmapFrame> image in imageManager.InitializedValues)
                     image.Dispose();
-                loadTimer.Dispose();
-                LoadInstancesWorker.Dispose();
-            }));
-
-            // Cleanup the resources the now closed form can finally release.
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
     }
 }

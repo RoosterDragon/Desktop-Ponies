@@ -137,8 +137,15 @@ Public Class PonySelectionControl
         End If
     End Sub
 
-    Private Sub PonySelectionControl_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        If PonyImage IsNot Nothing Then PonyImage.Dispose()
-        imageLoaded.Dispose()
+    Protected Overrides Sub Dispose(disposing As Boolean)
+        Try
+            If disposing Then
+                If components IsNot Nothing Then components.Dispose()
+                If PonyImage IsNot Nothing Then PonyImage.Dispose()
+                imageLoaded.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
     End Sub
 End Class

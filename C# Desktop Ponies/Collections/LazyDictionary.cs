@@ -273,15 +273,22 @@
         public void Add(TKey key)
         {
             if (!dictionary.ContainsKey(key))
-            {
-                Lazy<TValue> lazy;
-                if (ValueFactory == null)
-                    lazy = new Lazy<TValue>(LazyThreadSafetyMode.None);
-                else
-                    lazy = new Lazy<TValue>(() => ValueFactory(key), LazyThreadSafetyMode.None);
+                CreateEntry(key);
+        }
+        /// <summary>
+        /// Creates an entry for the internal dictionary.
+        /// </summary>
+        /// <param name="key">The key of the element to add, for which a lazily initialized value will be created. The key should not yet
+        /// exist.</param>
+        private void CreateEntry(TKey key)
+        {
+            Lazy<TValue> lazy;
+            if (ValueFactory == null)
+                lazy = new Lazy<TValue>(LazyThreadSafetyMode.None);
+            else
+                lazy = new Lazy<TValue>(() => ValueFactory(key), LazyThreadSafetyMode.None);
 
-                dictionary.Add(key, lazy);
-            }
+            dictionary.Add(key, lazy);
         }
         /// <summary>
         /// Removes all keys and values from the <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/>.

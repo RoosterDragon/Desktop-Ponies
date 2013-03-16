@@ -25,8 +25,10 @@
         }
 
         /// <summary>
-        /// Releases all resources used by the <see cref="CSDesktopPonies.Disposable"/>.
+        /// Releases all resources allocated by the object.
         /// </summary>
+        /// <remarks>This method guarantees to only call the underlying disposal method once, even if invoked multiple times. It is also
+        /// thread-safe.</remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly",
             Justification = "Implementation is correct, but not an exact match which misleads analysis.")]
         public void Dispose()
@@ -47,9 +49,9 @@
     }
 
     /// <summary>
-    /// Provides extensions methods for <see cref="T:System.IDisposable"/> objects.
+    /// Provides methods for managing <see cref="T:System.IDisposable"/> objects.
     /// </summary>
-    public static class DisposableExtensions
+    public static class DisposableResource
     {
         /// <summary>
         /// Performs additional setup on a newly instantiated <see cref="T:System.IDisposable"/> whilst ensuring the resource is disposed

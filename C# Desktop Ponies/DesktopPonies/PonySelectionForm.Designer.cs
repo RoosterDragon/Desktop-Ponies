@@ -7,19 +7,6 @@
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -623,7 +610,7 @@
             this.Padding = new System.Windows.Forms.Padding(10, 6, 10, 10);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Select Ponies - C# Desktop Ponies";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.PonySelectionForm_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PonySelectionForm_FormClosing);
             this.Load += new System.EventHandler(this.PonySelectionForm_Load);
             this.LocationChanged += new System.EventHandler(this.PonySelectionForm_LocationChanged);
             this.CommandsGroup.ResumeLayout(false);

@@ -21,8 +21,8 @@ Public Class Main
     Friend processId As IntPtr
     Friend Suspended_For_FullScreenApp As Boolean = False
 
-    Private Animator As DesktopPonyAnimator
-    Private PonyViewer As ISpriteCollectionView
+    Private animator As DesktopPonyAnimator
+    Private ponyViewer As ISpriteCollectionView
     Friend Startup_Ponies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
     Friend DeadEffects As New List(Of Effect)
@@ -813,7 +813,7 @@ Public Class Main
                 Startup_Ponies.Clear()
                 PonyStartup()
                 CurrentGame.Setup()
-                Animator.Start()
+                animator.Start()
             Else
                 If Me.IsDisposed = False Then
                     Me.Visible = True
@@ -1276,8 +1276,8 @@ Public Class Main
         End If
 
         AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
-        PonyViewer = GetInterface()
-        PonyViewer.Topmost = Options.AlwaysOnTop
+        ponyViewer = GetInterface()
+        ponyViewer.Topmost = Options.AlwaysOnTop
 
         If Not InPreviewMode Then
             ' Get a collection of all images to be loaded.
@@ -1305,12 +1305,12 @@ Public Class Main
                              imagesLoaded += 1
                              PonyLoader.ReportProgress(imagesLoaded)
                          End Sub
-            PonyViewer.LoadImages(images, loaded)
+            ponyViewer.LoadImages(images, loaded)
         End If
 
-        Animator = New DesktopPonyAnimator(PonyViewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
-        Pony.CurrentViewer = PonyViewer
-        Pony.CurrentAnimator = Animator
+        animator = New DesktopPonyAnimator(ponyViewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
+        Pony.CurrentViewer = ponyViewer
+        Pony.CurrentAnimator = animator
     End Sub
 
     Public Function GetInterface() As ISpriteCollectionView
@@ -1347,12 +1347,14 @@ Public Class Main
     End Function
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
-        PonyShutdown()
-        Main.Instance.Invoke(Sub()
-                                 MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
-                                                 "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                 Main.Instance.Show()
-                             End Sub)
+        If Not Disposing AndAlso Not IsDisposed Then
+            PonyShutdown()
+            Main.Instance.Invoke(Sub()
+                                     MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
+                                                     "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                     Main.Instance.Show()
+                                 End Sub)
+        End If
     End Sub
 
     Private Sub PonyLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles PonyLoader.ProgressChanged
@@ -1381,7 +1383,7 @@ Public Class Main
 
         If Not e.Cancelled Then
             Ponies_Have_Launched = True
-            Animator.Start()
+            animator.Start()
 
             ' Hide the menu form now.
             Me.Visible = False
@@ -1420,22 +1422,22 @@ Public Class Main
     End Sub
 
     Friend Sub PonyShutdown()
-        If Not IsNothing(Animator) Then Animator.Finish()
+        If Not IsNothing(animator) Then animator.Finish()
         Ponies_Have_Launched = False
-        If Not IsNothing(Animator) Then Animator.Clear()
+        If Not IsNothing(animator) Then animator.Clear()
 
         If Not IsNothing(CurrentGame) Then
             CurrentGame.CleanUp()
             CurrentGame = Nothing
         End If
 
-        If Object.ReferenceEquals(Animator, Pony.CurrentAnimator) Then
+        If Object.ReferenceEquals(animator, Pony.CurrentAnimator) Then
             Pony.CurrentAnimator = Nothing
         End If
-        Animator = Nothing
+        animator = Nothing
 
-        If Not IsNothing(PonyViewer) Then
-            PonyViewer.Close()
+        If Not IsNothing(ponyViewer) Then
+            ponyViewer.Close()
         End If
 
         RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
@@ -1501,7 +1503,7 @@ Public Class Main
 
             all_sleeping = True
 
-            For Each pony In Animator.Ponies()
+            For Each pony In animator.Ponies()
                 'Pony.sleep()
                 pony.ShouldBeSleeping = True
             Next
@@ -1510,7 +1512,7 @@ Public Class Main
 
             all_sleeping = False
 
-            For Each pony In Animator.Ponies()
+            For Each pony In animator.Ponies()
                 'Pony.wake_up()
                 pony.ShouldBeSleeping = False
             Next
@@ -1560,7 +1562,15 @@ Public Class Main
         e.Cancel = loading AndAlso Not My.Application.IsFaulted
     End Sub
 
-    Private Sub Main_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
+    Protected Overrides Sub Dispose(disposing As Boolean)
+        Try
+            RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
+            If disposing Then
+                If components IsNot Nothing Then components.Dispose()
+                If animator IsNot Nothing Then animator.Dispose()
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
     End Sub
 End Class

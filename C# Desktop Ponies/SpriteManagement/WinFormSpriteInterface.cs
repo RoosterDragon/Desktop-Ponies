@@ -1149,7 +1149,7 @@
         /// </summary>
         public void Hide()
         {
-            ApplicationInvoke(() => form.Hide());
+            ApplicationInvoke(form.Hide);
         }
 
         /// <summary>
@@ -1157,7 +1157,7 @@
         /// </summary>
         public void Show()
         {
-            ApplicationInvoke(() => form.Show());
+            ApplicationInvoke(form.Show);
         }
 
         /// <summary>
@@ -1190,7 +1190,7 @@
                     });
                 }
 
-                ApplicationInvoke(form.Show);
+                Show();
                 paused = false;
             }
         }
@@ -1435,6 +1435,7 @@
         private void GraphicsForm_Disposed(object sender, EventArgs e)
         {
             Application.ExitThread();
+            Dispose();
         }
 
         /// <summary>
@@ -1444,40 +1445,44 @@
         /// unmanaged resources should be disposed.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !form.Disposing && !form.IsDisposed)
+            if (disposing)
             {
-                ApplicationInvoke(() =>
+                if (form.InvokeRequired)
                 {
+                    Dispose(disposing);
+                    return;
+                }
+
+                if (form != null)
                     form.Dispose();
 
-                    foreach (AnimatedImage<BitmapFrame> image in images.InitializedValues)
-                        image.Dispose();
+                foreach (AnimatedImage<BitmapFrame> image in images.InitializedValues)
+                    image.Dispose();
 
-                    if (graphics != null)
-                        graphics.Dispose();
-                    if (bufferedGraphics != null)
-                        bufferedGraphics.Dispose();
-                    if (bufferedGraphicsContext != null)
-                        bufferedGraphicsContext.Dispose();
-                    if (alphaBitmap != null)
-                        alphaBitmap.Dispose();
-                    if (alphaGraphics != null)
-                        alphaGraphics.Dispose();
-                    if (windowIcon != null)
-                        windowIcon.Dispose();
+                if (graphics != null)
+                    graphics.Dispose();
+                if (bufferedGraphics != null)
+                    bufferedGraphics.Dispose();
+                if (bufferedGraphicsContext != null)
+                    bufferedGraphicsContext.Dispose();
+                if (alphaBitmap != null)
+                    alphaBitmap.Dispose();
+                if (alphaGraphics != null)
+                    alphaGraphics.Dispose();
+                if (windowIcon != null)
+                    windowIcon.Dispose();
 
-                    foreach (WinFormContextMenu contextMenu in contextMenus)
-                        contextMenu.Dispose();
+                foreach (WinFormContextMenu contextMenu in contextMenus)
+                    contextMenu.Dispose();
 
-                    preUpdateInvalidRegion.Dispose();
-                    postUpdateInvalidRegion.Dispose();
+                preUpdateInvalidRegion.Dispose();
+                postUpdateInvalidRegion.Dispose();
 
-                    identityMatrix.Dispose();
-                    font.Dispose();
-                    whiteBrush.Dispose();
-                    blackBrush.Dispose();
-                    blackPen.Dispose();
-                });
+                identityMatrix.Dispose();
+                font.Dispose();
+                whiteBrush.Dispose();
+                blackBrush.Dispose();
+                blackPen.Dispose();
 
                 GC.Collect();
             }

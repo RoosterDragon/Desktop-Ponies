@@ -134,7 +134,7 @@ Public Class PonyEditor
         pe_interface = Main.Instance.GetInterface()
         pe_interface.Topmost = True
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing)
-        AddHandler pe_animator.AnimationFinished, Sub() Invoke(Sub() Close())
+        AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
     End Sub
 
     ''' <summary>
@@ -226,16 +226,7 @@ Public Class PonyEditor
         End If
         IsClosing = True
         If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed AndAlso pe_animator.Started Then pe_animator.Pause(True)
-    End Sub
-
-    Private Sub PonyEditor_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
-        If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
-            pe_animator.Finish()
-            pe_animator.Dispose()
-            If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
-                Pony.CurrentAnimator = Nothing
-            End If
-        End If
+        RemoveHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
     End Sub
 
     Friend Function GetPreviewWindowScreenRectangle() As Rectangle
@@ -2234,5 +2225,26 @@ Public Class PonyEditor
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
         Load_Parameters(PreviewPony)
         RestoreSortOrder()
+    End Sub
+
+    Private Sub PonyEditorAnimator_AnimationFinished(sender As Object, e As EventArgs)
+        Invoke(Sub() Close())
+    End Sub
+
+    Protected Overrides Sub Dispose(disposing As Boolean)
+        Try
+            If disposing Then
+                If components IsNot Nothing Then components.Dispose()
+                If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
+                    pe_animator.Finish()
+                    pe_animator.Dispose()
+                    If Object.ReferenceEquals(pe_animator, Pony.CurrentAnimator) Then
+                        Pony.CurrentAnimator = Nothing
+                    End If
+                End If
+            End If
+        Finally
+            MyBase.Dispose(disposing)
+        End Try
     End Sub
 End Class
