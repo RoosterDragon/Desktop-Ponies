@@ -360,7 +360,7 @@ Friend Module Games
                 End If
                 If scoringStyles.Contains(ScoreStyle.BallAtGoal) Then
                     For Each goal In goals
-                        Dim goalArea As New Rectangle(goal.HostEffect.Location, goal.HostEffect.CurrentImageSize())
+                        Dim goalArea As New Rectangle(goal.HostEffect.Location, goal.HostEffect.CurrentImageSize)
                         If Pony.IsPonyInBox(ball.Handler.CenterLocation, goalArea) Then
                             For Each team In Teams
                                 If ReferenceEquals(team.Goal, goal) AndAlso
@@ -532,8 +532,8 @@ Friend Module Games
                 End If
 
                 TeamNumber = _teamNumber
-                HostEffect = New Effect(imageFilename, imageFilename)
-                HostEffect.Name = "Team " & TeamNumber & "'s Goal"
+                Dim base As New EffectBase("Team " & TeamNumber & "'s Goal", imageFilename, imageFilename)
+                HostEffect = New Effect(base, True)
 
                 Dim locationParts = Split(location, ",")
                 startPoint = New Point(
@@ -545,12 +545,11 @@ Friend Module Games
                 HostEffect.Location = New Point(
                     CInt(startPoint.X * 0.01 * gamescreen.WorkingArea.Width + gamescreen.WorkingArea.X),
                     CInt(startPoint.Y * 0.01 * gamescreen.WorkingArea.Height + gamescreen.WorkingArea.Y))
-                HostEffect.CurrentImagePath = HostEffect.RightImagePath
             End Sub
 
             Public Function Center() As Point
-                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize().Width / 2)),
-                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize().Height) / 2))
+                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize.Width / 2)),
+                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize.Height) / 2))
             End Function
         End Class
 
@@ -577,8 +576,8 @@ Friend Module Games
                     Throw New FileNotFoundException("File does not exist: " & imageFilename)
                 End If
 
-                HostEffect = New Effect(imageFilename, imageFilename)
-                HostEffect.Name = "Scoreboard"
+                Dim base As New EffectBase("Scoreboard", imageFilename, imageFilename)
+                HostEffect = New Effect(base, True)
 
                 startPoint = New Point(
                     Integer.Parse(x, CultureInfo.InvariantCulture),
@@ -592,8 +591,8 @@ Friend Module Games
             End Sub
 
             Public Function Center() As Point
-                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize().Width / 2)),
-                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize().Height) / 2))
+                Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize.Width / 2)),
+                                 CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize.Height) / 2))
             End Function
 
             Public Sub SetScores(teamOne As Team, teamTwo As Team)
@@ -895,11 +894,11 @@ Friend Module Games
 
                     Case PlayerActionType.ApproachOwnGoal
                         Dim goal = Get_Team_Goal()
-                        SetFollowBehavior(goal.HostEffect.Name, goal.HostEffect)
+                        SetFollowBehavior(goal.HostEffect.Base.Name, goal.HostEffect)
 
                     Case PlayerActionType.ApproachTargetGoal
                         Dim goal = Get_OtherTeam_Goal()
-                        SetFollowBehavior(goal.HostEffect.Name, goal.HostEffect)
+                        SetFollowBehavior(goal.HostEffect.Base.Name, goal.HostEffect)
 
                     Case PlayerActionType.Idle
                         If CurrentAction = PlayerActionType.Idle Then Exit Sub

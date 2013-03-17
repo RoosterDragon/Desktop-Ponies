@@ -404,7 +404,7 @@ Public Class PonyEditor
                 End With
             Next
 
-            For Each effect As Effect In PreviewPonyEffects()
+            For Each effect In PreviewPonyEffects()
                 With effect
                     PonyEffectsGrid.Rows.Add(.Name, _
                                                  .Name, _
@@ -413,11 +413,11 @@ Public Class PonyEditor
                                                  Get_Filename(.LeftImagePath), _
                                                  .Duration, _
                                                  .Repeat_Delay, _
-                                                 Location_ToString(.placement_direction_right), _
-                                                 Location_ToString(.centering_right), _
-                                                 Location_ToString(.placement_direction_left), _
-                                                 Location_ToString(.centering_left), _
-                                                 .follow, .dont_repeat_image_animations)
+                                                 Location_ToString(.PlacementDirectionRight), _
+                                                 Location_ToString(.CenteringRight), _
+                                                 Location_ToString(.PlacementDirectionLeft), _
+                                                 Location_ToString(.CenteringLeft), _
+                                                 .Follow, .DoNotRepeatImageAnimations)
                 End With
             Next
 
@@ -699,23 +699,16 @@ Public Class PonyEditor
 
             For Each listing In effects_list
                 If String.Equals(Trim(listing.Name), Trim(name), StringComparison.OrdinalIgnoreCase) Then
-                    effect = listing
+                    effect = New Effect(listing, Not PreviewPony.facingRight)
                 End If
             Next
 
             If IsNothing(effect) Then Return Nothing
 
-            If effect.Duration <> 0 Then
-                effect.DesiredDuration = effect.Duration
+            If effect.Base.Duration <> 0 Then
+                effect.DesiredDuration = effect.Base.Duration
                 effect.CloseOnNewBehavior = False
             End If
-
-            effect.direction = effect.placement_direction_right
-            effect.centering = effect.centering_right
-
-            effect.follow = effect.follow
-            effect.Name = effect.Name
-            effect.BehaviorName = "none"
 
             Dim rect = GetPreviewWindowScreenRectangle()
             effect.Location = New Point(CInt(rect.X + rect.Width * Rng.NextDouble), CInt(rect.Y + rect.Height * Rng.NextDouble))
@@ -958,7 +951,7 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
-            Dim changed_effect As Effect = Nothing
+            Dim changed_effect As EffectBase = Nothing
 
             For Each effect In PreviewPonyEffects()
                 If effect.Name = changed_effect_name Then
@@ -1218,7 +1211,7 @@ Public Class PonyEditor
             Dim new_value As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
-            Dim changed_effect As Effect = Nothing
+            Dim changed_effect As EffectBase = Nothing
 
             For Each effect In PreviewPonyEffects()
                 If effect.Name = changed_effect_name Then
@@ -1275,17 +1268,17 @@ Public Class PonyEditor
                     Case colEffectRepeatDelay.Index
                         changed_effect.Repeat_Delay = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colEffectLocationRight.Index
-                        changed_effect.placement_direction_right = String_ToLocation(new_value)
+                        changed_effect.PlacementDirectionRight = String_ToLocation(new_value)
                     Case colEffectLocationLeft.Index
-                        changed_effect.placement_direction_left = String_ToLocation(new_value)
+                        changed_effect.PlacementDirectionLeft = String_ToLocation(new_value)
                     Case colEffectCenteringRight.Index
-                        changed_effect.centering_right = String_ToLocation(new_value)
+                        changed_effect.CenteringRight = String_ToLocation(new_value)
                     Case colEffectCenteringLeft.Index
-                        changed_effect.centering_left = String_ToLocation(new_value)
+                        changed_effect.CenteringLeft = String_ToLocation(new_value)
                     Case colEffectFollowPony.Index
                         changed_effect.follow = Boolean.Parse(new_value)
                     Case colEffectDoNotRepeatAnimations.Index
-                        changed_effect.dont_repeat_image_animations = Boolean.Parse(new_value)
+                        changed_effect.DoNotRepeatImageAnimations = Boolean.Parse(new_value)
                 End Select
 
             Catch ex As Exception
@@ -1464,13 +1457,13 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Shared Function get_effect_list() As List(Of Effect)
+    Friend Shared Function get_effect_list() As List(Of EffectBase)
 
-        Dim effect_list As New List(Of Effect)
+        Dim effect_list As New List(Of EffectBase)
 
         For Each ponyBase In Main.Instance.SelectablePonies
             For Each behavior As PonyBase.Behavior In ponyBase.Behaviors
-                For Each effect As Effect In behavior.Effects
+                For Each effect In behavior.Effects
                     effect_list.Add(effect)
                 Next
             Next
@@ -1479,7 +1472,7 @@ Public Class PonyEditor
         Return effect_list
     End Function
 
-    Private Function PreviewPonyEffects() As IEnumerable(Of Effect)
+    Private Function PreviewPonyEffects() As IEnumerable(Of EffectBase)
         Return PreviewPony.Behaviors.SelectMany(Function(behavior) (behavior.Effects))
     End Function
 
@@ -1822,7 +1815,7 @@ Public Class PonyEditor
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
             If Object.ReferenceEquals(grid, PonyEffectsGrid) Then
-                Dim todelete As Effect = Nothing
+                Dim todelete As EffectBase = Nothing
                 For Each behavior In PreviewPony.Behaviors
                     For Each effect In behavior.Effects
                         If effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value) Then
@@ -2064,12 +2057,12 @@ Public Class PonyEditor
                                       Quoted(Get_Filename(effect.LeftImagePath)),
                                       effect.Duration.ToString(CultureInfo.InvariantCulture),
                                       effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),
-                                      Space_To_Under(Location_ToString(effect.placement_direction_right)),
-                                      Space_To_Under(Location_ToString(effect.centering_right)),
-                                      Space_To_Under(Location_ToString(effect.placement_direction_left)),
-                                      Space_To_Under(Location_ToString(effect.centering_left)),
+                                      Space_To_Under(Location_ToString(effect.PlacementDirectionRight)),
+                                      Space_To_Under(Location_ToString(effect.CenteringRight)),
+                                      Space_To_Under(Location_ToString(effect.PlacementDirectionLeft)),
+                                      Space_To_Under(Location_ToString(effect.CenteringLeft)),
                                       effect.follow,
-                                      effect.dont_repeat_image_animations))
+                                      effect.DoNotRepeatImageAnimations))
                 Next
 
                 For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines

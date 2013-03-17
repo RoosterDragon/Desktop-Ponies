@@ -12,7 +12,7 @@ Public Class HouseOptionsForm
         Icon = My.Resources.Twilight
 
         house = _house
-        Dim base = house.Base
+        Dim base = house.HouseBase
 
         Text = base.Name + " - House Options - Desktop Ponies"
 
@@ -23,9 +23,9 @@ Public Class HouseOptionsForm
         Bias_TrackBar.Value = CInt(base.Bias * 10)
 
         Try
-            houseImage = Image.FromFile(base.ImageFilename)
+            houseImage = Image.FromFile(base.LeftImagePath)
         Catch ex As Exception
-            MsgBox("Couldn't open file: " & base.ImageFilename)
+            MsgBox("Couldn't open file: " & base.LeftImagePath)
             Exit Sub
         End Try
         DoorLocation_Label.Text = doorLocation.ToString()
@@ -119,7 +119,7 @@ Public Class HouseOptionsForm
     End Sub
 
     Private Function SaveSettings() As Boolean
-        Dim base = house.Base
+        Dim base = house.HouseBase
 
         base.CycleInterval = TimeSpan.FromSeconds(Cycle_Counter.Value)
         base.DoorPosition = doorLocation
@@ -146,7 +146,7 @@ Public Class HouseOptionsForm
         If SaveSettings() = False Then Exit Sub
 
         Try
-            Dim base = house.Base
+            Dim base = house.HouseBase
 
             Dim comments As New List(Of String)
             Dim ini_file_path = Path.Combine(Options.InstallLocation, HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
@@ -168,11 +168,11 @@ Public Class HouseOptionsForm
                     new_ini.WriteLine(line)
                 Next
 
-                new_ini.WriteLine("name," & house.Base.Name)
+                new_ini.WriteLine("name," & house.HouseBase.Name)
 
                 Dim cma = ","
 
-                new_ini.WriteLine("image," & base.ImageFilename.Remove(0, base.ImageFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1))
+                new_ini.WriteLine("image," & base.LeftImagePath.Remove(0, base.LeftImagePath.LastIndexOf(Path.DirectorySeparatorChar) + 1))
                 new_ini.WriteLine("door," &
                                   base.DoorPosition.X.ToString(CultureInfo.InvariantCulture) & cma &
                                   base.DoorPosition.Y.ToString(CultureInfo.InvariantCulture))
@@ -203,6 +203,6 @@ Public Class HouseOptionsForm
     End Sub
 
     Private Sub HouseOptionsForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
-        house.Base.OptionsForm = Nothing
+        house.HouseBase.OptionsForm = Nothing
     End Sub
 End Class

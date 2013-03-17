@@ -1293,7 +1293,7 @@ Public Class Main
                 Next
             Next
             For Each house In HouseBases
-                images.Add(house.ImageFilename)
+                images.Add(house.LeftImagePath)
             Next
 
             Invoke(Sub()

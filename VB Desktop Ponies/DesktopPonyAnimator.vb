@@ -342,15 +342,15 @@ Public Class DesktopPonyAnimator
         menuItems.AddLast(
             New SimpleContextMenuItem(Nothing, Sub()
                                                    Main.Instance.Invoke(Sub()
-                                                                            If selectedHouse.Base.OptionsForm IsNot Nothing Then
-                                                                                selectedHouse.Base.OptionsForm.BringToFront()
+                                                                            If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
+                                                                                selectedHouse.HouseBase.OptionsForm.BringToFront()
                                                                             Else
                                                                                 Using houseForm As New HouseOptionsForm(selectedHouse)
-                                                                                    selectedHouse.Base.OptionsForm = houseForm
+                                                                                    selectedHouse.HouseBase.OptionsForm = houseForm
                                                                                     houseForm.ShowDialog()
                                                                                     houseForm.BringToFront()
                                                                                 End Using
-                                                                                selectedHouse.Base.OptionsForm = Nothing
+                                                                                selectedHouse.HouseBase.OptionsForm = Nothing
                                                                             End If
                                                                         End Sub)
                                                End Sub))
@@ -513,7 +513,7 @@ Public Class DesktopPonyAnimator
                     End If
                 End If
                 If Not IsNothing(draggedEffect) Then
-                    draggedEffect.beingDragged = False
+                    draggedEffect.BeingDragged = False
                 End If
                 Main.Instance.Dragging = False
 
@@ -611,16 +611,16 @@ Public Class DesktopPonyAnimator
 
     Friend Sub DisplayHouseMenu(location As Point)
         Dim i = 0
-        houseMenu.Items(i).Text = "Edit " & selectedHouse.Base.Name
+        houseMenu.Items(i).Text = "Edit " & selectedHouse.HouseBase.Name
         i += 1
-        houseMenu.Items(i).Text = "Remove " & selectedHouse.Base.Name
+        houseMenu.Items(i).Text = "Remove " & selectedHouse.HouseBase.Name
         i += 1
         houseMenu.Show(location.X, location.Y)
     End Sub
 
     Friend Sub DragEffect(effect As Effect)
 
-        effect.beingDragged = True
+        effect.BeingDragged = True
         draggingPonyOrEffect = True
         draggedEffect = effect
         Main.Instance.Dragging = True

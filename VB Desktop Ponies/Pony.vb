@@ -809,7 +809,7 @@ Friend Class PonyBase
         Friend AutoSelectImagesOnFollow As Boolean = True
         Friend Group As Integer = AnyGroup
 
-        Friend Effects As New List(Of Effect)
+        Friend Effects As New List(Of EffectBase)
 
         Public Sub New(rightImagePath As String, leftImagePath As String)
             If IsNothing(rightImagePath) AndAlso IsNothing(leftImagePath) Then Throw New ArgumentException("Both paths were null.")
@@ -846,21 +846,20 @@ Friend Class PonyBase
                              direction_left As Direction, centering_left As Direction,
                              follow As Boolean, _dont_repeat_image_animations As Boolean, owner As PonyBase)
 
-            Dim new_effect As New Effect(right_path, left_path)
+            Dim newEffect As New EffectBase(effectname, left_path, right_path) With {
+                .BehaviorName = Name,
+                .Duration = duration,
+                .Repeat_Delay = repeat_delay,
+                .PlacementDirectionLeft = direction_left,
+                .CenteringLeft = centering_left,
+                .PlacementDirectionRight = direction_right,
+                .CenteringRight = centering_right,
+                .Follow = follow,
+                .DoNotRepeatImageAnimations = _dont_repeat_image_animations,
+                .ParentPonyBase = owner
+            }
 
-            new_effect.BehaviorName = Me.Name
-            new_effect.Name = effectname
-            new_effect.Duration = duration
-            new_effect.Repeat_Delay = repeat_delay
-            new_effect.placement_direction_right = direction_right
-            new_effect.centering_right = centering_right
-            new_effect.placement_direction_left = direction_left
-            new_effect.centering_left = centering_left
-            new_effect.follow = follow
-            new_effect.dont_repeat_image_animations = _dont_repeat_image_animations
-            new_effect.OwnerPony = owner
-
-            Effects.Add(new_effect)
+            Effects.Add(newEffect)
 
         End Sub
 
@@ -910,7 +909,7 @@ Friend Class PonyBase
 
 End Class
 
-Class Pony
+Friend Class Pony
     Implements ISpeakingSprite
 
     ''' <summary>
@@ -1149,7 +1148,7 @@ Class Pony
     Friend ManualControlPlayerTwo As Boolean
     Private effectsToRemove As New List(Of Effect)
 
-    Private ReadOnly EffectsLastUsed As New Dictionary(Of Effect, TimeSpan)
+    Private ReadOnly EffectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)
 
     Friend destinationCoords As Point
     Friend followObjectName As String = ""
@@ -1453,7 +1452,7 @@ Class Pony
         ' Reset effects.
         ' TODO: Make an immutable effect base from which new instances are spawned, as they are currently cloned...
         For Each effect In CurrentBehavior.Effects
-            effect.already_played_for_currentbehavior = False
+            effect.AlreadyPlayedForCurrentBehavior = False
         Next
 
         BehaviorStartTime = internalTime
@@ -1636,7 +1635,7 @@ Class Pony
                 If behavior.AllowedMovement = AllowedMoves.MouseOver Then
                     CurrentBehavior = behavior
                     For Each effect In CurrentBehavior.Effects
-                        effect.already_played_for_currentbehavior = False
+                        effect.AlreadyPlayedForCurrentBehavior = False
                     Next
                     Exit For
                 End If
@@ -1994,7 +1993,7 @@ Class Pony
             ' We may be following an effect instead.
             Dim effectsToFollow As New List(Of Effect)
             For Each effect In CurrentAnimator.Effects()
-                If String.Equals(effect.Name, followObjectName, StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(effect.Base.Name, followObjectName, StringComparison.OrdinalIgnoreCase) Then
                     effectsToFollow.Add(effect)
                 End If
             Next
@@ -2054,15 +2053,15 @@ Class Pony
                 If (currentTime - EffectsLastUsed(effect)).TotalMilliseconds >= effect.Repeat_Delay * 1000 Then
 
                     If effect.Repeat_Delay = 0 Then
-                        If effect.already_played_for_currentbehavior = True Then Continue For
+                        If effect.AlreadyPlayedForCurrentBehavior Then Continue For
                     End If
 
-                    effect.already_played_for_currentbehavior = True
+                    effect.AlreadyPlayedForCurrentBehavior = True
 
-                    Dim new_effect As Effect = effect.Clone()
+                    Dim new_effect = New Effect(effect, Not facingRight)
 
-                    If new_effect.Duration <> 0 Then
-                        new_effect.DesiredDuration = new_effect.Duration
+                    If new_effect.Base.Duration <> 0 Then
+                        new_effect.DesiredDuration = new_effect.Base.Duration
                         new_effect.CloseOnNewBehavior = False
                     Else
                         If Me.HaltedForCursor Then
@@ -2073,44 +2072,11 @@ Class Pony
                         new_effect.CloseOnNewBehavior = True
                     End If
 
-                    'new_effect.Text = Name & "'s " & new_effect.name
-
-                    If facingRight Then
-                        new_effect.direction = new_effect.placement_direction_right
-                        new_effect.centering = new_effect.centering_right
-                        new_effect.CurrentImagePath = new_effect.RightImagePath
-                    Else
-                        new_effect.direction = new_effect.placement_direction_left
-                        new_effect.centering = new_effect.centering_left
-                        new_effect.CurrentImagePath = new_effect.LeftImagePath
-                    End If
-
-                    Dim directionsCount = [Enum].GetValues(GetType(Direction)).Length
-
-                    If new_effect.direction = Direction.Random Then
-                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Direction)
-                    End If
-                    If new_effect.centering = Direction.Random Then
-                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 2, 0), Direction)
-                    End If
-
-                    If new_effect.direction = Direction.RandomNotCenter Then
-                        new_effect.direction = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Direction)
-                    End If
-                    If new_effect.centering = Direction.RandomNotCenter Then
-                        new_effect.centering = CType(Math.Round(Rng.NextDouble() * directionsCount - 3, 0), Direction)
-                    End If
-
-                    If (facingRight) Then
-                        new_effect.Facing_Left = False
-                    Else
-                        new_effect.Facing_Left = True
-                    End If
-
-                    new_effect.Location = GetEffectLocation(new_effect.CurrentImageSize(),
-                     new_effect.direction, TopLeftLocation, CurrentImageSize, new_effect.centering)
-
-                    new_effect.BehaviorName = CurrentBehavior.Name
+                    new_effect.Location = GetEffectLocation(new_effect.CurrentImageSize,
+                                                            new_effect.PlacementDirection,
+                                                            TopLeftLocation,
+                                                            CurrentImageSize,
+                                                            new_effect.Centering)
 
                     new_effect.OwningPony = Me
 
@@ -2299,7 +2265,7 @@ Class Pony
 
         For Each effect As Effect In Me.ActiveEffects
             If effect.CloseOnNewBehavior Then
-                If CurrentBehavior.Name <> effect.BehaviorName Then
+                If CurrentBehavior.Name <> effect.Base.BehaviorName Then
                     effectsToRemove.Add(effect)
                 End If
             End If
@@ -2937,150 +2903,148 @@ Class Pony
     End Function
 End Class
 
-Class Effect
-    Implements ISprite
+Friend Class EffectBase
+    Public Property Name As String
+    Public Property BehaviorName As String
+    Public Property ParentPonyBase As PonyBase
+    Public Property LeftImagePath As String
+    Public Property RightImagePath As String
+    Public Property LeftImageSize As Size
+    Public Property RightImageSize As Size
+    Public Property Duration As Double
+    Public Property Repeat_Delay As Double
 
-    Friend Name As String = ""
-    Friend Location As Point
-    Friend translated_location As Point
+    Public Property PlacementDirectionRight As Direction
+    Public Property CenteringRight As Direction
+    Public Property PlacementDirectionLeft As Direction
+    Public Property CenteringLeft As Direction
 
-    Friend beingDragged As Boolean = False
+    Public Property Follow As Boolean
+    Public Property DoNotRepeatImageAnimations As Boolean
+    Public Property AlreadyPlayedForCurrentBehavior As Boolean
 
-    Friend dont_repeat_image_animations As Boolean = False
-
-    Friend BehaviorName As String
-
-    Friend OwnerPony As PonyBase
-    Friend OwningPony As Pony
-
-    Friend RightImagePath As String
-    Friend right_image_size As Size
-    Friend LeftImagePath As String
-    Friend left_image_size As Size
-    Friend CurrentImagePath As String
-    Friend Duration As Double
-    Friend DesiredDuration As Double
-
-    Friend Repeat_Delay As Double
-
-    Friend placement_direction_right As Direction
-    Friend centering_right As Direction
-    Friend placement_direction_left As Direction
-    Friend centering_left As Direction
-
-    Friend centering As Direction
-    Friend direction As Direction
-
-    Friend Facing_Left As Boolean = False
-
-    Private start_time As TimeSpan
-    Friend CloseOnNewBehavior As Boolean = False
-
-    Friend follow As Boolean = False
-
-    Friend already_played_for_currentbehavior As Boolean = False
-
-    Public Sub New(rightImagePath As String, leftImagePath As String)
-        SetRightImagePath(rightImagePath)
-        SetLeftImagePath(leftImagePath)
+    Protected Sub New()
     End Sub
 
-    Friend Sub SetRightImagePath(path As String)
-        Argument.EnsureNotNull(path, "path")
-        RightImagePath = path
-        right_image_size = ImageSize.GetSize(RightImagePath)
+    Public Sub New(_name As String, leftImagePath As String, rightImagePath As String)
+        Name = _name
+        SetLeftImagePath(leftImagePath)
+        SetRightImagePath(rightImagePath)
     End Sub
 
     Friend Sub SetLeftImagePath(path As String)
         Argument.EnsureNotNull(path, "path")
         LeftImagePath = path
-        left_image_size = ImageSize.GetSize(LeftImagePath)
+        LeftImageSize = ImageSize.GetSize(LeftImagePath)
+    End Sub
+
+    Friend Sub SetRightImagePath(path As String)
+        Argument.EnsureNotNull(path, "path")
+        RightImagePath = path
+        RightImageSize = ImageSize.GetSize(RightImagePath)
+    End Sub
+End Class
+
+Friend Class Effect
+    Implements ISprite
+
+    Private Shared ReadOnly DirectionCount As Integer = [Enum].GetValues(GetType(Direction)).Length
+
+    Private _base As EffectBase
+    Public ReadOnly Property Base As EffectBase
+        Get
+            Return _base
+        End Get
+    End Property
+
+    Private startTime As TimeSpan
+    Private internalTime As TimeSpan
+
+    Friend OwningPony As Pony
+    Friend DesiredDuration As Double
+    Friend CloseOnNewBehavior As Boolean
+
+    Friend Location As Point
+    Friend TranslatedLocation As Point
+    Friend FacingLeft As Boolean
+    Friend BeingDragged As Boolean
+    Friend PlacementDirection As Direction
+    Friend Centering As Direction
+
+    Public Sub New(base As EffectBase, startFacingLeft As Boolean)
+        _base = base
+        FacingLeft = startFacingLeft
+
+        If PlacementDirection = Direction.RandomNotCenter Then
+            PlacementDirection = CType(Math.Round(Rng.NextDouble() * DirectionCount - 3, 0), Direction)
+        ElseIf PlacementDirection = Direction.Random Then
+            PlacementDirection = CType(Math.Round(Rng.NextDouble() * DirectionCount - 2, 0), Direction)
+        Else
+            PlacementDirection = If(FacingLeft, base.PlacementDirectionLeft, base.PlacementDirectionRight)
+        End If
+
+        If Centering = Direction.RandomNotCenter Then
+            Centering = CType(Math.Round(Rng.NextDouble() * DirectionCount - 3, 0), Direction)
+        ElseIf Centering = Direction.Random Then
+            Centering = CType(Math.Round(Rng.NextDouble() * DirectionCount - 2, 0), Direction)
+        Else
+            Centering = If(FacingLeft, base.CenteringLeft, base.CenteringRight)
+        End If
     End Sub
 
     Sub Teleport()
         Dim screens = Main.Instance.ScreensToUse
         Dim screen = screens(Rng.Next(screens.Count))
         Location = New Point(
-            CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - left_image_size.Width), 0)),
-            CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - left_image_size.Height), 0)))
+            CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
+            CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
     End Sub
 
     Public Function Clone() As Effect
-        Dim new_effect As New Effect(RightImagePath, LeftImagePath)
-
-        new_effect.Name = Name
-        new_effect.BehaviorName = BehaviorName
-
-        new_effect.Duration = Duration
-        new_effect.Repeat_Delay = Repeat_Delay
-        new_effect.placement_direction_right = placement_direction_right
-        new_effect.centering_right = centering_right
-        new_effect.placement_direction_left = placement_direction_left
-        new_effect.centering_left = centering_left
-
-        new_effect.dont_repeat_image_animations = dont_repeat_image_animations
-
-        new_effect.follow = follow
-
-        new_effect.already_played_for_currentbehavior = already_played_for_currentbehavior
-        new_effect.OwnerPony = OwnerPony
-
-        Return new_effect
+        Dim clonedEffect As New Effect(Base, FacingLeft)
+        clonedEffect.OwningPony = OwningPony
+        Return clonedEffect
     End Function
 
     Friend Function Center() As Point
         Dim scale As Double
-
         If OwningPony IsNot Nothing Then
             scale = OwningPony.Scale
         Else
             scale = 1
         End If
 
-        If IsNothing(CurrentImagePath) Then
-            If Not IsNothing(LeftImagePath) Then
-                Return New Point(CInt(Me.Location.X + ((scale * left_image_size.Width) / 2)), CInt(Me.Location.Y + ((scale * left_image_size.Height) / 2)))
-            End If
-
-            If Not IsNothing(RightImagePath) Then
-                Return New Point(CInt(Me.Location.X + ((scale * right_image_size.Width) / 2)), CInt(Me.Location.Y + ((scale * right_image_size.Height) / 2)))
-            End If
-
-            Return Location
-        End If
-
-        Return New Point(CInt(Me.Location.X + ((scale * CurrentImageSize().Width) / 2)), CInt(Me.Location.Y + ((scale * CurrentImageSize().Height) / 2)))
+        Return New Point(CInt(Me.Location.X + ((scale * CurrentImageSize.Width) / 2)),
+                         CInt(Me.Location.Y + ((scale * CurrentImageSize.Height) / 2)))
     End Function
 
-    Friend Function CurrentImageSize() As Size
-        If CurrentImagePath = RightImagePath Then
-            Return right_image_size
-        Else
-            Return left_image_size
-        End If
-    End Function
+    Friend ReadOnly Property CurrentImagePath() As String
+        Get
+            Return If(FacingLeft, Base.LeftImagePath, Base.RightImagePath)
+        End Get
+    End Property
 
-    Private internalTime As TimeSpan
+    Friend ReadOnly Property CurrentImageSize() As Size
+        Get
+            Return If(FacingLeft, Base.LeftImageSize, Base.RightImageSize)
+        End Get
+    End Property
 
-    Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentImagePath = If(Facing_Left, LeftImagePath, RightImagePath)
-        start_time = startTime
+    Public Sub Start(_startTime As TimeSpan) Implements ISprite.Start
+        startTime = _startTime
         internalTime = startTime
     End Sub
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
-        CurrentImagePath = If(Facing_Left, LeftImagePath, RightImagePath)
-        If beingDragged Then
+        If BeingDragged Then
             Location = Pony.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
     End Sub
 
     Public ReadOnly Property CurrentTime As TimeSpan Implements ISprite.CurrentTime
         Get
-            Dim time = internalTime - start_time
-            If time < TimeSpan.Zero Then Stop
-            Return internalTime - start_time
+            Return internalTime - startTime
         End Get
     End Property
 
@@ -3092,7 +3056,7 @@ Class Effect
 
     Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
         Get
-            Return CurrentImagePath
+            Return CurrentImagePath()
         End Get
     End Property
 
@@ -3105,7 +3069,8 @@ Class Effect
     End Property
 End Class
 
-Class HouseBase
+Friend Class HouseBase
+    Inherits EffectBase
     Public Const RootDirectory = "Houses"
     Public Const ConfigFilename = "house.ini"
 
@@ -3118,16 +3083,6 @@ Class HouseBase
         End Get
     End Property
 
-    Private _name As String
-    Public Property Name() As String
-        Get
-            Return _name
-        End Get
-        Set(value As String)
-            _name = value
-        End Set
-    End Property
-
     Private _doorPosition As Point
     Public Property DoorPosition() As Point
         Get
@@ -3135,16 +3090,6 @@ Class HouseBase
         End Get
         Set(value As Point)
             _doorPosition = value
-        End Set
-    End Property
-
-    Private _imageFilename As String
-    Public Property ImageFilename() As String
-        Get
-            Return _imageFilename
-        End Get
-        Set(value As String)
-            _imageFilename = value
         End Set
     End Property
 
@@ -3210,6 +3155,7 @@ Class HouseBase
 
     Private Sub LoadFromIni()
         Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, Directory)
+        Dim imageFilename As String = Nothing
         Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
             Do Until configFile.EndOfStream
 
@@ -3227,9 +3173,12 @@ Class HouseBase
                     Case "name"
                         Name = columns(1)
                     Case "image"
-                        ImageFilename = Path.Combine(fullDirectory, columns(1))
-                        If Not File.Exists(ImageFilename) Then
-                            Throw New FileNotFoundException(ImageFilename, ImageFilename)
+                        imageFilename = Path.Combine(fullDirectory, columns(1))
+                        If Not File.Exists(imageFilename) Then
+                            Throw New FileNotFoundException(imageFilename, imageFilename)
+                        Else
+                            SetLeftImagePath(imageFilename)
+                            SetRightImagePath(imageFilename)
                         End If
                     Case "door"
                         DoorPosition = New Point(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
@@ -3247,7 +3196,7 @@ Class HouseBase
                 End Select
             Loop
 
-            If String.IsNullOrEmpty(Name) OrElse String.IsNullOrEmpty(ImageFilename) OrElse
+            If String.IsNullOrEmpty(Name) OrElse String.IsNullOrEmpty(imageFilename) OrElse
                 Visitors.Count = 0 Then
                 Throw New InvalidDataException("Unable to load 'House' at: " & fullDirectory &
                                                ".INI file does not contain all necessary parameters: " & ControlChars.NewLine &
@@ -3255,20 +3204,19 @@ Class HouseBase
             End If
         End Using
     End Sub
-
 End Class
 
-Class House
+Friend Class House
     Inherits Effect
 
     Private deployedPonies As New List(Of Pony)
 
     Private lastCycleTime As TimeSpan
 
-    Private _base As HouseBase
-    Public ReadOnly Property Base() As HouseBase
+    Private _houseBase As HouseBase
+    Public ReadOnly Property HouseBase() As HouseBase
         Get
-            Return _base
+            Return _houseBase
         End Get
     End Property
 
@@ -3278,15 +3226,15 @@ Class House
     End Function
 
     Public Sub New(houseBase As HouseBase)
-        MyBase.New(houseBase.ImageFilename, houseBase.ImageFilename)
-        _base = houseBase
+        MyBase.New(houseBase, True)
+        _houseBase = houseBase
         DesiredDuration = TimeSpan.FromDays(100).TotalSeconds
     End Sub
 
     Friend Sub InitializeVisitorList()
         deployedPonies.Clear()
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-            For Each guest In base.Visitors
+            For Each guest In HouseBase.Visitors
                 If String.Equals(Pony.Directory, guest, StringComparison.OrdinalIgnoreCase) Then
                     deployedPonies.Add(Pony)
                     Exit For
@@ -3301,28 +3249,28 @@ Class House
     ''' <param name="currentTime">The current time.</param>
     Friend Sub Cycle(currentTime As TimeSpan)
 
-        If currentTime - lastCycleTime > base.CycleInterval Then
+        If currentTime - lastCycleTime > HouseBase.CycleInterval Then
             lastCycleTime = currentTime
 
-            Console.WriteLine(Me.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
+            Console.WriteLine(Me.Base.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
 
             If Rng.NextDouble() < 0.5 Then
                 'skip this round
-                Console.WriteLine(Me.Name & " - Decided to skip this round of cycling.")
+                Console.WriteLine(Me.Base.Name & " - Decided to skip this round of cycling.")
                 Exit Sub
             End If
 
-            If Rng.NextDouble() < Base.Bias Then
-                If deployedPonies.Count < Base.MaximumPonies AndAlso Pony.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
+            If Rng.NextDouble() < HouseBase.Bias Then
+                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Pony.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
                     DeployPony(Me)
                 Else
-                    Console.WriteLine(Me.Name & " - Cannot deploy. Pony limit reached.")
+                    Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
                 End If
             Else
-                If deployedPonies.Count > Base.MinimumPonies AndAlso Pony.CurrentAnimator.Ponies().Count > 1 Then
+                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Pony.CurrentAnimator.Ponies().Count > 1 Then
                     RecallPony(Me)
                 Else
-                    Console.WriteLine(Me.Name & " - Cannot recall. Too few ponies deployed.")
+                    Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
                 End If
             End If
 
@@ -3336,7 +3284,7 @@ Class House
 
         Dim all As Boolean = False
 
-        For Each entry In base.Visitors
+        For Each entry In HouseBase.Visitors
             If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
                 For Each Pony In Main.Instance.SelectablePonies
                     choices.Add(Pony.Directory)
@@ -3347,7 +3295,7 @@ Class House
         Next
 
         If all = False Then
-            For Each Pony In base.Visitors
+            For Each Pony In HouseBase.Visitors
                 choices.Add(Pony)
             Next
         End If
@@ -3371,7 +3319,7 @@ Class House
 
                 deployed_pony.SelectBehavior()
 
-                deployed_pony.TopLeftLocation = instance.Location + New Size(Base.DoorPosition) - deployed_pony.GetImageCenterOffset()
+                deployed_pony.TopLeftLocation = instance.Location + New Size(HouseBase.DoorPosition) - deployed_pony.GetImageCenterOffset()
 
                 Dim groups As New List(Of Integer)
                 Dim Alternate_Group_Behaviors As New List(Of PonyBase.Behavior)
@@ -3393,7 +3341,7 @@ Class House
                 Pony.CurrentAnimator.AddPony(deployed_pony)
                 deployedPonies.Add(deployed_pony)
 
-                Console.WriteLine(Me.Name & " - Deployed " & ponyBase.Directory)
+                Console.WriteLine(Me.Base.Name & " - Deployed " & ponyBase.Directory)
 
                 For Each other_Pony In Pony.CurrentAnimator.Ponies()
                     'we need to set up interactions again to account for new ponies.
@@ -3412,7 +3360,7 @@ Class House
 
         Dim all As Boolean = False
 
-        For Each entry In Base.Visitors
+        For Each entry In HouseBase.Visitors
             If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
                 For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
                     choices.Add(Pony.Directory)
@@ -3424,7 +3372,7 @@ Class House
 
         If all = False Then
             For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-                For Each otherpony In Base.Visitors
+                For Each otherpony In HouseBase.Visitors
                     If Pony.Directory = otherpony Then
                         choices.Add(Pony.Directory)
                         Exit For
@@ -3445,21 +3393,20 @@ Class House
 
                 If pony.Sleeping Then pony.WakeUp()
 
-                pony.Destination = instance.Location + New Size(Base.DoorPosition)
+                pony.Destination = instance.Location + New Size(HouseBase.DoorPosition)
                 pony.GoingHome = True
                 pony.CurrentBehavior = pony.GetAppropriateBehaviorOrCurrent(pony.AllowedMoves.All, False)
                 pony.BehaviorDesiredDuration = TimeSpan.FromMinutes(5)
 
                 deployedPonies.Remove(pony)
 
-                Console.WriteLine(Me.Name & " - Recalled " & pony.Directory)
+                Console.WriteLine(Me.Base.Name & " - Recalled " & pony.Directory)
 
                 Exit Sub
             End If
         Next
 
     End Sub
-
 End Class
 
 Friend Enum Direction
