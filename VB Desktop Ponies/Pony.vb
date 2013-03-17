@@ -1172,6 +1172,8 @@ Friend Class Pony
     Private lastSpeakLine As String
     Friend internalTime As TimeSpan
     Private lastUpdateTime As TimeSpan
+
+    Private ReadOnly possibleMoveModes As New List(Of AllowedMoves)(3)
 #End Region
 
     Public ReadOnly Property Scale() As Double
@@ -1490,7 +1492,7 @@ Friend Class Pony
     ''' </summary>
     Private Sub SetAllowableDirections()
         ' Determine move modes that can be used.
-        Dim possibleMoveModes As New List(Of AllowedMoves)(3)
+        possibleMoveModes.Clear()
         If (CurrentBehavior.AllowedMovement And AllowedMoves.HorizontalOnly) = AllowedMoves.HorizontalOnly Then
             possibleMoveModes.Add(AllowedMoves.HorizontalOnly)
         End If

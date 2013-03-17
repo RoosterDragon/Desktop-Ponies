@@ -515,6 +515,10 @@
         /// Represents the area that becomes invalidated after updating. This area needs to be drawn.
         /// </summary>
         private readonly Region postUpdateInvalidRegion = new Region();
+        /// <summary>
+        /// Method call that renders the current buffer to the window.
+        /// </summary>
+        private readonly MethodInvoker render;
 
         /// <summary>
         /// List of <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
@@ -806,6 +810,13 @@
                     fileName, BitmapFrameFromFile,
                     (b, p, tI, s, w, h, d, hC) => BitmapFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
                     BitmapFrame.AllowableBitDepths));
+            render = () =>
+            {
+                if (IsAlphaBlended)
+                    form.SetBitmap(alphaBitmap);
+                else
+                    bufferedGraphics.Render();
+            };
 
             Thread appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
             appThread.SetApartmentState(ApartmentState.STA);
@@ -1332,13 +1343,7 @@
             surface.ResetTransform();
 
             // Render the result.
-            ApplicationInvoke(() =>
-            {
-                if (IsAlphaBlended)
-                    form.SetBitmap(alphaBitmap);
-                else
-                    bufferedGraphics.Render();
-            });
+            ApplicationInvoke(render);
         }
 
         /// <summary>
