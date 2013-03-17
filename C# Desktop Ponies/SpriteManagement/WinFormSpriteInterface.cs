@@ -430,15 +430,6 @@
 
         #region Fields and Properties
         /// <summary>
-        /// Gets the high-speed metric, a relative measure of the number of sprites this interface can handle at high FPS.
-        /// </summary>
-        public const int HighSpeedMetric = 110;
-        /// <summary>
-        /// Gets the low-speed metric, a relative measure of the number of sprites this interface can handle at low FPS.
-        /// </summary>
-        public const int LowSpeedMetric = 825;
-
-        /// <summary>
         /// Gets or sets the FrameRecordCollector for debugging purposes.
         /// </summary>
         internal AnimationLoopBase.FrameRecordCollector Collector { get; set; }
@@ -516,9 +507,13 @@
         /// </summary>
         private readonly Region postUpdateInvalidRegion = new Region();
         /// <summary>
-        /// Method call that renders the current buffer to the window.
+        /// Method call that renders the current sprite collection to the window.
         /// </summary>
         private readonly MethodInvoker render;
+        /// <summary>
+        /// Collection of sprites to be rendered.
+        /// </summary>
+        private AsyncLinkedList<ISprite> sprites;
 
         /// <summary>
         /// List of <see cref="T:CSDesktopPonies.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
@@ -671,6 +666,7 @@
                     {
                         form.DesktopBounds = value;
                         AllocateBuffers();
+                        render();
                     });
             }
         }
@@ -810,13 +806,7 @@
                     fileName, BitmapFrameFromFile,
                     (b, p, tI, s, w, h, d, hC) => BitmapFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
                     BitmapFrame.AllowableBitDepths));
-            render = () =>
-            {
-                if (IsAlphaBlended)
-                    form.SetBitmap(alphaBitmap);
-                else
-                    bufferedGraphics.Render();
-            };
+            render = new MethodInvoker(Render);
 
             Thread appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
             appThread.SetApartmentState(ApartmentState.STA);
@@ -1218,6 +1208,18 @@
             if (paused)
                 return;
 
+            this.sprites = sprites;
+            ApplicationInvoke(render);
+        }
+
+        /// <summary>
+        /// Renders the current sprites to the window.
+        /// </summary>
+        private void Render()
+        {
+            if (sprites == null)
+                return;
+
             // Get the target graphics surface.
             Graphics surface;
             if (IsAlphaBlended)
@@ -1225,8 +1227,8 @@
             else
                 surface = bufferedGraphics.Graphics;
 
-            // Translate drawing surface so top-left of the form and the drawing area coincide.
-            surface.TranslateTransform(-form.Left, -form.Top);
+            // Translation offset so the top-left of the form and drawing surface coincide.
+            Size translate = new Size(-form.Left, -form.Top);
 
             // Save the invalid region from last frame.
             preUpdateInvalidRegion.MakeEmpty();
@@ -1247,7 +1249,7 @@
                 Size timingsSize = Size.Ceiling(surface.MeasureString(timingsInfo, font));
 
                 // Set location and get area of graph draw.
-                Point offset = new Point(10, 10);
+                Point offset = new Point(10, 10) + translate;
                 Point graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
                 Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
                 postUpdateInvalidRegion.Union(recorderGraphArea);
@@ -1268,16 +1270,16 @@
             {
                 foreach (ISprite sprite in sprites)
                 {
-                    postUpdateInvalidRegion.Union(sprite.Region);
+                    postUpdateInvalidRegion.Union(OffsetRectangle(sprite.Region, translate));
                     ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
                     if (speakingSprite != null && speakingSprite.IsSpeaking)
-                        postUpdateInvalidRegion.Union(GetSpeechBubbleRegion(speakingSprite, surface));
+                        postUpdateInvalidRegion.Union(OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate));
                 }
-                postUpdateInvalidRegion.Intersect(DisplayBounds);
+                postUpdateInvalidRegion.Intersect(OffsetRectangle(DisplayBounds, translate));
             }
             else
             {
-                postUpdateInvalidRegion.Union(DisplayBounds);
+                postUpdateInvalidRegion.Union(OffsetRectangle(DisplayBounds, translate));
             }
 
             // Determine the current clipping area required, and clear it of old graphics.
@@ -1302,9 +1304,13 @@
                 RectangleF[] invalidRectangles = postUpdateInvalidRegion.GetRegionScans(identityMatrix);
 
                 // Display the clipping rectangles.
-                foreach (RectangleF invalidRectangle in invalidRectangles)
-                    surface.DrawRectangle(
-                        Pens.Blue, invalidRectangle.X, invalidRectangle.Y, invalidRectangle.Width - 1, invalidRectangle.Height - 1);
+                foreach (RectangleF invalidRectangleF in invalidRectangles)
+                {
+                    Rectangle invalidRectangle = new Rectangle(
+                        (int)invalidRectangleF.X, (int)invalidRectangleF.Y,
+                        (int)invalidRectangleF.Width - 1, (int)invalidRectangleF.Height - 1);
+                    surface.DrawRectangle(Pens.Blue, invalidRectangle);
+                }
             }
             #endregion
 
@@ -1314,13 +1320,13 @@
                 // Draw the sprite image.
                 BitmapFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
                 frame.Flip(sprite.FlipImage);
-                surface.DrawImage(frame.Image, sprite.Region);
+                surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
 
                 // Draw a speech bubble for a speaking sprite.
                 ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
                 if (speakingSprite != null && speakingSprite.IsSpeaking)
                 {
-                    Rectangle bubble = GetSpeechBubbleRegion(speakingSprite, surface);
+                    Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate);
                     surface.FillRectangle(whiteBrush, bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
                     surface.DrawRectangle(blackPen,
                         new Rectangle(bubble.X, bubble.Y, bubble.Width - 1, bubble.Height - 1));
@@ -1340,10 +1346,24 @@
             }
             #endregion
 
-            surface.ResetTransform();
-
             // Render the result.
-            ApplicationInvoke(render);
+            if (IsAlphaBlended)
+                form.SetBitmap(alphaBitmap);
+            else
+                bufferedGraphics.Render();
+        }
+
+        /// <summary>
+        /// Returns a copy of the specified rectangle, whose location is offset by the specified amount.
+        /// </summary>
+        /// <param name="rectangle">The rectangle to offset.</param>
+        /// <param name="offset">The amount to offset the location of the rectangle.</param>
+        /// <returns>A new rectangle offset by the specified amount.</returns>
+        private static Rectangle OffsetRectangle(Rectangle rectangle, Size offset)
+        {
+            Rectangle offsetRectangle = rectangle;
+            offsetRectangle.Location += offset;
+            return offsetRectangle;
         }
 
         /// <summary>
@@ -1390,8 +1410,8 @@
                 // even small reductions in width and height result in big savings on area (e.g. 90% width and 90% height is only 81%
                 // of the area), and the saved CPU indirectly benefits our frame time.
                 bufferedGraphics.Dispose();
-                bufferedGraphics = bufferedGraphicsContext.Allocate(graphics, Rectangle.Ceiling(boundsF));
-                bufferedGraphics.Graphics.SetClip(DisplayBounds);
+                bufferedGraphics = bufferedGraphicsContext.Allocate(graphics, boundsF.BoundingRectangle());
+                bufferedGraphics.Graphics.SetClip(OffsetRectangle(DisplayBounds, new Size(-form.Left, -form.Top)));
 
                 // Set the quality of drawing.
                 // As a result of having to use a transparency key, we can't use anti-aliasing functions.
@@ -1488,8 +1508,6 @@
                 whiteBrush.Dispose();
                 blackBrush.Dispose();
                 blackPen.Dispose();
-
-                GC.Collect();
             }
         }
     }

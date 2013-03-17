@@ -3,6 +3,7 @@
 Public Class PonySelectionControl
     Friend PonyBase As PonyBase
     Friend PonyImage As AnimatedImage(Of BitmapFrame)
+    Public Property ShowPonyImage As Boolean
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
@@ -31,10 +32,10 @@ Public Class PonySelectionControl
             imageLoaded.Set()
             Try
                 If IsHandleCreated Then
-                    Invoke(Sub()
-                               ResizeToFit()
-                               InvalidatePonyImageArea()
-                           End Sub)
+                    BeginInvoke(Sub()
+                                    ResizeToFit()
+                                    If ShowPonyImage Then InvalidatePonyImageArea()
+                                End Sub)
                 End If
             Catch ex As ObjectDisposedException
                 If ex.ObjectName <> PonyImage.GetType().Name Then Throw
@@ -42,10 +43,10 @@ Public Class PonySelectionControl
         End If
     End Sub
 
-    Public Function GetPonyImage(milliseconds As Double) As Bitmap
+    Public Function GetPonyImage() As AnimatedImage(Of BitmapFrame)
         If Disposing OrElse IsDisposed Then Throw New ObjectDisposedException(Me.GetType().FullName)
         imageLoaded.WaitOne()
-        Return PonyImage(milliseconds).Image
+        Return PonyImage
     End Function
 
     Public Sub AdvanceTimeIndex(amount As TimeSpan)
@@ -90,10 +91,11 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
-        If PonyImage IsNot Nothing Then
+        If ShowPonyImage Then
+            Dim image = GetPonyImage()
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
-            PonyImage(timeIndex).Flip(flip)
-            e.Graphics.DrawImage(PonyImage(timeIndex).Image, 0, 0, PonyImage.Width * Options.ScaleFactor, PonyImage.Height * Options.ScaleFactor)
+            image(timeIndex).Flip(flip)
+            e.Graphics.DrawImage(image(timeIndex).Image, 0, 0, image.Width * Options.ScaleFactor, image.Height * Options.ScaleFactor)
         End If
     End Sub
 

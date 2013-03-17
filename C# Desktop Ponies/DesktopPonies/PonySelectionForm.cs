@@ -297,6 +297,7 @@
             // Do a garbage collection so we can free garbage caused by startup and loading the templates.
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            GC.Collect();
 
             // Report status to the user.
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Loaded {1} templates in {0} seconds. {2} images in cache.",
@@ -566,6 +567,8 @@
                     spriteInterface = null;
                     ponyInstances.Clear();
                     GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
                     e.Cancel = true;
                     break;
                 }
@@ -662,7 +665,6 @@
                             //    StartAnimator();
                         }));
                     spriteInterface.LoadImages(imageSequence, imageLoadedHandler2);
-                    GC.Collect();
                 //});
 
             // Trim excess due to templates that could not load.
@@ -892,9 +894,6 @@
             if (disposing)
                 foreach (AnimatedImage<BitmapFrame> image in imageManager.InitializedValues)
                     image.Dispose();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
     }
 }

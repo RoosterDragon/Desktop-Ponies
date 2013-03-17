@@ -95,17 +95,8 @@
         /// <param name="e">The event data.</param>
         private void GifForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            // Hide the form and let cleanup happen without the user having to watch.
-            Hide();
-
-            // Dispose of resources.
-            Dispose();
             foreach (GifControl gc in FramesDisplayPanel.Controls)
                 gc.Dispose();
-
-            // Cleanup the resources the now closed form can finally release.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
     }
 }

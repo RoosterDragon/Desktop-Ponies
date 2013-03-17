@@ -260,8 +260,8 @@ Friend Module Games
                 ball.Initialize(GameScreen)
             Next
 
-            Main.Instance.ScreensToUse.Clear()
-            Main.Instance.ScreensToUse.Add(GameScreen)
+            Options.MonitorNames.Clear()
+            Options.MonitorNames.Add(GameScreen.DeviceName)
 
             If Options.ScaleFactor <> 1 Then
                 MessageBox.Show(String.Format("Note: Games may not work properly if you use a scale factor other than 1." &

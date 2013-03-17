@@ -1,6 +1,7 @@
 ﻿Imports System.Globalization
 Imports System.IO
 Imports System.Text
+Imports System.Collections.ObjectModel
 
 Public NotInheritable Class Options
     Public Const DefaultProfileName = "default"
@@ -49,7 +50,7 @@ Public NotInheritable Class Options
     Public Shared ScaleFactor As Single
     Public Shared ExclusionZone As RectangleF
 
-    Public Shared MonitorNames As New List(Of String)
+    Public Shared MonitorNames As New ObservableCollection(Of String)
     Public Shared PonyCounts As New Dictionary(Of String, Integer)
     Public Shared CustomTags As New List(Of String)
 
@@ -163,6 +164,7 @@ Public NotInheritable Class Options
     Public Shared Sub LoadDefaultProfile()
         ProfileName = DefaultProfileName
         MonitorNames.Clear()
+        MonitorNames.Add(Screen.PrimaryScreen.DeviceName)
         PonyCounts.Clear()
         CustomTags.Clear()
 

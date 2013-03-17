@@ -30,12 +30,9 @@ Public Class Main
     Friend HouseBases As New List(Of HouseBase)
 
     'How big the area around the cursor used for cursor detection should be, in pixels.
-    Friend cursor_zone_size As Integer = 100
+    Friend CursorZoneSize As Integer = 100
     'used to tell when we should come out of screensaver mode
     Friend cursor_position As New Point
-
-    'A list of monitors the user has selected to use, from the options screen.
-    Friend ScreensToUse As New List(Of Screen) From {Screen.PrimaryScreen}
 
     'Are ponies currently walking around the desktop?
     Friend Ponies_Have_Launched As Boolean = False
@@ -96,6 +93,8 @@ Public Class Main
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
+
+    Private ReadOnly screensToUse As New List(Of Screen)
 #End Region
 
     Enum BehaviorOption
@@ -133,6 +132,33 @@ Public Class Main
         BehaviorList = 6
         RepeatDelay = 7
     End Enum
+
+    ''' <summary>
+    ''' Performs a full garbage collection (collection, flush the finalization queue, collect again).
+    ''' </summary>
+    Private Shared Sub FullCollect()
+#If DEBUG Then
+        Dim beforeCollect As Long
+        Dim beforeFinalize As Long
+        Dim afterCollect As Long
+        beforeCollect = GC.GetTotalMemory(False)
+#End If
+        GC.Collect()
+#If DEBUG Then
+        beforeFinalize = GC.GetTotalMemory(False)
+#End If
+        GC.WaitForPendingFinalizers()
+        GC.Collect()
+#If DEBUG Then
+        afterCollect = GC.GetTotalMemory(False)
+        Console.Write("Before full collect: ")
+        Console.WriteLine(beforeCollect)
+        Console.Write("Before finalize: ")
+        Console.WriteLine(beforeFinalize)
+        Console.Write("After finalize & collect: ")
+        Console.WriteLine(afterCollect)
+#End If
+    End Sub
 
 #Region "Initialization"
 
@@ -257,6 +283,7 @@ Public Class Main
         ' The PonyEditor also requires this, but must wait until templates are loaded.
         OptionsForm.Instance = New OptionsForm()
         'OptionsForm.Instance.Load_Button_Click(Nothing, Nothing, Option.DefaultProfileName, True)
+        AddHandler Options.MonitorNames.CollectionChanged, AddressOf MonitorNames_CollectionChanged
 
         LoadFilterSelections()
 
@@ -482,11 +509,18 @@ Public Class Main
                 If Options.PonyInteractionsEnabled Then
                     Dim displaywarnings =
                         Options.DisplayPonyInteractionsErrors AndAlso Not AutoStarted AndAlso Not ScreensaverMode
-                    Invoke(Sub() LoadInteractions(displaywarnings))
+                    BeginInvoke(Sub() LoadInteractions(displaywarnings))
                 End If
             Catch ex As Exception
                 MsgBox("Unable to load interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
             End Try
+
+            ' Wait for all images to load.
+            BeginInvoke(Sub()
+                            For Each control As PonySelectionControl In PonySelectionPanel.Controls
+                                control.ShowPonyImage = True
+                            Next
+                        End Sub)
 
         Catch ex As Exception
 #If Not Debug Then
@@ -683,7 +717,7 @@ Public Class Main
         SelectionControlsPanel.Enabled = True
         AnimationTimer.Enabled = True
         loading = False
-        GC.Collect()
+        FullCollect()
 
         loadWatch.Stop()
         Console.WriteLine("Loaded in {0:0.00s} ({1} templates)", loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
@@ -699,7 +733,7 @@ Public Class Main
 
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             Dim count As Integer
-            If Integer.TryParse(ponyPanel.PonyCount.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, count) Then
+            If Integer.TryParse(ponyPanel.PonyCount.Text, NumberStyles.Integer, CultureInfo.CurrentCulture, count) Then
                 total_ponies += count
             End If
         Next
@@ -1314,19 +1348,10 @@ Public Class Main
     End Sub
 
     Public Function GetInterface() As ISpriteCollectionView
-        'In case the cursor size wasn't set by the options menu, set it to something based on the screen size.
-        If cursor_zone_size = Nothing Then
-            For Each monitor In Screen.AllScreens
-                cursor_zone_size = CInt(0.03 * monitor.WorkingArea.Height)
-                Exit For
-            Next
-        End If
-
         'This should already be set in the options, but in case it isn't, use all monitors.
-        If ScreensToUse.Count = 0 Then
+        If Options.MonitorNames.Count = 0 Then
             For Each monitor In Screen.AllScreens
-                ScreensToUse.Add(monitor)
-                cursor_zone_size = CInt(0.03 * monitor.WorkingArea.Height)
+                Options.MonitorNames.Add(monitor.DeviceName)
             Next
         End If
 
@@ -1389,7 +1414,7 @@ Public Class Main
             Me.Visible = False
             Temp_Save_Counts()
 
-            GC.Collect()
+            FullCollect()
             loadWatch.Stop()
             Console.WriteLine("Loaded in {0:0.00s} ({1} images)", loadWatch.Elapsed.TotalSeconds, totalImages)
         End If
@@ -1520,9 +1545,18 @@ Public Class Main
 
     End Sub
 
+    Private Sub MonitorNames_CollectionChanged(sender As Object, e As System.Collections.Specialized.NotifyCollectionChangedEventArgs)
+        screensToUse.Clear()
+        screensToUse.AddRange(Screen.AllScreens.Where(Function(screen) Options.MonitorNames.Contains(screen.DeviceName)))
+    End Sub
+
+    Friend Function GetScreensToUse() As List(Of Screen)
+        Return screensToUse
+    End Function
+
     Friend Function GetCombinedScreenArea() As Rectangle
         Dim area As Rectangle = Rectangle.Empty
-        For Each screen In ScreensToUse
+        For Each screen In GetScreensToUse()
             If area = Rectangle.Empty Then
                 area = screen.WorkingArea
             Else

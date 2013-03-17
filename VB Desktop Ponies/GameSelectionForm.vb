@@ -15,7 +15,6 @@ Public Class GameSelectionForm
 
         For Each monitor In Screen.AllScreens
             ScreenSelection_Box.Items.Add(monitor.DeviceName)
-            Main.Instance.ScreensToUse.Add(monitor)
         Next
 
         If ScreenSelection_Box.Items.Count <> 0 Then
@@ -31,7 +30,7 @@ Public Class GameSelectionForm
         pony_image_list.ImageSize = New Size(75, 75)
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-            pony_image_list.Images.Add(CType(ponyPanel.GetPonyImage(0).Clone(), Bitmap))
+            pony_image_list.Images.Add(CType(ponyPanel.GetPonyImage(0).Image.Clone(), Bitmap))
         Next
 
         Pony_Selection_View.LargeImageList = pony_image_list

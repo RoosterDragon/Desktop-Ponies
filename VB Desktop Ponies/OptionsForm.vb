@@ -23,7 +23,7 @@
         Icon = My.Resources.Twilight
 
         'setup avoidance area
-        CursorAvoidanceRadius.Value = Main.Instance.cursor_zone_size
+        CursorAvoidanceRadius.Value = Main.Instance.CursorZoneSize
 
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
@@ -31,7 +31,6 @@
         'get monitor names
         For Each monitor In Screen.AllScreens
             MonitorsSelection.Items.Add(monitor.DeviceName)
-            Main.Instance.ScreensToUse.Add(monitor)
         Next
 
         For i = 0 To MonitorsSelection.Items.Count - 1
@@ -108,7 +107,7 @@
         'Interactions_error_label.Visible = False
         InteractionErrorsDisplayed.Checked = Options.DisplayPonyInteractionsErrors
 
-        SelectMonitors(Options.MonitorNames)
+        SelectMonitors()
 
         SizeScale.Value = CInt(Options.ScaleFactor * 100)
         MaxPonies.Value = Options.MaxPonyCount
@@ -143,29 +142,20 @@
 
     End Sub
 
-    Private Sub SelectMonitors(monitors As List(Of String))
-        Argument.EnsureNotNull(monitors, "monitors")
-
+    Private Sub SelectMonitors()
         selectingMonitors = True
         MonitorsSelection.SelectedItems.Clear()
 
-        For Each monitorLoop As String In monitors
-            Dim monitor = monitorLoop
+        For Each monitorNameLoop In Options.MonitorNames
+            Dim monitorName = monitorNameLoop
             For i = 0 To MonitorsSelection.Items.Count - 1
-                If CStr(MonitorsSelection.Items(i)) = monitor Then
+                If CStr(MonitorsSelection.Items(i)) = monitorName Then
                     MonitorsSelection.SetSelected(i, True)
-                    Main.Instance.ScreensToUse.Add(Array.Find(Screen.AllScreens, Function(screen As Screen)
-                                                                                     Return screen.DeviceName = monitor
-                                                                                 End Function))
                 End If
             Next
         Next
 
-        If MonitorsSelection.SelectedItems.Count = 0 AndAlso MonitorsSelection.Items.Count > 0 Then
-            MonitorsSelection.SetSelected(0, True)
-        End If
         selectingMonitors = False
-
     End Sub
 
     Friend Sub LoadButton_Click(sender As Object, e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles LoadButton.Click
@@ -253,14 +243,11 @@
             MonitorsMinimumLabel.Visible = False
         End If
 
-
-        Main.Instance.ScreensToUse.Clear()
         Options.MonitorNames.Clear()
 
         For i = 0 To MonitorsSelection.SelectedItems.Count - 1
             For Each monitor In Screen.AllScreens
                 If monitor.DeviceName = CStr(MonitorsSelection.SelectedItems(i)) Then
-                    Main.Instance.ScreensToUse.Add(monitor)
                     Options.MonitorNames.Add(monitor.DeviceName)
                 End If
             Next
@@ -277,7 +264,7 @@
     End Sub
 
     Private Sub CursorAvoidanceRadius_ValueChanged(sender As Object, e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
-        Main.Instance.cursor_zone_size = CInt(CursorAvoidanceRadius.Value)
+        Main.Instance.CursorZoneSize = CInt(CursorAvoidanceRadius.Value)
         Options.CursorAvoidanceSize = CursorAvoidanceRadius.Value
     End Sub
 

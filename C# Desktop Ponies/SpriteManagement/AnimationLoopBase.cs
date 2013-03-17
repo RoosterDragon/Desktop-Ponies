@@ -728,6 +728,7 @@
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            GC.Collect();
 
             runner.Start();
         }

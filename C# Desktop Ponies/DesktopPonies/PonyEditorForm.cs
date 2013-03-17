@@ -246,6 +246,7 @@
             // Cleanup the resources the now closed form can finally release.
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
     }
 }

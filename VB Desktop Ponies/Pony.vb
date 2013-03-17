@@ -1226,10 +1226,10 @@ Friend Class Pony
 
         ' Try an arbitrary number of times to find a point a point in bounds that is not also in the exclusion zone.
         ' TODO: Create method that will uniformly choose a random location from allowable points, also taking into account image sizing.
-        Dim screens = Main.Instance.ScreensToUse
+        Dim screens = Main.Instance.GetScreensToUse().ToArray()
         Dim teleportLocation As Point
         For tries = 0 To 300
-            Dim area = screens(Rng.Next(screens.Count)).WorkingArea
+            Dim area = screens(Rng.Next(screens.Length)).WorkingArea
             teleportLocation = New Point(
                 CInt(area.X + Rng.NextDouble() * area.Width),
                 CInt(area.Y + Rng.NextDouble() * area.Height))
@@ -2060,30 +2060,30 @@ Friend Class Pony
 
                     effect.AlreadyPlayedForCurrentBehavior = True
 
-                    Dim new_effect = New Effect(effect, Not facingRight)
+                    Dim newEffect = New Effect(effect, Not facingRight)
 
-                    If new_effect.Base.Duration <> 0 Then
-                        new_effect.DesiredDuration = new_effect.Base.Duration
-                        new_effect.CloseOnNewBehavior = False
+                    If newEffect.Base.Duration <> 0 Then
+                        newEffect.DesiredDuration = newEffect.Base.Duration
+                        newEffect.CloseOnNewBehavior = False
                     Else
                         If Me.HaltedForCursor Then
-                            new_effect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration).TotalSeconds
+                            newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration).TotalSeconds
                         Else
-                            new_effect.DesiredDuration = (BehaviorDesiredDuration - Me.CurrentTime).TotalSeconds
+                            newEffect.DesiredDuration = (BehaviorDesiredDuration - Me.CurrentTime).TotalSeconds
                         End If
-                        new_effect.CloseOnNewBehavior = True
+                        newEffect.CloseOnNewBehavior = True
                     End If
 
-                    new_effect.Location = GetEffectLocation(new_effect.CurrentImageSize,
-                                                            new_effect.PlacementDirection,
+                    newEffect.Location = GetEffectLocation(newEffect.CurrentImageSize,
+                                                            newEffect.PlacementDirection,
                                                             TopLeftLocation,
                                                             CurrentImageSize,
-                                                            new_effect.Centering)
+                                                            newEffect.Centering)
 
-                    new_effect.OwningPony = Me
+                    newEffect.OwningPony = Me
 
-                    Pony.CurrentAnimator.AddEffect(new_effect)
-                    Me.ActiveEffects.Add(new_effect)
+                    Pony.CurrentAnimator.AddEffect(newEffect)
+                    Me.ActiveEffects.Add(newEffect)
 
                     EffectsLastUsed(effect) = currentTime
 
@@ -2415,10 +2415,10 @@ Friend Class Pony
     End Function
 
     Shared Function GetScreenContainingPoint(point As Point) As Screen
-        For Each screen In Main.Instance.ScreensToUse
+        For Each screen In Main.Instance.GetScreensToUse()
             If (screen.WorkingArea.Contains(point)) Then Return screen
         Next
-        Return Main.Instance.ScreensToUse(0)
+        Return Nothing
     End Function
 
     'Test to see if we overlap with another application's window.
@@ -2588,8 +2588,10 @@ Friend Class Pony
         'return true if any of the points hit the bad area
         For Each point In points
             Dim screen = GetScreenContainingPoint(point)
-            Dim area = Options.ExclusionZoneForBounds(screen.WorkingArea)
-            If area.Contains(point) Then Return True
+            If screen IsNot Nothing Then
+                Dim area = Options.ExclusionZoneForBounds(screen.WorkingArea)
+                If area.Contains(point) Then Return True
+            End If
         Next
 
         Return False
@@ -2634,7 +2636,7 @@ Friend Class Pony
                         End If
 
                         Dim distance = Vector2.Distance(pony_location, CursorLocation)
-                        If distance <= .cursor_zone_size Then
+                        If distance <= .CursorZoneSize Then
                             Return True
                         End If
                     Next
@@ -2654,9 +2656,9 @@ Friend Class Pony
     Friend Function FindSafeDestination() As Point
         If Main.Instance.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
 
-        Dim usableScreens = Main.Instance.ScreensToUse
+        Dim usableScreens = Main.Instance.GetScreensToUse.ToArray()
         For i = 0 To 300
-            Dim randomScreen = usableScreens(Rng.Next(usableScreens.Count))
+            Dim randomScreen = usableScreens(Rng.Next(usableScreens.Length))
             Dim teleportLocation = New Point(
                 CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
                 CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
@@ -2995,18 +2997,12 @@ Friend Class Effect
     End Sub
 
     Sub Teleport()
-        Dim screens = Main.Instance.ScreensToUse
-        Dim screen = screens(Rng.Next(screens.Count))
+        Dim screens = Main.Instance.GetScreensToUse().ToArray()
+        Dim screen = screens(Rng.Next(screens.Length))
         Location = New Point(
             CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
             CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
     End Sub
-
-    Public Function Clone() As Effect
-        Dim clonedEffect As New Effect(Base, FacingLeft)
-        clonedEffect.OwningPony = OwningPony
-        Return clonedEffect
-    End Function
 
     Friend Function Center() As Point
         Dim scale As Double

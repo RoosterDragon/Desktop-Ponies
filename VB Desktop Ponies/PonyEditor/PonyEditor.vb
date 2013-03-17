@@ -700,6 +700,7 @@ Public Class PonyEditor
             For Each listing In effects_list
                 If String.Equals(Trim(listing.Name), Trim(name), StringComparison.OrdinalIgnoreCase) Then
                     effect = New Effect(listing, Not PreviewPony.facingRight)
+                    effect.OwningPony = PreviewPony
                 End If
             Next
 

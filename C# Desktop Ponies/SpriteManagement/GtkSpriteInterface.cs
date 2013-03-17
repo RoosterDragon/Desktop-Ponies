@@ -1608,134 +1608,6 @@
             }
         }
 
-        /*
-        private GraphicsWindow mainWindow;
-        private static Gdk.Rectangle mainWindowRect = new Gdk.Rectangle(SWF.Screen.PrimaryScreen.WorkingArea.X,
-                                                                        SWF.Screen.PrimaryScreen.WorkingArea.Y,
-                                                                        SWF.Screen.PrimaryScreen.WorkingArea.Width,
-                                                                        SWF.Screen.PrimaryScreen.WorkingArea.Height);
-        private Pixmap mainWindowClip;
-
-        public void Draw(AsyncLinkedList<ISprite> sprites)
-        {
-            Argument.EnsureNotNull(sprites, "sprites");
-
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            if (paused)
-                return;
-
-            lock (drawSync)
-            {
-                ApplicationInvoke(() => DrawInternal(sprites));
-            }
-        }
-
-        private void DrawInternal(AsyncLinkedList<ISprite> sprites)
-        {
-            if (mainWindow == null)
-            {
-                mainWindow = CreateWindow(null);
-                mainWindow.Move(0, 0);
-                mainWindow.Resize(mainWindowRect.Width, mainWindowRect.Height);
-                mainWindow.Show();
-                using (Region region = Region.Rectangle(new Gdk.Rectangle(0, 0, 1, 1)))
-                    mainWindow.GdkWindow.InputShapeCombineRegion(region, 0, 0);
-                mainWindowClip = new Pixmap(null, mainWindowRect.Width, mainWindowRect.Height, 1);
-            }
-
-            mainWindow.GdkWindow.BeginPaintRect(mainWindowRect);
-            using (Context context = CairoHelper.Create(mainWindow.GdkWindow),
-                clipContext = CairoHelper.Create(mainWindowClip))
-            {
-                context.Antialias = Antialias.None;
-                clipContext.Antialias = Antialias.None;
-
-                context.SetSourceRGBA(0, 0, 0, 0);
-                context.Operator = Operator.Source;
-                context.Paint();
-
-                clipContext.SetSourceRGB(0, 0, 0);
-                clipContext.Operator = Operator.Source;
-                clipContext.Paint();
-
-                context.Operator = Operator.Over;
-                clipContext.Operator = Operator.Add;
-                foreach (ISprite sprite in sprites)
-                {
-                    GtkFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
-                    frame.Flip(sprite.FlipImage);
-
-                    context.Save();
-                    clipContext.Save();
-
-                    context.Translate(sprite.Region.X, sprite.Region.Y);
-                    CairoHelper.SetSourcePixbuf(context, frame.Image.Image, 0, 0);
-                    context.Paint();
-
-                    clipContext.Translate(sprite.Region.X, sprite.Region.Y);
-                    CairoHelper.SetSourcePixmap(clipContext, frame.Image.Clip, 0, 0);
-                    clipContext.Paint();
-
-                    ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                    if (speakingSprite != null && speakingSprite.IsSpeaking)
-                    {
-                        const int padding = 3;
-
-                        context.SelectFontFace("Sans", FontSlant.Normal, FontWeight.Normal);
-                        context.SetFontSize(12);
-                        TextExtents extents = context.TextExtents(speakingSprite.SpeechText);
-                        PointD location = new PointD(sprite.Region.Width / 2d, 0);
-                        location.X -= extents.Width / 2 + padding;
-                        location.Y -= extents.Height + 2 * padding + 2;
-
-                        context.Translate(location.X, location.Y);
-                        context.Rectangle(-padding, -padding, extents.Width + 2 * padding, extents.Height + 2 * padding);
-                        context.SetSourceRGB(1, 1, 1);
-                        context.FillPreserve();
-                        context.SetSourceRGB(0, 0, 0);
-                        context.LineWidth = 1;
-                        context.Stroke();
-
-                        clipContext.Translate(location.X, location.Y);
-                        clipContext.Rectangle(-padding, -padding, extents.Width + 2 * padding, extents.Height + 2 * padding);
-                        clipContext.SetSourceRGB(1, 1, 1);
-                        clipContext.FillPreserve();
-                        clipContext.LineWidth = 1;
-                        clipContext.Stroke();
-
-                        context.Translate(0, extents.Height);
-                        context.ShowText(speakingSprite.SpeechText);
-                    }
-
-                    context.Restore();
-                    clipContext.Restore();
-                }
-
-                #region Timings Graph
-                if (Collector != null && Collector.Count != 0)
-                {
-                    // Set location and get area of graph draw.
-                    SD.Point graphLocation = new SD.Point(10, 10);
-                    SD.Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
-                    clipContext.SetSourceRGB(1, 1, 1);
-                    clipContext.Rectangle(recorderGraphArea.X, recorderGraphArea.Y, recorderGraphArea.Width, recorderGraphArea.Height);
-                    clipContext.Fill();
-
-                    // Display a graph of frame times and garbage collections.
-                    Collector.DrawGraph(context);
-                }
-                #endregion
-            }
-            if (mainWindow.SupportsRgba)
-                mainWindow.GdkWindow.InputShapeCombineMask(mainWindowClip, 0, 0);
-            else
-                mainWindow.GdkWindow.ShapeCombineMask(mainWindowClip, 0, 0);
-            mainWindow.GdkWindow.EndPaint();
-        }
-        */
-
         /// <summary>
         /// Closes the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
@@ -1757,11 +1629,6 @@
                 {
                     ApplicationInvoke(() =>
                     {
-                        /*
-                        mainWindow.Destroy();
-                        mainWindowClip.Dispose();
-                        */
-
                         foreach (GraphicsWindow window in spriteWindows.Values)
                             window.Hide();
                         foreach (GraphicsWindow window in spriteWindows.Values)
@@ -1778,9 +1645,6 @@
 
                     foreach (AnimatedImage<GtkFrame> image in images.InitializedValues)
                         image.Dispose();
-
-                    // The images occupy a large amount of managed memory, so reclaim that now.
-                    System.GC.Collect();
                 }
             }
         }
