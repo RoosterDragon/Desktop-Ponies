@@ -59,7 +59,9 @@
 
                 if (value < FrameSelector.Minimum || value > FrameSelector.Maximum)
                     throw new ArgumentOutOfRangeException("value", value,
-                        string.Format("value must be between {0} and {1} inclusive.", FrameSelector.Minimum, FrameSelector.Maximum));
+                        string.Format(CultureInfo.CurrentCulture,
+                        "value must be between {0} and {1} inclusive.",
+                        FrameSelector.Minimum, FrameSelector.Maximum));
 
                 updating = true;
                 FrameSelector.Value = value;
@@ -95,7 +97,9 @@
 
                 if (value < TimeSelector.Minimum || value > TimeSelector.Maximum)
                     throw new ArgumentOutOfRangeException("value", value,
-                        string.Format("value must be between {0} and {1} inclusive.", TimeSelector.Minimum, TimeSelector.Maximum));
+                        string.Format(CultureInfo.CurrentCulture,
+                        "value must be between {0} and {1} inclusive.",
+                        TimeSelector.Minimum, TimeSelector.Maximum));
 
                 updating = true;
                 TimeSelector.Value = value;

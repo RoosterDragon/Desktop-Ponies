@@ -58,17 +58,26 @@
             Try
                 Dim exceptionString = ex.ToString()
                 Dim version = GetProgramVersion()
+                Const errorMessage = "An unexpected error occurred and Desktop Ponies must close." &
+                    " Please report this error so it can be fixed."
 
                 ' Attempt to log error.
                 Try
-                    Using errorFile As New IO.StreamWriter(
-                        IO.Path.Combine(Options.InstallLocation, "error.txt"), False, System.Text.Encoding.UTF8)
+                    Console.WriteLine("An unexpected error occurred and Desktop Ponies must close.")
+                    Console.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
+                    Console.WriteLine()
+                    Console.WriteLine(exceptionString)
+                    Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
+                    Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
                         errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
                         errorFile.WriteLine()
                         errorFile.WriteLine(exceptionString)
+                        Console.WriteLine(errorMessage)
+                        Console.WriteLine("An error file can be found at " & path)
                     End Using
                 Catch
                     ' Logging might fail, but we'll just have to live with that.
+                    Console.WriteLine("An unexpected error occurred and Desktop Ponies must close. (An error file could not be generated)")
                 End Try
 
                 If TypeOf ex Is InvalidOperationException Then
@@ -85,9 +94,7 @@
                     End If
                 Else
                     ' Attempt to notify user of an unknown error.
-                    MessageBox.Show("An unexpected error occurred and Desktop Ponies must close." &
-                                    " Please report this error so it can be fixed." &
-                                    vbNewLine & vbNewLine & exceptionString,
+                    MessageBox.Show(errorMessage & vbNewLine & vbNewLine & exceptionString,
                                     "Unhandled Error - Desktop Ponies v" & version,
                                     MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End If

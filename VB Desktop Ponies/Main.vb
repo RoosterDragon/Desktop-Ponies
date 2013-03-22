@@ -335,7 +335,7 @@ Public Class Main
         ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
         ' fully drawn.
         Application.DoEvents()
-        Console.WriteLine("Main Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
+        Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         If loadTemplates Then
             TemplateLoader.RunWorkerAsync()
@@ -692,7 +692,7 @@ Public Class Main
     End Sub
 
     Private Sub TemplateLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles TemplateLoader.RunWorkerCompleted
-        Console.WriteLine("Templates Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
+        Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
         TemplateLoader.Dispose()
 
         If AutoStarted = True Then
@@ -1486,11 +1486,10 @@ Public Class Main
     End Sub
 
     ''' <summary>
-    ''' Even when it is not visible, animations on the main form still take CPU.  This sub disposes all of the controls 
-    ''' to bring its CPU usage back down to 0.
+    ''' Removes all ponies from the menu.
     ''' </summary>
-    ''' <remarks></remarks>
     Sub DisposeMenu()
+        SelectablePonies.Clear()
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls

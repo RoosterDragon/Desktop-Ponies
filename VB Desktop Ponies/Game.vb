@@ -264,7 +264,8 @@ Friend Module Games
             Options.MonitorNames.Add(GameScreen.DeviceName)
 
             If Options.ScaleFactor <> 1 Then
-                MessageBox.Show(String.Format("Note: Games may not work properly if you use a scale factor other than 1." &
+                MessageBox.Show(String.Format(CultureInfo.CurrentCulture,
+                                              "Note: Games may not work properly if you use a scale factor other than 1." &
                                               " You are currently using a scale factor of {0:0.00}x.", Options.ScaleFactor))
             End If
         End Sub
@@ -600,24 +601,6 @@ Friend Module Games
                 teamOneScoreDisplay.Text = teamOne.Score.ToString(CultureInfo.CurrentCulture)
                 teamTwoNameDisplay.Text = teamTwo.Name
                 teamTwoScoreDisplay.Text = teamTwo.Score.ToString(CultureInfo.CurrentCulture)
-            End Sub
-
-            Private Sub Paint(screengraphics As Graphics)
-                'Using font As New Font("Arial", 8)
-                '    TextRenderer.DrawText(Graphics, team1, font,
-                '                          New Rectangle(New Point(30, 82), New Size(75, 35)), Color.White)
-                '    TextRenderer.DrawText(Graphics, team2, font,
-                '                          New Rectangle(New Point(30, 126), New Size(75, 35)), Color.White)
-                'End Using
-                'Using font As New Font("Arial", 8, FontStyle.Bold)
-                '    TextRenderer.DrawText(Graphics, CStr(team1_score), font,
-                '                          New Rectangle(New Point(95, 85), New Size(75, 35)), Color.White)
-                '    TextRenderer.DrawText(Graphics, CStr(team2_score), font,
-                '                          New Rectangle(New Point(95, 130), New Size(75, 35)), Color.White)
-                'End Using
-
-                'Dim translated_location = Point.Empty
-                'screengraphics.DrawImageUnscaled(Image, translated_location.X, translated_location.Y)
             End Sub
 
             Public Class ScoreDisplay

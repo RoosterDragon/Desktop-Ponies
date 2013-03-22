@@ -23,6 +23,7 @@
         /// <see cref="T:System.Collections.Generic.IDictionary`2"/> is read-only.</exception>
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
+            Argument.EnsureNotNull(dictionary, "dictionary");
             TValue currentValue;
             if (dictionary.TryGetValue(key, out currentValue))
             {
@@ -52,6 +53,7 @@
         /// <see cref="T:System.Collections.Generic.IDictionary`2"/> is read-only.</exception>
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueFactory)
         {
+            Argument.EnsureNotNull(dictionary, "dictionary");
             Argument.EnsureNotNull(valueFactory, "valueFactory");
             TValue currentValue;
             if (dictionary.TryGetValue(key, out currentValue))

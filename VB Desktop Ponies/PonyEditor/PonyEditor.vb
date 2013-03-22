@@ -1036,7 +1036,7 @@ Public Class PonyEditor
                 Case colInteractionTargets.Index, colInteractionBehaviors.Index
                     HidePony()
                     Using form = New NewInteractionDialog(Me)
-                        form.Change_Interaction(changed_interaction)
+                        form.ChangeInteraction(changed_interaction)
                         form.ShowDialog(Me)
                     End Using
                     changes_made_now = True
@@ -1706,7 +1706,7 @@ Public Class PonyEditor
 
             HidePony()
             Using form = New NewInteractionDialog(Me)
-                form.Change_Interaction(Nothing)
+                form.ChangeInteraction(Nothing)
                 form.ShowDialog()
             End Using
             ShowPony()

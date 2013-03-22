@@ -12,7 +12,6 @@ Public Class NewInteractionDialog
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-
         If Trim(Name_Textbox.Text) = "" Then
             MsgBox("You must enter a name for the new behavior.")
             Exit Sub
@@ -24,12 +23,12 @@ Public Class NewInteractionDialog
         End If
 
         For Each Interaction In m_editor.PreviewPony.Interactions
-            If String.Equals(Interaction.Name, Trim(Name_Textbox.Text), StringComparison.OrdinalIgnoreCase) Then
+            If Not change_existing_interaction AndAlso
+                String.Equals(Interaction.Name, Trim(Name_Textbox.Text), StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
                 Exit Sub
             End If
         Next
-
 
         Dim chance As Double
 
@@ -93,16 +92,7 @@ Public Class NewInteractionDialog
         behaviorlist = Mid(behaviorlist, 1, behaviorlist.Length - 1)
 
         If change_existing_interaction Then
-            Dim old_interaction As PonyBase.Interaction = Nothing
-            For Each Interaction As PonyBase.Interaction In m_editor.PreviewPony.Interactions
-                If Name_Textbox.Text = Interaction.Name Then
-                    old_interaction = Interaction
-                End If
-            Next
-
-            If Not IsNothing(old_interaction) Then
-                m_editor.PreviewPony.Interactions.Remove(old_interaction)
-            End If
+            m_editor.PreviewPony.Base.Interactions.RemoveAll(Function(interaction) interaction.Name = Name_Textbox.Text)
         End If
 
         Dim targetsActivated As PonyBase.Interaction.TargetActivation
@@ -111,28 +101,27 @@ Public Class NewInteractionDialog
         If AllRadioButton.Checked Then targetsActivated = PonyBase.Interaction.TargetActivation.All
 
         m_editor.PreviewPony.Base.AddInteraction(Name_Textbox.Text,
-                                                          m_editor.PreviewPony.Directory, _
-                                                          chance / 100,
-                                                          Proximity_Box.Text, _
-                                                          targetlist, _
-                                                          targetsActivated, _
-                                                          behaviorlist, _
-                                                          CInt(reactivationDelay), _
-                                                          False)
+                                                      m_editor.PreviewPony.Directory, _
+                                                      chance / 100,
+                                                      Proximity_Box.Text, _
+                                                      targetlist, _
+                                                      targetsActivated, _
+                                                      behaviorlist, _
+                                                      CInt(reactivationDelay), _
+                                                      False)
 
-        MsgBox("Important note!:  You will need to make sure that the initiating pony and EACH target pony have all the behaviors selected, with those names.")
+        MessageBox.Show(Me, "Important note:" & vbCrLf &
+                        "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
+                        "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Me.Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-
         Me.Close()
     End Sub
 
-
-    Friend Sub Change_Interaction(interaction As PonyBase.Interaction)
-
+    Friend Sub ChangeInteraction(interaction As PonyBase.Interaction)
         Targets_Box.Items.Clear()
         Behaviors_Box.Items.Clear()
 
@@ -210,7 +199,5 @@ Public Class NewInteractionDialog
         For Each index In behaviors_index_list
             Behaviors_Box.SetItemChecked(index, True)
         Next
-
     End Sub
-
 End Class
