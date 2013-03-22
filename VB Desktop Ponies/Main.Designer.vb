@@ -14,7 +14,6 @@ Partial Class Main
         Me.AnimationTimer = New System.Windows.Forms.Timer(Me.components)
         Me.PonySelectionPanel = New System.Windows.Forms.FlowLayoutPanel()
         Me.LoadingProgressBar = New System.Windows.Forms.ProgressBar()
-        Me.TemplateLoader = New System.ComponentModel.BackgroundWorker()
         Me.PonyLoader = New System.ComponentModel.BackgroundWorker()
         Me.SelectionControlsPanel = New System.Windows.Forms.Panel()
         Me.PonyCountValueLabel = New System.Windows.Forms.Label()
@@ -78,9 +77,6 @@ Partial Class Main
         Me.LoadingProgressBar.Size = New System.Drawing.Size(728, 23)
         Me.LoadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.LoadingProgressBar.TabIndex = 3
-        '
-        'TemplateLoader
-        '
         '
         'PonyLoader
         '
@@ -467,7 +463,6 @@ Partial Class Main
     End Sub
     Friend WithEvents AnimationTimer As System.Windows.Forms.Timer
     Friend WithEvents LoadingProgressBar As System.Windows.Forms.ProgressBar
-    Friend WithEvents TemplateLoader As System.ComponentModel.BackgroundWorker
     Friend WithEvents PonyLoader As System.ComponentModel.BackgroundWorker
     Friend WithEvents PonySelectionPanel As System.Windows.Forms.FlowLayoutPanel
     Friend WithEvents SelectionControlsPanel As System.Windows.Forms.Panel

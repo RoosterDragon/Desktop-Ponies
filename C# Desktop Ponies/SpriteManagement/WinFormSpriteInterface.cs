@@ -944,7 +944,7 @@
         /// <returns>A new <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
         private BitmapFrame BitmapFrameFromFile(string fileName)
         {
-            return new BitmapFrame(fileName).SetupSafely(frame =>
+            return Disposable.SetupSafely(new BitmapFrame(fileName), frame =>
             {
                 if (IsAlphaBlended)
                     frame.Image.PreMultiplyAlpha();
@@ -970,8 +970,9 @@
         private BitmapFrame BitmapFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
             int stride, int width, int height, int depth, int hashCode, string fileName)
         {
-            return BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode).SetupSafely(
-                frame => 
+            return Disposable.SetupSafely(
+                BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode),
+                frame =>
                 {
                     if (IsAlphaBlended)
                     {

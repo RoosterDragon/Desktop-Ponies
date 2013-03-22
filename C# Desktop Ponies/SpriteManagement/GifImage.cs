@@ -99,7 +99,7 @@
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 1, 4 or 8.");
 
                 // Create the bitmap.
-                return new Bitmap(width, height, targetFormat).SetupSafely(bitmap =>
+                return Disposable.SetupSafely(new Bitmap(width, height, targetFormat), bitmap =>
                 {
                     // Lock the data into memory for fast marshaled access.
                     BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
@@ -429,16 +429,14 @@
                 private set
                 {
                     bitsPerValue = value;
+                    ValuesPerByte = (byte)(8 / bitsPerValue);
                     UpdateSeekMultiplier();
                 }
             }
             /// <summary>
             /// Gets the number of values that are stored in each byte of the buffer.
             /// </summary>
-            public byte ValuesPerByte
-            {
-                get { return (byte)(8 / BitsPerValue); }
-            }
+            public byte ValuesPerByte { get; private set; }
             /// <summary>
             /// Gets the maximum value that may be stored given the current BitsPerValue of the buffer.
             /// </summary>
@@ -1127,7 +1125,7 @@
             validDepths = allowableDepths;
             try
             {
-                reader = new BinaryReader(new BufferedStream(stream));
+                reader = new BinaryReader(stream);
                 DecodeGif();
             }
             finally
@@ -1633,6 +1631,8 @@
             int bottom = imageDescriptor.Subframe.Bottom;
             // Iterator that will allow the subframe region to be traversed efficiently.
             DataBuffer.Iterator iterator = frameBuffer.GetIterator(left, top);
+            // Index used for the transparent pixel, or -1 is transparency is not in use.
+            int transparentIndex = graphicControl != null && graphicControl.TransparencyUsed ? graphicControl.TransparentIndex : -1;
             // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
@@ -1663,10 +1663,10 @@
             int stackIndex = 0;
 
             // Initialize table with root characters.
-            for (int i = 0; i < clearCode; i++)
+            for (byte i = 0; i < clearCode; i++)
             {
                 prefix[i] = 0;
-                suffix[i] = (byte)i;
+                suffix[i] = i;
             }
             #endregion
 
@@ -1783,7 +1783,9 @@
 
                 #region Pop a pixel off the pixel stack.
                 // Apply pixel to our buffers.
-                ApplyPixelToFrame(iterator, pixelStack[--stackIndex], graphicControl);
+                byte pixel = pixelStack[--stackIndex];
+                if (pixel != transparentIndex)
+                    ApplyPixelToFrame(iterator, pixel);
                 pixelIndex++;
 
                 // Move right one pixel.
@@ -1835,21 +1837,16 @@
         /// Uses a value from the subframe and applies it onto the frame buffer.
         /// </summary>
         /// <param name="iterator">An iterator for the frameBuffer via which the value will be set.</param>
-        /// <param name="pixel">The value to be applied, in accordance with the <paramref name="graphicControl"/> parameters if specified.
-        /// </param>
-        /// <param name="graphicControl">A <see cref="T:CSDesktopPonies.SpriteManagement.GifDecoder`1.GraphicControlExtension"/> specifying
-        /// how the value from the subframe is to be applied. This is optional.</param>
-        private void ApplyPixelToFrame(DataBuffer.Iterator iterator, byte pixel, GraphicControlExtension graphicControl)
+        /// <param name="pixel">The value to be applied.</param>
+        private void ApplyPixelToFrame(DataBuffer.Iterator iterator, byte pixel)
         {
-            // Do not set a transparent pixel.
-            if (graphicControl != null && graphicControl.TransparencyUsed && pixel == graphicControl.TransparentIndex)
-                return;
-
             // Check the pixel does not conflict with the choice of transparency index.
             if (pixel != imageTransparentIndex)
             {
                 // No conflict, so check the value is in range and set the pixel.
-                CheckValueInRange(pixel);
+                if (pixel >= colorTable.Length)
+                    throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture,
+                            "Indexed value of {0} was larger that the maximum of {1}.", pixel, colorTable.Length - 1));
                 iterator.SetValue(pixel);
             }
             else if (imageTransparentIndex != imageTransparentIndexRemap)
@@ -1864,19 +1861,6 @@
                     "Attempted to decode an image using 256 RGB colors and transparency. " +
                     "If transparency is required, this decoder only supports 255 RGB colors."));
             }
-        }
-        /// <summary>
-        /// Checks a lookup value is without the limits for the current table size, otherwise throws an
-        /// <see cref="T:System.IO.InvalidDataException"/>.
-        /// </summary>
-        /// <param name="value">The value to check.</param>
-        /// <exception cref="T:System.IO.InvalidDataException">Thrown when <paramref name="value"/> is greater than or equal to the size of
-        /// the color table.</exception>
-        private void CheckValueInRange(byte value)
-        {
-            if (value >= colorTable.Length)
-                throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture,
-                        "Indexed value of {0} was larger that the maximum of {1}.", value, colorTable.Length - 1));
         }
         /// <summary>
         /// Creates the frame image using the current buffer.

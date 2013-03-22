@@ -1301,7 +1301,7 @@
         /// </returns>
         private GtkFrame GtkFrameFromFile(string fileName)
         {
-            return new GtkFrame(fileName).SetupSafely(frame => AlterPixbufForTransparency(fileName, frame.Image.Image));
+            return Disposable.SetupSafely(new GtkFrame(fileName), frame => AlterPixbufForTransparency(fileName, frame.Image.Image));
         }
 
         /// <summary>
@@ -1490,7 +1490,7 @@
             GraphicsWindow window = null;
             ApplicationInvoke(() =>
             {
-                window = new GraphicsWindow().SetupSafely(win =>
+                window = Disposable.SetupSafely(new GraphicsWindow(), win =>
                 {
                     win.Sprite = sprite;
                     win.Title = windowTitle;

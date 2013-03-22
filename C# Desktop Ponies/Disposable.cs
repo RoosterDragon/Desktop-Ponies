@@ -46,35 +46,30 @@
         /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise, only
         /// unmanaged resources should be disposed.</param>
         protected abstract void Dispose(bool disposing);
-    }
 
-    /// <summary>
-    /// Provides methods for managing <see cref="T:System.IDisposable"/> objects.
-    /// </summary>
-    public static class DisposableResource
-    {
         /// <summary>
-        /// Performs additional setup on a newly instantiated <see cref="T:System.IDisposable"/> whilst ensuring the resource is disposed
-        /// if an exception occurs.
+        /// Performs additional setup on an <see cref="T:System.IDisposable"/> whilst ensuring the resource is disposed if an exception
+        /// occurs. This is useful for methods that own a resource but intend to relinquish ownership to their caller, as they are
+        /// responsible for the resource until it is relinquished, and thus must ensure it is released under exceptional circumstances.
         /// </summary>
         /// <typeparam name="TDisposable">The type of the resource to setup.</typeparam>
-        /// <param name="disposable">A newly instantiated resource to be setup.</param>
-        /// <param name="setup">Action to perform on the newly instantiated resource. This is done in a try-catch block that will ensure
-        /// the resource is disposed in the event of an exception; before allowing the exception to propagate.</param>
+        /// <param name="resource">A resource to be setup .</param>
+        /// <param name="setup">Actions to perform on the resource. This is done in a try-catch block to ensure the resource is released if
+        /// an exception occurs.</param>
         /// <returns>A reference to the <see cref="T:System.IDisposable"/>.</returns>
-        public static TDisposable SetupSafely<TDisposable>(this TDisposable disposable, Action<TDisposable> setup)
+        public static TDisposable SetupSafely<TDisposable>(TDisposable resource, Action<TDisposable> setup)
             where TDisposable : IDisposable
         {
-            Argument.EnsureNotNull(disposable, "disposable");
+            Argument.EnsureNotNull(resource, "resource");
             Argument.EnsureNotNull(setup, "setup");
             try
             {
-                setup(disposable);
-                return disposable;
+                setup(resource);
+                return resource;
             }
             catch (Exception)
             {
-                disposable.Dispose();
+                resource.Dispose();
                 throw;
             }
         }

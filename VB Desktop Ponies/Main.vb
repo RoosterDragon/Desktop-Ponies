@@ -12,6 +12,7 @@ Public Class Main
     Private initialized As Boolean = False
     Private loading As Boolean = False
     Private loadWatch As New Diagnostics.Stopwatch()
+    Private idleWorker As New IdleWorker()
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -338,7 +339,7 @@ Public Class Main
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         If loadTemplates Then
-            TemplateLoader.RunWorkerAsync()
+            Threading.ThreadPool.QueueUserWorkItem(Sub() Me.LoadTemplates())
         End If
     End Sub
 
@@ -438,32 +439,30 @@ Public Class Main
 
     End Sub
 
-    Private Sub TemplateLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles TemplateLoader.DoWork
+    Private Sub LoadTemplates()
         Try
             Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
             Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-            Dim skipLoadingErrors As Boolean = False
-
-            Dim ponyBasesToAdd As New List(Of PonyBase)
-
             While Not IsHandleCreated
             End While
 
-            BeginInvoke(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
+            idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
 
+            Dim skipLoadingErrors As Boolean = False
             For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
                 skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
             Next
 
+            Dim ponyBasesToAdd As New List(Of PonyBase)
             For Each folder In ponyBaseDirectories
                 Try
                     Dim pony = New PonyBase(folder)
                     ponyBasesToAdd.Add(pony)
-                    BeginInvoke(Sub()
-                                    AddToMenu(pony)
-                                    LoadingProgressBar.Value += 1
-                                End Sub)
+                    idleWorker.QueueTask(Sub()
+                                             AddToMenu(pony)
+                                             LoadingProgressBar.Value += 1
+                                         End Sub)
                 Catch ex As InvalidDataException
                     If skipLoadingErrors = False Then
                         Select Case MsgBox("Error: Invalid data in " & PonyBase.ConfigFilename & " configuration file in " & folder _
@@ -493,13 +492,16 @@ Public Class Main
                 End Try
             Next
 
+            idleWorker.WaitOnAllTasks()
             If SelectablePonies.Count = 0 Then
-                MsgBox("Sorry, but you don't seem to have any ponies installed.  There should have at least been a 'Derpy' folder in the same spot as this program.")
+                MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
+                                "There should have at least been a 'Derpy' folder in the same spot as this program.",
+                                "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 GoButton.Enabled = False
             End If
 
             'Load pony counts.
-            BeginInvoke(Sub() Options.LoadPonyCounts())
+            idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
 
             'We first load interactions to get a list of names 
             'that each pony should interact with.
@@ -509,18 +511,19 @@ Public Class Main
                 If Options.PonyInteractionsEnabled Then
                     Dim displaywarnings =
                         Options.DisplayPonyInteractionsErrors AndAlso Not AutoStarted AndAlso Not ScreensaverMode
-                    BeginInvoke(Sub() LoadInteractions(displaywarnings))
+                    idleWorker.QueueTask(Sub() LoadInteractions(displaywarnings))
                 End If
             Catch ex As Exception
                 MsgBox("Unable to load interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
             End Try
 
             ' Wait for all images to load.
-            BeginInvoke(Sub()
-                            For Each control As PonySelectionControl In PonySelectionPanel.Controls
-                                control.ShowPonyImage = True
-                            Next
-                        End Sub)
+            idleWorker.QueueTask(Sub()
+                                     For Each control As PonySelectionControl In PonySelectionPanel.Controls
+                                         control.ShowPonyImage = True
+                                         control.Invalidate()
+                                     Next
+                                 End Sub)
 
         Catch ex As Exception
 #If Not Debug Then
@@ -530,6 +533,39 @@ Public Class Main
             Throw
 #End If
         End Try
+
+        idleWorker.QueueTask(Sub()
+                                 Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
+
+                                 If AutoStarted = True Then
+                                     'Me.Opacity = 0
+                                     GoButton_Click(Nothing, Nothing)
+                                 Else
+                                     'Me.Opacity = 100
+                                 End If
+
+                                 CountSelectedPonies()
+
+                                 If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+                                 LoadingProgressBar.Value = 0
+                                 LoadingProgressBar.Maximum = 1
+
+                                 PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
+                                 PonyPaginationLabel.Text = String.Format(
+                                     CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
+                                 PaginationEnabled.Enabled = True
+                                 PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+
+                                 PonySelectionPanel.Enabled = True
+                                 SelectionControlsPanel.Enabled = True
+                                 AnimationTimer.Enabled = True
+                                 loading = False
+                                 FullCollect()
+
+                                 loadWatch.Stop()
+                                 Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
+                                                   loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
+                             End Sub)
     End Sub
 
     Function LoadHouse(folder As String, skipErrors As Boolean) As Boolean
@@ -689,38 +725,6 @@ Public Class Main
 
             Loop
         End Using
-    End Sub
-
-    Private Sub TemplateLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles TemplateLoader.RunWorkerCompleted
-        Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
-        TemplateLoader.Dispose()
-
-        If AutoStarted = True Then
-            'Me.Opacity = 0
-            GoButton_Click(Nothing, Nothing)
-        Else
-            'Me.Opacity = 100
-        End If
-
-        CountSelectedPonies()
-
-        If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
-        LoadingProgressBar.Value = 0
-        LoadingProgressBar.Maximum = 1
-
-        PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
-        PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
-        PaginationEnabled.Enabled = True
-        PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
-
-        PonySelectionPanel.Enabled = True
-        SelectionControlsPanel.Enabled = True
-        AnimationTimer.Enabled = True
-        loading = False
-        FullCollect()
-
-        loadWatch.Stop()
-        Console.WriteLine("Loaded in {0:0.00s} ({1} templates)", loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
     End Sub
 
     Private Sub HandleCountChange(sender As Object, e As EventArgs)
@@ -1600,6 +1604,7 @@ Public Class Main
             RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
             If disposing Then
                 If components IsNot Nothing Then components.Dispose()
+                If idleWorker IsNot Nothing Then idleWorker.Dispose()
                 If animator IsNot Nothing Then animator.Dispose()
             End If
         Finally
