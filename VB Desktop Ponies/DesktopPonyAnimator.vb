@@ -329,6 +329,7 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub ReturnToMenu()
+        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
         Finish()
         Main.Instance.Invoke(Sub()
                                  Main.Instance.PonyShutdown()

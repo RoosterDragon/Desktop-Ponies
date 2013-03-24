@@ -72,7 +72,7 @@ Public Class IdleWorker
         If disposing Then
             SyncLock tasks
                 empty.Dispose()
-                control.Dispose()
+                If control.InvokeRequired Then control.Invoke(Sub() control.Dispose())
             End SyncLock
         End If
     End Sub
