@@ -3,7 +3,7 @@
     Dim PreviewPoint As Point = New Point(0, 0)
     Dim Point_Preview_Graphics As Graphics = Nothing
     Dim pony_thumbnail As Image = Nothing
-    Friend behavior_to_change As PonyBase.Behavior = Nothing
+    Friend behavior_to_change As Behavior = Nothing
 
     Private m_editor As PonyEditor
     Public Sub New(editor As PonyEditor)
@@ -87,7 +87,7 @@
 
     End Sub
 
-    Friend Sub Change_Behavior(behavior As PonyBase.Behavior)
+    Friend Sub Change_Behavior(behavior As Behavior)
         Argument.EnsureNotNull(behavior, "behavior")
 
         behavior_to_change = behavior

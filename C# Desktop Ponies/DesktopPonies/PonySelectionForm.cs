@@ -34,8 +34,7 @@
         /// The <see cref="T:CSDesktopPonies.Collections.LazyDictionary`2"/> that handles the set of pony images.
         /// </summary>
         private LazyDictionary<string, AnimatedImage<BitmapFrame>> imageManager =
-            new LazyDictionary<string, AnimatedImage<BitmapFrame>>(fileName => new AnimatedImage<BitmapFrame>(
-                fileName, file => new BitmapFrame(file), BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths));
+            new LazyDictionary<string, AnimatedImage<BitmapFrame>>(fileName => BitmapFrame.AnimationFromFile(fileName));
 
         /// <summary>
         /// The <see cref="T:CSDesktopPonies.SpriteManagement.ISpriteCollectionView"/> handling the display of sprites.

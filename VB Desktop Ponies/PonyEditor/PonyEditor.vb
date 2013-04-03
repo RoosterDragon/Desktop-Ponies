@@ -6,7 +6,17 @@ Public Class PonyEditor
     ''' <summary>
     ''' The pony displayed in the preview window and where settings are changed (live).
     ''' </summary>
-    Friend PreviewPony As Pony = Nothing
+    Friend PreviewPony As Pony
+
+    Friend ReadOnly Property PreviewPonyBase As MutablePonyBase
+        Get
+            If PreviewPony IsNot Nothing Then
+                Return DirectCast(PreviewPony.Base, MutablePonyBase)
+            Else
+                Return Nothing
+            End If
+        End Get
+    End Property
 
     Friend IsClosing As Boolean
 
@@ -55,7 +65,7 @@ Public Class PonyEditor
         InitializeComponent()
         CreateHandle()
 
-        For Each value As PonyBase.Interaction.TargetActivation In [Enum].GetValues(GetType(PonyBase.Interaction.TargetActivation))
+        For Each value As Interaction.TargetActivation In [Enum].GetValues(GetType(Interaction.TargetActivation))
             colInteractionInteractWith.Items.Add(value.ToString())
         Next
 
@@ -188,10 +198,10 @@ Public Class PonyEditor
         Dim index As Integer = GetPonyOrder(ponyNameList(menu_index))
 
         'as everywhere else, we make a copy from the master copy in selectable_ponies
-        PreviewPony = New Pony(Main.Instance.SelectablePonies(index))
+        PreviewPony = New Pony(New MutablePonyBase(Main.Instance.SelectablePonies(index).Directory))
 
         If PreviewPony.Behaviors.Count = 0 Then
-            PreviewPony.Base.AddBehavior("Default", 1, 60, 60, 0, Pony.AllowedMoves.None, "", "", "")
+            PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
         End If
 
         SaveSortOrder()
@@ -251,7 +261,7 @@ Public Class PonyEditor
 
     'This is used to keep track of the links in each behavior chain.
     Private Structure ChainLink
-        Dim behavior As PonyBase.Behavior
+        Dim behavior As Behavior
         Dim order As Integer
         Dim series As Integer
     End Structure
@@ -288,7 +298,7 @@ Public Class PonyEditor
             end_speech_list.Items.Add("None")
 
             Dim unnamed_counter = 1
-            For Each speech As PonyBase.Behavior.SpeakingLine In pony.Base.SpeakingLines
+            For Each speech As Behavior.SpeakingLine In pony.Base.SpeakingLines
                 If speech.Name = "Unnamed" Then
                     speech.Name = "Unnamed #" & unnamed_counter
                     unnamed_counter += 1
@@ -421,7 +431,7 @@ Public Class PonyEditor
                 End With
             Next
 
-            For Each Interaction As PonyBase.Interaction In PreviewPony.Interactions
+            For Each Interaction As Interaction In PreviewPony.Interactions
 
                 With Interaction
                     PonyInteractionsGrid.Rows.Add(.Name, _
@@ -439,7 +449,7 @@ Public Class PonyEditor
             Next
 
             'to make sure that speech match behaviors
-            PreviewPony.Base.LinkBehaviors()
+            PreviewPonyBase.LinkBehaviors()
 
             already_updating = False
 
@@ -537,105 +547,45 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Shared Function Movement_ToString(movement As Pony.AllowedMoves) As String
-        Select Case movement
-            Case Pony.AllowedMoves.None
-                Return "None"
-            Case Pony.AllowedMoves.HorizontalOnly
-                Return "Horizontal Only"
-            Case Pony.AllowedMoves.VerticalOnly
-                Return "Vertical Only"
-            Case Pony.AllowedMoves.HorizontalVertical
-                Return "Horizontal Vertical"
-            Case Pony.AllowedMoves.DiagonalOnly
-                Return "Diagonal Only"
-            Case Pony.AllowedMoves.DiagonalHorizontal
-                Return "Diagonal/horizontal"
-            Case Pony.AllowedMoves.DiagonalVertical
-                Return "Diagonal/Vertical"
-            Case Pony.AllowedMoves.All
-                Return "All"
-            Case Pony.AllowedMoves.MouseOver
-                Return "MouseOver"
-            Case Pony.AllowedMoves.Sleep
-                Return "Sleep"
-            Case Pony.AllowedMoves.Dragged
-                Return "Dragged"
-            Case Else
-                Throw New ArgumentException("Invalid movement option: " & movement, "movement")
-        End Select
-    End Function
-
-    Friend Shared Function String_ToMovement(movement As String) As Pony.AllowedMoves
+    Friend Shared Function String_ToMovement(movement As String) As AllowedMoves
         Select Case movement
             Case "None"
-                Return Pony.AllowedMoves.None
+                Return AllowedMoves.None
             Case "Horizontal Only"
-                Return Pony.AllowedMoves.HorizontalOnly
+                Return AllowedMoves.HorizontalOnly
             Case "Vertical Only"
-                Return Pony.AllowedMoves.VerticalOnly
+                Return AllowedMoves.VerticalOnly
             Case "Horizontal Vertical"
-                Return Pony.AllowedMoves.HorizontalVertical
+                Return AllowedMoves.HorizontalVertical
             Case "Diagonal Only"
-                Return Pony.AllowedMoves.DiagonalOnly
+                Return AllowedMoves.DiagonalOnly
             Case "Diagonal/horizontal"
-                Return Pony.AllowedMoves.DiagonalHorizontal
+                Return AllowedMoves.DiagonalHorizontal
             Case "Diagonal/Vertical"
-                Return Pony.AllowedMoves.DiagonalVertical
+                Return AllowedMoves.DiagonalVertical
             Case "All"
-                Return Pony.AllowedMoves.All
+                Return AllowedMoves.All
             Case "MouseOver"
-                Return Pony.AllowedMoves.MouseOver
+                Return AllowedMoves.MouseOver
             Case "Sleep"
-                Return Pony.AllowedMoves.Sleep
+                Return AllowedMoves.Sleep
             Case "Dragged"
-                Return Pony.AllowedMoves.Dragged
+                Return AllowedMoves.Dragged
             Case Else
                 Throw New ArgumentException("Invalid movement string:" & movement, "movement")
-        End Select
-    End Function
-
-    Private Shared Function Location_ToString(location As Direction) As String
-
-        Select Case location
-
-            Case Direction.Top
-                Return "Top"
-            Case Direction.Bottom
-                Return "Bottom"
-            Case Direction.Left
-                Return "Left"
-            Case Direction.Right
-                Return "Right"
-            Case Direction.BottomRight
-                Return "Bottom Right"
-            Case Direction.BottomLeft
-                Return "Bottom Left"
-            Case Direction.TopRight
-                Return "Top Right"
-            Case Direction.TopLeft
-                Return "Top Left"
-            Case Direction.Center
-                Return "Center"
-            Case Direction.Random
-                Return "Any"
-            Case Direction.RandomNotCenter
-                Return "Any-Not Center"
-            Case Else
-                Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
         End Select
     End Function
 
     Friend Shared Function String_ToLocation(location As String) As Direction
         Select Case location
             Case "Top"
-                Return Direction.Top
+                Return Direction.TopCenter
             Case "Bottom"
-                Return Direction.Bottom
+                Return Direction.BottomCenter
             Case "Left"
-                Return Direction.Left
+                Return Direction.MiddleLeft
             Case "Right"
-                Return Direction.Right
+                Return Direction.MiddleRight
             Case "Bottom Right"
                 Return Direction.BottomRight
             Case "Bottom Left"
@@ -645,7 +595,7 @@ Public Class PonyEditor
             Case "Top Left"
                 Return Direction.TopLeft
             Case "Center"
-                Return Direction.Center
+                Return Direction.MiddleCenter
             Case "Any"
                 Return Direction.Random
             Case "Any-Not Center"
@@ -713,7 +663,6 @@ Public Class PonyEditor
 
             Dim rect = GetPreviewWindowScreenRectangle()
             effect.Location = New Point(CInt(rect.X + rect.Width * Rng.NextDouble), CInt(rect.Y + rect.Height * Rng.NextDouble))
-
             pe_animator.AddEffect(effect)
             PreviewPony.ActiveEffects.Add(effect)
 
@@ -802,7 +751,7 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_behavior_name As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
-            Dim changed_behavior As PonyBase.Behavior = Nothing
+            Dim changed_behavior As Behavior = Nothing
 
             For Each behavior In PreviewPony.Behaviors
                 If behavior.Name = changed_behavior_name Then
@@ -902,9 +851,9 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
-            Dim changed_speech As PonyBase.Behavior.SpeakingLine = Nothing
+            Dim changed_speech As Behavior.SpeakingLine = Nothing
 
-            For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
+            For Each speech As Behavior.SpeakingLine In PreviewPonyBase.SpeakingLines
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -1014,9 +963,9 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
-            Dim changed_interaction As PonyBase.Interaction = Nothing
+            Dim changed_interaction As Interaction = Nothing
 
-            For Each interaction As PonyBase.Interaction In PreviewPony.Interactions
+            For Each interaction As Interaction In PreviewPony.Interactions
                 If interaction.Name = changed_interaction_name Then
                     changed_interaction = interaction
                     Exit For
@@ -1068,7 +1017,7 @@ Public Class PonyEditor
             Dim new_value As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_behavior_name As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
-            Dim changed_behavior As PonyBase.Behavior = Nothing
+            Dim changed_behavior As Behavior = Nothing
 
             For Each behavior In PreviewPony.Behaviors
                 If behavior.Name = changed_behavior_name Then
@@ -1138,10 +1087,10 @@ Public Class PonyEditor
                         Else
                             changed_behavior.EndLineName = new_value
                         End If
-                        PreviewPony.Base.LinkBehaviors()
+                        PreviewPonyBase.LinkBehaviors()
                     Case colBehaviorLinked.Index
                         changed_behavior.LinkedBehaviorName = new_value
-                        PreviewPony.Base.LinkBehaviors()
+                        PreviewPonyBase.LinkBehaviors()
                     Case colBehaviorDoNotRunRandomly.Index
                         changed_behavior.Skip = Boolean.Parse(new_value)
                     Case colBehaviorDoNotRepeatAnimations.Index
@@ -1154,14 +1103,14 @@ Public Class PonyEditor
                         End If
                         changed_behavior.Group = new_group_value
                     Case colBehaviorGroupName.Index
-                        If changed_behavior.Group = PonyBase.Behavior.AnyGroup Then
+                        If changed_behavior.Group = Behavior.AnyGroup Then
                             MsgBox("You can't change the name of the 'Any' group. This is reserved. " &
                                    "It means the behavior can run at any time, regardless of the current group that is running.")
                             Exit Sub
                         End If
 
                         If PreviewPony.GetBehaviorGroupName(changed_behavior.Group) = "Unnamed" Then
-                            PreviewPony.BehaviorGroups.Add(New PonyBase.BehaviorGroup(new_value, changed_behavior.Group))
+                            PreviewPony.BehaviorGroups.Add(New BehaviorGroup(new_value, changed_behavior.Group))
                         Else
                             For Each behaviorgroup In PreviewPony.BehaviorGroups
 
@@ -1187,7 +1136,7 @@ Public Class PonyEditor
                        ControlChars.NewLine & "Details: " & ex.Message)
             End Try
 
-            PreviewPony.Base.LinkBehaviors()
+            PreviewPonyBase.LinkBehaviors()
 
             If already_updating = False Then
                 'Load_Parameters(Preview_Pony)
@@ -1253,14 +1202,14 @@ Public Class PonyEditor
                     Case colEffectBehavior.Index
                         For Each behavior In PreviewPony.Behaviors
                             If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.Effects.Remove(changed_effect)
+                                behavior.RemoveEffect(changed_effect)
                                 Exit For
                             End If
                         Next
                         changed_effect.BehaviorName = new_value
                         For Each behavior In PreviewPony.Behaviors
                             If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.Effects.Add(changed_effect)
+                                behavior.AddEffect(changed_effect, PreviewPonyBase)
                                 Exit For
                             End If
                         Next
@@ -1287,7 +1236,7 @@ Public Class PonyEditor
                        ControlChars.NewLine & "Details: " & ex.Message)
             End Try
 
-            PreviewPony.Base.LinkBehaviors()
+            PreviewPonyBase.LinkBehaviors()
 
             If already_updating = False Then
                 'Load_Parameters(Preview_Pony)
@@ -1313,9 +1262,9 @@ Public Class PonyEditor
             Dim new_value As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
-            Dim changed_speech As PonyBase.Behavior.SpeakingLine = Nothing
+            Dim changed_speech As Behavior.SpeakingLine = Nothing
 
-            For Each speech In PreviewPony.Base.SpeakingLines
+            For Each speech In PreviewPonyBase.SpeakingLines
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -1341,7 +1290,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each speechname In PreviewPony.Base.SpeakingLines
+                        For Each speechname In PreviewPonyBase.SpeakingLines
                             If String.Equals(speechname.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Speech names must be unique.  Speech '" & new_value & "' already exists.")
                                 PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
@@ -1365,7 +1314,7 @@ Public Class PonyEditor
                 Exit Sub
             End Try
 
-            PreviewPony.Base.LinkBehaviors()
+            PreviewPonyBase.LinkBehaviors()
 
             If already_updating = False Then
                 'Load_Parameters(Preview_Pony)
@@ -1391,7 +1340,7 @@ Public Class PonyEditor
             Dim new_value As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
-            Dim changed_interaction As PonyBase.Interaction = Nothing
+            Dim changed_interaction As Interaction = Nothing
 
             For Each interaction In PreviewPony.Interactions
                 If interaction.Name = changed_interaction_name Then
@@ -1435,7 +1384,7 @@ Public Class PonyEditor
                         changed_interaction.Proximity_Activation_Distance = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colInteractionInteractWith.Index
                         changed_interaction.Targets_Activated =
-                            CType([Enum].Parse(GetType(PonyBase.Interaction.TargetActivation), new_value), PonyBase.Interaction.TargetActivation)
+                            CType([Enum].Parse(GetType(Interaction.TargetActivation), new_value), Interaction.TargetActivation)
                     Case colInteractionReactivationDelay.Index
                         changed_interaction.ReactivationDelay = Integer.Parse(new_value, CultureInfo.InvariantCulture)
                 End Select
@@ -1463,7 +1412,7 @@ Public Class PonyEditor
         Dim effect_list As New List(Of EffectBase)
 
         For Each ponyBase In Main.Instance.SelectablePonies
-            For Each behavior As PonyBase.Behavior In ponyBase.Behaviors
+            For Each behavior As Behavior In ponyBase.Behaviors
                 For Each effect In behavior.Effects
                     effect_list.Add(effect)
                 Next
@@ -1825,7 +1774,7 @@ Public Class PonyEditor
                         End If
                     Next
                     If Not IsNothing(todelete) Then
-                        behavior.Effects.Remove(todelete)
+                        behavior.RemoveEffect(todelete)
                     End If
                 Next
             ElseIf Object.ReferenceEquals(grid, PonyBehaviorsGrid) Then
@@ -1833,7 +1782,7 @@ Public Class PonyEditor
                     e.Cancel = True
                     MsgBox("A pony must have at least 1 behavior.  You can't delete the last one.")
                 End If
-                Dim todelete As PonyBase.Behavior = Nothing
+                Dim todelete As Behavior = Nothing
                 For Each behavior In PreviewPony.Behaviors
                     If CStr(e.Row.Cells(colBehaviorName.Index).Value) = behavior.Name Then
                         todelete = behavior
@@ -1844,7 +1793,7 @@ Public Class PonyEditor
                     PreviewPony.Behaviors.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, PonyInteractionsGrid) Then
-                Dim todelete As PonyBase.Interaction = Nothing
+                Dim todelete As Interaction = Nothing
                 For Each interaction In PreviewPony.Interactions
                     If CStr(e.Row.Cells(colInteractionName.Index).Value) = interaction.Name Then
                         todelete = interaction
@@ -1855,16 +1804,16 @@ Public Class PonyEditor
                     PreviewPony.Interactions.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, PonySpeechesGrid) Then
-                Dim todelete As PonyBase.Behavior.SpeakingLine = Nothing
-                For Each speech In PreviewPony.Base.SpeakingLines
+                Dim todelete As Behavior.SpeakingLine = Nothing
+                For Each speech In PreviewPonyBase.SpeakingLines
                     If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
                         todelete = speech
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPony.Base.SpeakingLines.Remove(todelete)
-                    PreviewPony.Base.SetLines(PreviewPony.Base.SpeakingLines)
+                    PreviewPonyBase.SpeakingLines.Remove(todelete)
+                    PreviewPonyBase.SetLines(PreviewPonyBase.SpeakingLines)
                 End If
             Else
                 Throw New Exception("Unknown grid when deleting row: " & grid.Name)
@@ -1872,7 +1821,7 @@ Public Class PonyEditor
 
             has_saved = False
 
-            PreviewPony.Base.LinkBehaviors()
+            PreviewPonyBase.LinkBehaviors()
 
         Catch ex As Exception
             MsgBox("Error handling row deletion! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
@@ -1890,7 +1839,7 @@ Public Class PonyEditor
         MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
     End Sub
 
-    Private Sub Set_Behavior_Follow_Parameters(behavior As PonyBase.Behavior)
+    Private Sub Set_Behavior_Follow_Parameters(behavior As Behavior)
         Try
 
             HidePony()
@@ -1926,7 +1875,7 @@ Public Class PonyEditor
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
 
         If already_updating = False Then
-            PreviewPony.Base.Name = PonyName.Text
+            PreviewPonyBase.Name = PonyName.Text
             has_saved = False
         End If
 
@@ -1949,7 +1898,7 @@ Public Class PonyEditor
                 previous_pony = PreviewPony
             End If
 
-            Dim ponyBase = New PonyBase()
+            Dim ponyBase = New MutablePonyBase()
             ponyBase.Name = "New Pony"
             PreviewPony = New Pony(ponyBase)
 
@@ -1977,16 +1926,14 @@ Public Class PonyEditor
     End Sub
 
     Friend Sub SavePony(path As String)
-
         Try
-
             'rebuild the list of ponies, in the original order
             Dim temp_list As New List(Of PonyBase)
             For Each Pony In Main.Instance.SelectablePonies
                 If Pony.Directory <> PreviewPony.Directory Then
                     temp_list.Add(Pony)
                 Else
-                    temp_list.Add(PreviewPony.Base)
+                    temp_list.Add(PreviewPonyBase)
                 End If
             Next
 
@@ -2016,77 +1963,19 @@ Public Class PonyEditor
                                                                                                                  End Function))))
 
                 For Each behaviorGroup In PreviewPony.BehaviorGroups
-                    newPonyIniFile.WriteLine(String.Join(",", "behaviorgroup", behaviorGroup.Number, behaviorGroup.Name))
+                    newPonyIniFile.WriteLine(behaviorGroup.GetPonyIni())
                 Next
 
                 For Each behavior In PreviewPony.Behaviors
-                    newPonyIniFile.WriteLine(String.Join(
-                                      ",", "Behavior",
-                                      Quoted(behavior.Name),
-                                      behavior.ChanceOfOccurance.ToString(CultureInfo.InvariantCulture),
-                                      behavior.MaxDuration.ToString(CultureInfo.InvariantCulture),
-                                      behavior.MinDuration.ToString(CultureInfo.InvariantCulture),
-                                      behavior.Speed.ToString(CultureInfo.InvariantCulture),
-                                      Quoted(Get_Filename(behavior.RightImagePath)),
-                                      Quoted(Get_Filename(behavior.LeftImagePath)),
-                                      Space_To_Under(Movement_ToString(behavior.AllowedMovement)),
-                                      Quoted(behavior.LinkedBehaviorName),
-                                      Quoted(behavior.StartLineName),
-                                      Quoted(behavior.EndLineName),
-                                      behavior.Skip,
-                                      behavior.OriginalDestinationXCoord.ToString(CultureInfo.InvariantCulture),
-                                      behavior.OriginalDestinationYCoord.ToString(CultureInfo.InvariantCulture),
-                                      Quoted(behavior.OriginalFollowObjectName),
-                                      behavior.AutoSelectImagesOnFollow,
-                                      behavior.FollowStoppedBehaviorName,
-                                      behavior.FollowMovingBehaviorName,
-                                      Quoted(behavior.RightImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                                             behavior.RightImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-                                      Quoted(behavior.LeftImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                                             behavior.LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-                                      behavior.dont_repeat_image_animations,
-                                      behavior.Group.ToString(CultureInfo.InvariantCulture)))
-
+                    newPonyIniFile.WriteLine(behavior.GetPonyIni())
                 Next
 
                 For Each effect In PreviewPonyEffects()
-                    newPonyIniFile.WriteLine(String.Join(
-                                      ",", "Effect",
-                                      Quoted(effect.Name),
-                                      Quoted(effect.BehaviorName),
-                                      Quoted(Get_Filename(effect.RightImagePath)),
-                                      Quoted(Get_Filename(effect.LeftImagePath)),
-                                      effect.Duration.ToString(CultureInfo.InvariantCulture),
-                                      effect.Repeat_Delay.ToString(CultureInfo.InvariantCulture),
-                                      Space_To_Under(Location_ToString(effect.PlacementDirectionRight)),
-                                      Space_To_Under(Location_ToString(effect.CenteringRight)),
-                                      Space_To_Under(Location_ToString(effect.PlacementDirectionLeft)),
-                                      Space_To_Under(Location_ToString(effect.CenteringLeft)),
-                                      effect.follow,
-                                      effect.DoNotRepeatImageAnimations))
+                    newPonyIniFile.WriteLine(effect.GetPonyIni())
                 Next
 
-                For Each speech As PonyBase.Behavior.SpeakingLine In PreviewPony.Base.SpeakingLines
-
-                    'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
-
-                    If speech.SoundFile = "" Then
-                        newPonyIniFile.WriteLine(String.Join(
-                                          ",", "Speak",
-                                          Quoted(speech.Name),
-                                          Quoted(speech.Text),
-                                          "",
-                                          speech.Skip,
-                                          speech.Group))
-                    Else
-                        newPonyIniFile.WriteLine(String.Join(
-                                          ",", "Speak",
-                                          Quoted(speech.Name),
-                                          Quoted(speech.Text),
-                                          "{" & Quoted(Get_Filename(speech.SoundFile)) & "," & Quoted(Replace(Get_Filename(speech.SoundFile), ".mp3", ".ogg")) & "}",
-                                          speech.Skip,
-                                          speech.Group))
-                    End If
+                For Each speech As Behavior.SpeakingLine In PreviewPonyBase.SpeakingLines
+                    newPonyIniFile.WriteLine(speech.GetPonyIni())
                 Next
             End Using
 
@@ -2095,7 +1984,7 @@ Public Class PonyEditor
                 Dim interactions_lines As New List(Of String)
 
                 Using reader = New StreamReader(IO.Path.Combine(
-                                                Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
+                                                Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
                     Do Until reader.EndOfStream
                         Dim line = reader.ReadLine()
                         Dim name_check = CommaSplitQuoteQualified(line)
@@ -2110,7 +1999,7 @@ Public Class PonyEditor
                 End Using
 
                 Using writer = New StreamWriter(IO.Path.Combine(
-                                                Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename),
+                                                Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename),
                                             False, System.Text.Encoding.UTF8)
                     If IsNothing(writer) Then Throw New Exception("Unable to write back to interactions.ini file...")
 
@@ -2119,20 +2008,7 @@ Public Class PonyEditor
                     Next
 
                     For Each interaction In PreviewPony.Interactions
-                        Dim behaviors_list = String.Join(",", interaction.BehaviorList.Select(Function(behavior As PonyBase.Behavior)
-                                                                                                  Return Quoted(behavior.Name)
-                                                                                              End Function))
-
-                        Dim interactionLine = String.Join(",",
-                            interaction.Name,
-                            Quoted(interaction.PonyName),
-                            interaction.Probability.ToString(CultureInfo.InvariantCulture),
-                            interaction.Proximity_Activation_Distance.ToString(CultureInfo.InvariantCulture),
-                            Braced(interaction.Targets_String),
-                            interaction.Targets_Activated.ToString(),
-                            Braced(behaviors_list),
-                            interaction.ReactivationDelay.ToString(CultureInfo.InvariantCulture))
-                        writer.WriteLine(interactionLine)
+                        writer.WriteLine(interaction.GetPonyIni())
                     Next
                 End Using
 
@@ -2148,18 +2024,6 @@ Public Class PonyEditor
         MsgBox("Save completed!")
 
     End Sub
-
-    Friend Shared Function Quoted(text As String) As String
-        Return ControlChars.Quote & text & ControlChars.Quote
-    End Function
-
-    Friend Shared Function Braced(text As String) As String
-        Return "{" & text & "}"
-    End Function
-
-    Private Shared Function Space_To_Under(text As String) As String
-        Return Replace(Replace(text, " ", "_"), "/", "_")
-    End Function
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
 

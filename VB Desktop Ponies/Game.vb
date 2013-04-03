@@ -277,7 +277,7 @@ Friend Module Games
                     For Each team In Teams
                         For Each position In team.Positions
                             If position.CurrentAction <> PlayerActionType.ReturnToStart OrElse
-                                position.Player.CurrentBehavior.AllowedMovement = Pony.AllowedMoves.None Then
+                                position.Player.CurrentBehavior.AllowedMovement = AllowedMoves.None Then
                                 ' Go to starting position.
                                 position.SetFollowBehavior(Nothing, Nothing, True)
                             End If
@@ -419,22 +419,22 @@ Friend Module Games
                     fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer, files_path As String)
 
                 ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
-                Dim handlerBase = New PonyBase()
+                Dim handlerBase = New MutablePonyBase()
                 handlerBase.Name = "Ball"
                 Handler = New Pony(handlerBase)
 
                 handlerBase.AddBehavior("idle", 100, 99, 99, 0,
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
-                                        Pony.AllowedMoves.None, "", "", "")
+                                        AllowedMoves.None, "", "", "")
                 handlerBase.AddBehavior("slow", 100, 99, 99, 3,
                                         files_path & Replace(slow_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(slow_left_image_filename, ControlChars.Quote, ""),
-                                        Pony.AllowedMoves.All, "", "", "")
+                                        AllowedMoves.All, "", "", "")
                 handlerBase.AddBehavior("fast", 100, 99, 99, 5,
                                         files_path & Replace(fast_right_image_filename, ControlChars.Quote, ""),
                                         files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
-                                        Pony.AllowedMoves.All, "", "", "")
+                                        AllowedMoves.All, "", "", "")
 
                 initialPosition = New Point(x_location, y_location)
 
@@ -502,7 +502,7 @@ Friend Module Games
             Friend Sub Kick(_speed As Double, _angle As Double, kicker As Position)
                 LastHandledBy = kicker
 
-                Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
+                Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
                 m_speed = _speed
                 Handler.Diagonal = _angle
             End Sub
@@ -952,7 +952,7 @@ Friend Module Games
 
                 SpeedOverride(True)
 
-                Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(Pony.AllowedMoves.All, True)
+                Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
                 'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
                 Player.followObject = Nothing
                 Player.followObjectName = ""
@@ -1110,7 +1110,7 @@ Friend Module Games
             End Function
 
             Sub Speak(line As String)
-                Dim new_line As New PonyBase.Behavior.SpeakingLine(Player.Name, "Kick", line, "", "", True, 0)
+                Dim new_line As New Behavior.SpeakingLine("Kick", line, True, 0)
                 Player.PonySpeak(new_line)
             End Sub
 
@@ -1153,10 +1153,10 @@ Friend Module Games
 
                 Dim xchange = 1
                 Dim ychange = 2
-                If pony1.GetDestinationDirectionHorizontal(pony2.CenterLocation) = Direction.Left Then
+                If pony1.GetDestinationDirectionHorizontal(pony2.CenterLocation) = Direction.MiddleLeft Then
                     xchange = -1
                 End If
-                If pony1.GetDestinationDirectionVertical(pony2.CenterLocation) = Direction.Top Then
+                If pony1.GetDestinationDirectionVertical(pony2.CenterLocation) = Direction.TopCenter Then
                     ychange = -2
                 End If
 

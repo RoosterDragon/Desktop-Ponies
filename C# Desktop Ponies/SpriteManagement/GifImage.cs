@@ -1663,10 +1663,10 @@
             int stackIndex = 0;
 
             // Initialize table with root characters.
-            for (byte i = 0; i < clearCode; i++)
+            for (int i = 0; i < clearCode; i++)
             {
                 prefix[i] = 0;
-                suffix[i] = i;
+                suffix[i] = (byte)i;
             }
             #endregion
 

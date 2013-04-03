@@ -1,8 +1,25 @@
-﻿''' <summary>
+﻿Imports System.Threading
+
+''' <summary>
 ''' Processes UI dependant tasks on the UI thread when the application is idle.
 ''' </summary>
 Public Class IdleWorker
-    Inherits Disposable
+
+    ''' <summary>
+    ''' The idle worker for this thread.
+    ''' </summary>
+    <ThreadStatic>
+    Private Shared worker As IdleWorker
+
+    ''' <summary>
+    ''' Gets the idle worker for this thread.
+    ''' </summary>
+    Public Shared ReadOnly Property CurrentThreadWorker As IdleWorker
+        Get
+            If worker Is Nothing Then worker = New IdleWorker()
+            Return worker
+        End Get
+    End Property
 
     ''' <summary>
     ''' Maintains a collection on tasks to perform when the application is idle.
@@ -16,15 +33,25 @@ Public Class IdleWorker
     ''' A control, from which the UI thread can be invoked.
     ''' </summary>
     Private ReadOnly control As Control
+    ''' <summary>
+    ''' The thread that owns this instance.
+    ''' </summary>
+    Private ReadOnly owningThread As Threading.Thread
+
+    ''' <summary>
+    ''' Indicates if we have disposed of the instance.
+    ''' </summary>
+    Private disposed As Boolean
 
     ''' <summary>
     ''' Initializes a new instance of the <see cref="IdleWorker"/> class on the current thread.
     ''' </summary>
-    Public Sub New()
+    Private Sub New()
+        owningThread = Threading.Thread.CurrentThread
         control = New Control()
         control.CreateControl()
         AddHandler Application.Idle, AddressOf RunTask
-        AddHandler Application.ThreadExit, Sub(sender, e) Dispose()
+        AddHandler Application.ThreadExit, AddressOf DisposeWorker
     End Sub
 
     ''' <summary>
@@ -51,7 +78,7 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If Not Disposed Then
+            If Not disposed Then
                 If tasks.Count > 0 Then
                     tasks.Dequeue().Invoke()
                     If tasks.Count = 0 Then empty.Set()
@@ -64,16 +91,27 @@ Public Class IdleWorker
     ''' Waits until all tasks queued by this worker have been processed.
     ''' </summary>
     Public Sub WaitOnAllTasks()
+        SyncLock tasks
+            If disposed Then Return
+        End SyncLock
         empty.WaitOne()
     End Sub
 
-    Protected Overrides Sub Dispose(disposing As Boolean)
-        RemoveHandler Application.Idle, AddressOf RunTask
-        If disposing Then
-            SyncLock tasks
+    ''' <summary>
+    ''' Disposes of the worker, if the current thread is exiting.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">Data about the event.</param>
+    Private Sub DisposeWorker(sender As Object, e As EventArgs)
+        SyncLock tasks
+            If Object.ReferenceEquals(owningThread, Threading.Thread.CurrentThread) Then
+                disposed = True
+                RemoveHandler Application.ThreadExit, AddressOf DisposeWorker
+                RemoveHandler Application.Idle, AddressOf RunTask
+                empty.Set()
                 empty.Dispose()
                 If control.InvokeRequired Then control.Invoke(Sub() control.Dispose())
-            End SyncLock
-        End If
+            End If
+        End SyncLock
     End Sub
 End Class

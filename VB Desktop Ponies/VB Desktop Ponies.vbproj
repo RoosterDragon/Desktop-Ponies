@@ -137,6 +137,54 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Options.vb" />
+    <Compile Include="PonyEditor2\AnimatedImageViewer.Designer.vb">
+      <DependentUpon>AnimatedImageViewer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\AnimatedImageViewer.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\BehaviorEditor.Designer.vb">
+      <DependentUpon>BehaviorEditor.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\BehaviorEditor.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\EffectEditor.Designer.vb">
+      <DependentUpon>EffectEditor.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\EffectEditor.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\EffectImageViewer.Designer.vb">
+      <DependentUpon>EffectImageViewer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\EffectImageViewer.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\FileSelector.Designer.vb">
+      <DependentUpon>FileSelector.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\FileSelector.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\ItemEditorBase.Designer.vb">
+      <DependentUpon>ItemEditorBase.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\ItemEditorBase.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\PonyEditorForm2.Designer.vb">
+      <DependentUpon>PonyEditorForm2.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\PonyEditorForm2.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\SpeechEditor.Designer.vb">
+      <DependentUpon>SpeechEditor.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\SpeechEditor.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="PonyEditor\PonyEditorAnimator.vb" />
     <Compile Include="PonySelectionControl.Designer.vb">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
@@ -282,6 +330,27 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopControlForm.resx">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\AnimatedImageViewer.resx">
+      <DependentUpon>AnimatedImageViewer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\BehaviorEditor.resx">
+      <DependentUpon>BehaviorEditor.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\EffectEditor.resx">
+      <DependentUpon>EffectEditor.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\FileSelector.resx">
+      <DependentUpon>FileSelector.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\ItemEditorBase.resx">
+      <DependentUpon>ItemEditorBase.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\PonyEditorForm2.resx">
+      <DependentUpon>PonyEditorForm2.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\SpeechEditor.resx">
+      <DependentUpon>SpeechEditor.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Monitoring\PonyLogForm.resx">
       <DependentUpon>PonyLogForm.vb</DependentUpon>

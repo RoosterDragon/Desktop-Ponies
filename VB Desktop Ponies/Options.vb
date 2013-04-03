@@ -192,7 +192,7 @@ Public NotInheritable Class Options
 
         ScreensaverSoundEnabled = True
         ScreensaverStyle = ScreensaverBackgroundStyle.Transparent
-        ScreensaverBackgroundColor = Color.Black
+        ScreensaverBackgroundColor = Color.Empty
         ScreensaverBackgroundImagePath = ""
 
         MaxPonyCount = 300

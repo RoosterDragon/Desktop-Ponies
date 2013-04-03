@@ -34,7 +34,7 @@ Partial Class ScreensaverBackgroundForm
         Me.ScreenSaver_Image.TabIndex = 0
         Me.ScreenSaver_Image.TabStop = False
         '
-        'Screensaver_Background_Form
+        'ScreensaverBackgroundForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -47,7 +47,7 @@ Partial Class ScreensaverBackgroundForm
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "Screensaver_Background_Form"
+        Me.Name = "ScreensaverBackgroundForm"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide

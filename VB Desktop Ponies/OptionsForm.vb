@@ -2,11 +2,6 @@
     Friend Shared Instance As OptionsForm
     Private Shared alreadyLoaded As Boolean
 
-    Friend SoundVolume As Integer
-    Friend TimeScaleFactor As Double = 1.0
-    Friend ScreensaverBackgroundColor As Color
-    Friend ScreensaverBackgroundImagePath As String = ""
-
     Private selectingMonitors As Boolean
     Private avoidanceZonePreviewGraphics As Graphics
 
@@ -294,7 +289,7 @@
         'Microsoft.DirectX.AudioVideoPlayback.Audio.volume would take.
         'which is from -10000 to 0 (0 being the loudest), on a logarithmic scale.
 
-        SoundVolume = CInt(4342 * Math.Log(Volume.Value / 100) - 10000)
+        'SoundVolume = CInt(4342 * Math.Log(Volume.Value / 100) - 10000)
         Options.SoundVolume = CSng(Volume.Value / 1000)
 
         VolumeValueLabel.Text = CStr(Volume.Value / 100)
@@ -306,8 +301,9 @@
 
     Private Sub ScreensaverColorButton_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
         Using dialog As New ColorDialog
+            dialog.Color = Options.ScreensaverBackgroundColor
             If dialog.ShowDialog() = DialogResult.OK Then
-                ScreensaverBackgroundColor = dialog.Color
+                Options.ScreensaverBackgroundColor = dialog.Color
                 ScreensaverColorNeededLabel.Visible = False
             End If
         End Using
@@ -315,22 +311,18 @@
 
     Private Sub ScreensaverColor_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverColor.CheckedChanged
         If ScreensaverColor.Checked Then
-            If IsNothing(ScreensaverBackgroundColor) OrElse ScreensaverBackgroundColor = New Color Then
-                ScreensaverColorNeededLabel.Visible = True
-            End If
-            Options.ScreensaverBackgroundColor = ScreensaverBackgroundColor
+            ScreensaverColorNeededLabel.Visible = Options.ScreensaverBackgroundColor.A < 255
             Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor
         Else
-            ScreensaverColorNeededLabel.Visible = False
+        ScreensaverColorNeededLabel.Visible = False
         End If
     End Sub
 
     Private Sub ScreensaverImage_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverImage.CheckedChanged
         If ScreensaverImage.Checked Then
-            If ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(ScreensaverBackgroundImagePath) Then
+            If Options.ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(Options.ScreensaverBackgroundImagePath) Then
                 ScreensaverImageNeededLabel.Visible = True
             End If
-            Options.ScreensaverBackgroundImagePath = ScreensaverBackgroundImagePath
             Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage
         Else
             ScreensaverImageNeededLabel.Visible = False
@@ -353,7 +345,7 @@
                         Exit Sub
                     End Try
 
-                    ScreensaverBackgroundImagePath = dialog.FileName
+                    Options.ScreensaverBackgroundImagePath = dialog.FileName
                     ScreensaverImageNeededLabel.Visible = False
                 End If
             End If
@@ -368,9 +360,8 @@
     End Sub
 
     Private Sub TimeScale_Scroll(sender As Object, e As EventArgs) Handles TimeScale.Scroll
-        TimeScaleFactor = TimeScale.Value / 10
-        TimeScaleValueLabel.Text = TimeScaleFactor & "x"
         Options.TimeFactor = TimeScale.Value / 10.0F
+        TimeScaleValueLabel.Text = Options.TimeFactor.ToString("0.0x")
     End Sub
 
     Private Sub PonySpeechChance_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged

@@ -12,7 +12,7 @@ Public Class Main
     Private initialized As Boolean = False
     Private loading As Boolean = False
     Private loadWatch As New Diagnostics.Stopwatch()
-    Private idleWorker As New IdleWorker()
+    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -29,6 +29,7 @@ Public Class Main
     Friend DeadEffects As New List(Of Effect)
     Friend ActiveSounds As New List(Of Object)
     Friend HouseBases As New List(Of HouseBase)
+    Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
     'How big the area around the cursor used for cursor detection should be, in pixels.
     Friend CursorZoneSize As Integer = 100
@@ -593,35 +594,37 @@ Public Class Main
     End Function
 
     Friend Shared Function GetDirection(setting As String) As Direction
-
         Select Case setting
-
-            Case "top"
-                Return Direction.Top
-            Case "bottom"
-                Return Direction.Bottom
-            Case "left"
-                Return Direction.Left
-            Case "right"
-                Return Direction.Right
-            Case "bottom_right"
-                Return Direction.BottomRight
-            Case "bottom_left"
-                Return Direction.BottomLeft
-            Case "top_right"
-                Return Direction.TopRight
             Case "top_left"
                 Return Direction.TopLeft
+            Case "top"
+                Return Direction.TopCenter
+            Case "top_right"
+                Return Direction.TopRight
+            Case "left"
+                Return Direction.MiddleLeft
             Case "center"
-                Return Direction.Center
+                Return Direction.MiddleCenter
+            Case "right"
+                Return Direction.MiddleRight
+            Case "bottom_left"
+                Return Direction.BottomLeft
+            Case "bottom"
+                Return Direction.BottomCenter
+            Case "bottom_right"
+                Return Direction.BottomRight
             Case "any"
                 Return Direction.Random
             Case "any-not_center"
                 Return Direction.RandomNotCenter
             Case Else
-                Throw New ArgumentException("Invalid placement direction or centering for effect.", "setting")
+                Dim result As Direction
+                If [Enum].TryParse(setting, result) Then
+                    Return result
+                Else
+                    Throw New ArgumentException("Invalid placement direction or centering for effect.", "setting")
+                End If
         End Select
-
     End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
@@ -643,13 +646,13 @@ Public Class Main
 
     Sub LoadInteractions(Optional displayWarnings As Boolean = True)
 
-        If Not My.Computer.FileSystem.FileExists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename)) Then
+        If Not My.Computer.FileSystem.FileExists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)) Then
             Options.PonyInteractionsExist = False
             Exit Sub
         End If
 
         Using interactions_file As New StreamReader(
-            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PonyBase.Interaction.ConfigFilename))
+            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
             Do Until interactions_file.EndOfStream
 
                 Dim line = interactions_file.ReadLine
@@ -661,9 +664,9 @@ Public Class Main
                 Dim ponyfound = False
 
                 Dim ponyname = CommaSplitQuoteQualified(columns(InteractionParameter.Initiator))(0)
-                For Each Pony In SelectablePonies
+                For Each ponyBase In SelectablePonies
                     Try
-                        If Pony.Directory = ponyname Then
+                        If ponyBase.Directory = ponyname Then
 
                             ponyfound = True
 
@@ -673,7 +676,7 @@ Public Class Main
                                 repeat_delay = Integer.Parse(columns(InteractionParameter.RepeatDelay), CultureInfo.InvariantCulture)
                             End If
 
-                            Dim targetsActivated As PonyBase.Interaction.TargetActivation
+                            Dim targetsActivated As Interaction.TargetActivation
                             Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
                             If Not [Enum].TryParse(activationValue, targetsActivated) Then
                                 ' If direct parsing failed, assume we've got some old definitions instead.
@@ -684,10 +687,10 @@ Public Class Main
                                 ' edited in.
                                 If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
                                     String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
-                                    targetsActivated = PonyBase.Interaction.TargetActivation.One
+                                    targetsActivated = Interaction.TargetActivation.One
                                 ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
                                     String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
-                                    targetsActivated = PonyBase.Interaction.TargetActivation.Any
+                                    targetsActivated = Interaction.TargetActivation.Any
                                 ElseIf Not Main.Instance.ScreensaverMode Then
                                     Throw New InvalidDataException(
                                         "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
@@ -696,7 +699,7 @@ Public Class Main
                                 End If
                             End If
 
-                            Pony.AddInteraction(columns(InteractionParameter.Name), _
+                            ponyBase.AddInteraction(columns(InteractionParameter.Name), _
                                             ponyname, _
                                             Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
                                             columns(InteractionParameter.Proximity), _
@@ -705,11 +708,10 @@ Public Class Main
                                             columns(InteractionParameter.BehaviorList), _
                                             repeat_delay, _
                                             displayWarnings)
-
                         End If
                     Catch ex As Exception
                         If displayWarnings Then
-                            MsgBox("Error loading interaction for Pony: " & Pony.Directory & _
+                            MsgBox("Error loading interaction for Pony: " & ponyBase.Directory & _
                              ControlChars.NewLine & line & ControlChars.NewLine & _
                              ex.Message)
                         End If
@@ -814,6 +816,7 @@ Public Class Main
 
             If form.changes_made Then
                 DisposeMenu()
+                LoadingProgressBar.Visible = True
                 '(We need to reload everything to account for anything changed while in the editor)
                 Main_Load(Nothing, Nothing)
             End If
@@ -1050,6 +1053,12 @@ Public Class Main
                     If compare >= 0 Then Exit For
                 End If
             Next
+        ElseIf e.KeyChar = "#" Then
+#If DEBUG Then
+            Using newEditor = New PonyEditorForm2()
+                newEditor.ShowDialog(Me)
+            End Using
+#End If
         End If
     End Sub
 
@@ -1286,31 +1295,41 @@ Public Class Main
 
     Friend Sub PonyStartup()
         If ScreensaverMode Then
-            If OptionsForm.Instance.ScreensaverTransparent.Checked = False Then
-                For Each monitor In Screen.AllScreens
-                    Dim screensaver_background As New ScreensaverBackgroundForm
-                    screensaver_background.Show()
+            Invoke(Sub()
+                       If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
+                           screensaverForms = New List(Of ScreensaverBackgroundForm)()
 
-                    If IsNothing(Options.ScreensaverBackgroundColor) Then
-                        screensaver_background.BackColor = Color.Black
-                    Else
-                        screensaver_background.BackColor = Options.ScreensaverBackgroundColor
-                    End If
+                           Dim backgroundColor As Color = Color.Black
+                           Dim backgroundImage As Image = Nothing
+                           If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor Then
+                               backgroundColor = Color.FromArgb(255, Options.ScreensaverBackgroundColor)
+                           End If
+                           If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
+                               Try
+                                   backgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
+                               Catch
+                                   ' Image failed to load, so we'll fall back to a background color.
+                               End Try
+                           End If
 
-                    If Options.ScreensaverBackgroundImagePath <> "" AndAlso
-                        Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
-                        Try
-                            screensaver_background.BackgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
-                        Catch ex As Exception
-                            'could not load the image
-                        End Try
-                    End If
+                           For Each monitor In Screen.AllScreens
+                               Dim screensaverBackground As New ScreensaverBackgroundForm()
+                               screensaverForms.Add(screensaverBackground)
 
-                    screensaver_background.Size = monitor.Bounds.Size
-                    screensaver_background.Location = monitor.Bounds.Location
-                Next
-            End If
-            Cursor.Hide()
+                               If backgroundImage IsNot Nothing Then
+                                   screensaverBackground.BackgroundImage = backgroundImage
+                               Else
+                                   screensaverBackground.BackColor = backgroundColor
+                               End If
+
+                               screensaverBackground.Size = monitor.Bounds.Size
+                               screensaverBackground.Location = monitor.Bounds.Location
+
+                               screensaverBackground.Show()
+                           Next
+                       End If
+                       Cursor.Hide()
+                   End Sub)
         End If
 
         AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
@@ -1460,6 +1479,13 @@ Public Class Main
             CurrentGame = Nothing
         End If
 
+        If screensaverForms IsNot Nothing Then
+            For Each screensaverForm In screensaverForms
+                screensaverForm.Dispose()
+            Next
+            screensaverForms = Nothing
+        End If
+
         If Object.ReferenceEquals(animator, Pony.CurrentAnimator) Then
             Pony.CurrentAnimator = Nothing
         End If
@@ -1496,10 +1522,12 @@ Public Class Main
         SelectablePonies.Clear()
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
+        PonySelectionPanel.SuspendLayout()
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.Dispose()
         Next
         PonySelectionPanel.Controls.Clear()
+        PonySelectionPanel.ResumeLayout()
     End Sub
 
     Friend Sub CleanupSounds()
@@ -1604,7 +1632,6 @@ Public Class Main
             RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
             If disposing Then
                 If components IsNot Nothing Then components.Dispose()
-                If idleWorker IsNot Nothing Then idleWorker.Dispose()
                 If animator IsNot Nothing Then animator.Dispose()
             End If
         Finally

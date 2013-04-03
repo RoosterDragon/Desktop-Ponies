@@ -64,7 +64,7 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        Dim behavior As PonyBase.Behavior = Nothing
+        Dim behavior As Behavior = Nothing
 
         For Each behavior In m_editor.PreviewPony.Behaviors
             If String.Equals(behavior.Name, CStr(Behavior_Box.SelectedItem), StringComparison.OrdinalIgnoreCase) Then
@@ -87,8 +87,7 @@ Public Class NewEffectDialog
                            PonyEditor.String_ToLocation(CStr(R_Centering_Box.SelectedItem)), _
                            PonyEditor.String_ToLocation(CStr(L_Placement_Box.SelectedItem)), _
                            PonyEditor.String_ToLocation(CStr(L_Centering_Box.SelectedItem)), _
-                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPony.Base)
-
+                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPonyBase)
         Me.Close()
     End Sub
 

@@ -10,6 +10,17 @@
     public sealed class BitmapFrame : SpriteFrame<Bitmap>, IDisposable
     {
         /// <summary>
+        /// Creates an <see cref="T:CsDesktopPonies.SpriteManagement.AnimatedImage`1"/> of
+        /// <see cref="T:CsDesktopPonies.SpriteManagement.BitmapFrame"/>.
+        /// </summary>
+        /// <param name="fileName">The path to the file which contains the image to be loaded.</param>
+        /// <returns>An animated image loaded from the specified file that that uses bitmaps for each frame.</returns>
+        public static AnimatedImage<BitmapFrame> AnimationFromFile(string fileName)
+        {
+            return new AnimatedImage<BitmapFrame>(fileName, path => new BitmapFrame(path), FromBuffer, AllowableBitDepths);
+        }
+
+        /// <summary>
         /// Gets the method that converts a buffer into an <see cref="T:CSDesktopPonies.SpriteManagement.BitmapFrame"/>.
         /// </summary>
         public static BufferToImage<BitmapFrame> FromBuffer

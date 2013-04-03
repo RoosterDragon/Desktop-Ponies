@@ -79,14 +79,14 @@ Public Class NewPonyDialog
                 Throw New Exception("Path already exists! Won't overwrite whatever is there: " & newPonyPath)
             End If
             My.Computer.FileSystem.CreateDirectory(newPonyPath)
-            m_editor.PreviewPony.Base.Directory = newPonyPath
+            m_editor.PreviewPonyBase.Directory = newPonyPath
         Catch ex As Exception
             MsgBox("Unable to create directory for new pony:  " & ex.Message)
             Name_Textbox.Enabled = True
             Exit Sub
         End Try
 
-        m_editor.PreviewPony.Base.Name = newName
+        m_editor.PreviewPonyBase.Name = newName
 
         Using form = New NewBehaviorDialog(m_editor)
             form.ShowDialog()

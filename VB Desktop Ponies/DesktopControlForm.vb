@@ -129,7 +129,7 @@ Public Class DesktopControlForm
 
         Private owner As DesktopControlForm
         Private _items As New List(Of ISimpleContextMenuItem)
-        Private _readOnlyItems As New ReadOnlyCollection(Of ISimpleContextMenuItem)(_items)
+        Private _readOnlyItems As New System.Collections.ObjectModel.ReadOnlyCollection(Of ISimpleContextMenuItem)(_items)
 
         Public Sub New(parent As DesktopControlForm, menuItems As IEnumerable(Of ISimpleContextMenuItem))
             Argument.EnsureNotNull(parent, "parent")
@@ -188,7 +188,7 @@ Public Class DesktopControlForm
             Return New ToolStripMenuItem(_menuItem.Text, Nothing, _subItems)
         End Function
 
-        Public ReadOnly Property ISimpleContextMenuItems As ReadOnlyCollection(Of ISimpleContextMenuItem) Implements ISimpleContextMenu.Items
+        Public ReadOnly Property ISimpleContextMenuItems As System.Collections.ObjectModel.ReadOnlyCollection(Of ISimpleContextMenuItem) Implements ISimpleContextMenu.Items
             Get
                 Return _readOnlyItems
             End Get

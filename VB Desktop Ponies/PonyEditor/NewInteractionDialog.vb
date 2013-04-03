@@ -3,7 +3,7 @@
 Public Class NewInteractionDialog
 
     Dim change_existing_interaction As Boolean = False
-    Dim existing_interaction As PonyBase.Interaction = Nothing
+    Dim existing_interaction As Interaction = Nothing
 
     Private m_editor As PonyEditor
     Public Sub New(editor As PonyEditor)
@@ -79,7 +79,7 @@ Public Class NewInteractionDialog
         Dim targetlist As String = ""
 
         For Each Pony As String In Targets_Box.CheckedItems
-            targetlist += PonyEditor.Quoted(Pony) & ","
+            targetlist += Quoted(Pony) & ","
         Next
 
         targetlist = Mid(targetlist, 1, targetlist.Length - 1)
@@ -92,15 +92,19 @@ Public Class NewInteractionDialog
         behaviorlist = Mid(behaviorlist, 1, behaviorlist.Length - 1)
 
         If change_existing_interaction Then
-            m_editor.PreviewPony.Base.Interactions.RemoveAll(Function(interaction) interaction.Name = Name_Textbox.Text)
+            Dim toRemove = m_editor.PreviewPonyBase.Interactions.Where(
+                Function(interaction) interaction.Name = Name_Textbox.Text).ToArray()
+            For Each interaction In toRemove
+                m_editor.PreviewPonyBase.Interactions.Remove(interaction)
+            Next
         End If
 
-        Dim targetsActivated As PonyBase.Interaction.TargetActivation
-        If OneRadioButton.Checked Then targetsActivated = PonyBase.Interaction.TargetActivation.One
-        If AnyRadioButton.Checked Then targetsActivated = PonyBase.Interaction.TargetActivation.Any
-        If AllRadioButton.Checked Then targetsActivated = PonyBase.Interaction.TargetActivation.All
+        Dim targetsActivated As Interaction.TargetActivation
+        If OneRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.One
+        If AnyRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.Any
+        If AllRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.All
 
-        m_editor.PreviewPony.Base.AddInteraction(Name_Textbox.Text,
+        m_editor.PreviewPonyBase.AddInteraction(Name_Textbox.Text,
                                                       m_editor.PreviewPony.Directory, _
                                                       chance / 100,
                                                       Proximity_Box.Text, _
@@ -121,7 +125,7 @@ Public Class NewInteractionDialog
         Me.Close()
     End Sub
 
-    Friend Sub ChangeInteraction(interaction As PonyBase.Interaction)
+    Friend Sub ChangeInteraction(interaction As Interaction)
         Targets_Box.Items.Clear()
         Behaviors_Box.Items.Clear()
 
@@ -157,11 +161,11 @@ Public Class NewInteractionDialog
         change_existing_interaction = True
         existing_interaction = interaction
         Select Case interaction.Targets_Activated
-            Case PonyBase.Interaction.TargetActivation.One
+            Case Interaction.TargetActivation.One
                 OneRadioButton.Checked = True
-            Case PonyBase.Interaction.TargetActivation.Any
+            Case Interaction.TargetActivation.Any
                 AnyRadioButton.Checked = True
-            Case PonyBase.Interaction.TargetActivation.All
+            Case Interaction.TargetActivation.All
                 AllRadioButton.Checked = True
         End Select
 
