@@ -65,6 +65,10 @@ Change Log
 
 Latest changes:
 
+v1.42.2.3:
+- Fixed screensaver mode when using a background color or image.
+- UI is now more responsive whilst loading.
+
 v1.42.2.2:
 - Fixed manual control outside of games.
 - Fixed an error that could occur when the "Ponies attempt to avoid other windows" option was active.
