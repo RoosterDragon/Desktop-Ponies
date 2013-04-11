@@ -119,7 +119,7 @@ Public Class NewBehaviorDialog
                                                        end_line, _
                                                        skip, _
                                                        follow_x, _
-                                                       follow_x, _
+                                                       follow_y, _
                                                        follow_name,
                                                     False, "", "", Nothing, Nothing, DontRepeat_CheckBox.Checked, CInt(Group_Numberbox.Value))
 

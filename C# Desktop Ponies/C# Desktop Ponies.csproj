@@ -103,6 +103,7 @@
     <Compile Include="ExceptionDialog.Designer.cs">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="General.cs" />
     <Compile Include="RectangleExtensions.cs" />
     <Compile Include="Rng.cs" />
     <Compile Include="SpriteManagement\AlphaForm.cs">

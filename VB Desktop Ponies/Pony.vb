@@ -51,7 +51,7 @@ Public Class MutablePonyBase
         Dim new_behavior As New Behavior("", "")
 
         new_behavior.Name = Trim(name)
-        new_behavior.ChanceOfOccurance = chance
+        new_behavior.ChanceOfOccurence = chance
         new_behavior.MaxDuration = max_duration
         new_behavior.MinDuration = min_duration
         new_behavior.SetSpeed(speed)
@@ -98,7 +98,7 @@ Public Class MutablePonyBase
     End Sub
 End Class
 
-Public Class ReadOnlySet
+Public NotInheritable Class ReadOnlySet
     Private Sub New()
     End Sub
 
@@ -107,7 +107,7 @@ Public Class ReadOnlySet
     End Function
 End Class
 
-Public Class ReadOnlyCollection
+Public NotInheritable Class ReadOnlyCollection
     Private Sub New()
     End Sub
 
@@ -683,12 +683,12 @@ Public Class PonyBase
         End If
 
         new_behavior.Name = Trim(name)
-        new_behavior.ChanceOfOccurance = chance
+        new_behavior.ChanceOfOccurence = chance
         new_behavior.MaxDuration = max_duration
         new_behavior.MinDuration = min_duration
         new_behavior.SetSpeed(speed)
         new_behavior.AllowedMovement = Allowed_Moves
-        new_behavior.dont_repeat_image_animations = _dont_repeat_image_animations
+        new_behavior.DoNotRepeatImageAnimations = _dont_repeat_image_animations
         new_behavior.StartLineName = _Startline
         new_behavior.EndLineName = _Endline
         new_behavior.Group = _group
@@ -790,6 +790,8 @@ Public Class PonyBase
     ''' <param name="lines">The collection of speaking lines that should be used to repopulate the specific and random speaking lines.
     ''' </param>
     Protected Sub SetLines(lines As IEnumerable(Of Behavior.SpeakingLine))
+        Argument.EnsureNotNull(lines, "lines")
+
         SpeakingLinesSpecific.Clear()
         SpeakingLinesRandom.Clear()
 
@@ -973,7 +975,7 @@ Public Class Behavior
     Public Shared ReadOnly AnyGroup As Integer = 0
 
     Public Property Name As String
-    Public Property ChanceOfOccurance As Double
+    Public Property ChanceOfOccurence As Double
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
 
@@ -1025,7 +1027,7 @@ Public Class Behavior
         m_speed = speed
     End Sub
 
-    Public Property dont_repeat_image_animations As Boolean = False
+    Public Property DoNotRepeatImageAnimations As Boolean = False
 
     Public Property AllowedMovement As AllowedMoves
 
@@ -1142,6 +1144,8 @@ Public Class Behavior
     End Sub
 
     Public Sub AddEffect(effect As EffectBase, owner As PonyBase)
+        Argument.EnsureNotNull(effect, "effect")
+        Argument.EnsureNotNull(owner, "owner")
         _effects.Add(effect)
         owner.Effects.Add(effect)
     End Sub
@@ -1177,7 +1181,7 @@ Public Class Behavior
                 MessageBox.Show("Error loading sound file for speaking line " & Name & " for pony " & ponyname & ControlChars.NewLine &
                                 "Sound file: " & SoundFile & " does not exist.", "File Not Found",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
-                End If
+            End If
         End Sub
 
         Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -1207,7 +1211,7 @@ Public Class Behavior
         Return String.Join(
             ",", "Behavior",
             Quoted(Name),
-            ChanceOfOccurance.ToString(CultureInfo.InvariantCulture),
+            ChanceOfOccurence.ToString(CultureInfo.InvariantCulture),
             MaxDuration.ToString(CultureInfo.InvariantCulture),
             MinDuration.ToString(CultureInfo.InvariantCulture),
             Speed.ToString(CultureInfo.InvariantCulture),
@@ -1228,7 +1232,7 @@ Public Class Behavior
                    RightImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
             Quoted(LeftImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
                    LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-            dont_repeat_image_animations,
+            DoNotRepeatImageAnimations,
             Group.ToString(CultureInfo.InvariantCulture))
     End Function
 End Class
@@ -1733,7 +1737,7 @@ Public Class Pony
                 ' Then, do a random test against the chance the behavior can occur.
                 If Not potentialBehavior.Skip AndAlso
                     (potentialBehavior.Group = CurrentBehaviorGroup OrElse potentialBehavior.Group = Behavior.AnyGroup) AndAlso
-                    Rng.NextDouble() <= potentialBehavior.ChanceOfOccurance Then
+                    Rng.NextDouble() <= potentialBehavior.ChanceOfOccurence Then
 
                     ' See if the behavior specifies that we follow another object.
                     followObjectName = potentialBehavior.OriginalFollowObjectName
@@ -3321,6 +3325,7 @@ Public Class Effect
     Public Property Centering As Direction
 
     Public Sub New(base As EffectBase, startFacingLeft As Boolean)
+        Argument.EnsureNotNull(base, "base")
         _base = base
         FacingLeft = startFacingLeft
 

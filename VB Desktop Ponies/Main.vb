@@ -135,33 +135,6 @@ Public Class Main
         RepeatDelay = 7
     End Enum
 
-    ''' <summary>
-    ''' Performs a full garbage collection (collection, flush the finalization queue, collect again).
-    ''' </summary>
-    Private Shared Sub FullCollect()
-#If DEBUG Then
-        Dim beforeCollect As Long
-        Dim beforeFinalize As Long
-        Dim afterCollect As Long
-        beforeCollect = GC.GetTotalMemory(False)
-#End If
-        GC.Collect()
-#If DEBUG Then
-        beforeFinalize = GC.GetTotalMemory(False)
-#End If
-        GC.WaitForPendingFinalizers()
-        GC.Collect()
-#If DEBUG Then
-        afterCollect = GC.GetTotalMemory(False)
-        Console.Write("Before full collect: ")
-        Console.WriteLine(beforeCollect)
-        Console.Write("Before finalize: ")
-        Console.WriteLine(beforeFinalize)
-        Console.Write("After finalize & collect: ")
-        Console.WriteLine(afterCollect)
-#End If
-    End Sub
-
 #Region "Initialization"
 
     Public Sub New()
@@ -561,7 +534,7 @@ Public Class Main
                                  SelectionControlsPanel.Enabled = True
                                  AnimationTimer.Enabled = True
                                  loading = False
-                                 FullCollect()
+                                 General.FullCollect()
 
                                  loadWatch.Stop()
                                  Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
@@ -1431,13 +1404,9 @@ Public Class Main
 
         If Not e.Cancelled Then
             Ponies_Have_Launched = True
-            animator.Start()
-
-            ' Hide the menu form now.
-            Me.Visible = False
             Temp_Save_Counts()
-
-            FullCollect()
+            Visible = False
+            animator.Start()
             loadWatch.Stop()
             Console.WriteLine("Loaded in {0:0.00s} ({1} images)", loadWatch.Elapsed.TotalSeconds, totalImages)
         End If
@@ -1501,9 +1470,7 @@ Public Class Main
     ''' <summary>
     ''' Save pony counts so they are preserved through clicking on and off filters.
     ''' </summary>
-    ''' <remarks></remarks>
     Friend Sub Temp_Save_Counts()
-
         If PonySelectionPanel.Controls.Count = 0 Then Exit Sub
 
         Options.PonyCounts.Clear()

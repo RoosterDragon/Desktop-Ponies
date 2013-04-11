@@ -2,6 +2,28 @@
 Imports System.IO
 
 Public Class ItemEditorBase
+
+    Private ReadOnly idleFocusControl As New Control(Me, Nothing)
+    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
+
+    Private _base As PonyBase
+    Protected ReadOnly Property Base As PonyBase
+        Get
+            Return _base
+        End Get
+    End Property
+    Private _ponyBasePath As String
+    Protected ReadOnly Property PonyBasePath As String
+        Get
+            Return _ponyBasePath
+        End Get
+    End Property
+    Private _isNewItem As Boolean = True
+    Protected ReadOnly Property IsNewItem As Boolean
+        Get
+            Return _isNewItem
+        End Get
+    End Property
     Private _itemChanged As Boolean
     Protected ReadOnly Property ItemChanged As Boolean
         Get
@@ -9,25 +31,34 @@ Public Class ItemEditorBase
         End Get
     End Property
 
-    Private ReadOnly idleFocusControl As New Control(Me, Nothing)
-    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
-
-    Private _ponyBasePath As String
-    Protected ReadOnly Property PonyBasePath As String
-        Get
-            Return _ponyBasePath
-        End Get
-    End Property
+    Public Overridable Sub NewItem(ponyBase As PonyBase)
+        Argument.EnsureNotNull(ponyBase, "ponyBase")
+        _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
+        _base = ponyBase
+    End Sub
 
     Public Overridable Sub LoadItem(ponyBase As PonyBase, name As String)
-        _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
+        NewItem(ponyBase)
+        _isNewItem = False
+    End Sub
+
+    Public Overridable Sub SaveItem()
+        _isNewItem = False
+        _itemChanged = False
+        UpdateDirtyFlag(_itemChanged)
     End Sub
 
     Protected Overridable Sub Property_ValueChanged(sender As Object, e As EventArgs)
         _itemChanged = True
+        UpdateDirtyFlag(_itemChanged)
+    End Sub
+
+    Private Sub UpdateDirtyFlag(dirty As Boolean)
+        DirectCast(Parent, ItemTabPage).IsDirty = dirty
     End Sub
 
     Protected Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
+        Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.BeginUpdate()
         comboBox.Items.Clear()
         If includeNoneOption Then comboBox.Items.Add("[None]")
@@ -36,11 +67,14 @@ Public Class ItemEditorBase
     End Sub
 
     Protected Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
+        Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.SelectedItem = item
         If comboBox.SelectedIndex = -1 Then comboBox.SelectedIndex = 0
     End Sub
 
     Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As AnimatedImageViewer)
+        Argument.EnsureNotNull(selector, "selector")
+        Argument.EnsureNotNull(viewer, "viewer")
         selector.Enabled = False
         selector.UseWaitCursor = True
         viewer.UseWaitCursor = True
@@ -87,6 +121,8 @@ Public Class ItemEditorBase
     End Sub
 
     Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorImagePath As String)
+        Argument.EnsureNotNull(selector, "selector")
+        Argument.EnsureNotNull(viewer, "viewer")
         selector.Enabled = False
         selector.UseWaitCursor = True
         viewer.UseWaitCursor = True

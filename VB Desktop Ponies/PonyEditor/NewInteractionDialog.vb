@@ -3,7 +3,6 @@
 Public Class NewInteractionDialog
 
     Dim change_existing_interaction As Boolean = False
-    Dim existing_interaction As Interaction = Nothing
 
     Private m_editor As PonyEditor
     Public Sub New(editor As PonyEditor)
@@ -153,13 +152,11 @@ Public Class NewInteractionDialog
         If IsNothing(interaction) Then
             change_existing_interaction = False
             Name_Textbox.Enabled = True
-            existing_interaction = Nothing
             Exit Sub
         End If
 
         Name_Textbox.Enabled = False
         change_existing_interaction = True
-        existing_interaction = interaction
         Select Case interaction.Targets_Activated
             Case Interaction.TargetActivation.One
                 OneRadioButton.Checked = True

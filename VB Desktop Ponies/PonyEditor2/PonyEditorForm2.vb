@@ -24,27 +24,16 @@ Public Class PonyEditorForm2
         End Sub
     End Class
 
-    Private Enum PageContent
-        Ponies
-        Pony
-        Behaviors
-        Behavior
-        Effects
-        Effect
-        Speeches
-        Speech
-    End Enum
-
     Public Sub New()
         InitializeComponent()
         Icon = My.Resources.Twilight
+        DocumentsView.PathSeparator = Path.DirectorySeparatorChar
     End Sub
 
     Private Sub PonyEditorForm2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Enabled = False
         Dim screenArea = Screen.FromHandle(Handle).WorkingArea.Size
-        'Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
-        Size = New Size(1024 - SystemInformation.Border3DSize.Width, screenArea.Height)
+        Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
     End Sub
@@ -133,52 +122,43 @@ Public Class PonyEditorForm2
 
     Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
         If e.KeyChar = ChrW(Keys.Enter) Then
-            OpenTab(DocumentsView.SelectedNode)
-            e.Handled = True
+            e.Handled = OpenTab(DocumentsView.SelectedNode)
         End If
     End Sub
 
-    Private Sub OpenTab(node As TreeNode)
-        If node Is Nothing Then Return
+    Private Function OpenTab(node As TreeNode) As Boolean
+        If node Is Nothing Then Return False
 
         Dim page = Documents.TabPages.Item(node.FullPath)
         Dim itemName = node.Text
 
         If page Is Nothing Then
             Dim pageRef = DirectCast(node.Tag, PageRef)
-            Dim pageControl As Control = Nothing
+            Dim editor As ItemEditorBase = Nothing
             Select Case pageRef.PageContent
-                Case PageContent.Ponies
-                    pageControl = New Control()
-                Case PageContent.Pony
-                    pageControl = New Control()
-                Case PageContent.Behaviors
-                    pageControl = New Control()
                 Case PageContent.Behavior
-                    Dim editor = New BehaviorEditor()
-                    editor.LoadItem(pageRef.PonyBase, itemName)
-                    pageControl = editor
-                Case PageContent.Effects
-                    pageControl = New Control()
+                    editor = New BehaviorEditor()
                 Case PageContent.Effect
-                    Dim editor = New EffectEditor()
-                    editor.LoadItem(pageRef.PonyBase, itemName)
-                    pageControl = editor
-                Case PageContent.Speeches
-                    pageControl = New Control()
+                    editor = New EffectEditor()
                 Case PageContent.Speech
-                    Dim editor = New SpeechEditor()
-                    editor.LoadItem(pageRef.PonyBase, itemName)
-                    pageControl = editor
+                    editor = New SpeechEditor()
             End Select
-            pageControl.Dock = DockStyle.Fill
-            page = New TabPage(GetTabText(pageRef, itemName)) With {.Name = node.FullPath}
-            page.Controls.Add(pageControl)
-            Documents.TabPages.Add(page)
+            If editor IsNot Nothing Then
+                editor.LoadItem(pageRef.PonyBase, itemName)
+                editor.Dock = DockStyle.Fill
+                page = New TabPage(GetTabText(pageRef, itemName)) With {.Name = node.FullPath}
+                page.Controls.Add(editor)
+                Documents.TabPages.Add(page)
+            End If
         End If
 
-        Documents.SelectedTab = page
-        DocumentsView.Select()
-        DocumentsView.SelectedNode = node
-    End Sub
+        If page IsNot Nothing Then
+            Documents.SelectedTab = page
+            DocumentsView.Select()
+            DocumentsView.SelectedNode = node
+            Return True
+        End If
+
+        Return False
+    End Function
 End Class

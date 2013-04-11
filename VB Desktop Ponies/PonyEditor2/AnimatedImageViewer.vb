@@ -1,7 +1,7 @@
 ﻿Imports CSDesktopPonies.SpriteManagement
 
 Public Class AnimatedImageViewer
-    Protected Time As TimeSpan
+    Protected Property Time As TimeSpan
     Private WithEvents animationTimer As New Timer() With {.Interval = 33}
     Private _image As AnimatedImage(Of BitmapFrame)
     Public Property Image As AnimatedImage(Of BitmapFrame)
@@ -60,6 +60,7 @@ Public Class AnimatedImageViewer
     End Sub
 
     Protected Sub PaintImageInCenter(e As PaintEventArgs)
+        Argument.EnsureNotNull(e, "e")
         If Image Is Nothing Then Return
 
         Dim loopTime = TimeSpan.FromMilliseconds(Image.ImageDuration)

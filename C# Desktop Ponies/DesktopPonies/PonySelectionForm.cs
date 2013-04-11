@@ -294,9 +294,7 @@
             AnimationTimer.Start();
 
             // Do a garbage collection so we can free garbage caused by startup and loading the templates.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            General.FullCollect();
 
             // Report status to the user.
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Loaded {1} templates in {0} seconds. {2} images in cache.",
@@ -565,9 +563,7 @@
                     spriteInterface.Close();
                     spriteInterface = null;
                     ponyInstances.Clear();
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    General.FullCollect();
                     e.Cancel = true;
                     break;
                 }

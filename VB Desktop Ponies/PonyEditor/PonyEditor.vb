@@ -392,7 +392,7 @@ Public Class PonyEditor
 
                 Dim chance = "N/A"
                 If behavior.Skip = False Then
-                    chance = behavior.ChanceOfOccurance.ToString("P", CultureInfo.CurrentCulture)
+                    chance = behavior.ChanceOfOccurence.ToString("P", CultureInfo.CurrentCulture)
                 End If
 
                 With behavior
@@ -409,7 +409,7 @@ Public Class PonyEditor
                                         follow_name, _
                                         .LinkedBehaviorName, _
                                         link_depth,
-                                        .Skip, .dont_repeat_image_animations)
+                                        .Skip, .DoNotRepeatImageAnimations)
 
                 End With
             Next
@@ -1056,7 +1056,7 @@ Public Class PonyEditor
                         changed_behavior.Name = new_value
                         PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
                     Case colBehaviorChance.Index
-                        changed_behavior.ChanceOfOccurance = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
+                        changed_behavior.ChanceOfOccurence = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
                     Case colBehaviorMaxDuration.Index
                         Dim maxDuration = Double.Parse(new_value, CultureInfo.CurrentCulture)
                         If maxDuration > 0 Then
@@ -1094,7 +1094,7 @@ Public Class PonyEditor
                     Case colBehaviorDoNotRunRandomly.Index
                         changed_behavior.Skip = Boolean.Parse(new_value)
                     Case colBehaviorDoNotRepeatAnimations.Index
-                        changed_behavior.dont_repeat_image_animations = Boolean.Parse(new_value)
+                        changed_behavior.DoNotRepeatImageAnimations = Boolean.Parse(new_value)
                     Case colBehaviorGroup.Index
                         Dim new_group_value = Integer.Parse(new_value, CultureInfo.CurrentCulture)
                         If new_group_value < 0 Then

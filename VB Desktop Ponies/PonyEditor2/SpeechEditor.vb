@@ -1,13 +1,11 @@
 ﻿Imports System.IO
 
 Friend Class SpeechEditor
-    Private base As PonyBase
     Private speechName As String
 
     Public Overrides Sub LoadItem(ponyBase As PonyBase, speechName As String)
         MyBase.LoadItem(ponyBase, speechName)
 
-        base = ponyBase
         Me.speechName = speechName
         Dim speech = base.SpeakingLines.First(Function(s) s.Name = speechName)
         NameTextBox.Text = speech.Name

@@ -726,9 +726,7 @@
 
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            General.FullCollect();
 
             runner.Start();
         }

@@ -361,7 +361,7 @@
 
     Private Sub TimeScale_Scroll(sender As Object, e As EventArgs) Handles TimeScale.Scroll
         Options.TimeFactor = TimeScale.Value / 10.0F
-        TimeScaleValueLabel.Text = Options.TimeFactor.ToString("0.0x")
+        TimeScaleValueLabel.Text = Options.TimeFactor.ToString("0.0x", Globalization.CultureInfo.CurrentCulture)
     End Sub
 
     Private Sub PonySpeechChance_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged
