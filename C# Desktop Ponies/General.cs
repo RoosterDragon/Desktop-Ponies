@@ -1,15 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CSDesktopPonies
+﻿namespace CSDesktopPonies
 {
+    using System;
+
     /// <summary>
     /// General utility methods.
     /// </summary>
     public static class General
     {
+#if DEBUG
+        /// <summary>
+        /// Provides a reusable character buffer of sufficient size to write simply formatted signed 64-bit integers.
+        /// </summary>
+        private static readonly char[] buffer = new char[(int)Math.Ceiling(Math.Log10(-(double)long.MinValue)) + 1];
+#endif
+
         /// <summary>
         /// Performs a full cleanup of unused memory (full garbage collection, empty the finalization queue, another full garbage
         /// collection).
@@ -33,36 +37,77 @@ namespace CSDesktopPonies
         public static void FullCollect()
         {
 #if DEBUG
-            long beforeCollect;
-            long beforeFinalize;
-            long afterCollect;
-            beforeCollect = GC.GetTotalMemory(false);
-#endif
+            // As we are outputting to console, we shall lock around the whole collection so as to minimize the interference from
+            // multithreaded calls, however other threads are still free to call for collections outside of this method, so this cannot be
+            // guaranteed.
+            lock (buffer)
+            {
+                long beforeCollect = GC.GetTotalMemory(false);
+                GC.Collect();
+                long beforeFinalize = GC.GetTotalMemory(false);
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                long afterCollect = GC.GetTotalMemory(false);
+
+                int beforeCollectDigits = (int)Math.Ceiling(Math.Log10(beforeCollect));
+                int beforeFinalizeDigits = (int)Math.Ceiling(Math.Log10(beforeFinalize));
+                int afterCollectDigits = (int)Math.Ceiling(Math.Log10(afterCollect));
+                int maxDigits = Math.Max(beforeCollectDigits, Math.Max(beforeFinalizeDigits, afterCollectDigits));
+
+                Console.Write("FullCollect:  Before first collection: ");
+                ConsoleWriteLineLong(beforeCollect, maxDigits);
+                Console.Write("FullCollect:      Before finalization: ");
+                ConsoleWriteLineLong(beforeFinalize, maxDigits);
+                Console.Write("FullCollect: After finalize & collect: ");
+                ConsoleWriteLineLong(afterCollect, maxDigits);
+            }
+#else
             GC.Collect();
-#if DEBUG
-            beforeFinalize = GC.GetTotalMemory(false);
-#endif
             GC.WaitForPendingFinalizers();
             GC.Collect();
-#if DEBUG
-            afterCollect = GC.GetTotalMemory(false);
-            int beforeCollectDigits = (int)Math.Ceiling(Math.Log10(beforeCollect));
-            int beforeFinalizeDigits = (int)Math.Ceiling(Math.Log10(beforeFinalize));
-            int afterCollectDigits = (int)Math.Ceiling(Math.Log10(afterCollect));
-
-            Console.Write("FullCollect:  Before first collection: ");
-            Console.WriteLine(beforeCollect);
-
-            Console.Write("FullCollect:      Before finalization: ");
-            for (int i = beforeFinalizeDigits; i < beforeCollectDigits; i++)
-                Console.Write(" ");
-            Console.WriteLine(beforeFinalize);
-
-            Console.Write("FullCollect: After finalize & collect: ");
-            for (int i = afterCollectDigits; i < beforeCollectDigits; i++)
-                Console.Write(" ");
-            Console.WriteLine(afterCollect);
 #endif
         }
+
+#if DEBUG
+        /// <summary>
+        /// Writes the text representation of the specified 64-bit signed integer value, followed by the current line terminator, to the
+        /// standard output stream. No allocations are made.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
+        /// <param name="minChars">The minimum number of characters to output (padding will be used as needed).</param>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="minChars"/> is less than zero or greater than then
+        /// maximum number of decimal digits required by a 64-bit signed integer, plus one (for the sign).</exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurred.</exception>
+        private static void ConsoleWriteLineLong(long value, int minChars = 0)
+        {
+            if (minChars < 0 || minChars > buffer.Length)
+                throw new ArgumentOutOfRangeException("minChars", minChars,
+                    "minChars must be greater than or equal to zero and less than or equal to " + buffer.Length);
+            int bufferIndex = buffer.Length - 1;
+            long shift = 1;
+            long doubleShiftedValue;
+            do
+            {
+                long doubleShift = shift * 10;
+                long shiftedValue = (value / shift) * shift;
+                doubleShiftedValue = (value / doubleShift) * doubleShift;
+                int digitOut = (int)((shiftedValue - doubleShiftedValue) / shift);
+                if (value < 0)
+                {
+                    digitOut *= -1;
+                    doubleShiftedValue *= -1;
+                }
+                buffer[bufferIndex--] = (char)((int)'0' + digitOut);
+                shift *= 10;
+            }
+            while (doubleShiftedValue > 0);
+            if (value < 0)
+                buffer[bufferIndex--] = '-';
+            while (minChars > buffer.Length - 1 - bufferIndex && bufferIndex >= 0)
+                buffer[bufferIndex--] = ' ';
+            bufferIndex++;
+            Console.WriteLine(buffer, bufferIndex, buffer.Length - bufferIndex);
+        }
+#endif
     }
 }

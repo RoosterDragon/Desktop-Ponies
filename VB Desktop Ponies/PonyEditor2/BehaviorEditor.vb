@@ -81,7 +81,7 @@ Friend Class BehaviorEditor
         MyBase.SaveItem()
     End Sub
 
-    Protected Overrides Sub Property_ValueChanged(sender As Object, e As EventArgs)
+    Protected Overrides Sub Property_ValueChanged(sender As Object, e As EventArgs) Handles StartSpeechComboBox.SelectedIndexChanged, SpeedNumber.ValueChanged, NameTextBox.TextChanged, MovementComboBox.SelectedIndexChanged, MinDurationNumber.ValueChanged, MaxDurationNumber.ValueChanged, LinkedBehaviorComboBox.SelectedIndexChanged, GroupNumber.ValueChanged, EndSpeechComboBox.SelectedIndexChanged, ChanceNumber.ValueChanged
         If loadingItem Then Return
         MyBase.Property_ValueChanged(sender, e)
         Source.Text = behavior.GetPonyIni()

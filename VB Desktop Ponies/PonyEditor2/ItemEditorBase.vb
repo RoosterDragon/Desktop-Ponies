@@ -57,7 +57,7 @@ Public Class ItemEditorBase
         DirectCast(Parent, ItemTabPage).IsDirty = dirty
     End Sub
 
-    Protected Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
+    Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.BeginUpdate()
         comboBox.Items.Clear()
@@ -66,7 +66,7 @@ Public Class ItemEditorBase
         comboBox.EndUpdate()
     End Sub
 
-    Protected Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
+    Protected Shared Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.SelectedItem = item
         If comboBox.SelectedIndex = -1 Then comboBox.SelectedIndex = 0

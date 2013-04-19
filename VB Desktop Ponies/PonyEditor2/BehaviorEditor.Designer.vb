@@ -107,7 +107,7 @@ Partial Class BehaviorEditor
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.PropertiesTable.Size = New System.Drawing.Size(701, 347)
+        Me.PropertiesTable.Size = New System.Drawing.Size(701, 197)
         Me.PropertiesTable.TabIndex = 0
         '
         'TargetLabel
@@ -396,26 +396,30 @@ Partial Class BehaviorEditor
         '
         Me.LeftImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.LeftImageViewer.Animate = True
+        Me.LeftImageViewer.AutoSize = True
+        Me.LeftImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.LeftImageViewer.BackColor = System.Drawing.Color.White
         Me.LeftImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.LeftImageViewer, 2)
         Me.LeftImageViewer.Image = Nothing
-        Me.LeftImageViewer.Location = New System.Drawing.Point(90, 194)
+        Me.LeftImageViewer.Location = New System.Drawing.Point(165, 194)
         Me.LeftImageViewer.Name = "LeftImageViewer"
-        Me.LeftImageViewer.Size = New System.Drawing.Size(150, 150)
+        Me.LeftImageViewer.Size = New System.Drawing.Size(0, 0)
         Me.LeftImageViewer.TabIndex = 1
         '
         'RightImageViewer
         '
         Me.RightImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.RightImageViewer.Animate = True
+        Me.RightImageViewer.AutoSize = True
+        Me.RightImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.RightImageViewer.BackColor = System.Drawing.Color.White
         Me.RightImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.RightImageViewer, 2)
         Me.RightImageViewer.Image = Nothing
-        Me.RightImageViewer.Location = New System.Drawing.Point(441, 194)
+        Me.RightImageViewer.Location = New System.Drawing.Point(516, 194)
         Me.RightImageViewer.Name = "RightImageViewer"
-        Me.RightImageViewer.Size = New System.Drawing.Size(150, 150)
+        Me.RightImageViewer.Size = New System.Drawing.Size(0, 0)
         Me.RightImageViewer.TabIndex = 2
         '
         'TargetButton

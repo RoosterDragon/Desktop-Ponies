@@ -146,7 +146,7 @@ Public Class PonyEditorForm2
             If editor IsNot Nothing Then
                 editor.LoadItem(pageRef.PonyBase, itemName)
                 editor.Dock = DockStyle.Fill
-                page = New TabPage(GetTabText(pageRef, itemName)) With {.Name = node.FullPath}
+                page = New ItemTabPage() With {.Name = node.FullPath, .Text = GetTabText(pageRef, itemName)}
                 page.Controls.Add(editor)
                 Documents.TabPages.Add(page)
             End If
