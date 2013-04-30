@@ -58,6 +58,7 @@ Partial Class BehaviorEditor
         'PropertiesPanel
         '
         Me.PropertiesPanel.Controls.Add(Me.PropertiesTable)
+        Me.PropertiesPanel.TabIndex = 2
         '
         'PropertiesTable
         '
@@ -118,7 +119,7 @@ Partial Class BehaviorEditor
         Me.TargetLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.TargetLabel.Name = "TargetLabel"
         Me.TargetLabel.Size = New System.Drawing.Size(60, 13)
-        Me.TargetLabel.TabIndex = 24
+        Me.TargetLabel.TabIndex = 20
         Me.TargetLabel.Text = "Target:"
         Me.TargetLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -132,7 +133,7 @@ Partial Class BehaviorEditor
         Me.LinkedBehaviorComboBox.Location = New System.Drawing.Point(439, 109)
         Me.LinkedBehaviorComboBox.Name = "LinkedBehaviorComboBox"
         Me.LinkedBehaviorComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.LinkedBehaviorComboBox.TabIndex = 23
+        Me.LinkedBehaviorComboBox.TabIndex = 19
         '
         'LinkedBehaviorLabel
         '
@@ -142,7 +143,7 @@ Partial Class BehaviorEditor
         Me.LinkedBehaviorLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LinkedBehaviorLabel.Name = "LinkedBehaviorLabel"
         Me.LinkedBehaviorLabel.Size = New System.Drawing.Size(99, 13)
-        Me.LinkedBehaviorLabel.TabIndex = 22
+        Me.LinkedBehaviorLabel.TabIndex = 18
         Me.LinkedBehaviorLabel.Text = "Linked Behavior:"
         Me.LinkedBehaviorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -156,7 +157,7 @@ Partial Class BehaviorEditor
         Me.EndSpeechComboBox.Location = New System.Drawing.Point(439, 82)
         Me.EndSpeechComboBox.Name = "EndSpeechComboBox"
         Me.EndSpeechComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.EndSpeechComboBox.TabIndex = 21
+        Me.EndSpeechComboBox.TabIndex = 17
         '
         'StartSpeechComboBox
         '
@@ -168,7 +169,7 @@ Partial Class BehaviorEditor
         Me.StartSpeechComboBox.Location = New System.Drawing.Point(439, 55)
         Me.StartSpeechComboBox.Name = "StartSpeechComboBox"
         Me.StartSpeechComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.StartSpeechComboBox.TabIndex = 20
+        Me.StartSpeechComboBox.TabIndex = 15
         '
         'EndSpeechLabel
         '
@@ -178,7 +179,7 @@ Partial Class BehaviorEditor
         Me.EndSpeechLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.EndSpeechLabel.Name = "EndSpeechLabel"
         Me.EndSpeechLabel.Size = New System.Drawing.Size(99, 13)
-        Me.EndSpeechLabel.TabIndex = 19
+        Me.EndSpeechLabel.TabIndex = 16
         Me.EndSpeechLabel.Text = "End Speech:"
         Me.EndSpeechLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -190,7 +191,7 @@ Partial Class BehaviorEditor
         Me.StartSpeechLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.StartSpeechLabel.Name = "StartSpeechLabel"
         Me.StartSpeechLabel.Size = New System.Drawing.Size(99, 13)
-        Me.StartSpeechLabel.TabIndex = 18
+        Me.StartSpeechLabel.TabIndex = 14
         Me.StartSpeechLabel.Text = "Start Speech:"
         Me.StartSpeechLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -237,7 +238,7 @@ Partial Class BehaviorEditor
         Me.RightImageFileSelector.Location = New System.Drawing.Point(439, 165)
         Me.RightImageFileSelector.Name = "RightImageFileSelector"
         Me.RightImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.RightImageFileSelector.TabIndex = 13
+        Me.RightImageFileSelector.TabIndex = 26
         '
         'LeftImageFileSelector
         '
@@ -246,7 +247,7 @@ Partial Class BehaviorEditor
         Me.LeftImageFileSelector.Location = New System.Drawing.Point(69, 165)
         Me.LeftImageFileSelector.Name = "LeftImageFileSelector"
         Me.LeftImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.LeftImageFileSelector.TabIndex = 11
+        Me.LeftImageFileSelector.TabIndex = 23
         '
         'SpeedLabel
         '
@@ -280,7 +281,7 @@ Partial Class BehaviorEditor
         Me.MinDurationLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.MinDurationLabel.Name = "MinDurationLabel"
         Me.MinDurationLabel.Size = New System.Drawing.Size(99, 13)
-        Me.MinDurationLabel.TabIndex = 14
+        Me.MinDurationLabel.TabIndex = 10
         Me.MinDurationLabel.Text = "Min Duration (sec):"
         Me.MinDurationLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -292,7 +293,7 @@ Partial Class BehaviorEditor
         Me.MaxDurationLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.MaxDurationLabel.Name = "MaxDurationLabel"
         Me.MaxDurationLabel.Size = New System.Drawing.Size(99, 13)
-        Me.MaxDurationLabel.TabIndex = 16
+        Me.MaxDurationLabel.TabIndex = 12
         Me.MaxDurationLabel.Text = "Max Duration (sec):"
         Me.MaxDurationLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -326,7 +327,7 @@ Partial Class BehaviorEditor
         Me.MinDurationNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
         Me.MinDurationNumber.Name = "MinDurationNumber"
         Me.MinDurationNumber.Size = New System.Drawing.Size(259, 20)
-        Me.MinDurationNumber.TabIndex = 15
+        Me.MinDurationNumber.TabIndex = 11
         '
         'MaxDurationNumber
         '
@@ -337,7 +338,7 @@ Partial Class BehaviorEditor
         Me.MaxDurationNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
         Me.MaxDurationNumber.Name = "MaxDurationNumber"
         Me.MaxDurationNumber.Size = New System.Drawing.Size(259, 20)
-        Me.MaxDurationNumber.TabIndex = 17
+        Me.MaxDurationNumber.TabIndex = 13
         '
         'ChanceNumber
         '
@@ -376,7 +377,7 @@ Partial Class BehaviorEditor
         Me.LeftImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LeftImageLabel.Name = "LeftImageLabel"
         Me.LeftImageLabel.Size = New System.Drawing.Size(60, 13)
-        Me.LeftImageLabel.TabIndex = 10
+        Me.LeftImageLabel.TabIndex = 22
         Me.LeftImageLabel.Text = "Left Image:"
         Me.LeftImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -388,39 +389,37 @@ Partial Class BehaviorEditor
         Me.RightImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RightImageLabel.Name = "RightImageLabel"
         Me.RightImageLabel.Size = New System.Drawing.Size(99, 13)
-        Me.RightImageLabel.TabIndex = 12
+        Me.RightImageLabel.TabIndex = 25
         Me.RightImageLabel.Text = "Right Image:"
         Me.RightImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'LeftImageViewer
         '
         Me.LeftImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.LeftImageViewer.Animate = True
+        Me.LeftImageViewer.Animate = False
         Me.LeftImageViewer.AutoSize = True
         Me.LeftImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.LeftImageViewer.BackColor = System.Drawing.Color.White
         Me.LeftImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.LeftImageViewer, 2)
-        Me.LeftImageViewer.Image = Nothing
         Me.LeftImageViewer.Location = New System.Drawing.Point(165, 194)
         Me.LeftImageViewer.Name = "LeftImageViewer"
         Me.LeftImageViewer.Size = New System.Drawing.Size(0, 0)
-        Me.LeftImageViewer.TabIndex = 1
+        Me.LeftImageViewer.TabIndex = 24
         '
         'RightImageViewer
         '
         Me.RightImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.RightImageViewer.Animate = True
+        Me.RightImageViewer.Animate = False
         Me.RightImageViewer.AutoSize = True
         Me.RightImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.RightImageViewer.BackColor = System.Drawing.Color.White
         Me.RightImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.RightImageViewer, 2)
-        Me.RightImageViewer.Image = Nothing
         Me.RightImageViewer.Location = New System.Drawing.Point(516, 194)
         Me.RightImageViewer.Name = "RightImageViewer"
         Me.RightImageViewer.Size = New System.Drawing.Size(0, 0)
-        Me.RightImageViewer.TabIndex = 2
+        Me.RightImageViewer.TabIndex = 27
         '
         'TargetButton
         '
@@ -429,7 +428,7 @@ Partial Class BehaviorEditor
         Me.TargetButton.Location = New System.Drawing.Point(69, 136)
         Me.TargetButton.Name = "TargetButton"
         Me.TargetButton.Size = New System.Drawing.Size(259, 23)
-        Me.TargetButton.TabIndex = 25
+        Me.TargetButton.TabIndex = 21
         Me.TargetButton.Text = "Setup Target..."
         Me.TargetButton.UseVisualStyleBackColor = True
         '

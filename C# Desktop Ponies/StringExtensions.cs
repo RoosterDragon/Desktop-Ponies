@@ -7,7 +7,7 @@
     using System.Text;
 
     /// <summary>
-    /// Defines SplitQualified extension method for <see cref="T:System.String"/>.
+    /// Defines extension methods for <see cref="T:System.String"/>.
     /// </summary>
     public static class StringExtensions
     {
@@ -29,7 +29,9 @@
         /// characters used as separators and opening qualifiers as a combined group are not unique from each other.-or-
         /// <paramref name="source"/> contains an opening qualifier character with no matching closing qualifier.</exception>
         /// <remarks>This method is not suitable for parsing CSV files, which generally require that two consecutive instances of a
-        /// qualifying character be treated as a literal of that character, which this method does not support.</remarks>
+        /// qualifying character be treated as a literal of that character, which this method does not support. If only one qualifying pair
+        /// in used, the opening qualifier character cannot appear inside a qualified string. If multiple pairs are used, one can use an
+        /// opening qualifier character within a qualified string by qualifying it with a different pair.</remarks>
         public static string[] SplitQualified(this string source, char[] separators, char[,] qualifiers, StringSplitOptions options)
         {
             Argument.EnsureNotNull(source, "source");

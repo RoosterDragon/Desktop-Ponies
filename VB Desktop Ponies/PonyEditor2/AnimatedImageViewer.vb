@@ -1,9 +1,13 @@
-﻿Imports CSDesktopPonies.SpriteManagement
+﻿Imports System.ComponentModel
+Imports CSDesktopPonies.SpriteManagement
 
 Public Class AnimatedImageViewer
+    <Description("The time index into the animated image.")>
+    <DefaultValue(0)>
     Protected Property Time As TimeSpan
     Private WithEvents animationTimer As New Timer() With {.Interval = 33}
     Private _image As AnimatedImage(Of BitmapFrame)
+    <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property Image As AnimatedImage(Of BitmapFrame)
         Get
             Return _image
@@ -15,6 +19,8 @@ Public Class AnimatedImageViewer
             Invalidate()
         End Set
     End Property
+    <Description("Indicates whether the image should be animated, or else displayed statically.")>
+    <DefaultValue(True)>
     Public Property Animate As Boolean
         Get
             Return animationTimer.Enabled

@@ -1621,8 +1621,7 @@
                 throw new ArgumentException("directory must not be empty.", "directory");
 
             Directory = directory;
-            if (Directory[Directory.Length - 1] == Path.DirectorySeparatorChar ||
-                Directory[Directory.Length - 1] == Path.AltDirectorySeparatorChar)
+            if (Directory[Directory.Length - 1] == Path.DirectorySeparatorChar)
                 Directory = Directory.Remove(Directory.Length - 1);
             TemplateName = Directory.Substring(Directory.LastIndexOf(Path.DirectorySeparatorChar) + 1);
             fileComment = null;

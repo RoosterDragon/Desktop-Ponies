@@ -30,11 +30,25 @@ Public Class ItemEditorBase
             Return _itemChanged
         End Get
     End Property
+    Private _loadingItem As Boolean
+    ''' <summary>
+    ''' Gets or sets a value indicating whether an item is being loaded, in which case property updates are ignored.
+    ''' </summary>
+    Protected Property LoadingItem As Boolean
+        Get
+            Return _loadingItem
+        End Get
+        Set(value As Boolean)
+            _loadingItem = value
+            UseWaitCursor = _loadingItem
+        End Set
+    End Property
 
     Public Overridable Sub NewItem(ponyBase As PonyBase)
         Argument.EnsureNotNull(ponyBase, "ponyBase")
         _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
         _base = ponyBase
+        Enabled = True
     End Sub
 
     Public Overridable Sub LoadItem(ponyBase As PonyBase, name As String)
@@ -48,13 +62,22 @@ Public Class ItemEditorBase
         UpdateDirtyFlag(_itemChanged)
     End Sub
 
-    Protected Overridable Sub Property_ValueChanged(sender As Object, e As EventArgs)
+    Protected Overridable Sub OnItemPropertyChanged()
         _itemChanged = True
         UpdateDirtyFlag(_itemChanged)
     End Sub
 
+    Public Overridable Sub AnimateImages(animate As Boolean)
+    End Sub
+
     Private Sub UpdateDirtyFlag(dirty As Boolean)
         DirectCast(Parent, ItemTabPage).IsDirty = dirty
+    End Sub
+
+    Protected Sub UpdateProperty(handler As Action)
+        If LoadingItem Then Return
+        handler()
+        OnItemPropertyChanged()
     End Sub
 
     Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
@@ -70,6 +93,15 @@ Public Class ItemEditorBase
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.SelectedItem = item
         If comboBox.SelectedIndex = -1 Then comboBox.SelectedIndex = 0
+    End Sub
+
+    Protected Shared Sub SelectItemElseAddItem(comboBox As ComboBox, item As Object)
+        Argument.EnsureNotNull(comboBox, "comboBox")
+        comboBox.SelectedItem = item
+        If comboBox.SelectedIndex = -1 Then
+            comboBox.Items.Add(item)
+            comboBox.SelectedItem = item
+        End If
     End Sub
 
     Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As AnimatedImageViewer)

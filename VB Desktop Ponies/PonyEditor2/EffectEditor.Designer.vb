@@ -92,7 +92,7 @@ Partial Class EffectEditor
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
-        Me.PropertiesTable.Size = New System.Drawing.Size(775, 337)
+        Me.PropertiesTable.Size = New System.Drawing.Size(775, 187)
         Me.PropertiesTable.TabIndex = 0
         '
         'RightCenterComboBox
@@ -278,33 +278,33 @@ Partial Class EffectEditor
         'LeftImageViewer
         '
         Me.LeftImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.LeftImageViewer.Animate = True
         Me.LeftImageViewer.AutoSize = True
         Me.LeftImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.LeftImageViewer.BackColor = System.Drawing.Color.White
         Me.LeftImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LeftImageViewer.Centering = VBDesktopPonies.Direction.TopLeft
         Me.PropertiesTable.SetColumnSpan(Me.LeftImageViewer, 2)
         Me.LeftImageViewer.EffectImage = Nothing
-        Me.LeftImageViewer.Image = Nothing
-        Me.LeftImageViewer.Location = New System.Drawing.Point(117, 184)
+        Me.LeftImageViewer.Location = New System.Drawing.Point(192, 184)
         Me.LeftImageViewer.Name = "LeftImageViewer"
-        Me.LeftImageViewer.Size = New System.Drawing.Size(150, 150)
+        Me.LeftImageViewer.Placement = VBDesktopPonies.Direction.TopLeft
+        Me.LeftImageViewer.Size = New System.Drawing.Size(0, 0)
         Me.LeftImageViewer.TabIndex = 12
         '
         'RightImageViewer
         '
         Me.RightImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.RightImageViewer.Animate = True
         Me.RightImageViewer.AutoSize = True
         Me.RightImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.RightImageViewer.BackColor = System.Drawing.Color.White
         Me.RightImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.RightImageViewer.Centering = VBDesktopPonies.Direction.TopLeft
         Me.PropertiesTable.SetColumnSpan(Me.RightImageViewer, 2)
         Me.RightImageViewer.EffectImage = Nothing
-        Me.RightImageViewer.Image = Nothing
-        Me.RightImageViewer.Location = New System.Drawing.Point(504, 184)
+        Me.RightImageViewer.Location = New System.Drawing.Point(579, 184)
         Me.RightImageViewer.Name = "RightImageViewer"
-        Me.RightImageViewer.Size = New System.Drawing.Size(150, 150)
+        Me.RightImageViewer.Placement = VBDesktopPonies.Direction.TopLeft
+        Me.RightImageViewer.Size = New System.Drawing.Size(0, 0)
         Me.RightImageViewer.TabIndex = 19
         '
         'DurationNumber

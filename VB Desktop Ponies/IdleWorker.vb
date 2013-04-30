@@ -78,11 +78,9 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If Not disposed Then
-                If tasks.Count > 0 Then
-                    tasks.Dequeue().Invoke()
-                    If tasks.Count = 0 Then empty.Set()
-                End If
+            If Not disposed AndAlso tasks.Count > 0 Then
+                tasks.Dequeue().Invoke()
+                If tasks.Count = 0 Then empty.Set()
             End If
         End SyncLock
     End Sub

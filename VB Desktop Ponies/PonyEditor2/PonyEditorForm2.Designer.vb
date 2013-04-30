@@ -61,7 +61,7 @@ Partial Class PonyEditorForm2
         Me.EditingArea.Panel2.UseWaitCursor = True
         Me.EditingArea.Panel2MinSize = 100
         Me.EditingArea.Size = New System.Drawing.Size(784, 224)
-        Me.EditingArea.SplitterDistance = 560
+        Me.EditingArea.SplitterDistance = 550
         Me.EditingArea.TabIndex = 0
         Me.EditingArea.UseWaitCursor = True
         '
@@ -71,7 +71,7 @@ Partial Class PonyEditorForm2
         Me.Documents.Location = New System.Drawing.Point(0, 0)
         Me.Documents.Name = "Documents"
         Me.Documents.SelectedIndex = 0
-        Me.Documents.Size = New System.Drawing.Size(560, 224)
+        Me.Documents.Size = New System.Drawing.Size(550, 224)
         Me.Documents.TabIndex = 0
         Me.Documents.UseWaitCursor = True
         '
@@ -82,7 +82,7 @@ Partial Class PonyEditorForm2
         Me.DocumentsView.HotTracking = True
         Me.DocumentsView.Location = New System.Drawing.Point(0, 0)
         Me.DocumentsView.Name = "DocumentsView"
-        Me.DocumentsView.Size = New System.Drawing.Size(220, 224)
+        Me.DocumentsView.Size = New System.Drawing.Size(230, 224)
         Me.DocumentsView.TabIndex = 0
         Me.DocumentsView.UseWaitCursor = True
         '

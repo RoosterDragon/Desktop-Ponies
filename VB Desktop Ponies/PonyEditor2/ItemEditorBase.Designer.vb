@@ -32,6 +32,7 @@ Partial Class ItemEditorBase
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Source.Location = New System.Drawing.Point(3, 277)
         Me.Source.Name = "Source"
+        Me.Source.ReadOnly = True
         Me.Source.Size = New System.Drawing.Size(494, 20)
         Me.Source.TabIndex = 1
         '
@@ -52,6 +53,7 @@ Partial Class ItemEditorBase
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.Controls.Add(Me.PropertiesPanel)
         Me.Controls.Add(Me.Source)
+        Me.Enabled = False
         Me.Name = "ItemEditorBase"
         Me.Size = New System.Drawing.Size(500, 300)
         Me.ResumeLayout(False)

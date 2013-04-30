@@ -5,95 +5,113 @@ Friend Class BehaviorEditor
     Private Shared allowedMovesValues As Object() =
         [Enum].GetValues(GetType(AllowedMoves)).Cast(Of Object)().ToArray()
 
-    Private loadingItem As Boolean
-    Private behavior As Behavior
+    Private originalBehavior As Behavior
+    Private newBehavior As Behavior
 
     Public Sub New()
         InitializeComponent()
         MovementComboBox.Items.AddRange(allowedMovesValues)
+        AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() newBehavior.Name = NameTextBox.Text)
+        AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() newBehavior.Group = CInt(GroupNumber.Value))
+        AddHandler ChanceNumber.TextChanged, Sub() UpdateProperty(Sub() newBehavior.ChanceOfOccurence = ChanceNumber.Value)
+        AddHandler SpeedNumber.TextChanged, Sub() UpdateProperty(Sub() newBehavior.SetSpeed(SpeedNumber.Value))
+        AddHandler MovementComboBox.SelectedIndexChanged,
+            Sub() UpdateProperty(Sub() newBehavior.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves))
+        AddHandler MinDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() newBehavior.MinDuration = MinDurationNumber.Value)
+        AddHandler MaxDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() newBehavior.MaxDuration = MaxDurationNumber.Value)
+        AddHandler StartSpeechComboBox.SelectedIndexChanged,
+            Sub() UpdateProperty(Sub()
+                                     Dim startLine = TryCast(StartSpeechComboBox.SelectedItem, Behavior.SpeakingLine)
+                                     newBehavior.StartLine = startLine
+                                 End Sub)
+        AddHandler EndSpeechComboBox.SelectedIndexChanged,
+            Sub() UpdateProperty(Sub()
+                                     Dim endLine = TryCast(EndSpeechComboBox.SelectedItem, Behavior.SpeakingLine)
+                                     newBehavior.EndLine = endLine
+                                 End Sub)
+        AddHandler LinkedBehaviorComboBox.SelectedIndexChanged,
+            Sub() UpdateProperty(Sub()
+                                     Dim linkedBehavior = TryCast(LinkedBehaviorComboBox.SelectedItem, Behavior)
+                                     newBehavior.LinkedBehavior = linkedBehavior
+                                 End Sub)
+        AddHandler LeftImageFileSelector.FilePathSelected,
+            Sub() UpdateProperty(Sub()
+                                     Dim leftPath = If(LeftImageFileSelector.FilePath = Nothing,
+                                                       Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
+                                     newBehavior.SetLeftImagePath(leftPath)
+                                 End Sub)
+        AddHandler LeftImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer)
+        AddHandler RightImageFileSelector.FilePathSelected,
+            Sub() UpdateProperty(Sub()
+                                     Dim rightPath = If(RightImageFileSelector.FilePath = Nothing,
+                                                        Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
+                                     newBehavior.SetRightImagePath(rightPath)
+                                 End Sub)
+        AddHandler RightImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
     End Sub
 
     Public Overrides Sub LoadItem(ponyBase As PonyBase, behaviorName As String)
+        LoadingItem = True
         MyBase.LoadItem(ponyBase, behaviorName)
 
-        loadingItem = True
-        behavior = ponyBase.Behaviors.Single(Function(b) b.Name = behaviorName)
-        NameTextBox.Text = behavior.Name
-        GroupNumber.Value = behavior.Group
-        ChanceNumber.Value = CDec(behavior.ChanceOfOccurence) * 100
-        SpeedNumber.Value = CDec(behavior.Speed)
-        MovementComboBox.SelectedItem = behavior.AllowedMovement
-        MinDurationNumber.Value = CDec(behavior.MinDuration)
-        MaxDurationNumber.Value = CDec(behavior.MaxDuration)
+        originalBehavior = ponyBase.Behaviors.Single(Function(b) b.Name = behaviorName)
+        newBehavior = originalBehavior.MemberwiseClone()
+        NameTextBox.Text = newBehavior.Name
+        GroupNumber.Value = newBehavior.Group
+        ChanceNumber.Value = CDec(newBehavior.ChanceOfOccurence) * 100
+        SpeedNumber.Value = CDec(newBehavior.Speed)
+        MovementComboBox.SelectedItem = newBehavior.AllowedMovement
+        MinDurationNumber.Value = CDec(newBehavior.MinDuration)
+        MaxDurationNumber.Value = CDec(newBehavior.MaxDuration)
 
         Dim images =
             Directory.GetFiles(PonyBasePath, "*.gif").Concat(Directory.GetFiles(PonyBasePath, "*.png")).
             Select(Function(filePath) Path.GetFileName(filePath)).ToArray()
         ReplaceItemsInComboBox(LeftImageFileSelector.FilePathComboBox, images, True)
         ReplaceItemsInComboBox(RightImageFileSelector.FilePathComboBox, images, True)
-        SelectItemElseNoneOption(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(behavior.LeftImagePath))
-        SelectItemElseNoneOption(RightImageFileSelector.FilePathComboBox, Path.GetFileName(behavior.RightImagePath))
+        SelectItemElseAddItem(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(newBehavior.LeftImagePath))
+        SelectItemElseAddItem(RightImageFileSelector.FilePathComboBox, Path.GetFileName(newBehavior.RightImagePath))
 
         Dim speeches = ponyBase.SpeakingLines.ToArray()
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
         ReplaceItemsInComboBox(EndSpeechComboBox, speeches, True)
-        SelectItemElseNoneOption(StartSpeechComboBox, behavior.StartLine)
-        SelectItemElseNoneOption(EndSpeechComboBox, behavior.EndLine)
+        SelectItemElseNoneOption(StartSpeechComboBox, newBehavior.StartLine)
+        SelectItemElseNoneOption(EndSpeechComboBox, newBehavior.EndLine)
 
-        Dim behaviors = ponyBase.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, behavior)).ToArray()
+        Dim behaviors = ponyBase.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, newBehavior)).ToArray()
         ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors, True)
-        SelectItemElseNoneOption(LinkedBehaviorComboBox, behavior.LinkedBehavior)
+        SelectItemElseNoneOption(LinkedBehaviorComboBox, newBehavior.LinkedBehavior)
 
-        Source.Text = behavior.GetPonyIni()
+        Source.Text = newBehavior.GetPonyIni()
 
-        loadingItem = False
+        LoadingItem = False
     End Sub
 
     Public Overrides Sub SaveItem()
-        If IsNewItem Then
-            If Linq.Enumerable.Count(Base.Behaviors, Function(b) b.Name = behavior.Name) > 0 Then
-                MessageBox.Show(Me, "A behavior with the name '" & behavior.Name &
-                                "' already exists for this pony. Please choose another name.",
-                                "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
-                Return
-            End If
+        If IsNewItem AndAlso Base.Behaviors.Any(Function(b) b.Name = newBehavior.Name) Then
+            MessageBox.Show(Me, "A behavior with the name '" & newBehavior.Name &
+                            "' already exists for this pony. Please choose another name.",
+                            "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Return
         End If
 
-        behavior.Name = NameTextBox.Text
-        behavior.Group = CInt(GroupNumber.Value)
-        behavior.ChanceOfOccurence = ChanceNumber.Value
-        behavior.SetSpeed(SpeedNumber.Value)
-        behavior.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves)
-        behavior.MinDuration = MinDurationNumber.Value
-        behavior.MaxDuration = MaxDurationNumber.Value
-
-        Dim startLine = TryCast(StartSpeechComboBox.SelectedItem, Behavior.SpeakingLine)
-        behavior.StartLine = startLine
-        Dim endLine = TryCast(EndSpeechComboBox.SelectedItem, Behavior.SpeakingLine)
-        behavior.EndLine = endLine
-        Dim linkedBehavior = TryCast(LinkedBehaviorComboBox.SelectedItem, Behavior)
-        behavior.LinkedBehavior = linkedBehavior
-        Dim leftPath = If(LeftImageFileSelector.FilePath = Nothing, Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
-        behavior.SetLeftImagePath(leftPath)
-        Dim rightPath = If(RightImageFileSelector.FilePath = Nothing, Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
-        behavior.SetRightImagePath(rightPath)
+        Base.Behaviors.Remove(originalBehavior)
+        Base.Behaviors.Add(newBehavior)
 
         MyBase.SaveItem()
     End Sub
 
-    Protected Overrides Sub Property_ValueChanged(sender As Object, e As EventArgs) Handles StartSpeechComboBox.SelectedIndexChanged, SpeedNumber.ValueChanged, NameTextBox.TextChanged, MovementComboBox.SelectedIndexChanged, MinDurationNumber.ValueChanged, MaxDurationNumber.ValueChanged, LinkedBehaviorComboBox.SelectedIndexChanged, GroupNumber.ValueChanged, EndSpeechComboBox.SelectedIndexChanged, ChanceNumber.ValueChanged
-        If loadingItem Then Return
-        MyBase.Property_ValueChanged(sender, e)
-        Source.Text = behavior.GetPonyIni()
+    Protected Overrides Sub OnItemPropertyChanged()
+        MyBase.OnItemPropertyChanged()
+        Source.Text = newBehavior.GetPonyIni()
     End Sub
 
-    Private Sub LeftImageFileSelector_FilePathSelected(sender As Object, e As EventArgs) Handles LeftImageFileSelector.FilePathSelected
-        LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer)
-        Property_ValueChanged(sender, e)
+    Public Overrides Sub AnimateImages(animate As Boolean)
+        LeftImageViewer.Animate = animate
+        RightImageViewer.Animate = animate
     End Sub
 
-    Private Sub RightImageFileSelector_FilePathSelected(sender As Object, e As EventArgs) Handles RightImageFileSelector.FilePathSelected
-        LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
-        Property_ValueChanged(sender, e)
+    Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
+        e.Handled = (e.KeyChar = """"c)
     End Sub
 End Class

@@ -2,8 +2,8 @@
 
 Public Class PonyEditorForm2
     Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
-
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)
+    Private activeTab As TabPage
 
     Private Class PageRef
         Private ReadOnly _ponyBase As MutablePonyBase
@@ -97,10 +97,6 @@ Public Class PonyEditorForm2
                              End Sub)
     End Sub
 
-    Private Sub DocumentsView_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles DocumentsView.AfterSelect
-        
-    End Sub
-
     Private Function GetTabText(pageRef As PageRef, itemName As String) As String
         Select Case pageRef.PageContent
             Case PageContent.Ponies
@@ -144,7 +140,7 @@ Public Class PonyEditorForm2
                     editor = New SpeechEditor()
             End Select
             If editor IsNot Nothing Then
-                editor.LoadItem(pageRef.PonyBase, itemName)
+                idleWorker.QueueTask(Sub() editor.LoadItem(pageRef.PonyBase, itemName))
                 editor.Dock = DockStyle.Fill
                 page = New ItemTabPage() With {.Name = node.FullPath, .Text = GetTabText(pageRef, itemName)}
                 page.Controls.Add(editor)
@@ -154,6 +150,7 @@ Public Class PonyEditorForm2
 
         If page IsNot Nothing Then
             Documents.SelectedTab = page
+            If activeTab Is Nothing Then ToggleTabAnimations(page)
             DocumentsView.Select()
             DocumentsView.SelectedNode = node
             Return True
@@ -161,4 +158,14 @@ Public Class PonyEditorForm2
 
         Return False
     End Function
+
+    Private Sub Documents_Selected(sender As Object, e As TabControlEventArgs) Handles Documents.Selected
+        ToggleTabAnimations(e.TabPage)
+    End Sub
+
+    Private Sub ToggleTabAnimations(newTab As TabPage)
+        If activeTab IsNot Nothing Then DirectCast(activeTab.Controls(0), ItemEditorBase).AnimateImages(False)
+        activeTab = newTab
+        DirectCast(activeTab.Controls(0), ItemEditorBase).AnimateImages(True)
+    End Sub
 End Class

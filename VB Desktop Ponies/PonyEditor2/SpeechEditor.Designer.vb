@@ -135,7 +135,7 @@ Partial Class SpeechEditor
         Me.RandomLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RandomLabel.Name = "RandomLabel"
         Me.RandomLabel.Size = New System.Drawing.Size(79, 13)
-        Me.RandomLabel.TabIndex = 5
+        Me.RandomLabel.TabIndex = 6
         Me.RandomLabel.Text = "Use Randomly:"
         Me.RandomLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -147,7 +147,7 @@ Partial Class SpeechEditor
         Me.GroupLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.GroupLabel.Name = "GroupLabel"
         Me.GroupLabel.Size = New System.Drawing.Size(79, 13)
-        Me.GroupLabel.TabIndex = 6
+        Me.GroupLabel.TabIndex = 8
         Me.GroupLabel.Text = "Group:"
         Me.GroupLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -159,7 +159,7 @@ Partial Class SpeechEditor
         Me.RandomCheckBox.Location = New System.Drawing.Point(88, 124)
         Me.RandomCheckBox.Name = "RandomCheckBox"
         Me.RandomCheckBox.Size = New System.Drawing.Size(15, 19)
-        Me.RandomCheckBox.TabIndex = 11
+        Me.RandomCheckBox.TabIndex = 7
         Me.RandomCheckBox.UseVisualStyleBackColor = True
         '
         'SoundFileSelector
@@ -171,7 +171,7 @@ Partial Class SpeechEditor
         Me.SoundFileSelector.Location = New System.Drawing.Point(88, 95)
         Me.SoundFileSelector.Name = "SoundFileSelector"
         Me.SoundFileSelector.Size = New System.Drawing.Size(403, 23)
-        Me.SoundFileSelector.TabIndex = 12
+        Me.SoundFileSelector.TabIndex = 5
         '
         'GroupNumber
         '
@@ -180,7 +180,7 @@ Partial Class SpeechEditor
         Me.GroupNumber.Location = New System.Drawing.Point(88, 149)
         Me.GroupNumber.Name = "GroupNumber"
         Me.GroupNumber.Size = New System.Drawing.Size(403, 20)
-        Me.GroupNumber.TabIndex = 13
+        Me.GroupNumber.TabIndex = 9
         '
         'SpeechEditor
         '

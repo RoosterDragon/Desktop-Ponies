@@ -341,7 +341,7 @@ Public Class PonyBase
     Protected Sub LoadFromIni(directory As String)
         Argument.EnsureNotNull(directory, "directory")
 
-        Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
+        Dim lastSeparator = directory.LastIndexOf(Path.DirectorySeparatorChar)
         If lastSeparator <> -1 Then
             _directory = directory.Substring(lastSeparator + 1)
         Else
@@ -970,7 +970,7 @@ End Class
 
 #Region "Behavior class"
 Public Class Behavior
-    Implements IPonyIniSerializable
+    Implements IPonyIniSerializable, IMemberwiseCloneable(Of Behavior)
 
     Public Shared ReadOnly AnyGroup As Integer = 0
 
@@ -1102,7 +1102,10 @@ Public Class Behavior
         right_image_path = path
         right_image_size = Vector2.Zero
         If Not String.IsNullOrEmpty(right_image_path) Then
-            right_image_size = New Vector2(ImageSize.GetSize(right_image_path))
+            Try
+                right_image_size = New Vector2(ImageSize.GetSize(right_image_path))
+            Catch ex As IOException
+            End Try
         End If
     End Sub
 
@@ -1110,7 +1113,10 @@ Public Class Behavior
         left_image_path = path
         left_image_size = Vector2.Zero
         If Not String.IsNullOrEmpty(left_image_path) Then
-            left_image_size = New Vector2(ImageSize.GetSize(left_image_path))
+            Try
+                left_image_size = New Vector2(ImageSize.GetSize(left_image_path))
+            Catch ex As IOException
+            End Try
         End If
     End Sub
 
@@ -1130,7 +1136,7 @@ Public Class Behavior
         Dim newEffect As New EffectBase(effectname, left_path, right_path) With {
             .BehaviorName = Name,
             .Duration = duration,
-            .Repeat_Delay = repeat_delay,
+            .RepeatDelay = repeat_delay,
             .PlacementDirectionLeft = direction_left,
             .CenteringLeft = centering_left,
             .PlacementDirectionRight = direction_right,
@@ -1155,7 +1161,7 @@ Public Class Behavior
     End Function
 
     Public Class SpeakingLine
-        Implements IPonyIniSerializable
+        Implements IPonyIniSerializable, IMemberwiseCloneable(Of SpeakingLine)
 
         Public Property Name As String = ""
         Public Property Text As String = ""
@@ -1205,6 +1211,10 @@ Public Class Behavior
                                   Group)
             End If
         End Function
+
+        Public Overloads Function MemberwiseClone() As SpeakingLine Implements IMemberwiseCloneable(Of SpeakingLine).MemberwiseClone
+            Return DirectCast(MyBase.MemberwiseClone(), SpeakingLine)
+        End Function
     End Class
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -1234,6 +1244,10 @@ Public Class Behavior
                    LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
             DoNotRepeatImageAnimations,
             Group.ToString(CultureInfo.InvariantCulture))
+    End Function
+
+    Public Overloads Function MemberwiseClone() As Behavior Implements IMemberwiseCloneable(Of Behavior).MemberwiseClone
+        Return DirectCast(MyBase.MemberwiseClone(), Behavior)
     End Function
 End Class
 #End Region
@@ -2383,9 +2397,9 @@ Public Class Pony
                 If Not EffectsLastUsed.ContainsKey(effect) Then
                     EffectsLastUsed(effect) = TimeSpan.Zero
                 End If
-                If (currentTime - EffectsLastUsed(effect)).TotalMilliseconds >= effect.Repeat_Delay * 1000 Then
+                If (currentTime - EffectsLastUsed(effect)).TotalMilliseconds >= effect.RepeatDelay * 1000 Then
 
-                    If effect.Repeat_Delay = 0 Then
+                    If effect.RepeatDelay = 0 Then
                         If effect.AlreadyPlayedForCurrentBehavior Then Continue For
                     End If
 
@@ -3239,7 +3253,7 @@ Public Class Pony
 End Class
 
 Public Class EffectBase
-    Implements IPonyIniSerializable
+    Implements IPonyIniSerializable, IMemberwiseCloneable(Of EffectBase)
 
     Public Property Name As String
     Public Property BehaviorName As String
@@ -3249,7 +3263,7 @@ Public Class EffectBase
     Public Property LeftImageSize As Size
     Public Property RightImageSize As Size
     Public Property Duration As Double
-    Public Property Repeat_Delay As Double
+    Public Property RepeatDelay As Double
 
     Public Property PlacementDirectionRight As Direction
     Public Property CenteringRight As Direction
@@ -3270,15 +3284,25 @@ Public Class EffectBase
     End Sub
 
     Public Sub SetLeftImagePath(path As String)
-        Argument.EnsureNotNull(path, "path")
         LeftImagePath = path
-        LeftImageSize = ImageSize.GetSize(LeftImagePath)
+        LeftImageSize = Size.Empty
+        If Not String.IsNullOrEmpty(LeftImagePath) Then
+            Try
+                LeftImageSize = ImageSize.GetSize(LeftImagePath)
+            Catch ex As IOException
+            End Try
+        End If
     End Sub
 
     Public Sub SetRightImagePath(path As String)
-        Argument.EnsureNotNull(path, "path")
         RightImagePath = path
-        RightImageSize = ImageSize.GetSize(RightImagePath)
+        RightImageSize = Size.Empty
+        If Not String.IsNullOrEmpty(RightImagePath) Then
+            Try
+                RightImageSize = ImageSize.GetSize(RightImagePath)
+            Catch ex As IOException
+            End Try
+        End If
     End Sub
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -3289,13 +3313,17 @@ Public Class EffectBase
             Quoted(Path.GetFileName(RightImagePath)),
             Quoted(Path.GetFileName(LeftImagePath)),
             Duration.ToString(CultureInfo.InvariantCulture),
-            Repeat_Delay.ToString(CultureInfo.InvariantCulture),
+            RepeatDelay.ToString(CultureInfo.InvariantCulture),
             Space_To_Under(Location_ToString(PlacementDirectionRight)),
             Space_To_Under(Location_ToString(CenteringRight)),
             Space_To_Under(Location_ToString(PlacementDirectionLeft)),
             Space_To_Under(Location_ToString(CenteringLeft)),
             Follow,
             DoNotRepeatImageAnimations)
+    End Function
+
+    Public Overloads Function MemberwiseClone() As EffectBase Implements IMemberwiseCloneable(Of EffectBase).MemberwiseClone
+        Return DirectCast(MyBase.MemberwiseClone(), EffectBase)
     End Function
 End Class
 
@@ -3493,7 +3521,7 @@ Public Class HouseBase
     Public Sub New(directory As String)
         Argument.EnsureNotNull(directory, "directory")
 
-        Dim lastSeparator = directory.LastIndexOfAny({Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})
+        Dim lastSeparator = directory.LastIndexOf(Path.DirectorySeparatorChar)
         If lastSeparator <> -1 Then
             _directory = directory.Substring(lastSeparator + 1)
         Else

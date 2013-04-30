@@ -422,7 +422,7 @@ Public Class PonyEditor
                                                  Get_Filename(.RightImagePath), _
                                                  Get_Filename(.LeftImagePath), _
                                                  .Duration, _
-                                                 .Repeat_Delay, _
+                                                 .RepeatDelay, _
                                                  Location_ToString(.PlacementDirectionRight), _
                                                  Location_ToString(.CenteringRight), _
                                                  Location_ToString(.PlacementDirectionLeft), _
@@ -1216,7 +1216,7 @@ Public Class PonyEditor
                     Case colEffectDuration.Index
                         changed_effect.Duration = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colEffectRepeatDelay.Index
-                        changed_effect.Repeat_Delay = Double.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_effect.RepeatDelay = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colEffectLocationRight.Index
                         changed_effect.PlacementDirectionRight = String_ToLocation(new_value)
                     Case colEffectLocationLeft.Index
