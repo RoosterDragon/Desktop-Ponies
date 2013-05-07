@@ -4,17 +4,22 @@ Have little ponies running around your desktop aimlessly!  Might entertain you f
 (not affiliated with Hasbro in any way, all of the art has been either created by others, or, in the case of the original Derpy images, from Derpy Delivery: http://www.hamalonesandwich.com/derpydelivery/#l  
 A lot of the animations have been done by Jay Wright)
 
-We have a new forum for things Desktop Pony related
+We have a new forum for things Desktop Pony related:
 http://desktopponies.bugs3.com/index.php
 
-There are also threads maintained on Ponychan for the main program, and an OC thread for custom creations
+There are also threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
 http://www.ponychan.net/chan/collab/
+Lastest threads at time of writing:
+Mane - http://www.ponychan.net/chan/collab/res/43172.html
+  OC - http://www.ponychan.net/chan/collab/res/43607.html
 
-The sprite artists maintain a community for their works on DeviantArt
+The sprite artists maintain a community for their works on DeviantArt:
 http://desktop-pony-team.deviantart.com/
 
-The source code is available under the Creative Commons BY-NC-SA 3.0 license.
+The source code is available under the Creative Commons BY-NC-SA 3.0 license:
 http://creativecommons.org/licenses/by-nc-sa/3.0/
+The source itself is available from:
+https://github.com/RoosterDragon/Desktop-Ponies
 
 ---------------------------------------
 
@@ -56,7 +61,6 @@ Screensaver
 - v1.42 is the first version that works on Mac & Unix systems. The program should run decently, but it can be less stable than running on Windows.
   Some features have been disabled on these systems where they are not supported or were causing problems.
 - Interactions files have changed since the previous version, and custom interactions may be broken. If you have errors, please post on the forums for assistance.
-- Minigames are missing scores in this version.
 - Some options available in previous versions are no longer supported, and thus you may notice them missing from the options menu.
 
 ---------------------------------------
@@ -64,6 +68,11 @@ Screensaver
 Change Log
 
 Latest changes:
+
+v1.42.2.4:
+- Added Fiddlesticks, Ginger Snap, Manticore by Bot-chan.
+- Updated flight animations for Princesses Celestia, Luna, Cadence & Queen Chrysalis by Bot-chan.
+- Fixed bug in v1.42.2.3 where interactions would not be loaded by the pony editor.
 
 v1.42.2.3:
 - Fixed screensaver mode when using a background color or image.
