@@ -19,15 +19,15 @@ Public Class ItemEditorBase
         End Get
     End Property
     Private _isNewItem As Boolean = True
-    Protected ReadOnly Property IsNewItem As Boolean
+    Public ReadOnly Property IsNewItem As Boolean
         Get
             Return _isNewItem
         End Get
     End Property
-    Private _itemChanged As Boolean
-    Protected ReadOnly Property ItemChanged As Boolean
+    Private _isItemDirty As Boolean
+    Public ReadOnly Property IsItemDirty As Boolean
         Get
-            Return _itemChanged
+            Return _isItemDirty
         End Get
     End Property
     Private _loadingItem As Boolean
@@ -44,6 +44,8 @@ Public Class ItemEditorBase
         End Set
     End Property
 
+    Public Event DirtinessChanged As EventHandler
+
     Public Overridable Sub NewItem(ponyBase As PonyBase)
         Argument.EnsureNotNull(ponyBase, "ponyBase")
         _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
@@ -57,21 +59,33 @@ Public Class ItemEditorBase
     End Sub
 
     Public Overridable Sub SaveItem()
-        _isNewItem = False
-        _itemChanged = False
-        UpdateDirtyFlag(_itemChanged)
+        Dim result = DialogResult.None
+        Do
+            Try
+                Base.Save()
+                _isNewItem = False
+                UpdateDirtyFlag(False)
+            Catch ex As IOException
+                result = MessageBox.Show(Me, "There was an error attempting to save the pony." & vbNewLine &
+                                         vbNewLine & ex.Message & vbNewLine & vbNewLine &
+                                         "Retry?", "Save Error", MessageBoxButtons.RetryCancel,
+                                         MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
+            End Try
+        Loop While result = DialogResult.Retry
     End Sub
 
     Protected Overridable Sub OnItemPropertyChanged()
-        _itemChanged = True
-        UpdateDirtyFlag(_itemChanged)
+        UpdateDirtyFlag(True)
     End Sub
 
     Public Overridable Sub AnimateImages(animate As Boolean)
     End Sub
 
-    Private Sub UpdateDirtyFlag(dirty As Boolean)
-        DirectCast(Parent, ItemTabPage).IsDirty = dirty
+    Private Sub UpdateDirtyFlag(newState As Boolean)
+        If _isItemDirty = newState Then Return
+        _isItemDirty = newState
+        RaiseEvent DirtinessChanged(Me, EventArgs.Empty)
+        DirectCast(Parent, ItemTabPage).IsDirty = newState
     End Sub
 
     Protected Sub UpdateProperty(handler As Action)

@@ -124,17 +124,6 @@ Public Class Main
         Group = 22
     End Enum
 
-    Enum InteractionParameter
-        Name = 0
-        Initiator = 1  'which pony triggers the interaction?
-        Probability = 2
-        Proximity = 3
-        TargetList = 4
-        TargetSelectionOption = 5  'do we interact with only the pony we ran into, or all of them on the list (even multiple instances)
-        BehaviorList = 6
-        RepeatDelay = 7
-    End Enum
-
 #Region "Initialization"
 
     Public Sub New()
@@ -477,20 +466,6 @@ Public Class Main
             'Load pony counts.
             idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
 
-            'We first load interactions to get a list of names 
-            'that each pony should interact with.
-            'Latter, we "initialize" interactions to get
-            'a list of each pony object.
-            Try
-                If Options.PonyInteractionsEnabled Then
-                    Dim displaywarnings =
-                        Options.DisplayPonyInteractionsErrors AndAlso Not AutoStarted AndAlso Not ScreensaverMode
-                    idleWorker.QueueTask(Sub() LoadInteractions(displaywarnings))
-                End If
-            Catch ex As Exception
-                MsgBox("Unable to load interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-            End Try
-
             ' Wait for all images to load.
             idleWorker.QueueTask(Sub()
                                      For Each control As PonySelectionControl In PonySelectionPanel.Controls
@@ -615,91 +590,6 @@ Public Class Main
         selectionControlFilter.Add(ponySelection, ponySelection.Visible)
         PonySelectionPanel.Controls.Add(ponySelection)
         ponySelection.Update()
-    End Sub
-
-    Sub LoadInteractions(Optional displayWarnings As Boolean = True)
-
-        If Not My.Computer.FileSystem.FileExists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)) Then
-            Options.PonyInteractionsExist = False
-            Exit Sub
-        End If
-
-        Using interactions_file As New StreamReader(
-            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
-            Do Until interactions_file.EndOfStream
-
-                Dim line = interactions_file.ReadLine
-
-                If InStr(line, "'") = 1 OrElse Trim(line) = "" Then Continue Do
-
-                Dim columns = CommaSplitBraceQualified(line)
-
-                Dim ponyfound = False
-
-                Dim ponyname = CommaSplitQuoteQualified(columns(InteractionParameter.Initiator))(0)
-                For Each ponyBase In SelectablePonies
-                    Try
-                        If ponyBase.Directory = ponyname Then
-
-                            ponyfound = True
-
-                            Dim repeat_delay = 60
-
-                            If UBound(columns) >= InteractionParameter.RepeatDelay Then
-                                repeat_delay = Integer.Parse(columns(InteractionParameter.RepeatDelay), CultureInfo.InvariantCulture)
-                            End If
-
-                            Dim targetsActivated As Interaction.TargetActivation
-                            Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
-                            If Not [Enum].TryParse(activationValue, targetsActivated) Then
-                                ' If direct parsing failed, assume we've got some old definitions instead.
-                                ' The old code accepted the following values irrespective of case.
-                                ' It should be noted that title-cased "All" will be recognized as a new value which has stricter semantics.
-                                ' However, the old code used to serialize a Boolean value and thus wrote "True" or "False". The chances of
-                                ' encountering "random" or "all" in practice are therefore almost nil, as they would have to be manually
-                                ' edited in.
-                                If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
-                                    String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
-                                    targetsActivated = Interaction.TargetActivation.One
-                                ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
-                                    String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
-                                    targetsActivated = Interaction.TargetActivation.Any
-                                ElseIf Not Main.Instance.ScreensaverMode Then
-                                    Throw New InvalidDataException(
-                                        "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
-                                        "Interaction file specified '" & columns(InteractionParameter.TargetSelectionOption) &
-                                        "' for interaction named: " & columns(InteractionParameter.Name))
-                                End If
-                            End If
-
-                            ponyBase.AddInteraction(columns(InteractionParameter.Name), _
-                                            ponyname, _
-                                            Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture), _
-                                            columns(InteractionParameter.Proximity), _
-                                            columns(InteractionParameter.TargetList), _
-                                            targetsActivated, _
-                                            columns(InteractionParameter.BehaviorList), _
-                                            repeat_delay, _
-                                            displayWarnings)
-                        End If
-                    Catch ex As Exception
-                        If displayWarnings Then
-                            MsgBox("Error loading interaction for Pony: " & ponyBase.Directory & _
-                             ControlChars.NewLine & line & ControlChars.NewLine & _
-                             ex.Message)
-                        End If
-                    End Try
-                Next
-
-                If ponyfound = False Then
-                    If displayWarnings Then
-                        MsgBox("Warning:  Interaction specifies a non-existent pony: " & _
-                               line)
-                    End If
-                End If
-
-            Loop
-        End Using
     End Sub
 
     Private Sub HandleCountChange(sender As Object, e As EventArgs)

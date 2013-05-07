@@ -24,6 +24,12 @@ Public Class PonyEditorForm2
         End Sub
     End Class
 
+    Private ReadOnly Property ActiveItemEditor As ItemEditorBase
+        Get
+            Return If(activeTab Is Nothing, Nothing, DirectCast(activeTab.Controls(0), ItemEditorBase))
+        End Get
+    End Property
+
     Public Sub New()
         InitializeComponent()
         Icon = My.Resources.Twilight
@@ -42,9 +48,9 @@ Public Class PonyEditorForm2
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-        IdleWorker.QueueTask(Sub() EditorProgressBar.Maximum = ponyBaseDirectories.Length)
+        idleWorker.QueueTask(Sub() EditorProgressBar.Maximum = ponyBaseDirectories.Length)
         Dim poniesNode As TreeNode = Nothing
-        IdleWorker.QueueTask(Sub()
+        idleWorker.QueueTask(Sub()
                                  poniesNode = New TreeNode("Ponies") With
                                               {.Tag = New PageRef(Nothing, PageContent.Ponies)}
                                  DocumentsView.Nodes.Add(poniesNode)
@@ -53,7 +59,7 @@ Public Class PonyEditorForm2
         For Each directory In ponyBaseDirectories
             Dim ponyBase As New MutablePonyBase(directory)
             bases.Add(ponyBase.Directory, ponyBase)
-            IdleWorker.QueueTask(Sub()
+            idleWorker.QueueTask(Sub()
                                      Dim ponyBaseNode = New TreeNode(ponyBase.Directory) With
                                                         {.Tag = New PageRef(ponyBase, PageContent.Pony)}
                                      poniesNode.Nodes.Add(ponyBaseNode)
@@ -125,10 +131,10 @@ Public Class PonyEditorForm2
     Private Function OpenTab(node As TreeNode) As Boolean
         If node Is Nothing Then Return False
 
-        Dim page = Documents.TabPages.Item(node.FullPath)
+        Dim tab = Documents.TabPages.Item(node.FullPath)
         Dim itemName = node.Text
 
-        If page Is Nothing Then
+        If tab Is Nothing Then
             Dim pageRef = DirectCast(node.Tag, PageRef)
             Dim editor As ItemEditorBase = Nothing
             Select Case pageRef.PageContent
@@ -142,15 +148,15 @@ Public Class PonyEditorForm2
             If editor IsNot Nothing Then
                 idleWorker.QueueTask(Sub() editor.LoadItem(pageRef.PonyBase, itemName))
                 editor.Dock = DockStyle.Fill
-                page = New ItemTabPage() With {.Name = node.FullPath, .Text = GetTabText(pageRef, itemName)}
-                page.Controls.Add(editor)
-                Documents.TabPages.Add(page)
+                tab = New ItemTabPage() With {.Name = node.FullPath, .Text = GetTabText(pageRef, itemName)}
+                tab.Controls.Add(editor)
+                Documents.TabPages.Add(tab)
             End If
         End If
 
-        If page IsNot Nothing Then
-            Documents.SelectedTab = page
-            If activeTab Is Nothing Then ToggleTabAnimations(page)
+        If tab IsNot Nothing Then
+            Documents.SelectedTab = tab
+            If activeTab Is Nothing Then SwitchTab(tab)
             DocumentsView.Select()
             DocumentsView.SelectedNode = node
             Return True
@@ -160,12 +166,29 @@ Public Class PonyEditorForm2
     End Function
 
     Private Sub Documents_Selected(sender As Object, e As TabControlEventArgs) Handles Documents.Selected
-        ToggleTabAnimations(e.TabPage)
+        SwitchTab(e.TabPage)
     End Sub
 
-    Private Sub ToggleTabAnimations(newTab As TabPage)
-        If activeTab IsNot Nothing Then DirectCast(activeTab.Controls(0), ItemEditorBase).AnimateImages(False)
+    Private Sub SwitchTab(newTab As TabPage)
+        If activeTab IsNot Nothing Then
+            RemoveHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
+            ActiveItemEditor.AnimateImages(False)
+        End If
+
         activeTab = newTab
-        DirectCast(activeTab.Controls(0), ItemEditorBase).AnimateImages(True)
+
+        ActiveItemEditor.AnimateImages(True)
+        AddHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
+        ActiveItemEditor_DirtinessChanged(Me, EventArgs.Empty)
+    End Sub
+
+    Private Sub ActiveItemEditor_DirtinessChanged(sender As Object, e As EventArgs)
+        SaveButton.Enabled = ActiveItemEditor.IsItemDirty
+        SaveButton.ToolTipText = If(ActiveItemEditor.IsItemDirty, "Save This Item", "No Save Needed")
+    End Sub
+
+    Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
+        ActiveItemEditor.SaveItem()
+        EditorStatus.Text = "Saved"
     End Sub
 End Class

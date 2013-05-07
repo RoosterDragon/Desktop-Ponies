@@ -41,7 +41,7 @@ Friend Class SpeechEditor
     End Sub
 
     Public Overrides Sub SaveItem()
-        If IsNewItem AndAlso Base.SpeakingLines.Any(Function(s) s.Name = newSpeech.Name) Then
+        If Base.SpeakingLines.Any(Function(s) s.Name = newSpeech.Name AndAlso Not Object.ReferenceEquals(s, originalSpeech)) Then
             MessageBox.Show(Me, "A speech with the name '" & newSpeech.Name &
                             "' already exists for this pony. Please choose another name.",
                             "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
@@ -52,6 +52,9 @@ Friend Class SpeechEditor
         Base.SpeakingLines.Add(newSpeech)
 
         MyBase.SaveItem()
+
+        originalSpeech = newSpeech
+        newSpeech = originalSpeech.MemberwiseClone()
     End Sub
 
     Protected Overrides Sub OnItemPropertyChanged()

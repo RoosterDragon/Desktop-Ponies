@@ -88,7 +88,7 @@ Friend Class BehaviorEditor
     End Sub
 
     Public Overrides Sub SaveItem()
-        If IsNewItem AndAlso Base.Behaviors.Any(Function(b) b.Name = newBehavior.Name) Then
+        If Base.Behaviors.Any(Function(b) b.Name = newBehavior.Name AndAlso Not Object.ReferenceEquals(b, originalBehavior)) Then
             MessageBox.Show(Me, "A behavior with the name '" & newBehavior.Name &
                             "' already exists for this pony. Please choose another name.",
                             "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
@@ -99,6 +99,9 @@ Friend Class BehaviorEditor
         Base.Behaviors.Add(newBehavior)
 
         MyBase.SaveItem()
+
+        originalBehavior = newBehavior
+        newBehavior = originalBehavior.MemberwiseClone()
     End Sub
 
     Protected Overrides Sub OnItemPropertyChanged()

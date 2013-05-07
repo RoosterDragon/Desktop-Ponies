@@ -416,43 +416,39 @@ Public Class PonyEditor
 
             For Each effect In PreviewPonyEffects()
                 With effect
-                    PonyEffectsGrid.Rows.Add(.Name, _
-                                                 .Name, _
-                                                 .BehaviorName, _
-                                                 Get_Filename(.RightImagePath), _
-                                                 Get_Filename(.LeftImagePath), _
-                                                 .Duration, _
-                                                 .RepeatDelay, _
-                                                 Location_ToString(.PlacementDirectionRight), _
-                                                 Location_ToString(.CenteringRight), _
-                                                 Location_ToString(.PlacementDirectionLeft), _
-                                                 Location_ToString(.CenteringLeft), _
-                                                 .Follow, .DoNotRepeatImageAnimations)
+                    PonyEffectsGrid.Rows.Add(.Name,
+                                             .Name,
+                                             .BehaviorName,
+                                             Get_Filename(.RightImagePath),
+                                             Get_Filename(.LeftImagePath),
+                                             .Duration,
+                                             .RepeatDelay,
+                                             Location_ToString(.PlacementDirectionRight),
+                                             Location_ToString(.CenteringRight),
+                                             Location_ToString(.PlacementDirectionLeft),
+                                             Location_ToString(.CenteringLeft),
+                                             .Follow,
+                                             .DoNotRepeatImageAnimations)
                 End With
             Next
 
-            For Each Interaction As Interaction In PreviewPony.Interactions
-
-                With Interaction
-                    PonyInteractionsGrid.Rows.Add(.Name, _
-                                                   .Name, _
-                                                   .Probability.ToString("P", CultureInfo.CurrentCulture), _
-                                                   .Proximity_Activation_Distance, _
-                                                   "Select...",
-                                                   Interaction.Targets_Activated.ToString(),
-                                                   "Select...",
-                                                   .ReactivationDelay)
-
+            For Each interaction As Interaction In PreviewPony.Interactions
+                With interaction
+                    PonyInteractionsGrid.Rows.Add(.Name,
+                                                  .Name,
+                                                  .Probability.ToString("P", CultureInfo.CurrentCulture),
+                                                  .Proximity_Activation_Distance,
+                                                  "Select...",
+                                                  interaction.Targets_Activated.ToString(),
+                                                  "Select...",
+                                                  .ReactivationDelay)
                 End With
-
-
             Next
 
             'to make sure that speech match behaviors
             PreviewPonyBase.LinkBehaviors()
 
             already_updating = False
-
 
             Dim Conflicting_names As Boolean = False
             Dim conflicts As New List(Of String)

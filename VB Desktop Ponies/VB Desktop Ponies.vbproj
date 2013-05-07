@@ -168,6 +168,12 @@
     <Compile Include="PonyEditor2\FileSelector.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="PonyEditor2\InteractionEditor.Designer.vb">
+      <DependentUpon>InteractionEditor.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\InteractionEditor.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="PonyEditor2\ItemEditorBase.Designer.vb">
       <DependentUpon>ItemEditorBase.vb</DependentUpon>
     </Compile>
@@ -350,6 +356,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\FileSelector.resx">
       <DependentUpon>FileSelector.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\InteractionEditor.resx">
+      <DependentUpon>InteractionEditor.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\ItemEditorBase.resx">
       <DependentUpon>ItemEditorBase.vb</DependentUpon>

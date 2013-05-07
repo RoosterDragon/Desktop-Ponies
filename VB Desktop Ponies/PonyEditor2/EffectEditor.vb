@@ -98,7 +98,7 @@ Friend Class EffectEditor
     End Sub
 
     Public Overrides Sub SaveItem()
-        If IsNewItem AndAlso Base.Effects.Any(Function(e) e.Name = newEffect.Name) Then
+        If Base.Effects.Any(Function(e) e.Name = newEffect.Name AndAlso Not Object.ReferenceEquals(e, originalEffect)) Then
             MessageBox.Show(Me, "An effect with the name '" & newEffect.Name &
                             "' already exists for this pony. Please choose another name.",
                             "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
@@ -109,6 +109,9 @@ Friend Class EffectEditor
         Base.Effects.Add(newEffect)
 
         MyBase.SaveItem()
+
+        originalEffect = newEffect
+        newEffect = originalEffect.MemberwiseClone()
     End Sub
 
     Protected Overrides Sub OnItemPropertyChanged()
