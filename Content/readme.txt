@@ -69,6 +69,9 @@ Change Log
 
 Latest changes:
 
+v1.42.2.5:
+- Added Prince Blueblood by Bot-chan.
+
 v1.42.2.4:
 - Added Fiddlesticks, Ginger Snap, Manticore by Bot-chan.
 - Updated flight animations for Princesses Celestia, Luna, Cadence & Queen Chrysalis by Bot-chan.
