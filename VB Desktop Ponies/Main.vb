@@ -127,13 +127,18 @@ Public Class Main
 #Region "Initialization"
 
     Public Sub New()
+        loadWatch.Start()
         InitializeComponent()
         initialized = True
     End Sub
 
     'Read all configuration files and pony folders.
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        loadWatch.Start()
+        BeginInvoke(New Action(AddressOf LoadInternal))
+    End Sub
+
+    Private Sub LoadInternal()
+        Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
         Instance = Me
 
         Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()

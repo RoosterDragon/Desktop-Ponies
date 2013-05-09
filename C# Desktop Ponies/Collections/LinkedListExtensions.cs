@@ -20,11 +20,7 @@
         /// <typeparamref name="TSource"/>.</exception>
         public static void Sort<TSource>(this LinkedList<TSource> source)
         {
-            Argument.EnsureNotNull(source, "source");
-            if (Comparer<TSource>.Default == null)
-                throw new InvalidOperationException();
-
-            Sort(source, Comparer<TSource>.Default);
+            Sort(source, (IComparer<TSource>)null);
         }
 
         /// <summary>
@@ -59,16 +55,10 @@
         public static void Sort<TSource>(this LinkedList<TSource> source, IComparer<TSource> comparer)
         {
             Argument.EnsureNotNull(source, "source");
-            if (comparer == null && Comparer<TSource>.Default == null)
+            if (comparer == null && (comparer = Comparer<TSource>.Default) == null)
                 throw new InvalidOperationException();
 
-            Comparison<TSource> comparison;
-            if (comparer == null)
-                comparison = Comparer<TSource>.Default.Compare;
-            else
-                comparison = comparer.Compare;
-
-            MergeSort(source, comparison);
+            MergeSort(source, comparer.Compare);
         }
 
         /// <summary>
