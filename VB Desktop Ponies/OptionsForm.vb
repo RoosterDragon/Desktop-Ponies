@@ -251,9 +251,9 @@
         If IsNothing(Pony.CurrentViewer) Then
             'done
             Exit Sub
-        ElseIf TypeOf Pony.CurrentViewer Is SpriteManagement.WinFormSpriteInterface Then
+        ElseIf TypeOf Pony.CurrentViewer Is CSDesktopPonies.SpriteManagement.WinFormSpriteInterface Then
             Dim area = Main.Instance.GetCombinedScreenArea()
-            DirectCast(Pony.CurrentViewer, SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
+            DirectCast(Pony.CurrentViewer, CSDesktopPonies.SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
         End If
 
     End Sub

@@ -5,6 +5,7 @@
     using System.Drawing;
     using System.Globalization;
     using System.Windows.Forms;
+    using CSDesktopPonies.Core;
     using CSDesktopPonies.SpriteManagement;
 
     /// <summary>

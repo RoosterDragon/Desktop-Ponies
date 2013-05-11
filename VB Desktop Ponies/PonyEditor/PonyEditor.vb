@@ -59,7 +59,7 @@ Public Class PonyEditor
     End Class
 
     Private pe_animator As PonyEditorAnimator
-    Private pe_interface As SpriteManagement.ISpriteCollectionView
+    Private pe_interface As ISpriteCollectionView
 
     Public Sub New()
         InitializeComponent()

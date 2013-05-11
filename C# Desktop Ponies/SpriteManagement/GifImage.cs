@@ -6,6 +6,7 @@
     using System.Drawing.Imaging;
     using System.Globalization;
     using System.IO;
+    using CSDesktopPonies.Core;
 
     #region BufferToImage delegate
     /// <summary>

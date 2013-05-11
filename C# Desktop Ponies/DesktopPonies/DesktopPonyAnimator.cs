@@ -5,6 +5,7 @@
     using System.Drawing;
     using System.Linq;
     using CSDesktopPonies.Collections;
+    using CSDesktopPonies.Core;
     using CSDesktopPonies.SpriteManagement;
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies
+﻿namespace CSDesktopPonies.Core
 {
     using System;
     using System.Globalization;

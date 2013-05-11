@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Provides methods to create and draw animated images based on a time index.

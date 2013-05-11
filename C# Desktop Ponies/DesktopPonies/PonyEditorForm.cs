@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Text;
     using System.Windows.Forms;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Displays the data about each pony, and allows editing to be done.

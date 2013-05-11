@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies.Win32
+﻿namespace CSDesktopPonies.Interop.Win32
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

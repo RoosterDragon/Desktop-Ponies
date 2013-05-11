@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using CSDesktopPonies.Core;
 
     /// <summary> 
     /// Represents a collection of keys and lazily-initialized values.

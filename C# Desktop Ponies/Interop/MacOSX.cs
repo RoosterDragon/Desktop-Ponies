@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies.MacOSX
+﻿namespace CSDesktopPonies.Interop.MacOSX
 {
     using System;
     using System.Runtime.InteropServices;

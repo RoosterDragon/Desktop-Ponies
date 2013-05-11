@@ -7,6 +7,7 @@
     using System.Text;
     using System.Threading;
     using CSDesktopPonies.Collections;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Defines a base class for animators. Provides a timing loop and monitors the frame rate.

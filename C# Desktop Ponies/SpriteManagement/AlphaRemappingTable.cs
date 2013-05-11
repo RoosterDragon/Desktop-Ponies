@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Manages a mapping of RGB colors to ARGB colors and provides methods to load and save the data.

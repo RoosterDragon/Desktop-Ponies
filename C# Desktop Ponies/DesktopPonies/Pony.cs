@@ -6,6 +6,7 @@
     using System.Globalization;
     using System.IO;
     using System.Xml;
+    using CSDesktopPonies.Core;
     using CSDesktopPonies.SpriteManagement;
 
     // TODO: Fix documentation.

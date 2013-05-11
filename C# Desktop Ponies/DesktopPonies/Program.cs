@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies
+﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
     using System.Threading;

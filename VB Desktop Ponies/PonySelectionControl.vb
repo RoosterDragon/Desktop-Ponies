@@ -13,7 +13,7 @@ Public Class PonySelectionControl
         InitializeComponent()
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
-        imageSize = CSDesktopPonies.ImageSize.GetSize(imagePath)
+        imageSize = CSDesktopPonies.Core.ImageSize.GetSize(imagePath)
         imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
         flip = flipImage
 

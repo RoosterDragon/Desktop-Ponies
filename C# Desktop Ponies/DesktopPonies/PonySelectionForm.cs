@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Windows.Forms;
     using CSDesktopPonies.Collections;
+    using CSDesktopPonies.Core;
     using CSDesktopPonies.SpriteManagement;
 
     /// <summary>

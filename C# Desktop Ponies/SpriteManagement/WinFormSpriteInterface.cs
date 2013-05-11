@@ -10,6 +10,7 @@
     using System.Threading;
     using System.Windows.Forms;
     using CSDesktopPonies.Collections;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Creates a single Windows Form that is used as a canvas to display sprites.

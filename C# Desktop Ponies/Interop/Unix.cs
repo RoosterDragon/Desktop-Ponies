@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies.Unix
+﻿namespace CSDesktopPonies.Interop.Unix
 {
     using System;
     using System.Runtime.InteropServices;

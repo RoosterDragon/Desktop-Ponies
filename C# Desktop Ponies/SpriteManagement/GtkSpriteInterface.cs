@@ -8,6 +8,7 @@
     using System.Threading;
     using Cairo;
     using CSDesktopPonies.Collections;
+    using CSDesktopPonies.Core;
     using Gdk;
     using Gtk;
     using SD = System.Drawing;
@@ -63,14 +64,14 @@
             public static void SetHasShadow(Gdk.Window window, bool hasShadow)
             {
                 // Get the native window handle.
-                IntPtr nsWindow = MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
+                IntPtr nsWindow = CSDesktopPonies.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
 
                 // Register the method with the runtime, if it has not yet been.
                 if (setHasShadowSelector == IntPtr.Zero)
-                    setHasShadowSelector = MacOSX.NativeMethods.sel_registerName("setHasShadow:");
+                    setHasShadowSelector = CSDesktopPonies.Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
 
                 // Send a message to the window, indicating the set shadow method and specified argument.
-                MacOSX.NativeMethods.objc_msgSend(nsWindow, setHasShadowSelector, hasShadow);
+                CSDesktopPonies.Interop.MacOSX.NativeMethods.objc_msgSend(nsWindow, setHasShadowSelector, hasShadow);
             }
         }
         #endregion

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Provides general extension methods to the <see cref="T:System.Collections.Generic.IDictionary`2"/> interface.

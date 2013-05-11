@@ -2,6 +2,7 @@
 {
     using System;
     using System.Drawing;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Defines a <see cref="T:CSDesktopPonies.SpriteManagement.SpriteFrame`1"/> whose underlying image is a

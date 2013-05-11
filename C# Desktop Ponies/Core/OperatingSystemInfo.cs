@@ -1,4 +1,4 @@
-﻿namespace CSDesktopPonies
+﻿namespace CSDesktopPonies.Core
 {
     using System;
     using System.Runtime.InteropServices;
@@ -27,7 +27,7 @@
             try
             {
                 buffer = Marshal.AllocHGlobal(8196);
-                if (Unix.NativeMethods.uname(buffer) == 0)
+                if (CSDesktopPonies.Interop.Unix.NativeMethods.uname(buffer) == 0)
                 {
                     // The buffer contains 5 or 6 null-terminated char arrays, we will marshal the first one, containing the system name.
                     string osName = Marshal.PtrToStringAnsi(buffer);
