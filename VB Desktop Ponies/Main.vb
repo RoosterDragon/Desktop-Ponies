@@ -468,8 +468,21 @@ Public Class Main
                 GoButton.Enabled = False
             End If
 
-            'Load pony counts.
+            ' Load pony counts.
             idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
+
+            ' Load interactions, since references to other ponies can now be resolved.
+            idleWorker.QueueTask(Sub()
+                                     Try
+                                         For Each pony In SelectablePonies
+                                             pony.LoadInteractions()
+                                         Next
+                                     Catch ex As Exception
+                                         MessageBox.Show("There was a problem attempting to load interactions." & vbNewLine & vbNewLine &
+                                                         "Details: " & vbNewLine & ex.ToString(), "Interactions Error",
+                                                         MessageBoxButtons.OK, MessageBoxIcon.Error)
+                                     End Try
+                                 End Sub)
 
             ' Wait for all images to load.
             idleWorker.QueueTask(Sub()

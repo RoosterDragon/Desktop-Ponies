@@ -40,6 +40,8 @@ Public Class MutablePonyBase
 
     Public Sub New(directory As String)
         LoadFromIni(directory)
+        ' Loading interactions now assumes mutable bases are created only when the main form is around.
+        LoadInteractions()
     End Sub
 
     ''' <summary>
@@ -541,7 +543,7 @@ Public Class PonyBase
                         skip = Boolean.Parse(Trim(columns(Main.BehaviorOption.Skip)))
                         xcoord = Integer.Parse(columns(Main.BehaviorOption.XCoord), CultureInfo.InvariantCulture)
                         ycoord = Integer.Parse(columns(Main.BehaviorOption.YCoord), CultureInfo.InvariantCulture)
-                        follow = LCase(Trim(columns(Main.BehaviorOption.ObjectToFollow)))
+                        follow = Trim(columns(Main.BehaviorOption.ObjectToFollow))
                         If UBound(columns) >= Main.BehaviorOption.AutoSelectImages Then
                             auto_select_images = Boolean.Parse(Trim(columns(Main.BehaviorOption.AutoSelectImages)))
                         End If
@@ -662,12 +664,10 @@ Public Class PonyBase
             ' Behaviors that "chain" or link to another behavior to be played after they are done need to be set up now that we have a list
             ' of all of them.
             LinkBehaviors()
-
-            LoadInteractions()
         End Using
     End Sub
 
-    Private Sub LoadInteractions()
+    Public Sub LoadInteractions()
         If Not Options.PonyInteractionsEnabled Then Return
         Dim displaywarnings =
             Options.DisplayPonyInteractionsErrors AndAlso
@@ -735,6 +735,9 @@ Public Class PonyBase
                             MessageBox.Show("Error loading interaction for Pony: " & Directory & ControlChars.NewLine &
                                    line & ControlChars.NewLine & ex.Message, "Interaction Error",
                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+                        Else
+                            Console.WriteLine("Error loading interaction for Pony: " & Directory & ControlChars.NewLine &
+                                   line & ControlChars.NewLine & ex.Message)
                         End If
                     End Try
                 End If
@@ -746,8 +749,9 @@ Public Class PonyBase
         _tags = ReadOnlySet.Wrap(_tags)
         _behaviorGroups = ReadOnlyCollection.Wrap(_behaviorGroups)
         _behaviors = ReadOnlyCollection.Wrap(_behaviors)
-        _interactions = ReadOnlyCollection.Wrap(_interactions)
-        ' Effects must remain editable...
+        ' Interactions can use deferred loading, and should remain editable.
+        '_interactions = ReadOnlyCollection.Wrap(_interactions)
+        ' Effects must remain editable at the moment...
         '_effects = ReadOnlyCollection.Wrap(_effects)
         _speakingLines = ReadOnlyCollection.Wrap(_speakingLines)
         _speakingLinesRandom = ReadOnlyCollection.Wrap(_speakingLinesRandom)
@@ -809,17 +813,8 @@ Public Class PonyBase
             new_behavior.LinkedBehaviorName = _Linked_Behavior
         End If
 
-        If right_image_center = Point.Empty Then
-            new_behavior.SetRightImageCenter(new_behavior.RightImageSize / 2)
-        Else
-            new_behavior.SetRightImageCenter(right_image_center)
-        End If
-
-        If left_image_center = Point.Empty Then
-            new_behavior.SetLeftImageCenter(new_behavior.LeftImageSize / 2)
-        Else
-            new_behavior.SetLeftImageCenter(left_image_center)
-        End If
+        new_behavior.SetRightImageCenter(right_image_center)
+        new_behavior.SetLeftImageCenter(left_image_center)
 
         Behaviors.Add(new_behavior)
 
@@ -1148,12 +1143,12 @@ Public Class Behavior
     Private right_image_size As Vector2
     Public ReadOnly Property LeftImageCenter As Vector2
         Get
-            Return left_image_center
+            Return If(left_image_center = Vector2.Zero, LeftImageSize / 2, left_image_center)
         End Get
     End Property
     Public ReadOnly Property RightImageCenter As Vector2
         Get
-            Return right_image_center
+            Return If(right_image_center = Vector2.Zero, RightImageSize / 2, right_image_center)
         End Get
     End Property
     Public ReadOnly Property LeftImageSize As Vector2
@@ -1399,10 +1394,10 @@ Public Class Behavior
             AutoSelectImagesOnFollow,
             FollowStoppedBehaviorName,
             FollowMovingBehaviorName,
-            Quoted(RightImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   RightImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
-            Quoted(LeftImageCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   LeftImageCenter.Y.ToString(CultureInfo.InvariantCulture)),
+            Quoted(right_image_center.X.ToString(CultureInfo.InvariantCulture) & "," &
+                   right_image_center.Y.ToString(CultureInfo.InvariantCulture)),
+            Quoted(left_image_center.X.ToString(CultureInfo.InvariantCulture) & "," &
+                   left_image_center.Y.ToString(CultureInfo.InvariantCulture)),
             DoNotRepeatImageAnimations,
             Group.ToString(CultureInfo.InvariantCulture))
     End Function
@@ -1884,6 +1879,8 @@ Public Class Pony
             Next
         End If
 
+        AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", IsInteractionInitiator.ToString())
+
         interactionDelayUntil = internalTime + TimeSpan.FromSeconds(CurrentInteraction.ReactivationDelay)
         CurrentInteraction = Nothing
         IsInteractionInitiator = False
@@ -1935,10 +1932,15 @@ Public Class Pony
 
             ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
             ' suitable to repeat.
-            If Not foundAtRandom AndAlso IsInteracting AndAlso specifiedBehavior Is Nothing Then
+            If Not foundAtRandom AndAlso IsInteracting Then
                 CurrentBehavior = Behaviors(0)
                 AddUpdateRecord(
-                    "Selected the default behavior as random selection failed (SelectBehavior). Behavior: ", CurrentBehavior.Name)
+                    "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
+                    CurrentBehavior.Name)
+            ElseIf Not foundAtRandom Then
+                AddUpdateRecord(
+                    "Random selection failed. Continuing current behavior as no interaction is running. (SelectBehavior). Behavior: ",
+                    CurrentBehavior.Name)
             End If
         Else
             followObjectName = specifiedBehavior.OriginalFollowObjectName

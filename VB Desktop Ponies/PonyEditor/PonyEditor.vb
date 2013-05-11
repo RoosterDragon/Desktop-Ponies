@@ -305,8 +305,8 @@ Public Class PonyEditor
                 End If
 
                 PonySpeechesGrid.Rows.Add(speech.Name, speech.Name, speech.Group, pony.GetBehaviorGroupName(speech.Group), speech.Text, Get_Filename(speech.SoundFile), (Not speech.Skip).ToString())
-                start_speech_list.Items.Add(LCase(speech.Name))
-                end_speech_list.Items.Add(LCase(speech.Name))
+                start_speech_list.Items.Add(speech.Name)
+                end_speech_list.Items.Add(speech.Name)
             Next
 
             For Each behavior In pony.Behaviors
@@ -404,8 +404,8 @@ Public Class PonyEditor
                                         Get_Filename(.RightImagePath), _
                                         Get_Filename(.LeftImagePath), _
                                         Movement_ToString(.AllowedMovement), _
-                                        LCase(.StartLineName), _
-                                        LCase(.EndLineName), _
+                                        .StartLineName, _
+                                        .EndLineName, _
                                         follow_name, _
                                         .LinkedBehaviorName, _
                                         link_depth,
