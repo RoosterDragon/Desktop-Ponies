@@ -71,6 +71,8 @@ Latest changes:
 
 v1.42.2.5:
 - Added Prince Blueblood by Bot-chan.
+- Fixed some dodgy loading of interactions.
+- Fixed Fluttershy's config which was preventing random behavior selection working effectively.
 
 v1.42.2.4:
 - Added Fiddlesticks, Ginger Snap, Manticore by Bot-chan.

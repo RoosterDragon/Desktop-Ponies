@@ -114,14 +114,14 @@
     <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationEvents.vb" />
+    <Compile Include="DesktopPonies\ApplicationEvents.vb" />
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DesktopControlForm.Designer.vb">
+    <Compile Include="DesktopPonies\DesktopControlForm.Designer.vb">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="DesktopControlForm.vb">
+    <Compile Include="DesktopPonies\DesktopControlForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="IdleWorker.vb" />
@@ -137,7 +137,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Options.vb" />
+    <Compile Include="DesktopPonies\Options.vb" />
     <Compile Include="PonyEditor2\AnimatedImageViewer.Designer.vb">
       <DependentUpon>AnimatedImageViewer.vb</DependentUpon>
     </Compile>
@@ -200,10 +200,10 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PonyEditor\PonyEditorAnimator.vb" />
-    <Compile Include="PonySelectionControl.Designer.vb">
+    <Compile Include="DesktopPonies\PonySelectionControl.Designer.vb">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
     </Compile>
-    <Compile Include="PonySelectionControl.vb">
+    <Compile Include="DesktopPonies\PonySelectionControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Monitoring\SpriteDebugForm.Designer.vb">
@@ -213,33 +213,33 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Win32.vb" />
-    <Compile Include="HouseOptionsForm.Designer.vb">
+    <Compile Include="DesktopPonies\HouseOptionsForm.Designer.vb">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="HouseOptionsForm.vb">
+    <Compile Include="DesktopPonies\HouseOptionsForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
     </Compile>
-    <Compile Include="ScreensaverBackgroundForm.Designer.vb">
+    <Compile Include="DesktopPonies\ScreensaverBackgroundForm.Designer.vb">
       <DependentUpon>ScreensaverBackgroundForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="ScreensaverBackgroundForm.vb">
+    <Compile Include="DesktopPonies\ScreensaverBackgroundForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FiltersForm.Designer.vb">
+    <Compile Include="DesktopPonies\FiltersForm.Designer.vb">
       <DependentUpon>FiltersForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="FiltersForm.vb">
+    <Compile Include="DesktopPonies\FiltersForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Game.vb" />
-    <Compile Include="GameSelectionForm.Designer.vb">
+    <Compile Include="DesktopPonies\Game.vb" />
+    <Compile Include="DesktopPonies\GameSelectionForm.Designer.vb">
       <DependentUpon>GameSelectionForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="GameSelectionForm.vb">
+    <Compile Include="DesktopPonies\GameSelectionForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\Resources.Designer.vb">
@@ -247,21 +247,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Pony.vb" />
+    <Compile Include="DesktopPonies\Pony.vb" />
     <Compile Include="IniLineParser.vb" />
     <Compile Include="KeyboardState.vb" />
-    <Compile Include="Main.vb">
+    <Compile Include="DesktopPonies\Main.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Main.Designer.vb">
+    <Compile Include="DesktopPonies\Main.Designer.vb">
       <DependentUpon>Main.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
-    <Compile Include="OptionsForm.Designer.vb">
+    <Compile Include="DesktopPonies\OptionsForm.Designer.vb">
       <DependentUpon>OptionsForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="OptionsForm.vb">
+    <Compile Include="DesktopPonies\OptionsForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PonyEditor\GifRuntimeDialog.Designer.vb">
@@ -336,13 +336,13 @@
     <Compile Include="PonyEditor\TagsForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DesktopPonyAnimator.vb" />
+    <Compile Include="DesktopPonies\DesktopPonyAnimator.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="HouseOptionsForm.resx">
+    <EmbeddedResource Include="DesktopPonies\HouseOptionsForm.resx">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DesktopControlForm.resx">
+    <EmbeddedResource Include="DesktopPonies\DesktopControlForm.resx">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\AnimatedImageViewer.resx">
@@ -372,19 +372,19 @@
     <EmbeddedResource Include="Monitoring\PonyLogForm.resx">
       <DependentUpon>PonyLogForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PonySelectionControl.resx">
+    <EmbeddedResource Include="DesktopPonies\PonySelectionControl.resx">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ScreensaverBackgroundForm.resx">
+    <EmbeddedResource Include="DesktopPonies\ScreensaverBackgroundForm.resx">
       <DependentUpon>ScreensaverBackgroundForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FiltersForm.resx">
+    <EmbeddedResource Include="DesktopPonies\FiltersForm.resx">
       <DependentUpon>FiltersForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GameSelectionForm.resx">
+    <EmbeddedResource Include="DesktopPonies\GameSelectionForm.resx">
       <DependentUpon>GameSelectionForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Main.resx">
+    <EmbeddedResource Include="DesktopPonies\Main.resx">
       <DependentUpon>Main.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -392,7 +392,7 @@
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="OptionsForm.resx">
+    <EmbeddedResource Include="DesktopPonies\OptionsForm.resx">
       <DependentUpon>OptionsForm.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>

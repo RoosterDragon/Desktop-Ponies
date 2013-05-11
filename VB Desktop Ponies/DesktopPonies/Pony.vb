@@ -3105,8 +3105,7 @@ Public Class Pony
         Return False
     End Function
 
-    Function IsPonyNearMouseCursor(location As System.Drawing.Point) As Boolean
-
+    Function IsPonyNearMouseCursor(location As Point) As Boolean
         If Not Options.CursorAvoidanceEnabled Then Return False
         If Main.Instance.ScreensaverMode Then Return False
 
@@ -3117,43 +3116,17 @@ Public Class Pony
 
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
-        With Main.Instance
-            For Each behavior In Behaviors
-                If behavior.AllowedMovement = AllowedMoves.MouseOver Then
-                    Dim rightCenter As Point
-                    If facingRight AndAlso behavior.RightImageCenter <> Vector2.Zero Then
-                        rightCenter = New Point(CInt(location.X + (Scale * (behavior.RightImageCenter.X))),
-                                                CInt(location.Y + (Scale * (behavior.RightImageCenter.Y))))
-                    Else
-                        rightCenter = New Point(CInt(location.X + (Scale * (Behaviors(0).RightImageSize.X)) / 2),
-                          CInt(location.Y + (Scale * (Behaviors(0).RightImageSize.Y)) / 2))
-                    End If
-                    Dim leftCenter As Point
-                    If Not facingRight AndAlso behavior.LeftImageCenter <> Vector2.Zero Then
-                        leftCenter = New Point(CInt(location.X + (Scale * (behavior.LeftImageCenter.X))),
-                                             CInt(location.Y + (Scale * (behavior.LeftImageCenter.Y))))
-                    Else
-                        leftCenter = New Point(CInt(location.X + (Scale * (Behaviors(0).LeftImageSize.X)) / 2),
-                              CInt(location.Y + (Scale * (Behaviors(0).LeftImageSize.Y)) / 2))
-                    End If
-
-                    For i As Integer = 0 To 1
-                        Dim pony_location = rightCenter
-                        If i = 1 Then
-                            pony_location = leftCenter
-                        End If
-
-                        Dim distance = Vector2.Distance(pony_location, CursorLocation)
-                        If distance <= .CursorZoneSize Then
-                            Return True
-                        End If
-                    Next
-                End If
-            Next
-        End With
+        For Each behavior In Behaviors
+            If behavior.AllowedMovement = AllowedMoves.MouseOver Then
+                Dim loc = New Vector2F(location)
+                Dim s = CSng(Scale)
+                Dim cursorLoc = New Vector2F(CursorLocation)
+                If Vector2F.Distance(loc + (behavior.LeftImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
+                If Vector2F.Distance(loc + (behavior.RightImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
+            End If
+        Next
 
         Return False
-
     End Function
 
     ''' <summary>
