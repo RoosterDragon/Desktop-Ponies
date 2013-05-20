@@ -47,14 +47,29 @@
         End Function
 
         Private Sub Application_ThreadException(sender As Object, e As Threading.ThreadExceptionEventArgs)
-            NotifyUserOfUnhandledExceptionAndExit(e.Exception)
+            NotifyUserOfFatalExceptionAndExit(e.Exception)
         End Sub
 
         Private Sub AppDomain_UnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
-            NotifyUserOfUnhandledExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
+            NotifyUserOfFatalExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
         End Sub
 
-        Private Sub NotifyUserOfUnhandledExceptionAndExit(ex As Exception)
+        Public Sub NotifyUserOfNonFatalException(ex As Exception, message As String)
+            Dim exceptionString = ex.ToString()
+            Dim version = GetProgramVersion()
+
+            Console.WriteLine("-----")
+            Console.WriteLine("Non-fatal error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
+            Console.WriteLine()
+            Console.WriteLine(exceptionString)
+            Console.WriteLine("-----")
+
+            MessageBox.Show(message & vbNewLine & vbNewLine & exceptionString,
+                            "Warning - Desktop Ponies v" & version,
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End Sub
+
+        Public Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
             Try
                 Dim exceptionString = ex.ToString()
                 Dim version = GetProgramVersion()
@@ -63,10 +78,13 @@
 
                 ' Attempt to log error.
                 Try
+                    Console.WriteLine("-----")
                     Console.WriteLine("An unexpected error occurred and Desktop Ponies must close.")
                     Console.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
                     Console.WriteLine()
                     Console.WriteLine(exceptionString)
+                    Console.WriteLine("-----")
+
                     Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
                     Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
                         errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))

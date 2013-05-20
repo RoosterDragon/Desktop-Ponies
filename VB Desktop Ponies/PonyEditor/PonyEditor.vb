@@ -122,7 +122,7 @@ Public Class PonyEditor
             loaded = True
 
         Catch ex As Exception
-            MsgBox("Error loading the editor..." & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
             Me.Close()
         End Try
 
@@ -186,7 +186,7 @@ Public Class PonyEditor
 
             has_saved = True
         Catch ex As Exception
-            MsgBox("Error selecting pony..." & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
             Exit Sub
         End Try
     End Sub
@@ -517,7 +517,7 @@ Public Class PonyEditor
             PonySpeechesGrid.PerformLayout()
 
         Catch ex As Exception
-            MsgBox("Error loading pony parameters! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error loading pony parameters.")
             Me.Close()
         End Try
 
@@ -627,7 +627,7 @@ Public Class PonyEditor
             Return Nothing
 
         Catch ex As Exception
-            MsgBox("Error adding pony to editor! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error adding pony to the editor.")
             Me.Close()
             Return Nothing
         End Try
@@ -665,7 +665,7 @@ Public Class PonyEditor
             Return effect
 
         Catch ex As Exception
-            MsgBox("Error adding effect to editor! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error adding effect to the editor.")
             Me.Close()
             Return Nothing
         End Try
@@ -703,7 +703,7 @@ Public Class PonyEditor
                    ControlChars.NewLine & "Value will be reset.")
 
         Catch ex As Exception
-            MsgBox("Error while trying to handle a dataerror! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
             Me.Close()
         End Try
 
@@ -834,7 +834,7 @@ Public Class PonyEditor
             'End If
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -885,7 +885,7 @@ Public Class PonyEditor
 
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -947,7 +947,7 @@ Public Class PonyEditor
 
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -998,7 +998,7 @@ Public Class PonyEditor
 
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -1127,9 +1127,9 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                MsgBox("You entered an invalid value for column '" & PonyBehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                       CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value) & _
-                       ControlChars.NewLine & "Details: " & ex.Message)
+                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                                                             PonyBehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             PreviewPonyBase.LinkBehaviors()
@@ -1141,7 +1141,7 @@ Public Class PonyEditor
             End If
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -1228,8 +1228,9 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                MsgBox("You entered an invalid value for column '" & PonyEffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " & CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value) & _
-                       ControlChars.NewLine & "Details: " & ex.Message)
+                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                                                             PonyEffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             PreviewPonyBase.LinkBehaviors()
@@ -1242,7 +1243,7 @@ Public Class PonyEditor
 
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -1304,9 +1305,9 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                MsgBox("You entered an invalid value for column '" & PonySpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                       CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value) &
-                       ControlChars.NewLine & "Details: " & ex.Message)
+                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                                                             PonySpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
                 Exit Sub
             End Try
 
@@ -1320,7 +1321,7 @@ Public Class PonyEditor
 
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -1386,9 +1387,9 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                MsgBox("You entered an invalid value for column '" & PonyInteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                       CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value) & _
-                       ControlChars.NewLine & "Details: " & ex.Message)
+                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                                                             PonyInteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             If already_updating = False Then
@@ -1398,7 +1399,7 @@ Public Class PonyEditor
             End If
 
         Catch ex As Exception
-            MsgBox("Error altering pony parameters.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -1499,7 +1500,7 @@ Public Class PonyEditor
             Next
 
         Catch ex As Exception
-            MsgBox("Error restore sort order for grid. " & ex.Message & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error restoring sort order for grid.")
         End Try
     End Sub
 
@@ -1533,7 +1534,7 @@ Public Class PonyEditor
                 PausePonyButton.Text = "Pause Pony"
             End If
         Catch ex As Exception
-            MsgBox("Error on pause/resume! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to pause or resume animation.")
         End Try
 
     End Sub
@@ -1588,7 +1589,7 @@ Public Class PonyEditor
             has_saved = False
 
         Catch ex As Exception
-            MsgBox("Error creating new behavior! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new behavior. The editor will now close.")
             Me.Close()
         End Try
 
@@ -1612,7 +1613,7 @@ Public Class PonyEditor
             Load_Parameters(PreviewPony)
             has_saved = False
         Catch ex As Exception
-            MsgBox("Error creating new speech! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new speech. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1636,7 +1637,7 @@ Public Class PonyEditor
             Load_Parameters(PreviewPony)
             has_saved = False
         Catch ex As Exception
-            MsgBox("Error creating new effect! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new effect, the editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1660,7 +1661,7 @@ Public Class PonyEditor
             has_saved = False
 
         Catch ex As Exception
-            MsgBox("Error creating new interaction! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new interaction. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1707,8 +1708,9 @@ Public Class PonyEditor
                     End If
                     My.Computer.FileSystem.CopyFile(picture_path, new_path, True)
                 Catch ex As Exception
-                    MsgBox("Warning: Couldn't copy the image file to the pony directory. If you were trying to use the same image for left and right, you can safely ignore this message. " _
-                           & ControlChars.NewLine & "Details: " & ex.Message)
+                    My.Application.NotifyUserOfNonFatalException(
+                        ex, "Couldn't copy the image file to the pony directory." &
+                        " If you were trying to use the same image for left and right, you can safely ignore this message.")
                 End Try
             End If
 
@@ -1718,7 +1720,7 @@ Public Class PonyEditor
 
         Catch ex As Exception
 
-            MsgBox("Error loading image.  Details: " & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error loading image.")
             Return Nothing
 
         End Try
@@ -1820,7 +1822,7 @@ Public Class PonyEditor
             PreviewPonyBase.LinkBehaviors()
 
         Catch ex As Exception
-            MsgBox("Error handling row deletion! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error handling row deletion.")
         End Try
 
     End Sub
@@ -1850,7 +1852,7 @@ Public Class PonyEditor
 
             has_saved = False
         Catch ex As Exception
-            MsgBox("Error setting follow parameters! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error setting follow parameters. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1862,7 +1864,8 @@ Public Class PonyEditor
             'force lowercase for compatibility with other ports (like Browser ponies)
             Return LCase(path_components(UBound(path_components)))
         Catch ex As Exception
-            MsgBox("Error getting filename from path! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error getting the filename for the path: " & path & vbNewLine &
+                                                         "The editor will now close.")
             Me.Close()
             Return Nothing
         End Try
@@ -1915,7 +1918,7 @@ Public Class PonyEditor
             Me.Close()
 
         Catch ex As Exception
-            MsgBox("Error creating new pony! " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new pony. The editor will now close.")
             Me.Close()
         End Try
 
@@ -2012,7 +2015,7 @@ Public Class PonyEditor
                 Throw New Exception("Failed while updating interactions: " & ex.Message, ex)
             End Try
         Catch ex As Exception
-            MsgBox("Unable to save pony! Details: " & ControlChars.NewLine & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Failed to save successfully.")
             Exit Sub
         End Try
 

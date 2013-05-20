@@ -464,8 +464,8 @@ Public Class PonyBase
                             End Select
                             SpeakingLines.Add(newLine)
                         Catch ex As Exception
-                            MsgBox("Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name & ":" &
-                                   ControlChars.NewLine & line & ControlChars.NewLine & "Error: " & ex.Message)
+                            My.Application.NotifyUserOfNonFatalException(ex, "Invalid 'speak' line in " &
+                                                                         ConfigFilename & " file for pony named " & Name)
                         End Try
                     Case "effect"
                         effectLines.Add(line)
@@ -585,11 +585,11 @@ Public Class PonyBase
                 Catch ex As Exception
                     If Not Main.Instance.AutoStarted Then
                         If TypeOf ex Is IndexOutOfRangeException Then
-                            MsgBox("Warning:  You are missing a required parameter for pony " & Name & " in behavior:" &
-                                   ControlChars.NewLine & behaviorLine)
+                            My.Application.NotifyUserOfNonFatalException(ex, "You are missing a required parameter for pony " & Name &
+                                                                         " in behavior '" & behaviorLine & "'")
                         Else
-                            MsgBox("Invalid behavior line in configuration file for pony " & Name & ":" &
-                                   ControlChars.NewLine & behaviorLine & ControlChars.NewLine & "Details: " & ex.Message)
+                            My.Application.NotifyUserOfNonFatalException(ex, "Invalid behavior line in configuration file for pony " &
+                                                                         Name & ":" & ControlChars.NewLine & behaviorLine)
                         End If
                     End If
                     Exit For
@@ -628,8 +628,9 @@ Public Class PonyBase
                                 direction_left = Main.GetDirection(Trim(LCase(columns(9))))
                                 centering_left = Main.GetDirection(Trim(LCase(columns(10))))
                             Catch ex As Exception
-                                MsgBox("Invalid placement direction or centering for effect " & columns(1) & " for pony " &
-                                       Name & ":" & ControlChars.NewLine & effectLine)
+                                My.Application.NotifyUserOfNonFatalException(ex, "Invalid placement direction or centering for effect " &
+                                                                             columns(1) & " for pony " & Name & ":" &
+                                                                             ControlChars.NewLine & effectLine)
                             End Try
 
                             If UBound(columns) >= 12 Then
@@ -655,9 +656,8 @@ Public Class PonyBase
                     End If
 
                 Catch ex As Exception
-                    MsgBox("Invalid effect in configuration file for pony " & Name & ":" & ControlChars.NewLine _
-                           & effectLine & ControlChars.NewLine & _
-                          "Details: " & ex.Message)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Invalid effect in configuration file for pony " & Name & ":" &
+                                                                 ControlChars.NewLine & effectLine)
                 End Try
             Next
 
@@ -732,9 +732,8 @@ Public Class PonyBase
                                        displayWarnings)
                     Catch ex As Exception
                         If displayWarnings Then
-                            MessageBox.Show("Error loading interaction for Pony: " & Directory & ControlChars.NewLine &
-                                   line & ControlChars.NewLine & ex.Message, "Interaction Error",
-                                   MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+                            My.Application.NotifyUserOfNonFatalException(ex, "Error loading interaction for Pony: " & Directory &
+                                                                         ControlChars.NewLine & line)
                         Else
                             Console.WriteLine("Error loading interaction for Pony: " & Directory & ControlChars.NewLine &
                                    line & ControlChars.NewLine & ex.Message)
@@ -1261,6 +1260,7 @@ Public Class Behavior
             Try
                 right_image_size = New Vector2(ImageSize.GetSize(right_image_path))
             Catch ex As IOException
+                ' Leave size empty by default.
             End Try
         End If
     End Sub
@@ -1272,6 +1272,7 @@ Public Class Behavior
             Try
                 left_image_size = New Vector2(ImageSize.GetSize(left_image_path))
             Catch ex As IOException
+                ' Leave size empty by default.
             End Try
         End If
     End Sub
@@ -2118,13 +2119,13 @@ Public Class Pony
         Catch ex As Exception
             If Not Main.Instance.AudioErrorShown AndAlso Not Main.Instance.ScreensaverMode Then
                 Main.Instance.AudioErrorShown = True
-                MessageBox.Show(String.Format(CultureInfo.CurrentCulture,
-                                              "There was an error trying to play a sound. Maybe the file is corrupt?{0}" &
-                                              "You will not receive further notifications about sound errors.{0}{0}" &
-                                              "File: {1}{0}" &
-                                              "Pony: {2}{0}" &
-                                              "{3}", vbNewLine, filePath, Directory, ex),
-                                          "Sound Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                My.Application.NotifyUserOfNonFatalException(
+                    ex, String.Format(CultureInfo.CurrentCulture,
+                                      "There was an error trying to play a sound. Maybe the file is corrupt?{0}" &
+                                      "You will not receive further notifications about sound errors.{0}{0}" &
+                                      "File: {1}{0}" &
+                                      "Pony: {2}{0}",
+                                      vbNewLine, filePath, Directory))
             End If
         End Try
     End Sub
@@ -3026,7 +3027,7 @@ Public Class Pony
 
         Catch ex As Exception
             Options.WindowAvoidanceEnabled = False
-            MsgBox("Warning:  Error attempting to avoid windows.  Window avoidance disabled.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to avoid windows. Window avoidance has been disabled.")
             Return False
         End Try
 
@@ -3426,6 +3427,7 @@ Public Class EffectBase
             Try
                 LeftImageSize = ImageSize.GetSize(LeftImagePath)
             Catch ex As IOException
+                ' Leave size empty by default.
             End Try
         End If
     End Sub
@@ -3437,6 +3439,7 @@ Public Class EffectBase
             Try
                 RightImageSize = ImageSize.GetSize(RightImagePath)
             Catch ex As IOException
+                ' Leave size empty by default.
             End Try
         End If
     End Sub

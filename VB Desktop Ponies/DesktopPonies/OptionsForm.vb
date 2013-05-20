@@ -170,7 +170,7 @@
 
             SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
-            MsgBox("Failed to load profile '" & profile & "'")
+            My.Application.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
         End Try
         Try
             IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
@@ -341,7 +341,7 @@
                     Try
                         Image.FromFile(dialog.FileName)
                     Catch ex As Exception
-                        MsgBox("Error:  Could not load image '" & dialog.FileName & "'.  Details: " & ex.Message)
+                        My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image: " & dialog.FileName)
                         Exit Sub
                     End Try
 

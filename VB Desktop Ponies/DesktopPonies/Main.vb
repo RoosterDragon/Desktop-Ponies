@@ -229,7 +229,7 @@ Public Class Main
             End If
 
         Catch ex As Exception
-            MsgBox("Error processing command line arguments." & ControlChars.NewLine & ex.Message & ControlChars.NewLine & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
         End Try
 
         loading = True
@@ -311,7 +311,7 @@ Public Class Main
         End If
     End Sub
 
-    Sub GetScreensaverPath()
+    Private Sub GetScreensaverPath()
         Try
             'We can't use isolated storage as windows uses 8 character names when starting as a screensaver for some reason, and then
             'gets confused when it can't find the assembly name "DESKTO~1"...
@@ -343,8 +343,8 @@ Public Class Main
             End While
 
         Catch ex As Exception
-            MsgBox("Error: You need to set the settings of the screensaver first before using it." & ControlChars.NewLine & _
-                   "Unable to read settings file.  Screensaver mode will not work.  Details: " & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "The screensaver path has not been configured correctly." &
+                                                 " Until it has been set, the screensaver mode cannot be used.")
         End Try
     End Sub
 
@@ -358,8 +358,8 @@ Public Class Main
                         SelectFilesPathDialog.PathTextBox.Text = screen_saver_path
                     End Using
                 End If
-            Catch ex As Exception
-                MsgBox("Error reading current settings: " & ex.Message)
+            Catch ex As IOException
+                ' Ignore any problem trying to load current settings, it's just a user convenience.
             End Try
 
             If SelectFilesPathDialog.ShowDialog() <> DialogResult.OK Then
@@ -380,7 +380,7 @@ Public Class Main
             'UserIsolatedStorage.Close()
 
         Catch ex As Exception
-            MsgBox("Error:  Unable to create settings file.  Screensaver mode will not work.  Details: " & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Unable to save settings! Screensaver mode will not work.")
             Return False
         End Try
         Return True
@@ -408,98 +408,87 @@ Public Class Main
     End Sub
 
     Private Sub LoadTemplates()
-        Try
-            Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
-            Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
+        Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
+        Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-            While Not IsHandleCreated
-            End While
+        While Not IsHandleCreated
+        End While
 
-            idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
+        idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
 
-            Dim skipLoadingErrors As Boolean = False
-            For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
-                skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
-            Next
+        Dim skipLoadingErrors As Boolean = False
+        For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
+            skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
+        Next
 
-            Dim ponyBasesToAdd As New List(Of PonyBase)
-            For Each folder In ponyBaseDirectories
-                Try
-                    Dim pony = New PonyBase(folder)
-                    ponyBasesToAdd.Add(pony)
-                    idleWorker.QueueTask(Sub()
-                                             AddToMenu(pony)
-                                             LoadingProgressBar.Value += 1
-                                         End Sub)
-                Catch ex As InvalidDataException
-                    If skipLoadingErrors = False Then
-                        Select Case MsgBox("Error: Invalid data in " & PonyBase.ConfigFilename & " configuration file in " & folder _
-                           & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
-                           & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
-                            Case MsgBoxResult.Yes
-                                skipLoadingErrors = True
-                            Case MsgBoxResult.No
-                                'do nothing
-                            Case MsgBoxResult.Cancel
-                                Me.Close()
-                        End Select
-                    End If
-                Catch ex As FileNotFoundException
-                    If skipLoadingErrors = False Then
-                        Select Case MsgBox("Error: No " & PonyBase.ConfigFilename & " configuration file found for folder: " & folder _
-                           & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
-                           & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
-                            Case MsgBoxResult.Yes
-                                skipLoadingErrors = True
-                            Case MsgBoxResult.No
-                                'do nothing
-                            Case MsgBoxResult.Cancel
-                                Me.Close()
-                        End Select
-                    End If
-                End Try
-            Next
+        Dim ponyBasesToAdd As New List(Of PonyBase)
+        For Each folder In ponyBaseDirectories
 
-            idleWorker.WaitOnAllTasks()
-            If SelectablePonies.Count = 0 Then
-                MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
-                                "There should have at least been a 'Derpy' folder in the same spot as this program.",
-                                "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                GoButton.Enabled = False
-            End If
-
-            ' Load pony counts.
-            idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
-
-            ' Load interactions, since references to other ponies can now be resolved.
+            Dim pony = New PonyBase(folder)
+            ponyBasesToAdd.Add(pony)
             idleWorker.QueueTask(Sub()
                                      Try
-                                         For Each pony In SelectablePonies
-                                             pony.LoadInteractions()
-                                         Next
-                                     Catch ex As Exception
-                                         MessageBox.Show("There was a problem attempting to load interactions." & vbNewLine & vbNewLine &
-                                                         "Details: " & vbNewLine & ex.ToString(), "Interactions Error",
-                                                         MessageBoxButtons.OK, MessageBoxIcon.Error)
+                                         AddToMenu(pony)
+                                     Catch ex As InvalidDataException
+                                         If skipLoadingErrors = False Then
+                                             Select Case MsgBox("Error: Invalid data in " & PonyBase.ConfigFilename & " configuration file in " & folder _
+                                                & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
+                                                & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
+                                                 Case MsgBoxResult.Yes
+                                                     skipLoadingErrors = True
+                                                 Case MsgBoxResult.No
+                                                     'do nothing
+                                                 Case MsgBoxResult.Cancel
+                                                     Me.Close()
+                                             End Select
+                                         End If
+                                     Catch ex As FileNotFoundException
+                                         If skipLoadingErrors = False Then
+                                             Select Case MsgBox("Error: No " & PonyBase.ConfigFilename & " configuration file found for folder: " & folder _
+                                                & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
+                                                & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
+                                                 Case MsgBoxResult.Yes
+                                                     skipLoadingErrors = True
+                                                 Case MsgBoxResult.No
+                                                     'do nothing
+                                                 Case MsgBoxResult.Cancel
+                                                     Me.Close()
+                                             End Select
+                                         End If
                                      End Try
+                                     LoadingProgressBar.Value += 1
                                  End Sub)
+        Next
 
-            ' Wait for all images to load.
-            idleWorker.QueueTask(Sub()
-                                     For Each control As PonySelectionControl In PonySelectionPanel.Controls
-                                         control.ShowPonyImage = True
-                                         control.Invalidate()
+        idleWorker.WaitOnAllTasks()
+        If SelectablePonies.Count = 0 Then
+            MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
+                            "There should have at least been a 'Derpy' folder in the same spot as this program.",
+                            "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            GoButton.Enabled = False
+        End If
+
+        ' Load pony counts.
+        idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
+
+        ' Load interactions, since references to other ponies can now be resolved.
+        idleWorker.QueueTask(Sub()
+                                 Try
+                                     For Each pony In SelectablePonies
+                                         pony.LoadInteractions()
                                      Next
-                                 End Sub)
+                                 Catch ex As Exception
+                                     My.Application.NotifyUserOfNonFatalException(ex, "There was a problem attempting to load interactions.")
+                                 End Try
+                             End Sub)
 
-        Catch ex As Exception
-#If Not Debug Then
-            MsgBox("Error starting up!  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
-            Exit Sub
-#Else
-            Throw
-#End If
-        End Try
+        ' Wait for all images to load.
+        idleWorker.QueueTask(Sub()
+                                 For Each control As PonySelectionControl In PonySelectionPanel.Controls
+                                     control.ShowPonyImage = True
+                                     control.Invalidate()
+                                 Next
+                             End Sub)
 
         idleWorker.QueueTask(Sub()
                                  Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
@@ -720,13 +709,10 @@ Public Class Main
             For Each gameDirectory In gameDirectories
                 Try
                     Dim config_file_name = Path.Combine(gameDirectory, Game.ConfigFilename)
-
                     Dim new_game As New Game(gameDirectory)
-
                     games.Add(new_game)
-
                 Catch ex As Exception
-                    MsgBox("Error loading game: " & gameDirectory & ex.Message & ex.StackTrace)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
                 End Try
             Next
 
@@ -742,7 +728,7 @@ Public Class Main
                 End If
             End If
         Catch ex As Exception
-            MsgBox("Error loading games: " & ex.Message & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error loading games.")
 #If DEBUG Then
             Throw
 #End If
@@ -1040,9 +1026,7 @@ Public Class Main
                         number_of_ponies.Add(0)
                     End If
                 Catch ex As Exception
-                    MsgBox("Error: Too much pony!" & ControlChars.NewLine &
-                           "Details: You entered something crazy in one of the boxes." & ControlChars.NewLine &
-                           "Real Details: " & ex.Message)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Unable to load " & ponyPanel.PonyName.Text)
                     e.Cancel = True
                     Exit Sub
                 End Try
@@ -1137,14 +1121,13 @@ Public Class Main
                     InitializeInteractions()
                 End If
             Catch ex As Exception
-                MsgBox("Unable to initialize interactions.  Details: " & ex.Message & ControlChars.NewLine & ex.StackTrace)
+                My.Application.NotifyUserOfNonFatalException(ex, "Unable to initialize interactions.")
             End Try
 
             PonyStartup()
         Catch ex As Exception
 #If Not Debug Then
-            MsgBox("Error launching ponies... Details: " & ex.Message & ControlChars.NewLine _
-                   & ex.StackTrace)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
             e.Cancel = True
 #Else
             Throw

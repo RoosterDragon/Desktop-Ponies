@@ -45,7 +45,7 @@ Public Class NewPonyDialog
         Try
             m_editor.SavePony(newName)
         Catch ex As Exception
-            MsgBox("Unable to save pony! Details: " & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to save this pony!")
         End Try
         Me.DialogResult = DialogResult.OK
         Me.Close()
@@ -81,7 +81,7 @@ Public Class NewPonyDialog
             My.Computer.FileSystem.CreateDirectory(newPonyPath)
             m_editor.PreviewPonyBase.Directory = newPonyPath
         Catch ex As Exception
-            MsgBox("Unable to create directory for new pony:  " & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Unable to create a directory for the new pony.")
             Name_Textbox.Enabled = True
             Exit Sub
         End Try

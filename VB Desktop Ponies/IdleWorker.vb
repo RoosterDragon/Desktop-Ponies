@@ -92,7 +92,11 @@ Public Class IdleWorker
         SyncLock tasks
             If disposed Then Return
         End SyncLock
-        empty.WaitOne()
+        Try
+            empty.WaitOne()
+        Catch ex As ObjectDisposedException
+            ' This object will be disposed if the UI thread was closed down, in which case we won't be processing events anyway.
+        End Try
     End Sub
 
     ''' <summary>

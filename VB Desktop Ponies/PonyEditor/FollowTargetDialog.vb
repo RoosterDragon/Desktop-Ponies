@@ -229,7 +229,7 @@
                 Try
                     pony_thumbnail = Image.FromFile(Pony.Behaviors(0).RightImagePath)
                 Catch ex As Exception
-                    MsgBox("Note:  Failed to load image for pony " & Pony.Directory)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & Pony.Directory)
                 End Try
 
                 RedrawFollowPoint()
@@ -242,7 +242,7 @@
                 Try
                     pony_thumbnail = Image.FromFile(effect.RightImagePath)
                 Catch ex As Exception
-                    MsgBox("Note:  Failed to load image for effect " & effect.Name)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for effect " & effect.Name)
                 End Try
                 RedrawFollowPoint()
                 Exit Sub
