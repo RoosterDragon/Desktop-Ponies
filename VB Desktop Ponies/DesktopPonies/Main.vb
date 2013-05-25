@@ -134,7 +134,7 @@ Public Class Main
 
     'Read all configuration files and pony folders.
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        BeginInvoke(New Action(AddressOf LoadInternal))
+        BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
     End Sub
 
     Private Sub LoadInternal()
@@ -486,7 +486,6 @@ Public Class Main
         idleWorker.QueueTask(Sub()
                                  For Each control As PonySelectionControl In PonySelectionPanel.Controls
                                      control.ShowPonyImage = True
-                                     control.Invalidate()
                                  Next
                              End Sub)
 
@@ -662,9 +661,7 @@ Public Class Main
     End Sub
 
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
-        Main.Instance.Invoke(Sub()
-                                 OptionsForm.Instance.Show()
-                             End Sub)
+        Main.Instance.SmartInvoke(AddressOf OptionsForm.Instance.Show)
     End Sub
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
@@ -1044,9 +1041,7 @@ Public Class Main
             End If
 
             Dim maxPonies = 0
-            Main.Instance.Invoke(Sub()
-                                     maxPonies = CInt(OptionsForm.Instance.MaxPonies.Value)
-                                 End Sub)
+            Main.Instance.SmartInvoke(Sub() maxPonies = CInt(OptionsForm.Instance.MaxPonies.Value))
             If Total_Ponies > maxPonies Then
                 MsgBox("Sorry, you selected " & Total_Ponies & " ponies, which is more than the limit specified in the options menu." &
                        ControlChars.NewLine & "Try less than " & maxPonies & " total." & ControlChars.NewLine &
@@ -1055,10 +1050,10 @@ Public Class Main
                 Exit Sub
             End If
 
-            Invoke(Sub()
-                       LoadingProgressBar.Value = 0
-                       LoadingProgressBar.Maximum = Total_Ponies
-                   End Sub)
+            SmartInvoke(Sub()
+                            LoadingProgressBar.Value = 0
+                            LoadingProgressBar.Maximum = Total_Ponies
+                        End Sub)
 
             'Make duplicates of each type of pony, up to the number needed
             For i = 0 To number_of_ponies.Count - 1
@@ -1159,41 +1154,41 @@ Public Class Main
 
     Friend Sub PonyStartup()
         If ScreensaverMode Then
-            Invoke(Sub()
-                       If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
-                           screensaverForms = New List(Of ScreensaverBackgroundForm)()
+            SmartInvoke(Sub()
+                            If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
+                                screensaverForms = New List(Of ScreensaverBackgroundForm)()
 
-                           Dim backgroundColor As Color = Color.Black
-                           Dim backgroundImage As Image = Nothing
-                           If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor Then
-                               backgroundColor = Color.FromArgb(255, Options.ScreensaverBackgroundColor)
-                           End If
-                           If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
-                               Try
-                                   backgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
-                               Catch
-                                   ' Image failed to load, so we'll fall back to a background color.
-                               End Try
-                           End If
+                                Dim backgroundColor As Color = Color.Black
+                                Dim backgroundImage As Image = Nothing
+                                If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor Then
+                                    backgroundColor = Color.FromArgb(255, Options.ScreensaverBackgroundColor)
+                                End If
+                                If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
+                                    Try
+                                        backgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
+                                    Catch
+                                        ' Image failed to load, so we'll fall back to a background color.
+                                    End Try
+                                End If
 
-                           For Each monitor In Screen.AllScreens
-                               Dim screensaverBackground As New ScreensaverBackgroundForm()
-                               screensaverForms.Add(screensaverBackground)
+                                For Each monitor In Screen.AllScreens
+                                    Dim screensaverBackground As New ScreensaverBackgroundForm()
+                                    screensaverForms.Add(screensaverBackground)
 
-                               If backgroundImage IsNot Nothing Then
-                                   screensaverBackground.BackgroundImage = backgroundImage
-                               Else
-                                   screensaverBackground.BackColor = backgroundColor
-                               End If
+                                    If backgroundImage IsNot Nothing Then
+                                        screensaverBackground.BackgroundImage = backgroundImage
+                                    Else
+                                        screensaverBackground.BackColor = backgroundColor
+                                    End If
 
-                               screensaverBackground.Size = monitor.Bounds.Size
-                               screensaverBackground.Location = monitor.Bounds.Location
+                                    screensaverBackground.Size = monitor.Bounds.Size
+                                    screensaverBackground.Location = monitor.Bounds.Location
 
-                               screensaverBackground.Show()
-                           Next
-                       End If
-                       Cursor.Hide()
-                   End Sub)
+                                    screensaverBackground.Show()
+                                Next
+                            End If
+                            Cursor.Hide()
+                        End Sub)
         End If
 
         AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
@@ -1217,10 +1212,10 @@ Public Class Main
                 images.Add(house.LeftImagePath)
             Next
 
-            Invoke(Sub()
-                       LoadingProgressBar.Value = 0
-                       LoadingProgressBar.Maximum = images.Count
-                   End Sub)
+            SmartInvoke(Sub()
+                            LoadingProgressBar.Value = 0
+                            LoadingProgressBar.Maximum = images.Count
+                        End Sub)
             Dim imagesLoaded = 0
             Dim loaded = Sub(sender As Object, e As EventArgs)
                              imagesLoaded += 1
@@ -1261,11 +1256,12 @@ Public Class Main
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         If Not Disposing AndAlso Not IsDisposed Then
             PonyShutdown()
-            Main.Instance.Invoke(Sub()
-                                     MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
-                                                     "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                     Main.Instance.Show()
-                                 End Sub)
+            Main.Instance.SmartInvoke(Sub()
+                                          MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
+                                                          "Resolution Changed - Desktop Ponies",
+                                                          MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                          Main.Instance.Show()
+                                      End Sub)
         End If
     End Sub
 
@@ -1411,7 +1407,7 @@ Public Class Main
     ''' Put all ponies to sleep... 
     ''' </summary>
     ''' <remarks></remarks>
-    Friend Sub sleep_all()
+    Friend Sub SleepAll()
 
         If Not all_sleeping Then
 

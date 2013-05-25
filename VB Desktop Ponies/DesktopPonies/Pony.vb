@@ -1517,6 +1517,9 @@ Public Class Pony
     End Property
 #End Region
 
+    Private behaviorEnumerator As IEnumerator(Of Behavior)
+    Private interactionEnumerator As IEnumerator(Of Interaction)
+
     Public Property ShouldBeSleeping As Boolean
     Private _sleeping As Boolean
     Public Property Sleeping() As Boolean
@@ -1702,6 +1705,8 @@ Public Class Pony
     Public Sub New(base As PonyBase)
         Argument.EnsureNotNull(base, "base")
         _base = base
+        behaviorEnumerator = base.Behaviors.GetEnumerator()
+        interactionEnumerator = base.Interactions.GetEnumerator()
     End Sub
 
     ''' <summary>
@@ -2098,11 +2103,11 @@ Public Class Pony
         ' Quick sanity check that the file exists on disk.
         If Not My.Computer.FileSystem.FileExists(filePath) Then Exit Sub
 
-        ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
-        ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
-        ' We use DirectX now so that we can use MP3 instead of WAV files
-        Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filePath)
         Try
+            ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
+            ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
+            ' We use DirectX now so that we can use MP3 instead of WAV files
+            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filePath)
             Main.Instance.ActiveSounds.Add(audio)
 
             ' Volume is between -10000 and 0, with 0 being the loudest.
@@ -3117,15 +3122,17 @@ Public Class Pony
 
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
-        For Each behavior In Behaviors
-            If behavior.AllowedMovement = AllowedMoves.MouseOver Then
+        behaviorEnumerator.Reset()
+        While behaviorEnumerator.MoveNext()
+            Dim behavior = behaviorEnumerator.Current
+            If Behavior.AllowedMovement = AllowedMoves.MouseOver Then
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
                 Dim cursorLoc = New Vector2F(CursorLocation)
-                If Vector2F.Distance(loc + (behavior.LeftImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
-                If Vector2F.Distance(loc + (behavior.RightImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
+                If Vector2F.Distance(loc + (Behavior.LeftImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
+                If Vector2F.Distance(loc + (Behavior.RightImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
             End If
-        Next
+        End While
 
         Return False
     End Function
@@ -3254,7 +3261,9 @@ Public Class Pony
             Return Nothing
         End If
 
-        For Each interaction In Interactions
+        interactionEnumerator.Reset()
+        While interactionEnumerator.MoveNext()
+            Dim interaction = interactionEnumerator.Current
             For Each target As Pony In interaction.InteractsWith
                 ' Don't attempt to interact with a busy target, or with self.
                 If target.IsInteracting OrElse ReferenceEquals(Me, target) Then Continue For
@@ -3277,7 +3286,7 @@ Public Class Pony
                     Return interaction
                 End If
             Next
-        Next
+        End While
 
         ' No interactions ready to start at this time.
         Return Nothing

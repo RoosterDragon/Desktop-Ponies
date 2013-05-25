@@ -44,6 +44,6 @@
         /// <param name="window">The pointer to a <see cref="T:Gdk.Window"/>.</param>
         /// <returns>A pointer to the native NSWindow for the GDK window instance.</returns>
         [DllImport(gtkQuartz)]
-        public static extern IntPtr gdk_quartz_window_get_nswindow(IntPtr window);
+        public static extern IntPtr gdk_quartz_window_get_nswindow(HandleRef window);
     }
 }

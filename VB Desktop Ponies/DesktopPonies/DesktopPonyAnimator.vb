@@ -55,7 +55,7 @@ Public Class DesktopPonyAnimator
         AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 
         If createDesktopControlForm Then
-            Main.Instance.Invoke(Sub() controlForm = New DesktopControlForm(Me))
+            Main.Instance.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
             controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(Ponies.ToArray()))
             AddHandler Sprites.ItemAdded, AddressOf ControlFormItemAdded
             AddHandler Sprites.ItemsAdded, AddressOf ControlFormItemsAdded
@@ -138,7 +138,7 @@ Public Class DesktopPonyAnimator
 
                 If .cursor_position <> Cursor.Position Then
                     Finish()
-                    .Invoke(Sub() Main.Instance.Close())
+                    .SmartInvoke(AddressOf Main.Instance.Close)
                     Exit Sub
                 End If
             End If
@@ -229,93 +229,105 @@ Public Class DesktopPonyAnimator
 
     Private Sub CreatePonyMenu()
         Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 Main.Instance.Invoke(Sub()
-                                                                                          Sprites.RemoveAll(Function(sprite)
-                                                                                                                If Object.ReferenceEquals(sprite, selectedPony) Then Return True
-                                                                                                                Dim effect = TryCast(sprite, Effect)
-                                                                                                                If effect IsNot Nothing AndAlso Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
-                                                                                                                    Return True
-                                                                                                                End If
-                                                                                                                Return False
-                                                                                                            End Function)
-                                                                                          For Each other_pony In Sprites.OfType(Of Pony)()
-                                                                                              'we need to set up interactions again to account for removed ponies.
-                                                                                              other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-                                                                                          Next
-                                                                                      End Sub)
-                                                             End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 Main.Instance.Invoke(Sub()
-                                                                                          Sprites.RemoveAll(Function(sprite)
-                                                                                                                Dim pony = TryCast(sprite, Pony)
-                                                                                                                If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
-                                                                                                                    Return True
-                                                                                                                End If
-                                                                                                                Dim effect = TryCast(sprite, Effect)
-                                                                                                                If effect IsNot Nothing AndAlso effect.OwningPony.Directory = selectedPony.Directory Then
-                                                                                                                    Return True
-                                                                                                                End If
-                                                                                                                Return False
-                                                                                                            End Function)
-                                                                                          For Each other_pony In Sprites.OfType(Of Pony)()
-                                                                                              'we need to set up interactions again to account for removed ponies.
-                                                                                              other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-                                                                                          Next
-                                                                                      End Sub)
-                                                             End Sub))
+        menuItems.AddLast(
+            New SimpleContextMenuItem(
+                Nothing,
+                Sub()
+                    Main.Instance.SmartInvoke(
+                        Sub()
+                            Sprites.RemoveAll(Function(sprite)
+                                                  If Object.ReferenceEquals(sprite, selectedPony) Then Return True
+                                                  Dim effect = TryCast(sprite, Effect)
+                                                  If effect IsNot Nothing AndAlso
+                                                      Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
+                                                      Return True
+                                                  End If
+                                                  Return False
+                                              End Function)
+                            For Each other_pony In Sprites.OfType(Of Pony)()
+                                'we need to set up interactions again to account for removed ponies.
+                                other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
+                            Next
+                        End Sub)
+                End Sub))
+        menuItems.AddLast(
+            New SimpleContextMenuItem(
+                Nothing,
+                Sub()
+                    Main.Instance.SmartInvoke(
+                        Sub()
+                            Sprites.RemoveAll(Function(sprite)
+                                                  Dim pony = TryCast(sprite, Pony)
+                                                  If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
+                                                      Return True
+                                                  End If
+                                                  Dim effect = TryCast(sprite, Effect)
+                                                  If effect IsNot Nothing AndAlso
+                                                      effect.OwningPony.Directory = selectedPony.Directory Then
+                                                      Return True
+                                                  End If
+                                                  Return False
+                                              End Function)
+                            For Each other_pony In Sprites.OfType(Of Pony)()
+                                'we need to set up interactions again to account for removed ponies.
+                                other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
+                            Next
+                        End Sub)
+                End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  If selectedPony Is Nothing Then Return
                                                                  selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
                                                              End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.Invoke(Sub() Main.Instance.sleep_all())))
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(AddressOf Main.Instance.SleepAll)))
         menuItems.AddLast(New SimpleContextMenuItem())
         Dim ponies As IEnumerable(Of ISimpleContextMenuItem) = Nothing
-        Main.Instance.Invoke(Sub()
-                                 ponies = PonySelectionList()
-                             End Sub)
+        Main.Instance.SmartInvoke(Sub() ponies = PonySelectionList())
         menuItems.AddLast(New SimpleContextMenuItem("Add Pony", ponies))
         Dim houses As IEnumerable(Of ISimpleContextMenuItem) = Nothing
-        Main.Instance.Invoke(Sub()
-                                 houses = HouseSelectionList()
-                             End Sub)
+        Main.Instance.SmartInvoke(Sub() houses = HouseSelectionList())
         menuItems.AddLast(New SimpleContextMenuItem("Add House", houses))
         menuItems.AddLast(New SimpleContextMenuItem())
 
         If Not OperatingSystemInfo.IsMacOSX Then
-            menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                     If selectedPony Is Nothing Then Return
-                                                                     selectedPony.ManualControlPlayerOne = Not selectedPony.ManualControlPlayerOne
-                                                                     If selectedPony.ManualControlPlayerOne Then selectedPony.ManualControlPlayerTwo = False
-                                                                     Main.Instance.Invoke(Sub()
-                                                                                              If Main.Instance.controlled_pony <> "" Then
-                                                                                                  Main.Instance.controlled_pony = selectedPony.Directory
-                                                                                              Else
-                                                                                                  Main.Instance.controlled_pony = ""
-                                                                                              End If
-                                                                                          End Sub)
-                                                                 End Sub))
-            menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                     If selectedPony Is Nothing Then Return
-                                                                     selectedPony.ManualControlPlayerTwo = Not selectedPony.ManualControlPlayerTwo
-                                                                     If selectedPony.ManualControlPlayerTwo Then selectedPony.ManualControlPlayerOne = False
-                                                                     Main.Instance.Invoke(Sub()
-                                                                                              If Main.Instance.controlled_pony <> "" Then
-                                                                                                  Main.Instance.controlled_pony = selectedPony.Directory
-                                                                                              Else
-                                                                                                  Main.Instance.controlled_pony = ""
-                                                                                              End If
-                                                                                          End Sub)
-                                                                 End Sub))
+            menuItems.AddLast(
+                New SimpleContextMenuItem(
+                    Nothing,
+                    Sub()
+                        If selectedPony Is Nothing Then Return
+                        selectedPony.ManualControlPlayerOne = Not selectedPony.ManualControlPlayerOne
+                        If selectedPony.ManualControlPlayerOne Then selectedPony.ManualControlPlayerTwo = False
+                        Main.Instance.SmartInvoke(Sub()
+                                                      If Main.Instance.controlled_pony <> "" Then
+                                                          Main.Instance.controlled_pony = selectedPony.Directory
+                                                      Else
+                                                          Main.Instance.controlled_pony = ""
+                                                      End If
+                                                  End Sub)
+                    End Sub))
+            menuItems.AddLast(
+                New SimpleContextMenuItem(
+                    Nothing,
+                    Sub()
+                        If selectedPony Is Nothing Then Return
+                        selectedPony.ManualControlPlayerTwo = Not selectedPony.ManualControlPlayerTwo
+                        If selectedPony.ManualControlPlayerTwo Then selectedPony.ManualControlPlayerOne = False
+                        Main.Instance.SmartInvoke(Sub()
+                                                      If Main.Instance.controlled_pony <> "" Then
+                                                          Main.Instance.controlled_pony = selectedPony.Directory
+                                                      Else
+                                                          Main.Instance.controlled_pony = ""
+                                                      End If
+                                                  End Sub)
+                    End Sub))
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
 
-        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.Invoke(Sub() OptionsForm.Instance.Show())))
+        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.SmartInvoke(AddressOf OptionsForm.Instance.Show)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
                                                                 Finish()
-                                                                Main.Instance.Invoke(Sub() Main.Instance.Close())
+                                                                Main.Instance.SmartInvoke(AddressOf Main.Instance.Close)
                                                             End Sub))
         If controlForm Is Nothing Then
             ponyMenu = Viewer.CreateContextMenu(menuItems)
@@ -331,30 +343,33 @@ Public Class DesktopPonyAnimator
     Private Sub ReturnToMenu()
         RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
         Finish()
-        Main.Instance.Invoke(Sub()
-                                 Main.Instance.PonyShutdown()
-                                 Main.Instance.Opacity = 100 'for when autostarted
-                                 Main.Instance.Show()
-                             End Sub)
+        Main.Instance.SmartInvoke(Sub()
+                                      Main.Instance.PonyShutdown()
+                                      Main.Instance.Opacity = 100 'for when autostarted
+                                      Main.Instance.Show()
+                                  End Sub)
     End Sub
 
     Private Sub CreateHouseMenu()
         Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
         menuItems.AddLast(
-            New SimpleContextMenuItem(Nothing, Sub()
-                                                   Main.Instance.Invoke(Sub()
-                                                                            If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
-                                                                                selectedHouse.HouseBase.OptionsForm.BringToFront()
-                                                                            Else
-                                                                                Using houseForm As New HouseOptionsForm(selectedHouse)
-                                                                                    selectedHouse.HouseBase.OptionsForm = houseForm
-                                                                                    houseForm.ShowDialog()
-                                                                                    houseForm.BringToFront()
-                                                                                End Using
-                                                                                selectedHouse.HouseBase.OptionsForm = Nothing
-                                                                            End If
-                                                                        End Sub)
-                                               End Sub))
+            New SimpleContextMenuItem(
+                Nothing,
+                Sub()
+                    Main.Instance.SmartInvoke(
+                        Sub()
+                            If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
+                                selectedHouse.HouseBase.OptionsForm.BringToFront()
+                            Else
+                                Using houseForm As New HouseOptionsForm(selectedHouse)
+                                    selectedHouse.HouseBase.OptionsForm = houseForm
+                                    houseForm.ShowDialog()
+                                    houseForm.BringToFront()
+                                End Using
+                                selectedHouse.HouseBase.OptionsForm = Nothing
+                            End If
+                        End Sub)
+                End Sub))
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() RemoveEffect(selectedHouse)))
         If controlForm Is Nothing Then
             houseMenu = Viewer.CreateContextMenu(menuItems)
@@ -402,25 +417,25 @@ Public Class DesktopPonyAnimator
     End Function
 
     Friend Sub AddPonySelection(ponyName As String)
-        Main.Instance.Invoke(Sub()
-                                 Dim pony_to_add = ponyName
+        Main.Instance.SmartInvoke(Sub()
+                                      Dim pony_to_add = ponyName
 
-                                 If pony_to_add = "Random Pony" Then
-                                     Dim selection = Rng.Next(Main.Instance.SelectablePonies.Count)
+                                      If pony_to_add = "Random Pony" Then
+                                          Dim selection = Rng.Next(Main.Instance.SelectablePonies.Count)
 
-                                     pony_to_add = Main.Instance.SelectablePonies(selection).Directory
+                                          pony_to_add = Main.Instance.SelectablePonies(selection).Directory
 
-                                     If pony_to_add = "Random Pony" Then
-                                         pony_to_add = Main.Instance.SelectablePonies(selection + 1).Directory
-                                     End If
-                                 End If
-                                 For Each ponyBase In Main.Instance.SelectablePonies
-                                     If ponyBase.Directory = pony_to_add Then
-                                         Dim newPony = New Pony(ponyBase)
-                                         AddPony(newPony)
-                                     End If
-                                 Next
-                             End Sub)
+                                          If pony_to_add = "Random Pony" Then
+                                              pony_to_add = Main.Instance.SelectablePonies(selection + 1).Directory
+                                          End If
+                                      End If
+                                      For Each ponyBase In Main.Instance.SelectablePonies
+                                          If ponyBase.Directory = pony_to_add Then
+                                              Dim newPony = New Pony(ponyBase)
+                                              AddPony(newPony)
+                                          End If
+                                      Next
+                                  End Sub)
     End Sub
 
     Friend Sub AddPony(pony As Pony)
@@ -471,12 +486,12 @@ Public Class DesktopPonyAnimator
     End Function
 
     Private Sub AddHouseSelection(houseBase As HouseBase)
-        Main.Instance.Invoke(Sub()
-                                 Dim newHouse = New House(houseBase)
-                                 newHouse.InitializeVisitorList()
-                                 newHouse.Teleport()
-                                 Sprites.AddLast(newHouse)
-                             End Sub)
+        Main.Instance.SmartInvoke(Sub()
+                                      Dim newHouse = New House(houseBase)
+                                      newHouse.InitializeVisitorList()
+                                      newHouse.Teleport()
+                                      Sprites.AddLast(newHouse)
+                                  End Sub)
     End Sub
 
     Private Function GetClosestUnderPoint(Of T)(location As Point) As T

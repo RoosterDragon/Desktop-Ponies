@@ -881,10 +881,7 @@
                 return;
             try
             {
-                if (form.InvokeRequired)
-                    form.Invoke(method);
-                else
-                    method();
+                form.SmartInvoke(method);
             }
             catch (ObjectDisposedException ex)
             {

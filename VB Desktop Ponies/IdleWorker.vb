@@ -22,6 +22,12 @@ Public Class IdleWorker
     End Property
 
     ''' <summary>
+    ''' A method that does nothing.
+    ''' </summary>
+    Private Shared ReadOnly DummyCallback As New MethodInvoker(Sub()
+                                                               End Sub)
+
+    ''' <summary>
     ''' Maintains a collection on tasks to perform when the application is idle.
     ''' </summary>
     Private ReadOnly tasks As New Queue(Of MethodInvoker)
@@ -42,6 +48,10 @@ Public Class IdleWorker
     ''' Indicates if we have disposed of the instance.
     ''' </summary>
     Private disposed As Boolean
+    ''' <summary>
+    ''' Async result returned from dummy callback, held so wait handle may be disposed.
+    ''' </summary>
+    Private asyncResult As IAsyncResult
 
     ''' <summary>
     ''' Initializes a new instance of the <see cref="IdleWorker"/> class on the current thread.
@@ -64,8 +74,7 @@ Public Class IdleWorker
             ' If there were previously no tasks in the queue, the application may already be an an idle state.
             ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is cleared.
             If tasks.Count = 1 Then
-                control.BeginInvoke(Sub()
-                                    End Sub)
+                asyncResult = control.BeginInvoke(DummyCallback)
                 empty.Reset()
             End If
         End SyncLock
@@ -80,7 +89,15 @@ Public Class IdleWorker
         SyncLock tasks
             If Not disposed AndAlso tasks.Count > 0 Then
                 tasks.Dequeue().Invoke()
-                If tasks.Count = 0 Then empty.Set()
+                If tasks.Count = 0 Then
+                    empty.Set()
+                    Try
+                        control.EndInvoke(asyncResult)
+                    Finally
+                        asyncResult.AsyncWaitHandle.Dispose()
+                        asyncResult = Nothing
+                    End Try
+                End If
             End If
         End SyncLock
     End Sub
@@ -112,7 +129,8 @@ Public Class IdleWorker
                 RemoveHandler Application.Idle, AddressOf RunTask
                 empty.Set()
                 empty.Dispose()
-                If control.InvokeRequired Then control.Invoke(Sub() control.Dispose())
+                control.SmartInvoke(AddressOf control.Dispose)
+                worker = Nothing
             End If
         End SyncLock
     End Sub

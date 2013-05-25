@@ -213,15 +213,6 @@ Public Class DesktopControlForm
         CreateHandle()
     End Sub
 
-    Public Sub SmartInvoke(method As MethodInvoker)
-        Argument.EnsureNotNull(method, "method")
-        If InvokeRequired Then
-            Invoke(method)
-        Else
-            method()
-        End If
-    End Sub
-
     Public Function CreateContextMenu(menuItems As IEnumerable(Of ISimpleContextMenuItem)) As ISimpleContextMenu
         Dim contextMenu As MenuStripAsContextMenu
         SmartInvoke(Sub() contextMenu = New MenuStripAsContextMenu(Me, menuItems))
@@ -231,11 +222,11 @@ Public Class DesktopControlForm
 
     Private Sub ReturnButton_Click(sender As Object, e As EventArgs) Handles ReturnButton.Click
         Pony.CurrentAnimator.Finish()
-        Main.Instance.Invoke(Sub()
-                                 Main.Instance.PonyShutdown()
-                                 Main.Instance.Opacity = 100 'for when autostarted
-                                 Main.Instance.Show()
-                             End Sub)
+        Main.Instance.SmartInvoke(Sub()
+                                      Main.Instance.PonyShutdown()
+                                      Main.Instance.Opacity = 100 'for when autostarted
+                                      Main.Instance.Show()
+                                  End Sub)
         allowClose = True
         Close()
     End Sub

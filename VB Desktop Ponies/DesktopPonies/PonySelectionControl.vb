@@ -3,7 +3,16 @@
 Public Class PonySelectionControl
     Friend PonyBase As PonyBase
     Friend PonyImage As AnimatedImage(Of BitmapFrame)
+    Private _showPonyImage As Boolean
     Public Property ShowPonyImage As Boolean
+        Get
+            Return _showPonyImage
+        End Get
+        Set(value As Boolean)
+            _showPonyImage = value
+            InvalidatePonyImageArea()
+        End Set
+    End Property
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
@@ -32,10 +41,10 @@ Public Class PonySelectionControl
             imageLoaded.Set()
             Try
                 If IsHandleCreated Then
-                    BeginInvoke(Sub()
-                                    ResizeToFit()
-                                    If ShowPonyImage Then InvalidatePonyImageArea()
-                                End Sub)
+                    BeginInvoke(New MethodInvoker(Sub()
+                                                      ResizeToFit()
+                                                      If ShowPonyImage Then InvalidatePonyImageArea()
+                                                  End Sub))
                 End If
             Catch ex As ObjectDisposedException
                 If ex.ObjectName <> PonyImage.GetType().Name Then Throw

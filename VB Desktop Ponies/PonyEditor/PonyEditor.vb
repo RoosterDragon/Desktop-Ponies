@@ -2085,7 +2085,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyEditorAnimator_AnimationFinished(sender As Object, e As EventArgs)
-        Invoke(Sub() Close())
+        SmartInvoke(AddressOf Close)
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)

@@ -4,6 +4,7 @@
     using System.ComponentModel;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Runtime.InteropServices;
     using System.Windows.Forms;
     using CSDesktopPonies.Core;
     using CSDesktopPonies.Interop.Win32;
@@ -118,7 +119,7 @@
             POINT dstPos = new POINT(Left, Top);
             POINT srcPos = POINT.Empty;
             BLENDFUNCTION blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
-            if (!NativeMethods.UpdateLayeredWindow(Handle, screenDC, ref dstPos, ref dstSize,
+            if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), screenDC, ref dstPos, ref dstSize,
                 memDC, ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
                 throw new Win32Exception();
         }

@@ -120,8 +120,12 @@
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
             Finally
                 ' Signal that the application has faulted and exit.
-                faulted = True
-                Windows.Forms.Application.Exit()
+                Try
+                    faulted = True
+                    Windows.Forms.Application.Exit()
+                Finally
+                    Environment.Exit(-1)
+                End Try
             End Try
         End Sub
     End Class

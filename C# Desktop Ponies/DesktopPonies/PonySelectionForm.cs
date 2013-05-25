@@ -216,7 +216,7 @@
                     PonyTemplate newTemplate = new PonyTemplate(ponyDirectories[i], !Program.UseXmlFiles);
                     //newTemplate.SaveToXml();
                     ponyDisplays.Add(new PonyDisplay(newTemplate, PonyDisplay_CountChanged, imageManager));
-                    Invoke(new MethodInvoker(() => PonyDisplayPanel.Controls.Add(ponyDisplays[ponyDisplays.Count - 1].SelectionControl)));
+                    this.SmartInvoke(() => PonyDisplayPanel.Controls.Add(ponyDisplays[ponyDisplays.Count - 1].SelectionControl));
                 }
                 catch (Exception ex)
                 {
@@ -543,7 +543,7 @@
                 .Distinct(StringComparer.Ordinal);
             int totalImages = imageSequence.Count() + totalTemplates;
 
-            Invoke(new MethodInvoker(() =>
+            this.SmartInvoke(() =>
             {
                 ProgressBar1.Value = 0;
                 ProgressBar2.Value = 0;
@@ -553,7 +553,7 @@
                 ProgressBar1.Width = (int)(initialAmount * ProgressBarPanel.Width);
                 ProgressBar2.Left = ProgressBar1.Right;
                 ProgressBar2.Width = (int)((1 - initialAmount) * ProgressBarPanel.Width);
-            }));
+            });
 
             // Loads the images for templates we'll be using, and create the desired number of instances of each template.
             for (int i = 0; i < ponyDisplays.Count; i++)
@@ -626,11 +626,11 @@
                 {
                     #region Remove template and show an error message.
                     // Dispose and remove the template that does not work.
-                    Invoke(new MethodInvoker(() =>
-                        {
-                            ponyDisplays[i].SelectionControl.PonyCount = 0;
-                            ponyDisplays[i].Dispose();
-                        }));
+                    this.SmartInvoke(() =>
+                    {
+                        ponyDisplays[i].SelectionControl.PonyCount = 0;
+                        ponyDisplays[i].Dispose();
+                    });
                     ponyDisplays.RemoveAt(i--);
 
                     // Display an error message.
@@ -653,13 +653,13 @@
             //if (spriteInterface is WinFormSpriteInterface)
                 //System.Threading.ThreadPool.QueueUserWorkItem(o =>
                 //{
-                    EventHandler imageLoadedHandler2 = (ilSender, ilE) => Invoke(new MethodInvoker(() =>
-                        {
-                            ProgressBar2.Value++;
-                            LoadInfo.Text = "Images Loaded: " + ProgressBar2.Value + " of " + ProgressBar2.Maximum;
-                            //if (ProgressBar2.Value > .4f * ProgressBar2.Maximum && Visible)
-                            //    StartAnimator();
-                        }));
+                    EventHandler imageLoadedHandler2 = (ilSender, ilE) => this.SmartInvoke(() =>
+                    {
+                        ProgressBar2.Value++;
+                        LoadInfo.Text = "Images Loaded: " + ProgressBar2.Value + " of " + ProgressBar2.Maximum;
+                        //if (ProgressBar2.Value > .4f * ProgressBar2.Maximum && Visible)
+                        //    StartAnimator();
+                    });
                     spriteInterface.LoadImages(imageSequence, imageLoadedHandler2);
                 //});
 
@@ -771,10 +771,10 @@
             {
                 PonySelectionControl templateControl =
                     ponyDisplays.Find(display => display.Template == iccE.Template).SelectionControl;
-                templateControl.Invoke(new MethodInvoker(() => templateControl.PonyCount += iccE.Change));
+                templateControl.SmartInvoke(() => templateControl.PonyCount += iccE.Change);
             };
-            animator.AnimatorClosed += (acSender, acE) => Invoke(new MethodInvoker(Show));
-            animator.ProgramExitRequested += (perSender, perE) => Invoke(new MethodInvoker(Close));
+            animator.AnimatorClosed += (acSender, acE) => this.SmartInvoke(Show);
+            animator.ProgramExitRequested += (perSender, perE) => this.SmartInvoke(Close);
             animator.Start();
 
             Hide();

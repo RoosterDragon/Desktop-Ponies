@@ -377,7 +377,7 @@
         /// extended error information, call GetLastError.</returns>
         [DllImport(user, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, [In] ref POINT pptDst, [In] ref SIZE psize,
+        public static extern bool UpdateLayeredWindow(HandleRef hwnd, IntPtr hdcDst, [In] ref POINT pptDst, [In] ref SIZE psize,
             IntPtr hdcSrc, [In] ref POINT pptSrc, COLORREF crKey, [In] ref BLENDFUNCTION pblend, UlwFlags dwFlags);
 
         /// <summary>
