@@ -38,17 +38,9 @@
 
         Protected Overrides Function OnInitialize(commandLineArgs As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
                                                   ) As Boolean
-            If Not Diagnostics.Debugger.IsAttached Then
-                AddHandler Windows.Forms.Application.ThreadException, AddressOf Application_ThreadException
-                AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
-            End If
-
+            AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
             Return MyBase.OnInitialize(commandLineArgs)
         End Function
-
-        Private Sub Application_ThreadException(sender As Object, e As Threading.ThreadExceptionEventArgs)
-            NotifyUserOfFatalExceptionAndExit(e.Exception)
-        End Sub
 
         Private Sub AppDomain_UnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
             NotifyUserOfFatalExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
@@ -64,15 +56,14 @@
             Console.WriteLine(exceptionString)
             Console.WriteLine("-----")
 
-            MessageBox.Show(message & vbNewLine & vbNewLine & exceptionString,
-                            "Warning - Desktop Ponies v" & version,
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & version, False)
         End Sub
 
         Public Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
             Try
                 Dim exceptionString = ex.ToString()
                 Dim version = GetProgramVersion()
+                Dim time = DateTime.UtcNow.ToString("u")
                 Const errorMessage = "An unexpected error occurred and Desktop Ponies must close." &
                     " Please report this error so it can be fixed."
 
@@ -80,14 +71,14 @@
                 Try
                     Console.WriteLine("-----")
                     Console.WriteLine("An unexpected error occurred and Desktop Ponies must close.")
-                    Console.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
+                    Console.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & time)
                     Console.WriteLine()
                     Console.WriteLine(exceptionString)
                     Console.WriteLine("-----")
 
                     Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
                     Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
-                        errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
+                        errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & time)
                         errorFile.WriteLine()
                         errorFile.WriteLine(exceptionString)
                         Console.WriteLine(errorMessage)
@@ -107,14 +98,12 @@
                         MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
                                         "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
                                         vbNewLine & "The program will now exit.",
-                                "Font Not Found - Desktop Ponies v" & version,
-                                MessageBoxButtons.OK, MessageBoxIcon.Error)
+                                        "Font Not Found - Desktop Ponies v" & version,
+                                        MessageBoxButtons.OK, MessageBoxIcon.Error)
                     End If
                 Else
                     ' Attempt to notify user of an unknown error.
-                    MessageBox.Show(errorMessage & vbNewLine & vbNewLine & exceptionString,
-                                    "Unhandled Error - Desktop Ponies v" & version,
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    ExceptionDialog.Show(ex, errorMessage, "Unexpected Error - Desktop Ponies v" & version, True)
                 End If
             Catch
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
@@ -124,7 +113,7 @@
                     faulted = True
                     Windows.Forms.Application.Exit()
                 Finally
-                    Environment.Exit(-1)
+                    If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(-1)
                 End Try
             End Try
         End Sub

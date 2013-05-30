@@ -91,6 +91,12 @@
     <Compile Include="Collections\DictionaryExtensions.cs" />
     <Compile Include="Collections\Enumerable.cs" />
     <Compile Include="Core\ControlExtensions.cs" />
+    <Compile Include="Core\ExceptionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Core\ExceptionDialog.Designer.cs">
+      <DependentUpon>ExceptionDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="DesktopPonies\AnimatedImageIndexer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -98,12 +104,6 @@
       <DependentUpon>AnimatedImageIndexer.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\Disposable.cs" />
-    <Compile Include="Core\ExceptionDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Core\ExceptionDialog.Designer.cs">
-      <DependentUpon>ExceptionDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Core\General.cs" />
     <Compile Include="Core\RectangleExtensions.cs" />
     <Compile Include="Core\Rng.cs" />
@@ -190,6 +190,9 @@
     <Compile Include="Interop\Win32.cs" />
     <Compile Include="SpriteManagement\WinFormSpriteInterface.cs" />
     <Compile Include="Core\Vector2F.cs" />
+    <EmbeddedResource Include="Core\ExceptionDialog.resx">
+      <DependentUpon>ExceptionDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\AnimatedImageIndexer.resx">
       <DependentUpon>AnimatedImageIndexer.cs</DependentUpon>
     </EmbeddedResource>
@@ -210,9 +213,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\PonySelectionForm.resx">
       <DependentUpon>PonySelectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Core\ExceptionDialog.resx">
-      <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

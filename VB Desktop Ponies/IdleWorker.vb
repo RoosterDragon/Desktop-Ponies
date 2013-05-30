@@ -130,6 +130,7 @@ Public Class IdleWorker
                 empty.Set()
                 empty.Dispose()
                 control.SmartInvoke(AddressOf control.Dispose)
+                If asyncResult IsNot Nothing Then asyncResult.AsyncWaitHandle.Dispose()
                 worker = Nothing
             End If
         End SyncLock

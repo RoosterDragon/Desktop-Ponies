@@ -7,19 +7,6 @@
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -28,73 +15,185 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.ErrorMessage = new System.Windows.Forms.Label();
-            this.ExceptionInformation = new System.Windows.Forms.Label();
-            this.EmailCommand = new System.Windows.Forms.Button();
-            this.CloseCommand = new System.Windows.Forms.Button();
+            this.IconBox = new System.Windows.Forms.PictureBox();
+            this.ExceptionText = new System.Windows.Forms.TextBox();
+            this.MessageLabel = new System.Windows.Forms.Label();
+            this.CopyTextButton = new System.Windows.Forms.Button();
+            this.CloseButton = new System.Windows.Forms.Button();
+            this.LayoutTable = new System.Windows.Forms.TableLayoutPanel();
+            this.MessageTable = new System.Windows.Forms.TableLayoutPanel();
+            this.MessagePanel = new System.Windows.Forms.Panel();
+            this.ButtonPanel = new System.Windows.Forms.Panel();
+            this.TimeLabel = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
+            this.LayoutTable.SuspendLayout();
+            this.MessageTable.SuspendLayout();
+            this.MessagePanel.SuspendLayout();
+            this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // ErrorMessage
+            // IconBox
             // 
-            this.ErrorMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ErrorMessage.Location = new System.Drawing.Point(12, 9);
-            this.ErrorMessage.Name = "ErrorMessage";
-            this.ErrorMessage.Size = new System.Drawing.Size(350, 51);
-            this.ErrorMessage.TabIndex = 0;
-            this.ErrorMessage.Text = "An error has occured that the program could not handle and it needs to close.";
+            this.IconBox.ErrorImage = null;
+            this.IconBox.InitialImage = null;
+            this.IconBox.Location = new System.Drawing.Point(3, 3);
+            this.IconBox.Name = "IconBox";
+            this.IconBox.Size = new System.Drawing.Size(32, 32);
+            this.IconBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.IconBox.TabIndex = 0;
+            this.IconBox.TabStop = false;
             // 
-            // ExceptionInformation
+            // ExceptionText
             // 
-            this.ExceptionInformation.Location = new System.Drawing.Point(12, 60);
-            this.ExceptionInformation.Name = "ExceptionInformation";
-            this.ExceptionInformation.Size = new System.Drawing.Size(350, 81);
-            this.ExceptionInformation.TabIndex = 1;
-            this.ExceptionInformation.Text = "Exception:\r\nMessage:\r\n";
+            this.ExceptionText.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ExceptionText.Location = new System.Drawing.Point(3, 47);
+            this.ExceptionText.Multiline = true;
+            this.ExceptionText.Name = "ExceptionText";
+            this.ExceptionText.ReadOnly = true;
+            this.ExceptionText.Size = new System.Drawing.Size(254, 20);
+            this.ExceptionText.TabIndex = 1;
             // 
-            // EmailCommand
+            // MessageLabel
             // 
-            this.EmailCommand.Location = new System.Drawing.Point(206, 144);
-            this.EmailCommand.Name = "EmailCommand";
-            this.EmailCommand.Size = new System.Drawing.Size(75, 23);
-            this.EmailCommand.TabIndex = 2;
-            this.EmailCommand.Text = "Send E-Mail";
-            this.EmailCommand.UseVisualStyleBackColor = true;
-            this.EmailCommand.Click += new System.EventHandler(this.EmailCommand_Click);
+            this.MessageLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MessageLabel.Location = new System.Drawing.Point(41, 3);
+            this.MessageLabel.Name = "MessageLabel";
+            this.MessageLabel.Size = new System.Drawing.Size(210, 32);
+            this.MessageLabel.TabIndex = 0;
             // 
-            // CloseCommand
+            // CopyTextButton
             // 
-            this.CloseCommand.Location = new System.Drawing.Point(287, 144);
-            this.CloseCommand.Name = "CloseCommand";
-            this.CloseCommand.Size = new System.Drawing.Size(75, 23);
-            this.CloseCommand.TabIndex = 4;
-            this.CloseCommand.Text = "Close";
-            this.CloseCommand.UseVisualStyleBackColor = true;
-            this.CloseCommand.Click += new System.EventHandler(this.CloseCommand_Click);
+            this.CopyTextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CopyTextButton.Location = new System.Drawing.Point(122, 6);
+            this.CopyTextButton.Name = "CopyTextButton";
+            this.CopyTextButton.Size = new System.Drawing.Size(75, 23);
+            this.CopyTextButton.TabIndex = 1;
+            this.CopyTextButton.Text = "Copy Text";
+            this.CopyTextButton.UseVisualStyleBackColor = true;
+            this.CopyTextButton.Click += new System.EventHandler(this.CopyTextButton_Click);
             // 
-            // ExceptionForm
+            // CloseButton
+            // 
+            this.CloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CloseButton.Location = new System.Drawing.Point(203, 6);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(75, 23);
+            this.CloseButton.TabIndex = 2;
+            this.CloseButton.Text = "Close";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
+            // 
+            // LayoutTable
+            // 
+            this.LayoutTable.AutoSize = true;
+            this.LayoutTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.LayoutTable.ColumnCount = 1;
+            this.LayoutTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.LayoutTable.Controls.Add(this.MessageTable, 0, 0);
+            this.LayoutTable.Controls.Add(this.ButtonPanel, 0, 1);
+            this.LayoutTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.LayoutTable.Location = new System.Drawing.Point(0, 0);
+            this.LayoutTable.Name = "LayoutTable";
+            this.LayoutTable.RowCount = 2;
+            this.LayoutTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.LayoutTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.LayoutTable.Size = new System.Drawing.Size(284, 262);
+            this.LayoutTable.TabIndex = 0;
+            // 
+            // MessageTable
+            // 
+            this.MessageTable.AutoSize = true;
+            this.MessageTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.MessageTable.ColumnCount = 1;
+            this.MessageTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.MessageTable.Controls.Add(this.ExceptionText, 0, 1);
+            this.MessageTable.Controls.Add(this.MessagePanel, 0, 0);
+            this.MessageTable.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MessageTable.Location = new System.Drawing.Point(12, 12);
+            this.MessageTable.Margin = new System.Windows.Forms.Padding(12);
+            this.MessageTable.Name = "MessageTable";
+            this.MessageTable.RowCount = 2;
+            this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.MessageTable.Size = new System.Drawing.Size(260, 70);
+            this.MessageTable.TabIndex = 1;
+            // 
+            // MessagePanel
+            // 
+            this.MessagePanel.AutoSize = true;
+            this.MessagePanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.MessagePanel.Controls.Add(this.IconBox);
+            this.MessagePanel.Controls.Add(this.MessageLabel);
+            this.MessagePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MessagePanel.Location = new System.Drawing.Point(3, 3);
+            this.MessagePanel.Name = "MessagePanel";
+            this.MessagePanel.Size = new System.Drawing.Size(254, 38);
+            this.MessagePanel.TabIndex = 0;
+            // 
+            // ButtonPanel
+            // 
+            this.ButtonPanel.AutoSize = true;
+            this.ButtonPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ButtonPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.ButtonPanel.Controls.Add(this.TimeLabel);
+            this.ButtonPanel.Controls.Add(this.CloseButton);
+            this.ButtonPanel.Controls.Add(this.CopyTextButton);
+            this.ButtonPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ButtonPanel.Location = new System.Drawing.Point(0, 94);
+            this.ButtonPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.ButtonPanel.Name = "ButtonPanel";
+            this.ButtonPanel.Padding = new System.Windows.Forms.Padding(3);
+            this.ButtonPanel.Size = new System.Drawing.Size(284, 168);
+            this.ButtonPanel.TabIndex = 0;
+            // 
+            // TimeLabel
+            // 
+            this.TimeLabel.AutoSize = true;
+            this.TimeLabel.Location = new System.Drawing.Point(12, 11);
+            this.TimeLabel.Name = "TimeLabel";
+            this.TimeLabel.Size = new System.Drawing.Size(0, 13);
+            this.TimeLabel.TabIndex = 0;
+            // 
+            // ExceptionDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(374, 179);
-            this.Controls.Add(this.CloseCommand);
-            this.Controls.Add(this.EmailCommand);
-            this.Controls.Add(this.ExceptionInformation);
-            this.Controls.Add(this.ErrorMessage);
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = System.Drawing.SystemColors.Window;
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Controls.Add(this.LayoutTable);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ExceptionForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Critical Error";
+            this.Name = "ExceptionDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Unexpected Error";
+            ((System.ComponentModel.ISupportInitialize)(this.IconBox)).EndInit();
+            this.LayoutTable.ResumeLayout(false);
+            this.LayoutTable.PerformLayout();
+            this.MessageTable.ResumeLayout(false);
+            this.MessageTable.PerformLayout();
+            this.MessagePanel.ResumeLayout(false);
+            this.ButtonPanel.ResumeLayout(false);
+            this.ButtonPanel.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label ErrorMessage;
-        private System.Windows.Forms.Label ExceptionInformation;
-        private System.Windows.Forms.Button EmailCommand;
-        private System.Windows.Forms.Button CloseCommand;
+        private System.Windows.Forms.PictureBox IconBox;
+        private System.Windows.Forms.TextBox ExceptionText;
+        private System.Windows.Forms.Label MessageLabel;
+        private System.Windows.Forms.Button CopyTextButton;
+        private System.Windows.Forms.Button CloseButton;
+        private System.Windows.Forms.TableLayoutPanel LayoutTable;
+        private System.Windows.Forms.Panel MessagePanel;
+        private System.Windows.Forms.Panel ButtonPanel;
+        private System.Windows.Forms.TableLayoutPanel MessageTable;
+        private System.Windows.Forms.Label TimeLabel;
     }
 }

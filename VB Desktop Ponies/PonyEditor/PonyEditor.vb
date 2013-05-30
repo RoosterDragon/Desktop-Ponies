@@ -1834,7 +1834,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
-        MessageBox.Show(Me, e.Exception.ToString(), "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        My.Application.NotifyUserOfNonFatalException(e.Exception, "Error interpreting the data entered into the editor.")
     End Sub
 
     Private Sub Set_Behavior_Follow_Parameters(behavior As Behavior)
