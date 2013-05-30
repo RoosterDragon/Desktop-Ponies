@@ -64,16 +64,17 @@
             public static void SetHasShadow(Gdk.Window window, bool hasShadow)
             {
                 // Get the native window handle.
-                IntPtr nsWindow = CSDesktopPonies.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(
-                    new HandleRef(window, window.Handle));
+                IntPtr nativeWindow = 
+                    CSDesktopPonies.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(new HandleRef(window, window.Handle));
 
                 // Register the method with the runtime, if it has not yet been.
                 if (setHasShadowSelector == IntPtr.Zero)
                     setHasShadowSelector = CSDesktopPonies.Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
 
                 // Send a message to the window, indicating the set shadow method and specified argument.
-                CSDesktopPonies.Interop.MacOSX.NativeMethods.objc_msgSend(nsWindow, setHasShadowSelector, hasShadow);
+                CSDesktopPonies.Interop.MacOSX.NativeMethods.objc_msgSend(nativeWindow, setHasShadowSelector, hasShadow);
 
+                // Ensure the managed window remains in scope until all operations on the native handle are completed.
                 System.GC.KeepAlive(window);
             }
         }

@@ -18,7 +18,7 @@
         private static bool isMacOSX;
 
         /// <summary>
-        /// Initializes static members of the <see cref="T:CSDesktopPonies.OperatingSystemInfo"/> class.
+        /// Initializes static members of the <see cref="T:CSDesktopPonies.Core.OperatingSystemInfo"/> class.
         /// </summary>
         static OperatingSystemInfo()
         {

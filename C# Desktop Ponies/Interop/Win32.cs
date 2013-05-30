@@ -24,7 +24,7 @@
         public int Y;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Win32.POINT"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Interop.Win32.POINT"/> structure.
         /// </summary>
         /// <param name="x">The x-coordinate of the point.</param>
         /// <param name="y">The y-coordinate of the point.</param>
@@ -35,9 +35,9 @@
         }
 
         /// <summary>
-        /// Returns a string representation of this <see cref="T:CSDesktopPonies.Win32.POINT"/> structure.
+        /// Returns a string representation of this <see cref="T:CSDesktopPonies.Interop.Win32.POINT"/> structure.
         /// </summary>
-        /// <returns>A string representation of this <see cref="T:CSDesktopPonies.Win32.POINT"/> structure.</returns>
+        /// <returns>A string representation of this <see cref="T:CSDesktopPonies.Interop.Win32.POINT"/> structure.</returns>
         public override string ToString()
         {
             return "{X=" + X + " Y=" + Y + "}";
@@ -45,12 +45,12 @@
     }
 
     /// <summary>
-    /// The <see cref="T:CSDesktopPonies.Win32.SIZE"/> structure specifies the width and height of a rectangle.
+    /// The <see cref="T:CSDesktopPonies.Interop.Win32.SIZE"/> structure specifies the width and height of a rectangle.
     /// </summary>
     internal struct SIZE
     {
         /// <summary>
-        /// Represents a <see cref="T:CSDesktopPonies.Win32.SIZE"/> structure with its width and height set to zero.
+        /// Represents a <see cref="T:CSDesktopPonies.Interop.Win32.SIZE"/> structure with its width and height set to zero.
         /// </summary>
         public static readonly SIZE Empty = new SIZE();
 
@@ -64,7 +64,7 @@
         public int CY;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Win32.SIZE"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Interop.Win32.SIZE"/> structure.
         /// </summary>
         /// <param name="cx">The width of the rectangle.</param>
         /// <param name="cy">The height of the rectangle.</param>
@@ -108,11 +108,11 @@
         public AlphaFormat AlphaFormat;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Win32.BLENDFUNCTION"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Interop.Win32.BLENDFUNCTION"/> structure.
         /// </summary>
         /// <param name="blendOp">The source blend operation.</param>
         /// <param name="sourceConstantAlpha">Specifies an alpha transparency value to be used on the entire source bitmap. The
-        /// <see cref="P:CSDesktopPonies.Win32.BLENDFUNCTION.SourceConstantAlpha"/> value is combined with any per-pixel
+        /// <see cref="P:CSDesktopPonies.Interop.Win32.BLENDFUNCTION.SourceConstantAlpha"/> value is combined with any per-pixel
         /// alpha values in the source bitmap. If you set <see cref="P:CSDesktopPonies.Win32.BLENDFUNCTION.SourceConstantAlpha"/> to 0, it
         /// is assumed that your image is transparent. Set the <see cref="P:CSDesktopPonies.Win32.BLENDFUNCTION.SourceConstantAlpha"/>
         /// value to 255 (opaque) when you only want to use per-pixel alpha values.</param>
@@ -327,7 +327,7 @@
         public int Value;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Win32.COLORREF"/> structure from a Win32 color.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Interop.Win32.COLORREF"/> structure from a Win32 color.
         /// </summary>
         /// <param name="win32color">A win32 color in the format 0x00bbggrr.</param>
         public COLORREF(int win32color)

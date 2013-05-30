@@ -24,7 +24,7 @@
         public float Y { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Vector2F"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Core.Vector2F"/> structure.
         /// </summary>
         /// <param name='x'>The x component of the vector.</param>
         /// <param name='y'>The y component of the vector.</param>
@@ -35,7 +35,7 @@
             Y = y;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Vector2F"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Core.Vector2F"/> structure.
         /// </summary>
         /// <param name='point'>The point whose x- and y-coordinates are used to initialize the vector.</param>
         public Vector2F(PointF point)
@@ -45,7 +45,7 @@
             Y = point.Y;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Vector2F"/> structure.
+        /// Initializes a new instance of the <see cref="T:CSDesktopPonies.Core.Vector2F"/> structure.
         /// </summary>
         /// <param name='size'>The size whose width and height values are used to initialize the vector.</param>
         public Vector2F(SizeF size)

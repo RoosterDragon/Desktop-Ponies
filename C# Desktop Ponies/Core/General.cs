@@ -11,7 +11,7 @@
         /// <summary>
         /// Provides a reusable character buffer of sufficient size to write simply formatted signed 64-bit integers.
         /// </summary>
-        private static readonly char[] buffer = new char[(int)Math.Ceiling(Math.Log10(-(double)long.MinValue)) + 1];
+        private static readonly char[] Buffer = new char[(int)Math.Ceiling(Math.Log10(-(double)long.MinValue)) + 1];
 #endif
 
         /// <summary>
@@ -40,7 +40,7 @@
             // As we are outputting to console, we shall lock around the whole collection so as to minimize the interference from
             // multithreaded calls, however other threads are still free to call for collections outside of this method, so this cannot be
             // guaranteed.
-            lock (buffer)
+            lock (Buffer)
             {
                 long beforeCollect = GC.GetTotalMemory(false);
                 GC.Collect();
@@ -80,10 +80,10 @@
         /// <exception cref="T:System.IO.IOException">An I/O error occurred.</exception>
         private static void ConsoleWriteLineLong(long value, int minChars = 0)
         {
-            if (minChars < 0 || minChars > buffer.Length)
+            if (minChars < 0 || minChars > Buffer.Length)
                 throw new ArgumentOutOfRangeException("minChars", minChars,
-                    "minChars must be greater than or equal to zero and less than or equal to " + buffer.Length);
-            int bufferIndex = buffer.Length - 1;
+                    "minChars must be greater than or equal to zero and less than or equal to " + Buffer.Length);
+            int bufferIndex = Buffer.Length - 1;
             long shift = 1;
             long doubleShiftedValue;
             do
@@ -97,16 +97,16 @@
                     digitOut *= -1;
                     doubleShiftedValue *= -1;
                 }
-                buffer[bufferIndex--] = (char)((int)'0' + digitOut);
+                Buffer[bufferIndex--] = (char)((int)'0' + digitOut);
                 shift *= 10;
             }
             while (doubleShiftedValue > 0);
             if (value < 0)
-                buffer[bufferIndex--] = '-';
-            while (minChars > buffer.Length - 1 - bufferIndex && bufferIndex >= 0)
-                buffer[bufferIndex--] = ' ';
+                Buffer[bufferIndex--] = '-';
+            while (minChars > Buffer.Length - 1 - bufferIndex && bufferIndex >= 0)
+                Buffer[bufferIndex--] = ' ';
             bufferIndex++;
-            Console.WriteLine(buffer, bufferIndex, buffer.Length - bufferIndex);
+            Console.WriteLine(Buffer, bufferIndex, Buffer.Length - bufferIndex);
         }
 #endif
     }

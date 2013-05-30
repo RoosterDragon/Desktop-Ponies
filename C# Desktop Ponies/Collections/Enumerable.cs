@@ -18,7 +18,7 @@
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerable`1"/> which returns the specified
         /// <see cref="T:System.Collections.Generic.IEnumerator`1"/> when its
         /// <see cref="M:System.Collections.Generic.IEnumerable`1.GetEnumerator()"/> method is called.</returns>
-        public static IEnumerable<T> For<T>(IEnumerator<T> enumerator)
+        public static IEnumerable<T> From<T>(IEnumerator<T> enumerator)
         {
             return new EnumeratorWrapper<T>(enumerator);
         }
