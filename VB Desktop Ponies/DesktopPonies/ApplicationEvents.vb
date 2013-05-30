@@ -38,52 +38,43 @@
 
         Protected Overrides Function OnInitialize(commandLineArgs As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
                                                   ) As Boolean
+            AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
+            AddHandler System.Windows.Forms.Application.ThreadException, AddressOf Application_ThreadException
             AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
             Return MyBase.OnInitialize(commandLineArgs)
         End Function
+
+        Private Sub TaskScheduler_UnobservedTaskException(sender As Object, e As Threading.Tasks.UnobservedTaskExceptionEventArgs)
+            ' If a debugger is attached, this event is not raised (instead the exception is allowed to propagate to the debugger),
+            ' therefore we'll just log since ending the process gains no additional safety at this point.
+            e.SetObserved()
+            LogErrorToConsole(e.Exception, "Unobserved Task Exception")
+            LogErrorToDisk(e.Exception)
+        End Sub
+
+        Private Sub Application_ThreadException(sender As Object, e As Threading.ThreadExceptionEventArgs)
+            NotifyUserOfFatalExceptionAndExit(e.Exception)
+        End Sub
 
         Private Sub AppDomain_UnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
             NotifyUserOfFatalExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
         End Sub
 
         Public Sub NotifyUserOfNonFatalException(ex As Exception, message As String)
-            Dim exceptionString = ex.ToString()
-            Dim version = GetProgramVersion()
-
-            Console.WriteLine("-----")
-            Console.WriteLine("Non-fatal error in Desktop Ponies v" & version & " occurred " & DateTime.UtcNow.ToString("u"))
-            Console.WriteLine()
-            Console.WriteLine(exceptionString)
-            Console.WriteLine("-----")
-
-            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & version, False)
+            LogErrorToConsole(ex, "WARNING: " & message)
+            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & GetProgramVersion(), False)
         End Sub
 
         Public Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
             Try
-                Dim exceptionString = ex.ToString()
                 Dim version = GetProgramVersion()
-                Dim time = DateTime.UtcNow.ToString("u")
-                Const errorMessage = "An unexpected error occurred and Desktop Ponies must close." &
+                Const ErrorMessage = "An unexpected error occurred and Desktop Ponies must close." &
                     " Please report this error so it can be fixed."
 
                 ' Attempt to log error.
                 Try
-                    Console.WriteLine("-----")
-                    Console.WriteLine("An unexpected error occurred and Desktop Ponies must close.")
-                    Console.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & time)
-                    Console.WriteLine()
-                    Console.WriteLine(exceptionString)
-                    Console.WriteLine("-----")
-
-                    Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
-                    Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
-                        errorFile.WriteLine("Unhandled error in Desktop Ponies v" & version & " occurred " & time)
-                        errorFile.WriteLine()
-                        errorFile.WriteLine(exceptionString)
-                        Console.WriteLine(errorMessage)
-                        Console.WriteLine("An error file can be found at " & path)
-                    End Using
+                    LogErrorToConsole(ex, "FATAL: An unexpected error occurred and Desktop Ponies must close.")
+                    LogErrorToDisk(ex)
                 Catch
                     ' Logging might fail, but we'll just have to live with that.
                     Console.WriteLine("An unexpected error occurred and Desktop Ponies must close. (An error file could not be generated)")
@@ -103,7 +94,7 @@
                     End If
                 Else
                     ' Attempt to notify user of an unknown error.
-                    ExceptionDialog.Show(ex, errorMessage, "Unexpected Error - Desktop Ponies v" & version, True)
+                    ExceptionDialog.Show(ex, ErrorMessage, "Unexpected Error - Desktop Ponies v" & version, True)
                 End If
             Catch
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
@@ -113,9 +104,29 @@
                     faulted = True
                     Windows.Forms.Application.Exit()
                 Finally
-                    If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(-1)
+                    If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(1)
                 End Try
             End Try
+        End Sub
+
+        Private Sub LogErrorToConsole(ex As Exception, message As String)
+            Console.WriteLine("-----")
+            Console.WriteLine(message)
+            Console.WriteLine("Error in Desktop Ponies v" & GetProgramVersion() & " occurred " & DateTime.UtcNow.ToString("u"))
+            Console.WriteLine()
+            Console.WriteLine(ex.ToString())
+            Console.WriteLine("-----")
+        End Sub
+
+        Private Sub LogErrorToDisk(ex As Exception)
+            Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
+            Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
+                errorFile.WriteLine(
+                    "Unhandled error in Desktop Ponies v" & GetProgramVersion() & " occurred " & DateTime.UtcNow.ToString("u"))
+                errorFile.WriteLine()
+                errorFile.WriteLine(ex.ToString())
+                Console.WriteLine("An error file can be found at " & path)
+            End Using
         End Sub
     End Class
 End Namespace
