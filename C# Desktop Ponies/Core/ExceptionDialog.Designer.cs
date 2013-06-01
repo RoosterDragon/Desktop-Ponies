@@ -25,7 +25,6 @@
             this.MessagePanel = new System.Windows.Forms.Panel();
             this.ButtonPanel = new System.Windows.Forms.Panel();
             this.TimeLabel = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
             this.LayoutTable.SuspendLayout();
             this.MessageTable.SuspendLayout();
             this.MessagePanel.SuspendLayout();
@@ -170,7 +169,6 @@
             this.Name = "ExceptionDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Unexpected Error";
-            ((System.ComponentModel.ISupportInitialize)(this.IconBox)).EndInit();
             this.LayoutTable.ResumeLayout(false);
             this.LayoutTable.PerformLayout();
             this.MessageTable.ResumeLayout(false);

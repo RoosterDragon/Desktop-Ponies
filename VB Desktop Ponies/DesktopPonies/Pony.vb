@@ -583,7 +583,7 @@ Public Class PonyBase
                                          right_image_center, left_image_center, dont_repeat_image_animations, group)
 
                 Catch ex As Exception
-                    If Not Main.Instance.AutoStarted Then
+                    If Not Reference.AutoStarted Then
                         If TypeOf ex Is IndexOutOfRangeException Then
                             My.Application.NotifyUserOfNonFatalException(ex, "You are missing a required parameter for pony " & Name &
                                                                          " in behavior '" & behaviorLine & "'")
@@ -623,10 +623,10 @@ Public Class PonyBase
                             Dim dont_repeat_image_animations As Boolean = False
 
                             Try
-                                direction_right = Main.GetDirection(Trim(LCase(columns(7))))
-                                centering_right = Main.GetDirection(Trim(LCase(columns(8))))
-                                direction_left = Main.GetDirection(Trim(LCase(columns(9))))
-                                centering_left = Main.GetDirection(Trim(LCase(columns(10))))
+                                direction_right = GetDirection(Trim(LCase(columns(7))))
+                                centering_right = GetDirection(Trim(LCase(columns(8))))
+                                direction_left = GetDirection(Trim(LCase(columns(9))))
+                                centering_left = GetDirection(Trim(LCase(columns(10))))
                             Catch ex As Exception
                                 My.Application.NotifyUserOfNonFatalException(ex, "Invalid placement direction or centering for effect " &
                                                                              columns(1) & " for pony " & Name & ":" &
@@ -671,8 +671,8 @@ Public Class PonyBase
         If Not Options.PonyInteractionsEnabled Then Return
         Dim displaywarnings =
             Options.DisplayPonyInteractionsErrors AndAlso
-            Not Main.Instance.AutoStarted AndAlso
-            Not Main.Instance.ScreensaverMode
+            Not Reference.AutoStarted AndAlso
+            Not Reference.InScreensaverMode
         LoadInteractions(displaywarnings)
     End Sub
 
@@ -713,7 +713,7 @@ Public Class PonyBase
                             ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
                                 String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
                                 targetsActivated = Interaction.TargetActivation.Any
-                            ElseIf Not Main.Instance.ScreensaverMode Then
+                            ElseIf Not Reference.InScreensaverMode Then
                                 Throw New InvalidDataException(
                                     "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
                                     "Interaction file specified '" & columns(InteractionParameter.TargetSelectionOption) &
@@ -912,7 +912,7 @@ Public Class PonyBase
                 If Double.TryParse(proximity, NumberStyles.Float, CultureInfo.InvariantCulture, proximityValue) Then
                     new_interaction.Proximity_Activation_Distance = proximityValue
                 Else
-                    If Not Main.Instance.ScreensaverMode Then
+                    If Not Reference.InScreensaverMode Then
                         Throw New ArgumentException("Invalid option for proximity. Enter either a number or 'default'." _
                                     & " Interaction file specified: '" & proximity & "'", proximity)
                     Else
@@ -934,7 +934,7 @@ Public Class PonyBase
                     found = True
                 End If
             Next
-            If found = False AndAlso Options.DisplayPonyInteractionsErrors AndAlso Not Main.Instance.ScreensaverMode Then
+            If found = False AndAlso Options.DisplayPonyInteractionsErrors AndAlso Not Reference.InScreensaverMode Then
                 MsgBox("Warning: Pony '" & Me.Directory & "' does not have required behavior '" & iBehavior & "' for interaction: '" & _
                        interaction_name & "'. This interaction is disabled.")
                 Exit Sub
@@ -967,7 +967,7 @@ Public Class PonyBase
 
                         If found = False Then
                             ok_targets.Remove(Pony.Directory)
-                            If displaywarnings AndAlso Not Main.Instance.ScreensaverMode Then
+                            If displaywarnings AndAlso Not Reference.InScreensaverMode Then
                                 MsgBox("Warning:  Pony " & Pony.Name & " (" & Pony.Directory & ") " & _
                                 " does not have required behavior '" & _
                                Behavior & "' as specified in interaction " & interaction_name & _
@@ -979,7 +979,7 @@ Public Class PonyBase
                 End If
             Next
 
-            If ponyfound = False AndAlso displaywarnings AndAlso Not Main.Instance.ScreensaverMode Then
+            If ponyfound = False AndAlso displaywarnings AndAlso Not Reference.InScreensaverMode Then
 
                 MsgBox("Warning: There is no pony with name " & target & " loaded.  Interaction '" & name & _
                        "' has this pony listed as a target.")
@@ -1440,6 +1440,8 @@ Public Class Pony
     Public Shared Property CurrentViewer As ISpriteCollectionView
     Public Shared Property PreviewWindowRectangle As Rectangle
 
+    Private Shared audioErrorShown As Boolean
+
 #Region "DEBUG conditional code"
 #If DEBUG Then
     Friend UpdateRecord As New List(Of Record)()
@@ -1656,16 +1658,26 @@ Public Class Pony
 
     Public Property ActiveEffects As New List(Of Effect)
 
-    'User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
-    'these two options are used for the one-per-pony option.
+    ' User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
+    ' These two options are used for the one-at-a-time option.
+    Private Shared AnyAudioLastPlayed As Date = DateTime.UtcNow
+    Private Shared LastLengthAnyAudio As Integer
+    ' These two options are used for the one-per-pony option.
     Private AudioLastPlayed As Date = DateTime.UtcNow
-    Private LastAudioLength As Integer = 0
+    Private LastLengthAudio As Integer
 
     Public Property BehaviorStartTime As TimeSpan
     Public Property BehaviorDesiredDuration As TimeSpan
 
     Public Property ManualControlPlayerOne As Boolean
     Public Property ManualControlPlayerTwo As Boolean
+    Private _manualControlAction As Boolean
+    Public ReadOnly Property ManualControlAction As Boolean
+        Get
+            Return _manualControlAction
+        End Get
+    End Property
+
     Private effectsToRemove As New List(Of Effect)
 
     Private ReadOnly EffectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)
@@ -1726,14 +1738,14 @@ Public Class Pony
     ''' </summary>
     Friend Sub Teleport()
         ' If we are in preview mode, just teleport into the top-left corner for consistency.
-        If Main.Instance.InPreviewMode Then
+        If Reference.InPreviewMode Then
             TopLeftLocation = Point.Add(Pony.PreviewWindowRectangle.Location, New Size(10, 10))
             Exit Sub
         End If
 
         ' Try an arbitrary number of times to find a point a point in bounds that is not also in the exclusion zone.
         ' TODO: Create method that will uniformly choose a random location from allowable points, also taking into account image sizing.
-        Dim screens = Main.Instance.GetScreensToUse().ToArray()
+        Dim screens = Options.GetScreensToUse().ToArray()
         Dim teleportLocation As Point
         For tries = 0 To 300
             Dim area = screens(Rng.Next(screens.Length)).WorkingArea
@@ -1955,7 +1967,7 @@ Public Class Pony
             ' The behavior specifies an object to follow, but no instance of that object is present.
             ' We can't use this behavior, so we'll have to choose another at random.
             If Not hasDestination AndAlso specifiedBehavior.OriginalFollowObjectName <> "" AndAlso
-                Not Main.Instance.InPreviewMode Then
+                Not Reference.InPreviewMode Then
                 SelectBehavior()
                 Exit Sub
             End If
@@ -2079,7 +2091,7 @@ Public Class Pony
         End If
 
         ' Start the sound file playing.
-        If line.SoundFile <> "" AndAlso Main.Instance.DirectXSoundAvailable Then
+        If line.SoundFile <> "" AndAlso Reference.DirectXSoundAvailable Then
             PlaySound(line.SoundFile)
         End If
     End Sub
@@ -2091,13 +2103,13 @@ Public Class Pony
     Private Sub PlaySound(filePath As String)
         ' Sound must be enabled for the mode we are in.
         If Not Options.SoundEnabled Then Exit Sub
-        If Main.Instance.ScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
+        If Reference.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
 
         ' Don't play sounds over other ones - wait until they finish.
         If Not Options.SoundSingleChannelOnly Then
-            If DateTime.UtcNow.Subtract(Me.AudioLastPlayed).TotalMilliseconds <= Me.LastAudioLength Then Exit Sub
+            If DateTime.UtcNow.Subtract(Me.AudioLastPlayed).TotalMilliseconds <= Me.LastLengthAudio Then Exit Sub
         Else
-            If DateTime.UtcNow.Subtract(Main.Instance.Audio_Last_Played).TotalMilliseconds <= Main.Instance.Last_Audio_Length Then Exit Sub
+            If DateTime.UtcNow.Subtract(AnyAudioLastPlayed).TotalMilliseconds <= LastLengthAnyAudio Then Exit Sub
         End If
 
         ' Quick sanity check that the file exists on disk.
@@ -2115,15 +2127,15 @@ Public Class Pony
             audio.Play()
 
             If Not Options.SoundSingleChannelOnly Then
-                Me.LastAudioLength = CInt(audio.Duration * 1000)
+                Me.LastLengthAudio = CInt(audio.Duration * 1000)
                 Me.AudioLastPlayed = DateTime.UtcNow
             Else
-                Main.Instance.Last_Audio_Length = CInt(audio.Duration * 1000) 'to milliseconds
-                Main.Instance.Audio_Last_Played = DateTime.UtcNow
+                LastLengthAnyAudio = CInt(audio.Duration * 1000) 'to milliseconds
+                AnyAudioLastPlayed = DateTime.UtcNow
             End If
         Catch ex As Exception
-            If Not Main.Instance.AudioErrorShown AndAlso Not Main.Instance.ScreensaverMode Then
-                Main.Instance.AudioErrorShown = True
+            If Not audioErrorShown AndAlso Not Reference.InScreensaverMode Then
+                audioErrorShown = True
                 My.Application.NotifyUserOfNonFatalException(
                     ex, String.Format(CultureInfo.CurrentCulture,
                                       "There was an error trying to play a sound. Maybe the file is corrupt?{0}" &
@@ -2185,14 +2197,22 @@ Public Class Pony
         If Main.Instance.CurrentGame Is Nothing OrElse
             (Main.Instance.CurrentGame IsNot Nothing AndAlso
              Main.Instance.CurrentGame.Status <> Game.GameStatus.Setup) Then
-            With Main.Instance
-                ' User input will dictate our movement.
-                If ManualControlPlayerOne Then
-                    speed = ManualControl(.PonyAction, .PonyUp, .PonyDown, .PonyLeft, .PonyRight, .PonySpeed)
-                ElseIf ManualControlPlayerTwo Then
-                    speed = ManualControl(.PonyAction_2, .PonyUp_2, .PonyDown_2, .PonyLeft_2, .PonyRight_2, .PonySpeed_2)
-                End If
-            End With
+            ' User input will dictate our movement.
+            If ManualControlPlayerOne Then
+                speed = ManualControl(KeyboardState.IsKeyPressed(Keys.RControlKey),
+                                      KeyboardState.IsKeyPressed(Keys.Up),
+                                      KeyboardState.IsKeyPressed(Keys.Down),
+                                      KeyboardState.IsKeyPressed(Keys.Left),
+                                      KeyboardState.IsKeyPressed(Keys.Right),
+                                      KeyboardState.IsKeyPressed(Keys.RShiftKey))
+            ElseIf ManualControlPlayerTwo Then
+                speed = ManualControl(KeyboardState.IsKeyPressed(Keys.LControlKey),
+                                      KeyboardState.IsKeyPressed(Keys.W),
+                                      KeyboardState.IsKeyPressed(Keys.S),
+                                      KeyboardState.IsKeyPressed(Keys.A),
+                                      KeyboardState.IsKeyPressed(Keys.D),
+                                      KeyboardState.IsKeyPressed(Keys.LShiftKey))
+            End If
         End If
 
         'If the behavior specified a follow object, or a point to go to, figure out where that is.
@@ -2422,7 +2442,7 @@ Public Class Pony
             ' Sanity check time - are we even on screen now?
             If isInAvoidanceZoneNow OrElse Not isOnscreenNow Then
                 'we are no where! Find out where it is safe to be and run!
-                If Main.Instance.InPreviewMode OrElse Options.PonyTeleportEnabled Then
+                If Reference.InPreviewMode OrElse Options.PonyTeleportEnabled Then
                     Teleport()
                     AddUpdateRecord("Teleporting back onscreen.")
                     Exit Sub
@@ -2542,8 +2562,9 @@ Public Class Pony
 
         ' We are not following an object, but going to a point on the screen.
         If destinationCoords.X <> 0 AndAlso destinationCoords.Y <> 0 Then
-            Return New Point(CInt(0.01 * destinationCoords.X * Main.Instance.GetCombinedScreenArea().Width),
-                             CInt(0.01 * destinationCoords.Y * Main.Instance.GetCombinedScreenArea().Height))
+            Dim area = Options.GetCombinedScreenArea()
+            Return New Point(CInt(0.01 * destinationCoords.X * area.Width),
+                             CInt(0.01 * destinationCoords.Y * area.Height))
         End If
 
         ' We have no given destination.
@@ -2559,9 +2580,10 @@ Public Class Pony
 
     Friend Sub ActivateEffects(currentTime As TimeSpan)
 
-        If Options.PonyEffectsEnabled AndAlso Sleeping = False _
-          AndAlso Main.Instance.Dragging = False AndAlso ReturningToScreenArea = False Then
-
+        If Options.PonyEffectsEnabled AndAlso
+            Not Sleeping AndAlso
+            Not BeingDragged AndAlso
+            Not ReturningToScreenArea Then
             For Each effect In CurrentBehavior.Effects
                 If Not EffectsLastUsed.ContainsKey(effect) Then
                     EffectsLastUsed(effect) = TimeSpan.Zero
@@ -2929,8 +2951,8 @@ Public Class Pony
     End Function
 
     Shared Function GetScreenContainingPoint(point As Point) As Screen
-        For Each screen In Main.Instance.GetScreensToUse()
-            If (screen.WorkingArea.Contains(point)) Then Return screen
+        For Each screen In Options.GetScreensToUse()
+            If screen.WorkingArea.Contains(point) Then Return screen
         Next
         Return Nothing
     End Function
@@ -2940,7 +2962,7 @@ Public Class Pony
         If Not OperatingSystemInfo.IsWindows Then Return False
 
         Try
-            If Main.Instance.InPreviewMode Then Return False
+            If Reference.InPreviewMode Then Return False
             If Not Options.WindowAvoidanceEnabled Then Return False
 
             If movement = SizeF.Empty Then Return False
@@ -2992,18 +3014,27 @@ Public Class Pony
                 Dim pony_collision_count = 0
                 Dim ignored_collision_count = 0
 
+                'need our own PID for window avoidance (ignoring collisions with other ponies)
+                Dim currentProcessId As IntPtr
+                If Options.PonyAvoidsPonies Then
+                    Using currentProcess = Diagnostics.Process.GetCurrentProcess()
+                        currentProcessId = currentProcess.Handle
+                    End Using
+                End If
+
                 For Each collisionWindow In collisionWindows
 
                     If Options.PonyAvoidsPonies AndAlso Options.PonyStaysInBox Then
                         Exit For
                     End If
 
-                    Dim processId As IntPtr
-                    Win32.GetWindowThreadProcessId(collisionWindow, processId)
-
                     'ignore collisions with other ponies or effects
-                    If Options.PonyAvoidsPonies AndAlso processId = Main.Instance.processId Then
-                        pony_collision_count += 1
+                    If Options.PonyAvoidsPonies Then
+                        Dim collisisonWindowProcessId As IntPtr
+                        Win32.GetWindowThreadProcessId(collisionWindow, collisisonWindowProcessId)
+                        If collisisonWindowProcessId = currentProcessId Then
+                            pony_collision_count += 1
+                        End If
                     Else
 
                         'we are colliding with another window boundary.
@@ -3040,7 +3071,7 @@ Public Class Pony
 
     'Is the pony at least partially on any of the main screens?
     Friend Function IsPonyOnScreen(location As Point) As Boolean
-        Return IsLocationInRect(location, Main.Instance.GetCombinedScreenArea())
+        Return IsLocationInRect(location, Options.GetCombinedScreenArea())
     End Function
 
     'Is the pony at least partially on the supplied screens?
@@ -3049,7 +3080,7 @@ Public Class Pony
     End Function
 
     Private Function IsLocationInRect(location As Point, rect As Rectangle) As Boolean
-        If Main.Instance.InPreviewMode Then Return True
+        If Reference.InPreviewMode Then Return True
         Return rect.Contains(New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
     End Function
 
@@ -3060,7 +3091,7 @@ Public Class Pony
     ''are we inside the user specified "Everfree Forest"?
     Function InAvoidanceArea(new_location As Point) As Boolean
 
-        If Main.Instance.InPreviewMode Then
+        If Reference.InPreviewMode Then
             Dim previewArea = Pony.PreviewWindowRectangle
 
             If CurrentImageSize.Y > previewArea.Height OrElse _
@@ -3113,7 +3144,7 @@ Public Class Pony
 
     Function IsPonyNearMouseCursor(location As Point) As Boolean
         If Not Options.CursorAvoidanceEnabled Then Return False
-        If Main.Instance.ScreensaverMode Then Return False
+        If Reference.InScreensaverMode Then Return False
 
         If CursorImmunity > 0 Then Return False
 
@@ -3129,8 +3160,8 @@ Public Class Pony
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
                 Dim cursorLoc = New Vector2F(CursorLocation)
-                If Vector2F.Distance(loc + (Behavior.LeftImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
-                If Vector2F.Distance(loc + (Behavior.RightImageCenter * s), cursorLoc) <= Main.Instance.CursorZoneSize Then Return True
+                If Vector2F.Distance(loc + (behavior.LeftImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
+                If Vector2F.Distance(loc + (behavior.RightImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
             End If
         End While
 
@@ -3143,9 +3174,9 @@ Public Class Pony
     ''' <returns>The center of the preview area in preview mode, otherwise a random location within the allowable region, if one can be
     ''' found; otherwise Point.Empty.</returns>
     Friend Function FindSafeDestination() As Point
-        If Main.Instance.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
+        If Reference.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
 
-        Dim usableScreens = Main.Instance.GetScreensToUse.ToArray()
+        Dim usableScreens = Options.GetScreensToUse.ToArray()
         For i = 0 To 300
             Dim randomScreen = usableScreens(Rng.Next(usableScreens.Length))
             Dim teleportLocation = New Point(
@@ -3348,6 +3379,7 @@ Public Class Pony
                               ponyUp As Boolean, ponyDown As Boolean, ponyLeft As Boolean, ponyRight As Boolean,
                               ponySpeed As Boolean) As Double
         Diagonal = 0
+        _manualControlAction = ponyAction
         If Not PlayingGame AndAlso ponyAction Then
             CursorOverPony = True
             Paint() 'enable effects on mouseover.
@@ -3525,7 +3557,7 @@ Public Class Effect
     End Sub
 
     Public Sub Teleport()
-        Dim screens = Main.Instance.GetScreensToUse().ToArray()
+        Dim screens = Options.GetScreensToUse().ToArray()
         Dim screen = screens(Rng.Next(screens.Length))
         Location = New Point(
             CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),

@@ -212,6 +212,7 @@
     <Compile Include="Monitoring\SpriteDebugForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Reference.vb" />
     <Compile Include="Win32.vb" />
     <Compile Include="DesktopPonies\HouseOptionsForm.Designer.vb">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>

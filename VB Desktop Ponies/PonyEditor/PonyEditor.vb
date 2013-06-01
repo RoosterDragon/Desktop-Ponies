@@ -37,7 +37,7 @@ Public Class PonyEditor
     ''' <summary>
     ''' Keep track of any saves made at all in the editor. If so, we'll need to reload files when we quit.
     ''' </summary>
-    Friend changes_made As Boolean = False
+    Friend ChangesMade As Boolean = False
 
     ''' <summary>
     ''' Used so we can swap grid positions and keep track of how everything is sorted when we refresh.
@@ -75,7 +75,7 @@ Public Class PonyEditor
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
             has_saved = True
-            changes_made = False
+            ChangesMade = False
 
             PreviewPony = Nothing
 
@@ -141,7 +141,7 @@ Public Class PonyEditor
         '    Save_Button_Click(sender, e)
         'Next
 
-        pe_interface = Main.Instance.GetInterface()
+        pe_interface = Options.GetInterface()
         pe_interface.Topmost = True
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
@@ -1914,7 +1914,7 @@ Public Class PonyEditor
             End Using
 
             MsgBox("All ponies must now be reloaded. Once this operation is complete, you can reopen the editor and select your pony for editing.")
-            changes_made = True
+            ChangesMade = True
             Me.Close()
 
         Catch ex As Exception
@@ -2029,7 +2029,7 @@ Public Class PonyEditor
         PausePonyButton.Enabled = False
         pe_animator.Pause(False)
 
-        changes_made = True
+        ChangesMade = True
         SavePony(PreviewPony.Directory)
 
         RefreshButton_Click(Nothing, Nothing)

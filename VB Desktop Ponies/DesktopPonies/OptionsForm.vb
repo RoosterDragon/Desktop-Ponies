@@ -1,38 +1,30 @@
 ﻿Public Class OptionsForm
-    Friend Shared Instance As OptionsForm
-    Private Shared alreadyLoaded As Boolean
-
     Private selectingMonitors As Boolean
     Private avoidanceZonePreviewGraphics As Graphics
+    Private initializing As Boolean = True
 
     Public Sub New()
         InitializeComponent()
-        CreateHandle()
-        FirstLoad()
     End Sub
 
-    Private Sub FirstLoad()
-        If alreadyLoaded Then Exit Sub
+    Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Enabled = False
+        BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
+    End Sub
 
-        Instance = Me
+    Private Sub LoadInternal()
         Icon = My.Resources.Twilight
-
-        'setup avoidance area
-        CursorAvoidanceRadius.Value = Main.Instance.CursorZoneSize
 
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
 
-        'get monitor names
-        For Each monitor In Screen.AllScreens
-            MonitorsSelection.Items.Add(monitor.DeviceName)
-        Next
+        MonitorsSelection.Items.AddRange(Screen.AllScreens.Select(Function(s) s.DeviceName).ToArray())
 
         For i = 0 To MonitorsSelection.Items.Count - 1
             MonitorsSelection.SetSelected(i, True)
         Next
 
-        If Not Main.Instance.DirectXSoundAvailable Then
+        If Not Reference.DirectXSoundAvailable Then
             SoundDisabledLabel.Visible = True
             Sound.Enabled = False
             Sound.Checked = False
@@ -43,9 +35,7 @@
             Sound.Enabled = True
         End If
 
-        Main.Instance.NoRandomDuplicates = True
-
-        SetDefaultFilterCategories()
+        Main.Instance.ResetToDefaultFilterCategories()
 
         ' Set initial volume value, event handler will update values as needed.
         Volume.Value = 650
@@ -64,28 +54,10 @@
             Options.PonySpeechEnabled = False
         End If
 
-        alreadyLoaded = True
-    End Sub
+        initializing = False
+        RefreshOptions()
 
-    Private Shared Sub SetDefaultFilterCategories()
-
-        Main.Instance.FilterOptionsBox.Items.Clear()
-
-        Main.Instance.FilterOptionsBox.Items.Add("Main Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Supporting Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Alternate Art")
-        Main.Instance.FilterOptionsBox.Items.Add("Fillies")
-        Main.Instance.FilterOptionsBox.Items.Add("Colts")
-        Main.Instance.FilterOptionsBox.Items.Add("Pets")
-        Main.Instance.FilterOptionsBox.Items.Add("Stallions")
-        Main.Instance.FilterOptionsBox.Items.Add("Mares")
-        Main.Instance.FilterOptionsBox.Items.Add("Alicorns")
-        Main.Instance.FilterOptionsBox.Items.Add("Unicorns")
-        Main.Instance.FilterOptionsBox.Items.Add("Pegasi")
-        Main.Instance.FilterOptionsBox.Items.Add("Earth Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Non-Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Not Tagged")
-
+        Enabled = True
     End Sub
 
     Private Sub RefreshOptions()
@@ -153,19 +125,22 @@
         selectingMonitors = False
     End Sub
 
-    Friend Sub LoadButton_Click(sender As Object, e As EventArgs, Optional profile As String = Options.DefaultProfileName) Handles LoadButton.Click
+    Private Sub LoadButton_Click(sender As Object, e As EventArgs) Handles LoadButton.Click
+        LoadProfile()
+    End Sub
+
+    Private Sub LoadProfile()
+        Dim profile = Options.DefaultProfileName
         Try
-            If Not IsNothing(sender) Then
-                If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
-                    profile = Trim(Main.Instance.ProfileComboBox.Text)
-                End If
+            If Not String.IsNullOrWhiteSpace(Main.Instance.ProfileComboBox.Text) Then
+                profile = Main.Instance.ProfileComboBox.Text.Trim()
             End If
 
             Options.LoadProfile(profile)
 
             RefreshOptions()
             If Main.Instance.FilterOptionsBox.Items.Count = 0 Then
-                SetDefaultFilterCategories()
+                Main.Instance.ResetToDefaultFilterCategories()
             End If
 
             SizeScale_ValueChanged(Nothing, Nothing)
@@ -173,8 +148,7 @@
             My.Application.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
         End Try
         Try
-            IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
-                     profile, System.Text.Encoding.UTF8)
+            IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"), profile, System.Text.Encoding.UTF8)
         Catch ex As IO.IOException
             ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
             Console.WriteLine("Warning: Failed to save current.txt file.")
@@ -205,8 +179,6 @@
     End Sub
 
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
-        alreadyLoaded = False
-
         Options.PonyCounts.Clear()
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
@@ -215,6 +187,7 @@
     End Sub
 
     Private Sub AvoidanceZoneArea_ValueChanged(sender As Object, e As EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
+        If initializing Then Return
         Options.ExclusionZone.X = AvoidanceZoneX.Value / 100
         Options.ExclusionZone.Y = AvoidanceZoneY.Value / 100
         Options.ExclusionZone.Width = AvoidanceZoneWidth.Value / 100
@@ -229,6 +202,7 @@
     End Sub
 
     Private Sub MonitorsSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
+        If initializing Then Return
         If selectingMonitors Then Exit Sub
 
         If MonitorsSelection.SelectedItems.Count = 0 Then
@@ -252,28 +226,31 @@
             'done
             Exit Sub
         ElseIf TypeOf Pony.CurrentViewer Is CSDesktopPonies.SpriteManagement.WinFormSpriteInterface Then
-            Dim area = Main.Instance.GetCombinedScreenArea()
+            Dim area = Options.GetCombinedScreenArea()
             DirectCast(Pony.CurrentViewer, CSDesktopPonies.SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
         End If
 
     End Sub
 
     Private Sub CursorAvoidanceRadius_ValueChanged(sender As Object, e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
-        Main.Instance.CursorZoneSize = CInt(CursorAvoidanceRadius.Value)
+        If initializing Then Return
         Options.CursorAvoidanceSize = CursorAvoidanceRadius.Value
     End Sub
 
     Private Sub WindowAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles WindowAvoidance.CheckedChanged
+        If initializing Then Return
         PoniesAvoidPonies.Enabled = WindowAvoidance.Checked
         PoniesStayInBoxes.Enabled = WindowAvoidance.Checked
         Options.WindowAvoidanceEnabled = WindowAvoidance.Checked
     End Sub
 
     Private Sub SizeScale_ValueChanged(sender As Object, e As EventArgs) Handles SizeScale.ValueChanged
+        If initializing Then Return
         SizeScaleValueLabel.Text = Math.Round(SizeScale.Value / 100.0F, 2) & "x"
     End Sub
 
     Private Sub SizeScale_MouseUp(sender As Object, e As EventArgs) Handles SizeScale.MouseUp
+        If initializing Then Return
         Options.ScaleFactor = SizeScale.Value / 100.0F
         Main.Instance.PonySelectionPanel.SuspendLayout()
         For Each control As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
@@ -284,6 +261,7 @@
     End Sub
 
     Private Sub Volume_ValueChanged(sender As Object, e As EventArgs) Handles Volume.ValueChanged
+        If initializing Then Return
 
         'The slider is in %, we need to convert that to the volume that an
         'Microsoft.DirectX.AudioVideoPlayback.Audio.volume would take.
@@ -310,15 +288,17 @@
     End Sub
 
     Private Sub ScreensaverColor_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverColor.CheckedChanged
+        If initializing Then Return
         If ScreensaverColor.Checked Then
             ScreensaverColorNeededLabel.Visible = Options.ScreensaverBackgroundColor.A < 255
             Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor
         Else
-        ScreensaverColorNeededLabel.Visible = False
+            ScreensaverColorNeededLabel.Visible = False
         End If
     End Sub
 
     Private Sub ScreensaverImage_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverImage.CheckedChanged
+        If initializing Then Return
         If ScreensaverImage.Checked Then
             If Options.ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(Options.ScreensaverBackgroundImagePath) Then
                 ScreensaverImageNeededLabel.Visible = True
@@ -353,6 +333,7 @@
     End Sub
 
     Private Sub AlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
+        If initializing Then Return
         Options.AlwaysOnTop = AlwaysOnTop.Checked
         If Not IsNothing(Pony.CurrentViewer) Then
             Pony.CurrentViewer.Topmost = Options.AlwaysOnTop
@@ -360,86 +341,105 @@
     End Sub
 
     Private Sub TimeScale_Scroll(sender As Object, e As EventArgs) Handles TimeScale.Scroll
+        If initializing Then Return
         Options.TimeFactor = TimeScale.Value / 10.0F
         TimeScaleValueLabel.Text = Options.TimeFactor.ToString("0.0x", Globalization.CultureInfo.CurrentCulture)
     End Sub
 
     Private Sub PonySpeechChance_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged
+        If initializing Then Return
         Options.PonySpeechChance = PonySpeechChance.Value / 100
     End Sub
 
     Private Sub SpeechDisabled_CheckedChanged(sender As Object, e As EventArgs) Handles SpeechDisabled.CheckedChanged
+        If initializing Then Return
         Options.PonySpeechEnabled = Not SpeechDisabled.Checked
     End Sub
 
     Private Sub CursorAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles CursorAvoidance.CheckedChanged
+        If initializing Then Return
         Options.CursorAvoidanceEnabled = CursorAvoidance.Checked
     End Sub
 
     Private Sub PonyDragging_CheckedChanged(sender As Object, e As EventArgs) Handles PonyDragging.CheckedChanged
+        If initializing Then Return
         Options.PonyDraggingEnabled = PonyDragging.Checked
     End Sub
 
     Private Sub Interactions_CheckedChanged(sender As Object, e As EventArgs) Handles Interactions.CheckedChanged
+        If initializing Then Return
         Options.PonyInteractionsEnabled = Interactions.Checked
     End Sub
 
     Private Sub InteractionErrorsDisplayed_CheckedChanged(sender As Object, e As EventArgs) Handles InteractionErrorsDisplayed.CheckedChanged
+        If initializing Then Return
         Options.DisplayPonyInteractionsErrors = InteractionErrorsDisplayed.Checked
     End Sub
 
     Private Sub MaxPonies_ValueChanged(sender As Object, e As EventArgs) Handles MaxPonies.ValueChanged
+        If initializing Then Return
         Options.MaxPonyCount = CInt(MaxPonies.Value)
     End Sub
 
     Private Sub AlphaBlending_CheckedChanged(sender As Object, e As EventArgs) Handles AlphaBlending.CheckedChanged
+        If initializing Then Return
         Options.AlphaBlendingEnabled = AlphaBlending.Checked
     End Sub
 
     Private Sub Effects_CheckedChanged(sender As Object, e As EventArgs) Handles Effects.CheckedChanged
+        If initializing Then Return
         Options.PonyEffectsEnabled = Effects.Checked
     End Sub
 
     Private Sub PoniesAvoidPonies_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesAvoidPonies.CheckedChanged
+        If initializing Then Return
         Options.PonyAvoidsPonies = PoniesAvoidPonies.Checked
     End Sub
 
     Private Sub PoniesStayInBoxes_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesStayInBoxes.CheckedChanged
+        If initializing Then Return
         Options.PonyStaysInBox = PoniesStayInBoxes.Checked
     End Sub
 
     Private Sub Teleport_CheckedChanged(sender As Object, e As EventArgs) Handles Teleport.CheckedChanged
+        If initializing Then Return
         Options.PonyTeleportEnabled = Teleport.Checked
     End Sub
 
     Private Sub Sound_CheckedChanged(sender As Object, e As EventArgs) Handles Sound.CheckedChanged
+        If initializing Then Return
         Options.SoundEnabled = Sound.Checked
     End Sub
 
     Private Sub SoundLimitOneGlobally_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOneGlobally.CheckedChanged
+        If initializing Then Return
         Options.SoundSingleChannelOnly = SoundLimitOneGlobally.Checked
     End Sub
 
     Private Sub SoundLimitOnePerPony_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOnePerPony.CheckedChanged
+        If initializing Then Return
         Options.SoundSingleChannelOnly = Not SoundLimitOnePerPony.Checked
     End Sub
 
     Private Sub SuspendForFullscreenApp_CheckedChanged(sender As Object, e As EventArgs) Handles SuspendForFullscreenApp.CheckedChanged
+        If initializing Then Return
         Options.SuspendForFullscreenApplication = SuspendForFullscreenApp.Checked
     End Sub
 
     Private Sub ScreensaverSounds_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverSounds.CheckedChanged
+        If initializing Then Return
         Options.SoundEnabled = ScreensaverSounds.Checked
     End Sub
 
     Private Sub ScreensaverTransparent_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverTransparent.CheckedChanged
+        If initializing Then Return
         If ScreensaverTransparent.Checked Then
             Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.Transparent
         End If
     End Sub
 
     Private Sub CloseButton_Click(sender As Object, e As EventArgs) Handles CloseButton.Click
-        Me.Visible = False
+        Close()
     End Sub
 
     Private Sub OptionsForm_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed

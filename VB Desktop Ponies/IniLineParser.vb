@@ -52,4 +52,38 @@
                 Return Nothing
         End Select
     End Function
+
+    Public Function GetDirection(setting As String) As Direction
+        Select Case setting
+            Case "top_left"
+                Return Direction.TopLeft
+            Case "top"
+                Return Direction.TopCenter
+            Case "top_right"
+                Return Direction.TopRight
+            Case "left"
+                Return Direction.MiddleLeft
+            Case "center"
+                Return Direction.MiddleCenter
+            Case "right"
+                Return Direction.MiddleRight
+            Case "bottom_left"
+                Return Direction.BottomLeft
+            Case "bottom"
+                Return Direction.BottomCenter
+            Case "bottom_right"
+                Return Direction.BottomRight
+            Case "any"
+                Return Direction.Random
+            Case "any-not_center"
+                Return Direction.RandomNotCenter
+            Case Else
+                Dim result As Direction
+                If [Enum].TryParse(setting, result) Then
+                    Return result
+                Else
+                    Throw New ArgumentException("Invalid placement direction or centering for effect.", "setting")
+                End If
+        End Select
+    End Function
 End Module

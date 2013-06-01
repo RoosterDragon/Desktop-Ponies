@@ -5,15 +5,8 @@ Imports System.Collections.ObjectModel
 
 Public NotInheritable Class Options
     Public Const DefaultProfileName = "default"
-    Private Shared installLocationValue As String = Path.GetDirectoryName(Application.ExecutablePath)
-    Public Shared Property InstallLocation As String
-        Get
-            Return installLocationValue
-        End Get
-        Set(value As String)
-            installLocationValue = value
-        End Set
-    End Property
+
+    Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
 
     Private Const OptionsCount = 30
     Public Shared ProfileName As String
@@ -45,14 +38,16 @@ Public NotInheritable Class Options
     Public Shared ScreensaverBackgroundColor As Color
     Public Shared ScreensaverBackgroundImagePath As String = ""
 
+    Public Shared NoRandomDuplicates As Boolean
+
     Public Shared MaxPonyCount As Integer
     Public Shared TimeFactor As Single
     Public Shared ScaleFactor As Single
     Public Shared ExclusionZone As RectangleF
 
-    Public Shared MonitorNames As New ObservableCollection(Of String)
-    Public Shared PonyCounts As New Dictionary(Of String, Integer)
-    Public Shared CustomTags As New List(Of String)
+    Public Shared MonitorNames As New HashSet(Of String)()
+    Public Shared PonyCounts As New Dictionary(Of String, Integer)()
+    Public Shared CustomTags As New List(Of String)()
 
     Public Shared ReadOnly Property ProfileDirectory As String
         Get
@@ -67,10 +62,6 @@ Public NotInheritable Class Options
     End Enum
 
     Private Sub New()
-    End Sub
-
-    Shared Sub New()
-        LoadDefaultProfile()
     End Sub
 
     Private Shared Sub ValidateProfileName(profile As String)
@@ -142,7 +133,7 @@ Public NotInheritable Class Options
                                 ScreensaverBackgroundStyle)
                             ScreensaverBackgroundColor = Color.FromArgb(Integer.Parse(columns(28), CultureInfo.InvariantCulture))
                             ScreensaverBackgroundImagePath = columns(29)
-                            Main.Instance.NoRandomDuplicates = Boolean.Parse(columns(30))
+                            NoRandomDuplicates = Boolean.Parse(columns(30))
                         Case "monitor"
                             If columns.Length - 1 <> 1 Then Throw New InvalidDataException("Expected a monitor name on the monitor line.")
                             MonitorNames.Add(columns(1))
@@ -195,6 +186,8 @@ Public NotInheritable Class Options
         ScreensaverBackgroundColor = Color.Empty
         ScreensaverBackgroundImagePath = ""
 
+        NoRandomDuplicates = True
+
         MaxPonyCount = 300
         TimeFactor = 1
         ScaleFactor = 1
@@ -202,7 +195,7 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadPonyCounts()
-        If Main.Instance.Ponies_Have_Launched Then Exit Sub
+        If Main.Instance.PoniesHaveLaunched Then Exit Sub
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
             If PonyCounts.ContainsKey(ponyPanel.PonyName.Text) Then
@@ -214,25 +207,9 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadCustomTags()
-        If Main.Instance.Ponies_Have_Launched Then Exit Sub
+        If Main.Instance.PoniesHaveLaunched Then Exit Sub
 
-        Main.Instance.FilterOptionsBox.Items.Clear()
-
-        Main.Instance.FilterOptionsBox.Items.Add("Main Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Supporting Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Alternate Art")
-        Main.Instance.FilterOptionsBox.Items.Add("Fillies")
-        Main.Instance.FilterOptionsBox.Items.Add("Colts")
-        Main.Instance.FilterOptionsBox.Items.Add("Pets")
-        Main.Instance.FilterOptionsBox.Items.Add("Stallions")
-        Main.Instance.FilterOptionsBox.Items.Add("Mares")
-        Main.Instance.FilterOptionsBox.Items.Add("Alicorns")
-        Main.Instance.FilterOptionsBox.Items.Add("Unicorns")
-        Main.Instance.FilterOptionsBox.Items.Add("Pegasi")
-        Main.Instance.FilterOptionsBox.Items.Add("Earth Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Non-Ponies")
-        Main.Instance.FilterOptionsBox.Items.Add("Not Tagged")
-
+        Main.Instance.ResetToDefaultFilterCategories()
         Main.Instance.FilterOptionsBox.Items.AddRange(CustomTags.ToArray())
     End Sub
 
@@ -270,10 +247,9 @@ Public NotInheritable Class Options
                                      ScreensaverStyle,
                                      ScreensaverBackgroundColor.ToArgb().ToString(CultureInfo.InvariantCulture),
                                      ScreensaverBackgroundImagePath,
-                                     Main.Instance.NoRandomDuplicates)
+                                     NoRandomDuplicates)
             file.WriteLine(optionsLine)
 
-            GetMonitorNames()
             GetPonyCounts()
 
             For Each monitorName In MonitorNames
@@ -308,13 +284,6 @@ Public NotInheritable Class Options
                              CInt(ExclusionZone.Height * bounds.Height))
     End Function
 
-    Private Shared Sub GetMonitorNames()
-        MonitorNames.Clear()
-        For Each monitorName As String In OptionsForm.Instance.MonitorsSelection.SelectedItems
-            MonitorNames.Add(monitorName)
-        Next
-    End Sub
-
     Private Shared Sub GetPonyCounts()
         PonyCounts.Clear()
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
@@ -324,5 +293,39 @@ Public NotInheritable Class Options
             End If
         Next
     End Sub
+
+    Public Shared Function GetScreensToUse() As IEnumerable(Of Screen)
+        Return Screen.AllScreens.Where(Function(screen) Options.MonitorNames.Contains(screen.DeviceName))
+    End Function
+
+    Public Shared Function GetCombinedScreenArea() As Rectangle
+        Dim area As Rectangle = Rectangle.Empty
+        For Each screen In GetScreensToUse()
+            If area = Rectangle.Empty Then
+                area = screen.WorkingArea
+            Else
+                area = Rectangle.Union(area, screen.WorkingArea)
+            End If
+        Next
+        Return area
+    End Function
+
+    Public Shared Function GetInterface() As CSDesktopPonies.SpriteManagement.ISpriteCollectionView
+        'This should already be set in the options, but in case it isn't, use all monitors.
+        If MonitorNames.Count = 0 Then
+            For Each monitor In Screen.AllScreens
+                MonitorNames.Add(monitor.DeviceName)
+            Next
+        End If
+
+        Dim viewer As CSDesktopPonies.SpriteManagement.ISpriteCollectionView
+        If OperatingSystemInfo.IsWindows Then
+            viewer = New CSDesktopPonies.SpriteManagement.WinFormSpriteInterface(GetCombinedScreenArea(), AlphaBlendingEnabled)
+        Else
+            viewer = New CSDesktopPonies.SpriteManagement.GtkSpriteInterface(AlphaBlendingEnabled)
+        End If
+        viewer.ShowInTaskbar = ShowInTaskbar
+        Return viewer
+    End Function
 
 End Class

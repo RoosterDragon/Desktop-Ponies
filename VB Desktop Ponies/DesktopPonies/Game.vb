@@ -835,8 +835,8 @@ Friend Module Games
                             Exit Sub
                         End If
                         'If ponies are being controlled, don't kick unless the action key (control - left or right) is being pushed
-                        If Player.ManualControlPlayerOne AndAlso Not Main.Instance.PonyAction Then Exit Sub
-                        If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
+                        If Player.ManualControlPlayerOne AndAlso Not Player.ManualControlAction Then Exit Sub
+                        If Player.ManualControlPlayerTwo AndAlso Not Player.ManualControlAction Then Exit Sub
                         Kick_Ball(ball, 10, Get_OtherTeam_Goal(), Nothing, Me, "*Kick*!")
                         LastKickTime = DateTime.UtcNow
                     Case PlayerActionType.ThrowBallToTeammate
@@ -867,8 +867,8 @@ Friend Module Games
                             Exit Sub
                         End If
 
-                        If Player.ManualControlPlayerOne AndAlso Not Main.Instance.PonyAction Then Exit Sub
-                        If Player.ManualControlPlayerTwo AndAlso Not Main.Instance.PonyAction_2 Then Exit Sub
+                        If Player.ManualControlPlayerOne AndAlso Not Player.ManualControlAction Then Exit Sub
+                        If Player.ManualControlPlayerTwo AndAlso Not Player.ManualControlAction Then Exit Sub
 
                         Bounce_Ball(ball, 7, Me, "*Ping*!")
                         LastKickTime = DateTime.UtcNow

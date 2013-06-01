@@ -9,85 +9,34 @@ Public Class Main
     Friend Shared Instance As Main
 
 #Region "Fields and Properties"
-    Private initialized As Boolean = False
-    Private loading As Boolean = False
+    Private initialized As Boolean
+    Private loading As Boolean
     Private loadWatch As New Diagnostics.Stopwatch()
     Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
 
-    Friend DesktopHandle As IntPtr
-    Friend ShellHandle As IntPtr
-    Friend processId As IntPtr
-    Friend Suspended_For_FullScreenApp As Boolean = False
-
     Private animator As DesktopPonyAnimator
     Private ponyViewer As ISpriteCollectionView
-    Friend Startup_Ponies As New List(Of Pony)
+    Private ReadOnly startupPonies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
-    Friend DeadEffects As New List(Of Effect)
-    Friend ActiveSounds As New List(Of Object)
-    Friend HouseBases As New List(Of HouseBase)
+    Friend ReadOnly DeadEffects As New List(Of Effect)
+    Friend ReadOnly ActiveSounds As New List(Of Object)
+    Friend ReadOnly HouseBases As New List(Of HouseBase)
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
-    'How big the area around the cursor used for cursor detection should be, in pixels.
-    Friend CursorZoneSize As Integer = 100
-    'used to tell when we should come out of screensaver mode
-    Friend cursor_position As New Point
+    ''' <summary>
+    ''' Are ponies currently walking around the desktop?
+    ''' </summary>
+    Friend PoniesHaveLaunched As Boolean
 
-    'Are ponies currently walking around the desktop?
-    Friend Ponies_Have_Launched As Boolean = False
+    Friend ReadOnly games As New List(Of Game)
+    Friend CurrentGame As Game
 
-    'Is any pony being dragged by the mouse?
-    Friend Dragging As Boolean = False
-    Friend controlled_pony As String = ""
+    Private tempFilterOptions As String()
 
-    Friend Audio_Last_Played As DateTime = DateTime.UtcNow
-    Friend Last_Audio_Length As Integer = 0 'milliseconds
-
-    'Used in the editor.
-    Friend InPreviewMode As Boolean = False
-
-    'Were we told to auto-start from the command line?
-    Friend AutoStarted As Boolean = False
-
-    Friend ScreensaverMode As Boolean = False
-    Friend screen_saver_path As String = ""
-    Dim screensaver_settings_file_path As String = Path.Combine(Path.GetTempPath, "DesktopPonies_ScreenSaver_Settings.ini")
-
-    Friend games As New List(Of Game)
-    Friend CurrentGame As Game = Nothing
-
-    'the following are used when in manual control mode
-    Friend PonyUp As Boolean = False
-    Friend PonyDown As Boolean = False
-    Friend PonyLeft As Boolean = False
-    Friend PonyRight As Boolean = False
-    Friend PonySpeed As Boolean = False 'shift key is being pressed, so go faster.
-    Friend PonyAction As Boolean = False
-
-    'Keys for player 2
-    Friend PonyUp_2 As Boolean = False
-    Friend PonyDown_2 As Boolean = False
-    Friend PonyLeft_2 As Boolean = False
-    Friend PonyRight_2 As Boolean = False
-    Friend PonySpeed_2 As Boolean = False 'shift key is being pressed, so go faster.
-    Friend PonyAction_2 As Boolean = False
-
-    Friend NoRandomDuplicates As Boolean = True
-
-    Friend DirectXSoundAvailable As Boolean = False
-
-    Dim all_sleeping As Boolean = False
-
-    Friend AudioErrorShown As Boolean = False
-
-    'A temporary list of selected filter settings.
-    Dim Temp_Filters As New List(Of String)
-
-    Dim dont_load_profile As Boolean = False
-    Dim startup_profile As String = Options.DefaultProfileName
+    Private preventLoadProfile As Boolean
 
     Private previewWindowRectangle As Func(Of Rectangle)
 
@@ -95,11 +44,9 @@ Public Class Main
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
-
-    Private ReadOnly screensToUse As New List(Of Screen)
 #End Region
 
-    Enum BehaviorOption
+    Friend Enum BehaviorOption
         Name = 1
         Probability = 2
         MaxDuration = 3
@@ -125,18 +72,19 @@ Public Class Main
     End Enum
 
 #Region "Initialization"
-
     Public Sub New()
         loadWatch.Start()
         InitializeComponent()
         initialized = True
     End Sub
 
-    'Read all configuration files and pony folders.
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
     End Sub
 
+    ''' <summary>
+    ''' Read all configuration files and pony folders.
+    ''' </summary>
     Private Sub LoadInternal()
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
         Instance = Me
@@ -149,19 +97,7 @@ Public Class Main
         'DesktopHandle = DetectFulLScreen_m.GetDesktopWindow()
         'ShellHandle = DetectFulLScreen_m.GetShellWindow()
 
-        'need our own PID for window avoidance (ignoring collisions with other ponies)
-        Using currentProcess = Diagnostics.Process.GetCurrentProcess()
-            processId = currentProcess.Handle
-        End Using
 
-        ' Check to see if the right version of DirectX is installed for sounds.
-        Try
-            System.Reflection.Assembly.Load(
-                "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
-            DirectXSoundAvailable = True
-        Catch ex As Exception
-            ' If we can't load the assembly, just don't enable sound.
-        End Try
 
         Try
             Dim Arguments = My.Application.CommandLineArgs
@@ -170,7 +106,7 @@ Public Class Main
 
                 If Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase) Then
                     'for some versions of windows, starting with no parameters is the same as /c (configure)
-                    SetScreensaverPath()
+                    Reference.SetScreensaverPath()
                     Me.Close()
                     Exit Sub
                 End If
@@ -182,7 +118,7 @@ Public Class Main
             If Arguments.Count > 0 Then
                 Select Case Split(LCase(Trim(Arguments(0))), ":")(0)
                     Case "autostart"
-                        AutoStarted = True
+                        Reference.AutoStarted = True
                         Me.ShowInTaskbar = False
                         ShowInTaskbar = False
 
@@ -194,11 +130,17 @@ Public Class Main
 
                         'windows is telling us "start as a screensaver"
                     Case "/s"
-                        GetScreensaverPath()
-                        If screen_saver_path = "" Then Me.Close()
-                        Options.InstallLocation = screen_saver_path
-                        ScreensaverMode = True
-                        AutoStarted = True
+                        Dim path = Reference.TryGetScreensaverPath()
+                        If path Is Nothing Then
+                            MessageBox.Show(Me, "The screensaver path has not been configured correctly." &
+                                            " Until it has been set, the screensaver mode cannot be used.",
+                                            "Screensaver Not Configured", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                            Close()
+                        End If
+
+                        Options.InstallLocation = path
+                        Reference.InScreensaverMode = True
+                        Reference.AutoStarted = True
                         ShowInTaskbar = False
                         WindowState = FormWindowState.Minimized
 
@@ -214,7 +156,7 @@ Public Class Main
                         Exit Sub
                         'windows says:  "configure screensaver"
                     Case "/c"
-                        SetScreensaverPath()
+                        Reference.SetScreensaverPath()
                         Me.Close()
                         Exit Sub
                     Case Else
@@ -234,26 +176,13 @@ Public Class Main
 
         loading = True
 
-        If Not AutoStarted Then
+        If Not Reference.AutoStarted Then
             WindowState = FormWindowState.Normal
         End If
 
         'temporarily save filter selections, if any, in the case that we are reloading after making a change in the editor.
         '(Loading options resets the filter, and will cause havoc otherwise)
         SaveFilterSelections()
-
-        'the options form is needed now as the preferences are read directly from the controls on that form.
-        'we load it invisibly here
-        ' IMPORTANT: Porting note. The My.Forms class provides access to forms, but provides a new one per thread.
-        ' This annoying global state is now a problem due to callbacks from worker threads.
-        ' Affected forms have an instance class which must now be referenced.
-        ' Ideally, this global state would not be used and instances would get passed down the chain, but I am making do.
-        ' Ensure therefore that the instances are initialized on this application thread for later.
-        ' The PonyEditor also requires this, but must wait until templates are loaded.
-        OptionsForm.Instance = New OptionsForm()
-        'OptionsForm.Instance.Load_Button_Click(Nothing, Nothing, Option.DefaultProfileName, True)
-        AddHandler Options.MonitorNames.CollectionChanged, AddressOf MonitorNames_CollectionChanged
-
         LoadFilterSelections()
 
         ' Load the profile that was last in use by this user.
@@ -275,22 +204,23 @@ Public Class Main
         Dim loadTemplates = True
         Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
         If startedAsScr Then
-            ' Check screensaver path is still valid.
-            If Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory)) Then
-                MsgBox("The screensaver path does not appear to be correct. Please adjust it.")
-                Dim result = SetScreensaverPath()
+            Dim screensaverPath = Reference.TryGetScreensaverPath()
+            If screensaverPath Is Nothing Then
+                MessageBox.Show(
+                    Me, "The screensaver has not yet been configured, or the previous configuration is invalid. Please reconfigure now.",
+                    "Configuration Missing", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Dim result = Reference.SetScreensaverPath()
                 If Not result Then
-                    MsgBox("Will not be able to run screensaver mode until the correct path is specified.")
+                    MessageBox.Show(Me, "You will be unable to run Desktop Ponies as a screensaver until it is configured.",
+                                    "Configuration Aborted", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Else
-                    MsgBox("Restart the screensaver for changes to take effect.")
+                    MessageBox.Show(Me, "Restart Desktop Ponies for the new settings to take effect.",
+                                    "Configuration Successful", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 End If
                 loadTemplates = False
                 loading = False
                 Close()
             End If
-
             ' Start in a minimized state to load, and attempt to open the screensaver profile.
             ShowInTaskbar = False
             WindowState = FormWindowState.Minimized
@@ -311,108 +241,23 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub GetScreensaverPath()
-        Try
-            'We can't use isolated storage as windows uses 8 character names when starting as a screensaver for some reason, and then
-            'gets confused when it can't find the assembly name "DESKTO~1"...
-            'instead, we just place a file in the temporary folder.
-
-            'Dim UserIsolatedStorage = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForAssembly()
-            'Dim UserIsolatedStorageFile = New System.IO.IsolatedStorage.IsolatedStorageFileStream("DesktopPonies_ScreenSaver_Settings.txt", _
-            '                                                                      IO.FileMode.Open, IO.FileAccess.Read, UserIsolatedStorage)
-
-            'Dim SettingsFile As New System.IO.StreamReader(UserIsolatedStorageFile)
-
-            If Not My.Computer.FileSystem.FileExists(screensaver_settings_file_path) Then
-                SetScreensaverPath()
-            End If
-
-            Using reader As New StreamReader(screensaver_settings_file_path)
-                screen_saver_path = reader.ReadLine()
-            End Using
-            'UserIsolatedStorageFile.Close()
-            'UserIsolatedStorage.Close()
-
-            While Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, PonyBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, HouseBase.RootDirectory)) OrElse
-            Not My.Computer.FileSystem.DirectoryExists(IO.Path.Combine(Main.Instance.screen_saver_path, Game.RootDirectory))
-                MsgBox("The screensaver path does not appear to be correct. Please adjust it." & vbNewLine &
-                       "The '" & PonyBase.RootDirectory & "', '" & HouseBase.RootDirectory &
-                   "' and '" & Game.RootDirectory & "' directories are expected to exist in this location. Please check your selection.")
-                If Not SetScreensaverPath() Then Exit Sub
-            End While
-
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "The screensaver path has not been configured correctly." &
-                                                 " Until it has been set, the screensaver mode cannot be used.")
-        End Try
+    Private Sub SaveFilterSelections()
+        tempFilterOptions = FilterOptionsBox.CheckedItems.Cast(Of String).ToArray()
     End Sub
 
-    Private Function SetScreensaverPath() As Boolean
-        Try
-
-            Try
-                If My.Computer.FileSystem.FileExists(screensaver_settings_file_path) Then
-                    Using existing_file As New StreamReader(screensaver_settings_file_path)
-                        screen_saver_path = existing_file.ReadLine()
-                        SelectFilesPathDialog.PathTextBox.Text = screen_saver_path
-                    End Using
-                End If
-            Catch ex As IOException
-                ' Ignore any problem trying to load current settings, it's just a user convenience.
-            End Try
-
-            If SelectFilesPathDialog.ShowDialog() <> DialogResult.OK Then
-                Return False
-            End If
-
-            'Dim UserIsolatedStorage = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForAssembly()
-            'Dim UserIsolatedStorageFile = New System.IO.IsolatedStorage.IsolatedStorageFileStream("DesktopPonies_ScreenSaver_Settings.txt", _
-            '                                                                      IO.FileMode.Create, IO.FileAccess.Write, UserIsolatedStorage)
-
-            'Dim SettingsFile As New System.IO.StreamWriter(UserIsolatedStorageFile, System.Text.Encoding.Unicode)
-
-            'we use Unicode here, and any time we save a file as other languages can cause problems.
-            Using writer = New StreamWriter(screensaver_settings_file_path, False, System.Text.Encoding.UTF8)
-                writer.WriteLine(screen_saver_path)
-            End Using
-            'UserIsolatedStorageFile.Close()
-            'UserIsolatedStorage.Close()
-
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Unable to save settings! Screensaver mode will not work.")
-            Return False
-        End Try
-        Return True
-    End Function
-
-    Sub SaveFilterSelections()
-
-        Temp_Filters.Clear()
-        For Each item As String In FilterOptionsBox.CheckedItems
-            Temp_Filters.Add(item)
-        Next
-
-    End Sub
-
-    Sub LoadFilterSelections()
-
-        For Each item As String In Temp_Filters
+    Private Sub LoadFilterSelections()
+        For Each item In tempFilterOptions
             Try
                 FilterOptionsBox.SetItemChecked(FilterOptionsBox.Items.IndexOf(item), True)
             Catch ex As Exception
-                'Filter is not valid at time of restoring.  Do nothing
+                ' Filter is not valid at time of restoring.  Do nothing.
             End Try
         Next
-
     End Sub
 
     Private Sub LoadTemplates()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
-
-        While Not IsHandleCreated
-        End While
 
         idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
 
@@ -492,7 +337,7 @@ Public Class Main
         idleWorker.QueueTask(Sub()
                                  Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-                                 If AutoStarted = True Then
+                                 If Reference.AutoStarted Then
                                      'Me.Opacity = 0
                                      GoButton_Click(Nothing, Nothing)
                                  Else
@@ -523,7 +368,7 @@ Public Class Main
                              End Sub)
     End Sub
 
-    Function LoadHouse(folder As String, skipErrors As Boolean) As Boolean
+    Private Function LoadHouse(folder As String, skipErrors As Boolean) As Boolean
         Try
             Dim base = New HouseBase(folder)
             HouseBases.Add(base)
@@ -547,40 +392,6 @@ Public Class Main
         End Try
     End Function
 
-    Friend Shared Function GetDirection(setting As String) As Direction
-        Select Case setting
-            Case "top_left"
-                Return Direction.TopLeft
-            Case "top"
-                Return Direction.TopCenter
-            Case "top_right"
-                Return Direction.TopRight
-            Case "left"
-                Return Direction.MiddleLeft
-            Case "center"
-                Return Direction.MiddleCenter
-            Case "right"
-                Return Direction.MiddleRight
-            Case "bottom_left"
-                Return Direction.BottomLeft
-            Case "bottom"
-                Return Direction.BottomCenter
-            Case "bottom_right"
-                Return Direction.BottomRight
-            Case "any"
-                Return Direction.Random
-            Case "any-not_center"
-                Return Direction.RandomNotCenter
-            Case Else
-                Dim result As Direction
-                If [Enum].TryParse(setting, result) Then
-                    Return result
-                Else
-                    Throw New ArgumentException("Invalid placement direction or centering for effect.", "setting")
-                End If
-        End Select
-    End Function
-
     Private Sub AddToMenu(ponyBase As PonyBase)
         SelectablePonies.Add(ponyBase)
 
@@ -588,8 +399,8 @@ Public Class Main
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
-            ponySelection.NoDuplicates.Checked = NoRandomDuplicates
-            AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() NoRandomDuplicates = ponySelection.NoDuplicates.Checked
+            ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
+            AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
@@ -619,7 +430,7 @@ Public Class Main
 #End Region
 
 #Region "Selection"
-    Friend Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
+    Private Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
         Next
@@ -650,8 +461,7 @@ Public Class Main
     End Sub
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
-        'Options.LoadProfile(ProfileComboBox.Text)
-        OptionsForm.Instance.LoadButton_Click(sender, e, ProfileComboBox.Text)
+        Options.LoadProfile(ProfileComboBox.Text)
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
@@ -661,12 +471,14 @@ Public Class Main
     End Sub
 
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
-        Main.Instance.SmartInvoke(AddressOf OptionsForm.Instance.Show)
+        Using form = New OptionsForm()
+            form.ShowDialog(Me)
+        End Using
     End Sub
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
 
-        InPreviewMode = True
+        Reference.InPreviewMode = True
         Me.Visible = False
         Using form = New PonyEditor()
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
@@ -674,15 +486,13 @@ Public Class Main
 
             PonyShutdown()
 
-            InPreviewMode = False
+            Reference.InPreviewMode = False
             If Not Me.IsDisposed Then
                 Me.Visible = True
             End If
 
-            OptionsForm.Instance.Hide()
-
-            If form.changes_made Then
-                DisposeMenu()
+            If form.ChangesMade Then
+                ResetPonySelection()
                 LoadingProgressBar.Visible = True
                 '(We need to reload everything to account for anything changed while in the editor)
                 Main_Load(Nothing, Nothing)
@@ -697,10 +507,7 @@ Public Class Main
 
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
-            If games.Count <> 0 Then
-                games.Clear()
-            End If
-
+            games.Clear()
             Dim gameDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
 
             For Each gameDirectory In gameDirectories
@@ -715,7 +522,7 @@ Public Class Main
 
             Me.Visible = False
             If New GameSelectionForm().ShowDialog() = DialogResult.OK Then
-                Startup_Ponies.Clear()
+                startupPonies.Clear()
                 PonyStartup()
                 CurrentGame.Setup()
                 animator.Start()
@@ -742,7 +549,7 @@ Public Class Main
     End Sub
 
     Private Sub CopyProfileButton_Click(sender As Object, e As EventArgs) Handles CopyProfileButton.Click
-        dont_load_profile = True
+        preventLoadProfile = True
 
         Dim copiedProfileName = InputBox("Enter name of new profile to copy to:")
         copiedProfileName = Trim(copiedProfileName)
@@ -759,7 +566,7 @@ Public Class Main
         Options.SaveProfile(copiedProfileName)
         GetProfiles(copiedProfileName)
 
-        dont_load_profile = False
+        preventLoadProfile = False
     End Sub
 
     Private Sub DeleteProfileButton_Click(sender As Object, e As EventArgs) Handles DeleteProfileButton.Click
@@ -768,7 +575,7 @@ Public Class Main
             Exit Sub
         End If
 
-        dont_load_profile = True
+        preventLoadProfile = True
 
         If Options.DeleteProfile(ProfileComboBox.Text) Then
             MsgBox("Profile Deleted", MsgBoxStyle.OkOnly, "Success")
@@ -777,13 +584,12 @@ Public Class Main
         End If
         GetProfiles(Options.DefaultProfileName)
 
-        dont_load_profile = False
+        preventLoadProfile = False
     End Sub
 
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
-        If Not dont_load_profile Then
-            'Options.LoadProfile(ProfileComboBox.Text)
-            OptionsForm.Instance.LoadButton_Click(sender, e, ProfileComboBox.Text)
+        If Not preventLoadProfile Then
+            Options.LoadProfile(ProfileComboBox.Text)
         End If
     End Sub
 
@@ -995,124 +801,75 @@ Public Class Main
 
     Private Sub PonyLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles PonyLoader.DoWork
         Try
-            Startup_Ponies.Clear()
-
-            Dim number_of_ponies As New List(Of Integer)
-            Dim pony_names As New List(Of String)
-
-            Dim Total_Ponies As Integer = 0
-
-            Dim random_ponies As Integer = 0
-
-            'Go through each of the textboxes in the menu and record their names and the number of them wanted.
-
+            ' Note down the number of each pony that is wanted.
+            Dim totalPonies As Integer
+            Dim ponyBasesWanted As New List(Of Tuple(Of String, Integer))()
             For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-                Try
-                    Dim ponyName = ponyPanel.PonyName.Text
-                    Dim count As Integer
-                    If Integer.TryParse(ponyPanel.PonyCount.Text, count) AndAlso count > 0 Then
-                        If ponyName = "Random Pony" Then
-                            random_ponies = count
-                        End If
-
-                        pony_names.Add(ponyName)
-                        number_of_ponies.Add(count)
-                        Total_Ponies += count
-                    Else
-                        pony_names.Add(ponyName)
-                        number_of_ponies.Add(0)
-                    End If
-                Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Unable to load " & ponyPanel.PonyName.Text)
-                    e.Cancel = True
-                    Exit Sub
-                End Try
+                Dim ponyName = ponyPanel.PonyName.Text
+                Dim count As Integer
+                If Integer.TryParse(ponyPanel.PonyCount.Text, count) AndAlso count > 0 Then
+                    ponyBasesWanted.Add(Tuple.Create(ponyName, count))
+                    totalPonies += count
+                End If
             Next
 
-            If Total_Ponies = 0 Then
-                If ScreensaverMode Then
-                    Total_Ponies = 1
-                    random_ponies = 1
+            If totalPonies = 0 Then
+                If Reference.InScreensaverMode Then
+                    ponyBasesWanted.Add(Tuple.Create("Random Pony", 1))
+                    totalPonies = 1
                 Else
-                    MsgBox("The total is... no ponies...  That's TOO FEW PONY.")
+                    MessageBox.Show("You haven't selected any ponies! Choose some ponies to roam your desktop first.",
+                                    "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     e.Cancel = True
-                    Exit Sub
+                    Return
                 End If
             End If
 
-            Dim maxPonies = 0
-            Main.Instance.SmartInvoke(Sub() maxPonies = CInt(OptionsForm.Instance.MaxPonies.Value))
-            If Total_Ponies > maxPonies Then
-                MsgBox("Sorry, you selected " & Total_Ponies & " ponies, which is more than the limit specified in the options menu." &
-                       ControlChars.NewLine & "Try less than " & maxPonies & " total." & ControlChars.NewLine &
-                       "(Or override this limit in the options window)")
+            If totalPonies > Options.MaxPonyCount Then
+                MessageBox.Show(String.Format(
+                                "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
+                                "Try choosing no more than {2} in total.{0}" &
+                                "(or, you can increase the limit via the options menu)",
+                                vbNewLine, totalPonies, Options.MaxPonyCount),
+                            "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 e.Cancel = True
-                Exit Sub
+                Return
             End If
 
-            SmartInvoke(Sub()
-                            LoadingProgressBar.Value = 0
-                            LoadingProgressBar.Maximum = Total_Ponies
-                        End Sub)
-
-            'Make duplicates of each type of pony, up to the number needed
-            For i = 0 To number_of_ponies.Count - 1
-                If number_of_ponies(i) > 0 Then
-
-                    Dim pony_template = FindPonyBaseByDirectory(pony_names(i))
-
-                    If pony_template.Directory = "Random Pony" Then
-                        Continue For
-                    End If
-
-                    For z = 1 To number_of_ponies(i)
-                        Dim new_pony As Pony = New Pony(pony_template)
-                        Startup_Ponies.Add(new_pony)
+            ' Create the initial set of ponies to start.
+            startupPonies.Clear()
+            Dim randomPoniesWanted As Integer
+            For Each ponyBaseWanted In ponyBasesWanted
+                Dim base = FindPonyBaseByDirectory(ponyBaseWanted.Item1)
+                If base.Directory <> "Random Pony" Then
+                    ' Add the designated amount of a given pony.
+                    For i = 1 To ponyBaseWanted.Item2
+                        startupPonies.Add(New Pony(base))
                     Next
-                End If
-            Next
-
-            'Select random ponies, if necessary
-            For i = 1 To random_ponies
-                Dim selection = Rng.Next(SelectablePonies.Count)
-
-                Dim selected_pony = SelectablePonies(selection)
-
-                If NoRandomDuplicates Then
-
-                    Dim duplicate As Boolean = False
-                    Dim still_unique_available As Boolean = False
-
-                    For Each pony In Startup_Ponies
-                        If pony.Directory = selected_pony.Directory Then
-                            duplicate = True
-                        End If
-
-                        If Startup_Ponies.Count + 1 >= SelectablePonies.Count Then
-                            still_unique_available = False
-                        Else
-                            still_unique_available = True
-                        End If
-
-                        If duplicate AndAlso Not still_unique_available Then Exit For
-                    Next
-
-                    If duplicate AndAlso still_unique_available Then
-                        i -= 1
-                        Continue For
-                    End If
-                End If
-
-
-                If selected_pony.Directory = "Random Pony" Then
-                    i -= 1
                 Else
-                    Startup_Ponies.Add(New Pony(SelectablePonies(selection)))
+                    randomPoniesWanted = ponyBaseWanted.Item2
                 End If
             Next
+
+            ' Add a random amount of ponies.
+            If randomPoniesWanted > 0 Then
+                Dim remainingPonyBases As New List(Of PonyBase)(
+                    SelectablePonies.Where(Function(pb) pb.Directory <> "Random Pony"))
+                If Options.NoRandomDuplicates Then
+                    remainingPonyBases.RemoveAll(Function(pb) ponyBasesWanted.Any(Function(t) t.Item1 = pb.Directory))
+                End If
+                For i = 1 To randomPoniesWanted
+                    If remainingPonyBases.Count = 0 Then Exit For
+                    Dim index = Rng.Next(remainingPonyBases.Count)
+                    startupPonies.Add(New Pony(remainingPonyBases(index)))
+                    If Options.NoRandomDuplicates Then
+                        remainingPonyBases.RemoveAt(index)
+                    End If
+                Next
+            End If
 
             Try
-                If OptionsForm.Instance.Interactions.Checked Then
+                If Options.PonyInteractionsEnabled Then
                     InitializeInteractions()
                 End If
             Catch ex As Exception
@@ -1146,14 +903,14 @@ Public Class Main
     ''' interaction should interact with.
     ''' </summary>
     ''' <remarks></remarks>
-    Sub InitializeInteractions()
-        For Each pony In Startup_Ponies
-            pony.InitializeInteractions(Startup_Ponies)
+    Private Sub InitializeInteractions()
+        For Each pony In startupPonies
+            pony.InitializeInteractions(startupPonies)
         Next
     End Sub
 
-    Friend Sub PonyStartup()
-        If ScreensaverMode Then
+    Private Sub PonyStartup()
+        If Reference.InScreensaverMode Then
             SmartInvoke(Sub()
                             If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
                                 screensaverForms = New List(Of ScreensaverBackgroundForm)()
@@ -1192,13 +949,13 @@ Public Class Main
         End If
 
         AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
-        ponyViewer = GetInterface()
+        ponyViewer = Options.GetInterface()
         ponyViewer.Topmost = Options.AlwaysOnTop
 
-        If Not InPreviewMode Then
+        If Not Reference.InPreviewMode Then
             ' Get a collection of all images to be loaded.
             Dim images As New HashSet(Of String)(StringComparer.Ordinal)
-            For Each pony In Startup_Ponies
+            For Each pony In startupPonies
                 For Each behavior In pony.Behaviors
                     images.Add(behavior.LeftImagePath)
                     images.Add(behavior.RightImagePath)
@@ -1224,34 +981,10 @@ Public Class Main
             ponyViewer.LoadImages(images, loaded)
         End If
 
-        animator = New DesktopPonyAnimator(ponyViewer, Startup_Ponies, OperatingSystemInfo.IsMacOSX)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, OperatingSystemInfo.IsMacOSX)
         Pony.CurrentViewer = ponyViewer
         Pony.CurrentAnimator = animator
     End Sub
-
-    Public Function GetInterface() As ISpriteCollectionView
-        'This should already be set in the options, but in case it isn't, use all monitors.
-        If Options.MonitorNames.Count = 0 Then
-            For Each monitor In Screen.AllScreens
-                Options.MonitorNames.Add(monitor.DeviceName)
-            Next
-        End If
-
-        ' Begin Glue Code
-        Dim area = GetCombinedScreenArea()
-
-        Dim viewer As ISpriteCollectionView
-        Dim alphaBlending As Boolean = Options.AlphaBlendingEnabled
-        If OperatingSystemInfo.IsWindows Then
-            viewer = New WinFormSpriteInterface(area, alphaBlending)
-        Else
-            viewer = New GtkSpriteInterface(alphaBlending)
-        End If
-        viewer.ShowInTaskbar = Options.ShowInTaskbar
-        'End Glue Code
-
-        Return viewer
-    End Function
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         If Not Disposing AndAlso Not IsDisposed Then
@@ -1290,8 +1023,8 @@ Public Class Main
         oldLoader.Dispose()
 
         If Not e.Cancelled Then
-            Ponies_Have_Launched = True
-            Temp_Save_Counts()
+            PoniesHaveLaunched = True
+            TempSaveCounts()
             Visible = False
             animator.Start()
             loadWatch.Stop()
@@ -1299,18 +1032,6 @@ Public Class Main
         End If
     End Sub
 #End Region
-
-    ' ''' <summary>
-    ' ''' 'If we are set to auto-start in the command line, try to hide the menu as soon as possible.
-    ' ''' </summary>
-    ' ''' <param name="sender"></param>
-    ' ''' <param name="e"></param>
-    ' ''' <remarks></remarks>
-    'Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
-    '    If Not auto_started Then
-    '        Me.Opacity = 100
-    '    End If
-    'End Sub
 
     Private Sub PonySelectionPanel_Resize(sender As Object, e As EventArgs) Handles PonySelectionPanel.Resize
         ' If a horizontal scrollbar has appeared, renew the layout to forcibly remove it.
@@ -1327,7 +1048,7 @@ Public Class Main
 
     Friend Sub PonyShutdown()
         If Not IsNothing(animator) Then animator.Finish()
-        Ponies_Have_Launched = False
+        PoniesHaveLaunched = False
         If Not IsNothing(animator) Then animator.Clear()
 
         If Not IsNothing(CurrentGame) Then
@@ -1357,7 +1078,7 @@ Public Class Main
     ''' <summary>
     ''' Save pony counts so they are preserved through clicking on and off filters.
     ''' </summary>
-    Friend Sub Temp_Save_Counts()
+    Private Sub TempSaveCounts()
         If PonySelectionPanel.Controls.Count = 0 Then Exit Sub
 
         Options.PonyCounts.Clear()
@@ -1370,9 +1091,9 @@ Public Class Main
     End Sub
 
     ''' <summary>
-    ''' Removes all ponies from the menu.
+    ''' Resets pony selection related controls, which will require them to be reloaded from disk.
     ''' </summary>
-    Sub DisposeMenu()
+    Private Sub ResetPonySelection()
         SelectablePonies.Clear()
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
@@ -1403,53 +1124,26 @@ Public Class Main
         End If
     End Sub
 
-    ''' <summary>
-    ''' Put all ponies to sleep... 
-    ''' </summary>
-    ''' <remarks></remarks>
-    Friend Sub SleepAll()
-
-        If Not all_sleeping Then
-
-            all_sleeping = True
-
-            For Each pony In animator.Ponies()
-                'Pony.sleep()
-                pony.ShouldBeSleeping = True
-            Next
-
-        Else
-
-            all_sleeping = False
-
-            For Each pony In animator.Ponies()
-                'Pony.wake_up()
-                pony.ShouldBeSleeping = False
-            Next
-        End If
-
+    Friend Sub ResetToDefaultFilterCategories()
+        FilterOptionsBox.SuspendLayout()
+        FilterOptionsBox.Items.Clear()
+        FilterOptionsBox.Items.AddRange(
+            {"Main Ponies",
+             "Supporting Ponies",
+             "Alternate Art",
+             "Fillies",
+             "Colts",
+             "Pets",
+             "Stallions",
+             "Mares",
+             "Alicorns",
+             "Unicorns",
+             "Pegasi",
+             "Earth Ponies",
+             "Non-Ponies",
+             "Not Tagged"})
+        FilterOptionsBox.ResumeLayout()
     End Sub
-
-    Private Sub MonitorNames_CollectionChanged(sender As Object, e As System.Collections.Specialized.NotifyCollectionChangedEventArgs)
-        screensToUse.Clear()
-        screensToUse.AddRange(Screen.AllScreens.Where(Function(screen) Options.MonitorNames.Contains(screen.DeviceName)))
-    End Sub
-
-    Friend Function GetScreensToUse() As List(Of Screen)
-        Return screensToUse
-    End Function
-
-    Friend Function GetCombinedScreenArea() As Rectangle
-        Dim area As Rectangle = Rectangle.Empty
-        For Each screen In GetScreensToUse()
-            If area = Rectangle.Empty Then
-                area = screen.WorkingArea
-            Else
-                area = Rectangle.Union(area, screen.WorkingArea)
-            End If
-        Next
-        Return area
-    End Function
 
     Private Sub Main_LocationChanged(sender As Object, e As EventArgs) Handles MyBase.LocationChanged
         ' If we have just returned from the minimized state, the flow panel will have an incorrect scrollbar.

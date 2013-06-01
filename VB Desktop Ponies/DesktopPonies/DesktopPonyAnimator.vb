@@ -14,6 +14,7 @@ Public Class DesktopPonyAnimator
     Private draggingPonyOrEffect As Boolean
     Private draggedPonyWasSleeping As Boolean
     Private poniesToRemove As New List(Of Pony)
+    Private cursorPosition As Point
 
     Private controlForm As DesktopControlForm
 
@@ -111,7 +112,7 @@ Public Class DesktopPonyAnimator
         MyBase.Start()
         If controlForm IsNot Nothing Then controlForm.SmartInvoke(AddressOf controlForm.Show)
 #If DEBUG Then
-        If Not Main.Instance.InPreviewMode Then
+        If Not Reference.InPreviewMode Then
             Main.Instance.Invoke(Sub()
                                      spriteDebugForm = New SpriteDebugForm()
                                      spriteDebugForm.Show()
@@ -128,15 +129,14 @@ Public Class DesktopPonyAnimator
         If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then ReturnToMenu()
 
         Pony.CursorLocation = Viewer.CursorPosition
-        ManualControl()
         With Main.Instance
-            If .ScreensaverMode Then
+            If Reference.InScreensaverMode Then
                 'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
-                If .cursor_position.IsEmpty Then
-                    .cursor_position = Cursor.Position
+                If cursorPosition.IsEmpty Then
+                    cursorPosition = Cursor.Position
                 End If
 
-                If .cursor_position <> Cursor.Position Then
+                If cursorPosition <> Cursor.Position Then
                     Finish()
                     .SmartInvoke(AddressOf Main.Instance.Close)
                     Exit Sub
@@ -183,7 +183,7 @@ Public Class DesktopPonyAnimator
                 Next
             End If
 
-            If .DirectXSoundAvailable Then
+            If Reference.DirectXSoundAvailable Then
                 .CleanupSounds()
             End If
 
@@ -193,7 +193,7 @@ Public Class DesktopPonyAnimator
                 house.Cycle(ElapsedTime)
             Next
 
-            If Main.Instance.InPreviewMode Then
+            If Reference.InPreviewMode Then
                 Pony.PreviewWindowRectangle = Main.Instance.GetPreviewWindowRectangle()
             End If
 
@@ -279,7 +279,13 @@ Public Class DesktopPonyAnimator
                                                                  If selectedPony Is Nothing Then Return
                                                                  selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
                                                              End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(AddressOf Main.Instance.SleepAll)))
+        Dim allSleeping = False
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(Sub()
+                                                                                                 allSleeping = Not allSleeping
+                                                                                                 For Each pony In Me.Ponies()
+                                                                                                     pony.ShouldBeSleeping = allSleeping
+                                                                                                 Next
+                                                                                             End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem())
         Dim ponies As IEnumerable(Of ISimpleContextMenuItem) = Nothing
         Main.Instance.SmartInvoke(Sub() ponies = PonySelectionList())
@@ -297,13 +303,6 @@ Public Class DesktopPonyAnimator
                         If selectedPony Is Nothing Then Return
                         selectedPony.ManualControlPlayerOne = Not selectedPony.ManualControlPlayerOne
                         If selectedPony.ManualControlPlayerOne Then selectedPony.ManualControlPlayerTwo = False
-                        Main.Instance.SmartInvoke(Sub()
-                                                      If Main.Instance.controlled_pony <> "" Then
-                                                          Main.Instance.controlled_pony = selectedPony.Directory
-                                                      Else
-                                                          Main.Instance.controlled_pony = ""
-                                                      End If
-                                                  End Sub)
                     End Sub))
             menuItems.AddLast(
                 New SimpleContextMenuItem(
@@ -312,18 +311,14 @@ Public Class DesktopPonyAnimator
                         If selectedPony Is Nothing Then Return
                         selectedPony.ManualControlPlayerTwo = Not selectedPony.ManualControlPlayerTwo
                         If selectedPony.ManualControlPlayerTwo Then selectedPony.ManualControlPlayerOne = False
-                        Main.Instance.SmartInvoke(Sub()
-                                                      If Main.Instance.controlled_pony <> "" Then
-                                                          Main.Instance.controlled_pony = selectedPony.Directory
-                                                      Else
-                                                          Main.Instance.controlled_pony = ""
-                                                      End If
-                                                  End Sub)
                     End Sub))
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
 
-        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.SmartInvoke(AddressOf OptionsForm.Instance.Show)))
+        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.SmartInvoke(Sub()
+                                                                                                        Dim form = New OptionsForm()
+                                                                                                        form.Show()
+                                                                                                    End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
                                                                 Finish()
@@ -531,8 +526,6 @@ Public Class DesktopPonyAnimator
                 If Not IsNothing(draggedEffect) Then
                     draggedEffect.BeingDragged = False
                 End If
-                Main.Instance.Dragging = False
-
                 draggingPonyOrEffect = False
 
                 draggedPony = Nothing
@@ -562,7 +555,6 @@ Public Class DesktopPonyAnimator
 
             selectedForDragPony.BeingDragged = True
             draggedPony = selectedForDragPony
-            Main.Instance.Dragging = True
             draggingPonyOrEffect = True
             If Not Paused Then
                 selectedForDragPony.BeingDragged = True
@@ -581,7 +573,7 @@ Public Class DesktopPonyAnimator
                 Exit Sub
             End If
 
-            If Main.Instance.ScreensaverMode Then Main.Instance.Close()
+            If Reference.InScreensaverMode Then Main.Instance.Close()
 
             Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
             Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.ShouldBeSleeping)
@@ -635,33 +627,9 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Friend Sub DragEffect(effect As Effect)
-
         effect.BeingDragged = True
         draggingPonyOrEffect = True
         draggedEffect = effect
-        Main.Instance.Dragging = True
-
-    End Sub
-
-    ''' <summary>
-    ''' Allows ponies to be manually controlled.
-    ''' </summary>
-    Private Shared Sub ManualControl()
-        With Main.Instance
-            .PonyDown = KeyboardState.IsKeyPressed(Keys.Down)
-            .PonyUp = KeyboardState.IsKeyPressed(Keys.Up)
-            .PonyRight = KeyboardState.IsKeyPressed(Keys.Right)
-            .PonyLeft = KeyboardState.IsKeyPressed(Keys.Left)
-            .PonySpeed = KeyboardState.IsKeyPressed(Keys.RShiftKey)
-            .PonyAction = KeyboardState.IsKeyPressed(Keys.RControlKey)
-
-            .PonyDown_2 = KeyboardState.IsKeyPressed(Keys.S)
-            .PonyUp_2 = KeyboardState.IsKeyPressed(Keys.W)
-            .PonyRight_2 = KeyboardState.IsKeyPressed(Keys.D)
-            .PonyLeft_2 = KeyboardState.IsKeyPressed(Keys.A)
-            .PonySpeed_2 = KeyboardState.IsKeyPressed(Keys.LShiftKey)
-            .PonyAction_2 = KeyboardState.IsKeyPressed(Keys.LControlKey)
-        End With
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)
