@@ -153,7 +153,8 @@ Public Class GameSelectionForm
     Private Sub AddToPanel(panel As Panel, team As Integer)
 
         If Pony_Selection_View.SelectedIndices.Count = 0 Then
-            MsgBox("Select a pony by clicking on its picture first.")
+            MessageBox.Show(Me, "Select a pony by clicking on its picture first.",
+                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -192,9 +193,9 @@ Public Class GameSelectionForm
 
         If empty_spot_found = False Then
             If IsNothing(game) Then
-                MsgBox("Select a game first!")
+                MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Else
-                MsgBox("Team is full!")
+                MessageBox.Show(Me, "Team is full!", "Team Full", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
         Else
             Select Case team
@@ -286,18 +287,20 @@ Public Class GameSelectionForm
     Private Sub Play_Button_Click(sender As Object, e As EventArgs) Handles Play_Button.Click
 
         If IsNothing(game) Then
-            MsgBox("Select a game first!")
+            MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If ScreenSelection_Box.SelectedItems.Count = 0 Then
-            MsgBox("You need to select a monitor to play the game on.")
+            MessageBox.Show(Me, "You need to select a monitor to play the game on.",
+                            "No Monitor Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If Double.Parse(team1_requiredleft_label.Text, CultureInfo.InvariantCulture) > 0 OrElse
             Double.Parse(team2_requiredleft_label.Text, CultureInfo.InvariantCulture) > 0 Then
-            MsgBox("You must fill each required position with a pony before you can start the game.")
+            MessageBox.Show(Me, "You must fill each required position with a pony before you can start the game.",
+                            "Insufficient Positions Filled", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -309,9 +312,9 @@ Public Class GameSelectionForm
 
     Private Sub Info_Click(sender As Object, e As EventArgs) Handles Info_Button.Click
         If IsNothing(game) Then
-            MsgBox("Select a game first!")
+            MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Else
-            MsgBox(game.Description)
+            MessageBox.Show(Me, game.Description, game.Name, MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
 End Class

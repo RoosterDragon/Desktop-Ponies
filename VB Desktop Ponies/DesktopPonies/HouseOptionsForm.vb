@@ -25,7 +25,7 @@ Public Class HouseOptionsForm
         Try
             houseImage = Image.FromFile(base.LeftImagePath)
         Catch ex As Exception
-            MsgBox("Couldn't open file: " & base.LeftImagePath)
+            My.Application.NotifyUserOfNonFatalException(ex, "Couldn't open the image file for the house.")
             Exit Sub
         End Try
         DoorLocation_Label.Text = doorLocation.ToString()
@@ -128,7 +128,8 @@ Public Class HouseOptionsForm
         base.Bias = Bias_TrackBar.Value / 10D
 
         If Visitors_CheckedListBox.CheckedItems.Count = 0 Then
-            MsgBox("You must select at least one visitor!")
+            MessageBox.Show(Me, "You must select at least one visitor!",
+                            "No Visitors Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return False
         End If
 
@@ -150,7 +151,7 @@ Public Class HouseOptionsForm
 
             Dim comments As New List(Of String)
             Dim ini_file_path = Path.Combine(Options.InstallLocation, HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
-            If My.Computer.FileSystem.FileExists(ini_file_path) Then
+            If File.Exists(ini_file_path) Then
                 Using existing_ini As New StreamReader(ini_file_path)
                     Do Until existing_ini.EndOfStream
                         Dim line = existing_ini.ReadLine()
@@ -191,11 +192,11 @@ Public Class HouseOptionsForm
             End Using
 
         Catch ex As Exception
-            MsgBox("Unable to save house file! Details: " & ControlChars.NewLine & ex.Message)
+            My.Application.NotifyUserOfNonFatalException(ex, "Unable to save house file")
             Exit Sub
         End Try
 
-        MsgBox("Save completed!")
+        MessageBox.Show(Me, "Save Completed!", "Save Completed", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     Private Sub Close_Button_Click(sender As Object, e As EventArgs) Handles Close_Button.Click

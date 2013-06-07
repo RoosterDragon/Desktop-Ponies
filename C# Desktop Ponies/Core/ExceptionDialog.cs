@@ -2,6 +2,7 @@
 {
     using System;
     using System.Drawing;
+    using System.Globalization;
     using System.Windows.Forms;
 
     /// <summary>
@@ -59,7 +60,7 @@
             Icon = fatal ? SystemIcons.Error : SystemIcons.Exclamation;
             iconBitmap = Icon.ToBitmap();
             IconBox.Image = iconBitmap;
-            TimeLabel.Text = DateTime.UtcNow.ToString("u");
+            TimeLabel.Text = DateTime.UtcNow.ToString("u", CultureInfo.CurrentCulture);
         }
 
         /// <summary>

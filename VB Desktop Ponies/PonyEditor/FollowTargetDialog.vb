@@ -267,8 +267,11 @@
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If Auto_Select_Images_Checkbox.Checked = False AndAlso (CStr(moving_behavior_box.SelectedItem) = "" OrElse CStr(stopped_behavior_box.SelectedItem) = "") Then
-            MsgBox("If you disable auto-selection of images, then you must specifiy a moving behavior and a stopped behavior to get the images from." _
-                   & ControlChars.NewLine & "(You can select the behavior you are editing once you have saved it first.)")
+            MessageBox.Show(Me, "If you disable auto-selection of images, " &
+                            "then you must specify a moving behavior and a stopped behavior to get the images from." &
+                            ControlChars.NewLine &
+                            "(You can select the behavior you are editing once you have saved it first.)",
+                            "Images Undefined", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 

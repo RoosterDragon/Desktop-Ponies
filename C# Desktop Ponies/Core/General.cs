@@ -83,24 +83,17 @@
             if (minChars < 0 || minChars > Buffer.Length)
                 throw new ArgumentOutOfRangeException("minChars", minChars,
                     "minChars must be greater than or equal to zero and less than or equal to " + Buffer.Length);
+            // Absolute value of value parameter.
+            ulong v = value >= 0 ? (ulong)value : value != long.MinValue ? (ulong)-value : (ulong)long.MaxValue + 1;
             int bufferIndex = Buffer.Length - 1;
-            long shift = 1;
-            long doubleShiftedValue;
             do
             {
-                long doubleShift = shift * 10;
-                long shiftedValue = (value / shift) * shift;
-                doubleShiftedValue = (value / doubleShift) * doubleShift;
-                int digitOut = (int)((shiftedValue - doubleShiftedValue) / shift);
-                if (value < 0)
-                {
-                    digitOut *= -1;
-                    doubleShiftedValue *= -1;
-                }
-                Buffer[bufferIndex--] = (char)((int)'0' + digitOut);
-                shift *= 10;
+                ulong original = v;
+                v /= 10;
+                ulong digit = original - (v * 10);
+                Buffer[bufferIndex--] = (char)('0' + digit);
             }
-            while (doubleShiftedValue > 0);
+            while (v > 0);
             if (value < 0)
                 Buffer[bufferIndex--] = '-';
             while (minChars > Buffer.Length - 1 - bufferIndex && bufferIndex >= 0)

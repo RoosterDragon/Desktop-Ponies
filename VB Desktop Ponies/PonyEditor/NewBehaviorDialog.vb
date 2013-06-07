@@ -16,47 +16,44 @@ Public Class NewBehaviorDialog
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
-        If Trim(NameTextbox.Text) = "" Then
-            MsgBox("You must enter a name for the new behavior.")
+        If String.IsNullOrWhiteSpace(NameTextbox.Text) Then
+            MessageBox.Show(Me, "You must enter a name for the new behavior.",
+                            "No Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         For Each behavior In m_editor.PreviewPony.Behaviors
             If String.Equals(behavior.Name, NameTextbox.Text, StringComparison.OrdinalIgnoreCase) Then
-                MsgBox("Behavior '" & behavior.Name & "' already exists for this pony.  Please select another name.")
+                MessageBox.Show(Me, "Behavior '" & behavior.Name & "' already exists for this pony. Please select another name.",
+                                "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
         Next
 
-        If InStr(NameTextbox.Text, ",") <> 0 Then
-            MsgBox("The behavior name can't have a comma in it.")
-            Exit Sub
-        End If
-
-        If InStr(NameTextbox.Text, "{") <> 0 Then
-            MsgBox("The behavior name can't have a { in it.")
-            Exit Sub
-        End If
-
-        If InStr(NameTextbox.Text, "}") <> 0 Then
-            MsgBox("The behavior name can't have a } in it.")
+        If NameTextbox.Text.IndexOfAny({","c, "{"c, "}"c}) <> -1 Then
+            MessageBox.Show(Me, "The behavior name cannot contain a comma (,) or curly braces ({}). Please select another name.",
+                            "Invalid Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If left_image_path = "" OrElse right_image_path = "" Then
-            MsgBox("You need to select two pictures - one left, one right.")
+            MessageBox.Show(Me,
+                            "You still need to select the two images to use for this behavior, for both the left and right directions.",
+                            "Images Not Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If Movement_Combobox.SelectedIndex = -1 Then
-            MsgBox("You need to select a movement type.")
+            MessageBox.Show(Me, "You need to select a movement type.",
+                            "No Movement Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         Dim chance As Double
 
         If Not Double.TryParse(Trim(Replace(Chance_Box.Text, "%", "")), NumberStyles.Float, CultureInfo.InvariantCulture, chance) Then
-            MsgBox("You need to enter a % chance that the behavior has to occur (or you may have entered an invalid one).")
+            MessageBox.Show(Me, "You have not entered the chance the behavior has to occur (or the value you entered was invalid).",
+                            "No Chance Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -65,26 +62,29 @@ Public Class NewBehaviorDialog
 
         If Not Double.TryParse(Trim(Replace(Min_Box.Text, "%", "")), NumberStyles.Float, CultureInfo.InvariantCulture, minDuration) OrElse
            Not Double.TryParse(Trim(Replace(Max_Box.Text, "%", "")), NumberStyles.Float, CultureInfo.InvariantCulture, maxDuration) Then
-            MsgBox("You need to enter minimum and maximum durations of the behavior in seconds.")
+            MessageBox.Show(Me, "You need to enter minimum and maximum durations of the behavior in seconds.",
+                            "Durations Not Set", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If minDuration > maxDuration Then
-            MsgBox("The maximum duration needs to be larger than the minimum duration.")
+            MessageBox.Show(Me, "The maximum duration needs to be the same as, or larger than, the minimum duration.",
+                            "Invalid Durations Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If chance < 0 OrElse minDuration < 0 OrElse maxDuration < 0 Then
-            MsgBox("You entered a negative value for % chance, Min duration, or Max duration.  Please correct this.")
+            MessageBox.Show(Me, "You entered a negative value for a duration or chance. This is not allowed.",
+                            "Invalid Value Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         Dim speed As Double
 
         If Not Double.TryParse(Trim(Replace(Speed_Box.Text, "%", "")), NumberStyles.Float, CultureInfo.InvariantCulture, speed) Then
-            MsgBox("You need to enter a movement speed (or entered an invalid one)")
+            MessageBox.Show(Me, "You have not entered the movement speed (or the value you entered was invalid).",
+                            "No Speed Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
-
         End If
 
         Dim linked_behavior = ""
@@ -106,29 +106,32 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        m_editor.PreviewPonyBase.AddBehavior(NameTextbox.Text, _
-                                                       chance / 100, _
-                                                       maxDuration, _
-                                                       minDuration, _
-                                                       speed, _
-                                                       right_image_path, _
-                                                       left_image_path, _
-                                                       PonyEditor.String_ToMovement(CStr(Movement_Combobox.SelectedItem)), _
-                                                       linked_behavior, _
-                                                       start_line, _
-                                                       end_line, _
-                                                       skip, _
-                                                       follow_x, _
-                                                       follow_y, _
-                                                       follow_name,
-                                                    False, "", "", Nothing, Nothing, DontRepeat_CheckBox.Checked, CInt(Group_Numberbox.Value))
-
-
+        m_editor.PreviewPonyBase.AddBehavior(NameTextbox.Text,
+                                             chance / 100,
+                                             maxDuration,
+                                             minDuration,
+                                             speed,
+                                             right_image_path,
+                                             left_image_path,
+                                             PonyEditor.String_ToMovement(CStr(Movement_Combobox.SelectedItem)),
+                                             linked_behavior,
+                                             start_line,
+                                             end_line,
+                                             skip,
+                                             follow_x,
+                                             follow_y,
+                                             follow_name,
+                                             False,
+                                             "",
+                                             "",
+                                             Nothing,
+                                             Nothing,
+                                             DontRepeat_CheckBox.Checked,
+                                             CInt(Group_Numberbox.Value))
         Me.Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-
         Me.Close()
     End Sub
 
@@ -195,9 +198,13 @@ Public Class NewBehaviorDialog
 
         Dim runtime = GetGifTotalRuntime(Left_ImageBox.Image)
 
-        If runtime <> 0 AndAlso My.Forms.GifRuntimeDialog.ShowDialog = DialogResult.OK Then
-            Min_Box.Text = CStr(runtime)
-            Max_Box.Text = CStr(runtime)
+        If runtime <> 0 Then
+            Using dialog As New GifRuntimeDialog()
+                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                    Min_Box.Text = CStr(runtime)
+                    Max_Box.Text = CStr(runtime)
+                End If
+            End Using
         End If
 
     End Sub
@@ -219,9 +226,13 @@ Public Class NewBehaviorDialog
 
         Dim runtime = GetGifTotalRuntime(Right_ImageBox.Image)
 
-        If runtime <> 0 AndAlso My.Forms.GifRuntimeDialog.ShowDialog = DialogResult.OK Then
-            Min_Box.Text = CStr(runtime)
-            Max_Box.Text = CStr(runtime)
+        If runtime <> 0 Then
+            Using dialog As New GifRuntimeDialog()
+                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                    Min_Box.Text = CStr(runtime)
+                    Max_Box.Text = CStr(runtime)
+                End If
+            End Using
         End If
 
     End Sub

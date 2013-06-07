@@ -94,10 +94,6 @@ Public Class Main
 
         Application.DoEvents()
 
-        'DesktopHandle = DetectFulLScreen_m.GetDesktopWindow()
-        'ShellHandle = DetectFulLScreen_m.GetShellWindow()
-
-
 
         Try
             Dim Arguments = My.Application.CommandLineArgs
@@ -176,9 +172,7 @@ Public Class Main
 
         loading = True
 
-        If Not Reference.AutoStarted Then
-            WindowState = FormWindowState.Normal
-        End If
+        If Not Reference.AutoStarted Then WindowState = FormWindowState.Normal
 
         'temporarily save filter selections, if any, in the case that we are reloading after making a change in the editor.
         '(Loading options resets the filter, and will cause havoc otherwise)
@@ -187,14 +181,13 @@ Public Class Main
 
         ' Load the profile that was last in use by this user.
         Dim profile = Options.DefaultProfileName
-        Dim profileFile As IO.StreamReader = Nothing
+        Dim profileFile As StreamReader = Nothing
         Try
-            profileFile = New IO.StreamReader(IO.Path.Combine(Options.ProfileDirectory, "current.txt"),
-                                              System.Text.Encoding.UTF8)
+            profileFile = New StreamReader(Path.Combine(Options.ProfileDirectory, "current.txt"), System.Text.Encoding.UTF8)
             profile = profileFile.ReadLine()
-        Catch ex As IO.FileNotFoundException
+        Catch ex As FileNotFoundException
             ' We don't mind if no preferred profile is saved.
-        Catch ex As IO.DirectoryNotFoundException
+        Catch ex As DirectoryNotFoundException
             ' In screensaver mode, the user might set a bad path. We'll ignore it for now.
         Finally
             If profileFile IsNot Nothing Then profileFile.Close()
@@ -274,29 +267,21 @@ Public Class Main
             idleWorker.QueueTask(Sub()
                                      Try
                                          AddToMenu(pony)
-                                     Catch ex As InvalidDataException
-                                         If skipLoadingErrors = False Then
-                                             Select Case MsgBox("Error: Invalid data in " & PonyBase.ConfigFilename & " configuration file in " & folder _
-                                                & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
-                                                & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
-                                                 Case MsgBoxResult.Yes
+                                     Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse TypeOf ex Is FileNotFoundException
+                                         If Not skipLoadingErrors Then
+                                             Select Case MessageBox.Show(Me,
+                                                                         "Error: Invalid data in " & PonyBase.ConfigFilename &
+                                                                         " configuration file in " & folder & ControlChars.NewLine &
+                                                                         "Won't load this pony..." & ControlChars.NewLine &
+                                                                         "Do you want to skip seeing these errors? " &
+                                                                         "Press No to see the error for each pony. " &
+                                                                         "Press cancel to quit.", "Invalid Configuration File",
+                                                                         MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)
+                                                 Case DialogResult.Yes
                                                      skipLoadingErrors = True
-                                                 Case MsgBoxResult.No
+                                                 Case DialogResult.No
                                                      'do nothing
-                                                 Case MsgBoxResult.Cancel
-                                                     Me.Close()
-                                             End Select
-                                         End If
-                                     Catch ex As FileNotFoundException
-                                         If skipLoadingErrors = False Then
-                                             Select Case MsgBox("Error: No " & PonyBase.ConfigFilename & " configuration file found for folder: " & folder _
-                                                & ControlChars.NewLine & "Won't load this pony..." & ControlChars.NewLine _
-                                                & "Do you want to skip seeing these errors?  Press No to see the error for each pony.  Press cancel to quit.", MsgBoxStyle.YesNoCancel)
-                                                 Case MsgBoxResult.Yes
-                                                     skipLoadingErrors = True
-                                                 Case MsgBoxResult.No
-                                                     'do nothing
-                                                 Case MsgBoxResult.Cancel
+                                                 Case DialogResult.Cancel
                                                      Me.Close()
                                              End Select
                                          End If
@@ -374,17 +359,20 @@ Public Class Main
             HouseBases.Add(base)
             Return True
         Catch ex As Exception
-            If skipErrors = False Then
-                Select Case MsgBox("Error: No " & HouseBase.ConfigFilename & " configuration file found for folder: " & folder _
-                   & ControlChars.NewLine & "Won't load this house/structure..." & ControlChars.NewLine _
-                   & "Do you want to skip seeing these errors?  Press No to see the error for each folder.  Press cancel to quit.",
-                   MsgBoxStyle.YesNoCancel)
-
-                    Case MsgBoxResult.Yes
+            If Not skipErrors Then
+                Select Case MessageBox.Show(Me,
+                                            "Error: Invalid data in " & HouseBase.ConfigFilename &
+                                            " configuration file in " & folder & ControlChars.NewLine &
+                                            "Won't load this house..." & ControlChars.NewLine &
+                                            "Do you want to skip seeing these errors? " &
+                                            "Press No to see the error for each house. " &
+                                            "Press cancel to quit.", "Invalid Configuration File",
+                                            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)
+                    Case DialogResult.Yes
                         Return True
-                    Case MsgBoxResult.No
+                    Case DialogResult.No
                         'do nothing
-                    Case MsgBoxResult.Cancel
+                    Case DialogResult.Cancel
                         Me.Close()
                 End Select
             End If
@@ -440,13 +428,15 @@ Public Class Main
         Dim profileToSave = ProfileComboBox.Text
 
         If profileToSave = "" Then
-            MsgBox("Enter a profile name first!")
+            MessageBox.Show(Me, "Enter a profile name first!", "No Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If String.Equals(profileToSave, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile. " &
-                   "To create a new profile, type a new name for the profile into the box. You will then be able to save the profile.")
+            MessageBox.Show(
+                Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. " &
+                "To create a new profile, type a new name for the profile into the box. You will then be able to save the profile.",
+                "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -521,16 +511,18 @@ Public Class Main
             Next
 
             Me.Visible = False
-            If New GameSelectionForm().ShowDialog() = DialogResult.OK Then
-                startupPonies.Clear()
-                PonyStartup()
-                CurrentGame.Setup()
-                animator.Start()
-            Else
-                If Me.IsDisposed = False Then
-                    Me.Visible = True
+            Using gameForm As New GameSelectionForm()
+                If gameForm.ShowDialog() = DialogResult.OK Then
+                    startupPonies.Clear()
+                    PonyStartup()
+                    CurrentGame.Setup()
+                    animator.Start()
+                Else
+                    If Me.IsDisposed = False Then
+                        Me.Visible = True
+                    End If
                 End If
-            End If
+            End Using
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error loading games.")
 #If DEBUG Then
@@ -554,12 +546,14 @@ Public Class Main
         Dim copiedProfileName = InputBox("Enter name of new profile to copy to:")
         copiedProfileName = Trim(copiedProfileName)
         If copiedProfileName = "" Then
-            MsgBox("Can't enter a blank profile name!  Try again.")
+            MessageBox.Show(Me, "Can't copy to a profile with a blank name! Please choose another name.", "Invalid Profile Name",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         If String.Equals(copiedProfileName, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot copy over the '" & Options.DefaultProfileName & "' profile")
+            MessageBox.Show(Me, "Cannot copy over the '" & Options.DefaultProfileName & "' profile. Please choose another name.",
+                            "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -571,16 +565,18 @@ Public Class Main
 
     Private Sub DeleteProfileButton_Click(sender As Object, e As EventArgs) Handles DeleteProfileButton.Click
         If String.Equals(ProfileComboBox.Text, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot delete the '" & Options.DefaultProfileName & "' profile")
+            MessageBox.Show(Me, "Cannot delete the '" & Options.DefaultProfileName & "' profile.",
+                            "Invalid Profile", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         preventLoadProfile = True
 
         If Options.DeleteProfile(ProfileComboBox.Text) Then
-            MsgBox("Profile Deleted", MsgBoxStyle.OkOnly, "Success")
+            MessageBox.Show(Me, "Profile deleted successfully", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Else
-            MsgBox("Error attempting to delete profile. It may have already been deleted", MsgBoxStyle.OkOnly, "Error")
+            MessageBox.Show(Me, "Error attempting to delete this profile. Perhaps it has already been deleted.",
+                            "Deletion Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
         GetProfiles(Options.DefaultProfileName)
 
@@ -827,6 +823,7 @@ Public Class Main
 
             If totalPonies > Options.MaxPonyCount Then
                 MessageBox.Show(String.Format(
+                                CultureInfo.CurrentCulture,
                                 "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
                                 "Try choosing no more than {2} in total.{0}" &
                                 "(or, you can increase the limit via the options menu)",

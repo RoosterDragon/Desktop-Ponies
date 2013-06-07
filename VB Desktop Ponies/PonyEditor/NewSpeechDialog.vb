@@ -69,10 +69,10 @@ Public Class NewSpeechDialog
                                        m_editor.PreviewPony.Directory, m_editor.Get_Filename(sound_path))
 
         If new_path <> sound_path Then
-            If Not My.Computer.FileSystem.FileExists(new_path) Then
+            If Not IO.File.Exists(new_path) Then
                 IO.File.Create(new_path).Close()
             End If
-            My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
+            IO.File.Copy(sound_path, new_path, True)
         End If
 
         Sound_Textbox.Text = sound_path

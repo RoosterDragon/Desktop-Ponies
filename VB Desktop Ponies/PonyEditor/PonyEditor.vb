@@ -20,6 +20,7 @@ Public Class PonyEditor
 
     Friend IsClosing As Boolean
 
+    Private ponyImageList As ImageList
     Dim grids As New List(Of PonyInfoGrid)
     Dim loaded As Boolean = False
 
@@ -94,22 +95,19 @@ Public Class PonyEditor
 
             PonySelectionView.Items.Clear()
 
-            Dim pony_image_list As New ImageList()
-            pony_image_list.ImageSize = New Size(50, 50)
-
             'add all possible ponies to the selection window.
             ponyNameList.Clear()
             ponyNameList.Capacity = Main.Instance.PonySelectionPanel.Controls.Count
+            ponyImageList = New ImageList() With {.ImageSize = New Size(50, 50)}
             For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
                 Dim ponyName = ponyPanel.PonyName.Text
                 ponyNameList.Add(ponyName)
-                pony_image_list.Images.Add(Bitmap.FromFile(Main.Instance.SelectablePonies.Find(Function(base As PonyBase)
-                                                                                                   Return ponyName = base.Directory
-                                                                                               End Function).Behaviors(0).LeftImagePath))
+                ponyImageList.Images.Add(Bitmap.FromFile(Main.Instance.SelectablePonies.Find(Function(base As PonyBase)
+                                                                                                 Return ponyName = base.Directory
+                                                                                             End Function).Behaviors(0).LeftImagePath))
             Next
-
-            PonySelectionView.LargeImageList = pony_image_list
-            PonySelectionView.SmallImageList = pony_image_list
+            PonySelectionView.LargeImageList = ponyImageList
+            PonySelectionView.SmallImageList = ponyImageList
 
             Dim pony_menu_order As Integer = 0
             For Each PonyName As String In ponyNameList
@@ -235,8 +233,10 @@ Public Class PonyEditor
             End If
         End If
         IsClosing = True
-        If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed AndAlso pe_animator.Started Then pe_animator.Pause(True)
-        RemoveHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
+        If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
+            If pe_animator.Started Then pe_animator.Pause(True)
+            RemoveHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
+        End If
     End Sub
 
     Friend Function GetPreviewWindowScreenRectangle() As Rectangle
@@ -1703,7 +1703,7 @@ Public Class PonyEditor
 
             If new_path <> picture_path Then
                 Try
-                    If Not My.Computer.FileSystem.FileExists(new_path) Then
+                    If Not File.Exists(new_path) Then
                         File.Create(new_path).Close()
                     End If
                     My.Computer.FileSystem.CopyFile(picture_path, new_path, True)
@@ -1746,7 +1746,7 @@ Public Class PonyEditor
                                        PreviewPony.Directory, Get_Filename(sound_path))
 
         If new_path <> sound_path Then
-            If Not My.Computer.FileSystem.FileExists(new_path) Then
+            If Not File.Exists(new_path) Then
                 File.Create(new_path).Close()
             End If
             My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
@@ -1940,7 +1940,7 @@ Public Class PonyEditor
 
             Dim comments As New List(Of String)
             Dim ponyIniFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
-            If My.Computer.FileSystem.FileExists(ponyIniFilePath) Then
+            If File.Exists(ponyIniFilePath) Then
                 Using existing_ini As New StreamReader(ponyIniFilePath)
                     Do Until existing_ini.EndOfStream
                         Dim line = existing_ini.ReadLine()
@@ -2020,7 +2020,7 @@ Public Class PonyEditor
         End Try
 
         has_saved = True
-        MsgBox("Save completed!")
+        MessageBox.Show(Me, "Save completed!", "Save Completed", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
     End Sub
 
@@ -2099,9 +2099,11 @@ Public Class PonyEditor
                         Pony.CurrentAnimator = Nothing
                     End If
                 End If
+                If ponyImageList IsNot Nothing Then ponyImageList.Dispose()
             End If
         Finally
             MyBase.Dispose(disposing)
         End Try
+        General.FullCollect()
     End Sub
 End Class

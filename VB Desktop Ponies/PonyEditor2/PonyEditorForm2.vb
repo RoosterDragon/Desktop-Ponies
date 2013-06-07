@@ -103,7 +103,7 @@ Public Class PonyEditorForm2
                              End Sub)
     End Sub
 
-    Private Function GetTabText(pageRef As PageRef, itemName As String) As String
+    Private Shared Function GetTabText(pageRef As PageRef, itemName As String) As String
         Select Case pageRef.PageContent
             Case PageContent.Ponies
                 Return itemName

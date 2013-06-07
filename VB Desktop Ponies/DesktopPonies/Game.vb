@@ -526,7 +526,7 @@ Friend Module Games
             Private startPoint As Point
 
             Public Sub New(_teamNumber As Integer, imageFilename As String, location As String)
-                If Not My.Computer.FileSystem.FileExists(imageFilename) Then
+                If Not File.Exists(imageFilename) Then
                     Throw New FileNotFoundException("File does not exist: " & imageFilename)
                 End If
 
@@ -571,7 +571,7 @@ Friend Module Games
             End Property
 
             Public Sub New(x As String, y As String, imageFilename As String)
-                If Not My.Computer.FileSystem.FileExists(imageFilename) Then
+                If Not File.Exists(imageFilename) Then
                     Throw New FileNotFoundException("File does not exist: " & imageFilename)
                 End If
 
@@ -894,8 +894,7 @@ Friend Module Games
 
                     Case Else
                         Pony.CurrentAnimator.Pause(False)
-                        MsgBox("Invalid action type: " & selected_action)
-                        Throw New Exception("Invalid action type: " & selected_action)
+                        Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selected_action)
                 End Select
 
                 CurrentAction = selected_action

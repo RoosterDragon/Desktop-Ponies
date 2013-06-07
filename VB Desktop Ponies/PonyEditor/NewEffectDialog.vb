@@ -154,10 +154,13 @@ Public Class NewEffectDialog
 
         Dim runtime = GetGifTotalRuntime(Left_ImageBox.Image)
 
-        If runtime <> 0 AndAlso My.Forms.GifRuntimeDialog.ShowDialog = DialogResult.OK Then
-            Duration_Box.Text = CStr(runtime)
+        If runtime <> 0 Then
+            Using dialog As New GifRuntimeDialog()
+                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                    Duration_Box.Text = CStr(runtime)
+                End If
+            End Using
         End If
-
 
     End Sub
 
@@ -176,8 +179,12 @@ Public Class NewEffectDialog
 
         Dim runtime = GetGifTotalRuntime(Left_ImageBox.Image)
 
-        If runtime <> 0 AndAlso My.Forms.GifRuntimeDialog.ShowDialog = DialogResult.OK Then
-            Duration_Box.Text = CStr(runtime)
+        If runtime <> 0 Then
+            Using dialog As New GifRuntimeDialog()
+                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                    Duration_Box.Text = CStr(runtime)
+                End If
+            End Using
         End If
 
     End Sub

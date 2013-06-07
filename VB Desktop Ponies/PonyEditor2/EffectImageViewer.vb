@@ -78,7 +78,7 @@ Public Class EffectImageViewer
         PaintCircles(e.Graphics, effectImageRect, Color.FromArgb(196, Color.DarkGreen), Centering)
     End Sub
 
-    Private Sub PaintCrosses(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
+    Private Shared Sub PaintCrosses(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
         Using thinPen As New Pen(color, 1)
             Using thickPen As New Pen(color, 2)
                 For direct = Direction.TopLeft To Direction.BottomRight
@@ -92,7 +92,7 @@ Public Class EffectImageViewer
         End Using
     End Sub
 
-    Private Sub PaintCircles(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
+    Private Shared Sub PaintCircles(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
         Using thinPen As New Pen(color, 1)
             Using thickPen As New Pen(color, 2)
                 For direct = Direction.TopLeft To Direction.BottomRight
@@ -105,7 +105,7 @@ Public Class EffectImageViewer
         End Using
     End Sub
 
-    Private Function GetDirectionOnRectangle(rect As Rectangle, dir As Direction) As Point
+    Private Shared Function GetDirectionOnRectangle(rect As Rectangle, dir As Direction) As Point
         Dim position = rect.Location
         Select Case dir
             Case Direction.TopCenter, Direction.MiddleCenter, Direction.BottomCenter, Direction.Random, Direction.RandomNotCenter

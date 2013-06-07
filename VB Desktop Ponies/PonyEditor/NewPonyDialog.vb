@@ -75,10 +75,10 @@ Public Class NewPonyDialog
 
         Try
             Dim newPonyPath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newName)
-            If My.Computer.FileSystem.DirectoryExists(newPonyPath) Then
+            If IO.Directory.Exists(newPonyPath) Then
                 Throw New Exception("Path already exists! Won't overwrite whatever is there: " & newPonyPath)
             End If
-            My.Computer.FileSystem.CreateDirectory(newPonyPath)
+            IO.Directory.CreateDirectory(newPonyPath)
             m_editor.PreviewPonyBase.Directory = newPonyPath
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Unable to create a directory for the new pony.")

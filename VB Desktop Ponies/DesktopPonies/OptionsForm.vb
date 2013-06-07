@@ -157,7 +157,8 @@
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
         If MonitorsSelection.SelectedItems.Count = 0 Then
-            MsgBox("You need to select at least one monitor.")
+            MessageBox.Show(Me, "You need to select at least one monitor.",
+                            "No Monitor Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -170,8 +171,8 @@
         End If
 
         If String.Equals(profile, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
-            MsgBox("Cannot save over the '" & Options.DefaultProfileName & "' profile. Create a new profile first.",
-                   MsgBoxStyle.OkOnly, "Cannot Save")
+            MessageBox.Show(Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. Create a new profile first.",
+                            "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 

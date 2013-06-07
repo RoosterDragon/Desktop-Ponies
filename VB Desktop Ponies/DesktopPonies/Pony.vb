@@ -1,6 +1,5 @@
 ﻿Imports System.Globalization
 Imports System.IO
-Imports System.Collections.ObjectModel
 Imports CSDesktopPonies.SpriteManagement
 
 Public Interface IPonyIniSerializable
@@ -455,24 +454,37 @@ Public Class PonyBase
                                         newLine = New Behavior.SpeakingLine(columns(1), Replace(columns(2), ControlChars.Quote, ""),
                                                                             Boolean.Parse(Trim(columns(4))), group)
                                     End If
-
                                 Case Else
-                                    MsgBox("Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name & ":" &
-                                           ControlChars.NewLine & line & ControlChars.NewLine &
-                                           "Line must contain a name for the entry, the text to be displayed," &
-                                           " optional: soundfile, true if entry is for a specific behavior and should be skipped normally")
+                                    Throw New InvalidDataException(
+                                        "Speak line contained an invalid number of columns. Valid formats are:" & vbNewLine &
+                                        "The text to display, only, e.g." & vbNewLine &
+                                        "Speak,""Hello!""" & vbNewLine &
+                                        "The name of the speech, the text, the sound file, True/False for preventing random use, e.g." &
+                                        vbNewLine &
+                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False" & vbNewLine &
+                                        "You can specify multiple sound files inside curly braces. " &
+                                        "The program will choose the first format it recognizes, e.g." & vbNewLine &
+                                        "Speak,""Greeting"",""Hello!"",{""Hello.mp3"",""Hello.ogg""},False" & vbNewLine &
+                                        "You can leave out sound files if you wish, e.g." & vbNewLine &
+                                        "Speak,""Greeting"",""Hello!"",,False" & vbNewLine &
+                                        "The behavior group to which the speech belongs can also be added at the end, e.g." & vbNewLine &
+                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False,0" & vbNewLine &
+                                        vbNewLine &
+                                        "The invalid line was: " & line)
                             End Select
                             SpeakingLines.Add(newLine)
                         Catch ex As Exception
-                            My.Application.NotifyUserOfNonFatalException(ex, "Invalid 'speak' line in " &
-                                                                         ConfigFilename & " file for pony named " & Name)
+                            My.Application.NotifyUserOfNonFatalException(
+                                ex, "Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name)
                         End Try
                     Case "effect"
                         effectLines.Add(line)
                     Case Else
-                        MsgBox("Unknown command in " & ConfigFilename & " for pony " & Name & ": " & columns(0) _
-                               & ControlChars.NewLine & "Skipping line: " & _
-                               ControlChars.NewLine & line)
+                        MessageBox.Show(
+                            "Unknown command in " & ConfigFilename & " for pony " & Name & ": " & columns(0) & ControlChars.NewLine &
+                            "Valid commands are: name, scale, behaviorgroup, behavior, categories, speak, effect" & vbNewLine &
+                            "Skipping line: " & ControlChars.NewLine & line,
+                            "Unknown Command", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 End Select
             Loop
 
@@ -514,8 +526,11 @@ Public Class PonyBase
                         Case "dragged"
                             movement = AllowedMoves.Dragged
                         Case Else
-                            MsgBox("Unknown movement type: " & columns(Main.BehaviorOption.MovementType) _
-                                   & ControlChars.NewLine & "Skipping behavior " & columns(Main.BehaviorOption.Name) & " for " & Name)
+                            MessageBox.Show("Unknown movement type: " & columns(Main.BehaviorOption.MovementType) & ControlChars.NewLine &
+                                            "Valid movement types: none, horizontal_only, vertical_only, horizontal_vertical, " &
+                                            "diagonal_only, diagonal_horizontal, diagonal_vertical, all, mouseover, sleep, dragged" &
+                                            vbNewLine &
+                                            "Skipping behavior " & columns(Main.BehaviorOption.Name) & " for " & Name)
                             Continue For
                     End Select
 
@@ -651,8 +666,10 @@ Public Class PonyBase
                     Next
 
                     If Not found_behavior Then
-                        MsgBox("Could not find behavior for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine _
-                           & effectLine)
+                        MessageBox.Show(
+                            "Could not find behavior for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine &
+                            effectLine,
+                            "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     End If
 
                 Catch ex As Exception
@@ -772,11 +789,11 @@ Public Class PonyBase
 
         Dim new_behavior As New Behavior(right_image_path, left_image_path)
 
-        If Not My.Computer.FileSystem.FileExists(right_image_path) Then
+        If Not File.Exists(right_image_path) Then
             Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & right_image_path)
         End If
 
-        If Not My.Computer.FileSystem.FileExists(left_image_path) Then
+        If Not File.Exists(left_image_path) Then
             Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & left_image_path)
         End If
 
@@ -935,8 +952,9 @@ Public Class PonyBase
                 End If
             Next
             If found = False AndAlso Options.DisplayPonyInteractionsErrors AndAlso Not Reference.InScreensaverMode Then
-                MsgBox("Warning: Pony '" & Me.Directory & "' does not have required behavior '" & iBehavior & "' for interaction: '" & _
-                       interaction_name & "'. This interaction is disabled.")
+                MessageBox.Show("Warning: Pony '" & Me.Directory & "' does not have required behavior '" & iBehavior & "' for interaction: '" & _
+                       interaction_name & "'. This interaction is disabled.",
+                       "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 Exit Sub
             End If
         Next
@@ -968,10 +986,10 @@ Public Class PonyBase
                         If found = False Then
                             ok_targets.Remove(Pony.Directory)
                             If displaywarnings AndAlso Not Reference.InScreensaverMode Then
-                                MsgBox("Warning:  Pony " & Pony.Name & " (" & Pony.Directory & ") " & _
-                                " does not have required behavior '" & _
-                               Behavior & "' as specified in interaction " & interaction_name & _
-                               ControlChars.NewLine & "Interaction is disabled for this pony.")
+                                MessageBox.Show("Warning: Pony " & Pony.Name & " (" & Pony.Directory & ") " &
+                                                " does not have required behavior '" & Behavior & "' as specified in interaction " &
+                                                interaction_name & ControlChars.NewLine & "Interaction is disabled for this pony.",
+                                                "Incorrect Or Missing Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                             End If
                         End If
 
@@ -980,9 +998,9 @@ Public Class PonyBase
             Next
 
             If ponyfound = False AndAlso displaywarnings AndAlso Not Reference.InScreensaverMode Then
-
-                MsgBox("Warning: There is no pony with name " & target & " loaded.  Interaction '" & name & _
-                       "' has this pony listed as a target.")
+                MessageBox.Show("Warning: There is no pony with name " & target & " loaded. Interaction '" & name &
+                                "' has this pony listed as a target.",
+                                "Interaction Target Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Next
 
@@ -1340,7 +1358,7 @@ Public Class Behavior
             Group = _group
             SoundFile = _path & _soundfile
 
-            If Not My.Computer.FileSystem.FileExists(SoundFile) Then
+            If Not File.Exists(SoundFile) Then
                 MessageBox.Show("Error loading sound file for speaking line " & Name & " for pony " & ponyname & ControlChars.NewLine &
                                 "Sound file: " & SoundFile & " does not exist.", "File Not Found",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
@@ -2113,7 +2131,7 @@ Public Class Pony
         End If
 
         ' Quick sanity check that the file exists on disk.
-        If Not My.Computer.FileSystem.FileExists(filePath) Then Exit Sub
+        If Not File.Exists(filePath) Then Exit Sub
 
         Try
             ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
