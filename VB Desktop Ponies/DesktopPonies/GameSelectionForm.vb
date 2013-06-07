@@ -6,9 +6,12 @@ Public Class GameSelectionForm
     Dim team2 As Game.Team = Nothing
     Dim game As Game = Nothing
 
-    Private Sub GameSelectionForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Public Sub New()
+        InitializeComponent()
         Icon = My.Resources.Twilight
+    End Sub
 
+    Private Sub GameSelectionForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         'add all possible ponies to the selection window.
 
         ScreenSelection_Box.Items.Clear()

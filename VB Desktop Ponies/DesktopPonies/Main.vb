@@ -75,7 +75,10 @@ Public Class Main
     Public Sub New()
         loadWatch.Start()
         InitializeComponent()
+        Icon = My.Resources.Twilight
+        Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
         initialized = True
+        Instance = Me
     End Sub
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -87,92 +90,12 @@ Public Class Main
     ''' </summary>
     Private Sub LoadInternal()
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
-        Instance = Me
-
-        Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
-        Me.Icon = My.Resources.Twilight
 
         Application.DoEvents()
 
-
-        Try
-            Dim Arguments = My.Application.CommandLineArgs
-
-            If Arguments.Count = 0 Then
-
-                If Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase) Then
-                    'for some versions of windows, starting with no parameters is the same as /c (configure)
-                    Reference.SetScreensaverPath()
-                    Me.Close()
-                    Exit Sub
-                End If
-
-                Exit Try
-            End If
-
-            'handle any comment line arguments
-            If Arguments.Count > 0 Then
-                Select Case Split(LCase(Trim(Arguments(0))), ":")(0)
-                    Case "autostart"
-                        Reference.AutoStarted = True
-                        Me.ShowInTaskbar = False
-                        ShowInTaskbar = False
-
-                        Try
-                            Options.LoadProfile("autostart")
-                        Catch
-                            Options.LoadDefaultProfile()
-                        End Try
-
-                        'windows is telling us "start as a screensaver"
-                    Case "/s"
-                        Dim path = Reference.TryGetScreensaverPath()
-                        If path Is Nothing Then
-                            MessageBox.Show(Me, "The screensaver path has not been configured correctly." &
-                                            " Until it has been set, the screensaver mode cannot be used.",
-                                            "Screensaver Not Configured", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                            Close()
-                        End If
-
-                        Options.InstallLocation = path
-                        Reference.InScreensaverMode = True
-                        Reference.AutoStarted = True
-                        ShowInTaskbar = False
-                        WindowState = FormWindowState.Minimized
-
-                        Try
-                            Options.LoadProfile("screensaver")
-                        Catch
-                            Options.LoadDefaultProfile()
-                        End Try
-
-                        'windows says: "preview screensaver".  This isn't implemented so just quit
-                    Case "/p"
-                        Me.Close()
-                        Exit Sub
-                        'windows says:  "configure screensaver"
-                    Case "/c"
-                        Reference.SetScreensaverPath()
-                        Me.Close()
-                        Exit Sub
-                    Case Else
-                        MsgBox("Invalid command line argument.  Usage: " & ControlChars.NewLine & _
-                               "desktop ponies.exe autostart - Automatically start with saved settings (or defaults if no settings are saved)" & ControlChars.NewLine & _
-                               "desktop ponies.exe /s - Start in screensaver mode (you need to run /c first to configure the path to the pony files)" & ControlChars.NewLine & _
-                               "desktop ponies.exe /c - Configure the path to pony files, only used for Screensaver mode." & ControlChars.NewLine & _
-                               "desktop ponies.exe /p - Screensaver preview use only.  Not implemented.")
-                        Me.Close()
-                        Exit Sub
-                End Select
-            End If
-
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
-        End Try
+        If ProcessCommandLine() Then Return
 
         loading = True
-
-        If Not Reference.AutoStarted Then WindowState = FormWindowState.Normal
 
         'temporarily save filter selections, if any, in the case that we are reloading after making a change in the editor.
         '(Loading options resets the filter, and will cause havoc otherwise)
@@ -234,6 +157,86 @@ Public Class Main
         End If
     End Sub
 
+    Private Function ProcessCommandLine() As Boolean
+        Try
+            Dim args = Environment.GetCommandLineArgs()
+
+            If args.Length = 1 AndAlso args(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase) Then
+                'for some versions of windows, starting with no parameters is the same as /c (configure)
+                Reference.SetScreensaverPath()
+                Me.Close()
+                Return True
+            End If
+
+            ' Process command line arguments (used for the screensaver mode).
+            If My.Application.CommandLineArgs.Count >= 1 Then
+                Select Case Split(args(1).Trim(), ":")(0).ToLowerInvariant()
+                    Case "autostart"
+                        Reference.AutoStarted = True
+                        ShowInTaskbar = False
+
+                        Try
+                            Options.LoadProfile("autostart")
+                        Catch
+                            Options.LoadDefaultProfile()
+                        End Try
+
+                        'windows is telling us "start as a screensaver"
+                    Case "/s"
+                        Dim path = Reference.TryGetScreensaverPath()
+                        If path Is Nothing Then
+                            MessageBox.Show(Me, "The screensaver path has not been configured correctly." &
+                                            " Until it has been set, the screensaver mode cannot be used.",
+                                            "Screensaver Not Configured", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                            Close()
+                            Return True
+                        End If
+
+                        Options.InstallLocation = path
+                        Reference.InScreensaverMode = True
+                        Reference.AutoStarted = True
+                        ShowInTaskbar = False
+                        WindowState = FormWindowState.Minimized
+
+                        Try
+                            Options.LoadProfile("screensaver")
+                        Catch
+                            Options.LoadDefaultProfile()
+                        End Try
+
+                        'windows says: "preview screensaver".  This isn't implemented so just quit
+                    Case "/p"
+                        Me.Close()
+                        Return True
+                        'windows says:  "configure screensaver"
+                    Case "/c"
+                        Reference.SetScreensaverPath()
+                        Me.Close()
+                        Return True
+                    Case Else
+                        MessageBox.Show(
+                            Me,
+                            "Invalid command line argument. Usage: " & ControlChars.NewLine &
+                            "desktop ponies.exe autostart - " &
+                            "Automatically start with saved settings (or defaults if no settings are saved)" & ControlChars.NewLine &
+                            "desktop ponies.exe /s - " &
+                            "Start in screensaver mode (you need to run /c first to configure the path to the pony files)" &
+                            ControlChars.NewLine &
+                            "desktop ponies.exe /c - " &
+                            "Configure the path to pony files, only used for Screensaver mode." & ControlChars.NewLine &
+                            "desktop ponies.exe /p - " &
+                            "Screensaver preview use only.Not implemented.",
+                            "Invalid Arguments", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                        Me.Close()
+                        Return True
+                End Select
+            End If
+        Catch ex As Exception
+            My.Application.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
+        End Try
+        Return False
+    End Function
+
     Private Sub SaveFilterSelections()
         tempFilterOptions = FilterOptionsBox.CheckedItems.Cast(Of String).ToArray()
     End Sub
@@ -252,7 +255,7 @@ Public Class Main
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-        idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Count)
+        idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Length)
 
         Dim skipLoadingErrors As Boolean = False
         For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
@@ -308,7 +311,8 @@ Public Class Main
                                          pony.LoadInteractions()
                                      Next
                                  Catch ex As Exception
-                                     My.Application.NotifyUserOfNonFatalException(ex, "There was a problem attempting to load interactions.")
+                                     My.Application.NotifyUserOfNonFatalException(
+                                         ex, "There was a problem attempting to load interactions.")
                                  End Try
                              End Sub)
 
@@ -322,28 +326,27 @@ Public Class Main
         idleWorker.QueueTask(Sub()
                                  Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-                                 If Reference.AutoStarted Then
-                                     'Me.Opacity = 0
-                                     GoButton_Click(Nothing, Nothing)
-                                 Else
-                                     'Me.Opacity = 100
-                                 End If
-
-                                 CountSelectedPonies()
+                                 PonyPaginationLabel.Text = String.Format(
+                                         CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
 
                                  If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
                                  LoadingProgressBar.Value = 0
                                  LoadingProgressBar.Maximum = 1
 
-                                 PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
-                                 PonyPaginationLabel.Text = String.Format(
-                                     CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
-                                 PaginationEnabled.Enabled = True
-                                 PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+                                 If Reference.AutoStarted Then
+                                     LoadPonies()
+                                 Else
+                                     CountSelectedPonies()
 
-                                 PonySelectionPanel.Enabled = True
-                                 SelectionControlsPanel.Enabled = True
-                                 AnimationTimer.Enabled = True
+                                     PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
+                                     PaginationEnabled.Enabled = True
+                                     PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+
+                                     PonySelectionPanel.Enabled = True
+                                     SelectionControlsPanel.Enabled = True
+                                     AnimationTimer.Enabled = True
+                                 End If
+
                                  loading = False
                                  General.FullCollect()
 
@@ -402,18 +405,14 @@ Public Class Main
     End Sub
 
     Private Sub CountSelectedPonies()
-
-        Dim total_ponies As Integer = 0
-
+        Dim totalPonies As Integer = 0
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             Dim count As Integer
             If Integer.TryParse(ponyPanel.PonyCount.Text, NumberStyles.Integer, CultureInfo.CurrentCulture, count) Then
-                total_ponies += count
+                totalPonies += count
             End If
         Next
-
-        PonyCountValueLabel.Text = CStr(total_ponies)
-
+        PonyCountValueLabel.Text = totalPonies.ToString(CultureInfo.CurrentCulture)
     End Sub
 #End Region
 
@@ -783,6 +782,10 @@ Public Class Main
 
 #Region "Pony Startup"
     Private Sub GoButton_Click(sender As Object, e As EventArgs) Handles GoButton.Click
+        LoadPonies()
+    End Sub
+
+    Private Sub LoadPonies()
         If PonyLoader.IsBusy Then
             MessageBox.Show(Me, "Already busy loading ponies. Cannot start any more at this time.",
                             "Busy", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -865,20 +868,19 @@ Public Class Main
                 Next
             End If
 
-            Try
-                If Options.PonyInteractionsEnabled Then
+            If Options.PonyInteractionsEnabled Then
+                Try
                     InitializeInteractions()
-                End If
-            Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "Unable to initialize interactions.")
-            End Try
+                Catch ex As Exception
+                    My.Application.NotifyUserOfNonFatalException(ex, "Unable to initialize interactions.")
+                End Try
+            End If
 
             PonyStartup()
         Catch ex As Exception
-#If Not Debug Then
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
             e.Cancel = True
-#Else
+#If DEBUG Then
             Throw
 #End If
         End Try

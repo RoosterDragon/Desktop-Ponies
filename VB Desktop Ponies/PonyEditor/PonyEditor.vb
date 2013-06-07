@@ -64,13 +64,12 @@ Public Class PonyEditor
 
     Public Sub New()
         InitializeComponent()
+        Icon = My.Resources.Twilight
         CreateHandle()
 
         For Each value As Interaction.TargetActivation In [Enum].GetValues(GetType(Interaction.TargetActivation))
             colInteractionInteractWith.Items.Add(value.ToString())
         Next
-
-        Icon = My.Resources.Twilight
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load

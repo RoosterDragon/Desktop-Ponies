@@ -5,6 +5,7 @@
 
     Public Sub New()
         InitializeComponent()
+        Icon = My.Resources.Twilight
     End Sub
 
     Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -13,8 +14,6 @@
     End Sub
 
     Private Sub LoadInternal()
-        Icon = My.Resources.Twilight
-
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
 

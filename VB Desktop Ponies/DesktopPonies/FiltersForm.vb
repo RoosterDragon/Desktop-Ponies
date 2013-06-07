@@ -1,6 +1,10 @@
 ﻿Public Class FiltersForm
-    Private Sub Filters_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Public Sub New()
+        InitializeComponent()
         Icon = My.Resources.Twilight
+    End Sub
+
+    Private Sub Filters_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Filters_Box.Lines = Options.CustomTags.ToArray()
     End Sub
 
