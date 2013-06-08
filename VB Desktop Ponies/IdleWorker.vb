@@ -3,6 +3,7 @@
 ''' <summary>
 ''' Processes UI dependant tasks on the UI thread when the application is idle.
 ''' </summary>
+''' <remarks>When the application exits, any tasks queued for execution are abandoned.</remarks>
 Public Class IdleWorker
 
     ''' <summary>

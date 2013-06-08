@@ -4,7 +4,7 @@ Imports System.IO
 Public Class ItemEditorBase
 
     Private ReadOnly idleFocusControl As New Control(Me, Nothing)
-    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
+    Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
 
     Private _base As PonyBase
     Protected ReadOnly Property Base As PonyBase
@@ -137,7 +137,7 @@ Public Class ItemEditorBase
                         ex = e
                     End Try
                 End If
-                idleWorker.QueueTask(
+                worker.QueueTask(
                     Sub()
                         If filePath <> selector.FilePath Then
                             ' The file path was changed whilst we were generating the image.
@@ -189,7 +189,7 @@ Public Class ItemEditorBase
                 Catch e As Exception
                     ex = e
                 End Try
-                idleWorker.QueueTask(
+                worker.QueueTask(
                     Sub()
                         If filePath <> selector.FilePath Then
                             ' The file path was changed whilst we were generating the image.

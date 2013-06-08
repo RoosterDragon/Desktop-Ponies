@@ -1,7 +1,7 @@
 ﻿Imports System.IO
 
 Public Class PonyEditorForm2
-    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
+    Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)
     Private activeTab As TabPage
 
@@ -48,59 +48,59 @@ Public Class PonyEditorForm2
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-        idleWorker.QueueTask(Sub() EditorProgressBar.Maximum = ponyBaseDirectories.Length)
+        worker.QueueTask(Sub() EditorProgressBar.Maximum = ponyBaseDirectories.Length)
         Dim poniesNode As TreeNode = Nothing
-        idleWorker.QueueTask(Sub()
-                                 poniesNode = New TreeNode("Ponies") With
-                                              {.Tag = New PageRef(Nothing, PageContent.Ponies)}
-                                 DocumentsView.Nodes.Add(poniesNode)
-                                 poniesNode.Expand()
-                             End Sub)
+        worker.QueueTask(Sub()
+                             poniesNode = New TreeNode("Ponies") With
+                                          {.Tag = New PageRef(Nothing, PageContent.Ponies)}
+                             DocumentsView.Nodes.Add(poniesNode)
+                             poniesNode.Expand()
+                         End Sub)
         For Each directory In ponyBaseDirectories
             Dim ponyBase As New MutablePonyBase(directory)
             bases.Add(ponyBase.Directory, ponyBase)
-            idleWorker.QueueTask(Sub()
-                                     Dim ponyBaseNode = New TreeNode(ponyBase.Directory) With
-                                                        {.Tag = New PageRef(ponyBase, PageContent.Pony)}
-                                     poniesNode.Nodes.Add(ponyBaseNode)
+            worker.QueueTask(Sub()
+                                 Dim ponyBaseNode = New TreeNode(ponyBase.Directory) With
+                                                    {.Tag = New PageRef(ponyBase, PageContent.Pony)}
+                                 poniesNode.Nodes.Add(ponyBaseNode)
 
-                                     Dim behaviorsNode = New TreeNode("Behaviors") With
-                                                        {.Tag = New PageRef(ponyBase, PageContent.Behaviors)}
-                                     ponyBaseNode.Nodes.Add(behaviorsNode)
-                                     Dim effectsNode = New TreeNode("Effects") With
-                                                           {.Tag = New PageRef(ponyBase, PageContent.Effects)}
-                                     ponyBaseNode.Nodes.Add(effectsNode)
-                                     Dim speechesNode = New TreeNode("Speeches") With
-                                                        {.Tag = New PageRef(ponyBase, PageContent.Speeches)}
-                                     ponyBaseNode.Nodes.Add(speechesNode)
+                                 Dim behaviorsNode = New TreeNode("Behaviors") With
+                                                    {.Tag = New PageRef(ponyBase, PageContent.Behaviors)}
+                                 ponyBaseNode.Nodes.Add(behaviorsNode)
+                                 Dim effectsNode = New TreeNode("Effects") With
+                                                       {.Tag = New PageRef(ponyBase, PageContent.Effects)}
+                                 ponyBaseNode.Nodes.Add(effectsNode)
+                                 Dim speechesNode = New TreeNode("Speeches") With
+                                                    {.Tag = New PageRef(ponyBase, PageContent.Speeches)}
+                                 ponyBaseNode.Nodes.Add(speechesNode)
 
-                                     For Each behavior In ponyBase.Behaviors
-                                         behaviorsNode.Nodes.Add(
-                                             New TreeNode(behavior.Name) With {.Tag = New PageRef(ponyBase, PageContent.Behavior)})
-                                     Next
+                                 For Each behavior In ponyBase.Behaviors
+                                     behaviorsNode.Nodes.Add(
+                                         New TreeNode(behavior.Name) With {.Tag = New PageRef(ponyBase, PageContent.Behavior)})
+                                 Next
 
-                                     For Each effect In ponyBase.Effects
-                                         effectsNode.Nodes.Add(
-                                             New TreeNode(effect.Name) With {.Tag = New PageRef(ponyBase, PageContent.Effect)})
-                                     Next
+                                 For Each effect In ponyBase.Effects
+                                     effectsNode.Nodes.Add(
+                                         New TreeNode(effect.Name) With {.Tag = New PageRef(ponyBase, PageContent.Effect)})
+                                 Next
 
-                                     For Each speech In ponyBase.SpeakingLines
-                                         speechesNode.Nodes.Add(
-                                             New TreeNode(speech.Name) With {.Tag = New PageRef(ponyBase, PageContent.Speech)})
-                                     Next
+                                 For Each speech In ponyBase.SpeakingLines
+                                     speechesNode.Nodes.Add(
+                                         New TreeNode(speech.Name) With {.Tag = New PageRef(ponyBase, PageContent.Speech)})
+                                 Next
 
-                                     EditorProgressBar.Value += 1
-                                 End Sub)
-        Next
-        idleWorker.QueueTask(Sub()
-                                 EditorStatus.Text = "Ready"
-                                 EditorProgressBar.Value = 0
-                                 EditorProgressBar.Maximum = 0
-                                 DocumentsView.TopNode.Expand()
-                                 UseWaitCursor = False
-                                 Enabled = True
-                                 DocumentsView.Focus()
+                                 EditorProgressBar.Value += 1
                              End Sub)
+        Next
+        worker.QueueTask(Sub()
+                             EditorStatus.Text = "Ready"
+                             EditorProgressBar.Value = 0
+                             EditorProgressBar.Maximum = 0
+                             DocumentsView.TopNode.Expand()
+                             UseWaitCursor = False
+                             Enabled = True
+                             DocumentsView.Focus()
+                         End Sub)
     End Sub
 
     Private Shared Function GetTabText(pageRef As PageRef, itemName As String) As String
@@ -146,7 +146,7 @@ Public Class PonyEditorForm2
                     editor = New SpeechEditor()
             End Select
             If editor IsNot Nothing Then
-                idleWorker.QueueTask(Sub() editor.LoadItem(pageRef.PonyBase, itemName))
+                worker.QueueTask(Sub() editor.LoadItem(pageRef.PonyBase, itemName))
                 editor.Dock = DockStyle.Fill
                 tab = New ItemTabPage() With {.Name = node.FullPath, .Text = GetTabText(pageRef, itemName)}
                 tab.Controls.Add(editor)

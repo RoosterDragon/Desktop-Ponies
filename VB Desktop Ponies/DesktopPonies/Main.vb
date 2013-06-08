@@ -12,7 +12,6 @@ Public Class Main
     Private initialized As Boolean
     Private loading As Boolean
     Private loadWatch As New Diagnostics.Stopwatch()
-    Private ReadOnly idleWorker As IdleWorker = idleWorker.CurrentThreadWorker
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -157,7 +156,7 @@ Public Class Main
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         If loadTemplates Then
-            Threading.ThreadPool.QueueUserWorkItem(Sub() Me.LoadTemplates())
+            Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates, IdleWorker.CurrentThreadWorker)
         End If
     End Sub
 
@@ -255,11 +254,12 @@ Public Class Main
         Next
     End Sub
 
-    Private Sub LoadTemplates()
+    Private Sub LoadTemplates(workerObject As Object)
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
 
-        idleWorker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Length)
+        Dim worker = DirectCast(workerObject, IdleWorker)
+        worker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Length)
 
         Dim skipLoadingErrors As Boolean = False
         For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
@@ -271,12 +271,12 @@ Public Class Main
 
             Dim pony = New PonyBase(folder)
             ponyBasesToAdd.Add(pony)
-            idleWorker.QueueTask(Sub()
-                                     Try
-                                         AddToMenu(pony)
-                                     Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse TypeOf ex Is FileNotFoundException
-                                         If Not skipLoadingErrors Then
-                                             Select Case MessageBox.Show(Me,
+            worker.QueueTask(Sub()
+                                 Try
+                                     AddToMenu(pony)
+                                 Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse TypeOf ex Is FileNotFoundException
+                                     If Not skipLoadingErrors Then
+                                         Select Case MessageBox.Show(Me,
                                                                          "Error: Invalid data in " & PonyBase.ConfigFilename &
                                                                          " configuration file in " & folder & ControlChars.NewLine &
                                                                          "Won't load this pony..." & ControlChars.NewLine &
@@ -284,20 +284,20 @@ Public Class Main
                                                                          "Press No to see the error for each pony. " &
                                                                          "Press cancel to quit.", "Invalid Configuration File",
                                                                          MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)
-                                                 Case DialogResult.Yes
-                                                     skipLoadingErrors = True
-                                                 Case DialogResult.No
-                                                     'do nothing
-                                                 Case DialogResult.Cancel
-                                                     Me.Close()
-                                             End Select
-                                         End If
-                                     End Try
-                                     LoadingProgressBar.Value += 1
-                                 End Sub)
+                                             Case DialogResult.Yes
+                                                 skipLoadingErrors = True
+                                             Case DialogResult.No
+                                                 'do nothing
+                                             Case DialogResult.Cancel
+                                                 Me.Close()
+                                         End Select
+                                     End If
+                                 End Try
+                                 LoadingProgressBar.Value += 1
+                             End Sub)
         Next
 
-        idleWorker.WaitOnAllTasks()
+        worker.WaitOnAllTasks()
         If SelectablePonies.Count = 0 Then
             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
                             "There should have at least been a 'Derpy' folder in the same spot as this program.",
@@ -306,58 +306,58 @@ Public Class Main
         End If
 
         ' Load pony counts.
-        idleWorker.QueueTask(Sub() Options.LoadPonyCounts())
+        worker.QueueTask(Sub() Options.LoadPonyCounts())
 
         ' Load interactions, since references to other ponies can now be resolved.
-        idleWorker.QueueTask(Sub()
-                                 Try
-                                     For Each pony In SelectablePonies
-                                         pony.LoadInteractions()
-                                     Next
-                                 Catch ex As Exception
-                                     My.Application.NotifyUserOfNonFatalException(
+        worker.QueueTask(Sub()
+                             Try
+                                 For Each pony In SelectablePonies
+                                     pony.LoadInteractions()
+                                 Next
+                             Catch ex As Exception
+                                 My.Application.NotifyUserOfNonFatalException(
                                          ex, "There was a problem attempting to load interactions.")
-                                 End Try
-                             End Sub)
+                             End Try
+                         End Sub)
 
         ' Wait for all images to load.
-        idleWorker.QueueTask(Sub()
-                                 For Each control As PonySelectionControl In PonySelectionPanel.Controls
-                                     control.ShowPonyImage = True
-                                 Next
-                             End Sub)
+        worker.QueueTask(Sub()
+                             For Each control As PonySelectionControl In PonySelectionPanel.Controls
+                                 control.ShowPonyImage = True
+                             Next
+                         End Sub)
 
-        idleWorker.QueueTask(Sub()
-                                 Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
+        worker.QueueTask(Sub()
+                             Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-                                 PonyPaginationLabel.Text = String.Format(
-                                         CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
+                             PonyPaginationLabel.Text = String.Format(
+                                     CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
 
-                                 If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
-                                 LoadingProgressBar.Value = 0
-                                 LoadingProgressBar.Maximum = 1
+                             If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+                             LoadingProgressBar.Value = 0
+                             LoadingProgressBar.Maximum = 1
 
-                                 If Reference.AutoStarted Then
-                                     LoadPonies()
-                                 Else
-                                     CountSelectedPonies()
+                             If Reference.AutoStarted Then
+                                 LoadPonies()
+                             Else
+                                 CountSelectedPonies()
 
-                                     PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
-                                     PaginationEnabled.Enabled = True
-                                     PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+                                 PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
+                                 PaginationEnabled.Enabled = True
+                                 PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
 
-                                     PonySelectionPanel.Enabled = True
-                                     SelectionControlsPanel.Enabled = True
-                                     AnimationTimer.Enabled = True
-                                 End If
+                                 PonySelectionPanel.Enabled = True
+                                 SelectionControlsPanel.Enabled = True
+                                 AnimationTimer.Enabled = True
+                             End If
 
-                                 loading = False
-                                 General.FullCollect()
+                             loading = False
+                             General.FullCollect()
 
-                                 loadWatch.Stop()
-                                 Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
-                                                   loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
-                             End Sub)
+                             loadWatch.Stop()
+                             Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
+                                               loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
+                         End Sub)
     End Sub
 
     Private Function LoadHouse(folder As String, skipErrors As Boolean) As Boolean
