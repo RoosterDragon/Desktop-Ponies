@@ -73,10 +73,10 @@ Friend Module Games
 
         Public Sub New(directory As String)
             Dim gameData As String = Nothing
-            Dim descriptionData As String
-            Dim positionData As New List(Of String)
-            Dim ballData As New List(Of String)
-            Dim goalData As New List(Of String)
+            Dim descriptionData As String = Nothing
+            Dim positionData As New List(Of String)()
+            Dim ballData As New List(Of String)()
+            Dim goalData As New List(Of String)()
 
             Using configFile As New StreamReader(Path.Combine(directory, Game.ConfigFilename))
                 Do Until configFile.EndOfStream
@@ -116,7 +116,7 @@ Friend Module Games
             Dim gameColumns = CommaSplitBraceQualified(gameData)
             Name = gameColumns(1).Replace(ControlChars.Quote, "")
 
-            Dim descriptionColumns = CommaSplitQuoteQualified(gameData)
+            Dim descriptionColumns = CommaSplitQuoteQualified(descriptionData)
             If descriptionColumns.Length >= 2 Then
                 Description = descriptionColumns(1)
             Else

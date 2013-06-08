@@ -22,318 +22,327 @@ Partial Class GameSelectionForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.Pony_Selection_View = New System.Windows.Forms.ListView()
-        Me.Game_Selection_View = New System.Windows.Forms.ListView()
-        Me.Team1_Panel = New System.Windows.Forms.Panel()
-        Me.Team2_Panel = New System.Windows.Forms.Panel()
-        Me.Team1_Label = New System.Windows.Forms.Label()
-        Me.Team2_Label = New System.Windows.Forms.Label()
-        Me.Play_Button = New System.Windows.Forms.Button()
-        Me.Add_Team1_Button = New System.Windows.Forms.Button()
-        Me.Add_Team2_Button = New System.Windows.Forms.Button()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.team1_spotsleft_label = New System.Windows.Forms.Label()
-        Me.team1_requiredleft_label = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.team2_requiredleft_label = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.team2_spotsleft_label = New System.Windows.Forms.Label()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.Prompt_Label = New System.Windows.Forms.Label()
-        Me.Info_Button = New System.Windows.Forms.Button()
-        Me.Label8 = New System.Windows.Forms.Label()
-        Me.ScreenSelection_Box = New System.Windows.Forms.ListBox()
+        Me.PonyList = New System.Windows.Forms.ListView()
+        Me.GameList = New System.Windows.Forms.ListView()
+        Me.Team1AddButton = New System.Windows.Forms.Button()
+        Me.Team2AddButton = New System.Windows.Forms.Button()
+        Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.TeamTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.GameGroup = New System.Windows.Forms.GroupBox()
+        Me.CommandsPanel = New System.Windows.Forms.Panel()
+        Me.Transition3Label = New System.Windows.Forms.Label()
+        Me.Transition2Label = New System.Windows.Forms.Label()
+        Me.Transition1Label = New System.Windows.Forms.Label()
+        Me.StartLabel = New System.Windows.Forms.Label()
+        Me.SelectPlayersLabel = New System.Windows.Forms.Label()
+        Me.SelectGameLabel = New System.Windows.Forms.Label()
+        Me.MonitorLabel = New System.Windows.Forms.Label()
+        Me.PlayButton = New System.Windows.Forms.Button()
+        Me.MonitorComboBox = New System.Windows.Forms.ComboBox()
+        Me.GameTeam2 = New VBDesktopPonies.GameTeamControl()
+        Me.GameTeam1 = New VBDesktopPonies.GameTeamControl()
+        Me.GameDescriptionLabel = New System.Windows.Forms.Label()
+        Me.LayoutTable.SuspendLayout()
+        Me.TeamTable.SuspendLayout()
+        Me.GameGroup.SuspendLayout()
+        Me.CommandsPanel.SuspendLayout()
         Me.SuspendLayout()
         '
-        'Pony_Selection_View
+        'PonyList
         '
-        Me.Pony_Selection_View.Activation = System.Windows.Forms.ItemActivation.OneClick
-        Me.Pony_Selection_View.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.Pony_Selection_View.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
-        Me.Pony_Selection_View.HideSelection = False
-        Me.Pony_Selection_View.LabelWrap = False
-        Me.Pony_Selection_View.Location = New System.Drawing.Point(540, 49)
-        Me.Pony_Selection_View.MultiSelect = False
-        Me.Pony_Selection_View.Name = "Pony_Selection_View"
-        Me.Pony_Selection_View.ShowGroups = False
-        Me.Pony_Selection_View.Size = New System.Drawing.Size(150, 426)
-        Me.Pony_Selection_View.TabIndex = 3
-        Me.Pony_Selection_View.UseCompatibleStateImageBehavior = False
+        Me.PonyList.Activation = System.Windows.Forms.ItemActivation.OneClick
+        Me.PonyList.BackColor = System.Drawing.SystemColors.AppWorkspace
+        Me.PonyList.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PonyList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
+        Me.PonyList.HideSelection = False
+        Me.PonyList.Location = New System.Drawing.Point(189, 3)
+        Me.PonyList.MultiSelect = False
+        Me.PonyList.Name = "PonyList"
+        Me.PonyList.ShowGroups = False
+        Me.PonyList.Size = New System.Drawing.Size(564, 443)
+        Me.PonyList.TabIndex = 2
+        Me.PonyList.UseCompatibleStateImageBehavior = False
         '
-        'Game_Selection_View
+        'GameList
         '
-        Me.Game_Selection_View.Activation = System.Windows.Forms.ItemActivation.OneClick
-        Me.Game_Selection_View.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.Game_Selection_View.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
-        Me.Game_Selection_View.HideSelection = False
-        Me.Game_Selection_View.LabelWrap = False
-        Me.Game_Selection_View.Location = New System.Drawing.Point(44, 49)
-        Me.Game_Selection_View.MultiSelect = False
-        Me.Game_Selection_View.Name = "Game_Selection_View"
-        Me.Game_Selection_View.ShowGroups = False
-        Me.Game_Selection_View.Size = New System.Drawing.Size(192, 321)
-        Me.Game_Selection_View.TabIndex = 4
-        Me.Game_Selection_View.UseCompatibleStateImageBehavior = False
+        Me.GameList.Activation = System.Windows.Forms.ItemActivation.OneClick
+        Me.GameList.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GameList.BackColor = System.Drawing.SystemColors.AppWorkspace
+        Me.GameList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
+        Me.GameList.HideSelection = False
+        Me.GameList.Location = New System.Drawing.Point(6, 19)
+        Me.GameList.MultiSelect = False
+        Me.GameList.Name = "GameList"
+        Me.GameList.ShowGroups = False
+        Me.GameList.Size = New System.Drawing.Size(927, 101)
+        Me.GameList.TabIndex = 0
+        Me.GameList.UseCompatibleStateImageBehavior = False
         '
-        'Team1_Panel
+        'Team1AddButton
         '
-        Me.Team1_Panel.AutoScroll = True
-        Me.Team1_Panel.Location = New System.Drawing.Point(291, 69)
-        Me.Team1_Panel.Name = "Team1_Panel"
-        Me.Team1_Panel.Size = New System.Drawing.Size(163, 374)
-        Me.Team1_Panel.TabIndex = 5
+        Me.Team1AddButton.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Team1AddButton.Location = New System.Drawing.Point(153, 30)
+        Me.Team1AddButton.Margin = New System.Windows.Forms.Padding(3, 30, 3, 70)
+        Me.Team1AddButton.Name = "Team1AddButton"
+        Me.Team1AddButton.Size = New System.Drawing.Size(30, 349)
+        Me.Team1AddButton.TabIndex = 1
+        Me.Team1AddButton.Text = "<"
+        Me.Team1AddButton.UseVisualStyleBackColor = True
         '
-        'Team2_Panel
+        'Team2AddButton
         '
-        Me.Team2_Panel.AutoScroll = True
-        Me.Team2_Panel.Location = New System.Drawing.Point(764, 69)
-        Me.Team2_Panel.Name = "Team2_Panel"
-        Me.Team2_Panel.Size = New System.Drawing.Size(164, 374)
-        Me.Team2_Panel.TabIndex = 6
+        Me.Team2AddButton.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Team2AddButton.Location = New System.Drawing.Point(759, 30)
+        Me.Team2AddButton.Margin = New System.Windows.Forms.Padding(3, 30, 3, 70)
+        Me.Team2AddButton.Name = "Team2AddButton"
+        Me.Team2AddButton.Size = New System.Drawing.Size(30, 349)
+        Me.Team2AddButton.TabIndex = 3
+        Me.Team2AddButton.Text = ">"
+        Me.Team2AddButton.UseVisualStyleBackColor = True
         '
-        'Team1_Label
+        'LayoutTable
         '
-        Me.Team1_Label.AutoSize = True
-        Me.Team1_Label.Location = New System.Drawing.Point(294, 53)
-        Me.Team1_Label.Name = "Team1_Label"
-        Me.Team1_Label.Size = New System.Drawing.Size(43, 13)
-        Me.Team1_Label.TabIndex = 7
-        Me.Team1_Label.Text = "Team 1"
+        Me.LayoutTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.LayoutTable.ColumnCount = 1
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.Controls.Add(Me.TeamTable, 0, 2)
+        Me.LayoutTable.Controls.Add(Me.GameGroup, 0, 1)
+        Me.LayoutTable.Controls.Add(Me.CommandsPanel, 0, 0)
+        Me.LayoutTable.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LayoutTable.Location = New System.Drawing.Point(0, 0)
+        Me.LayoutTable.Name = "LayoutTable"
+        Me.LayoutTable.RowCount = 3
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.Size = New System.Drawing.Size(948, 690)
+        Me.LayoutTable.TabIndex = 0
         '
-        'Team2_Label
+        'TeamTable
         '
-        Me.Team2_Label.AutoSize = True
-        Me.Team2_Label.Location = New System.Drawing.Point(773, 53)
-        Me.Team2_Label.Name = "Team2_Label"
-        Me.Team2_Label.Size = New System.Drawing.Size(43, 13)
-        Me.Team2_Label.TabIndex = 8
-        Me.Team2_Label.Text = "Team 2"
+        Me.TeamTable.AutoSize = True
+        Me.TeamTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.TeamTable.ColumnCount = 5
+        Me.TeamTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TeamTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TeamTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TeamTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TeamTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TeamTable.Controls.Add(Me.GameTeam2, 4, 0)
+        Me.TeamTable.Controls.Add(Me.PonyList, 2, 0)
+        Me.TeamTable.Controls.Add(Me.Team1AddButton, 1, 0)
+        Me.TeamTable.Controls.Add(Me.Team2AddButton, 3, 0)
+        Me.TeamTable.Controls.Add(Me.GameTeam1, 0, 0)
+        Me.TeamTable.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TeamTable.Location = New System.Drawing.Point(3, 238)
+        Me.TeamTable.Name = "TeamTable"
+        Me.TeamTable.RowCount = 1
+        Me.TeamTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TeamTable.Size = New System.Drawing.Size(942, 449)
+        Me.TeamTable.TabIndex = 2
         '
-        'Play_Button
+        'GameGroup
         '
-        Me.Play_Button.Location = New System.Drawing.Point(103, 391)
-        Me.Play_Button.Name = "Play_Button"
-        Me.Play_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Play_Button.TabIndex = 9
-        Me.Play_Button.Text = "PLAY"
-        Me.Play_Button.UseVisualStyleBackColor = True
+        Me.GameGroup.AutoSize = True
+        Me.GameGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GameGroup.Controls.Add(Me.GameDescriptionLabel)
+        Me.GameGroup.Controls.Add(Me.GameList)
+        Me.GameGroup.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.GameGroup.Location = New System.Drawing.Point(3, 45)
+        Me.GameGroup.Name = "GameGroup"
+        Me.GameGroup.Size = New System.Drawing.Size(942, 187)
+        Me.GameGroup.TabIndex = 1
+        Me.GameGroup.TabStop = False
+        Me.GameGroup.Text = "Select Game"
         '
-        'Add_Team1_Button
+        'CommandsPanel
         '
-        Me.Add_Team1_Button.Location = New System.Drawing.Point(481, 162)
-        Me.Add_Team1_Button.Name = "Add_Team1_Button"
-        Me.Add_Team1_Button.Size = New System.Drawing.Size(31, 208)
-        Me.Add_Team1_Button.TabIndex = 10
-        Me.Add_Team1_Button.Text = "<"
-        Me.Add_Team1_Button.UseVisualStyleBackColor = True
+        Me.CommandsPanel.AutoSize = True
+        Me.CommandsPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.CommandsPanel.Controls.Add(Me.MonitorComboBox)
+        Me.CommandsPanel.Controls.Add(Me.Transition3Label)
+        Me.CommandsPanel.Controls.Add(Me.Transition2Label)
+        Me.CommandsPanel.Controls.Add(Me.Transition1Label)
+        Me.CommandsPanel.Controls.Add(Me.StartLabel)
+        Me.CommandsPanel.Controls.Add(Me.SelectPlayersLabel)
+        Me.CommandsPanel.Controls.Add(Me.SelectGameLabel)
+        Me.CommandsPanel.Controls.Add(Me.MonitorLabel)
+        Me.CommandsPanel.Controls.Add(Me.PlayButton)
+        Me.CommandsPanel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.CommandsPanel.Location = New System.Drawing.Point(3, 3)
+        Me.CommandsPanel.Name = "CommandsPanel"
+        Me.CommandsPanel.Size = New System.Drawing.Size(942, 36)
+        Me.CommandsPanel.TabIndex = 0
         '
-        'Add_Team2_Button
+        'Transition3Label
         '
-        Me.Add_Team2_Button.Location = New System.Drawing.Point(712, 162)
-        Me.Add_Team2_Button.Name = "Add_Team2_Button"
-        Me.Add_Team2_Button.Size = New System.Drawing.Size(31, 208)
-        Me.Add_Team2_Button.TabIndex = 11
-        Me.Add_Team2_Button.Text = ">"
-        Me.Add_Team2_Button.UseVisualStyleBackColor = True
+        Me.Transition3Label.AutoSize = True
+        Me.Transition3Label.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Transition3Label.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.Transition3Label.Location = New System.Drawing.Point(467, 6)
+        Me.Transition3Label.Name = "Transition3Label"
+        Me.Transition3Label.Size = New System.Drawing.Size(22, 24)
+        Me.Transition3Label.TabIndex = 5
+        Me.Transition3Label.Text = ">"
         '
-        'Label1
+        'Transition2Label
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(335, 462)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(54, 13)
-        Me.Label1.TabIndex = 12
-        Me.Label1.Text = "Spots left:"
+        Me.Transition2Label.AutoSize = True
+        Me.Transition2Label.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Transition2Label.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.Transition2Label.Location = New System.Drawing.Point(359, 6)
+        Me.Transition2Label.Name = "Transition2Label"
+        Me.Transition2Label.Size = New System.Drawing.Size(22, 24)
+        Me.Transition2Label.TabIndex = 3
+        Me.Transition2Label.Text = ">"
         '
-        'team1_spotsleft_label
+        'Transition1Label
         '
-        Me.team1_spotsleft_label.AutoSize = True
-        Me.team1_spotsleft_label.Location = New System.Drawing.Point(401, 462)
-        Me.team1_spotsleft_label.Name = "team1_spotsleft_label"
-        Me.team1_spotsleft_label.Size = New System.Drawing.Size(13, 13)
-        Me.team1_spotsleft_label.TabIndex = 14
-        Me.team1_spotsleft_label.Text = "0"
+        Me.Transition1Label.AutoSize = True
+        Me.Transition1Label.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Transition1Label.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.Transition1Label.Location = New System.Drawing.Point(160, 6)
+        Me.Transition1Label.Name = "Transition1Label"
+        Me.Transition1Label.Size = New System.Drawing.Size(22, 24)
+        Me.Transition1Label.TabIndex = 1
+        Me.Transition1Label.Text = ">"
         '
-        'team1_requiredleft_label
+        'StartLabel
         '
-        Me.team1_requiredleft_label.AutoSize = True
-        Me.team1_requiredleft_label.Location = New System.Drawing.Point(401, 488)
-        Me.team1_requiredleft_label.Name = "team1_requiredleft_label"
-        Me.team1_requiredleft_label.Size = New System.Drawing.Size(13, 13)
-        Me.team1_requiredleft_label.TabIndex = 18
-        Me.team1_requiredleft_label.Text = "0"
+        Me.StartLabel.AutoSize = True
+        Me.StartLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.StartLabel.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.StartLabel.Location = New System.Drawing.Point(387, 6)
+        Me.StartLabel.Name = "StartLabel"
+        Me.StartLabel.Size = New System.Drawing.Size(74, 24)
+        Me.StartLabel.TabIndex = 4
+        Me.StartLabel.Text = "3. Start"
         '
-        'Label4
+        'SelectPlayersLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(289, 488)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(100, 13)
-        Me.Label4.TabIndex = 17
-        Me.Label4.Text = "Required Spots left:"
+        Me.SelectPlayersLabel.AutoSize = True
+        Me.SelectPlayersLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.SelectPlayersLabel.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.SelectPlayersLabel.Location = New System.Drawing.Point(188, 6)
+        Me.SelectPlayersLabel.Name = "SelectPlayersLabel"
+        Me.SelectPlayersLabel.Size = New System.Drawing.Size(165, 24)
+        Me.SelectPlayersLabel.TabIndex = 2
+        Me.SelectPlayersLabel.Text = "2. Select Players"
         '
-        'team2_requiredleft_label
+        'SelectGameLabel
         '
-        Me.team2_requiredleft_label.AutoSize = True
-        Me.team2_requiredleft_label.Location = New System.Drawing.Point(885, 488)
-        Me.team2_requiredleft_label.Name = "team2_requiredleft_label"
-        Me.team2_requiredleft_label.Size = New System.Drawing.Size(13, 13)
-        Me.team2_requiredleft_label.TabIndex = 22
-        Me.team2_requiredleft_label.Text = "0"
+        Me.SelectGameLabel.AutoSize = True
+        Me.SelectGameLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.SelectGameLabel.ForeColor = System.Drawing.Color.RoyalBlue
+        Me.SelectGameLabel.Location = New System.Drawing.Point(2, 6)
+        Me.SelectGameLabel.Name = "SelectGameLabel"
+        Me.SelectGameLabel.Size = New System.Drawing.Size(152, 24)
+        Me.SelectGameLabel.TabIndex = 0
+        Me.SelectGameLabel.Text = "1. Select Game"
         '
-        'Label5
+        'MonitorLabel
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(773, 488)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(100, 13)
-        Me.Label5.TabIndex = 21
-        Me.Label5.Text = "Required Spots left:"
+        Me.MonitorLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.MonitorLabel.AutoSize = True
+        Me.MonitorLabel.Location = New System.Drawing.Point(735, 12)
+        Me.MonitorLabel.Name = "MonitorLabel"
+        Me.MonitorLabel.Size = New System.Drawing.Size(77, 13)
+        Me.MonitorLabel.TabIndex = 8
+        Me.MonitorLabel.Text = "Monitor to use:"
         '
-        'team2_spotsleft_label
+        'PlayButton
         '
-        Me.team2_spotsleft_label.AutoSize = True
-        Me.team2_spotsleft_label.Location = New System.Drawing.Point(885, 462)
-        Me.team2_spotsleft_label.Name = "team2_spotsleft_label"
-        Me.team2_spotsleft_label.Size = New System.Drawing.Size(13, 13)
-        Me.team2_spotsleft_label.TabIndex = 20
-        Me.team2_spotsleft_label.Text = "0"
+        Me.PlayButton.Location = New System.Drawing.Point(495, 3)
+        Me.PlayButton.Name = "PlayButton"
+        Me.PlayButton.Size = New System.Drawing.Size(100, 30)
+        Me.PlayButton.TabIndex = 6
+        Me.PlayButton.Text = "PLAY"
+        Me.PlayButton.UseVisualStyleBackColor = True
         '
-        'Label7
+        'MonitorComboBox
         '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(819, 462)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(54, 13)
-        Me.Label7.TabIndex = 19
-        Me.Label7.Text = "Spots left:"
+        Me.MonitorComboBox.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.MonitorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.MonitorComboBox.FormattingEnabled = True
+        Me.MonitorComboBox.Location = New System.Drawing.Point(818, 9)
+        Me.MonitorComboBox.Name = "MonitorComboBox"
+        Me.MonitorComboBox.Size = New System.Drawing.Size(121, 21)
+        Me.MonitorComboBox.TabIndex = 10
         '
-        'Label2
+        'GameTeam2
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(30, 33)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(75, 13)
-        Me.Label2.TabIndex = 23
-        Me.Label2.Text = "Select game..."
+        Me.GameTeam2.AutoSize = True
+        Me.GameTeam2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GameTeam2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.GameTeam2.Location = New System.Drawing.Point(795, 3)
+        Me.GameTeam2.Name = "GameTeam2"
+        Me.GameTeam2.Size = New System.Drawing.Size(144, 443)
+        Me.GameTeam2.TabIndex = 4
         '
-        'Label3
+        'GameTeam1
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(314, 510)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(121, 13)
-        Me.Label3.TabIndex = 24
-        Me.Label3.Text = "(Click a pony to remove)"
+        Me.GameTeam1.AutoSize = True
+        Me.GameTeam1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GameTeam1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.GameTeam1.Location = New System.Drawing.Point(3, 3)
+        Me.GameTeam1.Name = "GameTeam1"
+        Me.GameTeam1.Size = New System.Drawing.Size(144, 443)
+        Me.GameTeam1.TabIndex = 0
         '
-        'Label6
+        'GameDescriptionLabel
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(789, 510)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(121, 13)
-        Me.Label6.TabIndex = 25
-        Me.Label6.Text = "(Click a pony to remove)"
+        Me.GameDescriptionLabel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GameDescriptionLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.GameDescriptionLabel.Location = New System.Drawing.Point(6, 123)
+        Me.GameDescriptionLabel.Name = "GameDescriptionLabel"
+        Me.GameDescriptionLabel.Size = New System.Drawing.Size(927, 48)
+        Me.GameDescriptionLabel.TabIndex = 1
         '
-        'Prompt_Label
-        '
-        Me.Prompt_Label.AutoSize = True
-        Me.Prompt_Label.Font = New System.Drawing.Font("Microsoft Sans Serif", 24.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Prompt_Label.ForeColor = System.Drawing.Color.RoyalBlue
-        Me.Prompt_Label.Location = New System.Drawing.Point(115, 547)
-        Me.Prompt_Label.Name = "Prompt_Label"
-        Me.Prompt_Label.Size = New System.Drawing.Size(509, 37)
-        Me.Prompt_Label.TabIndex = 26
-        Me.Prompt_Label.Text = "Select the game you wish to play..."
-        '
-        'Info_Button
-        '
-        Me.Info_Button.Location = New System.Drawing.Point(103, 420)
-        Me.Info_Button.Name = "Info_Button"
-        Me.Info_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Info_Button.TabIndex = 27
-        Me.Info_Button.Text = "INFO"
-        Me.Info_Button.UseVisualStyleBackColor = True
-        '
-        'Label8
-        '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(30, 446)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(77, 13)
-        Me.Label8.TabIndex = 29
-        Me.Label8.Text = "Monitor to use:"
-        '
-        'ScreenSelection_Box
-        '
-        Me.ScreenSelection_Box.FormattingEnabled = True
-        Me.ScreenSelection_Box.Location = New System.Drawing.Point(74, 462)
-        Me.ScreenSelection_Box.Name = "ScreenSelection_Box"
-        Me.ScreenSelection_Box.Size = New System.Drawing.Size(135, 69)
-        Me.ScreenSelection_Box.TabIndex = 28
-        '
-        'Game_Selection_Form
+        'GameSelectionForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.AutoScroll = True
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.ClientSize = New System.Drawing.Size(954, 591)
-        Me.Controls.Add(Me.Label8)
-        Me.Controls.Add(Me.ScreenSelection_Box)
-        Me.Controls.Add(Me.Info_Button)
-        Me.Controls.Add(Me.Prompt_Label)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.team2_requiredleft_label)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.team2_spotsleft_label)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.team1_requiredleft_label)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.team1_spotsleft_label)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Add_Team2_Button)
-        Me.Controls.Add(Me.Add_Team1_Button)
-        Me.Controls.Add(Me.Play_Button)
-        Me.Controls.Add(Me.Team2_Label)
-        Me.Controls.Add(Me.Team1_Label)
-        Me.Controls.Add(Me.Team2_Panel)
-        Me.Controls.Add(Me.Team1_Panel)
-        Me.Controls.Add(Me.Game_Selection_View)
-        Me.Controls.Add(Me.Pony_Selection_View)
-        Me.Name = "Game_Selection_Form"
-        Me.Text = "Select game and players..."
+        Me.ClientSize = New System.Drawing.Size(948, 690)
+        Me.Controls.Add(Me.LayoutTable)
+        Me.MinimumSize = New System.Drawing.Size(841, 400)
+        Me.Name = "GameSelectionForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.Text = "Game Setup - Desktop Ponies"
+        Me.LayoutTable.ResumeLayout(False)
+        Me.LayoutTable.PerformLayout()
+        Me.TeamTable.ResumeLayout(False)
+        Me.TeamTable.PerformLayout()
+        Me.GameGroup.ResumeLayout(False)
+        Me.CommandsPanel.ResumeLayout(False)
+        Me.CommandsPanel.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
-    Friend WithEvents Pony_Selection_View As System.Windows.Forms.ListView
-    Friend WithEvents Game_Selection_View As System.Windows.Forms.ListView
-    Friend WithEvents Team1_Panel As System.Windows.Forms.Panel
-    Friend WithEvents Team2_Panel As System.Windows.Forms.Panel
-    Friend WithEvents Team1_Label As System.Windows.Forms.Label
-    Friend WithEvents Team2_Label As System.Windows.Forms.Label
-    Friend WithEvents Play_Button As System.Windows.Forms.Button
-    Friend WithEvents Add_Team1_Button As System.Windows.Forms.Button
-    Friend WithEvents Add_Team2_Button As System.Windows.Forms.Button
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents team1_spotsleft_label As System.Windows.Forms.Label
-    Friend WithEvents team1_requiredleft_label As System.Windows.Forms.Label
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents team2_requiredleft_label As System.Windows.Forms.Label
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents team2_spotsleft_label As System.Windows.Forms.Label
-    Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents Prompt_Label As System.Windows.Forms.Label
-    Friend WithEvents Info_Button As System.Windows.Forms.Button
-    Friend WithEvents Label8 As System.Windows.Forms.Label
-    Friend WithEvents ScreenSelection_Box As System.Windows.Forms.ListBox
+    Friend WithEvents PonyList As System.Windows.Forms.ListView
+    Friend WithEvents GameList As System.Windows.Forms.ListView
+    Friend WithEvents Team1AddButton As System.Windows.Forms.Button
+    Friend WithEvents Team2AddButton As System.Windows.Forms.Button
+    Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents TeamTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents GameGroup As System.Windows.Forms.GroupBox
+    Friend WithEvents GameTeam2 As VBDesktopPonies.GameTeamControl
+    Friend WithEvents GameTeam1 As VBDesktopPonies.GameTeamControl
+    Friend WithEvents CommandsPanel As System.Windows.Forms.Panel
+    Friend WithEvents MonitorLabel As System.Windows.Forms.Label
+    Friend WithEvents PlayButton As System.Windows.Forms.Button
+    Friend WithEvents Transition3Label As System.Windows.Forms.Label
+    Friend WithEvents Transition2Label As System.Windows.Forms.Label
+    Friend WithEvents Transition1Label As System.Windows.Forms.Label
+    Friend WithEvents StartLabel As System.Windows.Forms.Label
+    Friend WithEvents SelectPlayersLabel As System.Windows.Forms.Label
+    Friend WithEvents SelectGameLabel As System.Windows.Forms.Label
+    Friend WithEvents MonitorComboBox As System.Windows.Forms.ComboBox
+    Friend WithEvents GameDescriptionLabel As System.Windows.Forms.Label
 End Class

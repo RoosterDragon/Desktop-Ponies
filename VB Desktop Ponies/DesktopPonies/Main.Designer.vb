@@ -62,7 +62,6 @@ Partial Class Main
         Me.PonySelectionPanel.AutoScroll = True
         Me.LayoutTable.SetColumnSpan(Me.PonySelectionPanel, 2)
         Me.PonySelectionPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PonySelectionPanel.Enabled = False
         Me.PonySelectionPanel.Location = New System.Drawing.Point(3, 32)
         Me.PonySelectionPanel.Name = "PonySelectionPanel"
         Me.PonySelectionPanel.Size = New System.Drawing.Size(728, 446)
@@ -101,7 +100,6 @@ Partial Class Main
         Me.SelectionControlsPanel.Controls.Add(Me.OptionsButton)
         Me.SelectionControlsPanel.Controls.Add(Me.GoButton)
         Me.SelectionControlsPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.SelectionControlsPanel.Enabled = False
         Me.SelectionControlsPanel.Location = New System.Drawing.Point(3, 513)
         Me.SelectionControlsPanel.Name = "SelectionControlsPanel"
         Me.SelectionControlsPanel.Size = New System.Drawing.Size(728, 121)
@@ -316,7 +314,6 @@ Partial Class Main
         Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPageLabel)
         Me.PonyPaginationPanel.Controls.Add(Me.PoniesPerPage)
         Me.PonyPaginationPanel.Dock = System.Windows.Forms.DockStyle.Right
-        Me.PonyPaginationPanel.Enabled = False
         Me.PonyPaginationPanel.Location = New System.Drawing.Point(181, 0)
         Me.PonyPaginationPanel.Margin = New System.Windows.Forms.Padding(3, 0, 3, 0)
         Me.PonyPaginationPanel.Name = "PonyPaginationPanel"

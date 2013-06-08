@@ -12,22 +12,19 @@ Public Class GameSelectionForm
     End Sub
 
     Private Sub GameSelectionForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
+    End Sub
+
+    Private Sub LoadInternal()
+        Enabled = False
+        Update()
+
         'add all possible ponies to the selection window.
 
-        ScreenSelection_Box.Items.Clear()
-
-        For Each monitor In Screen.AllScreens
-            ScreenSelection_Box.Items.Add(monitor.DeviceName)
-        Next
-
-        If ScreenSelection_Box.Items.Count <> 0 Then
-            ScreenSelection_Box.SelectedIndex = 0
+        MonitorComboBox.Items.AddRange(Screen.AllScreens.Select(Function(screen) screen.DeviceName).ToArray())
+        If MonitorComboBox.Items.Count > 0 Then
+            MonitorComboBox.SelectedIndex = 0
         End If
-
-        Pony_Selection_View.Items.Clear()
-
-        Team1_Panel.Controls.Clear()
-        Team2_Panel.Controls.Clear()
 
         Dim pony_image_list As New ImageList()
         pony_image_list.ImageSize = New Size(75, 75)
@@ -36,20 +33,19 @@ Public Class GameSelectionForm
             pony_image_list.Images.Add(CType(ponyPanel.GetPonyImage(0).Image.Clone(), Bitmap))
         Next
 
-        Pony_Selection_View.LargeImageList = pony_image_list
-        Pony_Selection_View.SmallImageList = pony_image_list
+        PonyList.LargeImageList = pony_image_list
+        PonyList.SmallImageList = pony_image_list
 
         Dim ponycount As Integer = 0
         For Each Pony In Main.Instance.SelectablePonies
-            Pony_Selection_View.Items.Add(New ListViewItem(Pony.Directory, ponycount))
+            PonyList.Items.Add(New ListViewItem(Pony.Directory, ponycount))
             ponycount += 1
         Next
 
-        Pony_Selection_View.Columns.Add("Pony")
-
+        PonyList.Columns.Add("Pony")
 
         'do the same for the game list
-        Game_Selection_View.Items.Clear()
+        GameList.Items.Clear()
 
         Dim game_image_list As New ImageList()
         game_image_list.ImageSize = New Size(75, 75)
@@ -58,26 +54,29 @@ Public Class GameSelectionForm
             game_image_list.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImagePath))
         Next
 
-        Game_Selection_View.LargeImageList = game_image_list
-        Game_Selection_View.SmallImageList = game_image_list
+        GameList.LargeImageList = game_image_list
+        GameList.SmallImageList = game_image_list
 
         Dim gamecount As Integer = 0
         For Each game As Game In Main.Instance.games
-            Game_Selection_View.Items.Add(New ListViewItem(game.Name, gamecount))
+            GameList.Items.Add(New ListViewItem(game.Name, gamecount))
             gamecount += 1
         Next
 
-        Game_Selection_View.Columns.Add("Game")
+        GameList.Columns.Add("Game")
 
+        SetStage(1)
+
+        Enabled = True
     End Sub
 
-    Private Sub Game_Selection_View_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Game_Selection_View.SelectedIndexChanged
+    Private Sub GameList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles GameList.SelectedIndexChanged
 
-        If Game_Selection_View.SelectedIndices.Count = 0 Then Exit Sub
+        If GameList.SelectedIndices.Count = 0 Then Exit Sub
 
-        If Not IsNothing(game) AndAlso game.Name <> Main.Instance.games(Game_Selection_View.SelectedIndices(0)).Name Then
-            Team1_Panel.Controls.Clear()
-            Team2_Panel.Controls.Clear()
+        If Not IsNothing(game) AndAlso game.Name <> Main.Instance.games(GameList.SelectedIndices(0)).Name Then
+            GameTeam1.TeamPanel.Controls.Clear()
+            GameTeam2.TeamPanel.Controls.Clear()
             For Each position In team1.Positions
                 position.Player = Nothing
             Next
@@ -88,13 +87,15 @@ Public Class GameSelectionForm
             team2 = Nothing
         End If
 
-        game = Main.Instance.games(Game_Selection_View.SelectedIndices(0))
+        game = Main.Instance.games(GameList.SelectedIndices(0))
+
+        GameDescriptionLabel.Text = game.Name & ": " & game.Description
 
         team1 = game.Teams(0)
         team2 = game.Teams(1)
 
-        Team1_Label.Text = team1.Name
-        Team2_Label.Text = team2.Name
+        GameTeam1.TeamNameLabel.Text = team1.Name
+        GameTeam2.TeamNameLabel.Text = team2.Name
 
         GetSpotCounts()
 
@@ -122,14 +123,14 @@ Public Class GameSelectionForm
 
                 Select Case Position.TeamNumber
                     Case 1
-                        Team1_Panel.Controls.Add(picturebox)
-                        Team1_Panel.Controls.Add(new_label)
+                        GameTeam1.TeamPanel.Controls.Add(picturebox)
+                        GameTeam1.TeamPanel.Controls.Add(new_label)
                         picturebox.Location = New Point(0, last_y_team1)
                         new_label.Location = New Point(10, picturebox.Location.Y + picturebox.Size.Height)
                         last_y_team1 += picturebox.Size.Height + new_label.Size.Height + 10
                     Case 2
-                        Team2_Panel.Controls.Add(picturebox)
-                        Team2_Panel.Controls.Add(new_label)
+                        GameTeam2.TeamPanel.Controls.Add(picturebox)
+                        GameTeam2.TeamPanel.Controls.Add(new_label)
                         picturebox.Location = New Point(0, last_y_team2)
                         new_label.Location = New Point(10, picturebox.Location.Y + picturebox.Size.Height)
                         last_y_team2 += picturebox.Size.Height + new_label.Size.Height + 10
@@ -141,29 +142,29 @@ Public Class GameSelectionForm
             Next
         Next
 
-        Prompt_Label.Text = "Add ponies until all required slots are filled..."
+        SetStage(2)
 
     End Sub
 
-    Private Sub Add_To_Team1_Button_Click(sender As Object, e As EventArgs) Handles Add_Team1_Button.Click
-        AddToPanel(Team1_Panel, 1)
+    Private Sub Team1AddButton_Click(sender As Object, e As EventArgs) Handles Team1AddButton.Click
+        AddToPanel(GameTeam1.TeamPanel, 1)
     End Sub
 
-    Private Sub Add_To_Team2_Button_Click(sender As Object, e As EventArgs) Handles Add_Team2_Button.Click
-        AddToPanel(Team2_Panel, 2)
+    Private Sub Team2AddButton_Click(sender As Object, e As EventArgs) Handles Team2AddButton.Click
+        AddToPanel(GameTeam2.TeamPanel, 2)
     End Sub
 
     Private Sub AddToPanel(panel As Panel, team As Integer)
 
-        If Pony_Selection_View.SelectedIndices.Count = 0 Then
+        If PonyList.SelectedIndices.Count = 0 Then
             MessageBox.Show(Me, "Select a pony by clicking on its picture first.",
                             "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
-        Dim selection As Integer = Pony_Selection_View.SelectedIndices(0)
+        Dim selection As Integer = PonyList.SelectedIndices(0)
 
-        If Main.Instance.SelectablePonies(Pony_Selection_View.SelectedIndices(0)).Directory = "Random Pony" Then
+        If Main.Instance.SelectablePonies(PonyList.SelectedIndices(0)).Directory = "Random Pony" Then
 
             Do Until Main.Instance.SelectablePonies(selection).Directory <> "Random Pony"
                 selection = Rng.Next(Main.Instance.SelectablePonies.Count)
@@ -248,76 +249,94 @@ Public Class GameSelectionForm
 
     End Sub
 
-    Sub GetSpotCounts()
+    Private Sub GetSpotCounts()
 
-        Dim required_spots = 0
-        Dim optional_spots = 0
+        Dim required_spots1 = 0
+        Dim optional_spots1 = 0
         For Each position In team1.Positions
             If position.Required = True AndAlso IsNothing(position.Player) Then
-                required_spots += 1
+                required_spots1 += 1
             ElseIf IsNothing(position.Player) Then
-                optional_spots += 1
+                optional_spots1 += 1
             End If
         Next
 
-        team1_requiredleft_label.Text = CStr(required_spots)
-        team1_spotsleft_label.Text = CStr(optional_spots)
+        GameTeam1.RequiredSpacesLeftCountLabel.Text = required_spots1.ToString(CultureInfo.CurrentCulture)
+        GameTeam1.SpacesLeftCountLabel.Text = optional_spots1.ToString(CultureInfo.CurrentCulture)
 
-        required_spots = 0
-        optional_spots = 0
+        Dim required_spots2 = 0
+        Dim optional_spots2 = 0
         For Each position In team2.Positions
             If position.Required = True AndAlso IsNothing(position.Player) Then
-                required_spots += 1
+                required_spots2 += 1
             ElseIf IsNothing(position.Player) Then
-                optional_spots += 1
+                optional_spots2 += 1
             End If
         Next
 
-        team2_requiredleft_label.Text = CStr(required_spots)
-        team2_spotsleft_label.Text = CStr(optional_spots)
+        GameTeam2.RequiredSpacesLeftCountLabel.Text = required_spots2.ToString(CultureInfo.CurrentCulture)
+        GameTeam2.SpacesLeftCountLabel.Text = optional_spots2.ToString(CultureInfo.CurrentCulture)
 
-        If Double.Parse(team1_requiredleft_label.Text, CultureInfo.InvariantCulture) = 0 AndAlso
-            Double.Parse(team2_requiredleft_label.Text, CultureInfo.InvariantCulture) = 0 Then
-            Prompt_Label.Text = "You can play the game now!"
-            Prompt_Label.ForeColor = Color.ForestGreen
+        If required_spots1 = 0 AndAlso required_spots2 = 0 Then
+            SetStage(3)
         Else
-            Prompt_Label.Text = "Add ponies until all required slots are filled..."
-            Prompt_Label.ForeColor = Color.RoyalBlue
+            SetStage(2)
         End If
 
     End Sub
 
-    Private Sub Play_Button_Click(sender As Object, e As EventArgs) Handles Play_Button.Click
+    Private Sub PlayButton_Click(sender As Object, e As EventArgs) Handles PlayButton.Click
 
         If IsNothing(game) Then
             MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
-        If ScreenSelection_Box.SelectedItems.Count = 0 Then
+        If MonitorComboBox.SelectedIndex = -1 Then
             MessageBox.Show(Me, "You need to select a monitor to play the game on.",
                             "No Monitor Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
-        If Double.Parse(team1_requiredleft_label.Text, CultureInfo.InvariantCulture) > 0 OrElse
-            Double.Parse(team2_requiredleft_label.Text, CultureInfo.InvariantCulture) > 0 Then
+        If Integer.Parse(GameTeam1.RequiredSpacesLeftCountLabel.Text, CultureInfo.InvariantCulture) > 0 OrElse
+            Integer.Parse(GameTeam2.RequiredSpacesLeftCountLabel.Text, CultureInfo.InvariantCulture) > 0 Then
             MessageBox.Show(Me, "You must fill each required position with a pony before you can start the game.",
                             "Insufficient Positions Filled", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
-        game.GameScreen = Screen.AllScreens(ScreenSelection_Box.SelectedIndex)
+        game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
 
         Me.DialogResult = DialogResult.OK
         Main.Instance.CurrentGame = game
     End Sub
 
-    Private Sub Info_Click(sender As Object, e As EventArgs) Handles Info_Button.Click
-        If IsNothing(game) Then
-            MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        Else
-            MessageBox.Show(Me, game.Description, game.Name, MessageBoxButtons.OK, MessageBoxIcon.Information)
+    Private Sub SetStage(stage As Byte)
+        Dim inactiveColor = Color.RoyalBlue
+        Dim activeColor = Color.Orange
+        Dim highlightColor = Color.Gold
+
+        SelectGameLabel.ForeColor = inactiveColor
+        Transition1Label.ForeColor = inactiveColor
+        SelectPlayersLabel.ForeColor = inactiveColor
+        Transition2Label.ForeColor = inactiveColor
+        StartLabel.ForeColor = inactiveColor
+        Transition3Label.ForeColor = inactiveColor
+
+        If stage >= 1 Then
+            SelectGameLabel.ForeColor = If(stage = 1, highlightColor, activeColor)
+            Transition1Label.ForeColor = activeColor
         End If
+
+        If stage >= 2 Then
+            SelectPlayersLabel.ForeColor = If(stage = 2, highlightColor, activeColor)
+            Transition2Label.ForeColor = activeColor
+        End If
+
+        If stage >= 3 Then
+            StartLabel.ForeColor = If(stage = 3, highlightColor, activeColor)
+            Transition3Label.ForeColor = activeColor
+        End If
+
     End Sub
 End Class

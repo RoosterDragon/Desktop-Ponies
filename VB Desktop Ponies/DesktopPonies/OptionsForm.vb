@@ -9,11 +9,13 @@
     End Sub
 
     Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Enabled = False
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
     End Sub
 
     Private Sub LoadInternal()
+        Enabled = False
+        Update()
+
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
 

@@ -124,6 +124,12 @@
     <Compile Include="DesktopPonies\DesktopControlForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DesktopPonies\GameTeamControl.Designer.vb">
+      <DependentUpon>GameTeamControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DesktopPonies\GameTeamControl.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="IdleWorker.vb" />
     <Compile Include="IMemberwiseCloneable.vb" />
     <Compile Include="Monitoring\PonyLogForm.Designer.vb">
@@ -340,6 +346,9 @@
     <Compile Include="DesktopPonies\DesktopPonyAnimator.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DesktopPonies\GameTeamControl.resx">
+      <DependentUpon>GameTeamControl.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\HouseOptionsForm.resx">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
     </EmbeddedResource>

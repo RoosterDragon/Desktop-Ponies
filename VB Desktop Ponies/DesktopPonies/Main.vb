@@ -91,7 +91,11 @@ Public Class Main
     Private Sub LoadInternal()
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-        Application.DoEvents()
+        PonyPaginationPanel.Enabled = False
+        PonySelectionPanel.Enabled = False
+        SelectionControlsPanel.Enabled = False
+
+        Update()
 
         If ProcessCommandLine() Then Return
 

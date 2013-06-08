@@ -3,12 +3,48 @@ Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
 Public Class PonyEditor
+    Private pe_animator As PonyEditorAnimator
+    Private pe_interface As ISpriteCollectionView
+
+    Private ponyImageList As ImageList
+    Private grids As PonyInfoGrid()
+    Private loaded As Boolean
+
+    Private ReadOnly ponyNameList As New List(Of String)()
+
+    ''' <summary>
+    ''' Keep track of when the grids are being updated when loading a pony, otherwise we incorrectly think the user is making changes.
+    ''' </summary>
+    Private alreadyUpdating As Boolean
+    ''' <summary>
+    ''' Keep track of if changes have been made since the last save.
+    ''' </summary>
+    Private hasSaved As Boolean = True
+    Private _changesMade As Boolean
+    ''' <summary>
+    ''' Keep track of any saves made at all in the editor. If so, we'll need to reload files when we quit.
+    ''' </summary>
+    Public ReadOnly Property ChangesMade As Boolean
+        Get
+            Return _changesMade
+        End Get
+    End Property
+    Private _isClosing As Boolean
+    Public ReadOnly Property IsClosing As Boolean
+        Get
+            Return _isClosing
+        End Get
+    End Property
+    Private _previewPony As Pony
     ''' <summary>
     ''' The pony displayed in the preview window and where settings are changed (live).
     ''' </summary>
-    Friend PreviewPony As Pony
-
-    Friend ReadOnly Property PreviewPonyBase As MutablePonyBase
+    Public ReadOnly Property PreviewPony As Pony
+        Get
+            Return _previewPony
+        End Get
+    End Property
+    Public ReadOnly Property PreviewPonyBase As MutablePonyBase
         Get
             If PreviewPony IsNot Nothing Then
                 Return DirectCast(PreviewPony.Base, MutablePonyBase)
@@ -18,106 +54,74 @@ Public Class PonyEditor
         End Get
     End Property
 
-    Friend IsClosing As Boolean
-
-    Private ponyImageList As ImageList
-    Dim grids As New List(Of PonyInfoGrid)
-    Dim loaded As Boolean = False
-
-    Dim ponyNameList As New List(Of String)
-
-    ''' <summary>
-    ''' Keep track of when the grids are being updated when loading a pony, otherwise we incorrectly think the user is making changes.
-    ''' </summary>
-    Dim already_updating As Boolean = False
-
-    ''' <summary>
-    ''' Keep track of if changes have been made since the last save.
-    ''' </summary>
-    Dim has_saved As Boolean = True
-    ''' <summary>
-    ''' Keep track of any saves made at all in the editor. If so, we'll need to reload files when we quit.
-    ''' </summary>
-    Friend ChangesMade As Boolean = False
-
     ''' <summary>
     ''' Used so we can swap grid positions and keep track of how everything is sorted when we refresh.
     ''' </summary>
     Private Class PonyInfoGrid
-
-        Public Grid As DataGridView
-        Public Slot As Integer
-        Public SwapButton As Button
-        Public SortColumn As DataGridViewColumn = Nothing
-        Public SortOrder As SortOrder = Nothing
+        Public Property Grid As DataGridView
+        Public Property Slot As Integer
+        Public Property SwapButton As Button
+        Public Property SortColumn As DataGridViewColumn
+        Public Property SortOrder As SortOrder
 
         Sub New(_grid As DataGridView, _slot As Integer, _swapButton As Button)
             Grid = _grid
             Slot = _slot
             SwapButton = _swapButton
         End Sub
-
     End Class
-
-    Private pe_animator As PonyEditorAnimator
-    Private pe_interface As ISpriteCollectionView
 
     Public Sub New()
         InitializeComponent()
         Icon = My.Resources.Twilight
-        CreateHandle()
-
-        For Each value As Interaction.TargetActivation In [Enum].GetValues(GetType(Interaction.TargetActivation))
-            colInteractionInteractWith.Items.Add(value.ToString())
-        Next
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
+    End Sub
+
+    Private Sub LoadInternal()
+        Enabled = False
+        Update()
         Try
-            has_saved = True
-            ChangesMade = False
+            For Each value In DirectCast([Enum].GetValues(GetType(Interaction.TargetActivation)), Interaction.TargetActivation())
+                colInteractionInteractWith.Items.Add(value.ToString())
+            Next
 
-            PreviewPony = Nothing
-
-            loaded = False
-
-            PonyBehaviorsGrid.Rows.Clear()
-            PonyEffectsGrid.Rows.Clear()
-            PonyInteractionsGrid.Rows.Clear()
-            PonySpeechesGrid.Rows.Clear()
-
-            grids.Clear()
-            grids.Add(New PonyInfoGrid(PonyBehaviorsGrid, 0, NewBehaviorButton))
-            grids.Add(New PonyInfoGrid(PonySpeechesGrid, 1, NewSpeechButton))
-            grids.Add(New PonyInfoGrid(PonyEffectsGrid, 2, NewEffectButton))
-            grids.Add(New PonyInfoGrid(PonyInteractionsGrid, 3, NewInteractionButton))
-
-            PonySelectionView.Items.Clear()
+            grids = {New PonyInfoGrid(PonyBehaviorsGrid, 0, NewBehaviorButton),
+                     New PonyInfoGrid(PonySpeechesGrid, 1, NewSpeechButton),
+                     New PonyInfoGrid(PonyEffectsGrid, 2, NewEffectButton),
+                     New PonyInfoGrid(PonyInteractionsGrid, 3, NewInteractionButton)}
 
             'add all possible ponies to the selection window.
-            ponyNameList.Clear()
             ponyNameList.Capacity = Main.Instance.PonySelectionPanel.Controls.Count
-            ponyImageList = New ImageList() With {.ImageSize = New Size(50, 50)}
+            Dim size = 50
+            ponyImageList = New ImageList() With {.ImageSize = New Size(size, size)}
             For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
                 Dim ponyName = ponyPanel.PonyName.Text
                 ponyNameList.Add(ponyName)
-                ponyImageList.Images.Add(Bitmap.FromFile(Main.Instance.SelectablePonies.Find(Function(base As PonyBase)
-                                                                                                 Return ponyName = base.Directory
-                                                                                             End Function).Behaviors(0).LeftImagePath))
-            Next
-            PonySelectionView.LargeImageList = ponyImageList
-            PonySelectionView.SmallImageList = ponyImageList
+                Dim imagePath = Main.Instance.SelectablePonies.
+                    Find(Function(base) ponyName = base.Directory).Behaviors(0).LeftImagePath
 
-            Dim pony_menu_order As Integer = 0
-            For Each PonyName As String In ponyNameList
-                PonySelectionView.Items.Add(New ListViewItem(PonyName, pony_menu_order))
-                pony_menu_order += 1
-            Next
+                Dim dstImage = New Bitmap(size, size)
+                Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
+                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                    g.Clear(Me.PonyList.BackColor)
+                    g.DrawImage(srcImage, 0, 0, size, size)
+                End Using
 
-            PonySelectionView.Columns.Add("Pony")
+                ponyImageList.Images.Add(dstImage)
+            Next
+            PonyList.LargeImageList = ponyImageList
+            PonyList.SmallImageList = ponyImageList
+
+            PonyList.SuspendLayout()
+            For i = 0 To ponyNameList.Count - 1
+                PonyList.Items.Add(New ListViewItem(ponyNameList(i), i))
+            Next
+            PonyList.ResumeLayout()
 
             loaded = True
-
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
             Me.Close()
@@ -142,6 +146,7 @@ Public Class PonyEditor
         pe_interface.Topmost = True
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
+        Enabled = True
     End Sub
 
     ''' <summary>
@@ -166,22 +171,22 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub PonySelectionView_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonySelectionView.SelectedIndexChanged
+    Private Sub PonyList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyList.SelectedIndexChanged
 
         Try
-            If PonySelectionView.SelectedItems.Count = 0 Then Exit Sub
+            If PonyList.SelectedItems.Count = 0 Then Exit Sub
 
-            If has_saved = False Then
+            If hasSaved = False Then
                 If SaveDialog.ShowDialog() = DialogResult.Cancel Then
                     Exit Sub
                 End If
             End If
 
-            If PonySelectionView.SelectedIndices.Count = 0 Then Exit Sub
+            If PonyList.SelectedIndices.Count = 0 Then Exit Sub
 
-            LoadPony(PonySelectionView.SelectedIndices(0))
+            LoadPony(PonyList.SelectedIndices(0))
 
-            has_saved = True
+            hasSaved = True
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
             Exit Sub
@@ -195,7 +200,7 @@ Public Class PonyEditor
         Dim index As Integer = GetPonyOrder(ponyNameList(menu_index))
 
         'as everywhere else, we make a copy from the master copy in selectable_ponies
-        PreviewPony = New Pony(New MutablePonyBase(Main.Instance.SelectablePonies(index).Directory))
+        _previewPony = New Pony(New MutablePonyBase(Main.Instance.SelectablePonies(index).Directory))
 
         If PreviewPony.Behaviors.Count = 0 Then
             PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
@@ -225,13 +230,13 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyEditor_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        If has_saved = False Then
+        If hasSaved = False Then
             If SaveDialog.ShowDialog() = DialogResult.Cancel Then
                 e.Cancel = True
                 Exit Sub
             End If
         End If
-        IsClosing = True
+        _isClosing = True
         If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
             If pe_animator.Started Then pe_animator.Pause(True)
             RemoveHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
@@ -267,9 +272,9 @@ Public Class PonyEditor
 
     Friend Sub Load_Parameters(pony As Pony)
         Try
-            If already_updating Then Exit Sub
+            If alreadyUpdating Then Exit Sub
 
-            already_updating = True
+            alreadyUpdating = True
 
             PonyBehaviorsGrid.Rows.Clear()
             PonyEffectsGrid.Rows.Clear()
@@ -447,7 +452,7 @@ Public Class PonyEditor
             'to make sure that speech match behaviors
             PreviewPonyBase.LinkBehaviors()
 
-            already_updating = False
+            alreadyUpdating = False
 
             Dim Conflicting_names As Boolean = False
             Dim conflicts As New List(Of String)
@@ -710,7 +715,7 @@ Public Class PonyEditor
 
     Private Sub PonyEditor_Resize(sender As Object, e As EventArgs) Handles Me.Resize
 
-        If Me.loaded = False Then Exit Sub
+        If Not loaded Then Exit Sub
 
         Dim slot1 As DataGridView = Nothing
         Dim slot2 As DataGridView = Nothing
@@ -879,7 +884,7 @@ Public Class PonyEditor
             If changes_made_now Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
 
@@ -941,7 +946,7 @@ Public Class PonyEditor
             If changes_made_now Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
 
@@ -992,7 +997,7 @@ Public Class PonyEditor
             If changes_made_now Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
 
@@ -1002,7 +1007,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyBehaviorsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
-        If already_updating Then Return
+        If alreadyUpdating Then Return
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1133,10 +1138,10 @@ Public Class PonyEditor
 
             PreviewPonyBase.LinkBehaviors()
 
-            If already_updating = False Then
+            If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
         Catch ex As Exception
@@ -1146,7 +1151,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyEffectsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
-        If already_updating Then Return
+        If alreadyUpdating Then Return
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1234,10 +1239,10 @@ Public Class PonyEditor
 
             PreviewPonyBase.LinkBehaviors()
 
-            If already_updating = False Then
+            If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
 
@@ -1248,7 +1253,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonySpeechesGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
-        If already_updating Then Return
+        If alreadyUpdating Then Return
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1312,10 +1317,10 @@ Public Class PonyEditor
 
             PreviewPonyBase.LinkBehaviors()
 
-            If already_updating = False Then
+            If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
 
@@ -1326,7 +1331,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyInteractionsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
-        If already_updating Then Return
+        If alreadyUpdating Then Return
         Try
 
             If e.RowIndex < 0 Then Exit Sub
@@ -1391,10 +1396,10 @@ Public Class PonyEditor
                                                              CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
-            If already_updating = False Then
+            If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
-                has_saved = False
+                hasSaved = False
             End If
 
         Catch ex As Exception
@@ -1484,7 +1489,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub SaveSortOrder()
-        For Each control As PonyInfoGrid In grids
+        For Each control In grids
             control.SortColumn = control.Grid.SortedColumn
             control.SortOrder = control.Grid.SortOrder
         Next
@@ -1493,7 +1498,7 @@ Public Class PonyEditor
     Private Sub RestoreSortOrder()
         Try
 
-            For Each control As PonyInfoGrid In grids
+            For Each control In grids
                 If IsNothing(control.SortColumn) Then Continue For
                 control.Grid.Sort(control.SortColumn, ConvertSortOrder(control.SortOrder))
             Next
@@ -1585,7 +1590,7 @@ Public Class PonyEditor
             PreviewPony.SelectBehavior(PreviewPony.Behaviors(0))
 
             Load_Parameters(PreviewPony)
-            has_saved = False
+            hasSaved = False
 
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new behavior. The editor will now close.")
@@ -1610,7 +1615,7 @@ Public Class PonyEditor
             ShowPony()
 
             Load_Parameters(PreviewPony)
-            has_saved = False
+            hasSaved = False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new speech. The editor will now close.")
             Me.Close()
@@ -1634,7 +1639,7 @@ Public Class PonyEditor
             ShowPony()
 
             Load_Parameters(PreviewPony)
-            has_saved = False
+            hasSaved = False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new effect, the editor will now close.")
             Me.Close()
@@ -1657,7 +1662,7 @@ Public Class PonyEditor
             ShowPony()
 
             Load_Parameters(PreviewPony)
-            has_saved = False
+            hasSaved = False
 
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new interaction. The editor will now close.")
@@ -1715,7 +1720,7 @@ Public Class PonyEditor
 
             Return new_path
 
-            has_saved = False
+            hasSaved = False
 
         Catch ex As Exception
 
@@ -1816,7 +1821,7 @@ Public Class PonyEditor
                 Throw New Exception("Unknown grid when deleting row: " & grid.Name)
             End If
 
-            has_saved = False
+            hasSaved = False
 
             PreviewPonyBase.LinkBehaviors()
 
@@ -1849,7 +1854,7 @@ Public Class PonyEditor
 
             ShowPony()
 
-            has_saved = False
+            hasSaved = False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error setting follow parameters. The editor will now close.")
             Me.Close()
@@ -1872,9 +1877,9 @@ Public Class PonyEditor
 
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
 
-        If already_updating = False Then
+        If alreadyUpdating = False Then
             PreviewPonyBase.Name = PonyName.Text
-            has_saved = False
+            hasSaved = False
         End If
 
     End Sub
@@ -1883,7 +1888,7 @@ Public Class PonyEditor
 
         Try
 
-            If has_saved = False Then
+            If hasSaved = False Then
                 If SaveDialog.ShowDialog() = DialogResult.Cancel Then
                     Exit Sub
                 End If
@@ -1891,21 +1896,19 @@ Public Class PonyEditor
 
             HidePony()
 
-            Dim previous_pony As Pony = Nothing
+            Dim previousPony As Pony = Nothing
             If Not IsNothing(PreviewPony) Then
-                previous_pony = PreviewPony
+                previousPony = PreviewPony
             End If
 
             Dim ponyBase = New MutablePonyBase()
             ponyBase.Name = "New Pony"
-            PreviewPony = New Pony(ponyBase)
-
-            'Preview_Pony.Form.Visible = False
+            _previewPony = New Pony(ponyBase)
 
             Using form = New NewPonyDialog(Me)
                 If form.ShowDialog() = DialogResult.Cancel Then
-                    If Not IsNothing(previous_pony) Then
-                        PreviewPony = previous_pony
+                    If Not IsNothing(previousPony) Then
+                        _previewPony = previousPony
                         ShowPony()
                     End If
                     Exit Sub
@@ -1913,7 +1916,7 @@ Public Class PonyEditor
             End Using
 
             MsgBox("All ponies must now be reloaded. Once this operation is complete, you can reopen the editor and select your pony for editing.")
-            ChangesMade = True
+            _changesMade = True
             Me.Close()
 
         Catch ex As Exception
@@ -2018,7 +2021,7 @@ Public Class PonyEditor
             Exit Sub
         End Try
 
-        has_saved = True
+        hasSaved = True
         MessageBox.Show(Me, "Save completed!", "Save Completed", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
     End Sub
@@ -2028,7 +2031,7 @@ Public Class PonyEditor
         PausePonyButton.Enabled = False
         pe_animator.Pause(False)
 
-        ChangesMade = True
+        _changesMade = True
         SavePony(PreviewPony.Directory)
 
         RefreshButton_Click(Nothing, Nothing)
@@ -2058,7 +2061,7 @@ Public Class PonyEditor
         Using form = New TagsForm(Me)
             form.ShowDialog()
         End Using
-        has_saved = False
+        hasSaved = False
         ShowPony()
 
     End Sub
@@ -2073,7 +2076,7 @@ Public Class PonyEditor
         Using form = New ImageCentersForm(Me)
             form.ShowDialog()
         End Using
-        has_saved = False
+        hasSaved = False
         ShowPony()
 
     End Sub

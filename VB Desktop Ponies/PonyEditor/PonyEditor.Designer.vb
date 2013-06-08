@@ -11,17 +11,65 @@ Partial Class PonyEditor
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.PonyPreviewPanel = New System.Windows.Forms.Panel()
-        Me.PonySelectionView = New System.Windows.Forms.ListView()
+        Me.PonyList = New System.Windows.Forms.ListView()
+        Me.colPony = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.NewPonyButton = New System.Windows.Forms.Button()
         Me.PonyName = New System.Windows.Forms.TextBox()
         Me.PonyNameLabel = New System.Windows.Forms.Label()
         Me.PonyBehaviorsGrid = New System.Windows.Forms.DataGridView()
+        Me.colBehaviorActivate = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colBehaviorName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorChance = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorMaxDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorMinDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorSpeed = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colBehaviorLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colBehaviorMovement = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colBehaviorStartSpeech = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colBehaviorEndSpeech = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colBehaviorFollow = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colBehaviorLinked = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colBehaviorLinkOrder = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviorDoNotRunRandomly = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colBehaviorDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.PonySpeechesGrid = New System.Windows.Forms.DataGridView()
+        Me.colSpeechName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSpeechOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSpeechGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSpeechGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSpeechText = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSpeechSoundFile = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colSpeechUseRandomly = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.PonyInteractionsGrid = New System.Windows.Forms.DataGridView()
+        Me.colInteractionName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colInteractionOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colInteractionChance = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colInteractionProximity = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colInteractionTargets = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colInteractionInteractWith = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colInteractionBehaviors = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colInteractionReactivationDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Slot0Label = New System.Windows.Forms.Label()
         Me.Slot1Label = New System.Windows.Forms.Label()
         Me.Slot3Label = New System.Windows.Forms.Label()
         Me.PonyEffectsGrid = New System.Windows.Forms.DataGridView()
+        Me.colEffectName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectBehavior = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colEffectLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colEffectDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectRepeatDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectLocationRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectCenteringRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectLocationLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectCenteringLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectFollowPony = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colEffectDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.CurrentBehaviorLabel = New System.Windows.Forms.Label()
         Me.CurrentBehaviorValueLabel = New System.Windows.Forms.Label()
         Me.TimeLeftLabel = New System.Windows.Forms.Label()
@@ -45,53 +93,6 @@ Partial Class PonyEditor
         Me.GroupLabel = New System.Windows.Forms.Label()
         Me.SelectPonyGroup = New System.Windows.Forms.GroupBox()
         Me.PonyPreviewGroup = New System.Windows.Forms.GroupBox()
-        Me.colBehaviorActivate = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colBehaviorName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorChance = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorMaxDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorMinDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorSpeed = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colBehaviorLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colBehaviorMovement = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colBehaviorStartSpeech = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colBehaviorEndSpeech = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colBehaviorFollow = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colBehaviorLinked = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colBehaviorLinkOrder = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colBehaviorDoNotRunRandomly = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colBehaviorDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colSpeechName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSpeechOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSpeechGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSpeechGroupName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSpeechText = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSpeechSoundFile = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colSpeechUseRandomly = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colEffectName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectBehavior = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colEffectLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colEffectDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectRepeatDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectLocationRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectCenteringRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectLocationLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectCenteringLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectFollowPony = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colEffectDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colInteractionName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colInteractionOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colInteractionChance = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colInteractionProximity = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colInteractionTargets = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colInteractionInteractWith = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colInteractionBehaviors = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colInteractionReactivationDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SelectPonyGroup.SuspendLayout()
         Me.PonyPreviewGroup.SuspendLayout()
         Me.SuspendLayout()
@@ -105,23 +106,27 @@ Partial Class PonyEditor
         Me.PonyPreviewPanel.Size = New System.Drawing.Size(783, 208)
         Me.PonyPreviewPanel.TabIndex = 0
         '
-        'PonySelectionView
+        'PonyList
         '
-        Me.PonySelectionView.Activation = System.Windows.Forms.ItemActivation.OneClick
-        Me.PonySelectionView.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+        Me.PonyList.Activation = System.Windows.Forms.ItemActivation.OneClick
+        Me.PonyList.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.PonySelectionView.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.PonySelectionView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
-        Me.PonySelectionView.HideSelection = False
-        Me.PonySelectionView.LabelWrap = False
-        Me.PonySelectionView.Location = New System.Drawing.Point(6, 19)
-        Me.PonySelectionView.MultiSelect = False
-        Me.PonySelectionView.Name = "PonySelectionView"
-        Me.PonySelectionView.ShowGroups = False
-        Me.PonySelectionView.Size = New System.Drawing.Size(117, 175)
-        Me.PonySelectionView.TabIndex = 0
-        Me.PonySelectionView.UseCompatibleStateImageBehavior = False
+        Me.PonyList.BackColor = System.Drawing.SystemColors.AppWorkspace
+        Me.PonyList.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colPony})
+        Me.PonyList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
+        Me.PonyList.HideSelection = False
+        Me.PonyList.Location = New System.Drawing.Point(6, 19)
+        Me.PonyList.MultiSelect = False
+        Me.PonyList.Name = "PonyList"
+        Me.PonyList.ShowGroups = False
+        Me.PonyList.Size = New System.Drawing.Size(117, 175)
+        Me.PonyList.TabIndex = 0
+        Me.PonyList.UseCompatibleStateImageBehavior = False
+        '
+        'colPony
+        '
+        Me.colPony.Text = "Pony"
         '
         'NewPonyButton
         '
@@ -165,6 +170,126 @@ Partial Class PonyEditor
         Me.PonyBehaviorsGrid.Size = New System.Drawing.Size(915, 172)
         Me.PonyBehaviorsGrid.TabIndex = 16
         '
+        'colBehaviorActivate
+        '
+        Me.colBehaviorActivate.HeaderText = "Activate"
+        Me.colBehaviorActivate.Name = "colBehaviorActivate"
+        Me.colBehaviorActivate.Width = 52
+        '
+        'colBehaviorName
+        '
+        Me.colBehaviorName.HeaderText = "Name"
+        Me.colBehaviorName.MaxInputLength = 255
+        Me.colBehaviorName.Name = "colBehaviorName"
+        Me.colBehaviorName.Width = 60
+        '
+        'colBehaviorOriginalName
+        '
+        Me.colBehaviorOriginalName.HeaderText = "Original Name"
+        Me.colBehaviorOriginalName.Name = "colBehaviorOriginalName"
+        Me.colBehaviorOriginalName.Visible = False
+        Me.colBehaviorOriginalName.Width = 98
+        '
+        'colBehaviorGroup
+        '
+        Me.colBehaviorGroup.HeaderText = "Group"
+        Me.colBehaviorGroup.Name = "colBehaviorGroup"
+        Me.colBehaviorGroup.Width = 61
+        '
+        'colBehaviorGroupName
+        '
+        Me.colBehaviorGroupName.HeaderText = "Group Name"
+        Me.colBehaviorGroupName.Name = "colBehaviorGroupName"
+        Me.colBehaviorGroupName.Width = 92
+        '
+        'colBehaviorChance
+        '
+        Me.colBehaviorChance.HeaderText = "Chance"
+        Me.colBehaviorChance.Name = "colBehaviorChance"
+        Me.colBehaviorChance.Width = 69
+        '
+        'colBehaviorMaxDuration
+        '
+        Me.colBehaviorMaxDuration.HeaderText = "Max Duration"
+        Me.colBehaviorMaxDuration.Name = "colBehaviorMaxDuration"
+        Me.colBehaviorMaxDuration.Width = 95
+        '
+        'colBehaviorMinDuration
+        '
+        Me.colBehaviorMinDuration.HeaderText = "Min Duration"
+        Me.colBehaviorMinDuration.Name = "colBehaviorMinDuration"
+        Me.colBehaviorMinDuration.Width = 92
+        '
+        'colBehaviorSpeed
+        '
+        Me.colBehaviorSpeed.HeaderText = "Speed"
+        Me.colBehaviorSpeed.Name = "colBehaviorSpeed"
+        Me.colBehaviorSpeed.Width = 63
+        '
+        'colBehaviorRightImage
+        '
+        Me.colBehaviorRightImage.HeaderText = "Right Image"
+        Me.colBehaviorRightImage.Name = "colBehaviorRightImage"
+        Me.colBehaviorRightImage.Width = 70
+        '
+        'colBehaviorLeftImage
+        '
+        Me.colBehaviorLeftImage.HeaderText = "Left Image"
+        Me.colBehaviorLeftImage.Name = "colBehaviorLeftImage"
+        Me.colBehaviorLeftImage.Width = 63
+        '
+        'colBehaviorMovement
+        '
+        Me.colBehaviorMovement.HeaderText = "Movement Allowed"
+        Me.colBehaviorMovement.Items.AddRange(New Object() {"None", "Horizontal Only", "Vertical Only", "Horizontal Vertical", "Diagonal Only", "Diagonal/horizontal", "Diagonal/Vertical", "All", "MouseOver", "Sleep", "Dragged"})
+        Me.colBehaviorMovement.Name = "colBehaviorMovement"
+        Me.colBehaviorMovement.Width = 103
+        '
+        'colBehaviorStartSpeech
+        '
+        Me.colBehaviorStartSpeech.HeaderText = "Starting Speech"
+        Me.colBehaviorStartSpeech.Name = "colBehaviorStartSpeech"
+        Me.colBehaviorStartSpeech.Width = 89
+        '
+        'colBehaviorEndSpeech
+        '
+        Me.colBehaviorEndSpeech.HeaderText = "Ending Speech"
+        Me.colBehaviorEndSpeech.Name = "colBehaviorEndSpeech"
+        Me.colBehaviorEndSpeech.Width = 86
+        '
+        'colBehaviorFollow
+        '
+        Me.colBehaviorFollow.HeaderText = "Follows/Goto:"
+        Me.colBehaviorFollow.Name = "colBehaviorFollow"
+        Me.colBehaviorFollow.Width = 79
+        '
+        'colBehaviorLinked
+        '
+        Me.colBehaviorLinked.HeaderText = "Link to:"
+        Me.colBehaviorLinked.Name = "colBehaviorLinked"
+        Me.colBehaviorLinked.Width = 48
+        '
+        'colBehaviorLinkOrder
+        '
+        Me.colBehaviorLinkOrder.HeaderText = "Link Order"
+        Me.colBehaviorLinkOrder.Name = "colBehaviorLinkOrder"
+        Me.colBehaviorLinkOrder.ReadOnly = True
+        Me.colBehaviorLinkOrder.Width = 81
+        '
+        'colBehaviorDoNotRunRandomly
+        '
+        Me.colBehaviorDoNotRunRandomly.HeaderText = "Don't run randomly"
+        Me.colBehaviorDoNotRunRandomly.Name = "colBehaviorDoNotRunRandomly"
+        Me.colBehaviorDoNotRunRandomly.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colBehaviorDoNotRunRandomly.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colBehaviorDoNotRunRandomly.Width = 120
+        '
+        'colBehaviorDoNotRepeatAnimations
+        '
+        Me.colBehaviorDoNotRepeatAnimations.HeaderText = "Don't repeat animations"
+        Me.colBehaviorDoNotRepeatAnimations.Name = "colBehaviorDoNotRepeatAnimations"
+        Me.colBehaviorDoNotRepeatAnimations.Width = 124
+        '
         'PonySpeechesGrid
         '
         Me.PonySpeechesGrid.AllowUserToAddRows = False
@@ -177,6 +302,51 @@ Partial Class PonyEditor
         Me.PonySpeechesGrid.Size = New System.Drawing.Size(307, 150)
         Me.PonySpeechesGrid.TabIndex = 20
         '
+        'colSpeechName
+        '
+        Me.colSpeechName.HeaderText = "Name"
+        Me.colSpeechName.Name = "colSpeechName"
+        Me.colSpeechName.Width = 60
+        '
+        'colSpeechOriginalName
+        '
+        Me.colSpeechOriginalName.HeaderText = "Original Name"
+        Me.colSpeechOriginalName.Name = "colSpeechOriginalName"
+        Me.colSpeechOriginalName.Visible = False
+        Me.colSpeechOriginalName.Width = 98
+        '
+        'colSpeechGroup
+        '
+        Me.colSpeechGroup.HeaderText = "Group"
+        Me.colSpeechGroup.Name = "colSpeechGroup"
+        Me.colSpeechGroup.Width = 61
+        '
+        'colSpeechGroupName
+        '
+        Me.colSpeechGroupName.HeaderText = "Group Name"
+        Me.colSpeechGroupName.Name = "colSpeechGroupName"
+        Me.colSpeechGroupName.ReadOnly = True
+        Me.colSpeechGroupName.Width = 92
+        '
+        'colSpeechText
+        '
+        Me.colSpeechText.HeaderText = "Text"
+        Me.colSpeechText.Name = "colSpeechText"
+        Me.colSpeechText.Width = 53
+        '
+        'colSpeechSoundFile
+        '
+        Me.colSpeechSoundFile.HeaderText = "Sound File"
+        Me.colSpeechSoundFile.Name = "colSpeechSoundFile"
+        Me.colSpeechSoundFile.Width = 63
+        '
+        'colSpeechUseRandomly
+        '
+        Me.colSpeechUseRandomly.HeaderText = "Use Randomly"
+        Me.colSpeechUseRandomly.Name = "colSpeechUseRandomly"
+        Me.colSpeechUseRandomly.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colSpeechUseRandomly.Width = 82
+        '
         'PonyInteractionsGrid
         '
         Me.PonyInteractionsGrid.AllowUserToAddRows = False
@@ -188,6 +358,57 @@ Partial Class PonyEditor
         Me.PonyInteractionsGrid.Name = "PonyInteractionsGrid"
         Me.PonyInteractionsGrid.Size = New System.Drawing.Size(302, 150)
         Me.PonyInteractionsGrid.TabIndex = 28
+        '
+        'colInteractionName
+        '
+        Me.colInteractionName.HeaderText = "Name"
+        Me.colInteractionName.Name = "colInteractionName"
+        Me.colInteractionName.Width = 60
+        '
+        'colInteractionOriginalName
+        '
+        Me.colInteractionOriginalName.HeaderText = "Original Name"
+        Me.colInteractionOriginalName.Name = "colInteractionOriginalName"
+        Me.colInteractionOriginalName.Visible = False
+        Me.colInteractionOriginalName.Width = 98
+        '
+        'colInteractionChance
+        '
+        Me.colInteractionChance.HeaderText = "Chance"
+        Me.colInteractionChance.Name = "colInteractionChance"
+        Me.colInteractionChance.Width = 69
+        '
+        'colInteractionProximity
+        '
+        Me.colInteractionProximity.HeaderText = "Activation Proximity"
+        Me.colInteractionProximity.Name = "colInteractionProximity"
+        Me.colInteractionProximity.Width = 123
+        '
+        'colInteractionTargets
+        '
+        Me.colInteractionTargets.HeaderText = "Targets"
+        Me.colInteractionTargets.Name = "colInteractionTargets"
+        Me.colInteractionTargets.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colInteractionTargets.Width = 49
+        '
+        'colInteractionInteractWith
+        '
+        Me.colInteractionInteractWith.HeaderText = "Interact with:"
+        Me.colInteractionInteractWith.Name = "colInteractionInteractWith"
+        Me.colInteractionInteractWith.Width = 74
+        '
+        'colInteractionBehaviors
+        '
+        Me.colInteractionBehaviors.HeaderText = "Behaviors"
+        Me.colInteractionBehaviors.Name = "colInteractionBehaviors"
+        Me.colInteractionBehaviors.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colInteractionBehaviors.Width = 60
+        '
+        'colInteractionReactivationDelay
+        '
+        Me.colInteractionReactivationDelay.HeaderText = "Reactivation Delay"
+        Me.colInteractionReactivationDelay.Name = "colInteractionReactivationDelay"
+        Me.colInteractionReactivationDelay.Width = 122
         '
         'Slot0Label
         '
@@ -229,6 +450,103 @@ Partial Class PonyEditor
         Me.PonyEffectsGrid.Name = "PonyEffectsGrid"
         Me.PonyEffectsGrid.Size = New System.Drawing.Size(291, 150)
         Me.PonyEffectsGrid.TabIndex = 24
+        '
+        'colEffectName
+        '
+        Me.colEffectName.HeaderText = "Name"
+        Me.colEffectName.Name = "colEffectName"
+        Me.colEffectName.Width = 60
+        '
+        'colEffectOriginalName
+        '
+        Me.colEffectOriginalName.HeaderText = "Original_Name"
+        Me.colEffectOriginalName.Name = "colEffectOriginalName"
+        Me.colEffectOriginalName.Visible = False
+        Me.colEffectOriginalName.Width = 101
+        '
+        'colEffectBehavior
+        '
+        Me.colEffectBehavior.HeaderText = "Behavior"
+        Me.colEffectBehavior.Name = "colEffectBehavior"
+        Me.colEffectBehavior.Width = 55
+        '
+        'colEffectRightImage
+        '
+        Me.colEffectRightImage.HeaderText = "Right Image"
+        Me.colEffectRightImage.Name = "colEffectRightImage"
+        Me.colEffectRightImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectRightImage.Width = 70
+        '
+        'colEffectLeftImage
+        '
+        Me.colEffectLeftImage.HeaderText = "Left Image"
+        Me.colEffectLeftImage.Name = "colEffectLeftImage"
+        Me.colEffectLeftImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectLeftImage.Width = 63
+        '
+        'colEffectDuration
+        '
+        Me.colEffectDuration.HeaderText = "Duration"
+        Me.colEffectDuration.Name = "colEffectDuration"
+        Me.colEffectDuration.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.colEffectDuration.Width = 53
+        '
+        'colEffectRepeatDelay
+        '
+        Me.colEffectRepeatDelay.HeaderText = "Repeat Delay"
+        Me.colEffectRepeatDelay.Name = "colEffectRepeatDelay"
+        Me.colEffectRepeatDelay.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectRepeatDelay.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.colEffectRepeatDelay.Width = 78
+        '
+        'colEffectLocationRight
+        '
+        Me.colEffectLocationRight.HeaderText = "Location Heading Right"
+        Me.colEffectLocationRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
+        Me.colEffectLocationRight.Name = "colEffectLocationRight"
+        Me.colEffectLocationRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectLocationRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectLocationRight.Width = 144
+        '
+        'colEffectCenteringRight
+        '
+        Me.colEffectCenteringRight.HeaderText = "Centering Right"
+        Me.colEffectCenteringRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
+        Me.colEffectCenteringRight.Name = "colEffectCenteringRight"
+        Me.colEffectCenteringRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectCenteringRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectCenteringRight.Width = 105
+        '
+        'colEffectLocationLeft
+        '
+        Me.colEffectLocationLeft.HeaderText = "Location Heading Left"
+        Me.colEffectLocationLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
+        Me.colEffectLocationLeft.Name = "colEffectLocationLeft"
+        Me.colEffectLocationLeft.Width = 118
+        '
+        'colEffectCenteringLeft
+        '
+        Me.colEffectCenteringLeft.HeaderText = "Centering Left"
+        Me.colEffectCenteringLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
+        Me.colEffectCenteringLeft.Name = "colEffectCenteringLeft"
+        Me.colEffectCenteringLeft.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectCenteringLeft.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectCenteringLeft.Width = 98
+        '
+        'colEffectFollowPony
+        '
+        Me.colEffectFollowPony.HeaderText = "Follow Pony?"
+        Me.colEffectFollowPony.Name = "colEffectFollowPony"
+        Me.colEffectFollowPony.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectFollowPony.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectFollowPony.Width = 95
+        '
+        'colEffectDoNotRepeatAnimations
+        '
+        Me.colEffectDoNotRepeatAnimations.HeaderText = "Don't Repeat Animations"
+        Me.colEffectDoNotRepeatAnimations.Name = "colEffectDoNotRepeatAnimations"
+        Me.colEffectDoNotRepeatAnimations.Width = 130
         '
         'CurrentBehaviorLabel
         '
@@ -429,7 +747,7 @@ Partial Class PonyEditor
         'SelectPonyGroup
         '
         Me.SelectPonyGroup.Controls.Add(Me.NewPonyButton)
-        Me.SelectPonyGroup.Controls.Add(Me.PonySelectionView)
+        Me.SelectPonyGroup.Controls.Add(Me.PonyList)
         Me.SelectPonyGroup.Location = New System.Drawing.Point(12, 12)
         Me.SelectPonyGroup.Name = "SelectPonyGroup"
         Me.SelectPonyGroup.Size = New System.Drawing.Size(129, 227)
@@ -448,319 +766,6 @@ Partial Class PonyEditor
         Me.PonyPreviewGroup.TabIndex = 1
         Me.PonyPreviewGroup.TabStop = False
         Me.PonyPreviewGroup.Text = "Pony Preview"
-        '
-        'colBehaviorActivate
-        '
-        Me.colBehaviorActivate.HeaderText = "Activate"
-        Me.colBehaviorActivate.Name = "colBehaviorActivate"
-        Me.colBehaviorActivate.Width = 52
-        '
-        'colBehaviorName
-        '
-        Me.colBehaviorName.HeaderText = "Name"
-        Me.colBehaviorName.MaxInputLength = 255
-        Me.colBehaviorName.Name = "colBehaviorName"
-        Me.colBehaviorName.Width = 60
-        '
-        'colBehaviorOriginalName
-        '
-        Me.colBehaviorOriginalName.HeaderText = "Original Name"
-        Me.colBehaviorOriginalName.Name = "colBehaviorOriginalName"
-        Me.colBehaviorOriginalName.Visible = False
-        Me.colBehaviorOriginalName.Width = 98
-        '
-        'colBehaviorGroup
-        '
-        Me.colBehaviorGroup.HeaderText = "Group"
-        Me.colBehaviorGroup.Name = "colBehaviorGroup"
-        Me.colBehaviorGroup.Width = 61
-        '
-        'colBehaviorGroupName
-        '
-        Me.colBehaviorGroupName.HeaderText = "Group Name"
-        Me.colBehaviorGroupName.Name = "colBehaviorGroupName"
-        Me.colBehaviorGroupName.Width = 92
-        '
-        'colBehaviorChance
-        '
-        Me.colBehaviorChance.HeaderText = "Chance"
-        Me.colBehaviorChance.Name = "colBehaviorChance"
-        Me.colBehaviorChance.Width = 69
-        '
-        'colBehaviorMaxDuration
-        '
-        Me.colBehaviorMaxDuration.HeaderText = "Max Duration"
-        Me.colBehaviorMaxDuration.Name = "colBehaviorMaxDuration"
-        Me.colBehaviorMaxDuration.Width = 95
-        '
-        'colBehaviorMinDuration
-        '
-        Me.colBehaviorMinDuration.HeaderText = "Min Duration"
-        Me.colBehaviorMinDuration.Name = "colBehaviorMinDuration"
-        Me.colBehaviorMinDuration.Width = 92
-        '
-        'colBehaviorSpeed
-        '
-        Me.colBehaviorSpeed.HeaderText = "Speed"
-        Me.colBehaviorSpeed.Name = "colBehaviorSpeed"
-        Me.colBehaviorSpeed.Width = 63
-        '
-        'colBehaviorRightImage
-        '
-        Me.colBehaviorRightImage.HeaderText = "Right Image"
-        Me.colBehaviorRightImage.Name = "colBehaviorRightImage"
-        Me.colBehaviorRightImage.Width = 70
-        '
-        'colBehaviorLeftImage
-        '
-        Me.colBehaviorLeftImage.HeaderText = "Left Image"
-        Me.colBehaviorLeftImage.Name = "colBehaviorLeftImage"
-        Me.colBehaviorLeftImage.Width = 63
-        '
-        'colBehaviorMovement
-        '
-        Me.colBehaviorMovement.HeaderText = "Movement Allowed"
-        Me.colBehaviorMovement.Items.AddRange(New Object() {"None", "Horizontal Only", "Vertical Only", "Horizontal Vertical", "Diagonal Only", "Diagonal/horizontal", "Diagonal/Vertical", "All", "MouseOver", "Sleep", "Dragged"})
-        Me.colBehaviorMovement.Name = "colBehaviorMovement"
-        Me.colBehaviorMovement.Width = 103
-        '
-        'colBehaviorStartSpeech
-        '
-        Me.colBehaviorStartSpeech.HeaderText = "Starting Speech"
-        Me.colBehaviorStartSpeech.Name = "colBehaviorStartSpeech"
-        Me.colBehaviorStartSpeech.Width = 89
-        '
-        'colBehaviorEndSpeech
-        '
-        Me.colBehaviorEndSpeech.HeaderText = "Ending Speech"
-        Me.colBehaviorEndSpeech.Name = "colBehaviorEndSpeech"
-        Me.colBehaviorEndSpeech.Width = 86
-        '
-        'colBehaviorFollow
-        '
-        Me.colBehaviorFollow.HeaderText = "Follows/Goto:"
-        Me.colBehaviorFollow.Name = "colBehaviorFollow"
-        Me.colBehaviorFollow.Width = 79
-        '
-        'colBehaviorLinked
-        '
-        Me.colBehaviorLinked.HeaderText = "Link to:"
-        Me.colBehaviorLinked.Name = "colBehaviorLinked"
-        Me.colBehaviorLinked.Width = 48
-        '
-        'colBehaviorLinkOrder
-        '
-        Me.colBehaviorLinkOrder.HeaderText = "Link Order"
-        Me.colBehaviorLinkOrder.Name = "colBehaviorLinkOrder"
-        Me.colBehaviorLinkOrder.ReadOnly = True
-        Me.colBehaviorLinkOrder.Width = 81
-        '
-        'colBehaviorDoNotRunRandomly
-        '
-        Me.colBehaviorDoNotRunRandomly.HeaderText = "Don't run randomly"
-        Me.colBehaviorDoNotRunRandomly.Name = "colBehaviorDoNotRunRandomly"
-        Me.colBehaviorDoNotRunRandomly.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colBehaviorDoNotRunRandomly.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colBehaviorDoNotRunRandomly.Width = 120
-        '
-        'colBehaviorDoNotRepeatAnimations
-        '
-        Me.colBehaviorDoNotRepeatAnimations.HeaderText = "Don't repeat animations"
-        Me.colBehaviorDoNotRepeatAnimations.Name = "colBehaviorDoNotRepeatAnimations"
-        Me.colBehaviorDoNotRepeatAnimations.Width = 124
-        '
-        'colSpeechName
-        '
-        Me.colSpeechName.HeaderText = "Name"
-        Me.colSpeechName.Name = "colSpeechName"
-        Me.colSpeechName.Width = 60
-        '
-        'colSpeechOriginalName
-        '
-        Me.colSpeechOriginalName.HeaderText = "Original Name"
-        Me.colSpeechOriginalName.Name = "colSpeechOriginalName"
-        Me.colSpeechOriginalName.Visible = False
-        Me.colSpeechOriginalName.Width = 98
-        '
-        'colSpeechGroup
-        '
-        Me.colSpeechGroup.HeaderText = "Group"
-        Me.colSpeechGroup.Name = "colSpeechGroup"
-        Me.colSpeechGroup.Width = 61
-        '
-        'colSpeechGroupName
-        '
-        Me.colSpeechGroupName.HeaderText = "Group Name"
-        Me.colSpeechGroupName.Name = "colSpeechGroupName"
-        Me.colSpeechGroupName.ReadOnly = True
-        Me.colSpeechGroupName.Width = 92
-        '
-        'colSpeechText
-        '
-        Me.colSpeechText.HeaderText = "Text"
-        Me.colSpeechText.Name = "colSpeechText"
-        Me.colSpeechText.Width = 53
-        '
-        'colSpeechSoundFile
-        '
-        Me.colSpeechSoundFile.HeaderText = "Sound File"
-        Me.colSpeechSoundFile.Name = "colSpeechSoundFile"
-        Me.colSpeechSoundFile.Width = 63
-        '
-        'colSpeechUseRandomly
-        '
-        Me.colSpeechUseRandomly.HeaderText = "Use Randomly"
-        Me.colSpeechUseRandomly.Name = "colSpeechUseRandomly"
-        Me.colSpeechUseRandomly.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colSpeechUseRandomly.Width = 82
-        '
-        'colEffectName
-        '
-        Me.colEffectName.HeaderText = "Name"
-        Me.colEffectName.Name = "colEffectName"
-        Me.colEffectName.Width = 60
-        '
-        'colEffectOriginalName
-        '
-        Me.colEffectOriginalName.HeaderText = "Original_Name"
-        Me.colEffectOriginalName.Name = "colEffectOriginalName"
-        Me.colEffectOriginalName.Visible = False
-        Me.colEffectOriginalName.Width = 101
-        '
-        'colEffectBehavior
-        '
-        Me.colEffectBehavior.HeaderText = "Behavior"
-        Me.colEffectBehavior.Name = "colEffectBehavior"
-        Me.colEffectBehavior.Width = 55
-        '
-        'colEffectRightImage
-        '
-        Me.colEffectRightImage.HeaderText = "Right Image"
-        Me.colEffectRightImage.Name = "colEffectRightImage"
-        Me.colEffectRightImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectRightImage.Width = 70
-        '
-        'colEffectLeftImage
-        '
-        Me.colEffectLeftImage.HeaderText = "Left Image"
-        Me.colEffectLeftImage.Name = "colEffectLeftImage"
-        Me.colEffectLeftImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectLeftImage.Width = 63
-        '
-        'colEffectDuration
-        '
-        Me.colEffectDuration.HeaderText = "Duration"
-        Me.colEffectDuration.Name = "colEffectDuration"
-        Me.colEffectDuration.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.colEffectDuration.Width = 53
-        '
-        'colEffectRepeatDelay
-        '
-        Me.colEffectRepeatDelay.HeaderText = "Repeat Delay"
-        Me.colEffectRepeatDelay.Name = "colEffectRepeatDelay"
-        Me.colEffectRepeatDelay.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectRepeatDelay.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.colEffectRepeatDelay.Width = 78
-        '
-        'colEffectLocationRight
-        '
-        Me.colEffectLocationRight.HeaderText = "Location Heading Right"
-        Me.colEffectLocationRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectLocationRight.Name = "colEffectLocationRight"
-        Me.colEffectLocationRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectLocationRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectLocationRight.Width = 144
-        '
-        'colEffectCenteringRight
-        '
-        Me.colEffectCenteringRight.HeaderText = "Centering Right"
-        Me.colEffectCenteringRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectCenteringRight.Name = "colEffectCenteringRight"
-        Me.colEffectCenteringRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectCenteringRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectCenteringRight.Width = 105
-        '
-        'colEffectLocationLeft
-        '
-        Me.colEffectLocationLeft.HeaderText = "Location Heading Left"
-        Me.colEffectLocationLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectLocationLeft.Name = "colEffectLocationLeft"
-        Me.colEffectLocationLeft.Width = 118
-        '
-        'colEffectCenteringLeft
-        '
-        Me.colEffectCenteringLeft.HeaderText = "Centering Left"
-        Me.colEffectCenteringLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectCenteringLeft.Name = "colEffectCenteringLeft"
-        Me.colEffectCenteringLeft.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectCenteringLeft.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectCenteringLeft.Width = 98
-        '
-        'colEffectFollowPony
-        '
-        Me.colEffectFollowPony.HeaderText = "Follow Pony?"
-        Me.colEffectFollowPony.Name = "colEffectFollowPony"
-        Me.colEffectFollowPony.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectFollowPony.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectFollowPony.Width = 95
-        '
-        'colEffectDoNotRepeatAnimations
-        '
-        Me.colEffectDoNotRepeatAnimations.HeaderText = "Don't Repeat Animations"
-        Me.colEffectDoNotRepeatAnimations.Name = "colEffectDoNotRepeatAnimations"
-        Me.colEffectDoNotRepeatAnimations.Width = 130
-        '
-        'colInteractionName
-        '
-        Me.colInteractionName.HeaderText = "Name"
-        Me.colInteractionName.Name = "colInteractionName"
-        Me.colInteractionName.Width = 60
-        '
-        'colInteractionOriginalName
-        '
-        Me.colInteractionOriginalName.HeaderText = "Original Name"
-        Me.colInteractionOriginalName.Name = "colInteractionOriginalName"
-        Me.colInteractionOriginalName.Visible = False
-        Me.colInteractionOriginalName.Width = 98
-        '
-        'colInteractionChance
-        '
-        Me.colInteractionChance.HeaderText = "Chance"
-        Me.colInteractionChance.Name = "colInteractionChance"
-        Me.colInteractionChance.Width = 69
-        '
-        'colInteractionProximity
-        '
-        Me.colInteractionProximity.HeaderText = "Activation Proximity"
-        Me.colInteractionProximity.Name = "colInteractionProximity"
-        Me.colInteractionProximity.Width = 123
-        '
-        'colInteractionTargets
-        '
-        Me.colInteractionTargets.HeaderText = "Targets"
-        Me.colInteractionTargets.Name = "colInteractionTargets"
-        Me.colInteractionTargets.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colInteractionTargets.Width = 49
-        '
-        'colInteractionInteractWith
-        '
-        Me.colInteractionInteractWith.HeaderText = "Interact with:"
-        Me.colInteractionInteractWith.Name = "colInteractionInteractWith"
-        Me.colInteractionInteractWith.Width = 74
-        '
-        'colInteractionBehaviors
-        '
-        Me.colInteractionBehaviors.HeaderText = "Behaviors"
-        Me.colInteractionBehaviors.Name = "colInteractionBehaviors"
-        Me.colInteractionBehaviors.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colInteractionBehaviors.Width = 60
-        '
-        'colInteractionReactivationDelay
-        '
-        Me.colInteractionReactivationDelay.HeaderText = "Reactivation Delay"
-        Me.colInteractionReactivationDelay.Name = "colInteractionReactivationDelay"
-        Me.colInteractionReactivationDelay.Width = 122
         '
         'PonyEditor
         '
@@ -810,7 +815,7 @@ Partial Class PonyEditor
 
     End Sub
     Friend WithEvents PonyPreviewPanel As System.Windows.Forms.Panel
-    Friend WithEvents PonySelectionView As System.Windows.Forms.ListView
+    Friend WithEvents PonyList As System.Windows.Forms.ListView
     Friend WithEvents NewPonyButton As System.Windows.Forms.Button
     Friend WithEvents PonyName As System.Windows.Forms.TextBox
     Friend WithEvents PonyNameLabel As System.Windows.Forms.Label
@@ -891,4 +896,5 @@ Partial Class PonyEditor
     Friend WithEvents colEffectCenteringLeft As System.Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents colEffectFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colEffectDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents colPony As System.Windows.Forms.ColumnHeader
 End Class
