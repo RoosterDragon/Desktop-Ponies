@@ -67,10 +67,6 @@
 
         Public Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
             Try
-                Dim version = GetProgramVersion()
-                Const ErrorMessage = "An unexpected error occurred and Desktop Ponies must close." &
-                    " Please report this error so it can be fixed."
-
                 ' Attempt to log error.
                 Try
                     LogErrorToConsole(ex, "FATAL: An unexpected error occurred and Desktop Ponies must close.")
@@ -80,21 +76,23 @@
                     Console.WriteLine("An unexpected error occurred and Desktop Ponies must close. (An error file could not be generated)")
                 End Try
 
-                If TypeOf ex Is InvalidOperationException Then
-                    If ex.InnerException IsNot Nothing AndAlso
-                        TypeOf ex.InnerException Is ArgumentException AndAlso
-                        ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
-                        Not OperatingSystemInfo.IsWindows Then
-                        ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
-                        MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
-                                        "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
-                                        vbNewLine & "The program will now exit.",
-                                        "Font Not Found - Desktop Ponies v" & version,
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error)
-                    End If
+                Dim version = GetProgramVersion()
+                If TypeOf ex Is InvalidOperationException AndAlso
+                    ex.InnerException IsNot Nothing AndAlso
+                    TypeOf ex.InnerException Is ArgumentException AndAlso
+                    ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
+                    Not OperatingSystemInfo.IsWindows Then
+                    ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
+                    MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
+                                    "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
+                                    vbNewLine & "The program will now exit.",
+                                    "Font Not Found - Desktop Ponies v" & version,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Else
                     ' Attempt to notify user of an unknown error.
-                    ExceptionDialog.Show(ex, ErrorMessage, "Unexpected Error - Desktop Ponies v" & version, True)
+                    ExceptionDialog.Show(ex, "An unexpected error occurred and Desktop Ponies must close." &
+                                         " Please report this error so it can be fixed.",
+                                         "Unexpected Error - Desktop Ponies v" & version, True)
                 End If
             Catch
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
@@ -104,6 +102,8 @@
                     faulted = True
                     Windows.Forms.Application.Exit()
                 Finally
+                    ' Exit the program with an error code, unless a debugger is attached in which case we'll let the exception bubble to
+                    ' the debugger for analysis.
                     If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(1)
                 End Try
             End Try

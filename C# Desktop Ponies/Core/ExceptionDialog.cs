@@ -71,8 +71,16 @@
         /// <param name="e">The event data.</param>
         private void CopyTextButton_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(ExceptionText.Text);
-            MessageBox.Show(this, "Text copied to clipboard.", "Text Copied", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                Clipboard.SetText(string.Join("\r\n", Text, MessageLabel.Text, ExceptionText.Text, TimeLabel.Text));
+                MessageBox.Show(this, "Text copied to clipboard.", "Text Copied", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (System.Runtime.InteropServices.ExternalException)
+            {
+                MessageBox.Show(this, "Failed to copy text to clipboard. Another process may be using the clipboard at this time.", 
+                    "Copy Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
