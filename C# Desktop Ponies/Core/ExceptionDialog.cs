@@ -3,6 +3,7 @@
     using System;
     using System.Drawing;
     using System.Globalization;
+    using System.Threading;
     using System.Windows.Forms;
 
     /// <summary>
@@ -71,15 +72,32 @@
         /// <param name="e">The event data.</param>
         private void CopyTextButton_Click(object sender, EventArgs e)
         {
-            try
+            string text = string.Join("\r\n", Text, MessageLabel.Text, ExceptionText.Text, TimeLabel.Text);
+            ThreadStart copy = () =>
             {
-                Clipboard.SetText(string.Join("\r\n", Text, MessageLabel.Text, ExceptionText.Text, TimeLabel.Text));
-                MessageBox.Show(this, "Text copied to clipboard.", "Text Copied", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var owner = InvokeRequired ? null : this;
+                try
+                {
+                    Clipboard.SetText(text);
+                    MessageBox.Show(owner, "Text copied to clipboard.",
+                        "Text Copied", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (System.Runtime.InteropServices.ExternalException)
+                {
+                    MessageBox.Show(owner, "Failed to copy text to clipboard. Another process may be using the clipboard at this time.",
+                        "Copy Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            };
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                copy();
             }
-            catch (System.Runtime.InteropServices.ExternalException)
+            else
             {
-                MessageBox.Show(this, "Failed to copy text to clipboard. Another process may be using the clipboard at this time.", 
-                    "Copy Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                var t = new Thread(copy);
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+                t.Join();
             }
         }
 
