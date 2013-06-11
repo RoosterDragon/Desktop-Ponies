@@ -7,10 +7,8 @@ Public Class PonyEditor
     Private pe_interface As ISpriteCollectionView
 
     Private ponyImageList As ImageList
-    Private grids As PonyInfoGrid()
+    Private infoGrids As PonyInfoGrid()
     Private loaded As Boolean
-
-    Private ReadOnly ponyNameList As New List(Of String)()
 
     ''' <summary>
     ''' Keep track of when the grids are being updated when loading a pony, otherwise we incorrectly think the user is making changes.
@@ -71,9 +69,13 @@ Public Class PonyEditor
         End Sub
     End Class
 
-    Public Sub New()
+    Private ponyBases As PonyBase()
+
+    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
+        Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection")
         InitializeComponent()
         Icon = My.Resources.Twilight
+        ponyBases = ponyBaseCollection.ToArray()
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -88,20 +90,16 @@ Public Class PonyEditor
                 colInteractionInteractWith.Items.Add(value.ToString())
             Next
 
-            grids = {New PonyInfoGrid(PonyBehaviorsGrid, 0, NewBehaviorButton),
+            infoGrids = {New PonyInfoGrid(PonyBehaviorsGrid, 0, NewBehaviorButton),
                      New PonyInfoGrid(PonySpeechesGrid, 1, NewSpeechButton),
                      New PonyInfoGrid(PonyEffectsGrid, 2, NewEffectButton),
                      New PonyInfoGrid(PonyInteractionsGrid, 3, NewInteractionButton)}
 
             'add all possible ponies to the selection window.
-            ponyNameList.Capacity = Main.Instance.PonySelectionPanel.Controls.Count
-            Dim size = 50
+            Const size = 50
             ponyImageList = New ImageList() With {.ImageSize = New Size(size, size)}
-            For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-                Dim ponyName = ponyPanel.PonyName.Text
-                ponyNameList.Add(ponyName)
-                Dim imagePath = Main.Instance.SelectablePonies.
-                    Find(Function(base) ponyName = base.Directory).Behaviors(0).LeftImagePath
+            For Each ponyBase In ponyBases
+                Dim imagePath = ponyBase.Behaviors(0).LeftImagePath
 
                 Dim dstImage = New Bitmap(size, size)
                 Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
@@ -116,8 +114,8 @@ Public Class PonyEditor
             PonyList.SmallImageList = ponyImageList
 
             PonyList.SuspendLayout()
-            For i = 0 To ponyNameList.Count - 1
-                PonyList.Items.Add(New ListViewItem(ponyNameList(i), i))
+            For i = 0 To ponyBases.Length - 1
+                PonyList.Items.Add(New ListViewItem(ponyBases(i).Directory, i) With {.Tag = ponyBases(i)})
             Next
             PonyList.ResumeLayout()
 
@@ -149,92 +147,67 @@ Public Class PonyEditor
         Enabled = True
     End Sub
 
-    ''' <summary>
-    ''' get the index of the pony by name in the SelectablePonies list.
-    ''' This is needed because the order they appear in on the menu is different that in the list of all selectable ponies, due to filters.
-    ''' </summary>
-    ''' <param name="ponyname"></param>
-    ''' <returns></returns>
-    Private Shared Function GetPonyOrder(ponyname As String) As Integer
-
-        Dim index As Integer = 0
-
-        For Each ponyBase In Main.Instance.SelectablePonies
-            If ponyBase.Directory = ponyname Then
-                Return index
-            Else
-                index += 1
-            End If
-        Next
-
-        Throw New ArgumentException("Pony not found in selectable pony list.", "ponyname")
-
-    End Function
-
     Private Sub PonyList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyList.SelectedIndexChanged
-
         Try
-            If PonyList.SelectedItems.Count = 0 Then Exit Sub
+            If PonyList.SelectedItems.Count = 0 Then Return
 
-            If hasSaved = False Then
-                If SaveDialog.ShowDialog() = DialogResult.Cancel Then
-                    Exit Sub
-                End If
-            End If
+            If PreventStateChange("Save changes before loading a different pony?") Then Return
 
-            If PonyList.SelectedIndices.Count = 0 Then Exit Sub
-
-            LoadPony(PonyList.SelectedIndices(0))
+            LoadPony()
 
             hasSaved = True
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
-            Exit Sub
         End Try
     End Sub
 
-    Private Sub LoadPony(menu_index As Integer)
+    Private Sub LoadPony()
+        Dim worker = IdleWorker.CurrentThreadWorker
+        worker.QueueTask(Sub()
+                             Pony.CurrentViewer = pe_interface
+                             Pony.CurrentAnimator = pe_animator
+                             If Not pe_animator.Started Then
+                                 pe_animator.Start()
+                                 PausePonyButton.Enabled = True
+                             Else
+                                 pe_animator.Clear()
+                                 pe_animator.Pause(True)
+                             End If
 
-        Enabled = False
+                             Enabled = False
+                         End Sub)
+        worker.QueueTask(Sub()
+                             SaveSortOrder()
+                             RestoreSortOrder()
+                         End Sub)
 
-        Dim index As Integer = GetPonyOrder(ponyNameList(menu_index))
+        Dim directory = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase).Directory
+        Dim ponyLoadTask =
+            New Threading.Tasks.Task(
+            Sub()
+                _previewPony = New Pony(New MutablePonyBase(directory))
+                If PreviewPony.Behaviors.Count = 0 Then
+                    PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
+                End If
+            End Sub)
+        ponyLoadTask.ContinueWith(
+            Sub()
+                worker.QueueTask(Sub()
+                                     pe_animator.AddPony(PreviewPony)
+                                     LoadParameters(PreviewPony)
 
-        'as everywhere else, we make a copy from the master copy in selectable_ponies
-        _previewPony = New Pony(New MutablePonyBase(Main.Instance.SelectablePonies(index).Directory))
-
-        If PreviewPony.Behaviors.Count = 0 Then
-            PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
-        End If
-
-        SaveSortOrder()
-        RestoreSortOrder()
-
-        Pony.CurrentViewer = pe_interface
-        Pony.CurrentAnimator = pe_animator
-        If Not pe_animator.Started Then
-            pe_animator.Start()
-            PausePonyButton.Enabled = True
-        Else
-            pe_animator.Pause(True)
-            pe_animator.Clear()
-        End If
-
-        pe_animator.AddPony(PreviewPony)
-        Load_Parameters(PreviewPony)
-
-        PausePonyButton.Text = "Pause Pony"
-        pe_animator.Resume()
-
-        Enabled = True
-
+                                     PausePonyButton.Text = "Pause Pony"
+                                     Enabled = True
+                                     pe_animator.Resume()
+                                 End Sub)
+            End Sub)
+        ponyLoadTask.Start()
     End Sub
 
     Private Sub PonyEditor_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        If hasSaved = False Then
-            If SaveDialog.ShowDialog() = DialogResult.Cancel Then
-                e.Cancel = True
-                Exit Sub
-            End If
+        If PreventStateChange("Save changes before closing?") Then
+            e.Cancel = True
+            Return
         End If
         _isClosing = True
         If pe_animator IsNot Nothing AndAlso Not pe_animator.Disposed Then
@@ -265,16 +238,26 @@ Public Class PonyEditor
 
     'This is used to keep track of the links in each behavior chain.
     Private Structure ChainLink
-        Dim behavior As Behavior
-        Dim order As Integer
-        Dim series As Integer
+        Public Property Behavior As Behavior
+        Public Property Order As Integer
+        Public Property Series As Integer
+        Public Sub New(_behavior As Behavior, _order As Integer, _series As Integer)
+            Behavior = _behavior
+            Order = _order
+            Series = _series
+        End Sub
     End Structure
 
-    Friend Sub Load_Parameters(pony As Pony)
+    Friend Sub LoadParameters(pony As Pony)
         Try
             If alreadyUpdating Then Exit Sub
 
             alreadyUpdating = True
+
+            PonyBehaviorsGrid.SuspendLayout()
+            PonyEffectsGrid.SuspendLayout()
+            PonyInteractionsGrid.SuspendLayout()
+            PonySpeechesGrid.SuspendLayout()
 
             PonyBehaviorsGrid.Rows.Clear()
             PonyEffectsGrid.Rows.Clear()
@@ -286,167 +269,150 @@ Public Class PonyEditor
             CurrentBehaviorValueLabel.Text = "N/A"
             TimeLeftValueLabel.Text = "N/A"
 
-            Dim effect_behavior_list = colEffectBehavior
-            effect_behavior_list.Items.Clear()
+            colEffectBehavior.Items.Clear()
 
-            Dim linked_behavior_list = colBehaviorLinked
-            linked_behavior_list.Items.Clear()
-            linked_behavior_list.Items.Add("None")
+            colBehaviorLinked.Items.Clear()
+            colBehaviorLinked.Items.Add("None")
 
-            Dim start_speech_list = colBehaviorStartSpeech
-            Dim end_speech_list = colBehaviorEndSpeech
+            colBehaviorStartSpeech.Items.Clear()
+            colBehaviorStartSpeech.Items.Add("None")
+            colBehaviorEndSpeech.Items.Clear()
+            colBehaviorEndSpeech.Items.Add("None")
 
-            start_speech_list.Items.Clear()
-            start_speech_list.Items.Add("None")
-            end_speech_list.Items.Clear()
-            end_speech_list.Items.Add("None")
-
-            Dim unnamed_counter = 1
+            Dim unnamedCounter = 1
             For Each speech As Behavior.SpeakingLine In pony.Base.SpeakingLines
                 If speech.Name = "Unnamed" Then
-                    speech.Name = "Unnamed #" & unnamed_counter
-                    unnamed_counter += 1
+                    speech.Name = "Unnamed #" & unnamedCounter
+                    unnamedCounter += 1
                 End If
 
-                PonySpeechesGrid.Rows.Add(speech.Name, speech.Name, speech.Group, pony.GetBehaviorGroupName(speech.Group), speech.Text, Get_Filename(speech.SoundFile), (Not speech.Skip).ToString())
-                start_speech_list.Items.Add(speech.Name)
-                end_speech_list.Items.Add(speech.Name)
+                PonySpeechesGrid.Rows.Add(
+                    speech.Name, speech.Name, speech.Group, pony.GetBehaviorGroupName(speech.Group), speech.Text,
+                    GetFilename(speech.SoundFile), (Not speech.Skip).ToString())
+                colBehaviorStartSpeech.Items.Add(speech.Name)
+                colBehaviorEndSpeech.Items.Add(speech.Name)
             Next
 
             For Each behavior In pony.Behaviors
-                linked_behavior_list.Items.Add(behavior.Name)
-                effect_behavior_list.Items.Add(behavior.Name)
+                colBehaviorLinked.Items.Add(behavior.Name)
+                colEffectBehavior.Items.Add(behavior.Name)
             Next
 
             'Go through each behavior to see which ones are part of a chain, and if so, which order they go in.
-            Dim all_chains As New List(Of ChainLink)
+            Dim allChains As New List(Of ChainLink)()
 
             Dim link_series = 0
             For Each behavior In pony.Behaviors
-
                 If (behavior.LinkedBehaviorName) <> "" AndAlso behavior.LinkedBehaviorName <> "None" Then
-
-                    Dim not_start_of_chain = False
-                    For Each other_behavior In pony.Behaviors
-                        If other_behavior.LinkedBehaviorName = behavior.Name Then
-                            not_start_of_chain = True
-                            Exit For
-                        End If
-                    Next
-
                     'ignore behaviors that are not the first ones in a chain
                     '(chains that loop forever are ignored)
-                    If not_start_of_chain Then Continue For
 
-                    Dim new_link As New ChainLink()
-                    new_link.behavior = behavior
-                    new_link.order = 1
+                    Dim startOfChain = Not pony.Behaviors.Any(
+                        Function(b) String.Equals(b.LinkedBehaviorName, behavior.Name, StringComparison.OrdinalIgnoreCase))
+                    If Not startOfChain Then Continue For
+
                     link_series += 1
-                    new_link.series = link_series
+                    Dim newChainLink As New ChainLink(behavior, 1, link_series)
 
-                    Dim link_order As New List(Of ChainLink)
-                    link_order.Add(new_link)
+                    Dim linkOrder As New List(Of ChainLink)()
+                    linkOrder.Add(newChainLink)
 
                     Dim next_link = behavior.LinkedBehaviorName
 
                     Dim depth = 1
 
                     Dim no_more = False
-                    Do Until no_more = True OrElse next_link = "None"
-                        Append_Next_Link(next_link, depth, link_series, pony, link_order)
+                    Do Until no_more OrElse next_link = "None"
+                        Append_Next_Link(next_link, depth, link_series, pony, linkOrder)
                         depth = depth + 1
-                        If (link_order(link_order.Count - 1).behavior.LinkedBehaviorName) = "" OrElse link_order.Count <> depth Then
+                        If (linkOrder(linkOrder.Count - 1).Behavior.LinkedBehaviorName) = "" OrElse linkOrder.Count <> depth Then
                             no_more = True
                         Else
-                            next_link = link_order(link_order.Count - 1).behavior.LinkedBehaviorName
+                            next_link = linkOrder(linkOrder.Count - 1).Behavior.LinkedBehaviorName
                         End If
                     Loop
 
-                    For Each link In link_order
-                        all_chains.Add(link)
-                    Next
-
+                    allChains.AddRange(linkOrder)
                 End If
             Next
 
             For Each behavior In pony.Behaviors
-
-                Dim follow_name As String = ""
+                Dim followName As String = ""
                 If behavior.OriginalFollowObjectName <> "" Then
-                    follow_name = behavior.OriginalFollowObjectName
+                    followName = behavior.OriginalFollowObjectName
                 Else
                     If behavior.OriginalDestinationXCoord <> 0 AndAlso behavior.OriginalDestinationYCoord <> 0 Then
-                        follow_name = behavior.OriginalDestinationXCoord & " , " & behavior.OriginalDestinationYCoord
+                        followName = behavior.OriginalDestinationXCoord & " , " & behavior.OriginalDestinationYCoord
                     Else
-                        follow_name = "Select..."
+                        followName = "Select..."
                     End If
                 End If
 
                 Dim link_depth = ""
-                For Each link In all_chains
-                    If link.behavior.Name = behavior.Name Then
+                For Each link In allChains
+                    If String.Equals(link.Behavior.Name, behavior.Name, StringComparison.OrdinalIgnoreCase) Then
                         If link_depth <> "" Then
-                            link_depth += ", " & link.series & "-" & link.order
+                            link_depth += ", " & link.Series & "-" & link.Order
                         Else
-                            link_depth = link.series & "-" & link.order
+                            link_depth = link.Series & "-" & link.Order
                         End If
-
                     End If
                 Next
 
                 Dim chance = "N/A"
-                If behavior.Skip = False Then
+                If Not behavior.Skip Then
                     chance = behavior.ChanceOfOccurence.ToString("P", CultureInfo.CurrentCulture)
                 End If
 
-                With behavior
-                    PonyBehaviorsGrid.Rows.Add("Run", .Name, .Name, .Group, pony.GetBehaviorGroupName(.Group), _
-                                        chance, _
-                                        .MaxDuration, _
-                                        .MinDuration, _
-                                        .Speed, _
-                                        Get_Filename(.RightImagePath), _
-                                        Get_Filename(.LeftImagePath), _
-                                        Movement_ToString(.AllowedMovement), _
-                                        .StartLineName, _
-                                        .EndLineName, _
-                                        follow_name, _
-                                        .LinkedBehaviorName, _
-                                        link_depth,
-                                        .Skip, .DoNotRepeatImageAnimations)
-
-                End With
+                PonyBehaviorsGrid.Rows.Add(
+                    "Run",
+                    behavior.Name,
+                    behavior.Name,
+                    behavior.Group,
+                    pony.GetBehaviorGroupName(behavior.Group),
+                    chance,
+                    behavior.MaxDuration,
+                    behavior.MinDuration,
+                    behavior.Speed,
+                    GetFilename(behavior.RightImagePath),
+                    GetFilename(behavior.LeftImagePath),
+                    Movement_ToString(behavior.AllowedMovement),
+                    behavior.StartLineName,
+                    behavior.EndLineName,
+                    followName,
+                    behavior.LinkedBehaviorName,
+                    link_depth,
+                    behavior.Skip,
+                    behavior.DoNotRepeatImageAnimations)
             Next
 
             For Each effect In PreviewPonyEffects()
-                With effect
-                    PonyEffectsGrid.Rows.Add(.Name,
-                                             .Name,
-                                             .BehaviorName,
-                                             Get_Filename(.RightImagePath),
-                                             Get_Filename(.LeftImagePath),
-                                             .Duration,
-                                             .RepeatDelay,
-                                             Location_ToString(.PlacementDirectionRight),
-                                             Location_ToString(.CenteringRight),
-                                             Location_ToString(.PlacementDirectionLeft),
-                                             Location_ToString(.CenteringLeft),
-                                             .Follow,
-                                             .DoNotRepeatImageAnimations)
-                End With
+                PonyEffectsGrid.Rows.Add(
+                    effect.Name,
+                    effect.Name,
+                    effect.BehaviorName,
+                    GetFilename(effect.RightImagePath),
+                    GetFilename(effect.LeftImagePath),
+                    effect.Duration,
+                    effect.RepeatDelay,
+                    Location_ToString(effect.PlacementDirectionRight),
+                    Location_ToString(effect.CenteringRight),
+                    Location_ToString(effect.PlacementDirectionLeft),
+                    Location_ToString(effect.CenteringLeft),
+                    effect.Follow,
+                    effect.DoNotRepeatImageAnimations)
             Next
 
-            For Each interaction As Interaction In PreviewPony.Interactions
-                With interaction
-                    PonyInteractionsGrid.Rows.Add(.Name,
-                                                  .Name,
-                                                  .Probability.ToString("P", CultureInfo.CurrentCulture),
-                                                  .Proximity_Activation_Distance,
-                                                  "Select...",
-                                                  interaction.Targets_Activated.ToString(),
-                                                  "Select...",
-                                                  .ReactivationDelay)
-                End With
+            For Each interaction In PreviewPony.Interactions
+                PonyInteractionsGrid.Rows.Add(
+                    interaction.Name,
+                    interaction.Name,
+                    interaction.Probability.ToString("P", CultureInfo.CurrentCulture),
+                    interaction.Proximity_Activation_Distance,
+                    "Select...",
+                    interaction.Targets_Activated.ToString(),
+                    "Select...",
+                    interaction.ReactivationDelay)
             Next
 
             'to make sure that speech match behaviors
@@ -454,77 +420,66 @@ Public Class PonyEditor
 
             alreadyUpdating = False
 
-            Dim Conflicting_names As Boolean = False
-            Dim conflicts As New List(Of String)
+            Dim conflicts As New HashSet(Of String)()
 
+            ' TODO: Speed up cross-products.
             For Each behavior In pony.Behaviors
                 For Each otherbehavior In pony.Behaviors
-
                     If ReferenceEquals(behavior, otherbehavior) Then Continue For
 
                     For Each effect In behavior.Effects
                         For Each othereffect In otherbehavior.Effects
-
                             If ReferenceEquals(effect, othereffect) Then Continue For
 
                             If String.Equals(effect.Name, othereffect.Name, StringComparison.OrdinalIgnoreCase) Then
-                                Conflicting_names = True
-                                If Not conflicts.Contains("Effect: " & effect.Name) Then conflicts.Add("Effect: " & effect.Name)
+                                conflicts.Add("Effect: " & effect.Name)
                             End If
                         Next
                     Next
 
                     If String.Equals(behavior.Name, otherbehavior.Name, StringComparison.OrdinalIgnoreCase) Then
-                        Conflicting_names = True
-                        If Not conflicts.Contains("Behavior: " & behavior.Name) Then conflicts.Add("Behavior: " & behavior.Name)
+                        conflicts.Add("Behavior: " & behavior.Name)
                     End If
                 Next
-
             Next
 
             For Each speech In pony.Base.SpeakingLines
                 For Each otherspeech In pony.Base.SpeakingLines
                     If ReferenceEquals(speech, otherspeech) Then Continue For
+
                     If String.Equals(speech.Name, otherspeech.Name, StringComparison.OrdinalIgnoreCase) Then
-                        Conflicting_names = True
-                        If Not conflicts.Contains("Speech: " & speech.Name) Then conflicts.Add("Speech: " & speech.Name)
+                        conflicts.Add("Speech: " & speech.Name)
                     End If
                 Next
-
             Next
 
             For Each interaction In pony.Interactions
                 For Each otherinteraction In pony.Interactions
                     If ReferenceEquals(interaction, otherinteraction) Then Continue For
+
                     If String.Equals(interaction.Name, otherinteraction.Name, StringComparison.OrdinalIgnoreCase) Then
-                        Conflicting_names = True
-                        If Not conflicts.Contains("Interaction: " & interaction.Name) Then conflicts.Add("Interaction: " & interaction.Name)
+                        conflicts.Add("Interaction: " & interaction.Name)
                     End If
                 Next
 
             Next
 
-            If Conflicting_names Then
-
-                Dim conflicts_list As String = ""
-                For Each conflict In conflicts
-                    conflicts_list += conflict & ControlChars.NewLine
-                Next
-
-                MsgBox("Warning: Two or more behaviors, interactions, effects, of speeches have duplicate names.  Please correct these, or the results may be unexpected." & ControlChars.NewLine & conflicts_list)
+            If conflicts.Count > 0 Then
+                MessageBox.Show(
+                    Me, "Warning: Two or more behaviors, interactions, effects or speeches have duplicate names. " &
+                    "Please give them unique names or the pony may act in undefined ways." & vbNewLine & vbNewLine &
+                    String.Join(vbNewLine, conflicts),
+                    "Duplicate Names", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
 
-            ' Force layouts so scrollbars are correct, otherwise they will be the wrong sizes.
-            PonyBehaviorsGrid.PerformLayout()
-            PonyEffectsGrid.PerformLayout()
-            PonyInteractionsGrid.PerformLayout()
-            PonySpeechesGrid.PerformLayout()
-
+            PonyBehaviorsGrid.ResumeLayout()
+            PonyEffectsGrid.ResumeLayout()
+            PonyInteractionsGrid.ResumeLayout()
+            PonySpeechesGrid.ResumeLayout()
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error loading pony parameters.")
             Me.Close()
         End Try
-
     End Sub
 
     Private Shared Sub Append_Next_Link(link_name As String, depth As Integer, series As Integer,
@@ -619,7 +574,7 @@ Public Class PonyEditor
                 End If
             Next
 
-            For Each ponyBase In Main.Instance.SelectablePonies
+            For Each ponyBase In ponyBases
                 If String.Equals(Trim(ponyBase.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Dim new_pony = New Pony(ponyBase)
                     new_pony.Teleport()
@@ -721,7 +676,7 @@ Public Class PonyEditor
         Dim slot2 As DataGridView = Nothing
         Dim slot3 As DataGridView = Nothing
 
-        For Each entry In grids
+        For Each entry In infoGrids
             Select Case entry.Slot
                 Case 1
                     slot1 = entry.Grid
@@ -761,7 +716,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_behavior) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 RestoreSortOrder()
                 Exit Sub
             End If
@@ -809,7 +764,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Right Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetRightImagePath(new_image_path)
-                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = Get_Filename(new_image_path)
+                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = GetFilename(new_image_path)
                         ImageSizeCheck(changed_behavior.RightImageSize)
                     End If
                     ShowPony()
@@ -818,7 +773,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Left Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetLeftImagePath(new_image_path)
-                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = Get_Filename(new_image_path)
+                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(new_image_path)
                         ImageSizeCheck(changed_behavior.LeftImageSize)
                     End If
                     ShowPony()
@@ -861,7 +816,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_speech) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 RestoreSortOrder()
                 Exit Sub
             End If
@@ -911,7 +866,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_effect) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 RestoreSortOrder()
                 Exit Sub
             End If
@@ -925,7 +880,7 @@ Public Class PonyEditor
                     Dim new_image_path As String = Add_Picture(changed_effect_name & " Right Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_effect.SetRightImagePath(new_image_path)
-                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = Get_Filename(new_image_path)
+                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If
                     ShowPony()
@@ -934,7 +889,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(changed_effect_name & " Left Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_effect.SetLeftImagePath(new_image_path)
-                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = Get_Filename(new_image_path)
+                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If
                     ShowPony()
@@ -973,7 +928,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_interaction) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 RestoreSortOrder()
                 Exit Sub
             End If
@@ -1027,7 +982,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_behavior) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 Exit Sub
             End If
 
@@ -1171,7 +1126,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_effect) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 Exit Sub
             End If
 
@@ -1273,7 +1228,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_speech) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 Exit Sub
             End If
 
@@ -1351,7 +1306,7 @@ Public Class PonyEditor
             Next
 
             If IsNothing(changed_interaction) Then
-                Load_Parameters(PreviewPony)
+                LoadParameters(PreviewPony)
                 Exit Sub
             End If
 
@@ -1408,11 +1363,11 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Shared Function get_effect_list() As List(Of EffectBase)
+    Friend Function get_effect_list() As List(Of EffectBase)
 
         Dim effect_list As New List(Of EffectBase)
 
-        For Each ponyBase In Main.Instance.SelectablePonies
+        For Each ponyBase In ponyBases
             For Each behavior As Behavior In ponyBase.Behaviors
                 For Each effect In behavior.Effects
                     effect_list.Add(effect)
@@ -1445,7 +1400,7 @@ Public Class PonyEditor
         Dim button0 As Button = Nothing
         Dim button1 As Button = Nothing
 
-        For Each entry In grids
+        For Each entry In infoGrids
             Select Case entry.Slot
                 Case slot0_number
                     slot0 = entry.Grid
@@ -1489,20 +1444,18 @@ Public Class PonyEditor
     End Sub
 
     Private Sub SaveSortOrder()
-        For Each control In grids
-            control.SortColumn = control.Grid.SortedColumn
-            control.SortOrder = control.Grid.SortOrder
+        For Each infoGrid In infoGrids
+            infoGrid.SortColumn = infoGrid.Grid.SortedColumn
+            infoGrid.SortOrder = infoGrid.Grid.SortOrder
         Next
     End Sub
 
     Private Sub RestoreSortOrder()
         Try
-
-            For Each control In grids
-                If IsNothing(control.SortColumn) Then Continue For
-                control.Grid.Sort(control.SortColumn, ConvertSortOrder(control.SortOrder))
+            For Each infoGrid In infoGrids
+                If infoGrid.SortColumn Is Nothing Then Continue For
+                infoGrid.Grid.Sort(infoGrid.SortColumn, ConvertSortOrder(infoGrid.SortOrder))
             Next
-
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error restoring sort order for grid.")
         End Try
@@ -1515,7 +1468,6 @@ Public Class PonyEditor
     ''' <param name="sort"></param>
     ''' <returns></returns>
     Private Shared Function ConvertSortOrder(sort As SortOrder) As System.ComponentModel.ListSortDirection
-
         Select Case sort
             Case SortOrder.Ascending
                 Return System.ComponentModel.ListSortDirection.Ascending
@@ -1524,7 +1476,6 @@ Public Class PonyEditor
             Case Else
                 Return System.ComponentModel.ListSortDirection.Ascending
         End Select
-
     End Function
 
     Private Sub PausePonyButton_Click(sender As Object, e As EventArgs) Handles PausePonyButton.Click
@@ -1589,7 +1540,7 @@ Public Class PonyEditor
             ShowPony()
             PreviewPony.SelectBehavior(PreviewPony.Behaviors(0))
 
-            Load_Parameters(PreviewPony)
+            LoadParameters(PreviewPony)
             hasSaved = False
 
         Catch ex As Exception
@@ -1614,7 +1565,7 @@ Public Class PonyEditor
 
             ShowPony()
 
-            Load_Parameters(PreviewPony)
+            LoadParameters(PreviewPony)
             hasSaved = False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new speech. The editor will now close.")
@@ -1638,7 +1589,7 @@ Public Class PonyEditor
 
             ShowPony()
 
-            Load_Parameters(PreviewPony)
+            LoadParameters(PreviewPony)
             hasSaved = False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new effect, the editor will now close.")
@@ -1661,7 +1612,7 @@ Public Class PonyEditor
             End Using
             ShowPony()
 
-            Load_Parameters(PreviewPony)
+            LoadParameters(PreviewPony)
             hasSaved = False
 
         Catch ex As Exception
@@ -1703,7 +1654,7 @@ Public Class PonyEditor
             Image.FromFile(picture_path)
 
             Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
-                                           PreviewPony.Directory, Get_Filename(picture_path))
+                                           PreviewPony.Directory, GetFilename(picture_path))
 
             If new_path <> picture_path Then
                 Try
@@ -1747,7 +1698,7 @@ Public Class PonyEditor
         End If
 
         Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
-                                       PreviewPony.Directory, Get_Filename(sound_path))
+                                       PreviewPony.Directory, GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not File.Exists(new_path) Then
@@ -1756,7 +1707,7 @@ Public Class PonyEditor
             My.Computer.FileSystem.CopyFile(sound_path, new_path, True)
         End If
 
-        Return Get_Filename(sound_path)
+        Return GetFilename(sound_path)
 
     End Function
 
@@ -1850,7 +1801,7 @@ Public Class PonyEditor
                 form.Change_Behavior(behavior)
                 form.ShowDialog()
             End Using
-            Load_Parameters(PreviewPony)
+            LoadParameters(PreviewPony)
 
             ShowPony()
 
@@ -1861,38 +1812,21 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Friend Function Get_Filename(path As String) As String
-        Try
-            Dim path_components = Split(path, IO.Path.DirectorySeparatorChar)
-
-            'force lowercase for compatibility with other ports (like Browser ponies)
-            Return LCase(path_components(UBound(path_components)))
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error getting the filename for the path: " & path & vbNewLine &
-                                                         "The editor will now close.")
-            Me.Close()
-            Return Nothing
-        End Try
+    Friend Function GetFilename(path As String) As String
+        Return IO.Path.GetFileName(path)
     End Function
 
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
-
-        If alreadyUpdating = False Then
+        If Not alreadyUpdating Then
             PreviewPonyBase.Name = PonyName.Text
             hasSaved = False
         End If
-
     End Sub
 
     Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
 
         Try
-
-            If hasSaved = False Then
-                If SaveDialog.ShowDialog() = DialogResult.Cancel Then
-                    Exit Sub
-                End If
-            End If
+            If PreventStateChange("Save changes before creating a new pony?") Then Return
 
             HidePony()
 
@@ -1930,9 +1864,9 @@ Public Class PonyEditor
         Try
             'rebuild the list of ponies, in the original order
             Dim temp_list As New List(Of PonyBase)
-            For Each Pony In Main.Instance.SelectablePonies
-                If Pony.Directory <> PreviewPony.Directory Then
-                    temp_list.Add(Pony)
+            For Each ponyBase In ponyBases
+                If ponyBase.Directory <> PreviewPony.Directory Then
+                    temp_list.Add(ponyBase)
                 Else
                     temp_list.Add(PreviewPonyBase)
                 End If
@@ -2026,6 +1960,24 @@ Public Class PonyEditor
 
     End Sub
 
+    ''' <summary>
+    ''' Prompts the user about saving outstanding changes, if required.
+    ''' </summary>
+    ''' <returns>A value indicating whether the caller should abort any destructive state changes, as the user does not wish them this to
+    ''' happen at this time.</returns>
+    Private Function PreventStateChange(message As String) As Boolean
+        If Not hasSaved Then
+            Dim result = MessageBox.Show(Me, message, "Unsaved Changes",
+                                         MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3)
+            If result = DialogResult.Yes Then
+                SaveButton_Click(SaveButton, EventArgs.Empty)
+            ElseIf result = DialogResult.Cancel Then
+                Return True
+            End If
+        End If
+        Return False
+    End Function
+
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
 
         PausePonyButton.Enabled = False
@@ -2082,7 +2034,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
-        Load_Parameters(PreviewPony)
+        LoadParameters(PreviewPony)
         RestoreSortOrder()
     End Sub
 

@@ -2138,7 +2138,7 @@ Public Class Pony
             ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
             ' We use DirectX now so that we can use MP3 instead of WAV files
             Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filePath)
-            Main.Instance.ActiveSounds.Add(audio)
+            CurrentAnimator.ActiveSounds.Add(audio)
 
             ' Volume is between -10000 and 0, with 0 being the loudest.
             audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
@@ -2212,9 +2212,9 @@ Public Class Pony
 
         Dim speed As Double = ScaledSpeed()
 
-        If Main.Instance.CurrentGame Is Nothing OrElse
-            (Main.Instance.CurrentGame IsNot Nothing AndAlso
-             Main.Instance.CurrentGame.Status <> Game.GameStatus.Setup) Then
+        If Game.CurrentGame Is Nothing OrElse
+            (Game.CurrentGame IsNot Nothing AndAlso
+             Game.CurrentGame.Status <> Game.GameStatus.Setup) Then
             ' User input will dictate our movement.
             If ManualControlPlayerOne Then
                 speed = ManualControl(KeyboardState.IsKeyPressed(Keys.RControlKey),
@@ -2242,7 +2242,7 @@ Public Class Pony
         Dim distance As Double
         If hasDestination AndAlso
             ((Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
-             (Main.Instance.CurrentGame IsNot Nothing AndAlso Main.Instance.CurrentGame.Status = Game.GameStatus.Setup)) Then
+             (Game.CurrentGame IsNot Nothing AndAlso Game.CurrentGame.Status = Game.GameStatus.Setup)) Then
             ' A destination has been specified and the pony should head there.
             distance = Vector2.Distance(CenterLocation, Destination)
             ' Avoid division by zero.
@@ -2352,7 +2352,7 @@ Public Class Pony
 
         ' TODO: Refactor and extract.
         'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
-        '    Main.Instance.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
+        '    Game.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
         '    Not IsPonyInBox(newTopLeftLocation, Game.Position.Allowed_Area)
         Dim playingGameAndOutOfBounds = False
 
@@ -2424,7 +2424,7 @@ Public Class Pony
                                      (CurrentBehavior.AutoSelectImagesOnFollow OrElse
                                       CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
                                       CurrentBehavior.FollowStoppedBehavior IsNot Nothing)) OrElse
-                              (Main.Instance.CurrentGame IsNot Nothing AndAlso AtDestination)
+                              (Game.CurrentGame IsNot Nothing AndAlso AtDestination)
             Paint(useVisualOverride)
             AddUpdateRecord("Standard paint. VisualOverride: ", useVisualOverride.ToString())
 
@@ -2829,7 +2829,6 @@ Public Class Pony
 
         For Each effect In effectsToRemove
             Me.ActiveEffects.Remove(effect)
-            Main.Instance.DeadEffects.Add(effect)
         Next
 
     End Sub

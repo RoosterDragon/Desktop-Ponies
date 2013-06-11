@@ -21,7 +21,7 @@ Public Class NewSpeechDialog
 
         End If
 
-        Dim filename = m_editor.Get_Filename(Sound_Textbox.Text)
+        Dim filename = m_editor.GetFilename(Sound_Textbox.Text)
 
 
         Dim new_speech As New Behavior.SpeakingLine(m_editor.PreviewPony.Name, _
@@ -66,7 +66,7 @@ Public Class NewSpeechDialog
         End If
 
         Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
-                                       m_editor.PreviewPony.Directory, m_editor.Get_Filename(sound_path))
+                                       m_editor.PreviewPony.Directory, m_editor.GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not IO.File.Exists(new_path) Then

@@ -7,6 +7,8 @@ Friend Module Games
         Public Const RootDirectory = "Games"
         Public Const ConfigFilename = "game.ini"
 
+        Public Shared CurrentGame As Game
+
         Public Enum BallType
             Soccer = 0 'Is pushed around and slows to a stop.  No Gravity
             Baseball = 1 'Is thrown and arcs, then slows if not caught.
@@ -307,7 +309,7 @@ Friend Module Games
                 Case GameStatus.InProgress
                     For Each team In Teams
                         For Each position In team.Positions
-                            position.DecideOnAction(Main.Instance.CurrentGame)
+                            position.DecideOnAction(Game.CurrentGame)
                             position.PushBackOverlappingPonies(allPlayers)
                             'Position.Player.Update(Pony.CurrentAnimator.ElapsedTime)
                         Next
@@ -923,7 +925,7 @@ Friend Module Games
 
             Function Get_OtherTeam_Goal() As GoalArea
 
-                For Each goal In Main.Instance.CurrentGame.goals
+                For Each goal In Game.CurrentGame.goals
                     If goal.TeamNumber <> TeamNumber Then
                         Return goal
                     End If
@@ -935,7 +937,7 @@ Friend Module Games
 
             Function Get_Team_Goal() As GoalArea
 
-                For Each goal In Main.Instance.CurrentGame.goals
+                For Each goal In Game.CurrentGame.goals
                     If goal.TeamNumber = TeamNumber Then
                         Return goal
                     End If
@@ -1004,7 +1006,7 @@ Friend Module Games
 
             Sub Bounce_Ball(ball As Ball, speed As Double, kicker As Position, line As String)
 
-                If Main.Instance.CurrentGame.Name = "Ping Pong Pony" Then
+                If Game.CurrentGame.Name = "Ping Pong Pony" Then
                     'avoid boucing the ball back into our own goal.
                     If Not IsNothing(ball.LastHandledBy) AndAlso ReferenceEquals(ball.LastHandledBy, Me) Then
                         Exit Sub
@@ -1014,7 +1016,7 @@ Friend Module Games
                 Speak(line)
 
                 Dim angle As Double
-                Dim gamescreen = Main.Instance.CurrentGame.GameScreen
+                Dim gamescreen = Game.CurrentGame.GameScreen
 
                 If ball.Handler.Diagonal < (Math.PI / 2) OrElse ball.Handler.Diagonal > (3 / 2) * Math.PI Then
                     'ball is going to the right, it will 'bounce' to the left.
@@ -1160,7 +1162,7 @@ Friend Module Games
                 Dim change = New Size(xchange, ychange)
                 Dim new_location = pony1.TopLeftLocation + change
 
-                If pony1.IsPonyOnScreen(new_location, Main.Instance.CurrentGame.GameScreen) AndAlso
+                If pony1.IsPonyOnScreen(new_location, Game.CurrentGame.GameScreen) AndAlso
                     (Not allowed_area.HasValue OrElse Pony.IsPonyInBox(new_location, allowed_area.Value)) Then
                     pony1.TopLeftLocation = new_location
                 End If
@@ -1193,7 +1195,7 @@ Friend Module Games
                     End If
 
                     Dim open = True
-                    For Each other_position As Position In Main.Instance.CurrentGame.allPlayers
+                    For Each other_position As Position In Game.CurrentGame.allPlayers
                         If other_position.Team.Name = Me.Team.Name Then
                             Continue For
                         End If
@@ -1220,7 +1222,7 @@ Friend Module Games
 
             Sub SpeedOverride(enable As Boolean)
                 If enable Then
-                    Player.SpeedOverride = If(Main.Instance.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
+                    Player.SpeedOverride = If(Game.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
                 Else
                     Player.SpeedOverride = Nothing
                 End If

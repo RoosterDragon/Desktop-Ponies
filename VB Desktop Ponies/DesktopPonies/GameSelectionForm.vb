@@ -1,10 +1,10 @@
 ﻿Imports System.Globalization
 
 Public Class GameSelectionForm
-
-    Dim team1 As Game.Team = Nothing
-    Dim team2 As Game.Team = Nothing
-    Dim game As Game = Nothing
+    Private games As IList(Of Game)
+    Private game As Game
+    Private team1 As Game.Team
+    Private team2 As Game.Team
 
     Public Sub New()
         InitializeComponent()
@@ -19,6 +19,16 @@ Public Class GameSelectionForm
         Enabled = False
         Update()
 
+        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(Options.InstallLocation, game.RootDirectory))
+        games = New List(Of Game)(gameDirectories.Length)
+        For Each gameDirectory In gameDirectories
+            Try
+                games.Add(New Game(gameDirectory))
+            Catch ex As Exception
+                My.Application.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
+            End Try
+        Next
+
         'add all possible ponies to the selection window.
 
         MonitorComboBox.Items.AddRange(Screen.AllScreens.Select(Function(screen) screen.DeviceName).ToArray())
@@ -26,15 +36,13 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Dim pony_image_list As New ImageList()
-        pony_image_list.ImageSize = New Size(75, 75)
-
+        Dim ponyImageList As New ImageList() With {.ImageSize = New Size(75, 75)}
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-            pony_image_list.Images.Add(CType(ponyPanel.GetPonyImage(0).Image.Clone(), Bitmap))
+            ponyImageList.Images.Add(CType(ponyPanel.GetPonyImage(0).Image.Clone(), Bitmap))
         Next
 
-        PonyList.LargeImageList = pony_image_list
-        PonyList.SmallImageList = pony_image_list
+        PonyList.LargeImageList = ponyImageList
+        PonyList.SmallImageList = ponyImageList
 
         Dim ponycount As Integer = 0
         For Each Pony In Main.Instance.SelectablePonies
@@ -47,18 +55,16 @@ Public Class GameSelectionForm
         'do the same for the game list
         GameList.Items.Clear()
 
-        Dim game_image_list As New ImageList()
-        game_image_list.ImageSize = New Size(75, 75)
-
-        For Each game As Game In Main.Instance.games
-            game_image_list.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImagePath))
+        Dim gameImageList As New ImageList() With {.ImageSize = New Size(75, 75)}
+        For Each game As Game In games
+            gameImageList.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImagePath))
         Next
 
-        GameList.LargeImageList = game_image_list
-        GameList.SmallImageList = game_image_list
+        GameList.LargeImageList = gameImageList
+        GameList.SmallImageList = gameImageList
 
         Dim gamecount As Integer = 0
-        For Each game As Game In Main.Instance.games
+        For Each game As Game In games
             GameList.Items.Add(New ListViewItem(game.Name, gamecount))
             gamecount += 1
         Next
@@ -74,7 +80,7 @@ Public Class GameSelectionForm
 
         If GameList.SelectedIndices.Count = 0 Then Exit Sub
 
-        If Not IsNothing(game) AndAlso game.Name <> Main.Instance.games(GameList.SelectedIndices(0)).Name Then
+        If Not IsNothing(game) AndAlso game.Name <> games(GameList.SelectedIndices(0)).Name Then
             GameTeam1.TeamPanel.Controls.Clear()
             GameTeam2.TeamPanel.Controls.Clear()
             For Each position In team1.Positions
@@ -87,7 +93,7 @@ Public Class GameSelectionForm
             team2 = Nothing
         End If
 
-        game = Main.Instance.games(GameList.SelectedIndices(0))
+        game = games(GameList.SelectedIndices(0))
 
         GameDescriptionLabel.Text = game.Name & ": " & game.Description
 
@@ -308,7 +314,7 @@ Public Class GameSelectionForm
         game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
 
         Me.DialogResult = DialogResult.OK
-        Main.Instance.CurrentGame = game
+        Game.CurrentGame = game
     End Sub
 
     Private Sub SetStage(stage As Byte)

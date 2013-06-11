@@ -13,8 +13,8 @@ Public Class DesktopPonyAnimator
     Private draggedEffect As Effect
     Private draggingPonyOrEffect As Boolean
     Private draggedPonyWasSleeping As Boolean
-    Private poniesToRemove As New List(Of Pony)
     Private cursorPosition As Point
+    Friend ReadOnly ActiveSounds As New List(Of Object)()
 
     Private controlForm As DesktopControlForm
 
@@ -26,7 +26,7 @@ Public Class DesktopPonyAnimator
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
     ''' </summary>
     Private zOrder As Comparison(Of ISprite) = Function(a, b)
-                                                   If Main.Instance.CurrentGame IsNot Nothing Then
+                                                   If Game.CurrentGame IsNot Nothing Then
                                                        Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
                                                        Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
                                                        If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
@@ -120,77 +120,59 @@ Public Class DesktopPonyAnimator
         If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then ReturnToMenu()
 
         Pony.CursorLocation = Viewer.CursorPosition
-        With Main.Instance
-            If Reference.InScreensaverMode Then
-                'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
-                If cursorPosition.IsEmpty Then
-                    cursorPosition = Cursor.Position
-                End If
-
-                If cursorPosition <> Cursor.Position Then
-                    Finish()
-                    .SmartInvoke(AddressOf Main.Instance.Close)
-                    Exit Sub
-                End If
+        If Reference.InScreensaverMode Then
+            'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
+            If cursorPosition.IsEmpty Then
+                cursorPosition = Cursor.Position
             End If
 
-            poniesToRemove.Clear()
-
-            For Each sprite In Sprites
-                Dim pony = TryCast(sprite, Pony)
-                If pony Is Nothing Then Continue For
-                If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
-                    poniesToRemove.Add(pony)
-                End If
-            Next
-
-            For Each Pony In poniesToRemove
-                RemovePony(Pony)
-            Next
-
-            If Not IsNothing(.CurrentGame) Then
-                .CurrentGame.Update()
+            If cursorPosition <> Cursor.Position Then
+                Finish()
+                Main.Instance.SmartInvoke(AddressOf Main.Instance.Close)
+                Exit Sub
             End If
+        End If
 
-            For Each sprite In Sprites
-                Dim effect = TryCast(sprite, Effect)
-                If effect Is Nothing Then Continue For
-                If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
-                    effect.OwningPony.ActiveEffects.Remove(effect)
-                    Sprites.Remove(effect)
-                    .DeadEffects.Add(effect)
-                End If
-            Next
-
-            If .DeadEffects.Count > 0 Then
-                Dim toRemove As New List(Of Effect)(.DeadEffects.Count)
-                For Each effect In .DeadEffects
-                    If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
-                        toRemove.Add(effect)
-                    End If
-                Next
-                For Each effect In toRemove
-                    .DeadEffects.Remove(effect)
-                Next
+        Dim poniesRemoved = False
+        For Each sprite In Sprites
+            Dim pony = TryCast(sprite, Pony)
+            If pony Is Nothing Then Continue For
+            If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
+                RemovePonyOnly(pony)
+                poniesRemoved = True
             End If
+        Next
+        If poniesRemoved Then ReinitializeInteractions()
 
-            If Reference.DirectXSoundAvailable Then
-                .CleanupSounds()
+        If Not IsNothing(Game.CurrentGame) Then
+            Game.CurrentGame.Update()
+        End If
+
+        For Each sprite In Sprites
+            Dim effect = TryCast(sprite, Effect)
+            If effect Is Nothing Then Continue For
+            If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
+                effect.OwningPony.ActiveEffects.Remove(effect)
+                Sprites.Remove(effect)
             End If
+        Next
 
-            For Each sprite In Sprites
-                Dim house = TryCast(sprite, House)
-                If house Is Nothing Then Continue For
-                house.Cycle(ElapsedTime)
-            Next
+        If Reference.DirectXSoundAvailable Then
+            CleanupSounds()
+        End If
 
-            If Reference.InPreviewMode Then
-                Pony.PreviewWindowRectangle = Main.Instance.GetPreviewWindowRectangle()
-            End If
+        For Each sprite In Sprites
+            Dim house = TryCast(sprite, House)
+            If house Is Nothing Then Continue For
+            house.Cycle(ElapsedTime)
+        Next
 
-            MyBase.Update()
-            Sprites.Sort(zOrder)
-        End With
+        If Reference.InPreviewMode Then
+            Pony.PreviewWindowRectangle = Main.Instance.GetPreviewWindowRectangle()
+        End If
+
+        MyBase.Update()
+        Sprites.Sort(zOrder)
 #If DEBUG Then
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
@@ -198,6 +180,25 @@ Public Class DesktopPonyAnimator
             countSinceLastDebug = 0
         End If
 #End If
+    End Sub
+
+    Private Sub CleanupSounds()
+        Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
+
+        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
+            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
+                sound.CurrentPosition >= sound.Duration Then
+                sound.Dispose()
+                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
+                soundsToRemove.AddLast(sound)
+            End If
+        Next
+
+        If soundsToRemove IsNot Nothing Then
+            For Each sound In soundsToRemove
+                ActiveSounds.Remove(sound)
+            Next
+        End If
     End Sub
 
 #If DEBUG Then
@@ -437,13 +438,21 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Friend Sub RemovePony(pony As Pony)
+        RemovePonyOnly(pony)
+        ReinitializeInteractions()
+    End Sub
+
+    Private Sub RemovePonyOnly(pony As Pony)
         Sprites.Remove(pony)
-        For Each other_pony In Sprites.OfType(Of Pony)()
-            'we need to set up interactions again to account for removed ponies.
-            other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-        Next
         For Each effect In pony.ActiveEffects
             Sprites.Remove(effect)
+        Next
+    End Sub
+
+    Private Sub ReinitializeInteractions()
+        Dim ponies = Sprites.OfType(Of Pony)()
+        For Each pony In ponies
+            pony.InitializeInteractions(ponies)
         Next
     End Sub
 

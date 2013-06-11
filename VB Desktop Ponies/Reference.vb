@@ -12,7 +12,10 @@ Public NotInheritable Class Reference
             Return _directXSoundAvailable
         End Get
     End Property
-
+    ''' <summary>
+    ''' Are ponies currently walking around the desktop?
+    ''' </summary>
+    Public Shared Property PoniesHaveLaunched As Boolean
     Public Shared Property AutoStarted As Boolean
     Public Shared Property InScreensaverMode As Boolean
     Public Shared Property InPreviewMode As Boolean

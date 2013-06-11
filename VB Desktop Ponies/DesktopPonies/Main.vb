@@ -20,18 +20,8 @@ Public Class Main
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)
     Friend SelectablePonies As New List(Of PonyBase)
-    Friend ReadOnly DeadEffects As New List(Of Effect)
-    Friend ReadOnly ActiveSounds As New List(Of Object)
     Friend ReadOnly HouseBases As New List(Of HouseBase)
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
-
-    ''' <summary>
-    ''' Are ponies currently walking around the desktop?
-    ''' </summary>
-    Friend PoniesHaveLaunched As Boolean
-
-    Friend ReadOnly games As New List(Of Game)
-    Friend CurrentGame As Game
 
     Private tempFilterOptions As String()
 
@@ -448,7 +438,7 @@ Public Class Main
 
         Reference.InPreviewMode = True
         Me.Visible = False
-        Using form = New PonyEditor()
+        Using form = New PonyEditor(SelectablePonies)
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
@@ -463,7 +453,7 @@ Public Class Main
                 ResetPonySelection()
                 LoadingProgressBar.Visible = True
                 '(We need to reload everything to account for anything changed while in the editor)
-                Main_Load(Nothing, Nothing)
+                Main_Load(Me, EventArgs.Empty)
             End If
         End Using
 
@@ -475,25 +465,12 @@ Public Class Main
 
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
-            games.Clear()
-            Dim gameDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, Game.RootDirectory))
-
-            For Each gameDirectory In gameDirectories
-                Try
-                    Dim config_file_name = Path.Combine(gameDirectory, Game.ConfigFilename)
-                    Dim new_game As New Game(gameDirectory)
-                    games.Add(new_game)
-                Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
-                End Try
-            Next
-
             Me.Visible = False
             Using gameForm As New GameSelectionForm()
                 If gameForm.ShowDialog() = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()
-                    CurrentGame.Setup()
+                    Game.CurrentGame.Setup()
                     animator.Start()
                 Else
                     If Me.IsDisposed = False Then
@@ -1001,7 +978,7 @@ Public Class Main
         oldLoader.Dispose()
 
         If Not e.Cancelled Then
-            PoniesHaveLaunched = True
+            Reference.PoniesHaveLaunched = True
             TempSaveCounts()
             Visible = False
             animator.Start()
@@ -1026,12 +1003,12 @@ Public Class Main
 
     Friend Sub PonyShutdown()
         If Not IsNothing(animator) Then animator.Finish()
-        PoniesHaveLaunched = False
+        Reference.PoniesHaveLaunched = False
         If Not IsNothing(animator) Then animator.Clear()
 
-        If Not IsNothing(CurrentGame) Then
-            CurrentGame.CleanUp()
-            CurrentGame = Nothing
+        If Not IsNothing(Game.CurrentGame) Then
+            Game.CurrentGame.CleanUp()
+            Game.CurrentGame = Nothing
         End If
 
         If screensaverForms IsNot Nothing Then
@@ -1081,25 +1058,6 @@ Public Class Main
         Next
         PonySelectionPanel.Controls.Clear()
         PonySelectionPanel.ResumeLayout()
-    End Sub
-
-    Friend Sub CleanupSounds()
-        Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
-
-        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
-            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
-                sound.CurrentPosition >= sound.Duration Then
-                sound.Dispose()
-                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
-                soundsToRemove.AddLast(sound)
-            End If
-        Next
-
-        If soundsToRemove IsNot Nothing Then
-            For Each sound In soundsToRemove
-                ActiveSounds.Remove(sound)
-            Next
-        End If
     End Sub
 
     Friend Sub ResetToDefaultFilterCategories()

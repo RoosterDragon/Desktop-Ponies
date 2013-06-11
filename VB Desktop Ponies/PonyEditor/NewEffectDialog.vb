@@ -18,7 +18,7 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        For Each effect In PonyEditor.get_effect_list()
+        For Each effect In m_editor.get_effect_list()
             If String.Equals(effect.Name, Name_Textbox.Text, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Effect names must be unique.  Effect '" & Name_Textbox.Text & "' already exists.  Please select a different name.")
                 Exit Sub

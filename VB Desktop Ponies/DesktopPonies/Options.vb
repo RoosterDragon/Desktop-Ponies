@@ -195,7 +195,7 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadPonyCounts()
-        If Main.Instance.PoniesHaveLaunched Then Exit Sub
+        If Reference.PoniesHaveLaunched Then Exit Sub
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
             If PonyCounts.ContainsKey(ponyPanel.PonyName.Text) Then
@@ -207,7 +207,7 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadCustomTags()
-        If Main.Instance.PoniesHaveLaunched Then Exit Sub
+        If Reference.PoniesHaveLaunched Then Exit Sub
 
         Main.Instance.ResetToDefaultFilterCategories()
         Main.Instance.FilterOptionsBox.Items.AddRange(CustomTags.ToArray())

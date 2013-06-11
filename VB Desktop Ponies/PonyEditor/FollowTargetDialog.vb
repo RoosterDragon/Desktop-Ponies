@@ -94,7 +94,7 @@
 
         Follow_ComboBox.Items.Clear()
 
-        Dim effects_list = PonyEditor.get_effect_list()
+        Dim effects_list = m_editor.get_effect_list()
 
         For Each Available_Pony In Main.Instance.SelectablePonies
             Follow_ComboBox.Items.Add(Available_Pony.Directory)
@@ -237,7 +237,7 @@
             End If
         Next
 
-        For Each effect In PonyEditor.get_effect_list()
+        For Each effect In m_editor.get_effect_list()
             If effect.Name = string_to_effectname(CStr(Follow_ComboBox.SelectedItem)) Then
                 Try
                     pony_thumbnail = Image.FromFile(effect.RightImagePath)
@@ -250,9 +250,8 @@
         Next
     End Sub
 
-
-    Private Shared Function string_to_effectname(name As String) As String
-        For Each effect In PonyEditor.get_effect_list()
+    Private Function string_to_effectname(name As String) As String
+        For Each effect In m_editor.get_effect_list()
             If (effect.ParentPonyBase.Name & "'s " & effect.Name) = name Then
                 Return effect.Name
             End If
