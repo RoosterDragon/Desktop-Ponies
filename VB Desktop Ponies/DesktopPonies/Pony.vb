@@ -502,7 +502,7 @@ Public Class PonyBase
                     'movements are bytes so that they can be composite:
                     '"diagonal" means vertical AND horizontal at the same time.
                     'See the definition in the pony class for more information.
-                    Select Case Trim(LCase(columns(Main.BehaviorOption.MovementType)))
+                    Select Case Trim(LCase(columns(BehaviorOption.MovementType)))
                         Case "none"
                             movement = AllowedMoves.None
                         Case "horizontal_only"
@@ -526,11 +526,11 @@ Public Class PonyBase
                         Case "dragged"
                             movement = AllowedMoves.Dragged
                         Case Else
-                            MessageBox.Show("Unknown movement type: " & columns(Main.BehaviorOption.MovementType) & ControlChars.NewLine &
+                            MessageBox.Show("Unknown movement type: " & columns(BehaviorOption.MovementType) & ControlChars.NewLine &
                                             "Valid movement types: none, horizontal_only, vertical_only, horizontal_vertical, " &
                                             "diagonal_only, diagonal_horizontal, diagonal_vertical, all, mouseover, sleep, dragged" &
                                             vbNewLine &
-                                            "Skipping behavior " & columns(Main.BehaviorOption.Name) & " for " & Name)
+                                            "Skipping behavior " & columns(BehaviorOption.Name) & " for " & Name)
                             Continue For
                     End Select
 
@@ -551,48 +551,48 @@ Public Class PonyBase
                     Dim dont_repeat_image_animations As Boolean = False
                     Dim group As Integer = 0
 
-                    If UBound(columns) > Main.BehaviorOption.MovementType Then
-                        linked_behavior = Trim(columns(Main.BehaviorOption.LinkedBehavior))
-                        speak_start = Trim(columns(Main.BehaviorOption.SpeakingStart))
-                        speak_end = Trim(columns(Main.BehaviorOption.SpeakingEnd))
-                        skip = Boolean.Parse(Trim(columns(Main.BehaviorOption.Skip)))
-                        xcoord = Integer.Parse(columns(Main.BehaviorOption.XCoord), CultureInfo.InvariantCulture)
-                        ycoord = Integer.Parse(columns(Main.BehaviorOption.YCoord), CultureInfo.InvariantCulture)
-                        follow = Trim(columns(Main.BehaviorOption.ObjectToFollow))
-                        If UBound(columns) >= Main.BehaviorOption.AutoSelectImages Then
-                            auto_select_images = Boolean.Parse(Trim(columns(Main.BehaviorOption.AutoSelectImages)))
+                    If UBound(columns) > BehaviorOption.MovementType Then
+                        linked_behavior = Trim(columns(BehaviorOption.LinkedBehavior))
+                        speak_start = Trim(columns(BehaviorOption.SpeakingStart))
+                        speak_end = Trim(columns(BehaviorOption.SpeakingEnd))
+                        skip = Boolean.Parse(Trim(columns(BehaviorOption.Skip)))
+                        xcoord = Integer.Parse(columns(BehaviorOption.XCoord), CultureInfo.InvariantCulture)
+                        ycoord = Integer.Parse(columns(BehaviorOption.YCoord), CultureInfo.InvariantCulture)
+                        follow = Trim(columns(BehaviorOption.ObjectToFollow))
+                        If UBound(columns) >= BehaviorOption.AutoSelectImages Then
+                            auto_select_images = Boolean.Parse(Trim(columns(BehaviorOption.AutoSelectImages)))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.FollowStoppedBehavior Then
-                            follow_stopped_behavior = Trim(columns(Main.BehaviorOption.FollowStoppedBehavior))
+                        If UBound(columns) >= BehaviorOption.FollowStoppedBehavior Then
+                            follow_stopped_behavior = Trim(columns(BehaviorOption.FollowStoppedBehavior))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.FollowMovingBehavior Then
-                            follow_moving_behavior = Trim(columns(Main.BehaviorOption.FollowMovingBehavior))
+                        If UBound(columns) >= BehaviorOption.FollowMovingBehavior Then
+                            follow_moving_behavior = Trim(columns(BehaviorOption.FollowMovingBehavior))
                         End If
-                        If UBound(columns) >= Main.BehaviorOption.LeftImageCenter Then
-                            Dim center = Split(Trim(columns(Main.BehaviorOption.RightImageCenter)), ",")
+                        If UBound(columns) >= BehaviorOption.LeftImageCenter Then
+                            Dim center = Split(Trim(columns(BehaviorOption.RightImageCenter)), ",")
                             right_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
                                                            Integer.Parse(center(1), CultureInfo.InvariantCulture))
-                            center = Split(Trim(columns(Main.BehaviorOption.LeftImageCenter)), ",")
+                            center = Split(Trim(columns(BehaviorOption.LeftImageCenter)), ",")
                             left_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
                                                           Integer.Parse(center(1), CultureInfo.InvariantCulture))
                         End If
 
-                        If UBound(columns) >= Main.BehaviorOption.DoNotRepeatImageAnimations Then
-                            dont_repeat_image_animations = Boolean.Parse(Trim(columns(Main.BehaviorOption.DoNotRepeatImageAnimations)))
+                        If UBound(columns) >= BehaviorOption.DoNotRepeatImageAnimations Then
+                            dont_repeat_image_animations = Boolean.Parse(Trim(columns(BehaviorOption.DoNotRepeatImageAnimations)))
                         End If
 
-                        If UBound(columns) >= Main.BehaviorOption.Group Then
-                            group = Integer.Parse(columns(Main.BehaviorOption.Group), CultureInfo.InvariantCulture)
+                        If UBound(columns) >= BehaviorOption.Group Then
+                            group = Integer.Parse(columns(BehaviorOption.Group), CultureInfo.InvariantCulture)
                         End If
                     End If
 
-                    AddBehavior(columns(Main.BehaviorOption.Name),
-                                         Double.Parse(columns(Main.BehaviorOption.Probability), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.MaxDuration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.MinDuration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(Main.BehaviorOption.Speed), CultureInfo.InvariantCulture),
-                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.RightImagePath))),
-                                         Path.Combine(fullDirectory, Trim(columns(Main.BehaviorOption.LeftImagePath))),
+                    AddBehavior(columns(BehaviorOption.Name),
+                                         Double.Parse(columns(BehaviorOption.Probability), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(BehaviorOption.MaxDuration), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(BehaviorOption.MinDuration), CultureInfo.InvariantCulture),
+                                         Double.Parse(columns(BehaviorOption.Speed), CultureInfo.InvariantCulture),
+                                         Path.Combine(fullDirectory, Trim(columns(BehaviorOption.RightImagePath))),
+                                         Path.Combine(fullDirectory, Trim(columns(BehaviorOption.LeftImagePath))),
                                          movement, linked_behavior, speak_start, speak_end, skip, xcoord, ycoord,
                                          follow, auto_select_images, follow_stopped_behavior, follow_moving_behavior,
                                          right_image_center, left_image_center, dont_repeat_image_animations, group)
@@ -4012,6 +4012,31 @@ Public Enum AllowedMoves As Byte
     MouseOver = 8
     Sleep = 16
     Dragged = 32
+End Enum
+
+Public Enum BehaviorOption
+    Name = 1
+    Probability = 2
+    MaxDuration = 3
+    MinDuration = 4
+    Speed = 5 'specified in pixels per tick of the timer
+    RightImagePath = 6
+    LeftImagePath = 7
+    MovementType = 8
+    LinkedBehavior = 9
+    SpeakingStart = 10
+    SpeakingEnd = 11
+    Skip = 12 'Should we skip this behavior when considering ones to randomly choose (part of an interaction/chain?)
+    XCoord = 13  'used when following/moving to a point on the screen.
+    YCoord = 14
+    ObjectToFollow = 15
+    AutoSelectImages = 16
+    FollowStoppedBehavior = 17
+    FollowMovingBehavior = 18
+    RightImageCenter = 19
+    LeftImageCenter = 20
+    DoNotRepeatImageAnimations = 21
+    Group = 22
 End Enum
 
 Public Module EnumConversions

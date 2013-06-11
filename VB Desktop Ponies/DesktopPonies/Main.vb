@@ -45,31 +45,6 @@ Public Class Main
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
 #End Region
 
-    Friend Enum BehaviorOption
-        Name = 1
-        Probability = 2
-        MaxDuration = 3
-        MinDuration = 4
-        Speed = 5 'specified in pixels per tick of the timer
-        RightImagePath = 6
-        LeftImagePath = 7
-        MovementType = 8
-        LinkedBehavior = 9
-        SpeakingStart = 10
-        SpeakingEnd = 11
-        Skip = 12 'Should we skip this behavior when considering ones to randomly choose (part of an interaction/chain?)
-        XCoord = 13  'used when following/moving to a point on the screen.
-        YCoord = 14
-        ObjectToFollow = 15
-        AutoSelectImages = 16
-        FollowStoppedBehavior = 17
-        FollowMovingBehavior = 18
-        RightImageCenter = 19
-        LeftImageCenter = 20
-        DoNotRepeatImageAnimations = 21
-        Group = 22
-    End Enum
-
 #Region "Initialization"
     Public Sub New()
         loadWatch.Start()

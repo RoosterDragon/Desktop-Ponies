@@ -25,27 +25,18 @@ Public Class DesktopPonyAnimator
     ''' <summary>
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
     ''' </summary>
-    Private zOrder As Comparison(Of ISprite) = New Comparison(Of ISprite)(
-                                                               Function(a, b)
-                                                                   If Main.Instance.CurrentGame IsNot Nothing Then
-                                                                       Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
-                                                                       Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
-                                                                       If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
-                                                                   End If
-                                                                   Dim aIsHouse = TypeOf a Is House
-                                                                   Dim bIsHouse = TypeOf b Is House
-                                                                   If aIsHouse Xor bIsHouse Then Return If(aIsHouse, -1, 1)
-                                                                   Return a.Region.Bottom - b.Region.Bottom
-                                                               End Function)
+    Private zOrder As Comparison(Of ISprite) = Function(a, b)
+                                                   If Main.Instance.CurrentGame IsNot Nothing Then
+                                                       Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
+                                                       Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
+                                                       If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
+                                                   End If
+                                                   Dim aIsHouse = TypeOf a Is House
+                                                   Dim bIsHouse = TypeOf b Is House
+                                                   If aIsHouse Xor bIsHouse Then Return If(aIsHouse, -1, 1)
+                                                   Return a.Region.Bottom - b.Region.Bottom
+                                               End Function
 
-    ''' <summary>
-    ''' Initializes a new instance of the DesktopPonyAnimator class.
-    ''' </summary>
-    ''' <param name="spriteViewer">The interface used to display the ponies.</param>
-    ''' <param name="spriteCollection">The initial collection of ponies to be displayed.</param>
-    ''' <remarks>Manages a collection of ponies. I have added some skeleton functionality as an example. The base class
-    ''' SpriteManager.AnimationLoopBase handles the animation loop and other fanciness. You can add extra functionality
-    ''' on top of this class. For example, right-click context menus and the like.</remarks>
     Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite), createDesktopControlForm As Boolean)
         MyBase.New(spriteViewer, spriteCollection)
         MaximumFramesPerSecond = 30
@@ -228,7 +219,7 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub CreatePonyMenu()
-        Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
+        Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
         menuItems.AddLast(
             New SimpleContextMenuItem(
                 Nothing,
