@@ -113,7 +113,7 @@ Public Class NewBehaviorDialog
                                              speed,
                                              right_image_path,
                                              left_image_path,
-                                             PonyEditor.String_ToMovement(CStr(Movement_Combobox.SelectedItem)),
+                                             AllowedMovesFromString(CStr(Movement_Combobox.SelectedItem)),
                                              linked_behavior,
                                              start_line,
                                              end_line,

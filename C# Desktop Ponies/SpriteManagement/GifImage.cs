@@ -1712,7 +1712,7 @@
 
                     #region Interpret special codes.
                     // Indicates the end of input data.
-                    if ((code > available) || (code == endOfInformation))
+                    if (code > available || code == endOfInformation)
                         break;
 
                     // A clear code means the decoder dictionary should be reset.

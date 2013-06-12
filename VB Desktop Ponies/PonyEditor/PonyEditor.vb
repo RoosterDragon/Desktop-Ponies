@@ -6,6 +6,7 @@ Public Class PonyEditor
     Private pe_animator As PonyEditorAnimator
     Private pe_interface As ISpriteCollectionView
 
+    Private ponyBases As PonyBase()
     Private ponyImageList As ImageList
     Private infoGrids As PonyInfoGrid()
     Private loaded As Boolean
@@ -57,19 +58,12 @@ Public Class PonyEditor
     ''' </summary>
     Private Class PonyInfoGrid
         Public Property Grid As DataGridView
-        Public Property Slot As Integer
-        Public Property SwapButton As Button
         Public Property SortColumn As DataGridViewColumn
         Public Property SortOrder As SortOrder
-
-        Sub New(_grid As DataGridView, _slot As Integer, _swapButton As Button)
+        Public Sub New(_grid As DataGridView)
             Grid = _grid
-            Slot = _slot
-            SwapButton = _swapButton
         End Sub
     End Class
-
-    Private ponyBases As PonyBase()
 
     Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
         Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection")
@@ -90,10 +84,8 @@ Public Class PonyEditor
                 colInteractionInteractWith.Items.Add(value.ToString())
             Next
 
-            infoGrids = {New PonyInfoGrid(PonyBehaviorsGrid, 0, NewBehaviorButton),
-                     New PonyInfoGrid(PonySpeechesGrid, 1, NewSpeechButton),
-                     New PonyInfoGrid(PonyEffectsGrid, 2, NewEffectButton),
-                     New PonyInfoGrid(PonyInteractionsGrid, 3, NewInteractionButton)}
+            infoGrids = {New PonyInfoGrid(BehaviorsGrid), New PonyInfoGrid(SpeechesGrid),
+                         New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}
 
             'add all possible ponies to the selection window.
             Const size = 50
@@ -248,21 +240,21 @@ Public Class PonyEditor
         End Sub
     End Structure
 
-    Friend Sub LoadParameters(pony As Pony)
+    Private Sub LoadParameters(pony As Pony)
         Try
             If alreadyUpdating Then Exit Sub
 
             alreadyUpdating = True
 
-            PonyBehaviorsGrid.SuspendLayout()
-            PonyEffectsGrid.SuspendLayout()
-            PonyInteractionsGrid.SuspendLayout()
-            PonySpeechesGrid.SuspendLayout()
+            BehaviorsGrid.SuspendLayout()
+            EffectsGrid.SuspendLayout()
+            InteractionsGrid.SuspendLayout()
+            SpeechesGrid.SuspendLayout()
 
-            PonyBehaviorsGrid.Rows.Clear()
-            PonyEffectsGrid.Rows.Clear()
-            PonyInteractionsGrid.Rows.Clear()
-            PonySpeechesGrid.Rows.Clear()
+            BehaviorsGrid.Rows.Clear()
+            EffectsGrid.Rows.Clear()
+            InteractionsGrid.Rows.Clear()
+            SpeechesGrid.Rows.Clear()
 
             PonyName.Text = pony.Name
 
@@ -286,7 +278,7 @@ Public Class PonyEditor
                     unnamedCounter += 1
                 End If
 
-                PonySpeechesGrid.Rows.Add(
+                SpeechesGrid.Rows.Add(
                     speech.Name, speech.Name, speech.Group, pony.GetBehaviorGroupName(speech.Group), speech.Text,
                     GetFilename(speech.SoundFile), (Not speech.Skip).ToString())
                 colBehaviorStartSpeech.Items.Add(speech.Name)
@@ -364,7 +356,7 @@ Public Class PonyEditor
                     chance = behavior.ChanceOfOccurence.ToString("P", CultureInfo.CurrentCulture)
                 End If
 
-                PonyBehaviorsGrid.Rows.Add(
+                BehaviorsGrid.Rows.Add(
                     "Run",
                     behavior.Name,
                     behavior.Name,
@@ -376,7 +368,7 @@ Public Class PonyEditor
                     behavior.Speed,
                     GetFilename(behavior.RightImagePath),
                     GetFilename(behavior.LeftImagePath),
-                    Movement_ToString(behavior.AllowedMovement),
+                    AllowedMovesToString(behavior.AllowedMovement),
                     behavior.StartLineName,
                     behavior.EndLineName,
                     followName,
@@ -387,7 +379,7 @@ Public Class PonyEditor
             Next
 
             For Each effect In PreviewPonyEffects()
-                PonyEffectsGrid.Rows.Add(
+                EffectsGrid.Rows.Add(
                     effect.Name,
                     effect.Name,
                     effect.BehaviorName,
@@ -404,7 +396,7 @@ Public Class PonyEditor
             Next
 
             For Each interaction In PreviewPony.Interactions
-                PonyInteractionsGrid.Rows.Add(
+                InteractionsGrid.Rows.Add(
                     interaction.Name,
                     interaction.Name,
                     interaction.Probability.ToString("P", CultureInfo.CurrentCulture),
@@ -472,10 +464,10 @@ Public Class PonyEditor
                     "Duplicate Names", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
 
-            PonyBehaviorsGrid.ResumeLayout()
-            PonyEffectsGrid.ResumeLayout()
-            PonyInteractionsGrid.ResumeLayout()
-            PonySpeechesGrid.ResumeLayout()
+            BehaviorsGrid.ResumeLayout()
+            EffectsGrid.ResumeLayout()
+            InteractionsGrid.ResumeLayout()
+            SpeechesGrid.ResumeLayout()
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error loading pony parameters.")
             Me.Close()
@@ -501,64 +493,6 @@ Public Class PonyEditor
         Next
 
     End Sub
-
-    Friend Shared Function String_ToMovement(movement As String) As AllowedMoves
-        Select Case movement
-            Case "None"
-                Return AllowedMoves.None
-            Case "Horizontal Only"
-                Return AllowedMoves.HorizontalOnly
-            Case "Vertical Only"
-                Return AllowedMoves.VerticalOnly
-            Case "Horizontal Vertical"
-                Return AllowedMoves.HorizontalVertical
-            Case "Diagonal Only"
-                Return AllowedMoves.DiagonalOnly
-            Case "Diagonal/horizontal"
-                Return AllowedMoves.DiagonalHorizontal
-            Case "Diagonal/Vertical"
-                Return AllowedMoves.DiagonalVertical
-            Case "All"
-                Return AllowedMoves.All
-            Case "MouseOver"
-                Return AllowedMoves.MouseOver
-            Case "Sleep"
-                Return AllowedMoves.Sleep
-            Case "Dragged"
-                Return AllowedMoves.Dragged
-            Case Else
-                Throw New ArgumentException("Invalid movement string:" & movement, "movement")
-        End Select
-    End Function
-
-    Friend Shared Function String_ToLocation(location As String) As Direction
-        Select Case location
-            Case "Top"
-                Return Direction.TopCenter
-            Case "Bottom"
-                Return Direction.BottomCenter
-            Case "Left"
-                Return Direction.MiddleLeft
-            Case "Right"
-                Return Direction.MiddleRight
-            Case "Bottom Right"
-                Return Direction.BottomRight
-            Case "Bottom Left"
-                Return Direction.BottomLeft
-            Case "Top Right"
-                Return Direction.TopRight
-            Case "Top Left"
-                Return Direction.TopLeft
-            Case "Center"
-                Return Direction.MiddleCenter
-            Case "Any"
-                Return Direction.Random
-            Case "Any-Not Center"
-                Return Direction.RandomNotCenter
-            Case Else
-                Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
-        End Select
-    End Function
 
     ''' <summary>
     ''' If we want to run a behavior that has a follow object, we can add it with this.
@@ -595,14 +529,9 @@ Public Class PonyEditor
     End Function
 
     Private Function AddEffect(name As String) As Effect
-
         Try
-
-            Dim effects_list = get_effect_list()
-
             Dim effect As Effect = Nothing
-
-            For Each listing In effects_list
+            For Each listing In GetAllEffects()
                 If String.Equals(Trim(listing.Name), Trim(name), StringComparison.OrdinalIgnoreCase) Then
                     effect = New Effect(listing, Not PreviewPony.facingRight)
                     effect.OwningPony = PreviewPony
@@ -645,10 +574,10 @@ Public Class PonyEditor
 
             Select Case grid.Name
                 Case "Pony_Effects_Grid"
-                    grid = PonyEffectsGrid
+                    grid = EffectsGrid
                     replacement = ""
                 Case "Pony_Behaviors_Grid"
-                    grid = PonyBehaviorsGrid
+                    grid = BehaviorsGrid
                     replacement = "None"
                 Case Else
                     Throw New Exception("Unhandled error for grid: " & grid.Name)
@@ -668,36 +597,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEditor_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-
-        If Not loaded Then Exit Sub
-
-        Dim slot1 As DataGridView = Nothing
-        Dim slot2 As DataGridView = Nothing
-        Dim slot3 As DataGridView = Nothing
-
-        For Each entry In infoGrids
-            Select Case entry.Slot
-                Case 1
-                    slot1 = entry.Grid
-                Case 2
-                    slot2 = entry.Grid
-                Case 3
-                    slot3 = entry.Grid
-            End Select
-        Next
-
-        slot1.Size = New Size(CInt((Me.Size.Width / 3) - 10), slot1.Size.Height)
-
-        slot2.Location = New Point(CInt((Me.Size.Width / 3) + 5), slot2.Location.Y)
-        slot2.Size = New Size(CInt((Me.Size.Width / 3) - 12), slot2.Size.Height)
-
-        slot3.Location = New Point(CInt(2 * (Me.Size.Width / 3)), slot3.Location.Y)
-        slot3.Size = New Size(CInt((Me.Size.Width / 3) - 25), slot3.Size.Height)
-
-    End Sub
-
-    Private Sub PonyBehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellClick
+    Private Sub PonyBehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellClick
 
         Try
 
@@ -705,7 +605,7 @@ Public Class PonyEditor
 
             SaveSortOrder()
 
-            Dim changed_behavior_name As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
+            Dim changed_behavior_name As String = CStr(BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
             Dim changed_behavior As Behavior = Nothing
 
             For Each behavior In PreviewPony.Behaviors
@@ -764,7 +664,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Right Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetRightImagePath(new_image_path)
-                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = GetFilename(new_image_path)
+                        BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = GetFilename(new_image_path)
                         ImageSizeCheck(changed_behavior.RightImageSize)
                     End If
                     ShowPony()
@@ -773,7 +673,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Left Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_behavior.SetLeftImagePath(new_image_path)
-                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(new_image_path)
+                        BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(new_image_path)
                         ImageSizeCheck(changed_behavior.LeftImageSize)
                     End If
                     ShowPony()
@@ -798,14 +698,14 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechesGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellClick
+    Private Sub PonySpeechesGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles SpeechesGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
 
             SaveSortOrder()
 
-            Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
+            Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
             Dim changed_speech As Behavior.SpeakingLine = Nothing
 
             For Each speech As Behavior.SpeakingLine In PreviewPonyBase.SpeakingLines
@@ -828,7 +728,7 @@ Public Class PonyEditor
                 Case colSpeechSoundFile.Index
                     HidePony()
                     changed_speech.SoundFile = SetSound()
-                    PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechSoundFile.Index).Value = changed_speech.SoundFile
+                    SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechSoundFile.Index).Value = changed_speech.SoundFile
                     changes_made_now = True
                     ShowPony()
                 Case Else
@@ -848,14 +748,14 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyEffectsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellClick
+    Private Sub PonyEffectsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles EffectsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
 
             SaveSortOrder()
 
-            Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
+            Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
             For Each effect In PreviewPonyEffects()
@@ -880,7 +780,7 @@ Public Class PonyEditor
                     Dim new_image_path As String = Add_Picture(changed_effect_name & " Right Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_effect.SetRightImagePath(new_image_path)
-                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = GetFilename(new_image_path)
+                        EffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If
                     ShowPony()
@@ -889,7 +789,7 @@ Public Class PonyEditor
                     Dim new_image_path = Add_Picture(changed_effect_name & " Left Image...")
                     If Not IsNothing(new_image_path) Then
                         changed_effect.SetLeftImagePath(new_image_path)
-                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = GetFilename(new_image_path)
+                        EffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If
                     ShowPony()
@@ -910,14 +810,14 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyInteractionsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellClick
+    Private Sub PonyInteractionsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles InteractionsGrid.CellClick
         Try
 
             If e.RowIndex < 0 Then Exit Sub
 
             SaveSortOrder()
 
-            Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
+            Dim changed_interaction_name As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
             Dim changed_interaction As Interaction = Nothing
 
             For Each interaction As Interaction In PreviewPony.Interactions
@@ -961,7 +861,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Private Sub PonyBehaviorsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyBehaviorsGrid.CellValueChanged
+    Private Sub PonyBehaviorsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellValueChanged
         If alreadyUpdating Then Return
         Try
 
@@ -969,9 +869,9 @@ Public Class PonyEditor
 
             SaveSortOrder()
 
-            Dim new_value As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
+            Dim new_value As String = CStr(BehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
-            Dim changed_behavior_name As String = CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
+            Dim changed_behavior_name As String = CStr(BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value)
             Dim changed_behavior As Behavior = Nothing
 
             For Each behavior In PreviewPony.Behaviors
@@ -993,7 +893,7 @@ Public Class PonyEditor
                     Case colBehaviorName.Index
                         If new_value = "" Then
                             MsgBox("You must give a behavior a name.  It can't be blank.")
-                            PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = changed_behavior_name
+                            BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = changed_behavior_name
                             Exit Sub
                         End If
 
@@ -1004,12 +904,12 @@ Public Class PonyEditor
                         For Each behavior In PreviewPony.Behaviors
                             If String.Equals(behavior.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Behavior names must be unique.  Behavior '" & new_value & "' already exists.")
-                                PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = changed_behavior_name
+                                BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = changed_behavior_name
                                 Exit Sub
                             End If
                         Next
                         changed_behavior.Name = new_value
-                        PonyBehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
+                        BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
                     Case colBehaviorChance.Index
                         changed_behavior.ChanceOfOccurence = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
                     Case colBehaviorMaxDuration.Index
@@ -1029,7 +929,7 @@ Public Class PonyEditor
                     Case colBehaviorSpeed.Index
                         changed_behavior.SetSpeed(Double.Parse(new_value, CultureInfo.CurrentCulture))
                     Case colBehaviorMovement.Index
-                        changed_behavior.AllowedMovement = String_ToMovement(new_value)
+                        changed_behavior.AllowedMovement = AllowedMovesFromString(new_value)
                     Case colBehaviorStartSpeech.Index
                         If new_value = "None" Then
                             changed_behavior.StartLineName = ""
@@ -1087,8 +987,8 @@ Public Class PonyEditor
 
             Catch ex As Exception
                 My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
-                                                             PonyBehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                                                             CStr(PonyBehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
+                                                             BehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(BehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             PreviewPonyBase.LinkBehaviors()
@@ -1105,7 +1005,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyEffectsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyEffectsGrid.CellValueChanged
+    Private Sub PonyEffectsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles EffectsGrid.CellValueChanged
         If alreadyUpdating Then Return
         Try
 
@@ -1113,9 +1013,9 @@ Public Class PonyEditor
 
             SaveSortOrder()
 
-            Dim new_value As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
+            Dim new_value As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
-            Dim changed_effect_name As String = CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
+            Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
             For Each effect In PreviewPonyEffects()
@@ -1136,7 +1036,7 @@ Public Class PonyEditor
                     Case colEffectName.Index
                         If new_value = "" Then
                             MsgBox("You must give an effect a name.  It can't be blank.")
-                            PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectName.Index).Value = changed_effect_name
+                            EffectsGrid.Rows(e.RowIndex).Cells(colEffectName.Index).Value = changed_effect_name
                             Exit Sub
                         End If
 
@@ -1144,16 +1044,16 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each effect In get_effect_list()
+                        For Each effect In GetAllEffects()
                             If String.Equals(effect.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Effect names must be unique.  Effect '" & new_value & "' already exists.")
-                                PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectName.Index).Value = changed_effect_name
+                                EffectsGrid.Rows(e.RowIndex).Cells(colEffectName.Index).Value = changed_effect_name
                                 Exit Sub
                             End If
                         Next
 
                         changed_effect.Name = new_value
-                        PonyEffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = new_value
+                        EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = new_value
                     Case colEffectBehavior.Index
                         For Each behavior In PreviewPony.Behaviors
                             If behavior.Name = changed_effect.BehaviorName Then
@@ -1173,13 +1073,13 @@ Public Class PonyEditor
                     Case colEffectRepeatDelay.Index
                         changed_effect.RepeatDelay = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colEffectLocationRight.Index
-                        changed_effect.PlacementDirectionRight = String_ToLocation(new_value)
+                        changed_effect.PlacementDirectionRight = DirectionFromString(new_value)
                     Case colEffectLocationLeft.Index
-                        changed_effect.PlacementDirectionLeft = String_ToLocation(new_value)
+                        changed_effect.PlacementDirectionLeft = DirectionFromString(new_value)
                     Case colEffectCenteringRight.Index
-                        changed_effect.CenteringRight = String_ToLocation(new_value)
+                        changed_effect.CenteringRight = DirectionFromString(new_value)
                     Case colEffectCenteringLeft.Index
-                        changed_effect.CenteringLeft = String_ToLocation(new_value)
+                        changed_effect.CenteringLeft = DirectionFromString(new_value)
                     Case colEffectFollowPony.Index
                         changed_effect.follow = Boolean.Parse(new_value)
                     Case colEffectDoNotRepeatAnimations.Index
@@ -1188,8 +1088,8 @@ Public Class PonyEditor
 
             Catch ex As Exception
                 My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
-                                                             PonyEffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                                                             CStr(PonyEffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
+                                                             EffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(EffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             PreviewPonyBase.LinkBehaviors()
@@ -1207,7 +1107,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonySpeechesGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonySpeechesGrid.CellValueChanged
+    Private Sub PonySpeechesGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles SpeechesGrid.CellValueChanged
         If alreadyUpdating Then Return
         Try
 
@@ -1215,9 +1115,9 @@ Public Class PonyEditor
 
             SaveSortOrder()
 
-            Dim new_value As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
+            Dim new_value As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
-            Dim changed_speech_name As String = CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
+            Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
             Dim changed_speech As Behavior.SpeakingLine = Nothing
 
             For Each speech In PreviewPonyBase.SpeakingLines
@@ -1238,7 +1138,7 @@ Public Class PonyEditor
                     Case colSpeechName.Index
                         If new_value = "" Then
                             MsgBox("You must give a speech a name, it can't be blank")
-                            PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
+                            SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
                             Exit Sub
                         End If
 
@@ -1249,12 +1149,12 @@ Public Class PonyEditor
                         For Each speechname In PreviewPonyBase.SpeakingLines
                             If String.Equals(speechname.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Speech names must be unique.  Speech '" & new_value & "' already exists.")
-                                PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
+                                SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
                                 Exit Sub
                             End If
                         Next
                         changed_speech.Name = new_value
-                        PonySpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value = new_value
+                        SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value = new_value
                     Case colSpeechText.Index
                         changed_speech.Text = new_value
                     Case colSpeechUseRandomly.Index
@@ -1265,8 +1165,8 @@ Public Class PonyEditor
 
             Catch ex As Exception
                 My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
-                                                             PonySpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                                                             CStr(PonySpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
+                                                             SpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(SpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
                 Exit Sub
             End Try
 
@@ -1285,7 +1185,7 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub PonyInteractionsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles PonyInteractionsGrid.CellValueChanged
+    Private Sub PonyInteractionsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles InteractionsGrid.CellValueChanged
         If alreadyUpdating Then Return
         Try
 
@@ -1293,9 +1193,9 @@ Public Class PonyEditor
 
             SaveSortOrder()
 
-            Dim new_value As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
+            Dim new_value As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
-            Dim changed_interaction_name As String = CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
+            Dim changed_interaction_name As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
             Dim changed_interaction As Interaction = Nothing
 
             For Each interaction In PreviewPony.Interactions
@@ -1316,7 +1216,7 @@ Public Class PonyEditor
                     Case colInteractionName.Index
                         If new_value = "" Then
                             MsgBox("You must give an interaction a name.  It can't be blank.")
-                            PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
+                            InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
                             Exit Sub
                         End If
 
@@ -1327,13 +1227,13 @@ Public Class PonyEditor
                         For Each Interaction In PreviewPony.Interactions
                             If String.Equals(Interaction.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists for this pony.  Please select another name.")
-                                PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
+                                InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
                                 Exit Sub
                             End If
                         Next
 
                         changed_interaction.Name = new_value
-                        PonyInteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = new_value
+                        InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = new_value
                     Case colInteractionChance.Index
                         changed_interaction.Probability = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.InvariantCulture) / 100
                     Case colInteractionProximity.Index
@@ -1347,8 +1247,8 @@ Public Class PonyEditor
 
             Catch ex As Exception
                 My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
-                                                             PonyInteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
-                                                             CStr(PonyInteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
+                                                             InteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
+                                                             CStr(InteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
             If alreadyUpdating = False Then
@@ -1363,85 +1263,13 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Function get_effect_list() As List(Of EffectBase)
-
-        Dim effect_list As New List(Of EffectBase)
-
-        For Each ponyBase In ponyBases
-            For Each behavior As Behavior In ponyBase.Behaviors
-                For Each effect In behavior.Effects
-                    effect_list.Add(effect)
-                Next
-            Next
-        Next
-
-        Return effect_list
+    Friend Function GetAllEffects() As EffectBase()
+        Return ponyBases.SelectMany(Function(pb) pb.Behaviors).SelectMany(Function(b) b.Effects).ToArray()
     End Function
 
     Private Function PreviewPonyEffects() As IEnumerable(Of EffectBase)
         Return PreviewPony.Behaviors.SelectMany(Function(behavior) (behavior.Effects))
     End Function
-
-    'Swap positions of the grids.
-    Private Sub Swap0_1_Click(sender As Object, e As EventArgs) Handles Swap0_1.Click, Swap1_0.Click
-        SwapGrids(0, 1, Slot0Label, Slot1Label)
-    End Sub
-    Private Sub Swap2_0_Click(sender As Object, e As EventArgs) Handles Swap2_0.Click
-        SwapGrids(2, 0, Slot2Label, Slot0Label)
-    End Sub
-    Private Sub Swap3_0_Click(sender As Object, e As EventArgs) Handles Swap3_0.Click
-        SwapGrids(3, 0, Slot3Label, Slot0Label)
-    End Sub
-
-    Private Sub SwapGrids(slot0_number As Integer, slot1_number As Integer, label0 As Label, label1 As Label)
-
-        Dim slot0 As DataGridView = Nothing
-        Dim slot1 As DataGridView = Nothing
-        Dim button0 As Button = Nothing
-        Dim button1 As Button = Nothing
-
-        For Each entry In infoGrids
-            Select Case entry.Slot
-                Case slot0_number
-                    slot0 = entry.Grid
-                    button0 = entry.SwapButton
-                    entry.Slot = slot1_number
-                Case slot1_number
-                    slot1 = entry.Grid
-                    entry.Slot = slot0_number
-                    button1 = entry.SwapButton
-            End Select
-        Next
-
-        If IsNothing(slot0) OrElse IsNothing(slot1) OrElse IsNothing(button0) OrElse IsNothing(button1) Then
-            Throw New Exception("Error in swap_grids: did not find right control.")
-        End If
-
-        Dim tempsize As Size = slot0.Size
-        Dim templocation As Point = slot0.Location
-        Dim temp_button_size As Size = button0.Size
-        Dim temp_button_loc As Point = button0.Location
-        Dim temp_button_anchor = button0.Anchor
-        Dim templabel As String = label0.Text
-        Dim tempanchor = slot0.Anchor
-
-        slot0.Location = slot1.Location
-        slot0.Size = slot1.Size
-        slot0.Anchor = slot1.Anchor
-        label0.Text = label1.Text
-        button0.Size = button1.Size
-        button0.Location = button1.Location
-        button0.Anchor = button1.Anchor
-
-        slot1.Location = templocation
-        slot1.Size = tempsize
-        slot1.Anchor = tempanchor
-        label1.Text = templabel
-        button1.Size = temp_button_size
-        button1.Location = temp_button_loc
-        button1.Anchor = temp_button_anchor
-
-    End Sub
 
     Private Sub SaveSortOrder()
         For Each infoGrid In infoGrids
@@ -1495,33 +1323,15 @@ Public Class PonyEditor
     End Sub
 
     Private Sub HidePony()
-
         PausePonyButton.Text = "Resume Pony"
-
-        If pe_animator.Started Then
-            pe_animator.Pause(False)
-        End If
-        If Not IsNothing(PreviewPony) Then
-            pe_interface.Hide()
-
-            'Preview_Pony.Form.Visible = False
-        End If
-
+        If pe_animator.Started Then pe_animator.Pause(False)
+        If PreviewPony IsNot Nothing Then pe_interface.Hide()
     End Sub
 
     Private Sub ShowPony()
         PausePonyButton.Text = "Pause Pony"
-
-        If pe_animator.Started Then
-            pe_animator.Resume()
-        End If
-
-        If Not IsNothing(PreviewPony) Then
-
-            pe_interface.Show()
-
-            'Preview_Pony.Form.Visible = True
-        End If
+        If pe_animator.Started Then pe_animator.Resume()
+        If PreviewPony IsNot Nothing Then pe_interface.Show()
     End Sub
 
     Private Sub NewBehaviorButton_Click(sender As Object, e As EventArgs) Handles NewBehaviorButton.Click
@@ -1682,7 +1492,7 @@ Public Class PonyEditor
 
     End Function
 
-    Function SetSound() As String
+    Private Function SetSound() As String
         Dim sound_path As String = Nothing
 
         Using dialog = New NewSpeechDialog(Me)
@@ -1711,13 +1521,13 @@ Public Class PonyEditor
 
     End Function
 
-    Private Sub Grid_UserDeletingRow(sender As Object, e As DataGridViewRowCancelEventArgs) Handles PonyBehaviorsGrid.UserDeletingRow, PonyEffectsGrid.UserDeletingRow,
-                                                                                                            PonyInteractionsGrid.UserDeletingRow, PonySpeechesGrid.UserDeletingRow
+    Private Sub Grid_UserDeletingRow(sender As Object, e As DataGridViewRowCancelEventArgs) Handles BehaviorsGrid.UserDeletingRow, EffectsGrid.UserDeletingRow,
+                                                                                                            InteractionsGrid.UserDeletingRow, SpeechesGrid.UserDeletingRow
         Try
             SaveSortOrder()
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
-            If Object.ReferenceEquals(grid, PonyEffectsGrid) Then
+            If Object.ReferenceEquals(grid, EffectsGrid) Then
                 Dim todelete As EffectBase = Nothing
                 For Each behavior In PreviewPony.Behaviors
                     For Each effect In behavior.Effects
@@ -1730,7 +1540,7 @@ Public Class PonyEditor
                         behavior.RemoveEffect(todelete)
                     End If
                 Next
-            ElseIf Object.ReferenceEquals(grid, PonyBehaviorsGrid) Then
+            ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
                 If grid.RowCount = 1 Then
                     e.Cancel = True
                     MsgBox("A pony must have at least 1 behavior.  You can't delete the last one.")
@@ -1745,7 +1555,7 @@ Public Class PonyEditor
                 If Not IsNothing(todelete) Then
                     PreviewPony.Behaviors.Remove(todelete)
                 End If
-            ElseIf Object.ReferenceEquals(grid, PonyInteractionsGrid) Then
+            ElseIf Object.ReferenceEquals(grid, InteractionsGrid) Then
                 Dim todelete As Interaction = Nothing
                 For Each interaction In PreviewPony.Interactions
                     If CStr(e.Row.Cells(colInteractionName.Index).Value) = interaction.Name Then
@@ -1756,7 +1566,7 @@ Public Class PonyEditor
                 If Not IsNothing(todelete) Then
                     PreviewPony.Interactions.Remove(todelete)
                 End If
-            ElseIf Object.ReferenceEquals(grid, PonySpeechesGrid) Then
+            ElseIf Object.ReferenceEquals(grid, SpeechesGrid) Then
                 Dim todelete As Behavior.SpeakingLine = Nothing
                 For Each speech In PreviewPonyBase.SpeakingLines
                     If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
@@ -1782,13 +1592,13 @@ Public Class PonyEditor
 
     End Sub
 
-    Private Sub Grid_UserDeletedRow(sender As Object, e As DataGridViewRowEventArgs) Handles PonyBehaviorsGrid.UserDeletedRow, PonyEffectsGrid.UserDeletedRow,
-                                                                                                        PonyInteractionsGrid.UserDeletedRow, PonySpeechesGrid.UserDeletedRow
+    Private Sub Grid_UserDeletedRow(sender As Object, e As DataGridViewRowEventArgs) Handles BehaviorsGrid.UserDeletedRow, EffectsGrid.UserDeletedRow,
+                                                                                                        InteractionsGrid.UserDeletedRow, SpeechesGrid.UserDeletedRow
         'Load_Parameters(Preview_Pony)
         'RestoreSortOrder()
     End Sub
 
-    Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles PonySpeechesGrid.DataError, PonyInteractionsGrid.DataError, PonyEffectsGrid.DataError, PonyBehaviorsGrid.DataError
+    Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles SpeechesGrid.DataError, InteractionsGrid.DataError, EffectsGrid.DataError, BehaviorsGrid.DataError
         My.Application.NotifyUserOfNonFatalException(e.Exception, "Error interpreting the data entered into the editor.")
     End Sub
 
@@ -1993,13 +1803,13 @@ Public Class PonyEditor
 
     End Sub
 
-    Sub ImageSizeCheck(imageSize As Size)
-
+    Friend Sub ImageSizeCheck(imageSize As Size)
         If imageSize.Height > PonyPreviewPanel.Size.Height OrElse
             imageSize.Width > PonyPreviewPanel.Size.Width Then
-            MsgBox("Note:  The selected image is too large for the Pony Editor's preview window.  The results shown will not be accurate, but the pony will still work fine.")
+            MessageBox.Show(Me, "The selected image is too large for the preview area. " &
+                            "The preview may be inaccurate as a result, but the pony will still function correctly when used normally.",
+                            "Large Preview", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
-
     End Sub
 
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
@@ -2059,5 +1869,21 @@ Public Class PonyEditor
             MyBase.Dispose(disposing)
         End Try
         General.FullCollect()
+    End Sub
+
+    Private Sub SwapButton_Click(sender As Object, e As EventArgs) Handles BehaviorsSwapButton.Click,
+        SpeechesSwapButton.Click, EffectsSwapButton.Click, InteractionsSwapButton.Click
+        Dim swapButton = DirectCast(sender, Button)
+        Dim swapPanel = DirectCast(swapButton.Parent, Panel)
+        Dim topPanel = GridTable.GetControlFromPosition(0, 0)
+        If ReferenceEquals(topPanel, swapPanel) Then
+            swapPanel = DirectCast(GridTable.GetControlFromPosition(0, 1), Panel)
+        End If
+        GridTable.SuspendLayout()
+        GridTable.SetColumnSpan(topPanel, 1)
+        GridTable.SetCellPosition(topPanel, GridTable.GetCellPosition(swapPanel))
+        GridTable.SetCellPosition(swapPanel, New TableLayoutPanelCellPosition(0, 0))
+        GridTable.SetColumnSpan(swapPanel, 3)
+        GridTable.ResumeLayout()
     End Sub
 End Class

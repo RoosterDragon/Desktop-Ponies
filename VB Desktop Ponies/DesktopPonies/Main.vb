@@ -264,10 +264,12 @@ Public Class Main
 
         worker.WaitOnAllTasks()
         If SelectablePonies.Count = 0 Then
-            MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
-                            "There should have at least been a 'Derpy' folder in the same spot as this program.",
-                            "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            GoButton.Enabled = False
+            SmartInvoke(Sub()
+                            MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
+                                            "There should have at least been a 'Derpy' folder in the same spot as this program.",
+                                            "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            GoButton.Enabled = False
+                        End Sub)
         End If
 
         ' Load pony counts.
@@ -366,7 +368,6 @@ Public Class Main
 
         selectionControlFilter.Add(ponySelection, ponySelection.Visible)
         PonySelectionPanel.Controls.Add(ponySelection)
-        ponySelection.Update()
     End Sub
 
     Private Sub HandleCountChange(sender As Object, e As EventArgs)

@@ -18,7 +18,7 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        For Each effect In m_editor.get_effect_list()
+        For Each effect In m_editor.GetAllEffects()
             If String.Equals(effect.Name, Name_Textbox.Text, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Effect names must be unique.  Effect '" & Name_Textbox.Text & "' already exists.  Please select a different name.")
                 Exit Sub
@@ -83,10 +83,10 @@ Public Class NewEffectDialog
                            left_image_path, _
                            duration, _
                            repeatDelay, _
-                           PonyEditor.String_ToLocation(CStr(R_Placement_Box.SelectedItem)), _
-                           PonyEditor.String_ToLocation(CStr(R_Centering_Box.SelectedItem)), _
-                           PonyEditor.String_ToLocation(CStr(L_Placement_Box.SelectedItem)), _
-                           PonyEditor.String_ToLocation(CStr(L_Centering_Box.SelectedItem)), _
+                           DirectionFromString(CStr(R_Placement_Box.SelectedItem)), _
+                           DirectionFromString(CStr(R_Centering_Box.SelectedItem)), _
+                           DirectionFromString(CStr(L_Placement_Box.SelectedItem)), _
+                           DirectionFromString(CStr(L_Centering_Box.SelectedItem)), _
                            follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPonyBase)
         Me.Close()
     End Sub
@@ -121,7 +121,7 @@ Public Class NewEffectDialog
 
             Behavior_Box.Items.Remove("None")
 
-            Dim movement_list = CType(.PonyEffectsGrid.Columns(.colEffectLocationRight.Index), DataGridViewComboBoxColumn)
+            Dim movement_list = CType(.EffectsGrid.Columns(.colEffectLocationRight.Index), DataGridViewComboBoxColumn)
             For Each item In movement_list.Items
                 R_Placement_Box.Items.Add(item)
                 L_Placement_Box.Items.Add(item)

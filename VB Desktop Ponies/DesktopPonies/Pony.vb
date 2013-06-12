@@ -1402,7 +1402,7 @@ Public Class Behavior
             Speed.ToString(CultureInfo.InvariantCulture),
             Quoted(Path.GetFileName(RightImagePath)),
             Quoted(Path.GetFileName(LeftImagePath)),
-            Space_To_Under(Movement_ToString(AllowedMovement)),
+            Space_To_Under(AllowedMovesToString(AllowedMovement)),
             Quoted(LinkedBehaviorName),
             Quoted(StartLineName),
             Quoted(EndLineName),
@@ -4039,7 +4039,65 @@ Public Enum BehaviorOption
 End Enum
 
 Public Module EnumConversions
-    Public Function Movement_ToString(movement As AllowedMoves) As String
+    Public Function AllowedMovesFromString(movement As String) As AllowedMoves
+        Select Case movement
+            Case "None"
+                Return AllowedMoves.None
+            Case "Horizontal Only"
+                Return AllowedMoves.HorizontalOnly
+            Case "Vertical Only"
+                Return AllowedMoves.VerticalOnly
+            Case "Horizontal Vertical"
+                Return AllowedMoves.HorizontalVertical
+            Case "Diagonal Only"
+                Return AllowedMoves.DiagonalOnly
+            Case "Diagonal/horizontal"
+                Return AllowedMoves.DiagonalHorizontal
+            Case "Diagonal/Vertical"
+                Return AllowedMoves.DiagonalVertical
+            Case "All"
+                Return AllowedMoves.All
+            Case "MouseOver"
+                Return AllowedMoves.MouseOver
+            Case "Sleep"
+                Return AllowedMoves.Sleep
+            Case "Dragged"
+                Return AllowedMoves.Dragged
+            Case Else
+                Throw New ArgumentException("Invalid movement string:" & movement, "movement")
+        End Select
+    End Function
+
+    Public Function DirectionFromString(location As String) As Direction
+        Select Case location
+            Case "Top"
+                Return Direction.TopCenter
+            Case "Bottom"
+                Return Direction.BottomCenter
+            Case "Left"
+                Return Direction.MiddleLeft
+            Case "Right"
+                Return Direction.MiddleRight
+            Case "Bottom Right"
+                Return Direction.BottomRight
+            Case "Bottom Left"
+                Return Direction.BottomLeft
+            Case "Top Right"
+                Return Direction.TopRight
+            Case "Top Left"
+                Return Direction.TopLeft
+            Case "Center"
+                Return Direction.MiddleCenter
+            Case "Any"
+                Return Direction.Random
+            Case "Any-Not Center"
+                Return Direction.RandomNotCenter
+            Case Else
+                Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
+        End Select
+    End Function
+
+    Public Function AllowedMovesToString(movement As AllowedMoves) As String
         Select Case movement
             Case AllowedMoves.None
                 Return "None"
