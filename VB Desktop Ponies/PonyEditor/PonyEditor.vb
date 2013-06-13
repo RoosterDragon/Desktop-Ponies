@@ -742,7 +742,6 @@ Public Class PonyEditor
                 hasSaved = False
             End If
 
-
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try

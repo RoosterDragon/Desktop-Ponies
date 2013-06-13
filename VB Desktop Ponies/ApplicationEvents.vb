@@ -29,13 +29,6 @@
             Return fileVersion.ToString(versionFields)
         End Function
 
-        Private faulted As Boolean
-        Public ReadOnly Property IsFaulted() As Boolean
-            Get
-                Return faulted
-            End Get
-        End Property
-
         Protected Overrides Function OnInitialize(commandLineArgs As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
                                                   ) As Boolean
             AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
@@ -83,11 +76,11 @@
                     ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
                     Not OperatingSystemInfo.IsWindows Then
                     ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
-                    MessageBox.Show("Your system lacks fonts required by Desktop Ponies." & vbNewLine &
-                                    "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" &
-                                    vbNewLine & "The program will now exit.",
-                                    "Font Not Found - Desktop Ponies v" & version,
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    Dim message = "Your system lacks fonts required by Desktop Ponies." & vbNewLine &
+                        "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" & vbNewLine &
+                        "The program will now exit."
+                    Console.WriteLine(message)
+                    MessageBox.Show(message, "Font Not Found - Desktop Ponies v" & version, MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Else
                     ' Attempt to notify user of an unknown error.
                     ExceptionDialog.Show(ex, "An unexpected error occurred and Desktop Ponies must close." &
@@ -97,15 +90,9 @@
             Catch
                 ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
             Finally
-                ' Signal that the application has faulted and exit.
-                Try
-                    faulted = True
-                    Windows.Forms.Application.Exit()
-                Finally
-                    ' Exit the program with an error code, unless a debugger is attached in which case we'll let the exception bubble to
-                    ' the debugger for analysis.
-                    If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(1)
-                End Try
+                ' Exit the program with an error code, unless a debugger is attached in which case we'll let the exception bubble to the
+                ' debugger for analysis.
+                If Not Diagnostics.Debugger.IsAttached Then Environment.Exit(1)
             End Try
         End Sub
 

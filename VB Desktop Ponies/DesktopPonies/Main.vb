@@ -1109,7 +1109,7 @@ Public Class Main
     End Sub
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        e.Cancel = loading AndAlso Not My.Application.IsFaulted
+        e.Cancel = loading
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)
