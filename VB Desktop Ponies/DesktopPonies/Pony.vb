@@ -456,20 +456,20 @@ Public Class PonyBase
                                     End If
                                 Case Else
                                     Throw New InvalidDataException(
-                                        "Speak line contained an invalid number of columns. Valid formats are:" & vbNewLine &
-                                        "The text to display, only, e.g." & vbNewLine &
-                                        "Speak,""Hello!""" & vbNewLine &
+                                        "Speak line contained an invalid number of columns. Valid formats are:" & Environment.NewLine &
+                                        "The text to display, only, e.g." & Environment.NewLine &
+                                        "Speak,""Hello!""" & Environment.NewLine &
                                         "The name of the speech, the text, the sound file, True/False for preventing random use, e.g." &
-                                        vbNewLine &
-                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False" & vbNewLine &
+                                        Environment.NewLine &
+                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False" & Environment.NewLine &
                                         "You can specify multiple sound files inside curly braces. " &
-                                        "The program will choose the first format it recognizes, e.g." & vbNewLine &
-                                        "Speak,""Greeting"",""Hello!"",{""Hello.mp3"",""Hello.ogg""},False" & vbNewLine &
-                                        "You can leave out sound files if you wish, e.g." & vbNewLine &
-                                        "Speak,""Greeting"",""Hello!"",,False" & vbNewLine &
-                                        "The behavior group to which the speech belongs can also be added at the end, e.g." & vbNewLine &
-                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False,0" & vbNewLine &
-                                        vbNewLine &
+                                        "The program will choose the first format it recognizes, e.g." & Environment.NewLine &
+                                        "Speak,""Greeting"",""Hello!"",{""Hello.mp3"",""Hello.ogg""},False" & Environment.NewLine &
+                                        "You can leave out sound files if you wish, e.g." & Environment.NewLine &
+                                        "Speak,""Greeting"",""Hello!"",,False" & Environment.NewLine &
+                                        "The behavior group to which the speech belongs can also be added at the end, e.g." & Environment.NewLine &
+                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False,0" & Environment.NewLine &
+                                        Environment.NewLine &
                                         "The invalid line was: " & line)
                             End Select
                             SpeakingLines.Add(newLine)
@@ -482,7 +482,7 @@ Public Class PonyBase
                     Case Else
                         MessageBox.Show(
                             "Unknown command in " & ConfigFilename & " for pony " & Name & ": " & columns(0) & ControlChars.NewLine &
-                            "Valid commands are: name, scale, behaviorgroup, behavior, categories, speak, effect" & vbNewLine &
+                            "Valid commands are: name, scale, behaviorgroup, behavior, categories, speak, effect" & Environment.NewLine &
                             "Skipping line: " & ControlChars.NewLine & line,
                             "Unknown Command", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 End Select
@@ -529,7 +529,7 @@ Public Class PonyBase
                             MessageBox.Show("Unknown movement type: " & columns(BehaviorOption.MovementType) & ControlChars.NewLine &
                                             "Valid movement types: none, horizontal_only, vertical_only, horizontal_vertical, " &
                                             "diagonal_only, diagonal_horizontal, diagonal_vertical, all, mouseover, sleep, dragged" &
-                                            vbNewLine &
+                                            Environment.NewLine &
                                             "Skipping behavior " & columns(BehaviorOption.Name) & " for " & Name)
                             Continue For
                     End Select
@@ -2163,7 +2163,7 @@ Public Class Pony
                                       "You will not receive further notifications about sound errors.{0}{0}" &
                                       "File: {1}{0}" &
                                       "Pony: {2}{0}",
-                                      vbNewLine, filePath, Directory))
+                                      Environment.NewLine, filePath, Directory))
             End If
         End Try
     End Sub

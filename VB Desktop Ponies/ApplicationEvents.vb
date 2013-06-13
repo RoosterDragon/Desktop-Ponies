@@ -76,8 +76,8 @@
                     ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
                     Not OperatingSystemInfo.IsWindows Then
                     ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
-                    Dim message = "Your system lacks fonts required by Desktop Ponies." & vbNewLine &
-                        "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" & vbNewLine &
+                    Dim message = "Your system lacks fonts required by Desktop Ponies." & Environment.NewLine &
+                        "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" & Environment.NewLine &
                         "The program will now exit."
                     Console.WriteLine(message)
                     MessageBox.Show(message, "Font Not Found - Desktop Ponies v" & version, MessageBoxButtons.OK, MessageBoxIcon.Error)

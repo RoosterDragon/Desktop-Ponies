@@ -113,7 +113,7 @@ Public Class NewInteractionDialog
                                                       CInt(reactivationDelay), _
                                                       False)
 
-        MessageBox.Show(Me, "Important note:" & vbCrLf &
+        MessageBox.Show(Me, "Important note:" & Environment.NewLine &
                         "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
                         "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
 

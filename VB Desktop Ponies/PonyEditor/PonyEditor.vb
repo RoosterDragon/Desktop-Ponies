@@ -458,8 +458,8 @@ Public Class PonyEditor
             If conflicts.Count > 0 Then
                 MessageBox.Show(
                     Me, "Warning: Two or more behaviors, interactions, effects or speeches have duplicate names. " &
-                    "Please give them unique names or the pony may act in undefined ways." & vbNewLine & vbNewLine &
-                    String.Join(vbNewLine, conflicts),
+                    "Please give them unique names or the pony may act in undefined ways." & Environment.NewLine & Environment.NewLine &
+                    String.Join(Environment.NewLine, conflicts),
                     "Duplicate Names", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
 

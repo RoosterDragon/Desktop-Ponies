@@ -66,8 +66,8 @@ Public Class ItemEditorBase
                 _isNewItem = False
                 UpdateDirtyFlag(False)
             Catch ex As IOException
-                result = MessageBox.Show(Me, "There was an error attempting to save the pony." & vbNewLine &
-                                         vbNewLine & ex.Message & vbNewLine & vbNewLine &
+                result = MessageBox.Show(Me, "There was an error attempting to save the pony." & Environment.NewLine &
+                                         Environment.NewLine & ex.Message & Environment.NewLine & Environment.NewLine &
                                          "Retry?", "Save Error", MessageBoxButtons.RetryCancel,
                                          MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
             End Try
@@ -149,8 +149,8 @@ Public Class ItemEditorBase
                             viewer.Image = newImage
 
                             If ex IsNot Nothing Then
-                                viewer.ShowError("There was an error attempting to display this image." & vbNewLine & vbNewLine &
-                                                 ex.GetType().ToString() & vbNewLine & ex.Message)
+                                viewer.ShowError("There was an error attempting to display this image." & Environment.NewLine & Environment.NewLine &
+                                                 ex.GetType().ToString() & Environment.NewLine & ex.Message)
                             Else
                                 viewer.ClearError()
                             End If
@@ -206,8 +206,8 @@ Public Class ItemEditorBase
                             viewer.EffectImage = newImage
 
                             If ex IsNot Nothing Then
-                                viewer.ShowError("There was an error attempting to display this image." & vbNewLine & vbNewLine &
-                                                 ex.GetType().ToString() & vbNewLine & ex.Message)
+                                viewer.ShowError("There was an error attempting to display this image." & Environment.NewLine & Environment.NewLine &
+                                                 ex.GetType().ToString() & Environment.NewLine & ex.Message)
                             Else
                                 viewer.ClearError()
                             End If
