@@ -414,7 +414,6 @@ Public Class PonyEditor
 
             Dim conflicts As New HashSet(Of String)()
 
-            ' TODO: Speed up cross-products.
             For Each behavior In pony.Behaviors
                 For Each otherbehavior In pony.Behaviors
                     If ReferenceEquals(behavior, otherbehavior) Then Continue For
@@ -1671,102 +1670,18 @@ Public Class PonyEditor
 
     Friend Sub SavePony(path As String)
         Try
-            'rebuild the list of ponies, in the original order
-            Dim temp_list As New List(Of PonyBase)
-            For Each ponyBase In ponyBases
-                If ponyBase.Directory <> PreviewPony.Directory Then
-                    temp_list.Add(ponyBase)
-                Else
-                    temp_list.Add(PreviewPonyBase)
-                End If
-            Next
-
-            Main.Instance.SelectablePonies = temp_list
-
-            Dim comments As New List(Of String)
-            Dim ponyIniFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, path, PonyBase.ConfigFilename)
-            If File.Exists(ponyIniFilePath) Then
-                Using existing_ini As New StreamReader(ponyIniFilePath)
-                    Do Until existing_ini.EndOfStream
-                        Dim line = existing_ini.ReadLine()
-                        If line.Length > 0 AndAlso line(0) = "'" Then
-                            comments.Add(line)
-                        End If
-                    Loop
-                End Using
-            End If
-
-            Using newPonyIniFile As New StreamWriter(ponyIniFilePath, False, System.Text.Encoding.UTF8)
-                For Each line In comments
-                    newPonyIniFile.WriteLine(line)
-                Next
-
-                newPonyIniFile.WriteLine(String.Join(",", "Name", PreviewPony.Name))
-                newPonyIniFile.WriteLine(String.Join(",", "Categories", String.Join(",", PreviewPony.Tags.Select(Function(tag As String)
-                                                                                                                     Return Quoted(tag)
-                                                                                                                 End Function))))
-
-                For Each behaviorGroup In PreviewPony.BehaviorGroups
-                    newPonyIniFile.WriteLine(behaviorGroup.GetPonyIni())
-                Next
-
-                For Each behavior In PreviewPony.Behaviors
-                    newPonyIniFile.WriteLine(behavior.GetPonyIni())
-                Next
-
-                For Each effect In PreviewPonyEffects()
-                    newPonyIniFile.WriteLine(effect.GetPonyIni())
-                Next
-
-                For Each speech As Behavior.SpeakingLine In PreviewPonyBase.SpeakingLines
-                    newPonyIniFile.WriteLine(speech.GetPonyIni())
-                Next
-            End Using
-
-            Try
-
-                Dim interactions_lines As New List(Of String)
-
-                Using reader = New StreamReader(IO.Path.Combine(
-                                                Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
-                    Do Until reader.EndOfStream
-                        Dim line = reader.ReadLine()
-                        Dim name_check = CommaSplitQuoteQualified(line)
-
-                        If UBound(name_check) > 2 Then
-                            If name_check(1) = PreviewPony.Directory Then
-                                Continue Do
-                            End If
-                        End If
-                        interactions_lines.Add(line)
-                    Loop
-                End Using
-
-                Using writer = New StreamWriter(IO.Path.Combine(
-                                                Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename),
-                                            False, System.Text.Encoding.UTF8)
-                    If IsNothing(writer) Then Throw New Exception("Unable to write back to interactions.ini file...")
-
-                    For Each line In interactions_lines
-                        writer.WriteLine(line)
-                    Next
-
-                    For Each interaction In PreviewPony.Interactions
-                        writer.WriteLine(interaction.GetPonyIni())
-                    Next
-                End Using
-
-            Catch ex As Exception
-                Throw New Exception("Failed while updating interactions: " & ex.Message, ex)
-            End Try
+            PreviewPonyBase.Save()
+        Catch ex As ArgumentException When ex.ParamName = "text"
+            MessageBox.Show(Me, "Some invalid characters were detected. Please remove them." & Environment.NewLine &
+                            ex.Message.Remove(ex.Message.LastIndexOf(Environment.NewLine)),
+                            "Invalid Characters", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Failed to save successfully.")
-            Exit Sub
+            My.Application.NotifyUserOfNonFatalException(ex, "There was an unexpected error trying to save the pony.")
+            Return
         End Try
-
         hasSaved = True
         MessageBox.Show(Me, "Save completed!", "Save Completed", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
     End Sub
 
     ''' <summary>
@@ -1779,7 +1694,11 @@ Public Class PonyEditor
             Dim result = MessageBox.Show(Me, message, "Unsaved Changes",
                                          MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3)
             If result = DialogResult.Yes Then
-                SaveButton_Click(SaveButton, EventArgs.Empty)
+                Try
+                    SaveButton_Click(SaveButton, EventArgs.Empty)
+                Catch ex As Exception
+                    Return True
+                End Try
             ElseIf result = DialogResult.Cancel Then
                 Return True
             End If

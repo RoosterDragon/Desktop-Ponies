@@ -12,10 +12,18 @@
     End Function
 
     Public Function Quoted(text As String) As String
+        If text.IndexOf(ControlChars.Quote) <> -1 Then
+            Throw New ArgumentException("The source text must not contain any quote ("") characters." & Environment.NewLine &
+                                        "Text: " & text, "text")
+        End If
         Return ControlChars.Quote & text & ControlChars.Quote
     End Function
 
     Public Function Braced(text As String) As String
+        If text.IndexOfAny({"{"c, "}"c}) <> -1 Then
+            Throw New ArgumentException("The source text must not contain any curly brace ({}) characters." & Environment.NewLine &
+                                        "Text: " & text, "text")
+        End If
         Return "{" & text & "}"
     End Function
 

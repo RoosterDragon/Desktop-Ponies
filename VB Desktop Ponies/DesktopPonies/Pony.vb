@@ -1019,42 +1019,45 @@ Public Class PonyBase
 
         Dim comments As New List(Of String)()
         If File.Exists(configFilePath) Then
-            Using existingFile As New StreamReader(configFilePath)
-                Do Until existingFile.EndOfStream
-                    Dim line = existingFile.ReadLine()
+            Using reader As New StreamReader(configFilePath)
+                Do Until reader.EndOfStream
+                    Dim line = reader.ReadLine()
                     If line.Length > 0 AndAlso line(0) = "'" Then comments.Add(line)
                 Loop
             End Using
         End If
 
-        Using newFile As New StreamWriter(configFilePath, False, System.Text.Encoding.UTF8)
+        Dim tempFileName = Path.GetTempFileName()
+        Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
             For Each comment In comments
-                newFile.WriteLine(comment)
+                writer.WriteLine(comment)
             Next
 
-            newFile.WriteLine(String.Join(",", "Name", Name))
-            newFile.WriteLine(String.Join(",", "Categories", String.Join(",", Tags.Select(Function(tag As String) Quoted(tag)))))
+            writer.WriteLine(String.Join(",", "Name", Name))
+            writer.WriteLine(String.Join(",", "Categories", String.Join(",", Tags.Select(Function(tag) Quoted(tag)))))
 
             For Each behaviorGroup In BehaviorGroups
-                newFile.WriteLine(behaviorGroup.GetPonyIni())
+                writer.WriteLine(behaviorGroup.GetPonyIni())
             Next
 
             For Each behavior In Behaviors
-                newFile.WriteLine(behavior.GetPonyIni())
+                writer.WriteLine(behavior.GetPonyIni())
             Next
 
             For Each effect In Behaviors.SelectMany(Function(behavior) (behavior.Effects))
-                newFile.WriteLine(effect.GetPonyIni())
+                writer.WriteLine(effect.GetPonyIni())
             Next
 
             For Each speech In SpeakingLines
-                newFile.WriteLine(speech.GetPonyIni())
+                writer.WriteLine(speech.GetPonyIni())
             Next
         End Using
+        File.Replace(tempFileName, configFilePath, Nothing)
+        File.Delete(tempFileName)
 
+        Dim interactionsFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
-        Using reader = New StreamReader(IO.Path.Combine(
-                                        Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
+        Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
                 Dim line = reader.ReadLine()
                 Dim lineParts = CommaSplitQuoteQualified(line)
@@ -1063,9 +1066,8 @@ Public Class PonyBase
             Loop
         End Using
 
-        Using writer = New StreamWriter(IO.Path.Combine(
-                                        Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename),
-                                    False, System.Text.Encoding.UTF8)
+        tempFileName = Path.GetTempFileName()
+        Using writer = New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
             For Each line In interactionFileLines
                 writer.WriteLine(line)
             Next
@@ -1074,6 +1076,8 @@ Public Class PonyBase
                 writer.WriteLine(interaction.GetPonyIni())
             Next
         End Using
+        File.Replace(tempFileName, interactionsFilePath, Nothing)
+        File.Delete(tempFileName)
     End Sub
 End Class
 
@@ -1120,10 +1124,6 @@ Public Class Interaction
     End Enum
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
-        Dim behaviors_list = String.Join(",", BehaviorList.Select(Function(behavior As Behavior)
-                                                                      Return Quoted(behavior.Name)
-                                                                  End Function))
-
         Return String.Join(",",
             Name,
             Quoted(PonyName),
@@ -1131,7 +1131,7 @@ Public Class Interaction
             Proximity_Activation_Distance.ToString(CultureInfo.InvariantCulture),
             Braced(Targets_String),
             Targets_Activated.ToString(),
-            Braced(behaviors_list),
+            Braced(String.Join(",", BehaviorList.Select(Function(behavior) Quoted(behavior.Name)))),
             ReactivationDelay.ToString(CultureInfo.InvariantCulture))
     End Function
 
@@ -1376,12 +1376,15 @@ Public Class Behavior
                                   Skip,
                                   Group)
             Else
+                Dim soundFilePath = Path.GetFileName(SoundFile)
                 Return String.Join(
                                   ",", "Speak",
                                   Quoted(Name),
                                   Quoted(Text),
-                                  "{" & Quoted(Path.GetFileName(SoundFile)) & "," &
-                                  Quoted(Replace(Path.GetFileName(SoundFile), ".mp3", ".ogg")) & "}",
+                                  Braced(String.Join(",",
+                                                     Quoted(soundFilePath),
+                                                     Quoted(Path.ChangeExtension(soundFilePath, ".ogg"))
+                                                     )),
                                   Skip,
                                   Group)
             End If
