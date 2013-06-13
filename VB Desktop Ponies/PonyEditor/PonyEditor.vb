@@ -1668,21 +1668,28 @@ Public Class PonyEditor
 
     End Sub
 
-    Friend Sub SavePony(path As String)
+    Friend Function SavePony() As Boolean
         Try
+            PausePonyButton.Enabled = False
+            pe_animator.Pause(False)
+            _changesMade = True
             PreviewPonyBase.Save()
+            RefreshButton_Click(RefreshButton, EventArgs.Empty)
+            pe_animator.Resume()
+            PausePonyButton.Enabled = True
         Catch ex As ArgumentException When ex.ParamName = "text"
             MessageBox.Show(Me, "Some invalid characters were detected. Please remove them." & Environment.NewLine &
                             ex.Message.Remove(ex.Message.LastIndexOf(Environment.NewLine)),
                             "Invalid Characters", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            Return
+            Return False
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "There was an unexpected error trying to save the pony.")
-            Return
+            Return False
         End Try
         hasSaved = True
         MessageBox.Show(Me, "Save completed!", "Save Completed", MessageBoxButtons.OK, MessageBoxIcon.Information)
-    End Sub
+        Return True
+    End Function
 
     ''' <summary>
     ''' Prompts the user about saving outstanding changes, if required.
@@ -1694,11 +1701,7 @@ Public Class PonyEditor
             Dim result = MessageBox.Show(Me, message, "Unsaved Changes",
                                          MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3)
             If result = DialogResult.Yes Then
-                Try
-                    SaveButton_Click(SaveButton, EventArgs.Empty)
-                Catch ex As Exception
-                    Return True
-                End Try
+                Return Not SavePony()
             ElseIf result = DialogResult.Cancel Then
                 Return True
             End If
@@ -1707,18 +1710,7 @@ Public Class PonyEditor
     End Function
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
-
-        PausePonyButton.Enabled = False
-        pe_animator.Pause(False)
-
-        _changesMade = True
-        SavePony(PreviewPony.Directory)
-
-        RefreshButton_Click(Nothing, Nothing)
-
-        pe_animator.Resume()
-        PausePonyButton.Enabled = True
-
+        SavePony()
     End Sub
 
     Friend Sub ImageSizeCheck(imageSize As Size)

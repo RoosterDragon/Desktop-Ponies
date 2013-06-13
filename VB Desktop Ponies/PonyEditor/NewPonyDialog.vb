@@ -1,4 +1,5 @@
 ﻿Imports System.Windows.Forms
+Imports System.IO
 
 Public Class NewPonyDialog
     Private m_editor As PonyEditor
@@ -11,7 +12,7 @@ Public Class NewPonyDialog
         Dim newName = Trim(Name_Textbox.Text)
 
         If newName = "" Then
-            MsgBox("You must enter a name for the new pony.")
+            MsgBox("You must enter a name for the new pony first.")
             Exit Sub
         End If
 
@@ -43,12 +44,25 @@ Public Class NewPonyDialog
         End If
 
         Try
-            m_editor.SavePony(newName)
+            Dim newPonyPath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newName)
+            If Directory.Exists(newPonyPath) Then
+                MessageBox.Show(Me, "A pony with this name was detected. " &
+                                "Please choose a different name or delete the folder for the other pony." & Environment.NewLine &
+                                "Folder: " & newPonyPath, "Name Conflict", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Return
+            End If
+            Directory.CreateDirectory(newPonyPath)
+            m_editor.PreviewPonyBase.Directory = newPonyPath
+            m_editor.PreviewPonyBase.Name = newName
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to save this pony!")
+            My.Application.NotifyUserOfNonFatalException(ex, "Unable to create a directory for the new pony.")
+            Exit Sub
         End Try
-        Me.DialogResult = DialogResult.OK
-        Me.Close()
+
+        If m_editor.SavePony() Then
+            Me.DialogResult = DialogResult.OK
+            Me.Close()
+        End If
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
@@ -63,42 +77,15 @@ Public Class NewPonyDialog
     End Sub
 
     Private Sub First_Behavior_Button_Click(sender As Object, e As EventArgs) Handles First_Behavior_Button.Click
-
-        Dim newName = Trim(Name_Textbox.Text)
-
-        If newName = "" Then
-            MsgBox("You must enter a name for the new pony first.")
-            Exit Sub
-        End If
-
-        Name_Textbox.Enabled = False
-
-        Try
-            Dim newPonyPath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newName)
-            If IO.Directory.Exists(newPonyPath) Then
-                Throw New Exception("Path already exists! Won't overwrite whatever is there: " & newPonyPath)
-            End If
-            IO.Directory.CreateDirectory(newPonyPath)
-            m_editor.PreviewPonyBase.Directory = newPonyPath
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Unable to create a directory for the new pony.")
-            Name_Textbox.Enabled = True
-            Exit Sub
-        End Try
-
-        m_editor.PreviewPonyBase.Name = newName
-
-        Using form = New NewBehaviorDialog(m_editor)
-            form.ShowDialog()
+        Using dialog = New NewBehaviorDialog(m_editor)
+            dialog.ShowDialog()
         End Using
 
         For Each behavior In m_editor.PreviewPony.Behaviors
-            If System.IO.File.Exists(behavior.RightImagePath) Then
+            If File.Exists(behavior.RightImagePath) Then
                 Right_ImageBox.Image = Image.FromFile(behavior.RightImagePath)
                 Exit For
             End If
         Next
-
     End Sub
-
 End Class
