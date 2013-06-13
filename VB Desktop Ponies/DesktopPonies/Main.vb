@@ -18,9 +18,10 @@ Public Class Main
 
     Private animator As DesktopPonyAnimator
     Private ponyViewer As ISpriteCollectionView
-    Private ReadOnly startupPonies As New List(Of Pony)
-    Friend SelectablePonies As New List(Of PonyBase)
-    Friend ReadOnly HouseBases As New List(Of HouseBase)
+    Private ReadOnly startupPonies As New List(Of Pony)()
+    Private randomPony As PonyBase
+    Private ponyBases As New List(Of PonyBase)()
+    Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
     Private tempFilterOptions As String()
@@ -29,7 +30,7 @@ Public Class Main
 
     Private previewWindowRectangle As Func(Of Rectangle)
 
-    Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)
+    Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
@@ -263,7 +264,7 @@ Public Class Main
         Next
 
         worker.WaitOnAllTasks()
-        If SelectablePonies.Count = 0 Then
+        If ponyBases.Count = 0 Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
                                             "There should have at least been a 'Derpy' folder in the same spot as this program.",
@@ -278,8 +279,9 @@ Public Class Main
         ' Load interactions, since references to other ponies can now be resolved.
         worker.QueueTask(Sub()
                              Try
-                                 For Each pony In SelectablePonies
-                                     pony.LoadInteractions()
+                                 Dim bases = ponyBases.ToArray()
+                                 For Each pony In ponyBases
+                                     pony.LoadInteractions(bases)
                                  Next
                              Catch ex As Exception
                                  My.Application.NotifyUserOfNonFatalException(
@@ -355,14 +357,15 @@ Public Class Main
     End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
-        SelectablePonies.Add(ponyBase)
-
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImagePath, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
+            randomPony = ponyBase
+        Else
+            ponyBases.Add(ponyBase)
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
@@ -439,7 +442,7 @@ Public Class Main
 
         Reference.InPreviewMode = True
         Me.Visible = False
-        Using form = New PonyEditor(SelectablePonies)
+        Using form = New PonyEditor(ponyBases)
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
@@ -467,7 +470,7 @@ Public Class Main
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
             Me.Visible = False
-            Using gameForm As New GameSelectionForm()
+            Using gameForm As New GameSelectionForm(RandomPlusPonyBases)
                 If gameForm.ShowDialog() = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()
@@ -677,7 +680,7 @@ Public Class Main
             Next
         ElseIf e.KeyChar = "#" Then
 #If DEBUG Then
-            Using newEditor = New PonyEditorForm2()
+            Using newEditor = New PonyEditorForm2(ponyBases)
                 newEditor.ShowDialog(Me)
             End Using
 #End If
@@ -797,21 +800,20 @@ Public Class Main
             startupPonies.Clear()
             Dim randomPoniesWanted As Integer
             For Each ponyBaseWanted In ponyBasesWanted
-                Dim base = FindPonyBaseByDirectory(ponyBaseWanted.Item1)
-                If base.Directory <> "Random Pony" Then
-                    ' Add the designated amount of a given pony.
-                    For i = 1 To ponyBaseWanted.Item2
-                        startupPonies.Add(New Pony(base))
-                    Next
-                Else
+                If ponyBaseWanted.Item1 = "Random Pony" Then
                     randomPoniesWanted = ponyBaseWanted.Item2
+                    Continue For
                 End If
+                Dim base = ponyBases.Single(Function(ponyBase) ponyBase.Directory = ponyBaseWanted.Item1)
+                ' Add the designated amount of a given pony.
+                For i = 1 To ponyBaseWanted.Item2
+                    startupPonies.Add(New Pony(base))
+                Next
             Next
 
             ' Add a random amount of ponies.
             If randomPoniesWanted > 0 Then
-                Dim remainingPonyBases As New List(Of PonyBase)(
-                    SelectablePonies.Where(Function(pb) pb.Directory <> "Random Pony"))
+                Dim remainingPonyBases = ponyBases.ToList()
                 If Options.NoRandomDuplicates Then
                     remainingPonyBases.RemoveAll(Function(pb) ponyBasesWanted.Any(Function(t) t.Item1 = pb.Directory))
                 End If
@@ -842,16 +844,6 @@ Public Class Main
 #End If
         End Try
     End Sub
-
-    Private Function FindPonyBaseByDirectory(directory As String) As PonyBase
-        For Each base As PonyBase In SelectablePonies
-            If base.Directory = directory Then
-                Return base
-            End If
-        Next
-
-        Return Nothing
-    End Function
 
     ''' <summary>
     ''' After all of the ponies, and all of their interactions are loaded, we need to go through and see
@@ -937,7 +929,7 @@ Public Class Main
             ponyViewer.LoadImages(images, loaded)
         End If
 
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, OperatingSystemInfo.IsMacOSX)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponyBases, randomPony, OperatingSystemInfo.IsMacOSX)
         Pony.CurrentViewer = ponyViewer
         Pony.CurrentAnimator = animator
     End Sub
@@ -1050,7 +1042,7 @@ Public Class Main
     ''' Resets pony selection related controls, which will require them to be reloaded from disk.
     ''' </summary>
     Private Sub ResetPonySelection()
-        SelectablePonies.Clear()
+        ponyBases.Clear()
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
         PonySelectionPanel.SuspendLayout()
@@ -1107,6 +1099,13 @@ Public Class Main
     Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
         AnimationTimer.Enabled = Visible AndAlso Not loading
     End Sub
+
+    Private Iterator Function RandomPlusPonyBases() As IEnumerable(Of PonyBase)
+        Yield randomPony
+        For Each PonyBase In ponyBases
+            Yield PonyBase
+        Next
+    End Function
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = loading

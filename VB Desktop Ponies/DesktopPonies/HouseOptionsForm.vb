@@ -7,7 +7,7 @@ Public Class HouseOptionsForm
     Dim houseImage As Image
     Dim doorLocation As Point
 
-    Friend Sub New(_house As House)
+    Friend Sub New(_house As House, ponyBases As IEnumerable(Of PonyBase))
         InitializeComponent()
         Icon = My.Resources.Twilight
 
@@ -31,7 +31,7 @@ Public Class HouseOptionsForm
         DoorLocation_Label.Text = doorLocation.ToString()
 
         Visitors_CheckedListBox.Items.Clear()
-        For Each selectablePony In Main.Instance.SelectablePonies
+        For Each selectablePony In ponyBases
             Visitors_CheckedListBox.Items.Add(selectablePony.Directory)
         Next
 

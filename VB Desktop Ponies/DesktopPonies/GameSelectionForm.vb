@@ -5,10 +5,12 @@ Public Class GameSelectionForm
     Private game As Game
     Private team1 As Game.Team
     Private team2 As Game.Team
+    Private ponyBases As PonyBase()
 
-    Public Sub New()
+    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
         InitializeComponent()
         Icon = My.Resources.Twilight
+        ponyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
     End Sub
 
     Private Sub GameSelectionForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -36,17 +38,27 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Dim ponyImageList As New ImageList() With {.ImageSize = New Size(75, 75)}
-        For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-            ponyImageList.Images.Add(CType(ponyPanel.GetPonyImage(0).Image.Clone(), Bitmap))
+        Const size = 75
+        Dim ponyImageList As New ImageList() With {.ImageSize = New Size(size, size)}
+        For Each ponyBase In ponyBases
+            Dim imagePath = ponyBase.Behaviors(0).RightImagePath
+
+            Dim dstImage = New Bitmap(size, size)
+            Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
+                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                g.Clear(Me.PonyList.BackColor)
+                g.DrawImage(srcImage, 0, 0, size, size)
+            End Using
+
+            ponyImageList.Images.Add(dstImage)
         Next
 
         PonyList.LargeImageList = ponyImageList
         PonyList.SmallImageList = ponyImageList
 
         Dim ponycount As Integer = 0
-        For Each Pony In Main.Instance.SelectablePonies
-            PonyList.Items.Add(New ListViewItem(Pony.Directory, ponycount))
+        For Each ponyBase In ponyBases
+            PonyList.Items.Add(New ListViewItem(ponyBase.Directory, ponycount))
             ponycount += 1
         Next
 
@@ -169,15 +181,10 @@ Public Class GameSelectionForm
         End If
 
         Dim selection As Integer = PonyList.SelectedIndices(0)
-
-        If Main.Instance.SelectablePonies(PonyList.SelectedIndices(0)).Directory = "Random Pony" Then
-
-            Do Until Main.Instance.SelectablePonies(selection).Directory <> "Random Pony"
-                selection = Rng.Next(Main.Instance.SelectablePonies.Count)
-            Loop
-
-        End If
-        Dim pony = New Pony(Main.Instance.SelectablePonies(selection))
+        Do While ponyBases(selection).Directory = "Random Pony"
+            selection = Rng.Next(ponyBases.Count)
+        Loop
+        Dim pony = New Pony(ponyBases(selection))
 
         Dim empty_spot_found = False
 

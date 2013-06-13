@@ -30,7 +30,7 @@ Public Class PonyEditorForm2
         End Get
     End Property
 
-    Public Sub New()
+    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
         InitializeComponent()
         Icon = My.Resources.Twilight
         DocumentsView.PathSeparator = Path.DirectorySeparatorChar
@@ -92,6 +92,12 @@ Public Class PonyEditorForm2
                                  EditorProgressBar.Value += 1
                              End Sub)
         Next
+        worker.QueueTask(Sub()
+                             Dim basesCopy = bases.Values.ToArray()
+                             For Each base In bases.Values
+                                 base.LoadInteractions(basesCopy)
+                             Next
+                         End Sub)
         worker.QueueTask(Sub()
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 0

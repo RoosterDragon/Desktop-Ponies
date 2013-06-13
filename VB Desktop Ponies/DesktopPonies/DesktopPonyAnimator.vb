@@ -5,6 +5,8 @@ Public Class DesktopPonyAnimator
 
     Protected Property ExitWhenNoSprites As Boolean = True
 
+    Private randomPony As PonyBase
+    Private ponyBases As PonyBase()
     Private ponyMenu As ISimpleContextMenu
     Private houseMenu As ISimpleContextMenu
     Private selectedHouse As House
@@ -37,7 +39,8 @@ Public Class DesktopPonyAnimator
                                                    Return a.Region.Bottom - b.Region.Bottom
                                                End Function
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite), createDesktopControlForm As Boolean)
+    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                   ponyBaseCollection As IEnumerable(Of PonyBase), randomPonyBase As PonyBase, createDesktopControlForm As Boolean)
         MyBase.New(spriteViewer, spriteCollection)
         MaximumFramesPerSecond = 30
         Viewer.WindowTitle = "Desktop Ponies"
@@ -54,6 +57,9 @@ Public Class DesktopPonyAnimator
             AddHandler Sprites.ItemRemoved, AddressOf ControlFormItemRemoved
             AddHandler Sprites.ItemsRemoved, AddressOf ControlFormItemsRemoved
         End If
+
+        ponyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
+        randomPony = randomPonyBase
 
         CreatePonyMenu()
         CreateHouseMenu()
@@ -164,7 +170,7 @@ Public Class DesktopPonyAnimator
         For Each sprite In Sprites
             Dim house = TryCast(sprite, House)
             If house Is Nothing Then Continue For
-            house.Cycle(ElapsedTime)
+            house.Cycle(ElapsedTime, ponyBases)
         Next
 
         If Reference.InPreviewMode Then
@@ -348,7 +354,7 @@ Public Class DesktopPonyAnimator
                             If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
                                 selectedHouse.HouseBase.OptionsForm.BringToFront()
                             Else
-                                Using houseForm As New HouseOptionsForm(selectedHouse)
+                                Using houseForm As New HouseOptionsForm(selectedHouse, ponyBases)
                                     selectedHouse.HouseBase.OptionsForm = houseForm
                                     houseForm.ShowDialog()
                                     houseForm.BringToFront()
@@ -371,14 +377,14 @@ Public Class DesktopPonyAnimator
 
         For Each tag As String In Main.Instance.FilterOptionsBox.Items
             Dim ponyList = New List(Of ISimpleContextMenuItem)
-            For Each loopPony In Main.Instance.SelectablePonies
-                Dim pony = loopPony
-                For Each ponyTag In pony.Tags
+            Dim bases As IEnumerable(Of PonyBase) = ponyBases
+            If randomPony IsNot Nothing Then bases = {randomPony}.Union(ponyBases)
+            For Each loopPonyBase In bases
+                Dim ponyBase = loopPonyBase
+                For Each ponyTag In ponyBase.Tags
                     If String.Equals(tag, ponyTag, StringComparison.OrdinalIgnoreCase) OrElse
-                        (pony.Tags.Count = 0 AndAlso tag = "Not Tagged") Then
-                        ponyList.Add(New SimpleContextMenuItem(pony.Directory, Sub(sender, e)
-                                                                                   AddPonySelection(pony.Directory)
-                                                                               End Sub))
+                        (ponyBase.Tags.Count = 0 AndAlso tag = "Not Tagged") Then
+                        ponyList.Add(New SimpleContextMenuItem(ponyBase.Directory, Sub() AddPonySelection(ponyBase.Directory)))
                     End If
                 Next
             Next
@@ -405,19 +411,15 @@ Public Class DesktopPonyAnimator
 
     Friend Sub AddPonySelection(ponyName As String)
         Main.Instance.SmartInvoke(Sub()
-                                      Dim pony_to_add = ponyName
-
-                                      If pony_to_add = "Random Pony" Then
-                                          Dim selection = Rng.Next(Main.Instance.SelectablePonies.Count)
-
-                                          pony_to_add = Main.Instance.SelectablePonies(selection).Directory
-
-                                          If pony_to_add = "Random Pony" Then
-                                              pony_to_add = Main.Instance.SelectablePonies(selection + 1).Directory
+                                      If ponyName = "Random Pony" Then
+                                          Dim selection = Rng.Next(ponyBases.Count)
+                                          ponyName = ponyBases(selection).Directory
+                                          If ponyName = "Random Pony" Then
+                                              ponyName = ponyBases(0).Directory
                                           End If
                                       End If
-                                      For Each ponyBase In Main.Instance.SelectablePonies
-                                          If ponyBase.Directory = pony_to_add Then
+                                      For Each ponyBase In ponyBases
+                                          If ponyBase.Directory = ponyName Then
                                               Dim newPony = New Pony(ponyBase)
                                               AddPony(newPony)
                                           End If

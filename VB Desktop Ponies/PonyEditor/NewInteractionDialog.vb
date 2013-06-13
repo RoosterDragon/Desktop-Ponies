@@ -111,7 +111,7 @@ Public Class NewInteractionDialog
                                                       targetsActivated, _
                                                       behaviorlist, _
                                                       CInt(reactivationDelay), _
-                                                      False)
+                                                      False, m_editor.PonyBases)
 
         MessageBox.Show(Me, "Important note:" & Environment.NewLine &
                         "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
@@ -135,7 +135,7 @@ Public Class NewInteractionDialog
                 Behaviors_Box.Items.Add(item)
             Next
 
-            For Each Pony In Main.Instance.SelectablePonies
+            For Each Pony In m_editor.ponyBases
                 Targets_Box.Items.Add(Pony.Directory)
             Next
 

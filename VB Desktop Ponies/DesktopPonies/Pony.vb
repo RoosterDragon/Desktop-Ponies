@@ -39,8 +39,6 @@ Public Class MutablePonyBase
 
     Public Sub New(directory As String)
         LoadFromIni(directory)
-        ' Loading interactions now assumes mutable bases are created only when the main form is around.
-        LoadInteractions()
     End Sub
 
     ''' <summary>
@@ -100,9 +98,10 @@ Public Class MutablePonyBase
 
     Public Overloads Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
                    target_list As String, target_selection As Interaction.TargetActivation, _
-                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean)
+                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
+                   ponyBases As IEnumerable(Of PonyBase))
         MyBase.AddInteraction(interaction_name, name, probability, proximity,
-                              target_list, target_selection, behaviorlist, repeat_delay, displaywarnings)
+                              target_list, target_selection, behaviorlist, repeat_delay, displaywarnings, ponyBases)
     End Sub
 End Class
 
@@ -684,16 +683,16 @@ Public Class PonyBase
         End Using
     End Sub
 
-    Public Sub LoadInteractions()
+    Public Sub LoadInteractions(ponyBases As IEnumerable(Of PonyBase))
         If Not Options.PonyInteractionsEnabled Then Return
         Dim displaywarnings =
             Options.DisplayPonyInteractionsErrors AndAlso
             Not Reference.AutoStarted AndAlso
             Not Reference.InScreensaverMode
-        LoadInteractions(displaywarnings)
+        LoadInteractions(ponyBases, displaywarnings)
     End Sub
 
-    Private Sub LoadInteractions(Optional displayWarnings As Boolean = True)
+    Private Sub LoadInteractions(ponyBases As IEnumerable(Of PonyBase), Optional displayWarnings As Boolean = True)
         If Not File.Exists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)) Then
             Options.PonyInteractionsExist = False
             Exit Sub
@@ -746,7 +745,7 @@ Public Class PonyBase
                                        targetsActivated,
                                        columns(InteractionParameter.BehaviorList),
                                        repeatDelay,
-                                       displayWarnings)
+                                       displayWarnings, ponyBases)
                     Catch ex As Exception
                         If displayWarnings Then
                             My.Application.NotifyUserOfNonFatalException(ex, "Error loading interaction for Pony: " & Directory &
@@ -912,7 +911,8 @@ Public Class PonyBase
 
     Protected Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
                    target_list As String, target_selection As Interaction.TargetActivation, _
-                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean)
+                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
+                   ponyBases As IEnumerable(Of PonyBase))
         Dim new_interaction As New Interaction
 
         new_interaction.Name = interaction_name
@@ -965,18 +965,18 @@ Public Class PonyBase
 
             Dim ponyfound = False
 
-            For Each Pony In Main.Instance.SelectablePonies
+            For Each ponyBase In ponyBases
 
-                If String.Equals(Trim(target), Trim(Pony.Directory), StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(Trim(target), Trim(ponyBase.Directory), StringComparison.OrdinalIgnoreCase) Then
                     ponyfound = True
 
-                    ok_targets.Add(Pony.Directory)
+                    ok_targets.Add(ponyBase.Directory)
 
                     For Each Behavior In interaction_behaviors
 
                         Dim found = False
 
-                        For Each ponybehavior In Pony.Behaviors
+                        For Each ponybehavior In ponyBase.Behaviors
                             If String.Equals(Trim(Behavior), Trim(ponybehavior.Name), StringComparison.OrdinalIgnoreCase) Then
                                 found = True
                                 Exit For
@@ -984,9 +984,9 @@ Public Class PonyBase
                         Next
 
                         If found = False Then
-                            ok_targets.Remove(Pony.Directory)
+                            ok_targets.Remove(ponyBase.Directory)
                             If displaywarnings AndAlso Not Reference.InScreensaverMode Then
-                                MessageBox.Show("Warning: Pony " & Pony.Name & " (" & Pony.Directory & ") " &
+                                MessageBox.Show("Warning: Pony " & ponyBase.Name & " (" & ponyBase.Directory & ") " &
                                                 " does not have required behavior '" & Behavior & "' as specified in interaction " &
                                                 interaction_name & ControlChars.NewLine & "Interaction is disabled for this pony.",
                                                 "Incorrect Or Missing Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -3825,7 +3825,7 @@ Public Class House
     ''' Checks to see if it is time to deploy/recall a pony and does so. 
     ''' </summary>
     ''' <param name="currentTime">The current time.</param>
-    Friend Sub Cycle(currentTime As TimeSpan)
+    Friend Sub Cycle(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase))
 
         If currentTime - lastCycleTime > HouseBase.CycleInterval Then
             lastCycleTime = currentTime
@@ -3840,7 +3840,7 @@ Public Class House
 
             If Rng.NextDouble() < HouseBase.Bias Then
                 If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Pony.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
-                    DeployPony(Me)
+                    DeployPony(Me, ponyBases)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
                 End If
@@ -3856,7 +3856,7 @@ Public Class House
 
     End Sub
 
-    Private Sub DeployPony(instance As Effect)
+    Private Sub DeployPony(instance As Effect, ponyBases As IEnumerable(Of PonyBase))
 
         Dim choices As New List(Of String)
 
@@ -3864,7 +3864,7 @@ Public Class House
 
         For Each entry In HouseBase.Visitors
             If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
-                For Each Pony In Main.Instance.SelectablePonies
+                For Each Pony In ponyBases
                     choices.Add(Pony.Directory)
                 Next
                 all = True
@@ -3890,7 +3890,7 @@ Public Class House
 
         Dim selected_name = choices(Rng.Next(choices.Count))
 
-        For Each ponyBase In Main.Instance.SelectablePonies
+        For Each ponyBase In ponyBases
             If ponyBase.Directory = selected_name Then
 
                 Dim deployed_pony = New Pony(ponyBase)

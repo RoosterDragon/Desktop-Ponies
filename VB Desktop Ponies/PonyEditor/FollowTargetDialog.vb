@@ -94,7 +94,7 @@
 
         Follow_ComboBox.Items.Clear()
 
-        For Each Available_Pony In Main.Instance.SelectablePonies
+        For Each Available_Pony In m_editor.ponybases
             Follow_ComboBox.Items.Add(Available_Pony.Directory)
         Next
 
@@ -222,7 +222,7 @@
 
     Private Sub Follow_ComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Follow_ComboBox.SelectedIndexChanged
 
-        For Each Pony In Main.Instance.SelectablePonies
+        For Each Pony In m_editor.ponyBases
             If Pony.Directory = CStr(Follow_ComboBox.SelectedItem) Then
                 Try
                     pony_thumbnail = Image.FromFile(Pony.Behaviors(0).RightImagePath)

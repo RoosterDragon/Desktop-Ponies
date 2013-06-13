@@ -21,8 +21,8 @@ Public Class NewPonyDialog
             Exit Sub
         End If
 
-        For Each Pony In Main.Instance.SelectablePonies
-            If String.Equals(Pony.Directory, newName, StringComparison.OrdinalIgnoreCase) Then
+        For Each ponyBase In m_editor.PonyBases
+            If String.Equals(ponyBase.Directory, newName, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("A pony with this name already exists!  Please select another name or rename the other pony.")
                 Exit Sub
             End If

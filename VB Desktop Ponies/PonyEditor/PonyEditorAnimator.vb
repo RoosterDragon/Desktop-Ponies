@@ -6,8 +6,9 @@ Public Class PonyEditorAnimator
 
     Private m_editor As PonyEditor
 
-    Public Sub New(editor As PonyEditor, spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite))
-        MyBase.New(spriteViewer, spriteCollection, False)
+    Public Sub New(editor As PonyEditor, spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                   ponyBaseCollection As IEnumerable(Of PonyBase))
+        MyBase.New(spriteViewer, spriteCollection, ponyBaseCollection, Nothing, False)
         ExitWhenNoSprites = False
         m_editor = editor
         AddHandler Viewer.InterfaceClosed, Sub(sender As Object, e As EventArgs) Finish()

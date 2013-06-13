@@ -6,7 +6,7 @@ Public Class PonyEditor
     Private pe_animator As PonyEditorAnimator
     Private pe_interface As ISpriteCollectionView
 
-    Private ponyBases As PonyBase()
+    Friend PonyBases As PonyBase()
     Private ponyImageList As ImageList
     Private infoGrids As PonyInfoGrid()
     Private loaded As Boolean
@@ -66,10 +66,9 @@ Public Class PonyEditor
     End Class
 
     Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
-        Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection")
         InitializeComponent()
         Icon = My.Resources.Twilight
-        ponyBases = ponyBaseCollection.ToArray()
+        PonyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -90,7 +89,7 @@ Public Class PonyEditor
             'add all possible ponies to the selection window.
             Const size = 50
             ponyImageList = New ImageList() With {.ImageSize = New Size(size, size)}
-            For Each ponyBase In ponyBases
+            For Each ponyBase In PonyBases
                 Dim imagePath = ponyBase.Behaviors(0).LeftImagePath
 
                 Dim dstImage = New Bitmap(size, size)
@@ -106,8 +105,8 @@ Public Class PonyEditor
             PonyList.SmallImageList = ponyImageList
 
             PonyList.SuspendLayout()
-            For i = 0 To ponyBases.Length - 1
-                PonyList.Items.Add(New ListViewItem(ponyBases(i).Directory, i) With {.Tag = ponyBases(i)})
+            For i = 0 To PonyBases.Length - 1
+                PonyList.Items.Add(New ListViewItem(PonyBases(i).Directory, i) With {.Tag = PonyBases(i)})
             Next
             PonyList.ResumeLayout()
 
@@ -134,7 +133,7 @@ Public Class PonyEditor
 
         pe_interface = Options.GetInterface()
         pe_interface.Topmost = True
-        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing)
+        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, PonyBases)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
     End Sub
@@ -178,6 +177,7 @@ Public Class PonyEditor
             New Threading.Tasks.Task(
             Sub()
                 _previewPony = New Pony(New MutablePonyBase(directory))
+                PreviewPonyBase.LoadInteractions(PonyBases)
                 If PreviewPony.Behaviors.Count = 0 Then
                     PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
                 End If
@@ -507,7 +507,7 @@ Public Class PonyEditor
                 End If
             Next
 
-            For Each ponyBase In ponyBases
+            For Each ponyBase In PonyBases
                 If String.Equals(Trim(ponyBase.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Dim new_pony = New Pony(ponyBase)
                     new_pony.Teleport()
@@ -1262,7 +1262,7 @@ Public Class PonyEditor
     End Sub
 
     Friend Function GetAllEffects() As EffectBase()
-        Return ponyBases.SelectMany(Function(pb) pb.Behaviors).SelectMany(Function(b) b.Effects).ToArray()
+        Return PonyBases.SelectMany(Function(pb) pb.Behaviors).SelectMany(Function(b) b.Effects).ToArray()
     End Function
 
     Private Function PreviewPonyEffects() As IEnumerable(Of EffectBase)
