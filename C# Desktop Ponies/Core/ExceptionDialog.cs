@@ -55,7 +55,10 @@
         {
             InitializeComponent();
             ExceptionText.Text = ex.ToString();
-            ExceptionText.Size = ExceptionText.GetPreferredSize(Size.Empty);
+            if (OperatingSystemInfo.IsWindows)
+                ExceptionText.Size = ExceptionText.GetPreferredSize(Size.Empty);
+            else
+                ExceptionText.Size = new Size(750, 350);
             MessageLabel.Text = text;
             Text = caption;
             Icon = fatal ? SystemIcons.Error : SystemIcons.Exclamation;

@@ -70,15 +70,22 @@ Public Class IdleWorker
     ''' </summary>
     ''' <param name="task">The task which will be executed once other queued tasks have been processed and the UI thread is idle.</param>
     Public Sub QueueTask(task As MethodInvoker)
-        SyncLock tasks
-            tasks.Enqueue(task)
-            ' If there were previously no tasks in the queue, the application may already be an an idle state.
-            ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is cleared.
-            If tasks.Count = 1 Then
-                asyncResult = control.BeginInvoke(DummyCallback)
-                empty.Reset()
-            End If
-        End SyncLock
+        If OperatingSystemInfo.IsWindows Then
+            SyncLock tasks
+                tasks.Enqueue(task)
+                ' If there were previously no tasks in the queue, the application may already be an an idle state.
+                ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is cleared.
+                If tasks.Count = 1 Then
+                    asyncResult = control.BeginInvoke(DummyCallback)
+                    empty.Reset()
+                End If
+            End SyncLock
+        Else
+            ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This is
+            ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks.  This becomes an issue
+            ' if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
+            control.BeginInvoke(task)
+        End If
     End Sub
 
     ''' <summary>

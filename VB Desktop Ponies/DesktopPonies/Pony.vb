@@ -673,8 +673,9 @@ Public Class PonyBase
 
                     If Not found_behavior Then
                         MessageBox.Show(
-                            "Could not find behavior for effect " & columns(1) & " for pony " & Name & ":" & ControlChars.NewLine &
-                            effectLine,
+                            String.Format(
+                                "Pony '{0}' has an effect '{1}' which references a behavior named '{2}', " &
+                                "but this behavior does not exist.{3}{4}", Name, columns(1), columns(2), Environment.NewLine, effectLine),
                             "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     End If
 
@@ -1470,9 +1471,8 @@ Public Class Pony
 
     Private Shared audioErrorShown As Boolean
 
-#Region "DEBUG conditional code"
-#If DEBUG Then
-    Friend UpdateRecord As New List(Of Record)()
+#Region "Update Records"
+    Friend UpdateRecord As List(Of Record)
 
     Friend Structure Record
         Public Time As TimeSpan
@@ -1485,24 +1485,19 @@ Public Class Pony
             Return String.Format(CultureInfo.CurrentCulture, "{0:000.000} {1}", Time.TotalSeconds, Info)
         End Function
     End Structure
-#End If
 
-    <Diagnostics.Conditional("DEBUG")>
     Private Sub AddUpdateRecord(info As String)
-#If DEBUG Then
+        If UpdateRecord Is Nothing Then Return
         SyncLock UpdateRecord
             UpdateRecord.Add(New Record(internalTime, info))
         End SyncLock
-#End If
     End Sub
 
-    <Diagnostics.Conditional("DEBUG")>
     Private Sub AddUpdateRecord(info As String, info2 As String)
-#If DEBUG Then
+        If UpdateRecord Is Nothing Then Return
         SyncLock UpdateRecord
             UpdateRecord.Add(New Record(internalTime, info + info2))
         End SyncLock
-#End If
     End Sub
 #End Region
 
@@ -1742,6 +1737,7 @@ Public Class Pony
     Public Sub New(base As PonyBase)
         Argument.EnsureNotNull(base, "base")
         _base = base
+        If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
     End Sub
 
     ''' <summary>
@@ -2205,8 +2201,10 @@ Public Class Pony
     Friend Sub Move()
         Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
 
-        destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord,
-                                      CurrentBehavior.OriginalDestinationYCoord)
+        If Not PlayingGame Then
+            destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord,
+                                          CurrentBehavior.OriginalDestinationYCoord)
+        End If
 
         blocked = False
 

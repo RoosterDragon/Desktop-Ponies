@@ -69,6 +69,15 @@ Change Log
 
 Latest changes:
 
+v1.42.2.6:
+- Fixed destination offsets for behaviors. These work again.
+- Game selection interface redesigned.
+- Pony editor should be slightly snappier when switching between ponies, and on initial load.
+- Pony editor will now prevent some invalid characters in names.
+- Added some Windows-only options for showing the ponies in the taskbar, and a performance graph.
+- Added option for showing pony logs. These might prove useful to people designing behaviors and interactions for seeing what the pony is doing.
+- Error handling improved.
+
 v1.42.2.5:
 - Added Prince Blueblood by Bot-chan.
 - Fixed some dodgy loading of interactions.

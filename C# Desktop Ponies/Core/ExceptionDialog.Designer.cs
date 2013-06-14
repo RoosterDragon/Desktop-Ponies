@@ -49,6 +49,7 @@
             this.ExceptionText.Multiline = true;
             this.ExceptionText.Name = "ExceptionText";
             this.ExceptionText.ReadOnly = true;
+            this.ExceptionText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.ExceptionText.Size = new System.Drawing.Size(254, 20);
             this.ExceptionText.TabIndex = 1;
             // 

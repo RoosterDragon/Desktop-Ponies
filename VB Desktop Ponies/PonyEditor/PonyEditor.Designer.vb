@@ -93,23 +93,22 @@ Partial Class PonyEditor
         Me.GroupLabel = New System.Windows.Forms.Label()
         Me.SelectPonyGroup = New System.Windows.Forms.GroupBox()
         Me.PonyPreviewGroup = New System.Windows.Forms.GroupBox()
-        Me.LayoutContainer = New System.Windows.Forms.SplitContainer()
         Me.GridTable = New System.Windows.Forms.TableLayoutPanel()
         Me.InteractionsPanel = New System.Windows.Forms.Panel()
         Me.EffectsPanel = New System.Windows.Forms.Panel()
         Me.SpeechesPanel = New System.Windows.Forms.Panel()
         Me.BehaviorsPanel = New System.Windows.Forms.Panel()
+        Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.PonyPanel = New System.Windows.Forms.Panel()
         Me.SelectPonyGroup.SuspendLayout()
         Me.PonyPreviewGroup.SuspendLayout()
-        CType(Me.LayoutContainer, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.LayoutContainer.Panel1.SuspendLayout()
-        Me.LayoutContainer.Panel2.SuspendLayout()
-        Me.LayoutContainer.SuspendLayout()
         Me.GridTable.SuspendLayout()
         Me.InteractionsPanel.SuspendLayout()
         Me.EffectsPanel.SuspendLayout()
         Me.SpeechesPanel.SuspendLayout()
         Me.BehaviorsPanel.SuspendLayout()
+        Me.LayoutTable.SuspendLayout()
+        Me.PonyPanel.SuspendLayout()
         Me.SuspendLayout()
         '
         'PonyPreviewPanel
@@ -118,7 +117,7 @@ Partial Class PonyEditor
         Me.PonyPreviewPanel.Dock = System.Windows.Forms.DockStyle.Fill
         Me.PonyPreviewPanel.Location = New System.Drawing.Point(3, 16)
         Me.PonyPreviewPanel.Name = "PonyPreviewPanel"
-        Me.PonyPreviewPanel.Size = New System.Drawing.Size(861, 206)
+        Me.PonyPreviewPanel.Size = New System.Drawing.Size(855, 199)
         Me.PonyPreviewPanel.TabIndex = 0
         '
         'PonyList
@@ -135,7 +134,7 @@ Partial Class PonyEditor
         Me.PonyList.MultiSelect = False
         Me.PonyList.Name = "PonyList"
         Me.PonyList.ShowGroups = False
-        Me.PonyList.Size = New System.Drawing.Size(117, 226)
+        Me.PonyList.Size = New System.Drawing.Size(117, 216)
         Me.PonyList.TabIndex = 0
         Me.PonyList.UseCompatibleStateImageBehavior = False
         '
@@ -147,7 +146,7 @@ Partial Class PonyEditor
         '
         Me.NewPonyButton.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.NewPonyButton.Location = New System.Drawing.Point(6, 251)
+        Me.NewPonyButton.Location = New System.Drawing.Point(6, 241)
         Me.NewPonyButton.Name = "NewPonyButton"
         Me.NewPonyButton.Size = New System.Drawing.Size(117, 21)
         Me.NewPonyButton.TabIndex = 1
@@ -157,7 +156,7 @@ Partial Class PonyEditor
         'PonyName
         '
         Me.PonyName.Anchor = System.Windows.Forms.AnchorStyles.Bottom
-        Me.PonyName.Location = New System.Drawing.Point(288, 232)
+        Me.PonyName.Location = New System.Drawing.Point(281, 228)
         Me.PonyName.Name = "PonyName"
         Me.PonyName.Size = New System.Drawing.Size(125, 20)
         Me.PonyName.TabIndex = 3
@@ -166,7 +165,7 @@ Partial Class PonyEditor
         '
         Me.PonyNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.PonyNameLabel.AutoSize = True
-        Me.PonyNameLabel.Location = New System.Drawing.Point(244, 235)
+        Me.PonyNameLabel.Location = New System.Drawing.Point(237, 231)
         Me.PonyNameLabel.Name = "PonyNameLabel"
         Me.PonyNameLabel.Size = New System.Drawing.Size(38, 13)
         Me.PonyNameLabel.TabIndex = 2
@@ -184,7 +183,7 @@ Partial Class PonyEditor
         Me.BehaviorsGrid.Location = New System.Drawing.Point(3, 32)
         Me.BehaviorsGrid.MultiSelect = False
         Me.BehaviorsGrid.Name = "BehaviorsGrid"
-        Me.BehaviorsGrid.Size = New System.Drawing.Size(996, 180)
+        Me.BehaviorsGrid.Size = New System.Drawing.Size(990, 179)
         Me.BehaviorsGrid.TabIndex = 1
         '
         'colBehaviorActivate
@@ -319,7 +318,7 @@ Partial Class PonyEditor
         Me.SpeechesGrid.Location = New System.Drawing.Point(3, 32)
         Me.SpeechesGrid.MultiSelect = False
         Me.SpeechesGrid.Name = "SpeechesGrid"
-        Me.SpeechesGrid.Size = New System.Drawing.Size(323, 140)
+        Me.SpeechesGrid.Size = New System.Drawing.Size(322, 139)
         Me.SpeechesGrid.TabIndex = 1
         '
         'colSpeechName
@@ -379,7 +378,7 @@ Partial Class PonyEditor
         Me.InteractionsGrid.Location = New System.Drawing.Point(3, 32)
         Me.InteractionsGrid.MultiSelect = False
         Me.InteractionsGrid.Name = "InteractionsGrid"
-        Me.InteractionsGrid.Size = New System.Drawing.Size(326, 140)
+        Me.InteractionsGrid.Size = New System.Drawing.Size(322, 139)
         Me.InteractionsGrid.TabIndex = 1
         '
         'colInteractionName
@@ -472,7 +471,7 @@ Partial Class PonyEditor
         Me.EffectsGrid.Location = New System.Drawing.Point(3, 32)
         Me.EffectsGrid.MultiSelect = False
         Me.EffectsGrid.Name = "EffectsGrid"
-        Me.EffectsGrid.Size = New System.Drawing.Size(323, 140)
+        Me.EffectsGrid.Size = New System.Drawing.Size(322, 139)
         Me.EffectsGrid.TabIndex = 1
         '
         'colEffectName
@@ -576,7 +575,7 @@ Partial Class PonyEditor
         '
         Me.CurrentBehaviorLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.CurrentBehaviorLabel.AutoSize = True
-        Me.CurrentBehaviorLabel.Location = New System.Drawing.Point(750, 235)
+        Me.CurrentBehaviorLabel.Location = New System.Drawing.Point(743, 231)
         Me.CurrentBehaviorLabel.Name = "CurrentBehaviorLabel"
         Me.CurrentBehaviorLabel.Size = New System.Drawing.Size(89, 13)
         Me.CurrentBehaviorLabel.TabIndex = 9
@@ -586,7 +585,7 @@ Partial Class PonyEditor
         '
         Me.CurrentBehaviorValueLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.CurrentBehaviorValueLabel.AutoSize = True
-        Me.CurrentBehaviorValueLabel.Location = New System.Drawing.Point(845, 235)
+        Me.CurrentBehaviorValueLabel.Location = New System.Drawing.Point(838, 231)
         Me.CurrentBehaviorValueLabel.Name = "CurrentBehaviorValueLabel"
         Me.CurrentBehaviorValueLabel.Size = New System.Drawing.Size(27, 13)
         Me.CurrentBehaviorValueLabel.TabIndex = 10
@@ -596,7 +595,7 @@ Partial Class PonyEditor
         '
         Me.TimeLeftLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.TimeLeftLabel.AutoSize = True
-        Me.TimeLeftLabel.Location = New System.Drawing.Point(725, 262)
+        Me.TimeLeftLabel.Location = New System.Drawing.Point(718, 258)
         Me.TimeLeftLabel.Name = "TimeLeftLabel"
         Me.TimeLeftLabel.Size = New System.Drawing.Size(54, 13)
         Me.TimeLeftLabel.TabIndex = 11
@@ -606,7 +605,7 @@ Partial Class PonyEditor
         '
         Me.TimeLeftValueLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.TimeLeftValueLabel.AutoSize = True
-        Me.TimeLeftValueLabel.Location = New System.Drawing.Point(785, 262)
+        Me.TimeLeftValueLabel.Location = New System.Drawing.Point(778, 258)
         Me.TimeLeftValueLabel.Name = "TimeLeftValueLabel"
         Me.TimeLeftValueLabel.Size = New System.Drawing.Size(27, 13)
         Me.TimeLeftValueLabel.TabIndex = 12
@@ -624,7 +623,7 @@ Partial Class PonyEditor
         'NewBehaviorButton
         '
         Me.NewBehaviorButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.NewBehaviorButton.Location = New System.Drawing.Point(909, 3)
+        Me.NewBehaviorButton.Location = New System.Drawing.Point(903, 3)
         Me.NewBehaviorButton.Name = "NewBehaviorButton"
         Me.NewBehaviorButton.Size = New System.Drawing.Size(90, 23)
         Me.NewBehaviorButton.TabIndex = 3
@@ -634,7 +633,7 @@ Partial Class PonyEditor
         'NewSpeechButton
         '
         Me.NewSpeechButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.NewSpeechButton.Location = New System.Drawing.Point(236, 3)
+        Me.NewSpeechButton.Location = New System.Drawing.Point(235, 3)
         Me.NewSpeechButton.Name = "NewSpeechButton"
         Me.NewSpeechButton.Size = New System.Drawing.Size(90, 23)
         Me.NewSpeechButton.TabIndex = 3
@@ -644,7 +643,7 @@ Partial Class PonyEditor
         'NewEffectButton
         '
         Me.NewEffectButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.NewEffectButton.Location = New System.Drawing.Point(236, 3)
+        Me.NewEffectButton.Location = New System.Drawing.Point(235, 3)
         Me.NewEffectButton.Name = "NewEffectButton"
         Me.NewEffectButton.Size = New System.Drawing.Size(90, 23)
         Me.NewEffectButton.TabIndex = 3
@@ -654,7 +653,7 @@ Partial Class PonyEditor
         'NewInteractionButton
         '
         Me.NewInteractionButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.NewInteractionButton.Location = New System.Drawing.Point(239, 3)
+        Me.NewInteractionButton.Location = New System.Drawing.Point(235, 3)
         Me.NewInteractionButton.Name = "NewInteractionButton"
         Me.NewInteractionButton.Size = New System.Drawing.Size(90, 23)
         Me.NewInteractionButton.TabIndex = 3
@@ -665,7 +664,7 @@ Partial Class PonyEditor
         '
         Me.SpeechesSwapButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.SpeechesSwapButton.BackColor = System.Drawing.Color.GreenYellow
-        Me.SpeechesSwapButton.Location = New System.Drawing.Point(155, 3)
+        Me.SpeechesSwapButton.Location = New System.Drawing.Point(154, 3)
         Me.SpeechesSwapButton.Name = "SpeechesSwapButton"
         Me.SpeechesSwapButton.Size = New System.Drawing.Size(75, 23)
         Me.SpeechesSwapButton.TabIndex = 2
@@ -676,7 +675,7 @@ Partial Class PonyEditor
         '
         Me.EffectsSwapButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.EffectsSwapButton.BackColor = System.Drawing.Color.GreenYellow
-        Me.EffectsSwapButton.Location = New System.Drawing.Point(155, 3)
+        Me.EffectsSwapButton.Location = New System.Drawing.Point(154, 3)
         Me.EffectsSwapButton.Name = "EffectsSwapButton"
         Me.EffectsSwapButton.Size = New System.Drawing.Size(75, 23)
         Me.EffectsSwapButton.TabIndex = 2
@@ -687,7 +686,7 @@ Partial Class PonyEditor
         '
         Me.InteractionsSwapButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.InteractionsSwapButton.BackColor = System.Drawing.Color.GreenYellow
-        Me.InteractionsSwapButton.Location = New System.Drawing.Point(158, 3)
+        Me.InteractionsSwapButton.Location = New System.Drawing.Point(154, 3)
         Me.InteractionsSwapButton.Name = "InteractionsSwapButton"
         Me.InteractionsSwapButton.Size = New System.Drawing.Size(75, 23)
         Me.InteractionsSwapButton.TabIndex = 2
@@ -698,7 +697,7 @@ Partial Class PonyEditor
         '
         Me.BehaviorsSwapButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.BehaviorsSwapButton.BackColor = System.Drawing.Color.GreenYellow
-        Me.BehaviorsSwapButton.Location = New System.Drawing.Point(828, 3)
+        Me.BehaviorsSwapButton.Location = New System.Drawing.Point(822, 3)
         Me.BehaviorsSwapButton.Name = "BehaviorsSwapButton"
         Me.BehaviorsSwapButton.Size = New System.Drawing.Size(75, 23)
         Me.BehaviorsSwapButton.TabIndex = 2
@@ -709,7 +708,7 @@ Partial Class PonyEditor
         '
         Me.PausePonyButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.PausePonyButton.Enabled = False
-        Me.PausePonyButton.Location = New System.Drawing.Point(631, 231)
+        Me.PausePonyButton.Location = New System.Drawing.Point(624, 227)
         Me.PausePonyButton.Name = "PausePonyButton"
         Me.PausePonyButton.Size = New System.Drawing.Size(75, 21)
         Me.PausePonyButton.TabIndex = 6
@@ -721,7 +720,7 @@ Partial Class PonyEditor
         Me.SaveButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.SaveButton.BackColor = System.Drawing.Color.IndianRed
         Me.SaveButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.SaveButton.Location = New System.Drawing.Point(419, 258)
+        Me.SaveButton.Location = New System.Drawing.Point(412, 254)
         Me.SaveButton.Name = "SaveButton"
         Me.SaveButton.Size = New System.Drawing.Size(100, 21)
         Me.SaveButton.TabIndex = 7
@@ -731,7 +730,7 @@ Partial Class PonyEditor
         'EditTagsButton
         '
         Me.EditTagsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
-        Me.EditTagsButton.Location = New System.Drawing.Point(419, 231)
+        Me.EditTagsButton.Location = New System.Drawing.Point(412, 227)
         Me.EditTagsButton.Name = "EditTagsButton"
         Me.EditTagsButton.Size = New System.Drawing.Size(75, 21)
         Me.EditTagsButton.TabIndex = 4
@@ -741,7 +740,7 @@ Partial Class PonyEditor
         'SetImageCentersButton
         '
         Me.SetImageCentersButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
-        Me.SetImageCentersButton.Location = New System.Drawing.Point(500, 231)
+        Me.SetImageCentersButton.Location = New System.Drawing.Point(493, 227)
         Me.SetImageCentersButton.Name = "SetImageCentersButton"
         Me.SetImageCentersButton.Size = New System.Drawing.Size(125, 21)
         Me.SetImageCentersButton.TabIndex = 5
@@ -753,7 +752,7 @@ Partial Class PonyEditor
         Me.RefreshButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.RefreshButton.BackColor = System.Drawing.Color.SpringGreen
         Me.RefreshButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RefreshButton.Location = New System.Drawing.Point(531, 258)
+        Me.RefreshButton.Location = New System.Drawing.Point(524, 254)
         Me.RefreshButton.Name = "RefreshButton"
         Me.RefreshButton.Size = New System.Drawing.Size(175, 21)
         Me.RefreshButton.TabIndex = 8
@@ -764,7 +763,7 @@ Partial Class PonyEditor
         '
         Me.GroupValueLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.GroupValueLabel.AutoSize = True
-        Me.GroupValueLabel.Location = New System.Drawing.Point(869, 262)
+        Me.GroupValueLabel.Location = New System.Drawing.Point(862, 258)
         Me.GroupValueLabel.Name = "GroupValueLabel"
         Me.GroupValueLabel.Size = New System.Drawing.Size(27, 13)
         Me.GroupValueLabel.TabIndex = 14
@@ -774,7 +773,7 @@ Partial Class PonyEditor
         '
         Me.GroupLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.GroupLabel.AutoSize = True
-        Me.GroupLabel.Location = New System.Drawing.Point(824, 262)
+        Me.GroupLabel.Location = New System.Drawing.Point(817, 258)
         Me.GroupLabel.Name = "GroupLabel"
         Me.GroupLabel.Size = New System.Drawing.Size(39, 13)
         Me.GroupLabel.TabIndex = 13
@@ -788,7 +787,7 @@ Partial Class PonyEditor
         Me.SelectPonyGroup.Controls.Add(Me.PonyList)
         Me.SelectPonyGroup.Location = New System.Drawing.Point(3, 3)
         Me.SelectPonyGroup.Name = "SelectPonyGroup"
-        Me.SelectPonyGroup.Size = New System.Drawing.Size(129, 282)
+        Me.SelectPonyGroup.Size = New System.Drawing.Size(129, 272)
         Me.SelectPonyGroup.TabIndex = 0
         Me.SelectPonyGroup.TabStop = False
         Me.SelectPonyGroup.Text = "Select Pony"
@@ -801,45 +800,10 @@ Partial Class PonyEditor
         Me.PonyPreviewGroup.Controls.Add(Me.PonyPreviewPanel)
         Me.PonyPreviewGroup.Location = New System.Drawing.Point(138, 3)
         Me.PonyPreviewGroup.Name = "PonyPreviewGroup"
-        Me.PonyPreviewGroup.Size = New System.Drawing.Size(867, 225)
+        Me.PonyPreviewGroup.Size = New System.Drawing.Size(861, 218)
         Me.PonyPreviewGroup.TabIndex = 1
         Me.PonyPreviewGroup.TabStop = False
         Me.PonyPreviewGroup.Text = "Pony Preview"
-        '
-        'LayoutContainer
-        '
-        Me.LayoutContainer.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.LayoutContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel1
-        Me.LayoutContainer.Location = New System.Drawing.Point(0, 0)
-        Me.LayoutContainer.Name = "LayoutContainer"
-        Me.LayoutContainer.Orientation = System.Windows.Forms.Orientation.Horizontal
-        '
-        'LayoutContainer.Panel1
-        '
-        Me.LayoutContainer.Panel1.Controls.Add(Me.SelectPonyGroup)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.GroupValueLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.PonyPreviewGroup)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.GroupLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.PonyNameLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.RefreshButton)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.PonyName)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.SetImageCentersButton)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.CurrentBehaviorLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.EditTagsButton)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.CurrentBehaviorValueLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.SaveButton)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.TimeLeftLabel)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.PausePonyButton)
-        Me.LayoutContainer.Panel1.Controls.Add(Me.TimeLeftValueLabel)
-        Me.LayoutContainer.Panel1MinSize = 230
-        '
-        'LayoutContainer.Panel2
-        '
-        Me.LayoutContainer.Panel2.Controls.Add(Me.GridTable)
-        Me.LayoutContainer.Panel2MinSize = 300
-        Me.LayoutContainer.Size = New System.Drawing.Size(1008, 690)
-        Me.LayoutContainer.SplitterDistance = 284
-        Me.LayoutContainer.TabIndex = 0
         '
         'GridTable
         '
@@ -852,12 +816,12 @@ Partial Class PonyEditor
         Me.GridTable.Controls.Add(Me.SpeechesPanel, 0, 1)
         Me.GridTable.Controls.Add(Me.BehaviorsPanel, 0, 0)
         Me.GridTable.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.GridTable.Location = New System.Drawing.Point(0, 0)
+        Me.GridTable.Location = New System.Drawing.Point(3, 287)
         Me.GridTable.Name = "GridTable"
         Me.GridTable.RowCount = 2
         Me.GridTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55.0!))
         Me.GridTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45.0!))
-        Me.GridTable.Size = New System.Drawing.Size(1008, 402)
+        Me.GridTable.Size = New System.Drawing.Size(1002, 400)
         Me.GridTable.TabIndex = 0
         '
         'InteractionsPanel
@@ -867,9 +831,9 @@ Partial Class PonyEditor
         Me.InteractionsPanel.Controls.Add(Me.InteractionsGrid)
         Me.InteractionsPanel.Controls.Add(Me.NewInteractionButton)
         Me.InteractionsPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.InteractionsPanel.Location = New System.Drawing.Point(673, 224)
+        Me.InteractionsPanel.Location = New System.Drawing.Point(671, 223)
         Me.InteractionsPanel.Name = "InteractionsPanel"
-        Me.InteractionsPanel.Size = New System.Drawing.Size(332, 175)
+        Me.InteractionsPanel.Size = New System.Drawing.Size(328, 174)
         Me.InteractionsPanel.TabIndex = 3
         '
         'EffectsPanel
@@ -879,9 +843,9 @@ Partial Class PonyEditor
         Me.EffectsPanel.Controls.Add(Me.EffectsSwapButton)
         Me.EffectsPanel.Controls.Add(Me.NewEffectButton)
         Me.EffectsPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.EffectsPanel.Location = New System.Drawing.Point(338, 224)
+        Me.EffectsPanel.Location = New System.Drawing.Point(337, 223)
         Me.EffectsPanel.Name = "EffectsPanel"
-        Me.EffectsPanel.Size = New System.Drawing.Size(329, 175)
+        Me.EffectsPanel.Size = New System.Drawing.Size(328, 174)
         Me.EffectsPanel.TabIndex = 2
         '
         'SpeechesPanel
@@ -891,9 +855,9 @@ Partial Class PonyEditor
         Me.SpeechesPanel.Controls.Add(Me.SpeechesLabel)
         Me.SpeechesPanel.Controls.Add(Me.SpeechesGrid)
         Me.SpeechesPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.SpeechesPanel.Location = New System.Drawing.Point(3, 224)
+        Me.SpeechesPanel.Location = New System.Drawing.Point(3, 223)
         Me.SpeechesPanel.Name = "SpeechesPanel"
-        Me.SpeechesPanel.Size = New System.Drawing.Size(329, 175)
+        Me.SpeechesPanel.Size = New System.Drawing.Size(328, 174)
         Me.SpeechesPanel.TabIndex = 1
         '
         'BehaviorsPanel
@@ -906,8 +870,46 @@ Partial Class PonyEditor
         Me.BehaviorsPanel.Dock = System.Windows.Forms.DockStyle.Fill
         Me.BehaviorsPanel.Location = New System.Drawing.Point(3, 3)
         Me.BehaviorsPanel.Name = "BehaviorsPanel"
-        Me.BehaviorsPanel.Size = New System.Drawing.Size(1002, 215)
+        Me.BehaviorsPanel.Size = New System.Drawing.Size(996, 214)
         Me.BehaviorsPanel.TabIndex = 0
+        '
+        'LayoutTable
+        '
+        Me.LayoutTable.ColumnCount = 1
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.Controls.Add(Me.GridTable, 0, 1)
+        Me.LayoutTable.Controls.Add(Me.PonyPanel, 0, 0)
+        Me.LayoutTable.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LayoutTable.Location = New System.Drawing.Point(0, 0)
+        Me.LayoutTable.Name = "LayoutTable"
+        Me.LayoutTable.RowCount = 2
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 284.0!))
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.Size = New System.Drawing.Size(1008, 690)
+        Me.LayoutTable.TabIndex = 1
+        '
+        'PonyPanel
+        '
+        Me.PonyPanel.Controls.Add(Me.SelectPonyGroup)
+        Me.PonyPanel.Controls.Add(Me.GroupValueLabel)
+        Me.PonyPanel.Controls.Add(Me.TimeLeftValueLabel)
+        Me.PonyPanel.Controls.Add(Me.PonyPreviewGroup)
+        Me.PonyPanel.Controls.Add(Me.PausePonyButton)
+        Me.PonyPanel.Controls.Add(Me.GroupLabel)
+        Me.PonyPanel.Controls.Add(Me.TimeLeftLabel)
+        Me.PonyPanel.Controls.Add(Me.PonyNameLabel)
+        Me.PonyPanel.Controls.Add(Me.SaveButton)
+        Me.PonyPanel.Controls.Add(Me.RefreshButton)
+        Me.PonyPanel.Controls.Add(Me.CurrentBehaviorValueLabel)
+        Me.PonyPanel.Controls.Add(Me.PonyName)
+        Me.PonyPanel.Controls.Add(Me.EditTagsButton)
+        Me.PonyPanel.Controls.Add(Me.SetImageCentersButton)
+        Me.PonyPanel.Controls.Add(Me.CurrentBehaviorLabel)
+        Me.PonyPanel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PonyPanel.Location = New System.Drawing.Point(3, 3)
+        Me.PonyPanel.Name = "PonyPanel"
+        Me.PonyPanel.Size = New System.Drawing.Size(1002, 278)
+        Me.PonyPanel.TabIndex = 1
         '
         'PonyEditor
         '
@@ -915,18 +917,13 @@ Partial Class PonyEditor
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.ClientSize = New System.Drawing.Size(1008, 690)
-        Me.Controls.Add(Me.LayoutContainer)
+        Me.Controls.Add(Me.LayoutTable)
         Me.MinimumSize = New System.Drawing.Size(806, 500)
         Me.Name = "PonyEditor"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Pony Editor - Desktop Ponies"
         Me.SelectPonyGroup.ResumeLayout(False)
         Me.PonyPreviewGroup.ResumeLayout(False)
-        Me.LayoutContainer.Panel1.ResumeLayout(False)
-        Me.LayoutContainer.Panel1.PerformLayout()
-        Me.LayoutContainer.Panel2.ResumeLayout(False)
-        CType(Me.LayoutContainer, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.LayoutContainer.ResumeLayout(False)
         Me.GridTable.ResumeLayout(False)
         Me.InteractionsPanel.ResumeLayout(False)
         Me.InteractionsPanel.PerformLayout()
@@ -936,6 +933,9 @@ Partial Class PonyEditor
         Me.SpeechesPanel.PerformLayout()
         Me.BehaviorsPanel.ResumeLayout(False)
         Me.BehaviorsPanel.PerformLayout()
+        Me.LayoutTable.ResumeLayout(False)
+        Me.PonyPanel.ResumeLayout(False)
+        Me.PonyPanel.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -1022,10 +1022,11 @@ Partial Class PonyEditor
     Friend WithEvents colEffectFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colEffectDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colPony As System.Windows.Forms.ColumnHeader
-    Friend WithEvents LayoutContainer As System.Windows.Forms.SplitContainer
     Friend WithEvents GridTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents SpeechesPanel As System.Windows.Forms.Panel
     Friend WithEvents BehaviorsPanel As System.Windows.Forms.Panel
     Friend WithEvents EffectsPanel As System.Windows.Forms.Panel
     Friend WithEvents InteractionsPanel As System.Windows.Forms.Panel
+    Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents PonyPanel As System.Windows.Forms.Panel
 End Class

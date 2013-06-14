@@ -20,6 +20,7 @@ Public Class GameSelectionForm
     Private Sub LoadInternal()
         Enabled = False
         Update()
+        Application.DoEvents()
 
         Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(Options.InstallLocation, game.RootDirectory))
         games = New List(Of Game)(gameDirectories.Length)

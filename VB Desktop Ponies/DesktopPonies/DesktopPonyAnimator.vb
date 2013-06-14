@@ -21,6 +21,7 @@ Public Class DesktopPonyAnimator
     Private controlForm As DesktopControlForm
 
     Private spriteDebugForm As SpriteDebugForm
+    Private countSinceLastDebug As Integer
 
     ''' <summary>
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
@@ -201,10 +202,6 @@ Public Class DesktopPonyAnimator
             Next
         End If
     End Sub
-
-#If DEBUG Then
-    Private countSinceLastDebug As Integer
-#End If
 
     Public Overrides Sub Finish()
         If controlForm IsNot Nothing Then
