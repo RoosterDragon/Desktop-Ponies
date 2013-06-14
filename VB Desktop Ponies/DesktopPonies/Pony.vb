@@ -432,8 +432,9 @@ Public Class PonyBase
                                         group = Integer.Parse(columns(5), CultureInfo.InvariantCulture)
                                     End If
 
-                                    If UBound(sound_files_list) > 0 Then
-                                        Dim found_sound = False
+                                    Dim searchForSound = UBound(sound_files_list) > 0
+                                    Dim foundSound = False
+                                    If searchForSound Then
                                         For Each soundfile_path In sound_files_list
                                             If File.Exists(Path.Combine(fullDirectory, soundfile_path)) Then
                                                 newLine = New Behavior.SpeakingLine(Name, Trim(columns(1)),
@@ -441,15 +442,21 @@ Public Class PonyBase
                                                                                     fullDirectory & Path.DirectorySeparatorChar,
                                                                                     Replace(Trim(soundfile_path), ControlChars.Quote, ""),
                                                                                     Boolean.Parse(Trim(columns(4))), group)
-                                                found_sound = True
+                                                foundSound = True
                                                 Exit For
                                             End If
                                         Next
 
-                                        If found_sound = False Then
-                                            Throw New InvalidDataException("None of the listed sound files could be found.")
+                                        If Not foundSound Then
+                                            MessageBox.Show(
+                                                String.Format(
+                                                    "Could not find any of the sound files listed for speech named '{0}' " &
+                                                    "for pony named '{1}'. Files listed were: {2}",
+                                                    columns(1), Me.Directory, sound_files_list_column),
+                                                "Sound Files Missing", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                         End If
-                                    Else
+                                    End If
+                                    If Not searchForSound OrElse Not foundSound Then
                                         newLine = New Behavior.SpeakingLine(columns(1), Replace(columns(2), ControlChars.Quote, ""),
                                                                             Boolean.Parse(Trim(columns(4))), group)
                                     End If
@@ -2197,6 +2204,9 @@ Public Class Pony
 
     Friend Sub Move()
         Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
+
+        destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord,
+                                      CurrentBehavior.OriginalDestinationYCoord)
 
         blocked = False
 
