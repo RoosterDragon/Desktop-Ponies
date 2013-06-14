@@ -46,6 +46,13 @@
         SuspendForFullscreenApp.Enabled = False
         Options.SuspendForFullscreenApplication = False
 
+        If Not OperatingSystemInfo.IsWindows Then
+            ShowViewerInTaskbar.Checked = False
+            ShowViewerInTaskbar.Enabled = False
+            ShowPerformanceGraph.Checked = False
+            ShowPerformanceGraph.Visible = False
+        End If
+
         ' This option causes random crashes on Mac.
         ' TODO: Determine cause of errors - appears to be threading related.
         If OperatingSystemInfo.IsMacOSX Then
@@ -91,6 +98,7 @@
         SoundLimitOneGlobally.Checked = Options.SoundSingleChannelOnly
         SoundLimitOnePerPony.Checked = Not Options.SoundSingleChannelOnly
         Volume.Value = CInt(Options.SoundVolume * 1000)
+        ShowViewerInTaskbar.Checked = Options.ShowInTaskbar
         AlwaysOnTop.Checked = Options.AlwaysOnTop
         SuspendForFullscreenApp.Checked = Options.SuspendForFullscreenApplication
         AvoidanceZoneX.Value = CDec(Options.ExclusionZone.X * 100)
@@ -108,6 +116,8 @@
                 ScreensaverImage.Checked = True
         End Select
 
+        EnablePonyLogs.Checked = Options.EnablePonyLogs
+        ShowPerformanceGraph.Checked = Options.ShowPerformanceGraph
     End Sub
 
     Private Sub SelectMonitors()
@@ -334,6 +344,14 @@
         End Using
     End Sub
 
+    Private Sub ShowInTaskbar_CheckedChanged(sender As Object, e As EventArgs) Handles ShowViewerInTaskbar.CheckedChanged
+        If initializing Then Return
+        Options.ShowInTaskbar = ShowViewerInTaskbar.Checked
+        If Pony.CurrentViewer IsNot Nothing Then
+            Pony.CurrentViewer.ShowInTaskbar = Options.ShowInTaskbar
+        End If
+    End Sub
+
     Private Sub AlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
         If initializing Then Return
         Options.AlwaysOnTop = AlwaysOnTop.Checked
@@ -437,6 +455,21 @@
         If initializing Then Return
         If ScreensaverTransparent.Checked Then
             Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.Transparent
+        End If
+    End Sub
+
+    Private Sub ShowPonyLogs_CheckedChanged(sender As Object, e As EventArgs) Handles EnablePonyLogs.CheckedChanged
+        If initializing Then Return
+        Options.EnablePonyLogs = EnablePonyLogs.Checked
+    End Sub
+
+    Private Sub PerformanceGraph_CheckedChanged(sender As Object, e As EventArgs) Handles ShowPerformanceGraph.CheckedChanged
+        If initializing Then Return
+        Options.ShowPerformanceGraph = ShowPerformanceGraph.Checked
+        If Pony.CurrentViewer IsNot Nothing AndAlso
+            TypeOf Pony.CurrentViewer Is CSDesktopPonies.SpriteManagement.WinFormSpriteInterface Then
+            DirectCast(Pony.CurrentViewer, CSDesktopPonies.SpriteManagement.WinFormSpriteInterface).ShowPerformanceGraph =
+                Options.ShowPerformanceGraph
         End If
     End Sub
 

@@ -95,9 +95,13 @@ Partial Class OptionsForm
         Me.InteractionsGroup = New System.Windows.Forms.GroupBox()
         Me.InteractionsTable = New System.Windows.Forms.TableLayoutPanel()
         Me.WindowsGroup = New System.Windows.Forms.GroupBox()
+        Me.ShowViewerInTaskbar = New System.Windows.Forms.CheckBox()
         Me.ScreenGroup = New System.Windows.Forms.GroupBox()
         Me.SoundGroup = New System.Windows.Forms.GroupBox()
         Me.GeneralGroup = New System.Windows.Forms.GroupBox()
+        Me.MonitoringGroup = New System.Windows.Forms.GroupBox()
+        Me.ShowPerformanceGraph = New System.Windows.Forms.CheckBox()
+        Me.EnablePonyLogs = New System.Windows.Forms.CheckBox()
         Me.AvoidanceZoneGroup.SuspendLayout()
         Me.AvoidanceZoneAreaTable.SuspendLayout()
         Me.ScreensaverGroup.SuspendLayout()
@@ -110,6 +114,7 @@ Partial Class OptionsForm
         Me.ScreenGroup.SuspendLayout()
         Me.SoundGroup.SuspendLayout()
         Me.GeneralGroup.SuspendLayout()
+        Me.MonitoringGroup.SuspendLayout()
         Me.SuspendLayout()
         '
         'AvoidanceZoneLocationLabel
@@ -403,7 +408,7 @@ Partial Class OptionsForm
         'WindowAvoidance
         '
         Me.WindowAvoidance.AutoSize = True
-        Me.WindowAvoidance.Location = New System.Drawing.Point(6, 55)
+        Me.WindowAvoidance.Location = New System.Drawing.Point(6, 78)
         Me.WindowAvoidance.Name = "WindowAvoidance"
         Me.WindowAvoidance.Size = New System.Drawing.Size(184, 17)
         Me.WindowAvoidance.TabIndex = 2
@@ -442,7 +447,7 @@ Partial Class OptionsForm
         'PoniesAvoidPonies
         '
         Me.PoniesAvoidPonies.AutoSize = True
-        Me.PoniesAvoidPonies.Location = New System.Drawing.Point(27, 78)
+        Me.PoniesAvoidPonies.Location = New System.Drawing.Point(27, 101)
         Me.PoniesAvoidPonies.Name = "PoniesAvoidPonies"
         Me.PoniesAvoidPonies.Size = New System.Drawing.Size(174, 17)
         Me.PoniesAvoidPonies.TabIndex = 3
@@ -452,7 +457,7 @@ Partial Class OptionsForm
         'PoniesStayInBoxes
         '
         Me.PoniesStayInBoxes.AutoSize = True
-        Me.PoniesStayInBoxes.Location = New System.Drawing.Point(27, 101)
+        Me.PoniesStayInBoxes.Location = New System.Drawing.Point(27, 124)
         Me.PoniesStayInBoxes.Name = "PoniesStayInBoxes"
         Me.PoniesStayInBoxes.Size = New System.Drawing.Size(228, 17)
         Me.PoniesStayInBoxes.TabIndex = 4
@@ -737,7 +742,7 @@ Partial Class OptionsForm
         Me.AlwaysOnTop.AutoSize = True
         Me.AlwaysOnTop.Checked = True
         Me.AlwaysOnTop.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.AlwaysOnTop.Location = New System.Drawing.Point(6, 19)
+        Me.AlwaysOnTop.Location = New System.Drawing.Point(6, 42)
         Me.AlwaysOnTop.Name = "AlwaysOnTop"
         Me.AlwaysOnTop.Size = New System.Drawing.Size(227, 17)
         Me.AlwaysOnTop.TabIndex = 0
@@ -747,7 +752,7 @@ Partial Class OptionsForm
         'AlwaysOnTopLabel
         '
         Me.AlwaysOnTopLabel.AutoSize = True
-        Me.AlwaysOnTopLabel.Location = New System.Drawing.Point(6, 39)
+        Me.AlwaysOnTopLabel.Location = New System.Drawing.Point(6, 62)
         Me.AlwaysOnTopLabel.Name = "AlwaysOnTopLabel"
         Me.AlwaysOnTopLabel.Size = New System.Drawing.Size(304, 13)
         Me.AlwaysOnTopLabel.TabIndex = 1
@@ -888,7 +893,7 @@ Partial Class OptionsForm
         Me.InteractionsGroup.Controls.Add(Me.InteractionsTable)
         Me.InteractionsGroup.Location = New System.Drawing.Point(522, 346)
         Me.InteractionsGroup.Name = "InteractionsGroup"
-        Me.InteractionsGroup.Size = New System.Drawing.Size(249, 178)
+        Me.InteractionsGroup.Size = New System.Drawing.Size(249, 111)
         Me.InteractionsGroup.TabIndex = 8
         Me.InteractionsGroup.TabStop = False
         Me.InteractionsGroup.Text = "Interactions"
@@ -918,6 +923,7 @@ Partial Class OptionsForm
         'WindowsGroup
         '
         Me.WindowsGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.WindowsGroup.Controls.Add(Me.ShowViewerInTaskbar)
         Me.WindowsGroup.Controls.Add(Me.WindowAvoidance)
         Me.WindowsGroup.Controls.Add(Me.PoniesAvoidPonies)
         Me.WindowsGroup.Controls.Add(Me.PoniesStayInBoxes)
@@ -929,6 +935,18 @@ Partial Class OptionsForm
         Me.WindowsGroup.TabIndex = 7
         Me.WindowsGroup.TabStop = False
         Me.WindowsGroup.Text = "Windows"
+        '
+        'ShowViewerInTaskbar
+        '
+        Me.ShowViewerInTaskbar.AutoSize = True
+        Me.ShowViewerInTaskbar.Checked = True
+        Me.ShowViewerInTaskbar.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ShowViewerInTaskbar.Location = New System.Drawing.Point(6, 19)
+        Me.ShowViewerInTaskbar.Name = "ShowViewerInTaskbar"
+        Me.ShowViewerInTaskbar.Size = New System.Drawing.Size(136, 17)
+        Me.ShowViewerInTaskbar.TabIndex = 5
+        Me.ShowViewerInTaskbar.Text = "Show ponies in taskbar"
+        Me.ShowViewerInTaskbar.UseVisualStyleBackColor = True
         '
         'ScreenGroup
         '
@@ -984,6 +1002,37 @@ Partial Class OptionsForm
         Me.GeneralGroup.TabStop = False
         Me.GeneralGroup.Text = "General"
         '
+        'MonitoringGroup
+        '
+        Me.MonitoringGroup.Controls.Add(Me.ShowPerformanceGraph)
+        Me.MonitoringGroup.Controls.Add(Me.EnablePonyLogs)
+        Me.MonitoringGroup.Location = New System.Drawing.Point(521, 463)
+        Me.MonitoringGroup.Name = "MonitoringGroup"
+        Me.MonitoringGroup.Size = New System.Drawing.Size(250, 61)
+        Me.MonitoringGroup.TabIndex = 14
+        Me.MonitoringGroup.TabStop = False
+        Me.MonitoringGroup.Text = "Monitoring"
+        '
+        'ShowPerformanceGraph
+        '
+        Me.ShowPerformanceGraph.AutoSize = True
+        Me.ShowPerformanceGraph.Location = New System.Drawing.Point(6, 38)
+        Me.ShowPerformanceGraph.Name = "ShowPerformanceGraph"
+        Me.ShowPerformanceGraph.Size = New System.Drawing.Size(145, 17)
+        Me.ShowPerformanceGraph.TabIndex = 4
+        Me.ShowPerformanceGraph.Text = "Show performance graph"
+        Me.ShowPerformanceGraph.UseVisualStyleBackColor = True
+        '
+        'EnablePonyLogs
+        '
+        Me.EnablePonyLogs.AutoSize = True
+        Me.EnablePonyLogs.Location = New System.Drawing.Point(6, 19)
+        Me.EnablePonyLogs.Name = "EnablePonyLogs"
+        Me.EnablePonyLogs.Size = New System.Drawing.Size(174, 17)
+        Me.EnablePonyLogs.TabIndex = 3
+        Me.EnablePonyLogs.Text = "Enable pony logs when running"
+        Me.EnablePonyLogs.UseVisualStyleBackColor = True
+        '
         'OptionsForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -992,6 +1041,7 @@ Partial Class OptionsForm
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.ClientSize = New System.Drawing.Size(892, 536)
         Me.ControlBox = False
+        Me.Controls.Add(Me.MonitoringGroup)
         Me.Controls.Add(Me.GeneralGroup)
         Me.Controls.Add(Me.SoundGroup)
         Me.Controls.Add(Me.ScreenGroup)
@@ -1033,6 +1083,8 @@ Partial Class OptionsForm
         Me.SoundGroup.PerformLayout()
         Me.GeneralGroup.ResumeLayout(False)
         Me.GeneralGroup.PerformLayout()
+        Me.MonitoringGroup.ResumeLayout(False)
+        Me.MonitoringGroup.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -1112,4 +1164,8 @@ Partial Class OptionsForm
     Friend WithEvents GeneralGroup As System.Windows.Forms.GroupBox
     Friend WithEvents SpeechDisabledLabel As System.Windows.Forms.Label
     Friend WithEvents InteractionsTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents ShowViewerInTaskbar As System.Windows.Forms.CheckBox
+    Friend WithEvents MonitoringGroup As System.Windows.Forms.GroupBox
+    Friend WithEvents EnablePonyLogs As System.Windows.Forms.CheckBox
+    Friend WithEvents ShowPerformanceGraph As System.Windows.Forms.CheckBox
 End Class

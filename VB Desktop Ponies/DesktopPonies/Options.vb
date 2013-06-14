@@ -49,6 +49,9 @@ Public NotInheritable Class Options
     Public Shared PonyCounts As New Dictionary(Of String, Integer)()
     Public Shared CustomTags As New List(Of String)()
 
+    Public Shared EnablePonyLogs As Boolean
+    Public Shared ShowPerformanceGraph As Boolean
+
     Public Shared ReadOnly Property ProfileDirectory As String
         Get
             Return Path.Combine(Options.InstallLocation, "Profiles")
@@ -160,7 +163,7 @@ Public NotInheritable Class Options
         CustomTags.Clear()
 
         SuspendForFullscreenApplication = True
-        ShowInTaskbar = True
+        ShowInTaskbar = OperatingSystemInfo.IsWindows
         AlwaysOnTop = True
         AlphaBlendingEnabled = True
         WindowAvoidanceEnabled = False
@@ -192,6 +195,9 @@ Public NotInheritable Class Options
         TimeFactor = 1
         ScaleFactor = 1
         ExclusionZone = RectangleF.Empty
+
+        EnablePonyLogs = False
+        ShowPerformanceGraph = False
     End Sub
 
     Public Shared Sub LoadPonyCounts()

@@ -20,9 +20,7 @@ Public Class DesktopPonyAnimator
 
     Private controlForm As DesktopControlForm
 
-#If DEBUG Then
     Private spriteDebugForm As SpriteDebugForm
-#End If
 
     ''' <summary>
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
@@ -108,15 +106,13 @@ Public Class DesktopPonyAnimator
     Public Overrides Sub Start()
         MyBase.Start()
         If controlForm IsNot Nothing Then controlForm.SmartInvoke(AddressOf controlForm.Show)
-#If DEBUG Then
-        If Not Reference.InPreviewMode Then
+        If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
             Main.Instance.Invoke(Sub()
                                      spriteDebugForm = New SpriteDebugForm()
                                      spriteDebugForm.Show()
                                  End Sub)
             AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
         End If
-#End If
     End Sub
 
     ''' <summary>
@@ -179,13 +175,12 @@ Public Class DesktopPonyAnimator
 
         MyBase.Update()
         Sprites.Sort(zOrder)
-#If DEBUG Then
+
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
             Main.Instance.Invoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
             countSinceLastDebug = 0
         End If
-#End If
     End Sub
 
     Private Sub CleanupSounds()
@@ -219,9 +214,7 @@ Public Class DesktopPonyAnimator
             RemoveHandler Sprites.ItemRemoved, AddressOf ControlFormItemRemoved
             RemoveHandler Sprites.ItemsRemoved, AddressOf ControlFormItemsRemoved
         End If
-#If DEBUG Then
         If spriteDebugForm IsNot Nothing Then Main.Instance.Invoke(Sub() spriteDebugForm.Close())
-#End If
         MyBase.Finish()
     End Sub
 
@@ -638,9 +631,7 @@ Public Class DesktopPonyAnimator
         MyBase.Dispose(disposing)
         If disposing Then
             If controlForm IsNot Nothing Then controlForm.Dispose()
-#If DEBUG Then
             If spriteDebugForm IsNot Nothing Then Main.Instance.Invoke(Sub() spriteDebugForm.Dispose())
-#End If
         End If
     End Sub
 End Class

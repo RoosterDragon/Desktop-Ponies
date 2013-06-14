@@ -1540,9 +1540,6 @@ Public Class Pony
     End Property
 #End Region
 
-    Private behaviorEnumerator As IEnumerator(Of Behavior)
-    Private interactionEnumerator As IEnumerator(Of Interaction)
-
     Public Property ShouldBeSleeping As Boolean
     Private _sleeping As Boolean
     Public Property Sleeping() As Boolean
@@ -1738,8 +1735,6 @@ Public Class Pony
     Public Sub New(base As PonyBase)
         Argument.EnsureNotNull(base, "base")
         _base = base
-        behaviorEnumerator = base.Behaviors.GetEnumerator()
-        interactionEnumerator = base.Interactions.GetEnumerator()
     End Sub
 
     ''' <summary>
@@ -3173,9 +3168,7 @@ Public Class Pony
 
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
-        behaviorEnumerator.Reset()
-        While behaviorEnumerator.MoveNext()
-            Dim behavior = behaviorEnumerator.Current
+        For Each behavior In Behaviors
             If Behavior.AllowedMovement = AllowedMoves.MouseOver Then
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
@@ -3183,7 +3176,7 @@ Public Class Pony
                 If Vector2F.Distance(loc + (behavior.LeftImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
                 If Vector2F.Distance(loc + (behavior.RightImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
             End If
-        End While
+        Next
 
         Return False
     End Function
@@ -3312,9 +3305,7 @@ Public Class Pony
             Return Nothing
         End If
 
-        interactionEnumerator.Reset()
-        While interactionEnumerator.MoveNext()
-            Dim interaction = interactionEnumerator.Current
+        For Each interaction In Interactions
             For Each target As Pony In interaction.InteractsWith
                 ' Don't attempt to interact with a busy target, or with self.
                 If target.IsInteracting OrElse ReferenceEquals(Me, target) Then Continue For
@@ -3337,7 +3328,7 @@ Public Class Pony
                     Return interaction
                 End If
             Next
-        End While
+        Next
 
         ' No interactions ready to start at this time.
         Return Nothing
