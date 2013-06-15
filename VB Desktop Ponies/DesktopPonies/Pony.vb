@@ -1764,10 +1764,9 @@ Public Class Pony
 
         ' Try an arbitrary number of times to find a point a point in bounds that is not also in the exclusion zone.
         ' TODO: Create method that will uniformly choose a random location from allowable points, also taking into account image sizing.
-        Dim screens = Options.GetScreensToUse().ToArray()
         Dim teleportLocation As Point
         For tries = 0 To 300
-            Dim area = screens(Rng.Next(screens.Length)).WorkingArea
+            Dim area = Options.Screens(Rng.Next(Options.Screens.Count)).WorkingArea
             teleportLocation = New Point(
                 CInt(area.X + Rng.NextDouble() * area.Width),
                 CInt(area.Y + Rng.NextDouble() * area.Height))
@@ -2974,7 +2973,7 @@ Public Class Pony
     End Function
 
     Shared Function GetScreenContainingPoint(point As Point) As Screen
-        For Each screen In Options.GetScreensToUse()
+        For Each screen In Options.Screens
             If screen.WorkingArea.Contains(point) Then Return screen
         Next
         Return Nothing
@@ -3193,9 +3192,8 @@ Public Class Pony
     Friend Function FindSafeDestination() As Point
         If Reference.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
 
-        Dim usableScreens = Options.GetScreensToUse.ToArray()
         For i = 0 To 300
-            Dim randomScreen = usableScreens(Rng.Next(usableScreens.Length))
+            Dim randomScreen = Options.Screens(Rng.Next(Options.Screens.Count))
             Dim teleportLocation = New Point(
                 CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
                 CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
@@ -3572,8 +3570,7 @@ Public Class Effect
     End Sub
 
     Public Sub Teleport()
-        Dim screens = Options.GetScreensToUse().ToArray()
-        Dim screen = screens(Rng.Next(screens.Length))
+        Dim screen = Options.Screens(Rng.Next(Options.Screens.Count))
         Location = New Point(
             CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
             CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))

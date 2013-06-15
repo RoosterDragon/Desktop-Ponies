@@ -262,8 +262,8 @@ Friend Module Games
                 ball.Initialize(GameScreen)
             Next
 
-            Options.MonitorNames.Clear()
-            Options.MonitorNames.Add(GameScreen.DeviceName)
+            Options.Screens.Clear()
+            Options.Screens.Add(GameScreen)
 
             If Options.ScaleFactor <> 1 Then
                 MessageBox.Show(String.Format(CultureInfo.CurrentCulture,

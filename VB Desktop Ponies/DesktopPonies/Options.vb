@@ -45,9 +45,9 @@ Public NotInheritable Class Options
     Public Shared ScaleFactor As Single
     Public Shared ExclusionZone As RectangleF
 
-    Public Shared MonitorNames As New HashSet(Of String)()
-    Public Shared PonyCounts As New Dictionary(Of String, Integer)()
-    Public Shared CustomTags As New List(Of String)()
+    Public Shared ReadOnly Screens As New List(Of Screen)()
+    Public Shared ReadOnly PonyCounts As New Dictionary(Of String, Integer)()
+    Public Shared ReadOnly CustomTags As New List(Of String)()
 
     Public Shared EnablePonyLogs As Boolean
     Public Shared ShowPerformanceGraph As Boolean
@@ -95,7 +95,7 @@ Public NotInheritable Class Options
         Else
             Using reader As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
                 ProfileName = profile
-                MonitorNames.Clear()
+                Screens.Clear()
                 PonyCounts.Clear()
                 CustomTags.Clear()
                 While Not reader.EndOfStream
@@ -139,7 +139,8 @@ Public NotInheritable Class Options
                             NoRandomDuplicates = Boolean.Parse(columns(30))
                         Case "monitor"
                             If columns.Length - 1 <> 1 Then Throw New InvalidDataException("Expected a monitor name on the monitor line.")
-                            MonitorNames.Add(columns(1))
+                            Dim monitor = Screen.AllScreens.FirstOrDefault(Function(s) s.DeviceName = columns(1))
+                            If monitor IsNot Nothing Then Screens.Add(monitor)
                         Case "count"
                             If columns.Length - 1 <> 2 Then Throw New InvalidDataException("Expected a count on the count line.")
                             PonyCounts.Add(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture))
@@ -157,8 +158,8 @@ Public NotInheritable Class Options
 
     Public Shared Sub LoadDefaultProfile()
         ProfileName = DefaultProfileName
-        MonitorNames.Clear()
-        MonitorNames.Add(Screen.PrimaryScreen.DeviceName)
+        Screens.Clear()
+        Screens.Add(Screen.PrimaryScreen)
         PonyCounts.Clear()
         CustomTags.Clear()
 
@@ -258,8 +259,8 @@ Public NotInheritable Class Options
 
             GetPonyCounts()
 
-            For Each monitorName In MonitorNames
-                file.WriteLine(String.Join(",", "monitor", ControlChars.Quote & monitorName & ControlChars.Quote))
+            For Each screen In Screens
+                file.WriteLine(String.Join(",", "monitor", ControlChars.Quote & screen.DeviceName & ControlChars.Quote))
             Next
 
             For Each entry In PonyCounts
@@ -300,13 +301,9 @@ Public NotInheritable Class Options
         Next
     End Sub
 
-    Public Shared Function GetScreensToUse() As IEnumerable(Of Screen)
-        Return Screen.AllScreens.Where(Function(screen) Options.MonitorNames.Contains(screen.DeviceName))
-    End Function
-
     Public Shared Function GetCombinedScreenArea() As Rectangle
         Dim area As Rectangle = Rectangle.Empty
-        For Each screen In GetScreensToUse()
+        For Each screen In Screens
             If area = Rectangle.Empty Then
                 area = screen.WorkingArea
             Else
@@ -318,11 +315,7 @@ Public NotInheritable Class Options
 
     Public Shared Function GetInterface() As CSDesktopPonies.SpriteManagement.ISpriteCollectionView
         'This should already be set in the options, but in case it isn't, use all monitors.
-        If MonitorNames.Count = 0 Then
-            For Each monitor In Screen.AllScreens
-                MonitorNames.Add(monitor.DeviceName)
-            Next
-        End If
+        If Screens.Count = 0 Then Screens.AddRange(Screen.AllScreens)
 
         Dim viewer As CSDesktopPonies.SpriteManagement.ISpriteCollectionView
         If OperatingSystemInfo.IsWindows Then

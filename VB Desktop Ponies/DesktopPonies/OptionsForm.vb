@@ -124,10 +124,10 @@
         selectingMonitors = True
         MonitorsSelection.SelectedItems.Clear()
 
-        For Each monitorNameLoop In Options.MonitorNames
-            Dim monitorName = monitorNameLoop
+        For Each monitorLoop In Options.Screens
+            Dim monitor = monitorLoop
             For i = 0 To MonitorsSelection.Items.Count - 1
-                If CStr(MonitorsSelection.Items(i)) = monitorName Then
+                If CStr(MonitorsSelection.Items(i)) = monitor.DeviceName Then
                     MonitorsSelection.SetSelected(i, True)
                 End If
             Next
@@ -224,12 +224,11 @@
             MonitorsMinimumLabel.Visible = False
         End If
 
-        Options.MonitorNames.Clear()
-
+        Options.Screens.Clear()
         For i = 0 To MonitorsSelection.SelectedItems.Count - 1
             For Each monitor In Screen.AllScreens
                 If monitor.DeviceName = CStr(MonitorsSelection.SelectedItems(i)) Then
-                    Options.MonitorNames.Add(monitor.DeviceName)
+                    Options.Screens.Add(monitor)
                 End If
             Next
         Next

@@ -309,7 +309,7 @@ Public Class DesktopPonyAnimator
                                                                                                     End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
-                                                                Finish()
+                                                                FinishViewer()
                                                                 Main.Instance.SmartInvoke(AddressOf Main.Instance.Close)
                                                             End Sub))
         If controlForm Is Nothing Then
@@ -324,13 +324,17 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub ReturnToMenu()
-        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
-        Finish()
+        FinishViewer()
         Main.Instance.SmartInvoke(Sub()
                                       Main.Instance.PonyShutdown()
                                       Main.Instance.Opacity = 100 'for when autostarted
                                       Main.Instance.Show()
                                   End Sub)
+    End Sub
+
+    Private Sub FinishViewer()
+        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
+        Finish()
     End Sub
 
     Private Sub CreateHouseMenu()
