@@ -1567,7 +1567,7 @@ Public Class Pony
             _currentInteraction = value
         End Set
     End Property
-    Private IsInteractionInitiator As Boolean = False
+    Private isInteractionInitiator As Boolean
 
     Public Property IsInteracting As Boolean = False
     Public Property PlayingGame As Boolean = False
@@ -1904,7 +1904,7 @@ Public Class Pony
 
         If CurrentInteraction Is Nothing Then Exit Sub
 
-        If IsInteractionInitiator Then
+        If isInteractionInitiator Then
             For Each pony In CurrentInteraction.InteractsWith
                 ' Check the target is still running the interaction that the current pony initiated, then cancel it.
                 If Not ReferenceEquals(Me, pony) AndAlso
@@ -1916,11 +1916,11 @@ Public Class Pony
             Next
         End If
 
-        AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", IsInteractionInitiator.ToString())
+        AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
 
         interactionDelayUntil = internalTime + TimeSpan.FromSeconds(CurrentInteraction.ReactivationDelay)
         CurrentInteraction = Nothing
-        IsInteractionInitiator = False
+        isInteractionInitiator = False
     End Sub
 
     ''' <summary>
@@ -1929,7 +1929,7 @@ Public Class Pony
     ''' <param name="specifiedBehavior">The behavior that the pony should switch to, or null to choose one at random.</param>
     Public Sub SelectBehavior(Optional specifiedBehavior As Behavior = Nothing)
         ' Having no specified behavior when interacting means we've run to the last part of a chain and should end the interaction.
-        If IsInteracting AndAlso IsInteractionInitiator AndAlso specifiedBehavior Is Nothing Then CancelInteraction()
+        If IsInteracting AndAlso isInteractionInitiator AndAlso specifiedBehavior Is Nothing Then CancelInteraction()
 
         ' Clear following state.
         followObject = Nothing
@@ -2201,7 +2201,7 @@ Public Class Pony
     Friend Sub Move()
         Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
 
-        If Not PlayingGame Then
+        If Not PlayingGame AndAlso Not ReturningToScreenArea Then
             destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord,
                                           CurrentBehavior.OriginalDestinationYCoord)
         End If
@@ -3168,12 +3168,8 @@ Public Class Pony
     Function IsPonyNearMouseCursor(location As Point) As Boolean
         If Not Options.CursorAvoidanceEnabled Then Return False
         If Reference.InScreensaverMode Then Return False
-
         If CursorImmunity > 0 Then Return False
-
-        'ignore this if we are interacting - we don't want to cancel it.
-        If Me.IsInteracting Then Return False
-
+        If IsInteracting Then Return False
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
         For Each behavior In Behaviors
@@ -3252,6 +3248,7 @@ Public Class Pony
 
             For Each directory As String In Interaction.InteractsWithByDirectory
                 For Each pony In otherPonies
+                    If ReferenceEquals(Me, pony) Then Continue For
                     If directory = pony.Directory Then
                         Dim already_added = False
                         For Each otherPony In Interaction.InteractsWith
@@ -3273,9 +3270,9 @@ Public Class Pony
 
     End Sub
 
-    Friend Sub StartInteraction(interaction As Interaction)
+    Private Sub StartInteraction(interaction As Interaction)
 
-        IsInteractionInitiator = True
+        isInteractionInitiator = True
         CurrentInteraction = interaction
         SelectBehavior(interaction.BehaviorList(Rng.Next(interaction.BehaviorList.Count)))
 
@@ -3287,7 +3284,6 @@ Public Class Pony
         Else
             interaction.Trigger.StartInteractionAsTarget(CurrentBehavior.Name, Me, interaction)
         End If
-
 
         IsInteracting = True
 
@@ -3302,7 +3298,7 @@ Public Class Pony
         Next
 
         interaction.Initiator = initiator
-        IsInteractionInitiator = False
+        isInteractionInitiator = False
         CurrentInteraction = interaction
         IsInteracting = True
     End Sub
@@ -3326,9 +3322,9 @@ Public Class Pony
 
                 ' Get distance between the pony and the possible target.
                 Dim distance = Vector2.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
-                                                                   CInt(CurrentImageSize.Y / 2)),
+                                                                           CInt(CurrentImageSize.Y / 2)),
                                                target.TopLeftLocation + New Size(CInt(target.CurrentImageSize.X / 2),
-                                                                          CInt(target.CurrentImageSize.Y / 2)))
+                                                                                 CInt(target.CurrentImageSize.Y / 2)))
 
                 ' Check target is in range, and perform a random check against the chance the interaction can occur.
                 If distance <= interaction.Proximity_Activation_Distance AndAlso Rng.NextDouble() <= interaction.Probability Then
