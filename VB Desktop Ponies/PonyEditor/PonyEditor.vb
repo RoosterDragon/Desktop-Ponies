@@ -1671,11 +1671,11 @@ Public Class PonyEditor
     Friend Function SavePony() As Boolean
         Try
             PausePonyButton.Enabled = False
-            pe_animator.Pause(False)
+            If pe_animator.Started Then pe_animator.Pause(False)
             _changesMade = True
             PreviewPonyBase.Save()
             RefreshButton_Click(RefreshButton, EventArgs.Empty)
-            pe_animator.Resume()
+            If pe_animator.Started Then pe_animator.Resume()
             PausePonyButton.Enabled = True
         Catch ex As ArgumentException When ex.ParamName = "text"
             MessageBox.Show(Me, "Some invalid characters were detected. Please remove them." & Environment.NewLine &

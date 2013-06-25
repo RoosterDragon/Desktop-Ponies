@@ -55,11 +55,10 @@
             // 
             // MessageLabel
             // 
-            this.MessageLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MessageLabel.AutoSize = true;
             this.MessageLabel.Location = new System.Drawing.Point(41, 3);
             this.MessageLabel.Name = "MessageLabel";
-            this.MessageLabel.Size = new System.Drawing.Size(210, 32);
+            this.MessageLabel.Size = new System.Drawing.Size(0, 13);
             this.MessageLabel.TabIndex = 0;
             // 
             // CopyTextButton
@@ -115,7 +114,7 @@
             this.MessageTable.Name = "MessageTable";
             this.MessageTable.RowCount = 2;
             this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.MessageTable.Size = new System.Drawing.Size(260, 70);
             this.MessageTable.TabIndex = 1;
             // 
@@ -175,6 +174,7 @@
             this.MessageTable.ResumeLayout(false);
             this.MessageTable.PerformLayout();
             this.MessagePanel.ResumeLayout(false);
+            this.MessagePanel.PerformLayout();
             this.ButtonPanel.ResumeLayout(false);
             this.ButtonPanel.PerformLayout();
             this.ResumeLayout(false);

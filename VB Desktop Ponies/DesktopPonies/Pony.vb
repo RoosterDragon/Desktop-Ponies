@@ -1060,10 +1060,9 @@ Public Class PonyBase
                 writer.WriteLine(speech.GetPonyIni())
             Next
         End Using
-        File.Replace(tempFileName, configFilePath, Nothing)
-        File.Delete(tempFileName)
+        MoveOrReplace(tempFileName, configFilePath)
 
-        Dim interactionsFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)
+        Dim interactionsFilePath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
         Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
@@ -1084,7 +1083,12 @@ Public Class PonyBase
                 writer.WriteLine(interaction.GetPonyIni())
             Next
         End Using
-        File.Replace(tempFileName, interactionsFilePath, Nothing)
+        MoveOrReplace(tempFileName, interactionsFilePath)
+    End Sub
+
+    Private Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
+        If Not File.Exists(destinationFileName) Then File.Create(destinationFileName).Dispose()
+        File.Replace(tempFileName, destinationFileName, Nothing)
         File.Delete(tempFileName)
     End Sub
 End Class

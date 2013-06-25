@@ -234,8 +234,18 @@ Public Class Main
 
         Dim ponyBasesToAdd As New List(Of PonyBase)
         For Each folder In ponyBaseDirectories
-
-            Dim pony = New PonyBase(folder)
+            Dim pony As PonyBase
+            Try
+                pony = New PonyBase(folder)
+            Catch ex As FileNotFoundException
+                My.Application.NotifyUserOfNonFatalException(
+                    ex, String.Format("Found a pony folder but could not find all the required files.{0}" &
+                    "Does the configuration file '{1}' exist?{0}" &
+                    "Do any images and sound files referenced in the configuration file exist?{0}" &
+                    "The folder was '{2}'.{0}" &
+                    "The missing file was '{3}'", Environment.NewLine, PonyBase.ConfigFilename, folder, ex.FileName))
+                Continue For
+            End Try
             ponyBasesToAdd.Add(pony)
             worker.QueueTask(Sub()
                                  Try

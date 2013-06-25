@@ -40,7 +40,7 @@
         /// <param name="fatal">A value indicating if the exception is fatal to the process, which is reflected in the icon used.</param>
         public static void Show(IWin32Window owner, Exception ex, string text, string caption, bool fatal)
         {
-            using (var dialog = new ExceptionDialog(ex, text, caption, fatal))
+            using (var dialog = new ExceptionDialog(ex, text, caption, fatal, owner))
                 dialog.ShowDialog(owner);
         }
 
@@ -51,14 +51,27 @@
         /// <param name="text">The text to display in the dialog.</param>
         /// <param name="caption">The text to display in the title bar of the dialog.</param>
         /// <param name="fatal">A value indicating if the exception is fatal to the process, which is reflected in the icon used.</param>
-        private ExceptionDialog(Exception ex, string text, string caption, bool fatal)
+        /// <param name="owner">The owner of the dialog (optional).</param>
+        private ExceptionDialog(Exception ex, string text, string caption, bool fatal, IWin32Window owner = null)
         {
             InitializeComponent();
+            MaximumSize = (owner != null ? Screen.FromHandle(owner.Handle) : Screen.FromControl(this)).Bounds.Size;
             ExceptionText.Text = ex.ToString();
             if (OperatingSystemInfo.IsWindows)
-                ExceptionText.Size = ExceptionText.GetPreferredSize(Size.Empty);
+            {
+                Size oldSize = Size.Empty;
+                Size preferredSize = ExceptionText.GetPreferredSize(Size.Empty);
+                while (oldSize != ExceptionText.Size && preferredSize != ExceptionText.Size)
+                {
+                    oldSize = ExceptionText.Size;
+                    ExceptionText.Size = preferredSize;
+                    preferredSize = ExceptionText.GetPreferredSize(ExceptionText.Size);
+                }
+            }
             else
+            {
                 ExceptionText.Size = new Size(750, 350);
+            }
             MessageLabel.Text = text;
             Text = caption;
             Icon = fatal ? SystemIcons.Error : SystemIcons.Exclamation;
