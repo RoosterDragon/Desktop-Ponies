@@ -669,12 +669,10 @@
 
             Viewer = spriteViewer;
 
-#if DEBUG || true
             if (Viewer is WinFormSpriteInterface)
                 ((WinFormSpriteInterface)Viewer).Collector = performanceRecorder;
             else if (Viewer is GtkSpriteInterface)
                 ((GtkSpriteInterface)Viewer).Collector = performanceRecorder;
-#endif
 
             // Create an asynchronous collection, so it can be safely exposed to derived classes.
             if (spriteCollection == null)
@@ -712,8 +710,7 @@
         {
             if (Started)
                 throw new InvalidOperationException("Cannot start an animator that has already been started.");
-            if (Disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Started = true;
@@ -742,8 +739,7 @@
         {
             if (!Started)
                 throw new InvalidOperationException("Cannot pause an animator that has not been started.");
-            if (Disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             if (!Paused)
             {
@@ -767,8 +763,7 @@
         {
             if (!Started)
                 throw new InvalidOperationException("Cannot resume an animator that has not been started.");
-            if (Disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             if (Paused)
             {

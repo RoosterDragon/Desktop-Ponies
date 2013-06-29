@@ -7,6 +7,7 @@
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Windows.Forms;
     using CSDesktopPonies.Collections;
@@ -174,25 +175,25 @@
                 if (!menuItem.HasDropDownItems)
                     throw new ArgumentException("menuItem must have drop down items.", "menuItem");
 
-                List<ISimpleContextMenuItem> subItemsList = new List<ISimpleContextMenuItem>(subItems);
+                var subItemsArray = subItems.ToArray();
 
-                if (menuItem.DropDownItems.Count != subItemsList.Count)
+                if (menuItem.DropDownItems.Count != subItemsArray.Length)
                     throw new ArgumentException(
                         "The number of sub-items in menuItem is not the same as the number in the subItems collection.");
 
-                List<ISimpleContextMenuItem> winFormSubItemsList = new List<ISimpleContextMenuItem>(subItemsList.Count);
+                var winFormSubItemsList = new ISimpleContextMenuItem[subItemsArray.Length];
                 int index = 0;
                 foreach (ToolStripItem toolStripItem in menuItem.DropDownItems)
                 {
-                    if (subItemsList[index].IsSeparator)
-                        winFormSubItemsList.Add(
-                            new WinFormContextMenuItem(parent, (ToolStripSeparator)toolStripItem));
-                    else if (subItemsList[index].SubItems == null)
-                        winFormSubItemsList.Add(
-                            new WinFormContextMenuItem(parent, (ToolStripMenuItem)toolStripItem, subItemsList[index].Activated));
+                    if (subItemsArray[index].IsSeparator)
+                        winFormSubItemsList[index] =
+                            new WinFormContextMenuItem(parent, (ToolStripSeparator)toolStripItem);
+                    else if (subItemsArray[index].SubItems == null)
+                        winFormSubItemsList[index] =
+                            new WinFormContextMenuItem(parent, (ToolStripMenuItem)toolStripItem, subItemsArray[index].Activated);
                     else
-                        winFormSubItemsList.Add(
-                            new WinFormContextMenuItem(parent, (ToolStripMenuItem)toolStripItem, subItemsList[index].SubItems));
+                        winFormSubItemsList[index] =
+                            new WinFormContextMenuItem(parent, (ToolStripMenuItem)toolStripItem, subItemsArray[index].SubItems);
                     index++;
                 }
 

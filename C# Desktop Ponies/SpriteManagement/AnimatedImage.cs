@@ -63,7 +63,10 @@
         /// <summary>
         /// Gets the total number of frames in this animation, excluding any frames of zero duration.
         /// </summary>
-        public int FrameCount { get; private set; }
+        public int FrameCount
+        {
+            get { return frameIndexes.Length; }
+        }
         /// <summary>
         /// Gets a value indicating whether this animation contained frames that had a duration of zero. These are dropped from the final
         /// animation and do not count towards the total number of frames.
@@ -78,15 +81,15 @@
         /// <summary>
         /// The collection of unique frames that make up the image.
         /// </summary>
-        private List<T> frames;
+        private T[] frames;
         /// <summary>
         /// The duration of each frame in milliseconds.
         /// </summary>
-        private List<int> durations;
+        private int[] durations;
         /// <summary>
         /// Maps a frame index in an animation to a frame object. This allows the same frame object to be used many times.
         /// </summary>
-        private List<int> frameIndexes;
+        private int[] frameIndexes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> class from a given file.
@@ -123,14 +126,11 @@
             LoopCount = gifImage.Iterations;
             ImageDuration = gifImage.Duration;
 
-            int frameCount = gifImage.Frames.Count;
-
-            // Create the objects that store the image.
-            frames = new List<T>(frameCount);
-            durations = new List<int>(frameCount);
-            frameIndexes = new List<int>(frameCount);
-
-            List<int> frameHashes = new List<int>(frameCount);
+            int frameCount = gifImage.Frames.Length;
+            var framesList = new List<T>(frameCount);
+            var durationsList = new List<int>(frameCount);
+            var frameIndexesList = new List<int>(frameCount);
+            var frameHashesList = new List<int>(frameCount);
             for (int sourceFrame = 0; sourceFrame < frameCount; sourceFrame++)
             {
                 int frameDuration = gifImage.Frames[sourceFrame].Duration;
@@ -153,7 +153,7 @@
                     continue;
                 }
 
-                durations.Add(frameDuration);
+                durationsList.Add(frameDuration);
 
                 // Determine if all frames share the same duration.
                 if (sourceFrame == 0)
@@ -163,25 +163,25 @@
 
                 // Calculate the frame hash to check if a duplicate frame exists.
                 // This will update our collection and given hash list appropriately.
-                CheckForExistingFrame(gifImage.Frames[sourceFrame], frameHashes);
+                AddOrReuseFrame(gifImage.Frames[sourceFrame], framesList, durationsList, frameIndexesList, frameHashesList);
             }
 
-            frames.TrimExcess();
-            frameIndexes.TrimExcess();
-            durations.TrimExcess();
-            FrameCount = durations.Count;
+            frames = framesList.ToArray();
+            frameIndexes = frameIndexesList.ToArray();
+            durations = durationsList.ToArray();
             IsAnimated = FrameCount > 1;
         }
 
         /// <summary>
-        /// Checks if the hash of the given frame image matches any of the given frame hashes.
-        /// If so, the existing bitmap will be reused and lists updated.
-        /// If not, the new frame will be added to the collection.
+        /// Checks to see if the hash of the frame is already known, in order to potentially re-use the frame image and save on memory.
         /// </summary>
         /// <param name="frame">The frame whose image is to be checked.</param>
-        /// <param name="frameHashes">The list of existing frame hashes, this will be updated with a new hash if needed.</param>
-        /// <returns>True if a matching bitmap was found in the given collection, otherwise false.</returns>
-        private bool CheckForExistingFrame(GifFrame<T> frame, List<int> frameHashes)
+        /// <param name="frames">The collection of unique frames to which new frames should be added.</param>
+        /// <param name="durations">The collection of durations for each frame.</param>
+        /// <param name="frameIndexes">The collection of lookup indexes.</param>
+        /// <param name="frameHashes">The collection of hashes for each frame.</param>
+        private void AddOrReuseFrame(GifFrame<T> frame,
+            List<T> frames, List<int> durations, List<int> frameIndexes, List<int> frameHashes)
         {
             int frameHash = frame.Image.GetFrameHashCode();
 
@@ -211,8 +211,6 @@
                     disposable.Dispose();
                 System.Threading.Interlocked.Increment(ref duplicatesDropped);
             }
-
-            return foundMatchingBitmap;
         }
 
         /// <summary>
@@ -224,10 +222,9 @@
             Size = ImageSize.GetSize(FilePath);
             IsAnimated = false;
             LoopCount = 0;
-            FrameCount = 1;
 
-            frames = new List<T>(1) { staticImageFactory(FilePath) };
-            frameIndexes = new List<int>(1) { 0 };
+            frames = new T[] { staticImageFactory(FilePath) };
+            frameIndexes = new int[] { 0 };
         }
 
         /// <summary>
@@ -273,9 +270,7 @@
         {
             if (time < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException("time", time, "time must be non-negative.");
-
-            if (Disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             int frame = 0;
 
@@ -290,7 +285,7 @@
                 if (LoopCount != 0 && completeLoops >= LoopCount)
                 {
                     // We have reached the end of looping, and thus want the final frame.
-                    frame = durations.Count - 1;
+                    frame = durations.Length - 1;
                 }
                 else
                 {

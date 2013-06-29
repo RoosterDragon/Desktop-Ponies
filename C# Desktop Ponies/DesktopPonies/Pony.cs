@@ -1617,9 +1617,7 @@
         /// </exception>
         private void LoadFromIni(string directory)
         {
-            Argument.EnsureNotNull(directory, "directory");
-            if (directory.Length == 0)
-                throw new ArgumentException("directory must not be empty.", "directory");
+            Argument.EnsureNotNullOrEmpty(directory, "directory");
 
             Directory = directory;
             if (Directory[Directory.Length - 1] == Path.DirectorySeparatorChar)

@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Globalization;
+    using System.Linq;
 
     /// <summary>
     /// Provides methods to validate arguments.
@@ -32,6 +34,37 @@
         {
             if (arg == null)
                 throw new ArgumentNullException(paramName);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that a string argument is not null or the empty string.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>A reference to <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> is the empty string.</exception>
+        public static string EnsureNotNullOrEmpty([ValidatedNotNull] string arg, string paramName)
+        {
+            if (Argument.EnsureNotNull(arg, paramName) == string.Empty)
+                throw new ArgumentException(paramName + " must not be empty.", paramName);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that a collection argument is not null or an empty collection.
+        /// </summary>
+        /// <typeparam name="T">The type of the collection elements.</typeparam>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>A reference to <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> contains no elements.</exception>
+        public static IEnumerable<T> EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName) 
+        {
+            if (Argument.EnsureNotNull(arg, paramName).LongCount() == 0)
+                throw new ArgumentException(paramName + " must contain at least one element.", paramName);
             return arg;
         }
 

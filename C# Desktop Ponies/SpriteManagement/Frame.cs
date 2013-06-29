@@ -1,6 +1,7 @@
 ﻿namespace CSDesktopPonies.SpriteManagement
 {
     using System.Drawing;
+    using CSDesktopPonies.Core;
 
     /// <summary>
     /// Defines an image that can be used as a frame in an animation.
@@ -51,8 +52,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="image"/> is null.</exception>
         protected Frame(TImage image)
         {
-            if (image == null)
-                throw new System.ArgumentNullException("image");
+            Argument.EnsureNotNull(image, "image");
             Image = image;
         }
     }

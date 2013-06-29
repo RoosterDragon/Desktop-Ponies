@@ -29,7 +29,7 @@ Public Class IdleWorker
                                                                End Sub)
 
     ''' <summary>
-    ''' Maintains a collection on tasks to perform when the application is idle.
+    ''' Maintains a collection of tasks to perform when the application is idle.
     ''' </summary>
     Private ReadOnly tasks As New Queue(Of MethodInvoker)
     ''' <summary>

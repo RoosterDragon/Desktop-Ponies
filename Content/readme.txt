@@ -69,6 +69,10 @@ Change Log
 
 Latest changes:
 
+v1.42.2.7:
+- Added Sunset Shimmer by Bot-chan.
+- Fixed bug from 1.42.2.6 that prevented creating new ponies in the editor.
+
 v1.42.2.6:
 - Fixed destination offsets for behaviors. These work again.
 - Game selection interface redesigned.

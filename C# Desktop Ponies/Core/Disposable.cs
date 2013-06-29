@@ -48,6 +48,16 @@
         protected abstract void Dispose(bool disposing);
 
         /// <summary>
+        /// Checks the current instance has not been disposed, otherwise throws an <see cref="T:System.ObjectDisposedException"/>.
+        /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
+        protected void EnsureNotDisposed()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        /// <summary>
         /// Performs additional setup on an <see cref="T:System.IDisposable"/> whilst ensuring the resource is disposed if an exception
         /// occurs. This is useful for methods that own a resource but intend to relinquish ownership to their caller, as they are
         /// responsible for the resource until it is relinquished, and thus must ensure it is released under exceptional circumstances.

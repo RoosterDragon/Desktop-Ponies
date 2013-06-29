@@ -30,7 +30,7 @@ Public Class NewPonyDialog
         Me.Close()
     End Sub
 
-    Private Sub New_Pony_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Private Sub NewPonyDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         txtName.Text = ""
         txtName.Enabled = True
         Right_ImageBox.Image = Nothing

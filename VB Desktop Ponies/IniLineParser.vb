@@ -4,6 +4,14 @@
     End Function
 
     Public Function CommaSplitBraceQualified(source As String) As String()
+        Try
+            Return CommaSplitBraceQualifiedInternal(source)
+        Catch ex As ArgumentException
+            Return CommaSplitBraceQualifiedInternal(source & "}")
+        End Try
+    End Function
+
+    Private Function CommaSplitBraceQualifiedInternal(source As String) As String()
         Return source.SplitQualified({","c}, {{"{"c, "}"c}}, StringSplitOptions.None)
     End Function
 

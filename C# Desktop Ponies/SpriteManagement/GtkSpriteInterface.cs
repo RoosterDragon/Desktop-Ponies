@@ -756,23 +756,17 @@
             /// </summary>
             /// <param name="menuItem">The underlying <see cref="T:Gtk.MenuItem"/> that this class wraps.</param>
             /// <param name="subItems">The items to appear in the sub-menu.</param>
-            /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.-or-<paramref name="subItems"/> is
-            /// null.-or-<paramref name="parent"/> is null.</exception>
             /// <param name="parent">The <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface"/> that will own this
             /// <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>.</param>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.-or-<paramref name="subItems"/> is
+            /// null.-or-<paramref name="parent"/> is null.</exception>
             /// <exception cref="T:System.ArgumentException"><paramref name="subItems"/> is empty.</exception>
             public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent)
             {
                 Argument.EnsureNotNull(menuItem, "menuItem");
-                Argument.EnsureNotNull(subItems, "subItems");
-
-                List<ISimpleContextMenuItem> subItemsList = new List<ISimpleContextMenuItem>(subItems);
-
-                if (subItemsList.Count == 0)
-                    throw new ArgumentException("subItems must not be empty.", "subItems");
-
+                Argument.EnsureNotNullOrEmpty(subItems, "subItems");
                 item = menuItem;
-                GtkContextMenu gtkContextMenu = new GtkContextMenu(parent, subItemsList);
+                GtkContextMenu gtkContextMenu = new GtkContextMenu(parent, subItems);
                 item.Submenu = gtkContextMenu;
                 SubItems = gtkContextMenu.Items;
             }
@@ -1401,9 +1395,7 @@
         public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
         {
             Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
-
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             foreach (string imageFilePath in imageFilePaths)
                 images.Add(imageFilePath);
@@ -1420,8 +1412,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItems"/> is null.</exception>
         public ISimpleContextMenu CreateContextMenu(IEnumerable<ISimpleContextMenuItem> menuItems)
         {
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             GtkContextMenu menu = null;
             ApplicationInvoke(() => menu = new GtkContextMenu(this, menuItems));
@@ -1442,8 +1433,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Hide()
         {
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             ApplicationInvoke(() =>
             {
@@ -1458,8 +1448,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Show()
         {
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             ApplicationInvoke(() =>
             {
@@ -1520,8 +1509,7 @@
         {
             Argument.EnsureNotNull(sprites, "sprites");
 
-            if (disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            EnsureNotDisposed();
 
             if (paused)
                 return;
@@ -1611,6 +1599,16 @@
                     });
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks the current instance has not been disposed, otherwise throws an <see cref="T:System.ObjectDisposedException"/>.
+        /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
+        private void EnsureNotDisposed()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <summary>

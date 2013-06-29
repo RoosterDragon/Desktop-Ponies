@@ -154,18 +154,18 @@
             }
             else
             {
-                durations = new int[image.Frames.Count];
-                sectionValues = new int[image.Frames.Count + 1];
+                durations = new int[image.Frames.Length];
+                sectionValues = new int[image.Frames.Length + 1];
                 sectionValues[0] = 0;
                 int accumulatedDuration = 0;
-                for (int i = 0; i < image.Frames.Count; i++)
+                for (int i = 0; i < image.Frames.Length; i++)
                 {
                     int duration = image.Frames[i].Duration;
                     durations[i] = duration;
                     accumulatedDuration += duration;
                     sectionValues[i + 1] = accumulatedDuration;
                 }
-                FrameSelector.Maximum = image.Frames.Count - 1;
+                FrameSelector.Maximum = image.Frames.Length - 1;
                 TimeSelector.Maximum = image.Duration;
                 UpdateLabel();
                 Enabled = true;

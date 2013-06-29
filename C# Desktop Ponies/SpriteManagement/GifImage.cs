@@ -174,7 +174,7 @@
         /// <summary>
         /// Gets the frames that make up this GIF image.
         /// </summary>
-        public IList<GifFrame<T>> Frames { get; private set; }
+        public GifFrame<T>[] Frames { get; private set; }
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
@@ -995,7 +995,7 @@
         /// <summary>
         /// Gets the frames that make up this GIF image.
         /// </summary>
-        public IList<GifFrame<T>> Frames { get; private set; }
+        public GifFrame<T>[] Frames { get; private set; }
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
@@ -1032,6 +1032,10 @@
         /// </summary>
         private LogicalScreenDescriptor screenDescriptor;
 
+        /// <summary>
+        /// The frames that make up the image.
+        /// </summary>
+        private List<GifFrame<T>> frames = new List<GifFrame<T>>();
         /// <summary>
         /// Buffer holding the information for the frame.
         /// </summary>
@@ -1256,8 +1260,9 @@
         private void DecodeGif()
         {
             Iterations = 1;
-            Frames = new List<GifFrame<T>>();
             ReadGifDataStream();
+            Frames = frames.ToArray();
+            frames = null;
         }
         /// <summary>
         /// Reads the GIF data stream. This contains the header block, logical screen section, data sections, and trailer.
@@ -1892,7 +1897,7 @@
                 frameBuffer.Stride, frameBuffer.Size.Width, frameBuffer.Size.Height, frameBuffer.BitsPerValue, hashCode);
             int delay = graphicControl != null ? graphicControl.Delay : 0;
             GifFrame<T> newFrame = new GifFrame<T>(frame, delay, tableCopy, frameTransparentIndex);
-            Frames.Add(newFrame);
+            frames.Add(newFrame);
             Duration += newFrame.Duration;
         }
         /// <summary>

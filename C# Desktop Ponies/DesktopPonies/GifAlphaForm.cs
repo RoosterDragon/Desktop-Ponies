@@ -213,7 +213,7 @@
             ImageSourcePalette.BackColor = ImageComparison.BackColor;
             ImageDesiredPalette.BackColor = ImageComparison.BackColor;
 
-            desiredFrames = new Bitmap[gifImage.Frames.Count];
+            desiredFrames = new Bitmap[gifImage.Frames.Length];
             for (int i = 0; i < desiredFrames.Length; i++)
                 desiredFrames[i] = (Bitmap)gifImage.Frames[i].Image.Clone();
             UpdateDesiredFrames();
@@ -421,7 +421,7 @@
         /// </summary>
         private void UpdateDesiredFrames()
         {
-            for (int frame = 0; frame < gifImage.Frames.Count; frame++)
+            for (int frame = 0; frame < gifImage.Frames.Length; frame++)
             {
                 int tableSize = gifImage.Frames[frame].ColorTableSize;
                 ColorPalette palette = gifImage.Frames[frame].Image.Palette;
