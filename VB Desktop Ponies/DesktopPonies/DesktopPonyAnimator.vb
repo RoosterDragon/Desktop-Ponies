@@ -67,51 +67,55 @@ Public Class DesktopPonyAnimator
     Private Sub ControlFormItemAdded(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim pony = TryCast(e.Item, Pony)
         If pony IsNot Nothing Then
-            controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.Add(pony))
+            ControlFormInvoke(Sub() controlForm.PonyComboBox.Items.Add(pony))
         End If
     End Sub
 
     Private Sub ControlFormItemsAdded(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         Dim ponies = e.Items.OfType(Of Pony)().ToArray()
-        controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(ponies))
+        If ponies.Length > 0 Then
+            ControlFormInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(ponies))
+        End If
     End Sub
 
     Private Sub ControlFormItemRemoved(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim pony = TryCast(e.Item, Pony)
-        If pony IsNot Nothing AndAlso Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
-            Try
-                controlForm.SmartInvoke(Sub()
-                                            controlForm.PonyComboBox.Items.Remove(pony)
-                                            controlForm.NotifyRemovedPonyItems()
-                                        End Sub)
-            Catch ex As ObjectDisposedException
-                If ex.ObjectName <> controlForm.GetType().Name Then
-                    Throw
-                End If
-            End Try
+        If pony IsNot Nothing Then
+            ControlFormInvoke(Sub()
+                                  controlForm.PonyComboBox.Items.Remove(pony)
+                                  controlForm.NotifyRemovedPonyItems()
+                              End Sub)
         End If
     End Sub
 
     Private Sub ControlFormItemsRemoved(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
-        controlForm.SmartInvoke(Sub()
-                                    For Each item In e.Items
-                                        Dim pony = TryCast(item, Pony)
-                                        If pony IsNot Nothing Then
-                                            controlForm.PonyComboBox.Items.Remove(pony)
-                                        End If
-                                    Next
-                                    controlForm.NotifyRemovedPonyItems()
-                                End Sub)
+        ControlFormInvoke(Sub()
+                              For Each item In e.Items
+                                  Dim pony = TryCast(item, Pony)
+                                  If pony IsNot Nothing Then
+                                      controlForm.PonyComboBox.Items.Remove(pony)
+                                  End If
+                              Next
+                              controlForm.NotifyRemovedPonyItems()
+                          End Sub)
+    End Sub
+
+    Private Sub ControlFormInvoke(method As MethodInvoker)
+        SyncLock controlForm
+            If Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
+                controlForm.SmartInvoke(method)
+            End If
+        End SyncLock
     End Sub
 
     Public Overrides Sub Start()
         MyBase.Start()
-        If controlForm IsNot Nothing Then controlForm.SmartInvoke(AddressOf controlForm.Show)
+        If controlForm IsNot Nothing Then ControlFormInvoke(AddressOf controlForm.Show)
         If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
-            Main.Instance.Invoke(Sub()
-                                     spriteDebugForm = New SpriteDebugForm()
-                                     spriteDebugForm.Show()
-                                 End Sub)
+            Main.Instance.SmartInvoke(Sub()
+                                          spriteDebugForm = New SpriteDebugForm()
+                                          spriteDebugForm.Show()
+                                      End Sub)
             AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
         End If
     End Sub
@@ -179,7 +183,7 @@ Public Class DesktopPonyAnimator
 
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
-            Main.Instance.Invoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
+            Main.Instance.SmartInvoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
             countSinceLastDebug = 0
         End If
     End Sub
@@ -205,13 +209,21 @@ Public Class DesktopPonyAnimator
 
     Public Overrides Sub Finish()
         If controlForm IsNot Nothing Then
-            controlForm.SmartInvoke(AddressOf controlForm.ForceClose)
+            SyncLock controlForm
+                If Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
+                    controlForm.BeginInvoke(New MethodInvoker(AddressOf controlForm.ForceClose))
+                End If
+            End SyncLock
             RemoveHandler Sprites.ItemAdded, AddressOf ControlFormItemAdded
             RemoveHandler Sprites.ItemsAdded, AddressOf ControlFormItemsAdded
             RemoveHandler Sprites.ItemRemoved, AddressOf ControlFormItemRemoved
             RemoveHandler Sprites.ItemsRemoved, AddressOf ControlFormItemsRemoved
+            controlForm = Nothing
         End If
-        If spriteDebugForm IsNot Nothing Then Main.Instance.Invoke(Sub() spriteDebugForm.Close())
+        If spriteDebugForm IsNot Nothing Then
+            Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Close)
+            spriteDebugForm = Nothing
+        End If
         MyBase.Finish()
     End Sub
 
@@ -631,8 +643,8 @@ Public Class DesktopPonyAnimator
     Protected Overrides Sub Dispose(disposing As Boolean)
         MyBase.Dispose(disposing)
         If disposing Then
-            If controlForm IsNot Nothing Then controlForm.Dispose()
-            If spriteDebugForm IsNot Nothing Then Main.Instance.Invoke(Sub() spriteDebugForm.Dispose())
+            If controlForm IsNot Nothing Then ControlFormInvoke(AddressOf controlForm.Dispose)
+            If spriteDebugForm IsNot Nothing Then Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Dispose)
         End If
     End Sub
 End Class

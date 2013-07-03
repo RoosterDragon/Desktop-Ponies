@@ -128,10 +128,13 @@ Public Class NewBehaviorDialog
                                              Nothing,
                                              DontRepeat_CheckBox.Checked,
                                              CInt(Group_Numberbox.Value))
+
+        DialogResult = Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
+        DialogResult = Windows.Forms.DialogResult.Cancel
         Me.Close()
     End Sub
 

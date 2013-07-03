@@ -19,6 +19,8 @@ Public Class PonySelectionControl
     Private imageLoaded As New Threading.ManualResetEvent(False)
 
     Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
+        Argument.EnsureNotNull(ponyTemplate, "ponyTemplate")
+        Argument.EnsureNotNull(imagePath, "imagePath")
         InitializeComponent()
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
@@ -39,16 +41,11 @@ Public Class PonySelectionControl
             PonyImage.Dispose()
         Else
             imageLoaded.Set()
-            Try
-                If IsHandleCreated Then
-                    BeginInvoke(New MethodInvoker(Sub()
-                                                      ResizeToFit()
-                                                      If ShowPonyImage Then InvalidatePonyImageArea()
-                                                  End Sub))
-                End If
-            Catch ex As ObjectDisposedException
-                If ex.ObjectName <> PonyImage.GetType().Name Then Throw
-            End Try
+            If Not IsHandleCreated Then Return
+            BeginInvoke(New MethodInvoker(Sub()
+                                              ResizeToFit()
+                                              If ShowPonyImage Then InvalidatePonyImageArea()
+                                          End Sub))
         End If
     End Sub
 
@@ -101,10 +98,11 @@ Public Class PonySelectionControl
 
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
         If ShowPonyImage Then
-            Dim image = GetPonyImage()
+            Dim ponyImage = GetPonyImage()
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
-            image(timeIndex).Flip(flip)
-            e.Graphics.DrawImage(image(timeIndex).Image, 0, 0, image.Width * Options.ScaleFactor, image.Height * Options.ScaleFactor)
+            ponyImage(timeIndex).Flip(flip)
+            Dim bitmap = ponyImage(timeIndex).Image
+            e.Graphics.DrawImage(bitmap, 0, 0, bitmap.Width * Options.ScaleFactor, bitmap.Height * Options.ScaleFactor)
         End If
     End Sub
 

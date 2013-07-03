@@ -385,7 +385,7 @@
                 if (!kvp.Value.IsValueCreated)
                     InitializedCount++;
 
-                yield return new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value);
+                yield return KeyValuePair.From(kvp.Key, kvp.Value.Value);
             }
         }
         /// <summary>
@@ -417,7 +417,7 @@
                     throw new InvalidOperationException("Values were initialized during enumeration of the collection.");
 
                 if (kvp.Value.IsValueCreated)
-                    yield return new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value);
+                    yield return KeyValuePair.From(kvp.Key, kvp.Value.Value);
             }
         }
         /// <summary>
@@ -670,7 +670,7 @@
                     int i = 0;
                     foreach (var kvp in lazyDictionary.dictionary)
                         if (kvp.Value.IsValueCreated)
-                            array[i++] = new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value);
+                            array[i++] = KeyValuePair.From(kvp.Key, kvp.Value.Value);
                         else
                             array[i++] = new KeyUnit() { Key = kvp.Key };
                     return array;

@@ -30,25 +30,25 @@ Public Class DesktopControlForm
                 Throw New ArgumentException("menuItem must have drop down items.", "menuItem")
             End If
 
-            Dim subItemsList As New List(Of ISimpleContextMenuItem)(subItems)
+            Dim subItemsArray = subItems.ToArray()
 
-            If menuItem.DropDownItems.Count <> subItemsList.Count Then
+            If menuItem.DropDownItems.Count <> subItemsArray.Length Then
                 Throw New ArgumentException(
                     "The number of sub-items in menuItem is not the same as the number in the subItems collection.")
             End If
 
-            Dim winFormSubItemsList As New List(Of ISimpleContextMenuItem)(subItemsList.Count)
+            Dim winFormSubItemsList(subItemsArray.Length - 1) As ISimpleContextMenuItem
             Dim index = 0
             For Each _toolStripItem As ToolStripItem In menuItem.DropDownItems
-                If subItemsList(index).IsSeparator Then
-                    winFormSubItemsList.Add(
-                        New ToolStripItemAsContextMenuItem(CType(_toolStripItem, ToolStripSeparator)))
-                ElseIf subItemsList(index).SubItems Is Nothing Then
-                    winFormSubItemsList.Add(
-                        New ToolStripItemAsContextMenuItem(CType(_toolStripItem, ToolStripMenuItem), subItemsList(index).Activated))
+                If subItemsArray(index).IsSeparator Then
+                    winFormSubItemsList(index) =
+                        New ToolStripItemAsContextMenuItem(DirectCast(_toolStripItem, ToolStripSeparator))
+                ElseIf subItemsArray(index).SubItems Is Nothing Then
+                    winFormSubItemsList(index) =
+                        New ToolStripItemAsContextMenuItem(DirectCast(_toolStripItem, ToolStripMenuItem), subItemsArray(index).Activated)
                 Else
-                    winFormSubItemsList.Add(
-                        New ToolStripItemAsContextMenuItem(CType(_toolStripItem, ToolStripMenuItem), subItemsList(index).SubItems))
+                    winFormSubItemsList(index) =
+                        New ToolStripItemAsContextMenuItem(DirectCast(_toolStripItem, ToolStripMenuItem), subItemsArray(index).SubItems)
                 End If
                 index += 1
             Next
@@ -227,8 +227,6 @@ Public Class DesktopControlForm
                                       Main.Instance.Opacity = 100 'for when autostarted
                                       Main.Instance.Show()
                                   End Sub)
-        allowClose = True
-        Close()
     End Sub
 
     Public Sub ForceClose()
@@ -249,7 +247,6 @@ Public Class DesktopControlForm
     End Sub
 
     Public Sub NotifyRemovedPonyItems()
-        If Disposing OrElse IsDisposed Then Return
         If PonyComboBox.SelectedItem Is Nothing Then
             MenuStripPanel.Controls.Clear()
         End If

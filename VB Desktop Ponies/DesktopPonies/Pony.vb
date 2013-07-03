@@ -41,35 +41,6 @@ Public Class MutablePonyBase
         LoadFromIni(directory)
     End Sub
 
-    ''' <summary>
-    ''' This overload is in case the editor happens upon a very incomplete pony that has no behaviors (wasn't created by the editor).
-    ''' </summary>
-    Public Overloads Sub AddBehavior(name As String, chance As Double, max_duration As Double, min_duration As Double, speed As Double,
-                              Allowed_Moves As AllowedMoves, _Linked_Behavior As String, _Startline As String, _Endline As String)
-
-        Dim new_behavior As New Behavior("", "")
-
-        new_behavior.Name = Trim(name)
-        new_behavior.ChanceOfOccurence = chance
-        new_behavior.MaxDuration = max_duration
-        new_behavior.MinDuration = min_duration
-        new_behavior.SetSpeed(speed)
-        new_behavior.AllowedMovement = Allowed_Moves
-
-        new_behavior.StartLineName = _Startline
-        new_behavior.EndLineName = _Endline
-
-        If _Linked_Behavior <> "" Then
-            'We just record the name of the linked behavior for now
-            'Later, when we call "Link_Behaviors()" from the main form, we 
-            'will get references to the actual behaviors.
-            new_behavior.LinkedBehaviorName = _Linked_Behavior
-        End If
-
-        Behaviors.Add(new_behavior)
-
-    End Sub
-
     Public Overloads Sub AddBehavior(name As String, chance As Double,
                        max_duration As Double, min_duration As Double, speed As Double,
                        right_image_path As String, left_image_path As String,
@@ -1087,6 +1058,18 @@ Public Class PonyBase
     End Sub
 
     Private Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
+        If Path.GetPathRoot(Path.GetFullPath(tempFileName)) <> Path.GetPathRoot(Path.GetFullPath(destinationFileName)) Then
+            ' We will need to copy the temporary file to the same drive as the destination before we can call File.Replace
+            ' This is less safe, but there's not much choice.
+            Dim tempFileNameInSameDirectory As String
+            Dim destinationDirectory = Path.GetDirectoryName(destinationFileName)
+            Do
+                tempFileNameInSameDirectory = Path.Combine(destinationDirectory, Path.GetRandomFileName())
+            Loop While File.Exists(tempFileNameInSameDirectory)
+            File.Move(tempFileName, tempFileNameInSameDirectory)
+            tempFileName = tempFileNameInSameDirectory
+        End If
+
         If Not File.Exists(destinationFileName) Then File.Create(destinationFileName).Dispose()
         File.Replace(tempFileName, destinationFileName, Nothing)
         File.Delete(tempFileName)
@@ -1519,7 +1502,7 @@ Public Class Pony
             Return Base.Directory
         End Get
     End Property
-    Friend ReadOnly Property Name() As String
+    Public ReadOnly Property Name() As String
         Get
             Return Base.Name
         End Get

@@ -16,6 +16,7 @@
         /// <param name="method">The method to execute.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="method"/> is null.
         /// </exception>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, MethodInvoker method)
         {
             Argument.EnsureNotNull(control, "control");
@@ -33,6 +34,7 @@
         /// <param name="handler">The event handler to execute.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler)
         {
             Argument.EnsureNotNull(control, "control");
@@ -51,6 +53,7 @@
         /// <param name="sender">The source of the event.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler, object sender)
         {
             Argument.EnsureNotNull(control, "control");
@@ -70,6 +73,7 @@
         /// <param name="e">Data about the event.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler, object sender, EventArgs e)
         {
             Argument.EnsureNotNull(control, "control");
@@ -88,6 +92,7 @@
         /// <param name="state">An object containing information to be used by the callback method.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="callback"/> is null.
         /// </exception>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, WaitCallback callback, object state)
         {
             Argument.EnsureNotNull(control, "control");
@@ -103,6 +108,7 @@
         /// </summary>
         /// <param name="control">The control to invoke upon.</param>
         /// <param name="method">The method to execute.</param>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         private static void SafeInvoke(this Control control, Delegate method)
         {
             EndAndDisposeAsyncResult(control, control.BeginInvoke(method));
@@ -114,6 +120,7 @@
         /// <param name="control">The control to invoke upon.</param>
         /// <param name="method">The method to execute.</param>
         /// <param name="args">Arguments to pass to the method.</param>
+        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         private static void SafeInvoke(this Control control, Delegate method, params object[] args)
         {
             EndAndDisposeAsyncResult(control, control.BeginInvoke(method, args));

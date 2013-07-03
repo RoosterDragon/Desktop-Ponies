@@ -58,6 +58,8 @@ Public Class IdleWorker
     ''' Initializes a new instance of the <see cref="IdleWorker"/> class on the current thread.
     ''' </summary>
     Private Sub New()
+        If Not Application.MessageLoop Then Throw New InvalidOperationException(
+            String.Format("A message loop must be running on this thread before the {0} can be accessed.", GetType(IdleWorker).Name))
         owningThread = Threading.Thread.CurrentThread
         control = New Control()
         control.CreateControl()
@@ -70,22 +72,32 @@ Public Class IdleWorker
     ''' </summary>
     ''' <param name="task">The task which will be executed once other queued tasks have been processed and the UI thread is idle.</param>
     Public Sub QueueTask(task As MethodInvoker)
-        If OperatingSystemInfo.IsWindows Then
-            SyncLock tasks
-                tasks.Enqueue(task)
-                ' If there were previously no tasks in the queue, the application may already be an an idle state.
-                ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is cleared.
-                If tasks.Count = 1 Then
-                    asyncResult = control.BeginInvoke(DummyCallback)
-                    empty.Reset()
+        Argument.EnsureNotNull(task, "task")
+        SyncLock tasks
+            ' If the control is disposed or the handle has been lost, then the message pump on this thread has been shut down. We will drop
+            ' all new tasks since they can't be processed anyway.
+            If control.IsDisposed OrElse Not control.IsHandleCreated Then Return
+
+            Try
+                If OperatingSystemInfo.IsWindows Then
+                    tasks.Enqueue(task)
+                    ' If there were previously no tasks in the queue, the application may already be an an idle state.
+                    ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is cleared.
+                    If tasks.Count = 1 Then
+                        asyncResult = control.BeginInvoke(DummyCallback)
+                        empty.Reset()
+                    End If
+                Else
+                    ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This is
+                    ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks.  This becomes an issue
+                    ' if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
+                    control.BeginInvoke(task)
                 End If
-            End SyncLock
-        Else
-            ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This is
-            ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks.  This becomes an issue
-            ' if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
-            control.BeginInvoke(task)
-        End If
+            Catch ex As InvalidOperationException
+                ' If the handle was lost after our initial check, it means the message pump was closed from another thread.
+                ' Again, we will just drop any new tasks.
+            End Try
+        End SyncLock
     End Sub
 
     ''' <summary>
@@ -99,12 +111,14 @@ Public Class IdleWorker
                 tasks.Dequeue().Invoke()
                 If tasks.Count = 0 Then
                     empty.Set()
-                    Try
-                        control.EndInvoke(asyncResult)
-                    Finally
-                        asyncResult.AsyncWaitHandle.Dispose()
-                        asyncResult = Nothing
-                    End Try
+                    If asyncResult IsNot Nothing Then
+                        Try
+                            control.EndInvoke(asyncResult)
+                        Finally
+                            asyncResult.AsyncWaitHandle.Dispose()
+                            asyncResult = Nothing
+                        End Try
+                    End If
                 End If
             End If
         End SyncLock

@@ -5,6 +5,7 @@
     using System.Drawing;
     using System.IO;
     using System.Linq;
+    using CSDesktopPonies.Collections;
 
     /// <summary>
     /// Provides methods to get the size of an image without having to load the whole file.
@@ -26,20 +27,20 @@
         /// Contains a collection of known image formats based on the magic bytes in the header of those formats. Each sequence of magic
         /// bytes maps to a decoding function which reads the image and returns its size.
         /// </summary>
-        private static readonly Dictionary<byte[], Func<BinaryReader, Size>> ImageDecoders =
+        private static readonly KeyValuePair<byte[], Func<BinaryReader, Size>>[] ImageDecoders =
             new Dictionary<byte[], Func<BinaryReader, Size>>
-        {
-            { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, DecodePng },
-            { new byte[] { 0xFF, 0xD8 }, DecodeJfif },
-            { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, DecodeGif },
-            { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, DecodeGif },
-            { new byte[] { 0x42, 0x4D }, DecodeBitmap },
-        };
+            {
+                { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, DecodePng },
+                { new byte[] { 0xFF, 0xD8 }, DecodeJfif },
+                { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, DecodeGif },
+                { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, DecodeGif },
+                { new byte[] { 0x42, 0x4D }, DecodeBitmap },
+            }.ToArray();
 
         /// <summary>
         /// The length of the longest sequence of magic bytes in the collection of image decoders.
         /// </summary>
-        private static readonly int MaxMagicBytesLength = ImageDecoders.Keys.Max(magicBytes => magicBytes.Length);
+        private static readonly int MaxMagicBytesLength = ImageDecoders.Keys().Max(magicBytes => magicBytes.Length);
 
         /// <summary>
         /// Gets the width and height of an image, in pixels.
@@ -81,7 +82,6 @@
             Argument.EnsureNotNull(reader, "reader");
             
             byte[] magicBytes = new byte[MaxMagicBytesLength];
-
             for (int i = 0; i < magicBytes.Length; i++)
             {
                 magicBytes[i] = reader.ReadByte();

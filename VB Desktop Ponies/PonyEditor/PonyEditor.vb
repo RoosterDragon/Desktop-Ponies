@@ -87,20 +87,7 @@ Public Class PonyEditor
                          New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}
 
             'add all possible ponies to the selection window.
-            Const size = 50
-            ponyImageList = New ImageList() With {.ImageSize = New Size(size, size)}
-            For Each ponyBase In PonyBases
-                Dim imagePath = ponyBase.Behaviors(0).LeftImagePath
-
-                Dim dstImage = New Bitmap(size, size)
-                Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
-                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-                    g.Clear(Me.PonyList.BackColor)
-                    g.DrawImage(srcImage, 0, 0, size, size)
-                End Using
-
-                ponyImageList.Images.Add(dstImage)
-            Next
+            ponyImageList = GenerateImageList(PonyBases, 50, PonyList.BackColor, Function(b) b.LeftImagePath)
             PonyList.LargeImageList = ponyImageList
             PonyList.SmallImageList = ponyImageList
 
@@ -137,6 +124,28 @@ Public Class PonyEditor
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
     End Sub
+
+    Public Shared Function GenerateImageList(ponyBases As IEnumerable(Of PonyBase), size As Integer, backColor As Color,
+                                             pathSelect As Func(Of Behavior, String)) As ImageList
+        Dim imageList = New ImageList() With {.ImageSize = New Size(size, size)}
+        For Each ponyBase In ponyBases
+            Dim dstImage As Bitmap
+            If ponyBase.Behaviors.Any() Then
+                Dim imagePath = pathSelect(ponyBase.Behaviors(0))
+                dstImage = New Bitmap(size, size)
+                Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
+                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                    g.Clear(backColor)
+                    g.DrawImage(srcImage, 0, 0, size, size)
+                End Using
+            Else
+                dstImage = My.Resources.MysteryThumb
+            End If
+
+            imageList.Images.Add(dstImage)
+        Next
+        Return imageList
+    End Function
 
     Private Sub PonyList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyList.SelectedIndexChanged
         Try
@@ -178,14 +187,11 @@ Public Class PonyEditor
             Sub()
                 _previewPony = New Pony(New MutablePonyBase(directory))
                 PreviewPonyBase.LoadInteractions(PonyBases)
-                If PreviewPony.Behaviors.Count = 0 Then
-                    PreviewPonyBase.AddBehavior("Default", 1, 60, 60, 0, AllowedMoves.None, "", "", "")
-                End If
             End Sub)
         ponyLoadTask.ContinueWith(
             Sub()
                 worker.QueueTask(Sub()
-                                     pe_animator.AddPony(PreviewPony)
+                                     If PreviewPonyBase.Behaviors.Any() Then pe_animator.AddPony(PreviewPony)
                                      LoadParameters(PreviewPony)
 
                                      PausePonyButton.Text = "Pause Pony"
@@ -1341,15 +1347,18 @@ Public Class PonyEditor
             End If
 
             HidePony()
+            Dim addedNew As Boolean
             Using form = New NewBehaviorDialog(Me)
-                form.ShowDialog()
+                addedNew = (form.ShowDialog() = Windows.Forms.DialogResult.OK)
             End Using
-
             ShowPony()
-            PreviewPony.SelectBehavior(PreviewPony.Behaviors(0))
 
-            LoadParameters(PreviewPony)
-            hasSaved = False
+            If addedNew Then
+                If PreviewPony.Behaviors.Count = 1 Then pe_animator.AddPony(PreviewPony)
+                PreviewPony.SelectBehavior(PreviewPony.Behaviors(0))
+                LoadParameters(PreviewPony)
+                hasSaved = False
+            End If
 
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error creating new behavior. The editor will now close.")

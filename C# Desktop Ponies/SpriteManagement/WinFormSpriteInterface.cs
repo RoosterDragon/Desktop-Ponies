@@ -1474,7 +1474,7 @@
             {
                 if (form.InvokeRequired)
                 {
-                    Dispose(disposing);
+                    ApplicationInvoke(() => Dispose(disposing));
                     return;
                 }
 

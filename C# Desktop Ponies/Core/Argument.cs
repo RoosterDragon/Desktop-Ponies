@@ -63,7 +63,7 @@
         /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> contains no elements.</exception>
         public static IEnumerable<T> EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName) 
         {
-            if (Argument.EnsureNotNull(arg, paramName).LongCount() == 0)
+            if (!Argument.EnsureNotNull(arg, paramName).Any())
                 throw new ArgumentException(paramName + " must contain at least one element.", paramName);
             return arg;
         }

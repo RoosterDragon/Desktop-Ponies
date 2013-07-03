@@ -39,21 +39,7 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Const size = 75
-        Dim ponyImageList As New ImageList() With {.ImageSize = New Size(size, size)}
-        For Each ponyBase In ponyBases
-            Dim imagePath = ponyBase.Behaviors(0).RightImagePath
-
-            Dim dstImage = New Bitmap(size, size)
-            Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
-                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-                g.Clear(Me.PonyList.BackColor)
-                g.DrawImage(srcImage, 0, 0, size, size)
-            End Using
-
-            ponyImageList.Images.Add(dstImage)
-        Next
-
+        Dim ponyImageList = PonyEditor.GenerateImageList(ponyBases, 75, PonyList.BackColor, Function(b) b.RightImagePath)
         PonyList.LargeImageList = ponyImageList
         PonyList.SmallImageList = ponyImageList
 

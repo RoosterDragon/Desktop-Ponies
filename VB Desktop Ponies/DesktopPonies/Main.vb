@@ -232,7 +232,6 @@ Public Class Main
             skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
         Next
 
-        Dim ponyBasesToAdd As New List(Of PonyBase)
         For Each folder In ponyBaseDirectories
             Dim pony As PonyBase
             Try
@@ -246,7 +245,6 @@ Public Class Main
                     "The missing file was '{3}'", Environment.NewLine, PonyBase.ConfigFilename, folder, ex.FileName))
                 Continue For
             End Try
-            ponyBasesToAdd.Add(pony)
             worker.QueueTask(Sub()
                                  Try
                                      AddToMenu(pony)
@@ -284,12 +282,12 @@ Public Class Main
         End If
 
         ' Load pony counts.
-        worker.QueueTask(Sub() Options.LoadPonyCounts())
+        worker.QueueTask(AddressOf Options.LoadPonyCounts)
 
         ' Load interactions, since references to other ponies can now be resolved.
         worker.QueueTask(Sub()
                              Try
-                                 Dim bases = ponyBases.ToArray()
+                                 Dim bases = PonyBasesWithBehaviors.ToArray()
                                  For Each pony In ponyBases
                                      pony.LoadInteractions(bases)
                                  Next
@@ -367,6 +365,12 @@ Public Class Main
     End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
+        If ponyBase.Directory <> "Random Pony" Then
+            ponyBases.Add(ponyBase)
+        End If
+
+        If Not ponyBase.Behaviors.Any() Then Return
+
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImagePath, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
@@ -374,8 +378,6 @@ Public Class Main
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
             randomPony = ponyBase
-        Else
-            ponyBases.Add(ponyBase)
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
@@ -480,7 +482,7 @@ Public Class Main
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
             Me.Visible = False
-            Using gameForm As New GameSelectionForm(RandomPlusPonyBases)
+            Using gameForm As New GameSelectionForm(RandomPlusPonyBasesWithBehaviors)
                 If gameForm.ShowDialog() = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()
@@ -823,7 +825,7 @@ Public Class Main
 
             ' Add a random amount of ponies.
             If randomPoniesWanted > 0 Then
-                Dim remainingPonyBases = ponyBases.ToList()
+                Dim remainingPonyBases = PonyBasesWithBehaviors().ToList()
                 If Options.NoRandomDuplicates Then
                     remainingPonyBases.RemoveAll(Function(pb) ponyBasesWanted.Any(Function(t) t.Item1 = pb.Directory))
                 End If
@@ -939,7 +941,7 @@ Public Class Main
             ponyViewer.LoadImages(images, loaded)
         End If
 
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponyBases, randomPony, OperatingSystemInfo.IsMacOSX)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, PonyBasesWithBehaviors, randomPony, OperatingSystemInfo.IsMacOSX)
         Pony.CurrentViewer = ponyViewer
         Pony.CurrentAnimator = animator
     End Sub
@@ -1110,11 +1112,12 @@ Public Class Main
         AnimationTimer.Enabled = Visible AndAlso Not loading
     End Sub
 
-    Private Iterator Function RandomPlusPonyBases() As IEnumerable(Of PonyBase)
-        Yield randomPony
-        For Each PonyBase In ponyBases
-            Yield PonyBase
-        Next
+    Private Function PonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
+        Return ponyBases.Where(Function(pb) pb.Behaviors.Any())
+    End Function
+
+    Private Function RandomPlusPonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
+        Return {randomPony}.Union(PonyBasesWithBehaviors())
     End Function
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
