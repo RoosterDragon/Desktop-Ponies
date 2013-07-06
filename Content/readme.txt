@@ -69,6 +69,9 @@ Change Log
 
 Latest changes:
 
+v1.42.2.8:
+- Fixed bug from 1.42.2.5 that prevented saving ponies if the program was not running on the same drive as the temp folder.
+
 v1.42.2.7:
 - Added Sunset Shimmer by Bot-chan.
 - Fixed bug from 1.42.2.6 that prevented creating new ponies in the editor.
