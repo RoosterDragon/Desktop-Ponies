@@ -226,7 +226,6 @@ Friend Module Games
             If Options.WindowAvoidanceEnabled OrElse Options.CursorAvoidanceEnabled Then
                 Options.WindowAvoidanceEnabled = False
                 Options.CursorAvoidanceEnabled = False
-                '  MsgBox("Note: Window avoidance and cursor avoidance have been disabled as they may interfere with the game.")
             End If
 
             For Each goal In goals

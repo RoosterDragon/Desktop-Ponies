@@ -591,9 +591,12 @@ Public Class PonyEditor
             Dim invalid_value As String = CStr(grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
             grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value = replacement
 
-            MsgBox(PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalid_value & "' is not valid for column '" & grid.Columns(e.ColumnIndex).HeaderText _
-                   & "'" & ControlChars.NewLine & "Details: Column: " & e.ColumnIndex & " Row: " & e.RowIndex & " - " & e.Exception.Message & ControlChars.NewLine & _
-                   ControlChars.NewLine & "Value will be reset.")
+            MessageBox.Show(Me, PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalid_value &
+                            "' is not valid for column '" & grid.Columns(e.ColumnIndex).HeaderText & "'" & ControlChars.NewLine &
+                            "Details: Column: " & e.ColumnIndex &
+                            " Row: " & e.RowIndex & " - " & e.Exception.Message & ControlChars.NewLine & ControlChars.NewLine &
+                            "Value will be reset.",
+                            "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning)
 
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
@@ -1666,7 +1669,10 @@ Public Class PonyEditor
                 End If
             End Using
 
-            MsgBox("All ponies must now be reloaded. Once this operation is complete, you can reopen the editor and select your pony for editing.")
+            MessageBox.Show(
+                Me, "All ponies must now be reloaded. " &
+                "Once this operation is complete, you can reopen the editor and select your pony for editing.",
+                "Ponies Must Be Reloaded", MessageBoxButtons.OK, MessageBoxIcon.Information)
             _changesMade = True
             Me.Close()
 
@@ -1734,7 +1740,7 @@ Public Class PonyEditor
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
 
         If IsNothing(PreviewPony) Then
-            MsgBox("Select a pony first!")
+            MessageBox.Show(Me, "You need to select a pony first.", "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -1750,7 +1756,7 @@ Public Class PonyEditor
     Private Sub SetImageCentersButton_Click(sender As Object, e As EventArgs) Handles SetImageCentersButton.Click
 
         If IsNothing(PreviewPony) Then
-            MsgBox("Select a pony first.")
+            MessageBox.Show(Me, "You need to select a pony first.", "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
         HidePony()

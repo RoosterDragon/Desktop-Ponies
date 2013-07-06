@@ -18,6 +18,7 @@ Public Class DesktopPonyAnimator
     Private cursorPosition As Point
     Friend ReadOnly ActiveSounds As New List(Of Object)()
 
+    Private ReadOnly controlFormLock As New Object()
     Private controlForm As DesktopControlForm
 
     Private spriteDebugForm As SpriteDebugForm
@@ -101,7 +102,7 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub ControlFormInvoke(method As MethodInvoker)
-        SyncLock controlForm
+        SyncLock controlFormLock
             If Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
                 controlForm.SmartInvoke(method)
             End If
@@ -209,7 +210,7 @@ Public Class DesktopPonyAnimator
 
     Public Overrides Sub Finish()
         If controlForm IsNot Nothing Then
-            SyncLock controlForm
+            SyncLock controlFormLock
                 If Not controlForm.Disposing AndAlso Not controlForm.IsDisposed Then
                     controlForm.BeginInvoke(New MethodInvoker(AddressOf controlForm.ForceClose))
                 End If

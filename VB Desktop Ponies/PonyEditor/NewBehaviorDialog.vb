@@ -251,7 +251,6 @@ Public Class NewBehaviorDialog
 
         If new_behavior.OriginalFollowObjectName <> "" Then
             follow_name = new_behavior.OriginalFollowObjectName
-            'MsgBox("Note:  If you wish to have this behavior follow another pony, you should change the movement type to 'All'."
         Else
             If new_behavior.OriginalDestinationXCoord <> 0 AndAlso new_behavior.OriginalDestinationYCoord <> 0 Then
                 follow_name = new_behavior.OriginalDestinationXCoord & " , " & new_behavior.OriginalDestinationYCoord
