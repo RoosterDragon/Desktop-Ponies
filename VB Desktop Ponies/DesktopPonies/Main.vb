@@ -424,12 +424,13 @@ Public Class Main
             Exit Sub
         End If
 
+        Options.SaveProfile(profileToSave)
+
         If Not ProfileComboBox.Items.Contains(profileToSave) Then
             ProfileComboBox.Items.Add(profileToSave)
         End If
         ProfileComboBox.SelectedItem = profileToSave
 
-        Options.SaveProfile(profileToSave)
         MessageBox.Show(Me, "Profile '" & profileToSave & "' saved.", "Profile Saved",
                         MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
