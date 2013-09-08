@@ -37,23 +37,25 @@ Public Class HouseOptionsForm
 
         Dim ponies_to_check As New List(Of Integer)
 
-        For Each visitor In base.Visitors
-            Dim index = 0
+        SyncLock base.Visitors
+            For Each visitor In base.Visitors
+                Dim index = 0
 
-            If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                For i = 0 To Visitors_CheckedListBox.Items.Count - 1
-                    Visitors_CheckedListBox.SetItemChecked(i, True)
-                Next
-                Exit For
-            End If
-
-            For Each item As String In Visitors_CheckedListBox.Items
-                If String.Equals(item, visitor, StringComparison.OrdinalIgnoreCase) Then
-                    ponies_to_check.Add(index)
+                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
+                    For i = 0 To Visitors_CheckedListBox.Items.Count - 1
+                        Visitors_CheckedListBox.SetItemChecked(i, True)
+                    Next
+                    Exit For
                 End If
-                index += 1
+
+                For Each item As String In Visitors_CheckedListBox.Items
+                    If String.Equals(item, visitor, StringComparison.OrdinalIgnoreCase) Then
+                        ponies_to_check.Add(index)
+                    End If
+                    index += 1
+                Next
             Next
-        Next
+        End SyncLock
 
         For Each index In ponies_to_check
             Visitors_CheckedListBox.SetItemChecked(index, True)
@@ -133,10 +135,12 @@ Public Class HouseOptionsForm
             Return False
         End If
 
-        base.Visitors.Clear()
-        For Each entry As String In Visitors_CheckedListBox.CheckedItems
-            base.Visitors.Add(entry)
-        Next
+        SyncLock base.Visitors
+            base.Visitors.Clear()
+            For Each entry As String In Visitors_CheckedListBox.CheckedItems
+                base.Visitors.Add(entry)
+            Next
+        End SyncLock
 
         house.InitializeVisitorList()
 
@@ -185,9 +189,11 @@ Public Class HouseOptionsForm
                 If Visitors_CheckedListBox.Items.Count = Visitors_CheckedListBox.CheckedItems.Count Then
                     new_ini.WriteLine("ALL")
                 Else
-                    For Each entry In base.Visitors
-                        new_ini.WriteLine(entry)
-                    Next
+                    SyncLock base.Visitors
+                        For Each entry In base.Visitors
+                            new_ini.WriteLine(entry)
+                        Next
+                    End SyncLock
                 End If
             End Using
 
