@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
 
@@ -30,6 +31,7 @@
         /// <param name="paramName">The name of the parameter.</param>
         /// <returns>A reference to <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
+        [DebuggerStepThrough]
         public static T EnsureNotNull<T>([ValidatedNotNull] T arg, string paramName)
         {
             if (arg == null)
@@ -45,6 +47,7 @@
         /// <returns>A reference to <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> is the empty string.</exception>
+        [DebuggerStepThrough]
         public static string EnsureNotNullOrEmpty([ValidatedNotNull] string arg, string paramName)
         {
             if (Argument.EnsureNotNull(arg, paramName) == string.Empty)
@@ -61,6 +64,7 @@
         /// <returns>A reference to <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> contains no elements.</exception>
+        [DebuggerStepThrough]
         public static IEnumerable<T> EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName) 
         {
             if (!Argument.EnsureNotNull(arg, paramName).Any())
@@ -75,6 +79,7 @@
         /// <param name="paramName">The name of the parameter.</param>
         /// <returns>The value of <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
+        [DebuggerStepThrough]
         public static int EnsureNonnegative(int arg, string paramName)
         {
             if (arg < 0)
@@ -89,6 +94,7 @@
         /// <param name="paramName">The name of the parameter.</param>
         /// <returns>The value of <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
+        [DebuggerStepThrough]
         public static int EnsurePositive(int arg, string paramName)
         {
             if (arg <= 0)
@@ -113,6 +119,7 @@
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="arg"/> is not a valid member of its
         /// enumeration. That is, the enumeration is non-flagged and the value is not a defined member, or the enumeration is flagged and
         /// the value contains a flag that is not a defined member.</exception>
+        [DebuggerStepThrough]
         public static TEnum EnsureEnumIsValid<TEnum>(TEnum arg, string paramName) where TEnum : struct
         {
             Type enumType = typeof(TEnum);
