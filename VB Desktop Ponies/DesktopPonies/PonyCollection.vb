@@ -64,7 +64,7 @@ Public Class PonyCollection
                 Case "effect"
                     TryParse(Of EffectBase)(columns, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
                 Case "speak"
-                    TryParse(Of Behavior.SpeakingLine)(columns, folder, AddressOf Behavior.SpeakingLine.TryLoad, Sub(sl) pony.SpeakingLines.Add(sl))
+                    TryParse(Of Speech)(columns, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
                 Case "categories"
                     For i = 1 To columns.Count - 1
                         For Each item As String In Main.Instance.FilterOptionsBox.Items

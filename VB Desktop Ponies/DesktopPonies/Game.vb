@@ -1108,7 +1108,7 @@ Friend Module Games
             End Function
 
             Sub Speak(line As String)
-                Dim new_line As New Behavior.SpeakingLine() With {.Name = "Kick", .Text = line, .Skip = True, .Group = 0}
+                Dim new_line As New Speech() With {.Name = "Kick", .Text = line, .Skip = True, .Group = 0}
                 Player.PonySpeak(new_line)
             End Sub
 

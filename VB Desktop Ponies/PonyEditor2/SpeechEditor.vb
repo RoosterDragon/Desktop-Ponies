@@ -1,8 +1,8 @@
 ﻿Imports System.IO
 
 Friend Class SpeechEditor
-    Private originalSpeech As Behavior.SpeakingLine
-    Private newSpeech As Behavior.SpeakingLine
+    Private originalSpeech As Speech
+    Private newSpeech As Speech
 
     Public Sub New()
         InitializeComponent()
@@ -29,7 +29,7 @@ Friend Class SpeechEditor
     End Sub
 
     Public Overrides Sub LoadItem(speechName As String)
-        originalSpeech = Base.SpeakingLines.Single(Function(s) s.Name = speechName)
+        originalSpeech = Base.Speeches.Single(Function(s) s.Name = speechName)
         newSpeech = originalSpeech.MemberwiseClone()
         LoadItemCommon()
 
@@ -52,15 +52,15 @@ Friend Class SpeechEditor
     End Sub
 
     Public Overrides Sub SaveItem()
-        If Base.SpeakingLines.Any(Function(s) s.Name = newSpeech.Name AndAlso Not Object.ReferenceEquals(s, originalSpeech)) Then
+        If Base.Speeches.Any(Function(s) s.Name = newSpeech.Name AndAlso Not Object.ReferenceEquals(s, originalSpeech)) Then
             MessageBox.Show(Me, "A speech with the name '" & newSpeech.Name &
                             "' already exists for this pony. Please choose another name.",
                             "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             Return
         End If
 
-        Base.SpeakingLines.Remove(originalSpeech)
-        Base.SpeakingLines.Add(newSpeech)
+        Base.Speeches.Remove(originalSpeech)
+        Base.Speeches.Add(newSpeech)
 
         MyBase.SaveItem()
 
@@ -78,8 +78,8 @@ Friend Class SpeechEditor
     End Sub
 
     Protected Overrides Sub SourceTextChanged()
-        Dim s As Behavior.SpeakingLine = Nothing
-        Behavior.SpeakingLine.TryLoad(Source.Text, PonyBasePath, s, ParseIssues)
+        Dim s As Speech = Nothing
+        Speech.TryLoad(Source.Text, PonyBasePath, s, ParseIssues)
         OnIssuesChanged(Me, EventArgs.Empty)
         newSpeech = s
         LoadItemCommon()

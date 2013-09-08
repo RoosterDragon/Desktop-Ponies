@@ -278,7 +278,7 @@ Public Class PonyEditor
             colBehaviorEndSpeech.Items.Add("None")
 
             Dim unnamedCounter = 1
-            For Each speech As Behavior.SpeakingLine In pony.Base.SpeakingLines
+            For Each speech As Speech In pony.Base.Speeches
                 If speech.Name = "Unnamed" Then
                     speech.Name = "Unnamed #" & unnamedCounter
                     unnamedCounter += 1
@@ -437,8 +437,8 @@ Public Class PonyEditor
                 Next
             Next
 
-            For Each speech In pony.Base.SpeakingLines
-                For Each otherspeech In pony.Base.SpeakingLines
+            For Each speech In pony.Base.Speeches
+                For Each otherspeech In pony.Base.Speeches
                     If ReferenceEquals(speech, otherspeech) Then Continue For
 
                     If String.Equals(speech.Name, otherspeech.Name, StringComparison.OrdinalIgnoreCase) Then
@@ -671,9 +671,9 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
-            Dim changed_speech As Behavior.SpeakingLine = Nothing
+            Dim changed_speech As Speech = Nothing
 
-            For Each speech As Behavior.SpeakingLine In PreviewPonyBase.SpeakingLines
+            For Each speech In PreviewPonyBase.Speeches
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -1076,9 +1076,9 @@ Public Class PonyEditor
             Dim new_value As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
-            Dim changed_speech As Behavior.SpeakingLine = Nothing
+            Dim changed_speech As Speech = Nothing
 
-            For Each speech In PreviewPonyBase.SpeakingLines
+            For Each speech In PreviewPonyBase.Speeches
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -1104,7 +1104,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each speechname In PreviewPonyBase.SpeakingLines
+                        For Each speechname In PreviewPonyBase.Speeches
                             If String.Equals(speechname.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Speech names must be unique.  Speech '" & new_value & "' already exists.")
                                 SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
@@ -1522,16 +1522,16 @@ Public Class PonyEditor
                     PreviewPony.Interactions.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, SpeechesGrid) Then
-                Dim todelete As Behavior.SpeakingLine = Nothing
-                For Each speech In PreviewPonyBase.SpeakingLines
+                Dim todelete As Speech = Nothing
+                For Each speech In PreviewPonyBase.Speeches
                     If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
                         todelete = speech
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPonyBase.SpeakingLines.Remove(todelete)
-                    PreviewPonyBase.SetLines(PreviewPonyBase.SpeakingLines)
+                    PreviewPonyBase.Speeches.Remove(todelete)
+                    PreviewPonyBase.SetLines(PreviewPonyBase.Speeches)
                 End If
             Else
                 Throw New Exception("Unknown grid when deleting row: " & grid.Name)

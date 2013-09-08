@@ -23,7 +23,7 @@ Public Class NewSpeechDialog
 
         Dim filename = m_editor.GetFilename(Sound_Textbox.Text)
 
-        Dim new_speech = New Behavior.SpeakingLine() With {.Name = Name_Textbox.Text,
+        Dim new_speech = New Speech() With {.Name = Name_Textbox.Text,
                                                            .Text = Text_TextBox.Text,
                                                            .Skip = Not Random_Checkbox.Checked,
                                                            .Group = CInt(Group_NumberBox.Value),

@@ -93,7 +93,7 @@ Public Class PonyEditorForm2
                         effectsNode.Nodes.Add(New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()})
                     Next
 
-                    For Each speech In pony.SpeakingLines
+                    For Each speech In pony.Speeches
                         Dim ref = New PageRef(pony, PageContent.Speech, speech.Name)
                         speechesNode.Nodes.Add(New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()})
                     Next

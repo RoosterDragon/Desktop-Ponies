@@ -64,7 +64,7 @@ Public Class MutablePonyBase
                            right_image_center, left_image_center, _dont_repeat_image_animations, _group)
     End Sub
 
-    Public Overloads Sub SetLines(lines As IEnumerable(Of Behavior.SpeakingLine))
+    Public Overloads Sub SetLines(lines As IEnumerable(Of Speech))
         MyBase.SetLines(lines)
     End Sub
 
@@ -149,24 +149,24 @@ Public Class PonyBase
         End Get
     End Property
 
-    Private _speakingLines As ICollection(Of Behavior.SpeakingLine)
-    Public ReadOnly Property SpeakingLines() As ICollection(Of Behavior.SpeakingLine)
+    Private _speeches As ICollection(Of Speech)
+    Public ReadOnly Property Speeches() As ICollection(Of Speech)
         Get
-            Return _speakingLines
+            Return _speeches
         End Get
     End Property
 
-    Private _speakingLinesRandom As ICollection(Of Behavior.SpeakingLine)
-    Public ReadOnly Property SpeakingLinesRandom() As ICollection(Of Behavior.SpeakingLine)
+    Private _speechesRandom As ICollection(Of Speech)
+    Public ReadOnly Property SpeechesRandom() As ICollection(Of Speech)
         Get
-            Return _speakingLinesRandom
+            Return _speechesRandom
         End Get
     End Property
 
-    Private _speakingLinesSpecific As ICollection(Of Behavior.SpeakingLine)
-    Public ReadOnly Property SpeakingLinesSpecific() As ICollection(Of Behavior.SpeakingLine)
+    Private _speechesSpecific As ICollection(Of Speech)
+    Public ReadOnly Property SpeechesSpecific() As ICollection(Of Speech)
         Get
-            Return _speakingLinesSpecific
+            Return _speechesSpecific
         End Get
     End Property
 
@@ -175,10 +175,10 @@ Public Class PonyBase
         _behaviorGroups = New List(Of BehaviorGroup)
         _behaviors = New List(Of Behavior)
         _effects = New List(Of EffectBase)
-        _speakingLines = New List(Of Behavior.SpeakingLine)
+        _speeches = New List(Of Speech)
         _interactions = New List(Of Interaction)
-        _speakingLinesRandom = New List(Of Behavior.SpeakingLine)
-        _speakingLinesSpecific = New List(Of Behavior.SpeakingLine)
+        _speechesRandom = New List(Of Speech)
+        _speechesSpecific = New List(Of Speech)
         If makeReadOnly Then Me.MakeReadOnly()
     End Sub
 
@@ -240,12 +240,12 @@ Public Class PonyBase
                         '4 skip for normal use (used for chains or interactions)
 
                         Try
-                            Dim newLine As Behavior.SpeakingLine = Nothing
+                            Dim newLine As Speech = Nothing
                             Select Case UBound(columns)
                                 Case 1, Is >= 4
                                     Dim issues As ParseIssue() = Nothing
-                                    If Behavior.SpeakingLine.TryLoad(line, fullDirectory, newLine, issues) Then
-                                        SpeakingLines.Add(newLine)
+                                    If Speech.TryLoad(line, fullDirectory, newLine, issues) Then
+                                        Speeches.Add(newLine)
                                     Else
                                         Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason)
                                     End If
@@ -285,7 +285,7 @@ Public Class PonyBase
             ' Use the directory name as a fallback if a name was not specified in the configuration file.
             If DisplayName Is Nothing Then DisplayName = directory
 
-            SetLines(SpeakingLines)
+            SetLines(Speeches)
 
             'Now that we have a list of all the behaviors, process them
             For Each behaviorLine In behaviorLines
@@ -495,17 +495,17 @@ Public Class PonyBase
     ''' </summary>
     ''' <param name="lines">The collection of speaking lines that should be used to repopulate the specific and random speaking lines.
     ''' </param>
-    Protected Sub SetLines(lines As IEnumerable(Of Behavior.SpeakingLine))
+    Protected Sub SetLines(lines As IEnumerable(Of Speech))
         Argument.EnsureNotNull(lines, "lines")
 
-        SpeakingLinesSpecific.Clear()
-        SpeakingLinesRandom.Clear()
+        SpeechesSpecific.Clear()
+        SpeechesRandom.Clear()
 
         For Each line In lines
             If line.Skip Then
-                SpeakingLinesSpecific.Add(line)
+                SpeechesSpecific.Add(line)
             Else
-                SpeakingLinesRandom.Add(line)
+                SpeechesRandom.Add(line)
             End If
         Next
     End Sub
@@ -649,7 +649,7 @@ Public Class PonyBase
                 writer.WriteLine(effect.GetPonyIni())
             Next
 
-            For Each speech In SpeakingLines
+            For Each speech In Speeches
                 writer.WriteLine(speech.GetPonyIni())
             Next
         End Using
@@ -836,9 +836,9 @@ Public Class Behavior
             _startLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
-    Public ReadOnly Property StartLine As SpeakingLine
+    Public ReadOnly Property StartLine As Speech
         Get
-            Return pony.SpeakingLines.FirstOrDefault(Function(sl) sl.Name = StartLineName)
+            Return pony.Speeches.FirstOrDefault(Function(sl) sl.Name = StartLineName)
         End Get
     End Property
     Private _endLineName As String = ""
@@ -850,9 +850,9 @@ Public Class Behavior
             _endLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
-    Public ReadOnly Property EndLine As SpeakingLine
+    Public ReadOnly Property EndLine As Speech
         Get
-            Return pony.SpeakingLines.FirstOrDefault(Function(sl) sl.Name = EndLineName)
+            Return pony.Speeches.FirstOrDefault(Function(sl) sl.Name = EndLineName)
         End Get
     End Property
 
@@ -1024,83 +1024,6 @@ Public Class Behavior
         Return _effectNames.Remove(effectName)
     End Function
 
-    Public Class SpeakingLine
-        Implements IPonyIniSerializable, IMemberwiseCloneable(Of SpeakingLine)
-
-        Public Property Name As String
-        Public Property Text As String = ""
-        Public Property SoundFile As String
-        Public Property Skip As Boolean = False 'don't use randomly if true
-        Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
-
-        Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As SpeakingLine, ByRef issues As ParseIssue()) As Boolean
-            Return TryLoad(CommaSplitQuoteBraceQualified(iniLine), soundDirectory, result, issues)
-        End Function
-
-        Public Shared Function TryLoad(iniComponents As String(), soundDirectory As String, ByRef result As SpeakingLine, ByRef issues As ParseIssue()) As Boolean
-            result = Nothing
-            issues = Nothing
-
-            Dim l = New SpeakingLine()
-            If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
-            If iniComponents.Length > 3 Then
-                Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
-                iniComponents(3) = Nothing
-                For Each filePath In soundFilePaths
-                    If String.Equals(Path.GetExtension(filePath), ".mp3", PathComparison.Current) Then
-                        iniComponents(3) = filePath
-                        Exit For
-                    End If
-                Next
-            End If
-            Dim p As New StringCollectionParser(iniComponents,
-                                                {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
-            p.NoParse()
-            l.Name = p.NotNull("Unnamed")
-            l.Text = p.NotNull()
-            l.SoundFile = p.NoParse()
-            If l.SoundFile IsNot Nothing Then
-                l.SoundFile = p.SpecifiedCombinePath(soundDirectory, l.SoundFile, "Sound file will not be loaded.")
-                p.SpecifiedFileExists(l.SoundFile, "Sound file will not be loaded.")
-            End If
-            l.Skip = p.ParseBoolean(False)
-            l.Group = p.ParseInt32(AnyGroup, 0, 100)
-
-            issues = p.Issues.ToArray()
-            result = l
-            Return p.AllParsingSuccessful
-        End Function
-
-        Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
-            'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
-            If SoundFile Is Nothing Then
-                Return String.Join(
-                                  ",", "Speak",
-                                  Quoted(Name),
-                                  Quoted(Text),
-                                  "",
-                                  Skip,
-                                  Group)
-            Else
-                Dim soundFilePath = Path.GetFileName(SoundFile)
-                Return String.Join(
-                                  ",", "Speak",
-                                  Quoted(Name),
-                                  Quoted(Text),
-                                  Braced(String.Join(",",
-                                                     Quoted(soundFilePath),
-                                                     Quoted(Path.ChangeExtension(soundFilePath, ".ogg"))
-                                                     )),
-                                  Skip,
-                                  Group)
-            End If
-        End Function
-
-        Public Overloads Function MemberwiseClone() As SpeakingLine Implements IMemberwiseCloneable(Of SpeakingLine).MemberwiseClone
-            Return DirectCast(MyBase.MemberwiseClone(), SpeakingLine)
-        End Function
-    End Class
-
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
         Return String.Join(
             ",", "Behavior",
@@ -1153,6 +1076,83 @@ Public Class BehaviorGroup
     End Function
 End Class
 #End Region
+
+Public Class Speech
+    Implements IPonyIniSerializable, IMemberwiseCloneable(Of Speech)
+
+    Public Property Name As String
+    Public Property Text As String = ""
+    Public Property SoundFile As String
+    Public Property Skip As Boolean = False 'don't use randomly if true
+    Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
+
+    Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As Speech, ByRef issues As ParseIssue()) As Boolean
+        Return TryLoad(CommaSplitQuoteBraceQualified(iniLine), soundDirectory, result, issues)
+    End Function
+
+    Public Shared Function TryLoad(iniComponents As String(), soundDirectory As String, ByRef result As Speech, ByRef issues As ParseIssue()) As Boolean
+        result = Nothing
+        issues = Nothing
+
+        Dim s = New Speech()
+        If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
+        If iniComponents.Length > 3 Then
+            Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
+            iniComponents(3) = Nothing
+            For Each filePath In soundFilePaths
+                If String.Equals(Path.GetExtension(filePath), ".mp3", PathComparison.Current) Then
+                    iniComponents(3) = filePath
+                    Exit For
+                End If
+            Next
+        End If
+        Dim p As New StringCollectionParser(iniComponents,
+                                            {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
+        p.NoParse()
+        s.Name = p.NotNull("Unnamed")
+        s.Text = p.NotNull()
+        s.SoundFile = p.NoParse()
+        If s.SoundFile IsNot Nothing Then
+            s.SoundFile = p.SpecifiedCombinePath(soundDirectory, s.SoundFile, "Sound file will not be loaded.")
+            p.SpecifiedFileExists(s.SoundFile, "Sound file will not be loaded.")
+        End If
+        s.Skip = p.ParseBoolean(False)
+        s.Group = p.ParseInt32(Behavior.AnyGroup, 0, 100)
+
+        issues = p.Issues.ToArray()
+        result = s
+        Return p.AllParsingSuccessful
+    End Function
+
+    Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
+        'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
+        If SoundFile Is Nothing Then
+            Return String.Join(
+                              ",", "Speak",
+                              Quoted(Name),
+                              Quoted(Text),
+                              "",
+                              Skip,
+                              Group)
+        Else
+            Dim soundFilePath = Path.GetFileName(SoundFile)
+            Return String.Join(
+                              ",", "Speak",
+                              Quoted(Name),
+                              Quoted(Text),
+                              Braced(String.Join(",",
+                                                 Quoted(soundFilePath),
+                                                 Quoted(Path.ChangeExtension(soundFilePath, ".ogg"))
+                                                 )),
+                              Skip,
+                              Group)
+        End If
+    End Function
+
+    Public Overloads Function MemberwiseClone() As Speech Implements IMemberwiseCloneable(Of Speech).MemberwiseClone
+        Return DirectCast(MyBase.MemberwiseClone(), Speech)
+    End Function
+End Class
 
 Public Class Pony
     Implements ISpeakingSprite
@@ -1786,7 +1786,7 @@ Public Class Pony
     ''' Prompts the pony to speak a line if it has not done so recently. A random line is chosen unless one is specified.
     ''' </summary>
     ''' <param name="line">The line the pony should speak, or null to choose one at random.</param>
-    Public Sub PonySpeak(Optional line As Behavior.SpeakingLine = Nothing)
+    Public Sub PonySpeak(Optional line As Speech = Nothing)
         'When the cursor is over us, don't talk too often.
         If CursorOverPony AndAlso (internalTime - lastSpeakTime).TotalSeconds < 15 Then
             Exit Sub
@@ -1794,10 +1794,10 @@ Public Class Pony
 
         ' Select a line at random from the lines that may be played at random that are in the current group.
         If line Is Nothing Then
-            If Base.SpeakingLinesRandom.Count = 0 Then
+            If Base.SpeechesRandom.Count = 0 Then
                 Exit Sub
             Else
-                Dim randomGroupLines = Base.SpeakingLinesRandom.Where(
+                Dim randomGroupLines = Base.SpeechesRandom.Where(
                     Function(l) l.Group = 0 OrElse l.Group = CurrentBehavior.Group).ToArray()
                 If randomGroupLines.Length = 0 Then Exit Sub
                 line = randomGroupLines(Rng.Next(randomGroupLines.Count))

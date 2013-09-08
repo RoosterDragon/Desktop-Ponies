@@ -73,7 +73,7 @@ Friend Class BehaviorEditor
         SelectItemElseAddItem(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(newBehavior.LeftImagePath))
         SelectItemElseAddItem(RightImageFileSelector.FilePathComboBox, Path.GetFileName(newBehavior.RightImagePath))
 
-        Dim speeches = Base.SpeakingLines.Select(Function(s) s.Name).ToArray()
+        Dim speeches = Base.Speeches.Select(Function(s) s.Name).ToArray()
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
         ReplaceItemsInComboBox(EndSpeechComboBox, speeches, True)
 
