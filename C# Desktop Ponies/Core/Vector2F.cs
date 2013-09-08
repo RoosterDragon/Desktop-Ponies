@@ -69,7 +69,8 @@
         /// </summary>
         /// <param name="left">The vector to the left of the subtraction operator.</param>
         /// <param name="right">The vector to the right of the subtraction operator.</param>
-        /// <returns>A new vector where both components are calculated by subtracting the values in the second vector from the first.</returns>
+        /// <returns>A new vector where both components are calculated by subtracting the values in the second vector from the first.
+        /// </returns>
         public static Vector2F operator -(Vector2F left, Vector2F right)
         {
             return new Vector2F(left.X - right.X, left.Y - right.Y);
@@ -99,8 +100,7 @@
         /// </summary>
         /// <param name="v">The vector to divide.</param>
         /// <param name="scalar">The scale factor to apply.</param>
-        /// <returns>A new vector where both components are calculated by dividing their value by the scale factor.
-        /// </returns>
+        /// <returns>A new vector where both components are calculated by dividing their value by the scale factor.</returns>
         public static Vector2F operator /(Vector2F v, float scalar)
         {
             return new Vector2F(v.X / scalar, v.Y / scalar);

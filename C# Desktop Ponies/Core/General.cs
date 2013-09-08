@@ -1,6 +1,7 @@
 ﻿namespace CSDesktopPonies.Core
 {
     using System;
+    using System.Runtime;
 
     /// <summary>
     /// General utility methods.
@@ -46,6 +47,7 @@
                 GC.Collect();
                 long beforeFinalize = GC.GetTotalMemory(false);
                 GC.WaitForPendingFinalizers();
+                //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect();
                 long afterCollect = GC.GetTotalMemory(false);
 
@@ -64,6 +66,7 @@
 #else
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
 #endif
         }

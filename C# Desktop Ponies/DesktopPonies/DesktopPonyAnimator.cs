@@ -58,7 +58,7 @@
         /// <summary>
         /// Defines a comparison for Z-order sorting. This is done based on the location of the bottom part of the image.
         /// </summary>
-        private Comparison<ISprite> zOrder = new Comparison<ISprite>((a, b) => a.Region.Bottom - b.Region.Bottom);
+        private static readonly Comparison<ISprite> zOrder = new Comparison<ISprite>((a, b) => a.Region.Bottom - b.Region.Bottom);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.DesktopPonies.DesktopPonyAnimator"/> class.

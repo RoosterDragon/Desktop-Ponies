@@ -18,7 +18,7 @@
         /// <summary>
         /// Maps RGB colors to ARGB colors.
         /// </summary>
-        private Dictionary<RgbColor, ArgbColor> map = new Dictionary<RgbColor, ArgbColor>();
+        private readonly Dictionary<RgbColor, ArgbColor> map = new Dictionary<RgbColor, ArgbColor>();
 
         /// <summary>
         /// Loads a mapping from an Alpha Remapping Table file.
@@ -40,7 +40,7 @@
                 if (file.Length % 7 != 0)
                     throw new InvalidDataException("Length of file was not the expected multiple of 7 bytes.");
 
-                map = new Dictionary<RgbColor, ArgbColor>();
+                map.Clear();
 
                 while (file.Position < file.Length)
                     map.Add(

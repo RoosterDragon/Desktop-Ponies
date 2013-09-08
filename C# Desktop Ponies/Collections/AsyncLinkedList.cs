@@ -80,8 +80,7 @@
                 get { return Current; }
             }
             /// <summary>
-            /// Releases all resources used by the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/>
-            /// object.
+            /// Releases all resources used by the <see cref="T:CSDesktopPonies.Collections.AsyncLinkedList`1.Enumerator"/> object.
             /// </summary>
             public void Dispose()
             {
@@ -215,9 +214,15 @@
             ThreadPool.QueueUserWorkItem(o =>
             {
                 var itemsAdded = ItemsAdded;
-                LinkedList<T> valuesAdded = null;
+                List<T> valuesAdded = null;
                 if (itemsAdded != null)
-                    valuesAdded = new LinkedList<T>();
+                {
+                    var countableNodes = nodes as ICollection<T>;
+                    if (countableNodes != null)
+                        valuesAdded = new List<T>(countableNodes.Count);
+                    else
+                        valuesAdded = new List<T>();
+                }
                 lock (syncObject)
                 {
                     LinkedListNode<T> first = null;
@@ -233,7 +238,7 @@
                             list.AddAfter(first, node);
                         }
                         if (itemsAdded != null)
-                            valuesAdded.AddLast(node.Value);
+                            valuesAdded.Add(node.Value);
                     }
                 }
                 if (itemsAdded != null)
@@ -255,7 +260,15 @@
             ThreadPool.QueueUserWorkItem(o =>
             {
                 var itemsAdded = ItemsAdded;
-                LinkedList<T> valuesAdded = itemsAdded != null ? new LinkedList<T>() : null;
+                List<T> valuesAdded = null;
+                if (itemsAdded != null)
+                {
+                    var countableValues = values as ICollection<T>;
+                    if (countableValues != null)
+                        valuesAdded = new List<T>(countableValues.Count);
+                    else
+                        valuesAdded = new List<T>();
+                }
                 lock (syncObject)
                 {
                     LinkedListNode<T> first = null;
@@ -266,7 +279,7 @@
                         else
                             list.AddAfter(first, value);
                         if (itemsAdded != null)
-                            valuesAdded.AddLast(value);
+                            valuesAdded.Add(value);
                     }
                 }
                 if (itemsAdded != null)
@@ -320,7 +333,7 @@
         private void RemoveAllSync(Predicate<T> match)
         {
             var itemsRemoved = ItemsRemoved;
-            LinkedList<T> valuesRemoved = itemsRemoved != null ? new LinkedList<T>() : null;
+            List<T> valuesRemoved = itemsRemoved != null ? new List<T>() : null;
             lock (syncObject)
             {
                 LinkedListNode<T> node = list.First;
@@ -331,7 +344,7 @@
                     {
                         list.Remove(node);
                         if (itemsRemoved != null)
-                            valuesRemoved.AddLast(node);
+                            valuesRemoved.Add(node.Value);
                     }
                     node = nextNode;
                 }
@@ -642,9 +655,9 @@
             return GetEnumerator();
         }
         /// <summary>
-        /// Returns an enumerator that iterates through a collection.
+        /// Returns an enumerator that iterates through the collection.
         /// </summary>
-        /// <returns>An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.</returns>
+        /// <returns>A <see cref="T:System.Collections.Generic.IEnumerator"/> that can be used to iterate through the collection.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
