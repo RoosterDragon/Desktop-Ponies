@@ -838,16 +838,6 @@
             form.MouseClick += GraphicsForm_MouseClick;
             form.MouseUp += GraphicsForm_MouseUp;
             form.KeyPress += GraphicsForm_KeyPress;
-            
-#if DEBUG
-            form.KeyPress += (sender, e) =>
-            {
-                if (e.KeyChar == 'g')
-                    ShowPerformanceGraph = !ShowPerformanceGraph;
-                else if (e.KeyChar == 'c')
-                    ShowClippingRegion = !ShowClippingRegion;
-            };
-#endif
 
             // Create manual painting handlers.
             manualRender = (sender, e) =>
