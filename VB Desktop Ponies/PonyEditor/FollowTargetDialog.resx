@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AutoSelectImagesLabel.Text" xml:space="preserve">
+    <value>When checked, this option automatically selects images out of all behaviors for the pony when following, depending on the direction and speed. Uncheck this to manually select what behaviors to use for images below.</value>
+  </data>
 </root>

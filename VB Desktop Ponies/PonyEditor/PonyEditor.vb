@@ -1586,8 +1586,7 @@ Public Class PonyEditor
 
             HidePony()
 
-            Using form = New FollowTargetDialog(Me)
-                form.Change_Behavior(behavior)
+            Using form = New FollowTargetDialog(Me, behavior)
                 form.ShowDialog()
             End Using
             LoadParameters(PreviewPony)

@@ -1,244 +1,210 @@
 ﻿Public Class FollowTargetDialog
 
-    Dim PreviewPoint As Point = New Point(0, 0)
-    Dim Point_Preview_Graphics As Graphics = Nothing
-    Dim pony_thumbnail As Image = Nothing
-    Friend behavior_to_change As Behavior = Nothing
+    Private previewPoint As Vector2
+    Private previewGraphics As Graphics
+    Private ponyThumbnail As Image
+    Private behaviorToChange As Behavior
 
     Private m_editor As PonyEditor
-    Public Sub New(editor As PonyEditor)
+    Public Sub New(editor As PonyEditor, behavior As Behavior)
+        Argument.EnsureNotNull(behavior, "behavior")
         InitializeComponent()
         m_editor = editor
+        behaviorToChange = behavior
+        Text = "Select following parameters for " & behaviorToChange.Name
     End Sub
 
-    Private Sub Loc_X_ValueChanged(sender As Object, e As EventArgs) Handles Point_Loc_X.ValueChanged
-        If IsNothing(Point_Preview_Image.Image) Then Exit Sub
+    Private Sub FollowTargetDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
+    End Sub
 
-        SetPreviewPoint()
+    Private Sub LoadInternal()
+        Enabled = False
+        Update()
 
+        PointPreviewArea.Image = New Bitmap(PointPreviewArea.Size.Width, PointPreviewArea.Size.Height)
+        previewGraphics = Graphics.FromImage(PointPreviewArea.Image)
         RedrawFollowPoint()
+
+        Change_Behavior()
+
+        Enabled = True
     End Sub
 
-    Private Sub Loc_Y_ValueChanged(sender As Object, e As EventArgs) Handles Point_Loc_Y.ValueChanged
-        If IsNothing(Point_Preview_Image.Image) Then Exit Sub
+    Private Sub RedrawFollowPoint()
+        If previewGraphics Is Nothing Then Return
 
-        SetPreviewPoint()
-
-        RedrawFollowPoint()
-    End Sub
-
-    Sub SetPreviewPoint()
-
-        'do X
-        If Pony_Radio.Checked Then
-            PreviewPoint = New Point(CInt((Point_Preview_Image.Image.Size.Width / 2) + Point_Loc_X.Value), _
-                         CInt((Point_Preview_Image.Image.Size.Height / 2) + Point_Loc_Y.Value))
+        Dim location = New Vector2(CInt(PointX.Value), CInt(PointY.Value))
+        If FollowOption.Checked Then
+            previewPoint = New Vector2(PointPreviewArea.Image.Size) / 2 + location
         Else
-            PreviewPoint = New Point(CInt((0.01 * Point_Loc_X.Value) * Point_Preview_Image.Image.Size.Width), PreviewPoint.Y)
+            previewPoint = Vector2.Truncate(New Vector2F(0.01F * location.X * PointPreviewArea.Image.Width,
+                                                         0.01F * location.Y * PointPreviewArea.Image.Height))
         End If
 
-        'do Y
-        If Pony_Radio.Checked Then
-            PreviewPoint = New Point(CInt((Point_Preview_Image.Image.Size.Width / 2) + Point_Loc_X.Value), _
-                         CInt((Point_Preview_Image.Image.Size.Height / 2) + Point_Loc_Y.Value))
-        Else
-            PreviewPoint = New Point(PreviewPoint.X, CInt((Point_Loc_Y.Value * 0.01) * Point_Preview_Image.Image.Size.Height))
+        previewGraphics.Clear(Color.White)
+
+        If ponyThumbnail IsNot Nothing Then
+            previewGraphics.DrawImage(ponyThumbnail, New Vector2(PointPreviewArea.Image.Size) / 2 - New Vector2(ponyThumbnail.Size) / 2)
         End If
+        Using pen As New System.Drawing.Pen(Color.Red, 2)
+            previewGraphics.DrawLine(pen,
+                                     New Point(previewPoint.X - 5, previewPoint.Y - 5),
+                                     New Point(previewPoint.X + 5, previewPoint.Y + 5))
+            previewGraphics.DrawLine(pen,
+                                     New Point(previewPoint.X + 5, previewPoint.Y - 5),
+                                     New Point(previewPoint.X - 5, previewPoint.Y + 5))
+        End Using
+        PointPreviewArea.Invalidate()
     End Sub
 
-    Sub RedrawFollowPoint()
-        If Not IsNothing(Point_Preview_Graphics) Then
+    Private Sub Change_Behavior()
+        FollowComboBox.Items.Clear()
 
-            SetPreviewPoint()
-
-            Point_Preview_Graphics.Clear(Color.White)
-
-            If Not IsNothing(pony_thumbnail) Then
-                Point_Preview_Graphics.DrawImage(pony_thumbnail, New Point(
-                                                 CInt((Point_Preview_Image.Image.Size.Width / 2) - (pony_thumbnail.Size.Width / 2)),
-                                                 CInt((Point_Preview_Image.Image.Size.Height / 2) - (pony_thumbnail.Size.Height / 2))))
-            End If
-            Using pen As New System.Drawing.Pen(Color.Red, 2)
-                Point_Preview_Graphics.DrawLine(pen,
-                                                New Point(PreviewPoint.X - 5, PreviewPoint.Y - 5),
-                                                New Point(PreviewPoint.X + 5, PreviewPoint.Y + 5))
-                Point_Preview_Graphics.DrawLine(pen,
-                                               New Point(PreviewPoint.X + 5, PreviewPoint.Y - 5),
-                                               New Point(PreviewPoint.X - 5, PreviewPoint.Y + 5))
-            End Using
-            Point_Preview_Image.Invalidate()
-        End If
-    End Sub
-
-
-    Private Sub Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        If IsNothing(behavior_to_change) Then
-            Throw New InvalidOperationException("Behavior to modify is not set.  Call Change_Behavior() first before loading this form.")
-        End If
-
-        Dim bitmap As New Bitmap(Point_Preview_Image.Size.Width, Point_Preview_Image.Size.Height)
-
-        Point_Preview_Image.Image = bitmap
-
-        Point_Preview_Graphics = Graphics.FromImage(Point_Preview_Image.Image)
-
-        RedrawFollowPoint()
-
-    End Sub
-
-    Friend Sub Change_Behavior(behavior As Behavior)
-        Argument.EnsureNotNull(behavior, "behavior")
-
-        behavior_to_change = behavior
-
-        Follow_ComboBox.Items.Clear()
-
-        For Each Available_Pony In m_editor.ponybases
-            Follow_ComboBox.Items.Add(Available_Pony.Directory)
+        For Each Available_Pony In m_editor.PonyBases
+            FollowComboBox.Items.Add(Available_Pony.Directory)
         Next
 
         For Each effect In m_editor.GetAllEffects()
-            Follow_ComboBox.Items.Add(effect.ParentPonyBase.DisplayName & "'s " & effect.Name)
+            FollowComboBox.Items.Add(effect.ParentPonyBase.DisplayName & "'s " & effect.Name)
         Next
 
-        moving_behavior_box.Items.Clear()
-        stopped_behavior_box.Items.Clear()
+        MovingComboBox.Items.Clear()
+        StoppedComboBox.Items.Clear()
 
         For Each otherbehavior In m_editor.PreviewPony.Behaviors
-            moving_behavior_box.Items.Add(otherbehavior.Name)
-            stopped_behavior_box.Items.Add(otherbehavior.Name)
+            MovingComboBox.Items.Add(otherbehavior.Name)
+            StoppedComboBox.Items.Add(otherbehavior.Name)
         Next
 
-        If behavior.AutoSelectImagesOnFollow = False Then
-            Auto_Select_Images_Checkbox.Checked = False
+        If behaviorToChange.AutoSelectImagesOnFollow = False Then
+            AutoSelectImageCheckbox.Checked = False
         Else
-            Auto_Select_Images_Checkbox.Checked = True
+            AutoSelectImageCheckbox.Checked = True
         End If
 
         Dim point As Boolean = False
         Dim pony As Boolean = False
 
-        If (behavior.OriginalDestinationXCoord <> 0 OrElse behavior.OriginalDestinationYCoord <> 0) Then
+        If (behaviorToChange.OriginalDestinationXCoord <> 0 OrElse behaviorToChange.OriginalDestinationYCoord <> 0) Then
             point = True
         End If
 
-        If (Not IsNothing(behavior.OriginalFollowObjectName) AndAlso behavior.OriginalFollowObjectName <> "") Then
+        If (Not IsNothing(behaviorToChange.OriginalFollowObjectName) AndAlso behaviorToChange.OriginalFollowObjectName <> "") Then
             pony = True
-            For Each item As String In Follow_ComboBox.Items
-                If String.Equals(string_to_effectname(item), behavior_to_change.OriginalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
-                    Follow_ComboBox.SelectedItem = item
+            For Each item As String In FollowComboBox.Items
+                If String.Equals(StringToEffectName(item), behaviorToChange.OriginalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
+                    FollowComboBox.SelectedItem = item
                 End If
             Next
         End If
 
-        If (Not IsNothing(behavior.FollowMovingBehavior) AndAlso behavior.FollowMovingBehaviorName <> "") Then
-            For Each item As String In moving_behavior_box.Items
-                If String.Equals(item, behavior.FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase) Then
-                    moving_behavior_box.SelectedItem = item
+        If (Not IsNothing(behaviorToChange.FollowMovingBehavior) AndAlso behaviorToChange.FollowMovingBehaviorName <> "") Then
+            For Each item As String In MovingComboBox.Items
+                If String.Equals(item, behaviorToChange.FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase) Then
+                    MovingComboBox.SelectedItem = item
                 End If
             Next
         End If
 
-        If (Not IsNothing(behavior.FollowStoppedBehavior) AndAlso behavior.FollowStoppedBehaviorName <> "") Then
-            For Each item As String In stopped_behavior_box.Items
-                If String.Equals(item, behavior.FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase) Then
-                    stopped_behavior_box.SelectedItem = item
+        If (Not IsNothing(behaviorToChange.FollowStoppedBehavior) AndAlso behaviorToChange.FollowStoppedBehaviorName <> Nothing) Then
+            For Each item As String In StoppedComboBox.Items
+                If String.Equals(item, behaviorToChange.FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase) Then
+                    StoppedComboBox.SelectedItem = item
                 End If
             Next
         End If
 
         If pony AndAlso Not point Then
-            Pony_Radio.Checked = True
-            PreviewPoint = (New Point(CInt((0.01 * 50) * Point_Preview_Image.Size.Width), CInt((50 * 0.01) * Point_Preview_Image.Size.Height)))
+            FollowOption.Checked = True
+            previewPoint = (New Point(CInt((0.01 * 50) * PointPreviewArea.Size.Width), CInt((50 * 0.01) * PointPreviewArea.Size.Height)))
         End If
 
         If point AndAlso Not pony Then
-            Point_Radio.Checked = True
-            Point_Loc_X.Value = behavior.OriginalDestinationXCoord
-            Point_Loc_Y.Value = behavior.OriginalDestinationYCoord
+            GoToPointOption.Checked = True
+            PointX.Value = behaviorToChange.OriginalDestinationXCoord
+            PointY.Value = behaviorToChange.OriginalDestinationYCoord
         End If
 
         If pony AndAlso point Then
-            Pony_Radio.Checked = True
-            Point_Loc_X.Value = behavior.OriginalDestinationXCoord
-            Point_Loc_Y.Value = behavior.OriginalDestinationYCoord
+            FollowOption.Checked = True
+            PointX.Value = behaviorToChange.OriginalDestinationXCoord
+            PointY.Value = behaviorToChange.OriginalDestinationYCoord
         End If
 
         If Not pony AndAlso Not point Then
-            Pony_Radio.Checked = True
-            pony_thumbnail = Nothing
-            PreviewPoint = (New Point(
-                            CInt((0.01 * 50) * Point_Preview_Image.Size.Width),
-                            CInt((50 * 0.01) * Point_Preview_Image.Size.Height)))
-        End If
-
-        Me.Text = "Select following parameters for " & behavior.Name
-
-    End Sub
-
-
-    Private Sub Pony_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles Pony_Radio.CheckedChanged, Point_Radio.CheckedChanged
-
-        Point_Loc_X.Enabled = True
-        Point_Loc_Y.Enabled = True
-
-        If Pony_Radio.Checked Then
-            Point_Loc_X.Maximum = 500
-            Point_Loc_X.Minimum = -500
-            Point_Loc_X.Value = 0
-            Point_Loc_Y.Maximum = 500
-            Point_Loc_Y.Minimum = -500
-            Point_Loc_Y.Value = 0
-            Follow_ComboBox.Enabled = True
-            relativeto_label.Text = "(Relative to pony/effect center)"
-            units_label.Text = "Location (X/Y) (in pixels)"
-        Else
-            If Point_Radio.Checked Then
-
-                pony_thumbnail = Nothing
-                Point_Loc_X.Maximum = 100
-                Point_Loc_X.Minimum = 0
-                Point_Loc_X.Value = 50
-                Point_Loc_Y.Maximum = 100
-                Point_Loc_Y.Minimum = 0
-                Point_Loc_Y.Value = 50
-                Follow_ComboBox.Enabled = False
-                relativeto_label.Text = "(Relative to top right of screen)"
-                units_label.Text = "Location (X/Y) (in % of screen height/width)"
-
-            Else
-
-                Follow_ComboBox.Enabled = False
-                Point_Loc_X.Enabled = False
-                Point_Loc_Y.Enabled = False
-
-            End If
-
+            FollowOption.Checked = True
+            ponyThumbnail = Nothing
+            previewPoint = (New Point(
+                            CInt((0.01 * 50) * PointPreviewArea.Size.Width),
+                            CInt((50 * 0.01) * PointPreviewArea.Size.Height)))
         End If
 
     End Sub
 
+    Private Sub Pony_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles FollowOption.CheckedChanged
+        If Not FollowOption.Checked Then Return
+        GetThumbnail()
+        PointX.Maximum = 500
+        PointX.Minimum = -500
+        PointX.Value = 0
+        PointY.Maximum = 500
+        PointY.Minimum = -500
+        PointY.Value = 0
+        PointX.Enabled = True
+        PointY.Enabled = True
+        FollowComboBox.Enabled = True
+        RelativeToLabel.Text = "(Relative to pony/effect center)"
+        UnitsLabel.Text = "Location (X/Y) (in pixels)"
+    End Sub
 
-    Private Sub Follow_ComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Follow_ComboBox.SelectedIndexChanged
+    Private Sub Point_Radio_CheckedChanged(sender As Object, e As EventArgs) Handles GoToPointOption.CheckedChanged
+        If Not GoToPointOption.Checked Then Return
+        ponyThumbnail = Nothing
+        PointX.Maximum = 100
+        PointX.Minimum = 0
+        PointX.Value = 50
+        PointY.Maximum = 100
+        PointY.Minimum = 0
+        PointY.Value = 50
+        PointX.Enabled = True
+        PointY.Enabled = True
+        FollowComboBox.Enabled = False
+        RelativeToLabel.Text = "(Relative to top right of screen)"
+        UnitsLabel.Text = "Location (X/Y) (in % of screen height/width)"
+    End Sub
 
-        For Each Pony In m_editor.ponyBases
-            If Pony.Directory = CStr(Follow_ComboBox.SelectedItem) Then
+    Private Sub DisableRadio_CheckedChanged(sender As Object, e As EventArgs) Handles NoTargetOption.CheckedChanged
+        If Not NoTargetOption.Checked Then Return
+        ponyThumbnail = Nothing
+        PointX.Enabled = False
+        PointY.Enabled = False
+        FollowComboBox.Enabled = False
+        RedrawFollowPoint()
+    End Sub
+
+    Private Sub Follow_ComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles FollowComboBox.SelectedIndexChanged
+        GetThumbnail()
+    End Sub
+
+    Private Sub GetThumbnail()
+        If m_editor Is Nothing Then Return
+        For Each ponyBase In m_editor.PonyBases
+            If ponyBase.Directory = CStr(FollowComboBox.SelectedItem) Then
                 Try
-                    pony_thumbnail = Image.FromFile(Pony.Behaviors(0).RightImagePath)
+                    ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImagePath)
                 Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & Pony.Directory)
+                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & ponyBase.Directory)
                 End Try
-
                 RedrawFollowPoint()
                 Exit Sub
             End If
         Next
 
         For Each effect In m_editor.GetAllEffects()
-            If effect.Name = string_to_effectname(CStr(Follow_ComboBox.SelectedItem)) Then
+            If effect.Name = StringToEffectName(CStr(FollowComboBox.SelectedItem)) Then
                 Try
-                    pony_thumbnail = Image.FromFile(effect.RightImagePath)
+                    ponyThumbnail = Image.FromFile(effect.RightImagePath)
                 Catch ex As Exception
                     My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for effect " & effect.Name)
                 End Try
@@ -248,7 +214,11 @@
         Next
     End Sub
 
-    Private Function string_to_effectname(name As String) As String
+    Private Sub Point_Loc_ValueChanged(sender As Object, e As EventArgs) Handles PointX.ValueChanged, PointY.ValueChanged
+        RedrawFollowPoint()
+    End Sub
+
+    Private Function StringToEffectName(name As String) As String
         For Each effect In m_editor.GetAllEffects()
             If (effect.ParentPonyBase.DisplayName & "'s " & effect.Name) = name Then
                 Return effect.Name
@@ -257,13 +227,24 @@
         Return name
     End Function
 
+    Private Sub Auto_Select_Images_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles AutoSelectImageCheckbox.CheckedChanged
+        If AutoSelectImageCheckbox.Checked = True Then
+            MovingComboBox.Enabled = False
+            StoppedComboBox.Enabled = False
+        Else
+            MovingComboBox.Enabled = True
+            StoppedComboBox.Enabled = True
+        End If
+    End Sub
+
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
         Me.Close()
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
-        If Auto_Select_Images_Checkbox.Checked = False AndAlso (CStr(moving_behavior_box.SelectedItem) = "" OrElse CStr(stopped_behavior_box.SelectedItem) = "") Then
+        If AutoSelectImageCheckbox.Checked = False AndAlso
+            (CStr(MovingComboBox.SelectedItem) = "" OrElse CStr(StoppedComboBox.SelectedItem) = "") Then
             MessageBox.Show(Me, "If you disable auto-selection of images, " &
                             "then you must specify a moving behavior and a stopped behavior to get the images from." &
                             ControlChars.NewLine &
@@ -272,39 +253,29 @@
             Exit Sub
         End If
 
-        If Not DisableRadio.Checked Then
-            behavior_to_change.OriginalDestinationXCoord = CInt(Point_Loc_X.Value)
-            behavior_to_change.OriginalDestinationYCoord = CInt(Point_Loc_Y.Value)
+        If Not NoTargetOption.Checked Then
+            behaviorToChange.OriginalDestinationXCoord = CInt(PointX.Value)
+            behaviorToChange.OriginalDestinationYCoord = CInt(PointY.Value)
         Else
-            behavior_to_change.OriginalDestinationXCoord = 0
-            behavior_to_change.OriginalDestinationYCoord = 0
+            behaviorToChange.OriginalDestinationXCoord = 0
+            behaviorToChange.OriginalDestinationYCoord = 0
         End If
 
-        If Pony_Radio.Checked Then
-            behavior_to_change.OriginalFollowObjectName = string_to_effectname(CStr(Follow_ComboBox.SelectedItem))
+        If FollowOption.Checked Then
+            behaviorToChange.OriginalFollowObjectName = StringToEffectName(CStr(FollowComboBox.SelectedItem))
         Else
-            behavior_to_change.OriginalFollowObjectName = ""
+            behaviorToChange.OriginalFollowObjectName = ""
         End If
 
-        If Auto_Select_Images_Checkbox.Checked = True Then
-            behavior_to_change.AutoSelectImagesOnFollow = True
+        If AutoSelectImageCheckbox.Checked Then
+            behaviorToChange.AutoSelectImagesOnFollow = True
         Else
-            behavior_to_change.AutoSelectImagesOnFollow = False
-            behavior_to_change.FollowMovingBehaviorName = CStr(moving_behavior_box.SelectedItem)
-            behavior_to_change.FollowStoppedBehaviorName = CStr(stopped_behavior_box.SelectedItem)
+            behaviorToChange.AutoSelectImagesOnFollow = False
+            behaviorToChange.FollowMovingBehaviorName = CStr(MovingComboBox.SelectedItem)
+            behaviorToChange.FollowStoppedBehaviorName = CStr(StoppedComboBox.SelectedItem)
         End If
 
         Me.Close()
 
-    End Sub
-
-    Private Sub Auto_Select_Images_Checkbox_CheckedChanged(sender As Object, e As EventArgs) Handles Auto_Select_Images_Checkbox.CheckedChanged
-        If Auto_Select_Images_Checkbox.Checked = True Then
-            moving_behavior_box.Enabled = False
-            stopped_behavior_box.Enabled = False
-        Else
-            moving_behavior_box.Enabled = True
-            stopped_behavior_box.Enabled = True
-        End If
     End Sub
 End Class

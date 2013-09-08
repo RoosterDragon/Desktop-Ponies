@@ -244,8 +244,7 @@ Public Class NewBehaviorDialog
 
         Dim new_behavior As New Behavior(m_editor.PreviewPonyBase)
 
-        Using form = New FollowTargetDialog(m_editor)
-            form.Change_Behavior(new_behavior)
+        Using form = New FollowTargetDialog(m_editor, new_behavior)
             form.ShowDialog()
         End Using
 
