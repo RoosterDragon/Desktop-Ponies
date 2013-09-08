@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Threading;
@@ -307,7 +306,7 @@
             /// <returns>Returns true to stop other handlers being invoked; otherwise, false.</returns>
             protected override bool OnEnterNotifyEvent(EventCrossing evnt)
             {
-                if (SupportsRgba)
+                if (SupportsRgba && CurrentImage != null)
                 {
                     // Start actively updating the input mask for RGBA supported windows.
                     updatingMask = true;
@@ -345,6 +344,9 @@
             /// <param name="height">The height to fit the clipping region to, scaling as required.</param>
             public void SetClip(int width, int height)
             {
+                if (CurrentImage == null)
+                    throw new InvalidOperationException("This method may not be called until CurrentImage has been set.");
+
                 if (!SupportsRgba)
                 {
                     if (lastClip != CurrentImage.Clip)
