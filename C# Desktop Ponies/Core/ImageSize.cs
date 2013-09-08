@@ -27,7 +27,7 @@
         /// Contains a collection of known image formats based on the magic bytes in the header of those formats. Each sequence of magic
         /// bytes maps to a decoding function which reads the image and returns its size.
         /// </summary>
-        private static readonly KeyValuePair<byte[], Func<BinaryReader, Size>>[] ImageDecoders =
+        private static readonly ImmutableArray<KeyValuePair<byte[], Func<BinaryReader, Size>>> ImageDecoders =
             new Dictionary<byte[], Func<BinaryReader, Size>>
             {
                 { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, DecodePng },
@@ -35,7 +35,7 @@
                 { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, DecodeGif },
                 { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, DecodeGif },
                 { new byte[] { 0x42, 0x4D }, DecodeBitmap },
-            }.ToArray();
+            }.ToImmutableArray();
 
         /// <summary>
         /// The length of the longest sequence of magic bytes in the collection of image decoders.

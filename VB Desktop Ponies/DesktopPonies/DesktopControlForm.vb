@@ -1,5 +1,4 @@
-﻿Imports System.Collections.ObjectModel
-Imports CSDesktopPonies.SpriteManagement
+﻿Imports CSDesktopPonies.SpriteManagement
 
 Public Class DesktopControlForm
     Private allowClose As Boolean
@@ -59,7 +58,7 @@ Public Class DesktopControlForm
         End Sub
 
         Private _handler As EventHandler
-        Public Property Activated As System.EventHandler Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Activated
+        Public Property Activated As System.EventHandler Implements ISimpleContextMenuItem.Activated
             Get
                 Return _handler
             End Get
@@ -70,7 +69,7 @@ Public Class DesktopControlForm
             End Set
         End Property
 
-        Public Property IsSeparator As Boolean Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.IsSeparator
+        Public Property IsSeparator As Boolean Implements ISimpleContextMenuItem.IsSeparator
             Get
                 Return _separatorItem IsNot Nothing
             End Get
@@ -85,14 +84,14 @@ Public Class DesktopControlForm
             End Set
         End Property
 
-        Public _subItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem)
-        Public ReadOnly Property SubItems As System.Collections.ObjectModel.ReadOnlyCollection(Of CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem) Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.SubItems
+        Public _subItems As IList(Of ISimpleContextMenuItem)
+        Public ReadOnly Property SubItems As IList(Of ISimpleContextMenuItem) Implements ISimpleContextMenuItem.SubItems
             Get
                 Return _subItems
             End Get
         End Property
 
-        Public Property ISimpleContextMenuItemText As String Implements CSDesktopPonies.SpriteManagement.ISimpleContextMenuItem.Text
+        Public Property ISimpleContextMenuItemText As String Implements ISimpleContextMenuItem.Text
             Get
                 Return _menuItem.Text
             End Get
@@ -129,7 +128,7 @@ Public Class DesktopControlForm
 
         Private owner As DesktopControlForm
         Private _items As New List(Of ISimpleContextMenuItem)
-        Private _readOnlyItems As New System.Collections.ObjectModel.ReadOnlyCollection(Of ISimpleContextMenuItem)(_items)
+        Private _readOnlyItems As ReadOnlyList(Of ISimpleContextMenuItem) = ReadOnlyList.AsReadOnly(_items)
 
         Public Sub New(parent As DesktopControlForm, menuItems As IEnumerable(Of ISimpleContextMenuItem))
             Argument.EnsureNotNull(parent, "parent")
@@ -188,7 +187,7 @@ Public Class DesktopControlForm
             Return New ToolStripMenuItem(_menuItem.Text, Nothing, _subItems)
         End Function
 
-        Public ReadOnly Property ISimpleContextMenuItems As System.Collections.ObjectModel.ReadOnlyCollection(Of ISimpleContextMenuItem) Implements ISimpleContextMenu.Items
+        Public ReadOnly Property ISimpleContextMenuItems As IList(Of ISimpleContextMenuItem) Implements ISimpleContextMenu.Items
             Get
                 Return _readOnlyItems
             End Get

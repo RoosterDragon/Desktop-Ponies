@@ -1,10 +1,10 @@
 ﻿namespace CSDesktopPonies.DesktopPonies
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Windows.Forms;
+    using CSDesktopPonies.Collections;
     using CSDesktopPonies.SpriteManagement;
 
     /// <summary>
@@ -64,8 +64,8 @@
             ImageInfo.Text = string.Format(CultureInfo.CurrentCulture,
                 "Iterations: {0}  Size: {1}", gifImage.Iterations, gifImage.Size);
 
-            IList<GifFrame<BitmapFrame>> frames = gifImage.Frames;
-            for (int i = 0; i < frames.Count; i++)
+            ImmutableArray<GifFrame<BitmapFrame>> frames = gifImage.Frames;
+            for (int i = 0; i < frames.Length; i++)
             {
                 string info = string.Format(CultureInfo.CurrentCulture,
                     "{0}: {1}ms", i + 1, frames[i].Duration);

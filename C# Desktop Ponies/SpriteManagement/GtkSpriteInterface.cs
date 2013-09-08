@@ -839,7 +839,7 @@
             /// <summary>
             /// Gets the sub-items in an item that displays a new sub-menu of items.
             /// </summary>
-            public ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; private set; }
+            public IList<ISimpleContextMenuItem> SubItems { get; private set; }
 
             /// <summary>
             /// Releases all resources used by the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
@@ -869,13 +869,9 @@
             /// </summary>
             private GtkSpriteInterface owner;
             /// <summary>
-            /// The underlying list of menu items.
-            /// </summary>
-            private List<ISimpleContextMenuItem> items;
-            /// <summary>
             /// Gets the collection of menu items in this menu.
             /// </summary>
-            public ReadOnlyCollection<ISimpleContextMenuItem> Items { get; private set; }
+            public IList<ISimpleContextMenuItem> Items { get; private set; }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> class
@@ -893,8 +889,8 @@
 
                 owner = parent;
 
-                items = new List<ISimpleContextMenuItem>();
-                Items = new ReadOnlyCollection<ISimpleContextMenuItem>(items);
+                var items = new List<ISimpleContextMenuItem>();
+                Items = items;
 
                 foreach (ISimpleContextMenuItem menuItem in menuItems)
                 {
@@ -933,7 +929,7 @@
             /// </summary>
             public override void Dispose()
             {
-                foreach (GtkContextMenuItem item in items)
+                foreach (GtkContextMenuItem item in Items)
                     item.Dispose();
             }
         }

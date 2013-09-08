@@ -86,11 +86,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\ArrayExtensions.cs" />
     <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
+    <Compile Include="Collections\Comparer.cs" />
     <Compile Include="Collections\DictionaryExtensions.cs" />
     <Compile Include="Collections\Enumerable.cs" />
+    <Compile Include="Collections\ImmutableArray.cs" />
     <Compile Include="Collections\KeyValuePair.cs" />
+    <Compile Include="Collections\ReadOnlyCollection.cs" />
+    <Compile Include="Collections\ReadOnlyList.cs" />
     <Compile Include="Core\ControlExtensions.cs" />
     <Compile Include="Core\ExceptionDialog.cs">
       <SubType>Form</SubType>

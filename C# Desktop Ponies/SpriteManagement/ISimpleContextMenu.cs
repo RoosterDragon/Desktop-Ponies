@@ -1,6 +1,6 @@
 ﻿namespace CSDesktopPonies.SpriteManagement
 {
-    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Defines a simple set of methods for a context menu.
@@ -10,7 +10,7 @@
         /// <summary>
         /// Gets the collection of menu items in this menu.
         /// </summary>
-        ReadOnlyCollection<ISimpleContextMenuItem> Items { get; }
+        IList<ISimpleContextMenuItem> Items { get; }
 
         /// <summary>
         /// Displays the context menu at the given co-ordinates.

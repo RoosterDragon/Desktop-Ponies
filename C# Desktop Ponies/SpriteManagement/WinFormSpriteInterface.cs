@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Drawing.Imaging;
@@ -197,7 +196,7 @@
                     index++;
                 }
 
-                SubItems = new ReadOnlyCollection<ISimpleContextMenuItem>(winFormSubItemsList);
+                SubItems = winFormSubItemsList;
 
                 owner = parent;
                 item = menuItem;
@@ -289,7 +288,7 @@
             /// <summary>
             /// Gets the sub-items in an item that displays a new sub-menu of items.
             /// </summary>
-            public ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; private set; }
+            public IList<ISimpleContextMenuItem> SubItems { get; private set; }
 
             /// <summary>
             /// Releases all resources used by the
@@ -323,13 +322,9 @@
             /// </summary>
             private WinFormSpriteInterface owner;
             /// <summary>
-            /// The underlying list of menu items.
-            /// </summary>
-            private List<ISimpleContextMenuItem> items = new List<ISimpleContextMenuItem>();
-            /// <summary>
             /// Gets the collection of menu items in this menu.
             /// </summary>
-            public new ReadOnlyCollection<ISimpleContextMenuItem> Items { get; private set; }
+            public new IList<ISimpleContextMenuItem> Items { get; private set; }
 
             /// <summary>
             /// Initializes a new instance of the
@@ -348,7 +343,8 @@
 
                 owner = parent;
 
-                Items = new ReadOnlyCollection<ISimpleContextMenuItem>(items);
+                var items = new List<ISimpleContextMenuItem>();
+                Items = items;
 
                 foreach (ISimpleContextMenuItem menuItem in menuItems)
                 {
@@ -379,7 +375,7 @@
 
                 Disposed += (sender, e) =>
                 {
-                    foreach (WinFormContextMenuItem item in items)
+                    foreach (WinFormContextMenuItem item in Items)
                         item.Dispose();
                 };
             }

@@ -6,6 +6,7 @@
     using System.Drawing.Imaging;
     using System.Globalization;
     using System.IO;
+    using CSDesktopPonies.Collections;
     using CSDesktopPonies.Core;
 
     #region BufferToImage delegate
@@ -174,7 +175,7 @@
         /// <summary>
         /// Gets the frames that make up this GIF image.
         /// </summary>
-        public GifFrame<T>[] Frames { get; private set; }
+        public ImmutableArray<GifFrame<T>> Frames { get; private set; }
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
@@ -995,7 +996,7 @@
         /// <summary>
         /// Gets the frames that make up this GIF image.
         /// </summary>
-        public GifFrame<T>[] Frames { get; private set; }
+        public ImmutableArray<GifFrame<T>> Frames { get; private set; }
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
@@ -1018,15 +1019,15 @@
         /// <summary>
         /// Accesses the input stream being decoded.
         /// </summary>
-        private BinaryReader reader;
+        private readonly BinaryReader reader;
         /// <summary>
         /// Creates a frame of the desired type from the raw buffer.
         /// </summary>
-        private BufferToImage<T> createFrame;
+        private readonly BufferToImage<T> createFrame;
         /// <summary>
         /// The set of valid bit depths for use within buffers.
         /// </summary>
-        private BitDepths validDepths;
+        private readonly BitDepths validDepths;
         /// <summary>
         /// The description of the logical screen and global color table.
         /// </summary>
@@ -1079,15 +1080,15 @@
         /// <summary>
         /// The lookup array of "prefix" words. The value is the index of the "suffix" character at the end of the given codeword.
         /// </summary>
-        private short[] prefix = new short[MaxCodeWords];
+        private readonly short[] prefix = new short[MaxCodeWords];
         /// <summary>
         /// The lookup array of "suffix" characters. This holds the actual decompressed byte value for the given code character.
         /// </summary>
-        private byte[] suffix = new byte[MaxCodeWords];
+        private readonly byte[] suffix = new byte[MaxCodeWords];
         /// <summary>
         /// This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
         /// </summary>
-        private byte[] pixelStack = new byte[MaxCodeWords + 1];
+        private readonly byte[] pixelStack = new byte[MaxCodeWords + 1];
         /// <summary>
         /// This array is a buffer to hold the data read in from an image data sub block.
         /// </summary>
@@ -1261,7 +1262,7 @@
         {
             Iterations = 1;
             ReadGifDataStream();
-            Frames = frames.ToArray();
+            Frames = frames.ToImmutableArray();
             frames = null;
         }
         /// <summary>
@@ -1992,12 +1993,12 @@
         /// <summary>
         /// The color table used for the image.
         /// </summary>
-        private RgbColor[] colorTable;
+        private readonly ImmutableArray<RgbColor> colorTable;
         /// <summary>
         /// The index of the transparent color in the <see cref="F:CSDesktopPonies.SpriteManagement.GifFrame`1.colorTable"/>, or -1 to
         /// indicate no transparent color.
         /// </summary>
-        private int transparentIndex;
+        private readonly int transparentIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.GifFrame`1"/> class.
@@ -2011,7 +2012,7 @@
         {
             Image = frame;
             Duration = duration;
-            this.colorTable = colorTable;
+            this.colorTable = colorTable.ToImmutableArray();
             this.transparentIndex = transparentIndex;
         }
         /// <summary>

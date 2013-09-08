@@ -76,139 +76,6 @@ Public Class MutablePonyBase
     End Sub
 End Class
 
-Public NotInheritable Class ReadOnlySet
-    Private Sub New()
-    End Sub
-
-    Public Shared Function Wrap(Of T)(collection As ISet(Of T)) As ReadOnlySet(Of T)
-        Return New ReadOnlySet(Of T)(collection)
-    End Function
-End Class
-
-Public NotInheritable Class ReadOnlyCollection
-    Private Sub New()
-    End Sub
-
-    Public Shared Function Wrap(Of T)(collection As ICollection(Of T)) As ReadOnlyCollection(Of T)
-        Return New ReadOnlyCollection(Of T)(collection)
-    End Function
-End Class
-
-Public Class ReadOnlySet(Of T)
-    Inherits ReadOnlyCollection(Of T)
-    Implements ISet(Of T)
-
-    Protected Overloads ReadOnly Property Collection As ISet(Of T)
-        Get
-            Return DirectCast(MyBase.Collection, ISet(Of T))
-        End Get
-    End Property
-
-    Public Sub New(collection As ISet(Of T))
-        MyBase.New(collection)
-    End Sub
-
-    Private Function Add(item As T) As Boolean Implements ISet(Of T).Add
-        Throw New NotSupportedException("Collection is read-only.")
-    End Function
-
-    Private Sub ExceptWith(other As IEnumerable(Of T)) Implements ISet(Of T).ExceptWith
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-
-    Private Sub IntersectWith(other As IEnumerable(Of T)) Implements ISet(Of T).IntersectWith
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-
-    Public Function IsProperSubsetOf(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).IsProperSubsetOf
-        Return Collection.IsProperSubsetOf(other)
-    End Function
-
-    Public Function IsProperSupersetOf(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).IsProperSupersetOf
-        Return Collection.IsProperSupersetOf(other)
-    End Function
-
-    Public Function IsSubsetOf(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).IsSubsetOf
-        Return Collection.IsSubsetOf(other)
-    End Function
-
-    Public Function IsSupersetOf(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).IsSupersetOf
-        Return Collection.IsSupersetOf(other)
-    End Function
-
-    Public Function Overlaps(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).Overlaps
-        Return Collection.Overlaps(other)
-    End Function
-
-    Public Function SetEquals(other As IEnumerable(Of T)) As Boolean Implements ISet(Of T).SetEquals
-        Return Collection.SetEquals(other)
-    End Function
-
-    Public Sub SymmetricExceptWith(other As IEnumerable(Of T)) Implements ISet(Of T).SymmetricExceptWith
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-
-    Private Sub UnionWith(other As IEnumerable(Of T)) Implements ISet(Of T).UnionWith
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-End Class
-
-Public Class ReadOnlyCollection(Of T)
-    Implements ICollection(Of T)
-
-    Private _collection As ICollection(Of T)
-    Protected ReadOnly Property Collection As ICollection(Of T)
-        Get
-            Return _collection
-        End Get
-    End Property
-
-    Public Sub New(collection As ICollection(Of T))
-        Argument.EnsureNotNull(collection, "collection")
-        _collection = collection
-    End Sub
-
-    Private Sub Add(item As T) Implements ICollection(Of T).Add
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-
-    Private Sub Clear() Implements ICollection(Of T).Clear
-        Throw New NotSupportedException("Collection is read-only.")
-    End Sub
-
-    Public Function Contains(item As T) As Boolean Implements ICollection(Of T).Contains
-        Return Collection.Contains(item)
-    End Function
-
-    Public Sub CopyTo(array() As T, arrayIndex As Integer) Implements ICollection(Of T).CopyTo
-        Collection.CopyTo(array, arrayIndex)
-    End Sub
-
-    Public ReadOnly Property Count As Integer Implements ICollection(Of T).Count
-        Get
-            Return Collection.Count
-        End Get
-    End Property
-
-    Private ReadOnly Property IsReadOnly As Boolean Implements ICollection(Of T).IsReadOnly
-        Get
-            Return True
-        End Get
-    End Property
-
-    Private Function Remove(item As T) As Boolean Implements ICollection(Of T).Remove
-        Throw New NotSupportedException("Collection is read-only.")
-    End Function
-
-    Public Function GetEnumerator() As IEnumerator(Of T) Implements IEnumerable(Of T).GetEnumerator
-        Return Collection.GetEnumerator()
-    End Function
-
-    Public Function GetEnumerator1() As System.Collections.IEnumerator Implements System.Collections.IEnumerable.GetEnumerator
-        Return Collection.GetEnumerator()
-    End Function
-End Class
-
 Public Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
@@ -254,8 +121,8 @@ Public Class PonyBase
         End Set
     End Property
 
-    Private _tags As ISet(Of String)
-    Public ReadOnly Property Tags() As ISet(Of String)
+    Private _tags As ICollection(Of String)
+    Public ReadOnly Property Tags() As ICollection(Of String)
         Get
             Return _tags
         End Get
@@ -740,16 +607,16 @@ Public Class PonyBase
     End Sub
 
     Private Sub MakeReadOnly()
-        _tags = ReadOnlySet.Wrap(_tags)
-        _behaviorGroups = ReadOnlyCollection.Wrap(_behaviorGroups)
-        _behaviors = ReadOnlyCollection.Wrap(_behaviors)
+        _tags = _tags.AsReadOnly()
+        _behaviorGroups = _behaviorGroups.AsReadOnly()
+        _behaviors = _behaviors.AsReadOnly()
         ' Interactions can use deferred loading, and should remain editable.
-        '_interactions = ReadOnlyCollection.Wrap(_interactions)
+        '_interactions = _interactions.AsReadOnly()
         ' Effects must remain editable at the moment...
-        '_effects = ReadOnlyCollection.Wrap(_effects)
-        _speakingLines = ReadOnlyCollection.Wrap(_speakingLines)
-        _speakingLinesRandom = ReadOnlyCollection.Wrap(_speakingLinesRandom)
-        _speakingLinesSpecific = ReadOnlyCollection.Wrap(_speakingLinesSpecific)
+        '_effects = _effects.AsReadOnly()
+        _speakingLines = _speakingLines.AsReadOnly()
+        _speakingLinesRandom = _speakingLinesRandom.AsReadOnly()
+        _speakingLinesSpecific = _speakingLinesSpecific.AsReadOnly()
     End Sub
 
     Protected Sub AddBehavior(name As String, chance As Double,
@@ -1507,7 +1374,7 @@ Public Class Pony
             Return Base.Name
         End Get
     End Property
-    Friend ReadOnly Property Tags() As ISet(Of String)
+    Friend ReadOnly Property Tags() As ICollection(Of String)
         Get
             Return Base.Tags
         End Get

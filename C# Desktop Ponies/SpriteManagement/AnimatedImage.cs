@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using CSDesktopPonies.Collections;
     using CSDesktopPonies.Core;
 
     /// <summary>
@@ -81,15 +82,15 @@
         /// <summary>
         /// The collection of unique frames that make up the image.
         /// </summary>
-        private T[] frames;
+        private ImmutableArray<T> frames;
         /// <summary>
         /// The duration of each frame in milliseconds.
         /// </summary>
-        private int[] durations;
+        private ImmutableArray<int> durations;
         /// <summary>
         /// Maps a frame index in an animation to a frame object. This allows the same frame object to be used many times.
         /// </summary>
-        private int[] frameIndexes;
+        private ImmutableArray<int> frameIndexes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AnimatedImage`1"/> class from a given file.
@@ -145,7 +146,6 @@
                     IDisposable disposable = gifImage.Frames[sourceFrame] as IDisposable;
                     if (disposable != null)
                         disposable.Dispose();
-                    gifImage.Frames[sourceFrame] = null;
                     System.Threading.Interlocked.Increment(ref framesDropped);
                     HadZeroDurationFrames = true;
                     Console.WriteLine(string.Format(System.Globalization.CultureInfo.CurrentCulture,
@@ -166,9 +166,9 @@
                 AddOrReuseFrame(gifImage.Frames[sourceFrame], framesList, durationsList, frameIndexesList, frameHashesList);
             }
 
-            frames = framesList.ToArray();
-            frameIndexes = frameIndexesList.ToArray();
-            durations = durationsList.ToArray();
+            frames = framesList.ToImmutableArray();
+            frameIndexes = frameIndexesList.ToImmutableArray();
+            durations = durationsList.ToImmutableArray();
             IsAnimated = FrameCount > 1;
         }
 
@@ -223,8 +223,8 @@
             IsAnimated = false;
             LoopCount = 0;
 
-            frames = new T[] { staticImageFactory(FilePath) };
-            frameIndexes = new int[] { 0 };
+            frames = new T[] { staticImageFactory(FilePath) }.ToImmutableArray();
+            frameIndexes = new int[] { 0 }.ToImmutableArray();
         }
 
         /// <summary>
@@ -314,13 +314,12 @@
         {
             if (disposing)
             {
-                if (frames != null)
-                    foreach (T frame in frames)
-                    {
-                        IDisposable disposable = frame as IDisposable;
-                        if (disposable != null)
-                            disposable.Dispose();
-                    }
+                foreach (T frame in frames)
+                {
+                    IDisposable disposable = frame as IDisposable;
+                    if (disposable != null)
+                        disposable.Dispose();
+                }
             }
         }
     }

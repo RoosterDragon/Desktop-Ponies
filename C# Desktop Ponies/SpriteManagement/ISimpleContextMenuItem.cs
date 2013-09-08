@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
 
     /// <summary>
     /// Defines a simple set of methods for a context menu item.
@@ -24,7 +23,7 @@
         /// <summary>
         /// Gets the sub-items in an item that displays a new sub-menu of items.
         /// </summary>
-        ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; }
+        IList<ISimpleContextMenuItem> SubItems { get; }
     }
 
     /// <summary>
@@ -48,7 +47,7 @@
         /// <summary>
         /// Gets the sub-items in an item that displays a new sub-menu of items.
         /// </summary>
-        public ReadOnlyCollection<ISimpleContextMenuItem> SubItems { get; private set; }
+        public IList<ISimpleContextMenuItem> SubItems { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.SimpleContextMenuItem"/> class that represents
@@ -81,7 +80,7 @@
         public SimpleContextMenuItem(string text, IEnumerable<ISimpleContextMenuItem> subItems)
         {
             Text = text;
-            SubItems = new ReadOnlyCollection<ISimpleContextMenuItem>(new List<ISimpleContextMenuItem>(subItems));
+            SubItems = new List<ISimpleContextMenuItem>(subItems);
         }
     }
 }

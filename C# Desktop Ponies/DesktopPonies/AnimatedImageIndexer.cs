@@ -5,6 +5,7 @@
     using System.Drawing;
     using System.Globalization;
     using System.Windows.Forms;
+    using CSDesktopPonies.Collections;
     using CSDesktopPonies.Core;
     using CSDesktopPonies.SpriteManagement;
 
@@ -28,7 +29,8 @@
         /// <summary>
         /// Brushes used to draw sections for each frame.
         /// </summary>
-        private static readonly Brush[] SectionBrushes = new Brush[] { Brushes.DarkGray, Brushes.LightGray };
+        private static readonly ImmutableArray<Brush> SectionBrushes = 
+            new Brush[] { Brushes.DarkGray, Brushes.LightGray }.ToImmutableArray();
         /// <summary>
         /// Brush used to draw the section of the currently selected frame.
         /// </summary>
