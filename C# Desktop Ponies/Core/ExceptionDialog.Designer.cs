@@ -50,7 +50,7 @@
             this.ExceptionText.Name = "ExceptionText";
             this.ExceptionText.ReadOnly = true;
             this.ExceptionText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ExceptionText.Size = new System.Drawing.Size(254, 20);
+            this.ExceptionText.Size = new System.Drawing.Size(254, 153);
             this.ExceptionText.TabIndex = 1;
             // 
             // MessageLabel
@@ -95,7 +95,7 @@
             this.LayoutTable.Location = new System.Drawing.Point(0, 0);
             this.LayoutTable.Name = "LayoutTable";
             this.LayoutTable.RowCount = 2;
-            this.LayoutTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.LayoutTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.LayoutTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.LayoutTable.Size = new System.Drawing.Size(284, 262);
             this.LayoutTable.TabIndex = 0;
@@ -115,7 +115,7 @@
             this.MessageTable.RowCount = 2;
             this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.MessageTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.MessageTable.Size = new System.Drawing.Size(260, 70);
+            this.MessageTable.Size = new System.Drawing.Size(260, 203);
             this.MessageTable.TabIndex = 1;
             // 
             // MessagePanel
@@ -139,11 +139,11 @@
             this.ButtonPanel.Controls.Add(this.CloseButton);
             this.ButtonPanel.Controls.Add(this.CopyTextButton);
             this.ButtonPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ButtonPanel.Location = new System.Drawing.Point(0, 94);
+            this.ButtonPanel.Location = new System.Drawing.Point(0, 227);
             this.ButtonPanel.Margin = new System.Windows.Forms.Padding(0);
             this.ButtonPanel.Name = "ButtonPanel";
             this.ButtonPanel.Padding = new System.Windows.Forms.Padding(3);
-            this.ButtonPanel.Size = new System.Drawing.Size(284, 168);
+            this.ButtonPanel.Size = new System.Drawing.Size(284, 35);
             this.ButtonPanel.TabIndex = 0;
             // 
             // TimeLabel

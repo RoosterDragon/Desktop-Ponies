@@ -55,7 +55,8 @@
         private ExceptionDialog(Exception ex, string text, string caption, bool fatal, IWin32Window owner = null)
         {
             InitializeComponent();
-            MaximumSize = (owner != null ? Screen.FromHandle(owner.Handle) : Screen.FromControl(this)).Bounds.Size;
+            var screen = owner != null ? Screen.FromHandle(owner.Handle) : Screen.FromControl(this);
+            MaximumSize = Rectangle.Intersect(screen.WorkingArea, screen.Bounds).Size;
             ExceptionText.Text = ex.ToString();
             if (OperatingSystemInfo.IsWindows)
             {
