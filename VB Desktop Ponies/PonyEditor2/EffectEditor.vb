@@ -97,7 +97,6 @@ Friend Class EffectEditor
     Public Overrides Sub LoadItem(effectName As String)
         originalEffect = Base.Effects.Single(Function(e) e.Name = effectName)
         newEffect = originalEffect.MemberwiseClone()
-        LoadItemCommon()
 
         LeftImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
         RightImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
@@ -115,7 +114,7 @@ Friend Class EffectEditor
         ReplaceItemsInComboBox(BehaviorComboBox, behaviors, True)
         SelectItemElseNoneOption(BehaviorComboBox, behaviors.FirstOrDefault(Function(b) b.Name = newEffect.BehaviorName))
 
-        Source.Text = newEffect.GetPonyIni()
+        Source.Text = newEffect.SourceIni
     End Sub
 
     Private Sub LoadItemCommon()
@@ -140,6 +139,7 @@ Friend Class EffectEditor
         MyBase.SaveItem()
 
         originalEffect = newEffect
+        originalEffect.UpdateSourceIniTo(Source.Text)
         newEffect = originalEffect.MemberwiseClone()
     End Sub
 

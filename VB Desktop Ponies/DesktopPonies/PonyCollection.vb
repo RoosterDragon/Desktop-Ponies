@@ -50,46 +50,50 @@ Public Class PonyCollection
             ' Ignore blank lines, and those commented out with a single quote.
             If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
 
-            Dim columns = CommaSplitQuoteBraceQualified(line)
-
-            Select Case columns(0).ToLowerInvariant()
-                Case "name"
-                    TryParse(Of String)(columns, folder, AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
-                Case "scale"
-                    TryParse(Of Double)(columns, folder, AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
-                Case "behaviorgroup"
-                    TryParse(Of BehaviorGroup)(columns, folder, AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
-                Case "behavior"
-                    TryParse(Of Behavior)(columns, folder, pony, AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
-                Case "effect"
-                    TryParse(Of EffectBase)(columns, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
-                Case "speak"
-                    TryParse(Of Speech)(columns, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
-                Case "categories"
-                    For i = 1 To columns.Count - 1
-                        For Each item As String In Main.Instance.FilterOptionsBox.Items
-                            If String.Equals(item, columns(i), StringComparison.OrdinalIgnoreCase) Then
-                                pony.Tags.Add(columns(i))
-                                Exit For
-                            End If
+            Dim firstComma = line.IndexOf(","c)
+            If firstComma <> -1 Then
+                Select Case line.Substring(0, firstComma).ToLowerInvariant()
+                    Case "name"
+                        TryParse(Of String)(line, folder, AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
+                    Case "scale"
+                        TryParse(Of Double)(line, folder, AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
+                    Case "behaviorgroup"
+                        TryParse(Of BehaviorGroup)(line, folder, AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
+                    Case "behavior"
+                        TryParse(Of Behavior)(line, folder, pony, AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
+                    Case "effect"
+                        TryParse(Of EffectBase)(line, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
+                    Case "speak"
+                        TryParse(Of Speech)(line, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
+                    Case "categories"
+                        Dim columns = CommaSplitQuoteQualified(line)
+                        For i = 1 To columns.Count - 1
+                            For Each item As String In Main.Instance.FilterOptionsBox.Items
+                                If String.Equals(item, columns(i), StringComparison.OrdinalIgnoreCase) Then
+                                    pony.Tags.Add(columns(i))
+                                    Exit For
+                                End If
+                            Next
                         Next
-                    Next
-            End Select
+                    Case Else
+                        ' TODO: Handle unrecognized identifier, or lack of first comma.
+                End Select
+            End If
         Loop
     End Sub
 
-    Private Sub TryParse(Of T)(columns As String(), directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
+    Private Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
         Dim result As T
         Dim issues As ParseIssue() = Nothing
-        If parseFunc(columns, directory, result, issues) Then
+        If parseFunc(line, directory, result, issues) Then
             onSuccess(result)
         End If
     End Sub
 
-    Private Sub TryParse(Of T)(columns As String(), directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
+    Private Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
         Dim result As T
         Dim issues As ParseIssue() = Nothing
-        If parseFunc(columns, directory, pony, result, issues) Then
+        If parseFunc(line, directory, pony, result, issues) Then
             onSuccess(result)
         End If
     End Sub
@@ -107,27 +111,27 @@ Public Class PonyIniParser
         Return parser.AllParsingSuccessful
     End Function
 
-    Public Shared Function TryParseName(iniComponents As String(), directory As String, ByRef result As String, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseName(iniLine As String, directory As String, ByRef result As String, ByRef issues As ParseIssue()) As Boolean
         Return TryParse(result, issues,
-                                New StringCollectionParser(iniComponents, {"Identifier", "Name"}),
+                                New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Name"}),
                                 Function(p)
                                     p.NoParse()
                                     Return p.NoParse()
                                 End Function)
     End Function
 
-    Public Shared Function TryParseScale(iniComponents As String(), directory As String, ByRef result As Double, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseScale(iniLine As String, directory As String, ByRef result As Double, ByRef issues As ParseIssue()) As Boolean
         Return TryParse(result, issues,
-                                   New StringCollectionParser(iniComponents, {"Identifier", "Scale"}),
+                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Scale"}),
                                    Function(p)
                                        p.NoParse()
                                        Return p.ParseDouble(0, 0, 16)
                                    End Function)
     End Function
 
-    Public Shared Function TryParseBehaviorGroup(iniComponents As String(), directory As String, ByRef result As BehaviorGroup, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String, ByRef result As BehaviorGroup, ByRef issues As ParseIssue()) As Boolean
         Return TryParse(result, issues,
-                                   New StringCollectionParser(iniComponents, {"Identifier", "Number", "Name"}),
+                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
                                    Function(p)
                                        p.NoParse()
                                        Dim bg As New BehaviorGroup(Nothing, 0)
@@ -138,6 +142,6 @@ Public Class PonyIniParser
     End Function
 End Class
 
-Public Delegate Function TryParse(Of T)(iniComponents As String(), directory As String, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
+Public Delegate Function TryParse(Of T)(iniLine As String, directory As String, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
 
-Public Delegate Function TryParse(Of T, PonyBase)(iniComponents As String(), directory As String, pony As PonyBase, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
+Public Delegate Function TryParse(Of T, PonyBase)(iniLine As String, directory As String, pony As PonyBase, ByRef result As T, ByRef issues As ParseIssue()) As Boolean

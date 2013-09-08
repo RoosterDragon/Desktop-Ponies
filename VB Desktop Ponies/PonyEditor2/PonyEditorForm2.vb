@@ -225,7 +225,7 @@ Public Class PonyEditorForm2
     Private Sub ActiveItemEditor_IssuesChanged(sender As Object, e As EventArgs)
         IssuesGrid.SuspendLayout()
         IssuesGrid.Rows.Clear()
-        If ActiveItemEditor IsNot Nothing AndAlso ActiveItemEditor.Issues IsNot Nothing Then
+        If ActiveItemEditor IsNot Nothing Then
             For Each issue In ActiveItemEditor.Issues
                 IssuesGrid.Rows.Add(If(issue.Fatal, SystemIcons.Error, SystemIcons.Warning),
                                     If(issue.PropertyName, "Element " & issue.Index + 1),

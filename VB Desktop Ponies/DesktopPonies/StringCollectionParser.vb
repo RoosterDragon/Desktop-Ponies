@@ -346,6 +346,9 @@ Public Structure ParseIssue
             Return _reason
         End Get
     End Property
+    Public Sub New(_propertyName As String, _source As String, _fallbackValue As String, _reason As String)
+        Me.New(-1, _propertyName, _source, _fallbackValue, _reason)
+    End Sub
     Public Sub New(_index As Integer, _propertyName As String, _source As String, _fallbackValue As String, _reason As String)
         Me._index = _index
         Me._propertyName = _propertyName

@@ -1015,19 +1015,7 @@ Public Class PonyEditor
                         changed_effect.Name = new_value
                         EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = new_value
                     Case colEffectBehavior.Index
-                        For Each behavior In PreviewPony.Behaviors
-                            If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.RemoveEffect(changed_effect.Name)
-                                Exit For
-                            End If
-                        Next
                         changed_effect.BehaviorName = new_value
-                        For Each behavior In PreviewPony.Behaviors
-                            If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.AddEffect(changed_effect.Name, PreviewPonyBase)
-                                Exit For
-                            End If
-                        Next
                     Case colEffectDuration.Index
                         changed_effect.Duration = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colEffectRepeatDelay.Index
@@ -1483,18 +1471,9 @@ Public Class PonyEditor
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
             If Object.ReferenceEquals(grid, EffectsGrid) Then
-                Dim todelete As EffectBase = Nothing
-                For Each behavior In PreviewPony.Behaviors
-                    For Each effect In behavior.Effects
-                        If effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value) Then
-                            todelete = effect
-                            Exit For
-                        End If
-                    Next
-                    If Not IsNothing(todelete) Then
-                        behavior.RemoveEffect(todelete.Name)
-                    End If
-                Next
+                Dim effectToRemove = PreviewPonyBase.Effects.Single(
+                    Function(effect) effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value))
+                PreviewPonyBase.Effects.Remove(effectToRemove)
             ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
                 If grid.RowCount = 1 Then
                     e.Cancel = True

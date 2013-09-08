@@ -31,7 +31,6 @@ Friend Class SpeechEditor
     Public Overrides Sub LoadItem(speechName As String)
         originalSpeech = Base.Speeches.Single(Function(s) s.Name = speechName)
         newSpeech = originalSpeech.MemberwiseClone()
-        LoadItemCommon()
 
         Dim sounds =
             Directory.GetFiles(PonyBasePath, "*.mp3").Concat(Directory.GetFiles(PonyBasePath, "*.ogg")).
@@ -41,7 +40,7 @@ Friend Class SpeechEditor
             SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(newSpeech.SoundFile))
         End If
 
-        Source.Text = newSpeech.GetPonyIni()
+        Source.Text = newSpeech.SourceIni
     End Sub
 
     Private Sub LoadItemCommon()
@@ -65,6 +64,7 @@ Friend Class SpeechEditor
         MyBase.SaveItem()
 
         originalSpeech = newSpeech
+        originalSpeech.UpdateSourceIniTo(Source.Text)
         newSpeech = originalSpeech.MemberwiseClone()
     End Sub
 

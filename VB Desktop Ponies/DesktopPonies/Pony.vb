@@ -2,9 +2,45 @@
 Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
+Public Interface IPonyIniSourceable
+    ReadOnly Property SourceIni As String
+    Sub UpdateSourceIniTo(newSource As String)
+End Interface
+
 Public Interface IPonyIniSerializable
     Function GetPonyIni() As String
 End Interface
+
+Public Interface IReferential
+    Function GetReferentialIssues() As ParseIssue()
+End Interface
+
+Public Class Referential
+    Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of String)) As ParseIssue
+        If String.IsNullOrEmpty(name) Then Return Nothing
+        Dim result = CheckReference(name, collection)
+        If CheckReference(name, collection) <> ReferenceResult.Ok Then
+            Dim reason = If(result = ReferenceResult.NotFound,
+                            String.Format("There is no element with the name '{0}'.", name),
+                            String.Format("The name '{0}' does not refer to a unique element.", name))
+            Return New ParseIssue(propertyName, name, "", reason)
+        End If
+        Return Nothing
+    End Function
+    Private Shared Function CheckReference(name As String, collection As IEnumerable(Of String)) As ReferenceResult
+        Dim count = 0
+        For Each candidateName In collection
+            If name = candidateName Then count += 1
+            If count >= 2 Then Return ReferenceResult.NotUnique
+        Next
+        Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Ok)
+    End Function
+    Private Enum ReferenceResult
+        Ok
+        NotFound
+        NotUnique
+    End Enum
+End Class
 
 Public Class MutablePonyBase
     Inherits PonyBase
@@ -307,31 +343,11 @@ Public Class PonyBase
             Next
 
             For Each effectLine In effectLines
-                Try
-                    Dim issues As ParseIssue() = Nothing
-                    Dim effect As EffectBase = Nothing
-                    Dim found_behavior = False
-                    If EffectBase.TryLoad(effectLine, fullDirectory, Me, effect, issues) Then
-                        Effects.Add(effect)
-                        Dim behavior = Behaviors.FirstOrDefault(Function(b) b.Name = effect.BehaviorName)
-                        If behavior IsNot Nothing Then
-                            found_behavior = True
-                            behavior.AddEffect(effect.Name, Me)
-                        Else
-                            If Not found_behavior Then
-                                MessageBox.Show(
-                                    String.Format(
-                                        "Pony '{0}' has an effect '{1}' which references a behavior named '{2}', " &
-                                        "but this behavior does not exist.{3}{4}", DisplayName, effect.Name, effect.BehaviorName, Environment.NewLine, effectLine),
-                                    "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                            End If
-                        End If
-                    End If
-
-                Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Invalid effect in configuration file for pony " & DisplayName & ":" &
-                                                                 ControlChars.NewLine & effectLine)
-                End Try
+                Dim issues As ParseIssue() = Nothing
+                Dim effect As EffectBase = Nothing
+                If EffectBase.TryLoad(effectLine, fullDirectory, Me, effect, issues) Then
+                    Effects.Add(effect)
+                End If
             Next
         End Using
     End Sub
@@ -645,7 +661,7 @@ Public Class PonyBase
                 writer.WriteLine(behavior.GetPonyIni())
             Next
 
-            For Each effect In Behaviors.SelectMany(Function(behavior) (behavior.Effects))
+            For Each effect In Effects
                 writer.WriteLine(effect.GetPonyIni())
             Next
 
@@ -760,7 +776,7 @@ End Enum
 
 #Region "Behavior class"
 Public Class Behavior
-    Implements IPonyIniSerializable, IMemberwiseCloneable(Of Behavior)
+    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of Behavior), IReferential
     Private ReadOnly pony As PonyBase
 
     Public Shared ReadOnly AnyGroup As Integer = 0
@@ -882,16 +898,9 @@ Public Class Behavior
     Public Property AutoSelectImagesOnFollow As Boolean = True
     Public Property Group As Integer = AnyGroup
 
-    Private ReadOnly _effectNames As New List(Of String)()
-    Private ReadOnly _effectsNamesReadOnly As ReadOnlyCollection(Of String) = ReadOnlyCollection.AsReadOnly(_effectNames)
-    Public ReadOnly Property EffectNames As ReadOnlyCollection(Of String)
-        Get
-            Return _effectsNamesReadOnly
-        End Get
-    End Property
     Public ReadOnly Property Effects As IEnumerable(Of EffectBase)
         Get
-            Return _effectNames.Select(Function(n) pony.Effects.FirstOrDefault(Function(e) e.Name = n)).Where(Function(e) e IsNot Nothing)
+            Return pony.Effects.Where(Function(e) e.BehaviorName = Name)
         End Get
     End Property
 
@@ -900,15 +909,12 @@ Public Class Behavior
     End Sub
 
     Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ParseIssue()) As Boolean
-        Return TryLoad(CommaSplitQuoteQualified(iniLine), imageDirectory, pony, result, issues)
-    End Function
-
-    Public Shared Function TryLoad(iniComponents As String(), imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ParseIssue()) As Boolean
         result = Nothing
         issues = Nothing
 
         Dim b = New Behavior(pony)
-        Dim p As New StringCollectionParser(iniComponents,
+        b._sourceIni = iniLine
+        Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Name", "Chance",
                                              "Max Duration", "Min Duration", "Speed",
                                              "Right Image", "Left Image", "Movement", "Linked Behavior",
@@ -1010,19 +1016,7 @@ Public Class Behavior
             .DoNotRepeatImageAnimations = _dont_repeat_image_animations,
             .ParentPonyBase = owner
         }
-
-        AddEffect(effectname, owner)
     End Sub
-
-    Public Sub AddEffect(effectName As String, owner As PonyBase)
-        Argument.EnsureNotNull(effectName, "effectName")
-        Argument.EnsureNotNull(owner, "owner")
-        _effectNames.Add(effectName)
-    End Sub
-
-    Public Function RemoveEffect(effectName As String) As Boolean
-        Return _effectNames.Remove(effectName)
-    End Function
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
         Return String.Join(
@@ -1056,6 +1050,27 @@ Public Class Behavior
     Public Overloads Function MemberwiseClone() As Behavior Implements IMemberwiseCloneable(Of Behavior).MemberwiseClone
         Return DirectCast(MyBase.MemberwiseClone(), Behavior)
     End Function
+
+    Public Function GetReferentialIssues() As ParseIssue() Implements IReferential.GetReferentialIssues
+        Return {Referential.GetIssue("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.GetIssue("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
+                Referential.GetIssue("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
+                Referential.GetIssue("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.GetIssue("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name))}.
+            Where(Function(pi) pi.PropertyName IsNot Nothing).
+            ToArray()
+    End Function
+
+    Private _sourceIni As String
+    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
+        Get
+            Return _sourceIni
+        End Get
+    End Property
+
+    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
+        _sourceIni = newSource
+    End Sub
 End Class
 #End Region
 
@@ -1078,7 +1093,7 @@ End Class
 #End Region
 
 Public Class Speech
-    Implements IPonyIniSerializable, IMemberwiseCloneable(Of Speech)
+    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of Speech)
 
     Public Property Name As String
     Public Property Text As String = ""
@@ -1087,14 +1102,12 @@ Public Class Speech
     Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
 
     Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As Speech, ByRef issues As ParseIssue()) As Boolean
-        Return TryLoad(CommaSplitQuoteBraceQualified(iniLine), soundDirectory, result, issues)
-    End Function
-
-    Public Shared Function TryLoad(iniComponents As String(), soundDirectory As String, ByRef result As Speech, ByRef issues As ParseIssue()) As Boolean
         result = Nothing
         issues = Nothing
 
         Dim s = New Speech()
+        s._sourceIni = iniLine
+        Dim iniComponents = CommaSplitQuoteBraceQualified(iniLine)
         If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
         If iniComponents.Length > 3 Then
             Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
@@ -1152,6 +1165,17 @@ Public Class Speech
     Public Overloads Function MemberwiseClone() As Speech Implements IMemberwiseCloneable(Of Speech).MemberwiseClone
         Return DirectCast(MyBase.MemberwiseClone(), Speech)
     End Function
+
+    Private _sourceIni As String
+    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
+        Get
+            Return _sourceIni
+        End Get
+    End Property
+
+    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
+        _sourceIni = newSource
+    End Sub
 End Class
 
 Public Class Pony
@@ -3146,7 +3170,7 @@ Public Class Pony
 End Class
 
 Public Class EffectBase
-    Implements IPonyIniSerializable, IMemberwiseCloneable(Of EffectBase)
+    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of EffectBase)
 
     Public Property Name As String
     Public Property BehaviorName As String
@@ -3168,15 +3192,12 @@ Public Class EffectBase
     Public Property AlreadyPlayedForCurrentBehavior As Boolean
 
     Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ParseIssue()) As Boolean
-        Return TryLoad(CommaSplitQuoteQualified(iniLine), imageDirectory, pony, result, issues)
-    End Function
-
-    Public Shared Function TryLoad(iniComponents As String(), imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ParseIssue()) As Boolean
         result = Nothing
         issues = Nothing
 
         Dim e = New EffectBase(pony)
-        Dim p As New StringCollectionParser(iniComponents,
+        e._sourceIni = iniLine
+        Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Effect Name", "Behavior Name",
                                              "Right Image", "Left Image", "Duration", "Repeat Delay",
                                              "Placement Right", "Centering Right",
@@ -3270,6 +3291,17 @@ Public Class EffectBase
     Public Overloads Function MemberwiseClone() As EffectBase Implements IMemberwiseCloneable(Of EffectBase).MemberwiseClone
         Return DirectCast(MyBase.MemberwiseClone(), EffectBase)
     End Function
+
+    Private _sourceIni As String
+    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
+        Get
+            Return _sourceIni
+        End Get
+    End Property
+
+    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
+        _sourceIni = newSource
+    End Sub
 End Class
 
 Public Class Effect

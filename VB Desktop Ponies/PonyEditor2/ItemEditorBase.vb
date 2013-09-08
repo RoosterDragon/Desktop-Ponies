@@ -45,9 +45,11 @@ Public Class ItemEditorBase
     End Property
 
     Protected ParseIssues As ParseIssue()
+    Protected ReferentialIssues As ParseIssue()
     Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
-            Return ParseIssues
+            Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Union(
+                If(ReferentialIssues, Linq.Enumerable.Empty(Of ParseIssue)()))
         End Get
     End Property
     Public Event IssuesChanged As EventHandler
@@ -284,7 +286,6 @@ Public Class ItemEditorBase
     End Sub
 
     Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
-        If LoadingItem Then Return
         SourceTextTimer.Stop()
         SourceTextTimer.Start()
     End Sub

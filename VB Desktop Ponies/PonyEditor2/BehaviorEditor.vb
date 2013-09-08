@@ -80,9 +80,7 @@ Friend Class BehaviorEditor
         Dim behaviors = Base.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, newBehavior)).ToArray()
         ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors, True)
 
-        LoadItemCommon()
-
-        Source.Text = newBehavior.GetPonyIni()
+        Source.Text = newBehavior.SourceIni
     End Sub
 
     Private Sub LoadItemCommon()
@@ -121,6 +119,7 @@ Friend Class BehaviorEditor
         MyBase.SaveItem()
 
         originalBehavior = newBehavior
+        originalBehavior.UpdateSourceIniTo(Source.Text)
         newBehavior = originalBehavior.MemberwiseClone()
     End Sub
 
@@ -146,6 +145,7 @@ Friend Class BehaviorEditor
     Protected Overrides Sub SourceTextChanged()
         Dim b As Behavior = Nothing
         Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, ParseIssues)
+        ReferentialIssues = b.GetReferentialIssues()
         OnIssuesChanged(Me, EventArgs.Empty)
         newBehavior = b
         LoadItemCommon()

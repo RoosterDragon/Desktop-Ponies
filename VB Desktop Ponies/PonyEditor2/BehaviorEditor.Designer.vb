@@ -151,9 +151,6 @@ Partial Class BehaviorEditor
         '
         Me.EndSpeechComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.EndSpeechComboBox.DisplayMember = "Name"
-        Me.EndSpeechComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.EndSpeechComboBox.FormattingEnabled = True
         Me.EndSpeechComboBox.Location = New System.Drawing.Point(439, 82)
         Me.EndSpeechComboBox.Name = "EndSpeechComboBox"
         Me.EndSpeechComboBox.Size = New System.Drawing.Size(259, 21)
