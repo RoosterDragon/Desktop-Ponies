@@ -562,46 +562,6 @@ Public Class PonyEditor
 
     End Function
 
-    ''' <summary>
-    ''' Usually thrown when a value entered isn't in the list of allowed values of a dropdown box in a grid.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">The event data.</param>
-    Private Sub GridError(sender As Object, e As DataGridViewDataErrorEventArgs)
-        Try
-
-            Dim grid As DataGridView = CType(sender, DataGridView)
-
-            Dim replacement As String = ""
-
-            Select Case grid.Name
-                Case "Pony_Effects_Grid"
-                    grid = EffectsGrid
-                    replacement = ""
-                Case "Pony_Behaviors_Grid"
-                    grid = BehaviorsGrid
-                    replacement = "None"
-                Case Else
-                    Throw New Exception("Unhandled error for grid: " & grid.Name)
-            End Select
-
-            Dim invalid_value As String = CStr(grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
-            grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value = replacement
-
-            MessageBox.Show(Me, PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalid_value &
-                            "' is not valid for column '" & grid.Columns(e.ColumnIndex).HeaderText & "'" & ControlChars.NewLine &
-                            "Details: Column: " & e.ColumnIndex &
-                            " Row: " & e.RowIndex & " - " & e.Exception.Message & ControlChars.NewLine & ControlChars.NewLine &
-                            "Value will be reset.",
-                            "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-
-        Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
-            Me.Close()
-        End Try
-
-    End Sub
-
     Private Sub PonyBehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellClick
 
         Try
@@ -1592,7 +1552,33 @@ Public Class PonyEditor
     End Sub
 
     Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles SpeechesGrid.DataError, InteractionsGrid.DataError, EffectsGrid.DataError, BehaviorsGrid.DataError
-        My.Application.NotifyUserOfNonFatalException(e.Exception, "Error interpreting the data entered into the editor.")
+        Try
+            Dim grid As DataGridView = CType(sender, DataGridView)
+
+            Dim replacement As String = ""
+
+            Select Case grid.Name
+                Case EffectsGrid.Name
+                    replacement = ""
+                Case BehaviorsGrid.Name
+                    replacement = "None"
+                Case Else
+                    Throw New Exception("Unhandled error for grid: " & grid.Name)
+            End Select
+
+            Dim invalid_value As String = CStr(grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
+            grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value = replacement
+
+            MessageBox.Show(Me, PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalid_value &
+                            "' is not valid for column '" & grid.Columns(e.ColumnIndex).HeaderText & "'" & ControlChars.NewLine &
+                            "Details: Column: " & e.ColumnIndex &
+                            " Row: " & e.RowIndex & " - " & e.Exception.Message & ControlChars.NewLine & ControlChars.NewLine &
+                            "Value will be reset.",
+                            "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        Catch ex As Exception
+            My.Application.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
+            Me.Close()
+        End Try
     End Sub
 
     Private Sub Set_Behavior_Follow_Parameters(behavior As Behavior)
