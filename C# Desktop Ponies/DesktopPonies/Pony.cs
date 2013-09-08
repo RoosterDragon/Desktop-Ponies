@@ -524,12 +524,12 @@
             if (targets.Count < 2)
                 throw new ArgumentException("There must be at least two targets.", "targets");
 
-            Behavior[] behaviors = new Behavior[targets.Count];
+            BehaviorTemplate[] behaviors = new BehaviorTemplate[targets.Count];
             bool behaviorsExist = true;
             for (int i = 0; i < targets.Count; i++)
             {
                 bool behaviorFound = false;
-                foreach (Behavior behavior in targets[i].Template.Behaviors)
+                foreach (BehaviorTemplate behavior in targets[i].Template.Behaviors)
                     if (behavior.Name == BehaviorName)
                     {
                         behaviors[i] = behavior;
@@ -609,7 +609,7 @@
         /// <summary>
         /// Gets the current behavior being performed.
         /// </summary>
-        public Behavior CurrentBehavior { get; private set; }
+        public BehaviorTemplate CurrentBehavior { get; private set; }
         /// <summary>
         /// Gets the instant in time that is the time index for the current behavior.
         /// </summary>
@@ -664,7 +664,7 @@
         /// <summary>
         /// The line of text that is being spoken.
         /// </summary>
-        private Speech currentSpeech;
+        private SpeechTemplate currentSpeech;
         /// <summary>
         /// The time when the line of text being spoken should stop.
         /// </summary>
@@ -941,7 +941,7 @@
         /// Selects the given behavior to perform immediately, or a random behavior if null is given.
         /// </summary>
         /// <param name="behavior">The behavior to perform, or null to randomly select an behavior.</param>
-        public void SelectBehavior(Behavior behavior)
+        public void SelectBehavior(BehaviorTemplate behavior)
         {
             // Select an behavior at random.
             if (behavior == null)
@@ -1015,7 +1015,7 @@
         /// <param name="speech">The speech to display.</param>
         /// <param name="overrideExisting">If a speech is already being displayed, indicates if it should be overridden.</param>
         /// <param name="time">The length of time to display the line for.</param>
-        private void DisplaySpeech(Speech speech, bool overrideExisting, TimeSpan time)
+        private void DisplaySpeech(SpeechTemplate speech, bool overrideExisting, TimeSpan time)
         {
             if (overrideExisting || currentSpeech == null)
             {
@@ -1090,7 +1090,7 @@
         /// <summary>
         /// Gets the possible behaviors this pony can undertake.
         /// </summary>
-        public IList<Behavior> Behaviors { get; private set; }
+        public IList<BehaviorTemplate> Behaviors { get; private set; }
         /// <summary>
         /// Gets the sum of the chance values for all behaviors.
         /// </summary>
@@ -1098,15 +1098,15 @@
         /// <summary>
         /// Gets the available lines of dialogue.
         /// </summary>
-        public IList<Speech> Speeches { get; private set; }
+        public IList<SpeechTemplate> Speeches { get; private set; }
         /// <summary>
         /// Gets the available lines of dialogue for use at random intervals.
         /// </summary>
-        public IList<Speech> RandomSpeeches { get; private set; }
+        public IList<SpeechTemplate> RandomSpeeches { get; private set; }
         /// <summary>
         /// Gets the available lines of dialogue for use on mouseover.
         /// </summary>
-        public IList<Speech> MouseoverSpeeches { get; private set; }
+        public IList<SpeechTemplate> MouseoverSpeeches { get; private set; }
         /// <summary>
         /// Gets the set of all effects this pony may use.
         /// </summary>
@@ -1249,7 +1249,7 @@
                         throw new InvalidDataException("Unable to locate required tag \"dialogue\"");
 
                 // Read in the dialogue.
-                Speeches = new List<Speech>();
+                Speeches = new List<SpeechTemplate>();
                 ReadDialogueFromXml(reader);
 
                 // Skip any future elements added after these elements.
@@ -1258,7 +1258,7 @@
                         throw new InvalidDataException("Unable to locate required tag \"behaviors\"");
 
                 // Read in the behaviors.
-                Behaviors = new List<Behavior>();
+                Behaviors = new List<BehaviorTemplate>();
                 ReadBehaviorsFromXml(reader);
 
                 // Skip any future elements added after these elements.
@@ -1280,7 +1280,7 @@
                     throw new InvalidDataException("File did not end after closing pony tag. Nothing should come after this tag.");
 
                 // Resolve names into objects, and calculate the chance total.
-                foreach (Behavior behavior in Behaviors)
+                foreach (BehaviorTemplate behavior in Behaviors)
                 {
                     behavior.ResolveNextBehavior(Behaviors);
                     behavior.ResolveEffects(Effects);
@@ -1288,9 +1288,9 @@
                 }
 
                 // Generate lists of speech for use at random intervals and on mouseover.
-                RandomSpeeches = new List<Speech>();
-                MouseoverSpeeches = new List<Speech>();
-                foreach (Speech speech in Speeches)
+                RandomSpeeches = new List<SpeechTemplate>();
+                MouseoverSpeeches = new List<SpeechTemplate>();
+                foreach (SpeechTemplate speech in Speeches)
                 {
                     if (speech.Trigger.HasFlag(SpeechTriggers.Random))
                         RandomSpeeches.Add(speech);
@@ -1360,7 +1360,7 @@
                     reader.ReadToNextSibling("speech");
 
                 // Create a new Speech from the given values.
-                Speeches.Add(new Speech(name, Name, line, trigger));
+                Speeches.Add(new SpeechTemplate(name, Name, line, trigger));
                 reader.ReadEndElement();
             }
             reader.ReadEndElement();
@@ -1420,12 +1420,12 @@
                 rightImage = reader.ReadContentAsString();
                 reader.ReadEndElement();
 
-                Speech startSpeech;
+                SpeechTemplate startSpeech;
                 reader.ReadStartElement("startSpeech");
                 startSpeech = FindSpeechFromName(reader.ReadContentAsString(), SpeechTriggers.Script);
                 reader.ReadEndElement();
 
-                Speech endSpeech;
+                SpeechTemplate endSpeech;
                 reader.ReadStartElement("endSpeech");
                 endSpeech = FindSpeechFromName(reader.ReadContentAsString(), SpeechTriggers.Script);
                 reader.ReadEndElement();
@@ -1465,7 +1465,7 @@
                 Point? rightImageCenter = null;
 
                 // Create a new Behavior from given values.
-                Behaviors.Add(new Behavior(0, name, chance, minDuration, maxDuration, speed, movement,
+                Behaviors.Add(new BehaviorTemplate(0, name, chance, minDuration, maxDuration, speed, movement,
                     imageFlip, leftImageName, rightImageName, leftImageCenter, rightImageCenter,
                     startSpeech, endSpeech, nextBehaviorName));
                 reader.ReadEndElement();
@@ -1484,12 +1484,12 @@
         /// </returns>
         /// <exception cref="T:System.ArgumentException">There is no speech with the given name, or the speech was this name did not
         /// support the required triggers.</exception>
-        private Speech FindSpeechFromName(string name, SpeechTriggers requiredTriggers)
+        private SpeechTemplate FindSpeechFromName(string name, SpeechTriggers requiredTriggers)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
 
-            foreach (Speech speech in Speeches)
+            foreach (SpeechTemplate speech in Speeches)
                 if (speech.Name == name)
                     if (speech.Trigger.HasFlag(requiredTriggers))
                         return speech;
@@ -1630,7 +1630,7 @@
             // The list of categories that apply to this character, to be parsed later.
             List<string> tags = new List<string>();
             // Create our list of speeches, which will be built as the file is read.
-            Speeches = new List<Speech>();
+            Speeches = new List<SpeechTemplate>();
             // Create a lookup table of behavior group names, which will be built as the file is read.
             BehaviorGroupNames = new Dictionary<int, string>();
             // Behaviors are dependant on speeches, so must be processed after the whole file has been read.
@@ -1697,7 +1697,7 @@
             if (string.IsNullOrEmpty(Name))
                 throw new InvalidDataException("Pony name not specified.");
 
-            Behaviors = new List<Behavior>();
+            Behaviors = new List<BehaviorTemplate>();
             foreach (string[] chunks in behaviorChunks)
                 ReadBehaviorFromIni(chunks);
 
@@ -1706,9 +1706,9 @@
                 ReadEffectFromIni(chunks);
 
             // Generate lists of speech for use at random intervals and on mouseover.
-            RandomSpeeches = new List<Speech>();
-            MouseoverSpeeches = new List<Speech>();
-            foreach (Speech speech in Speeches)
+            RandomSpeeches = new List<SpeechTemplate>();
+            MouseoverSpeeches = new List<SpeechTemplate>();
+            foreach (SpeechTemplate speech in Speeches)
             {
                 if (speech.Trigger.HasFlag(SpeechTriggers.Random))
                     RandomSpeeches.Add(speech);
@@ -1723,7 +1723,7 @@
             ReadAttributesFromIni(tags);
 
             // Resolve names into objects, and calculate the chance total.
-            foreach (Behavior behavior in Behaviors)
+            foreach (BehaviorTemplate behavior in Behaviors)
             {
                 behavior.ResolveNextBehavior(Behaviors);
                 behavior.ResolveEffects(Effects);
@@ -1748,12 +1748,12 @@
             switch (chunks.Length - 1)
             {
                 case 1:
-                    Speeches.Add(new Speech("Unnamed", Name, chunks[1], SpeechTriggers.Any));
+                    Speeches.Add(new SpeechTemplate("Unnamed", Name, chunks[1], SpeechTriggers.Any));
                     break;
                 case 4:
                 case 5:
                     // For now, ignoring the line sounds filename(s) and group number.
-                    Speeches.Add(new Speech(chunks[1], Name, chunks[2],
+                    Speeches.Add(new SpeechTemplate(chunks[1], Name, chunks[2],
                             bool.Parse(chunks[4].ToUpperInvariant()) ? SpeechTriggers.Script : SpeechTriggers.Any));
                     break;
                 default:
@@ -1837,8 +1837,8 @@
             }
             #endregion
 
-            Speech startSpeech = null;
-            Speech endSpeech = null;
+            SpeechTemplate startSpeech = null;
+            SpeechTemplate endSpeech = null;
             string linkedBehavior = null;
 
             // thingToFollow is what the pony should follow.
@@ -1877,7 +1877,7 @@
                 #region Resolve speech names.
                 if (!string.IsNullOrEmpty(startSpeechName))
                 {
-                    foreach (Speech speech in Speeches)
+                    foreach (SpeechTemplate speech in Speeches)
                         if (string.Equals(speech.Name, startSpeechName, StringComparison.OrdinalIgnoreCase))
                         {
                             startSpeech = speech;
@@ -1889,7 +1889,7 @@
                 }
                 if (!string.IsNullOrEmpty(endSpeechName))
                 {
-                    foreach (Speech speech in Speeches)
+                    foreach (SpeechTemplate speech in Speeches)
                         if (string.Equals(speech.Name, endSpeechName, StringComparison.OrdinalIgnoreCase))
                         {
                             endSpeech = speech;
@@ -1947,7 +1947,7 @@
                     rightImageCenter = null;
             }
 
-            Behaviors.Add(new Behavior(group, name, chance, minDuration, maxDuration, speed, movement,
+            Behaviors.Add(new BehaviorTemplate(group, name, chance, minDuration, maxDuration, speed, movement,
                 imageFlip, leftImageName, rightImageName, leftImageCenter, rightImageCenter,
                 startSpeech, endSpeech, linkedBehavior));
             // Ignoring values: moveToX, moveToY, thingToFollow, autoSelectImageOnFollow, followStoppedBehavior, followMovingBehavior,
@@ -1965,7 +1965,7 @@
 
             // Link up effect to behavior.
             bool linked = false;
-            foreach (Behavior behavior in Behaviors)
+            foreach (BehaviorTemplate behavior in Behaviors)
                 if (behavior.Name == behaviorName)
                 {
                     behavior.EffectNames.Add(name);
@@ -2139,7 +2139,7 @@
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("dialogue");
-                foreach (Speech speech in Speeches)
+                foreach (SpeechTemplate speech in Speeches)
                 {
                     writer.WriteStartElement("speech");
 
@@ -2162,7 +2162,7 @@
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("behaviors");
-                foreach (Behavior behavior in Behaviors)
+                foreach (BehaviorTemplate behavior in Behaviors)
                 {
                     writer.WriteStartElement("behavior");
 
@@ -2294,7 +2294,7 @@
     /// <summary>
     /// Represents lines a pony can speak, and the allowable triggers of the line.
     /// </summary>
-    public class Speech
+    public class SpeechTemplate
     {
         /// <summary>
         /// Gets the name of the speech.
@@ -2320,7 +2320,7 @@
         /// <param name="characterName">The name of the character who says this speech.</param>
         /// <param name="line">The string containing the line to speak.</param>
         /// <param name="trigger">The allowable triggers that can be used to make this speech appear.</param>
-        public Speech(string name, string characterName, string line, SpeechTriggers trigger)
+        public SpeechTemplate(string name, string characterName, string line, SpeechTriggers trigger)
         {
             Name = name;
             Line = line;
@@ -2332,7 +2332,7 @@
     /// <summary>
     /// Represents a behavior a pony can assume. Specifies the images to use and the movements to perform.
     /// </summary>
-    public class Behavior
+    public class BehaviorTemplate
     {
         /// <summary>
         /// Gets the group number of the behavior. Only behaviors in this group or group 0 may follow on from this behavior unless
@@ -2395,16 +2395,16 @@
         /// <summary>
         /// Gets the line to use at the start of the behavior.
         /// </summary>
-        public Speech StartSpeech { get; private set; }
+        public SpeechTemplate StartSpeech { get; private set; }
         /// <summary>
         /// Gets the line to use at the end of the behavior.
         /// </summary>
-        public Speech EndSpeech { get; private set; }
+        public SpeechTemplate EndSpeech { get; private set; }
         /// <summary>
         /// Gets the next behavior to use in a series of linked behaviors. If not set, a random behavior will be selected from behaviors in
         /// the same group, or group 0. This selection is determined by the chance value.
         /// </summary>
-        public Behavior NextBehavior { get; private set; }
+        public BehaviorTemplate NextBehavior { get; private set; }
         /// <summary>
         /// The name of the next behavior to take, this needs to be resolved into an behavior object.
         /// </summary>
@@ -2443,9 +2443,9 @@
         /// <param name="endSpeech">The Speech to be said at the end of the behavior.</param>
         /// <param name="nextBehaviorName">The name of the behavior to take immediately after this.
         /// Use ResolveNextBehavior(behaviors) to find the Behavior object in the given list.</param>
-        public Behavior(int group, string name, int chance, int minDuration, int maxDuration, int speed, Directions movementAllowed,
+        public BehaviorTemplate(int group, string name, int chance, int minDuration, int maxDuration, int speed, Directions movementAllowed,
             ImageFlip behaviorImageFlip, string leftImageName, string rightImageName, Point? leftImageCenter, Point? rightImageCenter,
-            Speech startSpeech, Speech endSpeech, string nextBehaviorName)
+            SpeechTemplate startSpeech, SpeechTemplate endSpeech, string nextBehaviorName)
         {
             if (maxDuration < minDuration)
                 if (Program.UseRelaxedParsing)
@@ -2503,13 +2503,13 @@
         /// <param name="behaviors">The list of behaviors to be searched for the linked behavior.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="behaviors"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">There was no behavior with the name requested as the next behavior.</exception>
-        public void ResolveNextBehavior(IEnumerable<Behavior> behaviors)
+        public void ResolveNextBehavior(IEnumerable<BehaviorTemplate> behaviors)
         {
             Argument.EnsureNotNull(behaviors, "behaviors");
 
             if (!string.IsNullOrEmpty(nextBehaviorName))
             {
-                foreach (Behavior behavior in behaviors)
+                foreach (BehaviorTemplate behavior in behaviors)
                     if (behavior.Name == nextBehaviorName)
                     {
                         NextBehavior = behavior;
@@ -2575,7 +2575,7 @@
         /// <summary>
         /// Gets the behavior that triggered this effect. Effects should only be repeated during this behavior.
         /// </summary>
-        public Behavior Trigger { get; private set; }
+        public BehaviorTemplate Trigger { get; private set; }
         /// <summary>
         /// Gets a value indicating whether this effect has finished, and should stop being displayed.
         /// A repeating effect may need to be kept around to trigger a repeat at a later time however.
@@ -2630,7 +2630,7 @@
         /// <param name="parent">The parent pony to which this effect belongs and should be attached to.</param>
         /// <param name="trigger">The behavior that triggered this effect. Effects will only be repeated during this behavior.</param>
         /// <param name="elapsedTime">The current elapsed time to be used as the effective zero time for animation.</param>
-        public EffectInstance(EffectTemplate template, PonyInstance parent, Behavior trigger, TimeSpan elapsedTime)
+        public EffectInstance(EffectTemplate template, PonyInstance parent, BehaviorTemplate trigger, TimeSpan elapsedTime)
         {
             Argument.EnsureNotNull(parent, "parent");
 

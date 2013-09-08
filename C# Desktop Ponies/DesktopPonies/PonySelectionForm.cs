@@ -699,11 +699,11 @@
         private IEnumerable<string> GetImageFileNames(IEnumerable<PonyTemplate> templates)
         {
             var behaviors = templates
-                .SelectMany(template => template.Behaviors, (template, behavior) => new Tuple<PonyTemplate, Behavior>(template, behavior))
+                .SelectMany(template => template.Behaviors, (template, behavior) => new Tuple<PonyTemplate, BehaviorTemplate>(template, behavior))
                 .OrderByDescending(tuple => (float)tuple.Item2.Chance / tuple.Item1.ChanceTotal)
                 .Select(tuple => tuple.Item2);
 
-            foreach (Behavior behavior in behaviors)
+            foreach (BehaviorTemplate behavior in behaviors)
             {
                 yield return behavior.LeftImageName;
                 yield return behavior.RightImageName;

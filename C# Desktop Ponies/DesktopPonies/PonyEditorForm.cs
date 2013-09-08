@@ -91,12 +91,12 @@
                 PonyRoleSelector.SelectedItem = template.Role;
 
                 BehaviorNextBehaviorColumn.Items.Add("");
-                foreach (Behavior behavior in template.Behaviors)
+                foreach (BehaviorTemplate behavior in template.Behaviors)
                     BehaviorNextBehaviorColumn.Items.Add(behavior.Name);
 
                 BehaviorSpeechStartColumn.Items.Add("");
                 BehaviorSpeechEndColumn.Items.Add("");
-                foreach (Speech speech in template.Speeches)
+                foreach (SpeechTemplate speech in template.Speeches)
                 {
                     BehaviorSpeechStartColumn.Items.Add(speech.Name);
                     BehaviorSpeechEndColumn.Items.Add(speech.Name);
@@ -110,7 +110,7 @@
                     EffectRightImageColumn.Items.Add(Path.GetFileName(filename));
                 }
 
-                foreach (Behavior behavior in template.Behaviors)
+                foreach (BehaviorTemplate behavior in template.Behaviors)
                 {
                     DataGridViewRow newRow = null;
                     try
@@ -135,7 +135,7 @@
                     }
                 }
 
-                foreach (Speech speech in template.Speeches)
+                foreach (SpeechTemplate speech in template.Speeches)
                 {
                     DataGridViewRow newRow = null;
                     try
