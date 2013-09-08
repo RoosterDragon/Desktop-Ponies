@@ -79,7 +79,7 @@ Public Class PonyEditor
         Enabled = False
         Update()
         Try
-            For Each value In DirectCast([Enum].GetValues(GetType(Interaction.TargetActivation)), Interaction.TargetActivation())
+            For Each value In DirectCast([Enum].GetValues(GetType(TargetActivation)), TargetActivation())
                 colInteractionInteractWith.Items.Add(value.ToString())
             Next
 
@@ -301,7 +301,7 @@ Public Class PonyEditor
 
             Dim link_series = 0
             For Each behavior In pony.Behaviors
-                If (behavior.LinkedBehaviorName) <> "" AndAlso behavior.LinkedBehaviorName <> "None" Then
+                If (behavior.LinkedBehaviorName) <> Nothing Then
                     'ignore behaviors that are not the first ones in a chain
                     '(chains that loop forever are ignored)
 
@@ -323,7 +323,7 @@ Public Class PonyEditor
                     Do Until no_more OrElse next_link = "None"
                         Append_Next_Link(next_link, depth, link_series, pony, linkOrder)
                         depth = depth + 1
-                        If (linkOrder(linkOrder.Count - 1).Behavior.LinkedBehaviorName) = "" OrElse linkOrder.Count <> depth Then
+                        If (linkOrder(linkOrder.Count - 1).Behavior.LinkedBehaviorName) = Nothing OrElse linkOrder.Count <> depth Then
                             no_more = True
                         Else
                             next_link = linkOrder(linkOrder.Count - 1).Behavior.LinkedBehaviorName
@@ -384,7 +384,7 @@ Public Class PonyEditor
                     behavior.DoNotRepeatImageAnimations)
             Next
 
-            For Each effect In PreviewPonyEffects()
+            For Each effect In PreviewPonyBase.Effects
                 EffectsGrid.Rows.Add(
                     effect.Name,
                     effect.Name,
@@ -412,9 +412,6 @@ Public Class PonyEditor
                     "Select...",
                     interaction.ReactivationDelay)
             Next
-
-            'to make sure that speech match behaviors
-            PreviewPonyBase.LinkBehaviors()
 
             alreadyUpdating = False
 
@@ -765,7 +762,7 @@ Public Class PonyEditor
             Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
-            For Each effect In PreviewPonyEffects()
+            For Each effect In PreviewPonyBase.Effects
                 If effect.Name = changed_effect_name Then
                     changed_effect = effect
                     Exit For
@@ -934,25 +931,23 @@ Public Class PonyEditor
                             Throw New InvalidDataException("Minimum Duration must be greater than or equal to 0")
                         End If
                     Case colBehaviorSpeed.Index
-                        changed_behavior.SetSpeed(Double.Parse(new_value, CultureInfo.CurrentCulture))
+                        changed_behavior.Speed = Double.Parse(new_value, CultureInfo.CurrentCulture)
                     Case colBehaviorMovement.Index
                         changed_behavior.AllowedMovement = AllowedMovesFromString(new_value)
                     Case colBehaviorStartSpeech.Index
                         If new_value = "None" Then
-                            changed_behavior.StartLineName = ""
+                            changed_behavior.StartLineName = Nothing
                         Else
                             changed_behavior.StartLineName = new_value
                         End If
                     Case colBehaviorEndSpeech.Index
                         If new_value = "None" Then
-                            changed_behavior.EndLineName = ""
+                            changed_behavior.EndLineName = Nothing
                         Else
                             changed_behavior.EndLineName = new_value
                         End If
-                        PreviewPonyBase.LinkBehaviors()
                     Case colBehaviorLinked.Index
                         changed_behavior.LinkedBehaviorName = new_value
-                        PreviewPonyBase.LinkBehaviors()
                     Case colBehaviorDoNotRunRandomly.Index
                         changed_behavior.Skip = Boolean.Parse(new_value)
                     Case colBehaviorDoNotRepeatAnimations.Index
@@ -998,8 +993,6 @@ Public Class PonyEditor
                                                              CStr(BehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
 
-            PreviewPonyBase.LinkBehaviors()
-
             If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
@@ -1025,7 +1018,7 @@ Public Class PonyEditor
             Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
-            For Each effect In PreviewPonyEffects()
+            For Each effect In PreviewPonyBase.Effects
                 If effect.Name = changed_effect_name Then
                     changed_effect = effect
                     Exit For
@@ -1064,14 +1057,14 @@ Public Class PonyEditor
                     Case colEffectBehavior.Index
                         For Each behavior In PreviewPony.Behaviors
                             If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.RemoveEffect(changed_effect)
+                                behavior.RemoveEffect(changed_effect.Name)
                                 Exit For
                             End If
                         Next
                         changed_effect.BehaviorName = new_value
                         For Each behavior In PreviewPony.Behaviors
                             If behavior.Name = changed_effect.BehaviorName Then
-                                behavior.AddEffect(changed_effect, PreviewPonyBase)
+                                behavior.AddEffect(changed_effect.Name, PreviewPonyBase)
                                 Exit For
                             End If
                         Next
@@ -1098,8 +1091,6 @@ Public Class PonyEditor
                                                              EffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " &
                                                              CStr(EffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value))
             End Try
-
-            PreviewPonyBase.LinkBehaviors()
 
             If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
@@ -1177,8 +1168,6 @@ Public Class PonyEditor
                 Exit Sub
             End Try
 
-            PreviewPonyBase.LinkBehaviors()
-
             If alreadyUpdating = False Then
                 'Load_Parameters(Preview_Pony)
                 'RestoreSortOrder()
@@ -1247,7 +1236,7 @@ Public Class PonyEditor
                         changed_interaction.Proximity_Activation_Distance = Double.Parse(new_value, CultureInfo.InvariantCulture)
                     Case colInteractionInteractWith.Index
                         changed_interaction.Targets_Activated =
-                            CType([Enum].Parse(GetType(Interaction.TargetActivation), new_value), Interaction.TargetActivation)
+                            CType([Enum].Parse(GetType(TargetActivation), new_value), TargetActivation)
                     Case colInteractionReactivationDelay.Index
                         changed_interaction.ReactivationDelay = Integer.Parse(new_value, CultureInfo.InvariantCulture)
                 End Select
@@ -1271,11 +1260,7 @@ Public Class PonyEditor
     End Sub
 
     Friend Function GetAllEffects() As EffectBase()
-        Return PonyBases.SelectMany(Function(pb) pb.Behaviors).SelectMany(Function(b) b.Effects).ToArray()
-    End Function
-
-    Private Function PreviewPonyEffects() As IEnumerable(Of EffectBase)
-        Return PreviewPony.Behaviors.SelectMany(Function(behavior) (behavior.Effects))
+        Return PonyBases.SelectMany(Function(pb) pb.Effects).ToArray()
     End Function
 
     Private Sub SaveSortOrder()
@@ -1547,7 +1532,7 @@ Public Class PonyEditor
                         End If
                     Next
                     If Not IsNothing(todelete) Then
-                        behavior.RemoveEffect(todelete)
+                        behavior.RemoveEffect(todelete.Name)
                     End If
                 Next
             ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
@@ -1594,8 +1579,6 @@ Public Class PonyEditor
 
             hasSaved = False
 
-            PreviewPonyBase.LinkBehaviors()
-
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error handling row deletion.")
         End Try
@@ -1638,7 +1621,7 @@ Public Class PonyEditor
 
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
         If Not alreadyUpdating Then
-            PreviewPonyBase.Name = PonyName.Text
+            PreviewPonyBase.DisplayName = PonyName.Text
             hasSaved = False
         End If
     End Sub
@@ -1656,7 +1639,7 @@ Public Class PonyEditor
             End If
 
             Dim ponyBase = New MutablePonyBase()
-            ponyBase.Name = "New Pony"
+            ponyBase.DisplayName = "New Pony"
             _previewPony = New Pony(ponyBase)
 
             Using form = New NewPonyDialog(Me)

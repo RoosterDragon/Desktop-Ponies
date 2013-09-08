@@ -26,19 +26,27 @@ Partial Class PonyEditorForm2
         Me.Documents = New System.Windows.Forms.TabControl()
         Me.DocumentsView = New System.Windows.Forms.TreeView()
         Me.EditorToolStrip = New System.Windows.Forms.ToolStrip()
+        Me.SaveItemButton = New System.Windows.Forms.ToolStripButton()
+        Me.CloseTabButton = New System.Windows.Forms.ToolStripButton()
+        Me.CloseAllTabsButton = New System.Windows.Forms.ToolStripButton()
         Me.EditorStatusStrip = New System.Windows.Forms.StatusStrip()
         Me.EditorStatus = New System.Windows.Forms.ToolStripStatusLabel()
         Me.EditorProgressBar = New System.Windows.Forms.ToolStripProgressBar()
-        Me.SaveButton = New System.Windows.Forms.ToolStripButton()
         Me.Output = New System.Windows.Forms.TabControl()
-        Me.PreviewPage = New System.Windows.Forms.TabPage()
-        Me.ErrorsPage = New System.Windows.Forms.TabPage()
+        Me.IssuesPage = New System.Windows.Forms.TabPage()
+        Me.IssuesGrid = New System.Windows.Forms.DataGridView()
+        Me.colFatal = New System.Windows.Forms.DataGridViewImageColumn()
+        Me.colIndex = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
         Me.EditorToolStrip.SuspendLayout()
         Me.EditorStatusStrip.SuspendLayout()
         Me.Output.SuspendLayout()
+        Me.IssuesPage.SuspendLayout()
         Me.SuspendLayout()
         '
         'EditingArea
@@ -90,13 +98,36 @@ Partial Class PonyEditorForm2
         'EditorToolStrip
         '
         Me.EditorToolStrip.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SaveButton})
+        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
         Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
         Me.EditorToolStrip.TabIndex = 0
-        Me.EditorToolStrip.Text = "Controls"
+        Me.EditorToolStrip.Text = "Item Operations"
         Me.EditorToolStrip.UseWaitCursor = True
+        '
+        'SaveItemButton
+        '
+        Me.SaveItemButton.Enabled = False
+        Me.SaveItemButton.Name = "SaveItemButton"
+        Me.SaveItemButton.Size = New System.Drawing.Size(62, 22)
+        Me.SaveItemButton.Text = "Save Item"
+        '
+        'CloseTabButton
+        '
+        Me.CloseTabButton.Enabled = False
+        Me.CloseTabButton.Name = "CloseTabButton"
+        Me.CloseTabButton.Size = New System.Drawing.Size(63, 22)
+        Me.CloseTabButton.Text = "Close Tab"
+        Me.CloseTabButton.ToolTipText = "Close the currently visible tab."
+        '
+        'CloseAllTabsButton
+        '
+        Me.CloseAllTabsButton.Enabled = False
+        Me.CloseAllTabsButton.Name = "CloseAllTabsButton"
+        Me.CloseAllTabsButton.Size = New System.Drawing.Size(85, 22)
+        Me.CloseAllTabsButton.Text = "Close All Tabs"
+        Me.CloseAllTabsButton.ToolTipText = "Close all open tabs."
         '
         'EditorStatusStrip
         '
@@ -119,24 +150,16 @@ Partial Class PonyEditorForm2
         '
         'EditorProgressBar
         '
+        Me.EditorProgressBar.MarqueeAnimationSpeed = 33
         Me.EditorProgressBar.Name = "EditorProgressBar"
         Me.EditorProgressBar.Size = New System.Drawing.Size(100, 16)
         Me.EditorProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        '
-        'SaveButton
-        '
-        Me.SaveButton.Enabled = False
-        Me.SaveButton.Name = "SaveButton"
-        Me.SaveButton.Size = New System.Drawing.Size(35, 22)
-        Me.SaveButton.Text = "Save"
-        Me.SaveButton.ToolTipText = "Save This Item"
         '
         'Output
         '
         Me.Output.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Output.Controls.Add(Me.PreviewPage)
-        Me.Output.Controls.Add(Me.ErrorsPage)
+        Me.Output.Controls.Add(Me.IssuesPage)
         Me.Output.Location = New System.Drawing.Point(0, 287)
         Me.Output.Multiline = True
         Me.Output.Name = "Output"
@@ -145,27 +168,75 @@ Partial Class PonyEditorForm2
         Me.Output.TabIndex = 3
         Me.Output.UseWaitCursor = True
         '
-        'PreviewPage
+        'IssuesPage
         '
-        Me.PreviewPage.Location = New System.Drawing.Point(4, 22)
-        Me.PreviewPage.Name = "PreviewPage"
-        Me.PreviewPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.PreviewPage.Size = New System.Drawing.Size(776, 174)
-        Me.PreviewPage.TabIndex = 0
-        Me.PreviewPage.Text = "Preview"
-        Me.PreviewPage.UseVisualStyleBackColor = True
-        Me.PreviewPage.UseWaitCursor = True
+        Me.IssuesPage.Controls.Add(Me.IssuesGrid)
+        Me.IssuesPage.Location = New System.Drawing.Point(4, 22)
+        Me.IssuesPage.Name = "IssuesPage"
+        Me.IssuesPage.Padding = New System.Windows.Forms.Padding(3)
+        Me.IssuesPage.Size = New System.Drawing.Size(776, 174)
+        Me.IssuesPage.TabIndex = 1
+        Me.IssuesPage.Text = "Errors"
+        Me.IssuesPage.UseVisualStyleBackColor = True
+        Me.IssuesPage.UseWaitCursor = True
         '
-        'ErrorsPage
+        'IssuesGrid
         '
-        Me.ErrorsPage.Location = New System.Drawing.Point(4, 22)
-        Me.ErrorsPage.Name = "ErrorsPage"
-        Me.ErrorsPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.ErrorsPage.Size = New System.Drawing.Size(776, 174)
-        Me.ErrorsPage.TabIndex = 1
-        Me.ErrorsPage.Text = "Errors"
-        Me.ErrorsPage.UseVisualStyleBackColor = True
-        Me.ErrorsPage.UseWaitCursor = True
+        Me.IssuesGrid.AllowUserToAddRows = False
+        Me.IssuesGrid.AllowUserToDeleteRows = False
+        Me.IssuesGrid.AllowUserToOrderColumns = True
+        Me.IssuesGrid.BackgroundColor = System.Drawing.SystemColors.Control
+        Me.IssuesGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.IssuesGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colFatal, Me.colIndex, Me.colDescription, Me.colFallback, Me.colSource})
+        Me.IssuesGrid.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.IssuesGrid.Location = New System.Drawing.Point(3, 3)
+        Me.IssuesGrid.Name = "IssuesGrid"
+        Me.IssuesGrid.ReadOnly = True
+        Me.IssuesGrid.ShowEditingIcon = False
+        Me.IssuesGrid.Size = New System.Drawing.Size(770, 168)
+        Me.IssuesGrid.TabIndex = 0
+        Me.IssuesGrid.UseWaitCursor = True
+        '
+        'colFatal
+        '
+        Me.colFatal.HeaderText = "Fatal"
+        Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
+        Me.colFatal.Name = "colFatal"
+        Me.colFatal.ReadOnly = True
+        Me.colFatal.ToolTipText = "Does this issue prevent the item being used?"
+        Me.colFatal.Width = 35
+        '
+        'colIndex
+        '
+        Me.colIndex.HeaderText = "Property"
+        Me.colIndex.Name = "colIndex"
+        Me.colIndex.ReadOnly = True
+        Me.colIndex.ToolTipText = "What setting is causing the issue?"
+        Me.colIndex.Width = 80
+        '
+        'colDescription
+        '
+        Me.colDescription.HeaderText = "Description"
+        Me.colDescription.Name = "colDescription"
+        Me.colDescription.ReadOnly = True
+        Me.colDescription.ToolTipText = "A description of the issue."
+        Me.colDescription.Width = 300
+        '
+        'colFallback
+        '
+        Me.colFallback.HeaderText = "Fallback"
+        Me.colFallback.Name = "colFallback"
+        Me.colFallback.ReadOnly = True
+        Me.colFallback.ToolTipText = "For non-fatal issues: the fallback value used."
+        Me.colFallback.Width = 80
+        '
+        'colSource
+        '
+        Me.colSource.HeaderText = "Source"
+        Me.colSource.Name = "colSource"
+        Me.colSource.ReadOnly = True
+        Me.colSource.ToolTipText = "The source text that has an issue."
+        Me.colSource.Width = 300
         '
         'PonyEditorForm2
         '
@@ -176,6 +247,7 @@ Partial Class PonyEditorForm2
         Me.Controls.Add(Me.EditorStatusStrip)
         Me.Controls.Add(Me.EditingArea)
         Me.Controls.Add(Me.EditorToolStrip)
+        Me.KeyPreview = True
         Me.Name = "PonyEditorForm2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Pony Editor - Desktop Ponies"
@@ -188,6 +260,7 @@ Partial Class PonyEditorForm2
         Me.EditorStatusStrip.ResumeLayout(False)
         Me.EditorStatusStrip.PerformLayout()
         Me.Output.ResumeLayout(False)
+        Me.IssuesPage.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -199,8 +272,15 @@ Partial Class PonyEditorForm2
     Friend WithEvents EditorStatusStrip As System.Windows.Forms.StatusStrip
     Friend WithEvents EditorStatus As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents EditorProgressBar As System.Windows.Forms.ToolStripProgressBar
-    Private WithEvents SaveButton As System.Windows.Forms.ToolStripButton
+    Private WithEvents SaveItemButton As System.Windows.Forms.ToolStripButton
     Friend WithEvents Output As System.Windows.Forms.TabControl
-    Friend WithEvents PreviewPage As System.Windows.Forms.TabPage
-    Friend WithEvents ErrorsPage As System.Windows.Forms.TabPage
+    Friend WithEvents IssuesPage As System.Windows.Forms.TabPage
+    Private WithEvents CloseTabButton As System.Windows.Forms.ToolStripButton
+    Private WithEvents CloseAllTabsButton As System.Windows.Forms.ToolStripButton
+    Friend WithEvents IssuesGrid As System.Windows.Forms.DataGridView
+    Friend WithEvents colFatal As System.Windows.Forms.DataGridViewImageColumn
+    Friend WithEvents colIndex As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colDescription As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colFallback As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
 End Class

@@ -130,6 +130,8 @@
     <Compile Include="DesktopPonies\GameTeamControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="DesktopPonies\PonyCollection.vb" />
+    <Compile Include="DesktopPonies\StringCollectionParser.vb" />
     <Compile Include="IdleWorker.vb" />
     <Compile Include="IMemberwiseCloneable.vb" />
     <Compile Include="Monitoring\PonyLogForm.Designer.vb">
@@ -155,6 +157,9 @@
     </Compile>
     <Compile Include="PonyEditor2\BehaviorEditor.vb">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\ComboBoxCaseSensitive.vb">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="PonyEditor2\EffectEditor.Designer.vb">
       <DependentUpon>EffectEditor.vb</DependentUpon>
@@ -193,6 +198,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="PonyEditor2\PageContent.vb" />
+    <Compile Include="PonyEditor2\PathComparison.vb" />
     <Compile Include="PonyEditor2\PonyEditorForm2.Designer.vb">
       <DependentUpon>PonyEditorForm2.vb</DependentUpon>
     </Compile>

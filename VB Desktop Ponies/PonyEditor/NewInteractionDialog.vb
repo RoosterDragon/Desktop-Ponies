@@ -98,10 +98,10 @@ Public Class NewInteractionDialog
             Next
         End If
 
-        Dim targetsActivated As Interaction.TargetActivation
-        If OneRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.One
-        If AnyRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.Any
-        If AllRadioButton.Checked Then targetsActivated = Interaction.TargetActivation.All
+        Dim targetsActivated As TargetActivation
+        If OneRadioButton.Checked Then targetsActivated = TargetActivation.One
+        If AnyRadioButton.Checked Then targetsActivated = TargetActivation.Any
+        If AllRadioButton.Checked Then targetsActivated = TargetActivation.All
 
         m_editor.PreviewPonyBase.AddInteraction(Name_Textbox.Text,
                                                       m_editor.PreviewPony.Directory, _
@@ -158,11 +158,11 @@ Public Class NewInteractionDialog
         Name_Textbox.Enabled = False
         change_existing_interaction = True
         Select Case interaction.Targets_Activated
-            Case Interaction.TargetActivation.One
+            Case TargetActivation.One
                 OneRadioButton.Checked = True
-            Case Interaction.TargetActivation.Any
+            Case TargetActivation.Any
                 AnyRadioButton.Checked = True
-            Case Interaction.TargetActivation.All
+            Case TargetActivation.All
                 AllRadioButton.Checked = True
         End Select
 

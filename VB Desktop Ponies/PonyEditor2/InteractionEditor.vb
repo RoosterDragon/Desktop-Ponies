@@ -1,6 +1,6 @@
 ﻿Public Class InteractionEditor
     Private Shared typeValues As Object() =
-        [Enum].GetValues(GetType(Interaction.TargetActivation)).Cast(Of Object)().ToArray()
+        [Enum].GetValues(GetType(TargetActivation)).Cast(Of Object)().ToArray()
 
     Private originalInteraction As Interaction
     Private newInteraction As Interaction
@@ -10,16 +10,21 @@
         TypeComboBox.Items.AddRange(typeValues)
     End Sub
 
-    Public Overrides Sub LoadItem(ponyBase As PonyBase, interactionName As String)
-        LoadingItem = True
-        MyBase.LoadItem(ponyBase, interactionName)
+    Public Overrides ReadOnly Property ItemName As String
+        Get
+            Return originalInteraction.Name
+        End Get
+    End Property
 
-        originalInteraction = ponyBase.Interactions.Single(Function(i) i.Name = interactionName)
+    Public Overrides Sub NewItem(name As String)
+        ' TODO.
+    End Sub
+
+    Public Overrides Sub LoadItem(interactionName As String)
+        originalInteraction = Base.Interactions.Single(Function(i) i.Name = interactionName)
         newInteraction = originalInteraction.MemberwiseClone()
 
         Source.Text = newInteraction.GetPonyIni()
-
-        LoadingItem = False
     End Sub
 
     Public Overrides Sub SaveItem()
@@ -46,5 +51,9 @@
 
     Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
         e.Handled = (e.KeyChar = """"c)
+    End Sub
+
+    Protected Overrides Sub SourceTextChanged()
+        ' TODO.
     End Sub
 End Class

@@ -91,7 +91,7 @@ Public Class NewPonyDialog
             RemoveOldDirectory()
             createdDirectory = newPonyPath
             m_editor.PreviewPonyBase.Directory = newPonyPath
-            m_editor.PreviewPonyBase.Name = newName
+            m_editor.PreviewPonyBase.DisplayName = newName
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Unable to create a directory for the new pony.")
             Return False

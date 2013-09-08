@@ -26,8 +26,8 @@ Partial Class BehaviorEditor
         Me.TargetLabel = New System.Windows.Forms.Label()
         Me.LinkedBehaviorComboBox = New System.Windows.Forms.ComboBox()
         Me.LinkedBehaviorLabel = New System.Windows.Forms.Label()
-        Me.EndSpeechComboBox = New System.Windows.Forms.ComboBox()
-        Me.StartSpeechComboBox = New System.Windows.Forms.ComboBox()
+        Me.EndSpeechComboBox = New VBDesktopPonies.ComboBoxCaseSensitive()
+        Me.StartSpeechComboBox = New VBDesktopPonies.ComboBoxCaseSensitive()
         Me.EndSpeechLabel = New System.Windows.Forms.Label()
         Me.StartSpeechLabel = New System.Windows.Forms.Label()
         Me.NameLabel = New System.Windows.Forms.Label()
@@ -163,9 +163,6 @@ Partial Class BehaviorEditor
         '
         Me.StartSpeechComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.StartSpeechComboBox.DisplayMember = "Name"
-        Me.StartSpeechComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.StartSpeechComboBox.FormattingEnabled = True
         Me.StartSpeechComboBox.Location = New System.Drawing.Point(439, 55)
         Me.StartSpeechComboBox.Name = "StartSpeechComboBox"
         Me.StartSpeechComboBox.Size = New System.Drawing.Size(259, 21)
@@ -425,6 +422,7 @@ Partial Class BehaviorEditor
         '
         Me.TargetButton.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.TargetButton.Enabled = False
         Me.TargetButton.Location = New System.Drawing.Point(69, 136)
         Me.TargetButton.Name = "TargetButton"
         Me.TargetButton.Size = New System.Drawing.Size(259, 23)
@@ -466,8 +464,8 @@ Partial Class BehaviorEditor
     Friend WithEvents GroupNumber As System.Windows.Forms.NumericUpDown
     Friend WithEvents LeftImageViewer As VBDesktopPonies.AnimatedImageViewer
     Friend WithEvents RightImageViewer As VBDesktopPonies.AnimatedImageViewer
-    Friend WithEvents EndSpeechComboBox As System.Windows.Forms.ComboBox
-    Friend WithEvents StartSpeechComboBox As System.Windows.Forms.ComboBox
+    Friend WithEvents EndSpeechComboBox As VBDesktopPonies.ComboBoxCaseSensitive
+    Friend WithEvents StartSpeechComboBox As VBDesktopPonies.ComboBoxCaseSensitive
     Friend WithEvents EndSpeechLabel As System.Windows.Forms.Label
     Friend WithEvents StartSpeechLabel As System.Windows.Forms.Label
     Friend WithEvents LinkedBehaviorComboBox As System.Windows.Forms.ComboBox

@@ -99,7 +99,7 @@
         Next
 
         For Each effect In m_editor.GetAllEffects()
-            Follow_ComboBox.Items.Add(effect.ParentPonyBase.Name & "'s " & effect.Name)
+            Follow_ComboBox.Items.Add(effect.ParentPonyBase.DisplayName & "'s " & effect.Name)
         Next
 
         moving_behavior_box.Items.Clear()
@@ -250,7 +250,7 @@
 
     Private Function string_to_effectname(name As String) As String
         For Each effect In m_editor.GetAllEffects()
-            If (effect.ParentPonyBase.Name & "'s " & effect.Name) = name Then
+            If (effect.ParentPonyBase.DisplayName & "'s " & effect.Name) = name Then
                 Return effect.Name
             End If
         Next

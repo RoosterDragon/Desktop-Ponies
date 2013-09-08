@@ -2,9 +2,9 @@
 Imports System.IO
 
 Public Class ItemEditorBase
-
-    Private ReadOnly idleFocusControl As New Control(Me, Nothing)
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
+    Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
+    Private lastFocusedControl As Control
 
     Private _base As PonyBase
     Protected ReadOnly Property Base As PonyBase
@@ -44,18 +44,53 @@ Public Class ItemEditorBase
         End Set
     End Property
 
+    Protected ParseIssues As ParseIssue()
+    Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
+        Get
+            Return ParseIssues
+        End Get
+    End Property
+    Public Event IssuesChanged As EventHandler
+    Protected Overridable Sub OnIssuesChanged(sender As Object, e As EventArgs)
+        RaiseEvent IssuesChanged(sender, e)
+    End Sub
+
     Public Event DirtinessChanged As EventHandler
 
-    Public Overridable Sub NewItem(ponyBase As PonyBase)
+    Public Overridable ReadOnly Property ItemName As String
+        Get
+            Throw New NotImplementedException()
+        End Get
+    End Property
+
+    Private Sub SetupItem(ponyBase As PonyBase)
         Argument.EnsureNotNull(ponyBase, "ponyBase")
         _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
         _base = ponyBase
         Enabled = True
     End Sub
 
-    Public Overridable Sub LoadItem(ponyBase As PonyBase, name As String)
-        NewItem(ponyBase)
+    Public Sub NewItem(ponyBase As PonyBase, name As String)
+        SetupItem(ponyBase)
+        LoadingItem = True
+        NewItem(name)
+        LoadingItem = False
+    End Sub
+
+    Public Overridable Sub NewItem(name As String)
+        Throw New NotImplementedException()
+    End Sub
+
+    Public Sub LoadItem(ponyBase As PonyBase, name As String)
         _isNewItem = False
+        SetupItem(ponyBase)
+        LoadingItem = True
+        LoadItem(name)
+        LoadingItem = False
+    End Sub
+
+    Public Overridable Sub LoadItem(name As String)
+        Throw New NotImplementedException()
     End Sub
 
     Public Overridable Sub SaveItem()
@@ -103,6 +138,15 @@ Public Class ItemEditorBase
         comboBox.EndUpdate()
     End Sub
 
+    Protected Shared Sub SelectOrOvertypeItem(comboBox As ComboBox, item As Object)
+        Argument.EnsureNotNull(comboBox, "comboBox")
+        If TypeOf item Is String AndAlso String.IsNullOrEmpty(DirectCast(item, String)) Then
+            comboBox.SelectedIndex = 0
+        Else
+            comboBox.Text = If(item IsNot Nothing, item.ToString(), Nothing)
+        End If
+    End Sub
+
     Protected Shared Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.SelectedItem = item
@@ -111,20 +155,22 @@ Public Class ItemEditorBase
 
     Protected Shared Sub SelectItemElseAddItem(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
-        comboBox.SelectedItem = item
-        If comboBox.SelectedIndex = -1 Then
-            comboBox.Items.Add(item)
-            comboBox.SelectedItem = item
-        End If
+        Dim index = comboBox.Items.IndexOf(item)
+        If index = -1 Then index = comboBox.Items.Add(item)
+        comboBox.SelectedIndex = index
     End Sub
 
     Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As AnimatedImageViewer)
         Argument.EnsureNotNull(selector, "selector")
         Argument.EnsureNotNull(viewer, "viewer")
+        Dim hadFocus = selector.ContainsFocus OrElse idleFocusControl.ContainsFocus
         selector.Enabled = False
         selector.UseWaitCursor = True
         viewer.UseWaitCursor = True
-        idleFocusControl.Focus()
+        If hadFocus Then
+            idleFocusControl.Focus()
+            lastFocusedControl = selector.FilePathComboBox
+        End If
         Dim filePath = selector.FilePath
         Dim newImage As AnimatedImage(Of BitmapFrame) = Nothing
         Threading.ThreadPool.QueueUserWorkItem(
@@ -158,21 +204,31 @@ Public Class ItemEditorBase
                             viewer.UseWaitCursor = False
                             selector.UseWaitCursor = False
                             selector.Enabled = True
-                            If Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
-                                selector.Focus()
+                            If hadFocus AndAlso lastFocusedControl IsNot Nothing AndAlso
+                                Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
+                                lastFocusedControl.Focus()
+                                lastFocusedControl = Nothing
                             End If
                         End If
                     End Sub)
             End Sub)
     End Sub
 
-    Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorImagePath As String)
+    Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorCombo As ComboBox, behaviorImagePath As String)
         Argument.EnsureNotNull(selector, "selector")
         Argument.EnsureNotNull(viewer, "viewer")
+        Argument.EnsureNotNull(behaviorCombo, "behaviorCombo")
+        Dim behaviorComboHasFocus = behaviorCombo.Focused
+        Dim hadFocus = selector.ContainsFocus OrElse behaviorComboHasFocus
         selector.Enabled = False
+        behaviorCombo.Enabled = False
         selector.UseWaitCursor = True
+        behaviorCombo.UseWaitCursor = True
         viewer.UseWaitCursor = True
-        idleFocusControl.Focus()
+        If hadFocus Then
+            idleFocusControl.Focus()
+            lastFocusedControl = If(behaviorComboHasFocus, behaviorCombo, selector.FilePathComboBox)
+        End If
         Dim filePath = selector.FilePath
         Dim newImage As AnimatedImage(Of BitmapFrame) = Nothing
         Dim behaviorImage As AnimatedImage(Of BitmapFrame) = Nothing
@@ -214,12 +270,34 @@ Public Class ItemEditorBase
 
                             viewer.UseWaitCursor = False
                             selector.UseWaitCursor = False
+                            behaviorCombo.UseWaitCursor = False
                             selector.Enabled = True
-                            If Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
-                                selector.Focus()
+                            behaviorCombo.Enabled = True
+                            If hadFocus AndAlso lastFocusedControl IsNot Nothing AndAlso
+                                Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
+                                lastFocusedControl.Focus()
+                                lastFocusedControl = Nothing
                             End If
                         End If
                     End Sub)
             End Sub)
+    End Sub
+
+    Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
+        If LoadingItem Then Return
+        SourceTextTimer.Stop()
+        SourceTextTimer.Start()
+    End Sub
+
+    Private Sub SourceTextTimer_Tick(sender As Object, e As EventArgs) Handles SourceTextTimer.Tick
+        SourceTextTimer.Stop()
+        LoadingItem = True
+        SourceTextChanged()
+        UpdateDirtyFlag(True)
+        LoadingItem = False
+    End Sub
+
+    Protected Overridable Sub SourceTextChanged()
+        Throw New NotImplementedException()
     End Sub
 End Class

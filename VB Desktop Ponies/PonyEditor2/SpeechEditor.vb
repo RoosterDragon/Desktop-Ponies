@@ -18,26 +18,37 @@ Friend Class SpeechEditor
         AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() newSpeech.Group = CInt(GroupNumber.Value))
     End Sub
 
-    Public Overrides Sub LoadItem(ponyBase As PonyBase, speechName As String)
-        LoadingItem = True
-        MyBase.LoadItem(ponyBase, speechName)
+    Public Overrides ReadOnly Property ItemName As String
+        Get
+            Return originalSpeech.Name
+        End Get
+    End Property
 
+    Public Overrides Sub NewItem(name As String)
+        ' TODO.
+    End Sub
+
+    Public Overrides Sub LoadItem(speechName As String)
         originalSpeech = Base.SpeakingLines.Single(Function(s) s.Name = speechName)
         newSpeech = originalSpeech.MemberwiseClone()
-        NameTextBox.Text = newSpeech.Name
-        LineTextBox.Text = newSpeech.Text
-        RandomCheckBox.Checked = Not newSpeech.Skip
-        GroupNumber.Value = newSpeech.Group
+        LoadItemCommon()
 
         Dim sounds =
             Directory.GetFiles(PonyBasePath, "*.mp3").Concat(Directory.GetFiles(PonyBasePath, "*.ogg")).
             Select(Function(filePath) Path.GetFileName(filePath)).ToArray()
         ReplaceItemsInComboBox(SoundFileSelector.FilePathComboBox, sounds, True)
-        SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(newSpeech.SoundFile))
+        If newSpeech.SoundFile IsNot Nothing Then
+            SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(newSpeech.SoundFile))
+        End If
 
         Source.Text = newSpeech.GetPonyIni()
+    End Sub
 
-        LoadingItem = False
+    Private Sub LoadItemCommon()
+        NameTextBox.Text = newSpeech.Name
+        LineTextBox.Text = newSpeech.Text
+        RandomCheckBox.Checked = Not newSpeech.Skip
+        GroupNumber.Value = newSpeech.Group
     End Sub
 
     Public Overrides Sub SaveItem()
@@ -64,5 +75,13 @@ Friend Class SpeechEditor
 
     Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
         e.Handled = (e.KeyChar = """"c)
+    End Sub
+
+    Protected Overrides Sub SourceTextChanged()
+        Dim s As Behavior.SpeakingLine = Nothing
+        Behavior.SpeakingLine.TryLoad(Source.Text, PonyBasePath, s, ParseIssues)
+        OnIssuesChanged(Me, EventArgs.Empty)
+        newSpeech = s
+        LoadItemCommon()
     End Sub
 End Class

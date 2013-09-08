@@ -242,7 +242,7 @@ Public Class NewBehaviorDialog
 
     Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
 
-        Dim new_behavior As New Behavior("", "")
+        Dim new_behavior As New Behavior(m_editor.PreviewPonyBase)
 
         Using form = New FollowTargetDialog(m_editor)
             form.Change_Behavior(new_behavior)

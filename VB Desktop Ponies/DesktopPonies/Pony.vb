@@ -9,12 +9,12 @@ End Interface
 Public Class MutablePonyBase
     Inherits PonyBase
 
-    Public Overloads Property Name As String
+    Public Overloads Property DisplayName As String
         Get
-            Return MyBase.Name
+            Return MyBase.DisplayName
         End Get
         Set(value As String)
-            MyBase.Name = value
+            MyBase.DisplayName = value
         End Set
     End Property
     Public Overloads Property Directory As String
@@ -34,11 +34,16 @@ Public Class MutablePonyBase
         End Set
     End Property
 
-    Public Sub New()
-    End Sub
+    'Public Sub New()
+    'End Sub
 
     Public Sub New(directory As String)
+        MyBase.New(False)
         LoadFromIni(directory)
+    End Sub
+
+    Public Sub New()
+        MyBase.New(False)
     End Sub
 
     Public Overloads Sub AddBehavior(name As String, chance As Double,
@@ -59,16 +64,12 @@ Public Class MutablePonyBase
                            right_image_center, left_image_center, _dont_repeat_image_animations, _group)
     End Sub
 
-    Public Overloads Sub LinkBehaviors()
-        MyBase.LinkBehaviors()
-    End Sub
-
     Public Overloads Sub SetLines(lines As IEnumerable(Of Behavior.SpeakingLine))
         MyBase.SetLines(lines)
     End Sub
 
     Public Overloads Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
-                   target_list As String, target_selection As Interaction.TargetActivation, _
+                   target_list As String, target_selection As TargetActivation, _
                    behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
                    ponyBases As IEnumerable(Of PonyBase))
         MyBase.AddInteraction(interaction_name, name, probability, proximity,
@@ -91,23 +92,15 @@ Public Class PonyBase
         RepeatDelay = 7
     End Enum
 
-    Private _directory As String
-    Public Property Directory() As String
-        Get
-            Return _directory
-        End Get
-        Protected Set(value As String)
-            _directory = value
-        End Set
-    End Property
+    Public Property Directory As String
 
-    Private _name As String
-    Public Property Name() As String
+    Private _displayName As String
+    Public Property DisplayName() As String
         Get
-            Return _name
+            Return _displayName
         End Get
         Protected Set(value As String)
-            _name = value
+            _displayName = value
         End Set
     End Property
 
@@ -135,8 +128,8 @@ Public Class PonyBase
         End Get
     End Property
 
-    Private _behaviors As ICollection(Of Behavior)
-    Public ReadOnly Property Behaviors() As ICollection(Of Behavior)
+    Private _behaviors As IList(Of Behavior)
+    Public ReadOnly Property Behaviors() As IList(Of Behavior)
         Get
             Return _behaviors
         End Get
@@ -177,21 +170,16 @@ Public Class PonyBase
         End Get
     End Property
 
-    Protected Sub New()
+    Protected Sub New(makeReadOnly As Boolean)
         _tags = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         _behaviorGroups = New List(Of BehaviorGroup)
         _behaviors = New List(Of Behavior)
         _effects = New List(Of EffectBase)
-        _interactions = New List(Of Interaction)
         _speakingLines = New List(Of Behavior.SpeakingLine)
+        _interactions = New List(Of Interaction)
         _speakingLinesRandom = New List(Of Behavior.SpeakingLine)
         _speakingLinesSpecific = New List(Of Behavior.SpeakingLine)
-    End Sub
-
-    Public Sub New(directory As String)
-        Me.New()
-        LoadFromIni(directory)
-        MakeReadOnly()
+        If makeReadOnly Then Me.MakeReadOnly()
     End Sub
 
     Protected Sub LoadFromIni(directory As String)
@@ -199,9 +187,9 @@ Public Class PonyBase
 
         Dim lastSeparator = directory.LastIndexOf(Path.DirectorySeparatorChar)
         If lastSeparator <> -1 Then
-            _directory = directory.Substring(lastSeparator + 1)
+            Me.Directory = directory.Substring(lastSeparator + 1)
         Else
-            _directory = directory
+            Me.Directory = directory
         End If
 
         Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, directory)
@@ -221,7 +209,7 @@ Public Class PonyBase
 
                 Select Case LCase(columns(0))
                     Case "name"
-                        _name = columns(1)
+                        _displayName = columns(1)
                     Case "scale"
                         _scale = Double.Parse(columns(1), CultureInfo.InvariantCulture)
                     Case "behaviorgroup"
@@ -254,49 +242,12 @@ Public Class PonyBase
                         Try
                             Dim newLine As Behavior.SpeakingLine = Nothing
                             Select Case UBound(columns)
-                                Case 1
-                                    newLine = New Behavior.SpeakingLine("Unnamed", Replace(columns(1), ControlChars.Quote, ""), False, 0)
-                                Case Is >= 4
-                                    Dim sound_files_list_column = Replace(Replace(columns(3), "{", ""), "}", "")
-                                    If IsNothing(sound_files_list_column) Then
-                                        sound_files_list_column = ""
-                                    End If
-
-                                    Dim sound_files_list = CommaSplitQuoteQualified(sound_files_list_column)
-
-                                    Dim group As Integer = 0
-
-                                    If UBound(columns) = 5 Then
-                                        group = Integer.Parse(columns(5), CultureInfo.InvariantCulture)
-                                    End If
-
-                                    Dim searchForSound = UBound(sound_files_list) > 0
-                                    Dim foundSound = False
-                                    If searchForSound Then
-                                        For Each soundfile_path In sound_files_list
-                                            If File.Exists(Path.Combine(fullDirectory, soundfile_path)) Then
-                                                newLine = New Behavior.SpeakingLine(Name, Trim(columns(1)),
-                                                                                    Replace(columns(2), ControlChars.Quote, ""),
-                                                                                    fullDirectory & Path.DirectorySeparatorChar,
-                                                                                    Replace(Trim(soundfile_path), ControlChars.Quote, ""),
-                                                                                    Boolean.Parse(Trim(columns(4))), group)
-                                                foundSound = True
-                                                Exit For
-                                            End If
-                                        Next
-
-                                        If Not foundSound Then
-                                            MessageBox.Show(
-                                                String.Format(
-                                                    "Could not find any of the sound files listed for speech named '{0}' " &
-                                                    "for pony named '{1}'. Files listed were: {2}",
-                                                    columns(1), Me.Directory, sound_files_list_column),
-                                                "Sound Files Missing", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                        End If
-                                    End If
-                                    If Not searchForSound OrElse Not foundSound Then
-                                        newLine = New Behavior.SpeakingLine(columns(1), Replace(columns(2), ControlChars.Quote, ""),
-                                                                            Boolean.Parse(Trim(columns(4))), group)
+                                Case 1, Is >= 4
+                                    Dim issues As ParseIssue() = Nothing
+                                    If Behavior.SpeakingLine.TryLoad(line, fullDirectory, newLine, issues) Then
+                                        SpeakingLines.Add(newLine)
+                                    Else
+                                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason)
                                     End If
                                 Case Else
                                     Throw New InvalidDataException(
@@ -316,16 +267,15 @@ Public Class PonyBase
                                         Environment.NewLine &
                                         "The invalid line was: " & line)
                             End Select
-                            SpeakingLines.Add(newLine)
                         Catch ex As Exception
                             My.Application.NotifyUserOfNonFatalException(
-                                ex, "Invalid 'speak' line in " & ConfigFilename & " file for pony named " & Name)
+                                ex, "Invalid 'speak' line in " & ConfigFilename & " file for pony named " & DisplayName)
                         End Try
                     Case "effect"
                         effectLines.Add(line)
                     Case Else
                         MessageBox.Show(
-                            "Unknown command in " & ConfigFilename & " for pony " & Name & ": " & columns(0) & ControlChars.NewLine &
+                            "Unknown command in " & ConfigFilename & " for pony " & DisplayName & ": " & columns(0) & ControlChars.NewLine &
                             "Valid commands are: name, scale, behaviorgroup, behavior, categories, speak, effect" & Environment.NewLine &
                             "Skipping line: " & ControlChars.NewLine & line,
                             "Unknown Command", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -333,123 +283,24 @@ Public Class PonyBase
             Loop
 
             ' Use the directory name as a fallback if a name was not specified in the configuration file.
-            If Name Is Nothing Then Name = directory
+            If DisplayName Is Nothing Then DisplayName = directory
 
             SetLines(SpeakingLines)
 
             'Now that we have a list of all the behaviors, process them
             For Each behaviorLine In behaviorLines
                 Try
-                    Dim columns = CommaSplitQuoteQualified(behaviorLine)
-                    Dim movement As AllowedMoves
-
-                    'movements are bytes so that they can be composite:
-                    '"diagonal" means vertical AND horizontal at the same time.
-                    'See the definition in the pony class for more information.
-                    Select Case Trim(LCase(columns(BehaviorOption.MovementType)))
-                        Case "none"
-                            movement = AllowedMoves.None
-                        Case "horizontal_only"
-                            movement = AllowedMoves.HorizontalOnly
-                        Case "vertical_only"
-                            movement = AllowedMoves.VerticalOnly
-                        Case "horizontal_vertical"
-                            movement = AllowedMoves.HorizontalVertical
-                        Case "diagonal_only"
-                            movement = AllowedMoves.DiagonalOnly
-                        Case "diagonal_horizontal"
-                            movement = AllowedMoves.DiagonalHorizontal
-                        Case "diagonal_vertical"
-                            movement = AllowedMoves.DiagonalVertical
-                        Case "all"
-                            movement = AllowedMoves.All
-                        Case "mouseover"
-                            movement = AllowedMoves.MouseOver
-                        Case "sleep"
-                            movement = AllowedMoves.Sleep
-                        Case "dragged"
-                            movement = AllowedMoves.Dragged
-                        Case Else
-                            MessageBox.Show("Unknown movement type: " & columns(BehaviorOption.MovementType) & ControlChars.NewLine &
-                                            "Valid movement types: none, horizontal_only, vertical_only, horizontal_vertical, " &
-                                            "diagonal_only, diagonal_horizontal, diagonal_vertical, all, mouseover, sleep, dragged" &
-                                            Environment.NewLine &
-                                            "Skipping behavior " & columns(BehaviorOption.Name) & " for " & Name)
-                            Continue For
-                    End Select
-
-                    Dim linked_behavior As String = ""
-                    Dim speak_start As String = ""
-                    Dim speak_end As String = ""
-                    Dim xcoord As Integer = 0
-                    Dim ycoord As Integer = 0
-                    Dim follow As String = ""
-                    Dim follow_stopped_behavior As String = ""
-                    Dim follow_moving_behavior As String = ""
-
-                    Dim auto_select_images As Boolean = True
-                    Dim skip As Boolean = False
-
-                    Dim right_image_center As New Point
-                    Dim left_image_center As New Point
-                    Dim dont_repeat_image_animations As Boolean = False
-                    Dim group As Integer = 0
-
-                    If UBound(columns) > BehaviorOption.MovementType Then
-                        linked_behavior = Trim(columns(BehaviorOption.LinkedBehavior))
-                        speak_start = Trim(columns(BehaviorOption.SpeakingStart))
-                        speak_end = Trim(columns(BehaviorOption.SpeakingEnd))
-                        skip = Boolean.Parse(Trim(columns(BehaviorOption.Skip)))
-                        xcoord = Integer.Parse(columns(BehaviorOption.XCoord), CultureInfo.InvariantCulture)
-                        ycoord = Integer.Parse(columns(BehaviorOption.YCoord), CultureInfo.InvariantCulture)
-                        follow = Trim(columns(BehaviorOption.ObjectToFollow))
-                        If UBound(columns) >= BehaviorOption.AutoSelectImages Then
-                            auto_select_images = Boolean.Parse(Trim(columns(BehaviorOption.AutoSelectImages)))
-                        End If
-                        If UBound(columns) >= BehaviorOption.FollowStoppedBehavior Then
-                            follow_stopped_behavior = Trim(columns(BehaviorOption.FollowStoppedBehavior))
-                        End If
-                        If UBound(columns) >= BehaviorOption.FollowMovingBehavior Then
-                            follow_moving_behavior = Trim(columns(BehaviorOption.FollowMovingBehavior))
-                        End If
-                        If UBound(columns) >= BehaviorOption.LeftImageCenter Then
-                            Dim center = Split(Trim(columns(BehaviorOption.RightImageCenter)), ",")
-                            right_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
-                                                           Integer.Parse(center(1), CultureInfo.InvariantCulture))
-                            center = Split(Trim(columns(BehaviorOption.LeftImageCenter)), ",")
-                            left_image_center = New Point(Integer.Parse(center(0), CultureInfo.InvariantCulture),
-                                                          Integer.Parse(center(1), CultureInfo.InvariantCulture))
-                        End If
-
-                        If UBound(columns) >= BehaviorOption.DoNotRepeatImageAnimations Then
-                            dont_repeat_image_animations = Boolean.Parse(Trim(columns(BehaviorOption.DoNotRepeatImageAnimations)))
-                        End If
-
-                        If UBound(columns) >= BehaviorOption.Group Then
-                            group = Integer.Parse(columns(BehaviorOption.Group), CultureInfo.InvariantCulture)
-                        End If
+                    Dim b As Behavior = Nothing
+                    Dim issues As ParseIssue() = Nothing
+                    If Behavior.TryLoad(behaviorLine, fullDirectory, Me, b, issues) Then
+                        Behaviors.Add(b)
+                    Else
+                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason())
                     End If
-
-                    AddBehavior(columns(BehaviorOption.Name),
-                                         Double.Parse(columns(BehaviorOption.Probability), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(BehaviorOption.MaxDuration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(BehaviorOption.MinDuration), CultureInfo.InvariantCulture),
-                                         Double.Parse(columns(BehaviorOption.Speed), CultureInfo.InvariantCulture),
-                                         Path.Combine(fullDirectory, Trim(columns(BehaviorOption.RightImagePath))),
-                                         Path.Combine(fullDirectory, Trim(columns(BehaviorOption.LeftImagePath))),
-                                         movement, linked_behavior, speak_start, speak_end, skip, xcoord, ycoord,
-                                         follow, auto_select_images, follow_stopped_behavior, follow_moving_behavior,
-                                         right_image_center, left_image_center, dont_repeat_image_animations, group)
-
                 Catch ex As Exception
                     If Not Reference.AutoStarted Then
-                        If TypeOf ex Is IndexOutOfRangeException Then
-                            My.Application.NotifyUserOfNonFatalException(ex, "You are missing a required parameter for pony " & Name &
-                                                                         " in behavior '" & behaviorLine & "'")
-                        Else
-                            My.Application.NotifyUserOfNonFatalException(ex, "Invalid behavior line in configuration file for pony " &
-                                                                         Name & ":" & ControlChars.NewLine & behaviorLine)
-                        End If
+                        My.Application.NotifyUserOfNonFatalException(ex, "Invalid behavior line in configuration file for pony " &
+                                                                     DisplayName & ":" & ControlChars.NewLine & behaviorLine)
                     End If
                     Exit For
                 End Try
@@ -457,75 +308,31 @@ Public Class PonyBase
 
             For Each effectLine In effectLines
                 Try
-                    Dim columns = CommaSplitQuoteQualified(effectLine)
-
-                    '1 = effect name
-                    '2 = behavior name
-                    '3 = right image
-                    '4 = left image
-                    '5 = duration
-                    '6 = delay before next
-                    '7 = location relative to pony, right
-                    '8 = center of effect, right
-                    '9 = location going left
-                    '10 = centering going left
-                    '11 = effect follows pony
-                    '12 = animations shouldn't repeat
-
-                    Dim found_behavior As Boolean = False
-                    For Each behavior In Behaviors
-                        If behavior.Name = Trim(columns(2)) Then
-                            Dim direction_right = Direction.MiddleCenter
-                            Dim centering_right = Direction.MiddleCenter
-                            Dim direction_left = Direction.MiddleCenter
-                            Dim centering_left = Direction.MiddleCenter
-                            Dim dont_repeat_image_animations As Boolean = False
-
-                            Try
-                                direction_right = GetDirection(Trim(LCase(columns(7))))
-                                centering_right = GetDirection(Trim(LCase(columns(8))))
-                                direction_left = GetDirection(Trim(LCase(columns(9))))
-                                centering_left = GetDirection(Trim(LCase(columns(10))))
-                            Catch ex As Exception
-                                My.Application.NotifyUserOfNonFatalException(ex, "Invalid placement direction or centering for effect " &
-                                                                             columns(1) & " for pony " & Name & ":" &
-                                                                             ControlChars.NewLine & effectLine)
-                            End Try
-
-                            If UBound(columns) >= 12 Then
-                                dont_repeat_image_animations = Boolean.Parse(Trim(columns(12)))
-                            End If
-
-                            Dim right_imagepath = Path.Combine(fullDirectory, Trim(columns(3)))
-                            Dim left_imagepath = Path.Combine(fullDirectory, Trim(columns(4)))
-
-                            behavior.AddEffect(columns(1), right_imagepath, left_imagepath,
-                                               Double.Parse(columns(5), CultureInfo.InvariantCulture),
-                                               Double.Parse(columns(6), CultureInfo.InvariantCulture),
-                                               direction_right, centering_right, direction_left, centering_left,
-                                               Boolean.Parse(Trim(columns(11))), dont_repeat_image_animations, Me)
+                    Dim issues As ParseIssue() = Nothing
+                    Dim effect As EffectBase = Nothing
+                    Dim found_behavior = False
+                    If EffectBase.TryLoad(effectLine, fullDirectory, Me, effect, issues) Then
+                        Effects.Add(effect)
+                        Dim behavior = Behaviors.FirstOrDefault(Function(b) b.Name = effect.BehaviorName)
+                        If behavior IsNot Nothing Then
                             found_behavior = True
-                            Exit For
+                            behavior.AddEffect(effect.Name, Me)
+                        Else
+                            If Not found_behavior Then
+                                MessageBox.Show(
+                                    String.Format(
+                                        "Pony '{0}' has an effect '{1}' which references a behavior named '{2}', " &
+                                        "but this behavior does not exist.{3}{4}", DisplayName, effect.Name, effect.BehaviorName, Environment.NewLine, effectLine),
+                                    "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                            End If
                         End If
-                    Next
-
-                    If Not found_behavior Then
-                        MessageBox.Show(
-                            String.Format(
-                                "Pony '{0}' has an effect '{1}' which references a behavior named '{2}', " &
-                                "but this behavior does not exist.{3}{4}", Name, columns(1), columns(2), Environment.NewLine, effectLine),
-                            "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                     End If
 
                 Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Invalid effect in configuration file for pony " & Name & ":" &
+                    My.Application.NotifyUserOfNonFatalException(ex, "Invalid effect in configuration file for pony " & DisplayName & ":" &
                                                                  ControlChars.NewLine & effectLine)
                 End Try
             Next
-
-            ' Behaviors that "chain" or link to another behavior to be played after they are done need to be set up now that we have a list
-            ' of all of them.
-            LinkBehaviors()
         End Using
     End Sub
 
@@ -560,7 +367,7 @@ Public Class PonyBase
                             repeatDelay = Integer.Parse(columns(InteractionParameter.RepeatDelay), CultureInfo.InvariantCulture)
                         End If
 
-                        Dim targetsActivated As Interaction.TargetActivation
+                        Dim targetsActivated As TargetActivation
                         Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
                         If Not [Enum].TryParse(activationValue, targetsActivated) Then
                             ' If direct parsing failed, assume we've got some old definitions instead.
@@ -571,10 +378,10 @@ Public Class PonyBase
                             ' edited in.
                             If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
                                 String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
-                                targetsActivated = Interaction.TargetActivation.One
+                                targetsActivated = TargetActivation.One
                             ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
                                 String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
-                                targetsActivated = Interaction.TargetActivation.Any
+                                targetsActivated = TargetActivation.Any
                             ElseIf Not Reference.InScreensaverMode Then
                                 Throw New InvalidDataException(
                                     "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
@@ -607,16 +414,15 @@ Public Class PonyBase
     End Sub
 
     Private Sub MakeReadOnly()
-        _tags = _tags.AsReadOnly()
-        _behaviorGroups = _behaviorGroups.AsReadOnly()
-        _behaviors = _behaviors.AsReadOnly()
-        ' Interactions can use deferred loading, and should remain editable.
-        '_interactions = _interactions.AsReadOnly()
-        ' Effects must remain editable at the moment...
+        '_tags = _tags.AsReadOnly()
+        '_behaviorGroups = _behaviorGroups.AsReadOnly()
+        '_behaviors = _behaviors.AsReadOnly()
         '_effects = _effects.AsReadOnly()
-        _speakingLines = _speakingLines.AsReadOnly()
-        _speakingLinesRandom = _speakingLinesRandom.AsReadOnly()
-        _speakingLinesSpecific = _speakingLinesSpecific.AsReadOnly()
+        '_speakingLines = _speakingLines.AsReadOnly()
+        '' Interactions can use deferred loading, and should remain editable.
+        ''_interactions = _interactions.AsReadOnly()
+        '_speakingLinesRandom = _speakingLinesRandom.AsReadOnly()
+        '_speakingLinesSpecific = _speakingLinesSpecific.AsReadOnly()
     End Sub
 
     Protected Sub AddBehavior(name As String, chance As Double,
@@ -632,7 +438,7 @@ Public Class PonyBase
                        Optional right_image_center As Point = Nothing, Optional left_image_center As Point = Nothing,
                        Optional _dont_repeat_image_animations As Boolean = False, Optional _group As Integer = 0)
 
-        Dim new_behavior As New Behavior(right_image_path, left_image_path)
+        Dim new_behavior As New Behavior(Me)
 
         If Not File.Exists(right_image_path) Then
             Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & right_image_path)
@@ -646,7 +452,7 @@ Public Class PonyBase
         new_behavior.ChanceOfOccurence = chance
         new_behavior.MaxDuration = max_duration
         new_behavior.MinDuration = min_duration
-        new_behavior.SetSpeed(speed)
+        new_behavior.Speed = speed
         new_behavior.AllowedMovement = Allowed_Moves
         new_behavior.DoNotRepeatImageAnimations = _dont_repeat_image_animations
         new_behavior.StartLineName = _Startline
@@ -667,71 +473,20 @@ Public Class PonyBase
         new_behavior.FollowMovingBehaviorName = _follow_moving_behavior
         new_behavior.FollowStoppedBehaviorName = _follow_stopped_behavior
 
-        If _Linked_Behavior <> "" Then
+        If _Linked_Behavior <> Nothing Then
             'We just record the name of the linked behavior for now
             'Later, when we call "Link_Behaviors()" from the main form, we 
             'will get references to the actual behaviors.
             new_behavior.LinkedBehaviorName = _Linked_Behavior
         End If
 
+        new_behavior.SetLeftImagePath(left_image_path)
+        new_behavior.SetRightImagePath(right_image_path)
+
         new_behavior.SetRightImageCenter(right_image_center)
         new_behavior.SetLeftImageCenter(left_image_center)
 
         Behaviors.Add(new_behavior)
-
-    End Sub
-
-    ''' <summary>
-    ''' Resolves links from behavior names to their actual Behavior objects.
-    ''' </summary>
-    Protected Sub LinkBehaviors()
-
-        For Each behavior In Behaviors
-
-            ' Link chained behaviors.
-            If behavior.LinkedBehaviorName = "" OrElse behavior.LinkedBehaviorName = "None" Then
-                behavior.LinkedBehavior = Nothing
-            Else
-                For Each otherBehavior In Behaviors
-                    If String.Equals(behavior.LinkedBehaviorName, otherBehavior.Name, StringComparison.OrdinalIgnoreCase) Then
-                        behavior.LinkedBehavior = otherBehavior
-                        Exit For
-                    End If
-                Next
-            End If
-
-            ' Get start and end lines.
-            For Each line In SpeakingLines
-                If behavior.StartLineName <> "" AndAlso
-                    String.Equals(line.Name.Trim(), behavior.StartLineName.Trim(), StringComparison.OrdinalIgnoreCase) Then
-                    behavior.StartLine = line
-                End If
-                If behavior.EndLineName <> "" AndAlso
-                    String.Equals(line.Name.Trim(), behavior.EndLineName.Trim(), StringComparison.OrdinalIgnoreCase) Then
-                    behavior.EndLine = line
-                End If
-            Next
-
-            ' Link following behaviors.
-            If behavior.FollowStoppedBehaviorName <> "" Then
-                For Each otherBehavior In Behaviors
-                    If String.Equals(behavior.FollowStoppedBehaviorName, otherBehavior.Name, StringComparison.OrdinalIgnoreCase) Then
-                        behavior.FollowStoppedBehavior = otherBehavior
-                        Exit For
-                    End If
-                Next
-            End If
-
-            If behavior.FollowMovingBehaviorName <> "" Then
-                For Each otherBehavior In Behaviors
-                    If String.Equals(behavior.FollowMovingBehaviorName, otherBehavior.Name, StringComparison.OrdinalIgnoreCase) Then
-                        behavior.FollowMovingBehavior = otherBehavior
-                        Exit For
-                    End If
-                Next
-            End If
-
-        Next
 
     End Sub
 
@@ -756,7 +511,7 @@ Public Class PonyBase
     End Sub
 
     Protected Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
-                   target_list As String, target_selection As Interaction.TargetActivation, _
+                   target_list As String, target_selection As TargetActivation, _
                    behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
                    ponyBases As IEnumerable(Of PonyBase))
         Dim new_interaction As New Interaction
@@ -832,7 +587,7 @@ Public Class PonyBase
                         If found = False Then
                             ok_targets.Remove(ponyBase.Directory)
                             If displaywarnings AndAlso Not Reference.InScreensaverMode Then
-                                MessageBox.Show("Warning: Pony " & ponyBase.Name & " (" & ponyBase.Directory & ") " &
+                                MessageBox.Show("Warning: Pony " & ponyBase.DisplayName & " (" & ponyBase.Directory & ") " &
                                                 " does not have required behavior '" & Behavior & "' as specified in interaction " &
                                                 interaction_name & ControlChars.NewLine & "Interaction is disabled for this pony.",
                                                 "Incorrect Or Missing Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -879,7 +634,7 @@ Public Class PonyBase
                 writer.WriteLine(comment)
             Next
 
-            writer.WriteLine(String.Join(",", "Name", Name))
+            writer.WriteLine(String.Join(",", "Name", DisplayName))
             writer.WriteLine(String.Join(",", "Categories", String.Join(",", Tags.Select(Function(tag) Quoted(tag)))))
 
             For Each behaviorGroup In BehaviorGroups
@@ -967,24 +722,6 @@ Public Class Interaction
 
     Public Property ReactivationDelay As Integer = 60 'in seconds
 
-    ''' <summary>
-    ''' Specifies how the interaction is activated when dealing with multiple targets.
-    ''' </summary>
-    Public Enum TargetActivation
-        ''' <summary>
-        ''' Only one target from the list participates in the interaction.
-        ''' </summary>
-        One
-        ''' <summary>
-        ''' Any available targets participate in the interaction, even if some are not present.
-        ''' </summary>
-        Any
-        ''' <summary>
-        ''' All targets must participate in the interaction, the interaction cannot proceed unless all targets are present.
-        ''' </summary>
-        All
-    End Enum
-
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
         Return String.Join(",",
             Name,
@@ -1003,9 +740,28 @@ Public Class Interaction
 End Class
 #End Region
 
+''' <summary>
+''' Specifies how the interaction is activated when dealing with multiple targets.
+''' </summary>
+Public Enum TargetActivation
+    ''' <summary>
+    ''' Only one target from the list participates in the interaction.
+    ''' </summary>
+    One
+    ''' <summary>
+    ''' Any available targets participate in the interaction, even if some are not present.
+    ''' </summary>
+    Any
+    ''' <summary>
+    ''' All targets must participate in the interaction, the interaction cannot proceed unless all targets are present.
+    ''' </summary>
+    All
+End Enum
+
 #Region "Behavior class"
 Public Class Behavior
     Implements IPonyIniSerializable, IMemberwiseCloneable(Of Behavior)
+    Private ReadOnly pony As PonyBase
 
     Public Shared ReadOnly AnyGroup As Integer = 0
 
@@ -1051,55 +807,53 @@ Public Class Behavior
         End Get
     End Property
 
-    Private m_speed As Double
-    Public ReadOnly Property Speed() As Double
-        Get
-            Return m_speed
-        End Get
-    End Property
-
-    Public Sub SetSpeed(speed As Double)
-        m_speed = speed
-    End Sub
+    Public Property Speed As Double
 
     Public Property DoNotRepeatImageAnimations As Boolean = False
 
     Public Property AllowedMovement As AllowedMoves
 
-    Public Property LinkedBehaviorName As String = ""
-    Private _linkedBehavior As Behavior
-    Public Property LinkedBehavior As Behavior
+    Private _linkedBehaviorName As String = ""
+    Public Property LinkedBehaviorName As String
         Get
-            Return _linkedBehavior
+            Return _linkedBehaviorName
         End Get
-        Set(value As Behavior)
-            _linkedBehavior = value
-            LinkedBehaviorName = If(_linkedBehavior Is Nothing, "", _linkedBehavior.Name)
+        Set(value As String)
+            _linkedBehaviorName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
-
-    Public Property StartLineName As String = ""
-    Public Property EndLineName As String = ""
-
-    Private _startLine As SpeakingLine
-    Public Property StartLine As SpeakingLine
+    Public ReadOnly Property LinkedBehavior As Behavior
         Get
-            Return _startLine
+            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = LinkedBehaviorName)
         End Get
-        Set(value As SpeakingLine)
-            _startLine = value
-            StartLineName = If(_startLine Is Nothing, "", _startLine.Name)
+    End Property
+    Private _startLineName As String = ""
+    Public Property StartLineName As String
+        Get
+            Return _startLineName
+        End Get
+        Set(value As String)
+            _startLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
-    Private _endLine As SpeakingLine
-    Public Property EndLine As SpeakingLine
+    Public ReadOnly Property StartLine As SpeakingLine
         Get
-            Return _endLine
+            Return pony.SpeakingLines.FirstOrDefault(Function(sl) sl.Name = StartLineName)
         End Get
-        Set(value As SpeakingLine)
-            _endLine = value
-            EndLineName = If(_endLine Is Nothing, "", _endLine.Name)
+    End Property
+    Private _endLineName As String = ""
+    Public Property EndLineName As String
+        Get
+            Return _endLineName
+        End Get
+        Set(value As String)
+            _endLineName = Argument.EnsureNotNull(value, "value")
         End Set
+    End Property
+    Public ReadOnly Property EndLine As SpeakingLine
+        Get
+            Return pony.SpeakingLines.FirstOrDefault(Function(sl) sl.Name = EndLineName)
+        End Get
     End Property
 
     Public Property Skip As Boolean = False
@@ -1113,25 +867,95 @@ Public Class Behavior
     Public Property OriginalDestinationYCoord As Integer = 0
     Public Property OriginalFollowObjectName As String = ""
 
-    Public Property FollowStoppedBehaviorName As String = ""
-    Public Property FollowMovingBehaviorName As String = ""
-    Public Property FollowStoppedBehavior As Behavior = Nothing
-    Public Property FollowMovingBehavior As Behavior = Nothing
+    Public Property FollowStoppedBehaviorName As String
+    Public ReadOnly Property FollowStoppedBehavior As Behavior
+        Get
+            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = FollowStoppedBehaviorName)
+        End Get
+    End Property
+    Public Property FollowMovingBehaviorName As String
+    Public ReadOnly Property FollowMovingBehavior As Behavior
+        Get
+            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = FollowMovingBehaviorName)
+        End Get
+    End Property
     Public Property AutoSelectImagesOnFollow As Boolean = True
     Public Property Group As Integer = AnyGroup
 
-    Private ReadOnly _effects As New List(Of EffectBase)()
+    Private ReadOnly _effectNames As New List(Of String)()
+    Private ReadOnly _effectsNamesReadOnly As ReadOnlyCollection(Of String) = ReadOnlyCollection.AsReadOnly(_effectNames)
+    Public ReadOnly Property EffectNames As ReadOnlyCollection(Of String)
+        Get
+            Return _effectsNamesReadOnly
+        End Get
+    End Property
     Public ReadOnly Property Effects As IEnumerable(Of EffectBase)
         Get
-            Return _effects
+            Return _effectNames.Select(Function(n) pony.Effects.FirstOrDefault(Function(e) e.Name = n)).Where(Function(e) e IsNot Nothing)
         End Get
     End Property
 
-    Public Sub New(rightImagePath As String, leftImagePath As String)
-        If IsNothing(rightImagePath) AndAlso IsNothing(leftImagePath) Then Throw New ArgumentException("Both paths were null.")
-        SetRightImagePath(rightImagePath)
-        SetLeftImagePath(leftImagePath)
+    Public Sub New(pony As PonyBase)
+        Me.pony = Argument.EnsureNotNull(pony, "pony")
     End Sub
+
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ParseIssue()) As Boolean
+        Return TryLoad(CommaSplitQuoteQualified(iniLine), imageDirectory, pony, result, issues)
+    End Function
+
+    Public Shared Function TryLoad(iniComponents As String(), imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ParseIssue()) As Boolean
+        result = Nothing
+        issues = Nothing
+
+        Dim b = New Behavior(pony)
+        Dim p As New StringCollectionParser(iniComponents,
+                                            {"Identifier", "Name", "Chance",
+                                             "Max Duration", "Min Duration", "Speed",
+                                             "Right Image", "Left Image", "Movement", "Linked Behavior",
+                                             "Start Speech", "End Speech", "Skip", "Destination X", "Destination Y",
+                                             "Follow Target", "Auto Select Follow Images",
+                                             "Follow Stopped Behavior", "Follow Moving Behavior",
+                                             "Right Image Center", "Left Image Center",
+                                             "Prevent Animation Loop", "Group"})
+        p.NoParse()
+        b.Name = p.NotNull()
+        b.ChanceOfOccurence = p.ParseDouble(0, 0, 1)
+        b.MaxDuration = p.ParseDouble(15, 0, 300)
+        b.MinDuration = p.ParseDouble(5, 0, 300)
+        b.Speed = p.ParseDouble(3, 0, 25)
+        b.right_image_path = p.NoParse()
+        If p.Assert(b.right_image_path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            b.right_image_path = p.SpecifiedCombinePath(imageDirectory, b.right_image_path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.right_image_path, "Image will not be loaded.")
+        End If
+        b.left_image_path = p.NoParse()
+        If p.Assert(b.left_image_path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            b.left_image_path = p.SpecifiedCombinePath(imageDirectory, b.left_image_path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.left_image_path, "Image will not be loaded.")
+        End If
+        b.AllowedMovement = p.Map(AllowedMovesFromIni, AllowedMoves.All)
+        b.LinkedBehaviorName = p.NotNull("").Trim()
+        b.StartLineName = p.NotNull("").Trim()
+        b.EndLineName = p.NotNull("").Trim()
+        b.Skip = p.ParseBoolean(False)
+        b.OriginalDestinationXCoord = p.ParseInt32(0)
+        b.OriginalDestinationYCoord = p.ParseInt32(0)
+        b.OriginalFollowObjectName = p.NotNull("").Trim()
+        b.AutoSelectImagesOnFollow = p.ParseBoolean(True)
+        b.FollowStoppedBehaviorName = p.NotNull("").Trim()
+        b.FollowMovingBehaviorName = p.NotNull("").Trim()
+        b.right_image_center = p.ParseVector2(Vector2.Zero)
+        b.left_image_center = p.ParseVector2(Vector2.Zero)
+        b.DoNotRepeatImageAnimations = p.ParseBoolean(False)
+        b.Group = p.ParseInt32(AnyGroup, 0, 100)
+
+        b.SetLeftImagePath(b.left_image_path)
+        b.SetRightImagePath(b.right_image_path)
+
+        issues = p.Issues.ToArray()
+        result = b
+        Return p.AllParsingSuccessful
+    End Function
 
     Public Sub SetRightImagePath(path As String)
         right_image_path = path
@@ -1140,6 +964,8 @@ Public Class Behavior
             Try
                 right_image_size = New Vector2(ImageSize.GetSize(right_image_path))
             Catch ex As IOException
+                ' Leave size empty by default.
+            Catch ex As UnauthorizedAccessException
                 ' Leave size empty by default.
             End Try
         End If
@@ -1152,6 +978,8 @@ Public Class Behavior
             Try
                 left_image_size = New Vector2(ImageSize.GetSize(left_image_path))
             Catch ex As IOException
+                ' Leave size empty by default.
+            Catch ex As UnauthorizedAccessException
                 ' Leave size empty by default.
             End Try
         End If
@@ -1183,49 +1011,65 @@ Public Class Behavior
             .ParentPonyBase = owner
         }
 
-        AddEffect(newEffect, owner)
+        AddEffect(effectname, owner)
     End Sub
 
-    Public Sub AddEffect(effect As EffectBase, owner As PonyBase)
-        Argument.EnsureNotNull(effect, "effect")
+    Public Sub AddEffect(effectName As String, owner As PonyBase)
+        Argument.EnsureNotNull(effectName, "effectName")
         Argument.EnsureNotNull(owner, "owner")
-        _effects.Add(effect)
-        owner.Effects.Add(effect)
+        _effectNames.Add(effectName)
     End Sub
 
-    Public Function RemoveEffect(effect As EffectBase) As Boolean
-        Return _effects.Remove(effect)
+    Public Function RemoveEffect(effectName As String) As Boolean
+        Return _effectNames.Remove(effectName)
     End Function
 
     Public Class SpeakingLine
         Implements IPonyIniSerializable, IMemberwiseCloneable(Of SpeakingLine)
 
-        Public Property Name As String = ""
+        Public Property Name As String
         Public Property Text As String = ""
         Public Property SoundFile As String
         Public Property Skip As Boolean = False 'don't use randomly if true
         Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
 
-        Public Sub New(_name As String, _text As String, _skip As Boolean, _group As Integer)
-            Name = _name
-            Text = _text
-            Skip = _skip
-            Group = _group
-        End Sub
+        Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As SpeakingLine, ByRef issues As ParseIssue()) As Boolean
+            Return TryLoad(CommaSplitQuoteBraceQualified(iniLine), soundDirectory, result, issues)
+        End Function
 
-        Public Sub New(ponyname As String, _name As String, _text As String, _path As String, _soundfile As String, _skip As Boolean, _group As Integer)
-            Name = _name
-            Text = _text
-            Skip = _skip
-            Group = _group
-            SoundFile = _path & _soundfile
+        Public Shared Function TryLoad(iniComponents As String(), soundDirectory As String, ByRef result As SpeakingLine, ByRef issues As ParseIssue()) As Boolean
+            result = Nothing
+            issues = Nothing
 
-            If Not File.Exists(SoundFile) Then
-                MessageBox.Show("Error loading sound file for speaking line " & Name & " for pony " & ponyname & ControlChars.NewLine &
-                                "Sound file: " & SoundFile & " does not exist.", "File Not Found",
-                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Dim l = New SpeakingLine()
+            If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
+            If iniComponents.Length > 3 Then
+                Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
+                iniComponents(3) = Nothing
+                For Each filePath In soundFilePaths
+                    If String.Equals(Path.GetExtension(filePath), ".mp3", PathComparison.Current) Then
+                        iniComponents(3) = filePath
+                        Exit For
+                    End If
+                Next
             End If
-        End Sub
+            Dim p As New StringCollectionParser(iniComponents,
+                                                {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
+            p.NoParse()
+            l.Name = p.NotNull("Unnamed")
+            l.Text = p.NotNull()
+            l.SoundFile = p.NoParse()
+            If l.SoundFile IsNot Nothing Then
+                l.SoundFile = p.SpecifiedCombinePath(soundDirectory, l.SoundFile, "Sound file will not be loaded.")
+                p.SpecifiedFileExists(l.SoundFile, "Sound file will not be loaded.")
+            End If
+            l.Skip = p.ParseBoolean(False)
+            l.Group = p.ParseInt32(AnyGroup, 0, 100)
+
+            issues = p.Issues.ToArray()
+            result = l
+            Return p.AllParsingSuccessful
+        End Function
 
         Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
             'For compatibility with 'Browser Ponies', we write an .OGG file as the 2nd option.
@@ -1371,7 +1215,7 @@ Public Class Pony
     End Property
     Public ReadOnly Property Name() As String
         Get
-            Return Base.Name
+            Return Base.DisplayName
         End Get
     End Property
     Friend ReadOnly Property Tags() As ICollection(Of String)
@@ -1822,10 +1666,12 @@ Public Class Pony
 
             ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
             ' suitable to repeat.
-            If Not foundAtRandom AndAlso IsInteracting Then
+            If Not foundAtRandom AndAlso (IsInteracting OrElse CurrentBehavior Is Nothing) Then
                 CurrentBehavior = Behaviors(0)
                 AddUpdateRecord(
-                    "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
+                    If(IsInteracting,
+                       "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
+                       "Random selection failed. Using default behavior as no behavior has been set yet. (SelectBehavior). Behavior: "),
                     CurrentBehavior.Name)
             ElseIf Not foundAtRandom Then
                 AddUpdateRecord(
@@ -1846,6 +1692,8 @@ Public Class Pony
             CurrentBehavior = specifiedBehavior
             AddUpdateRecord("Selected a specified behavior (SelectBehavior). Behavior: ", CurrentBehavior.Name)
         End If
+
+        Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
 
         CurrentBehaviorGroup = CurrentBehavior.Group
 
@@ -3026,7 +2874,7 @@ Public Class Pony
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
         For Each behavior In Behaviors
-            If Behavior.AllowedMovement = AllowedMoves.MouseOver Then
+            If behavior.AllowedMovement = AllowedMoves.MouseOver Then
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
                 Dim cursorLoc = New Vector2F(CursorLocation)
@@ -3129,7 +2977,7 @@ Public Class Pony
         SelectBehavior(interaction.BehaviorList(Rng.Next(interaction.BehaviorList.Count)))
 
         'do we interact with ALL targets, including copies, or just the pony that we ran into?
-        If interaction.Targets_Activated <> interaction.TargetActivation.One Then
+        If interaction.Targets_Activated <> TargetActivation.One Then
             For Each targetPony In interaction.InteractsWith
                 targetPony.StartInteractionAsTarget(CurrentBehavior.Name, Me, interaction)
             Next
@@ -3167,7 +3015,7 @@ Public Class Pony
                 If target.IsInteracting OrElse ReferenceEquals(Me, target) Then Continue For
 
                 ' Make sure that all targets are present, if all are required.
-                If interaction.Targets_Activated = interaction.TargetActivation.All AndAlso
+                If interaction.Targets_Activated = TargetActivation.All AndAlso
                     interaction.InteractsWith.Count <> interaction.InteractsWithByDirectory.Count Then
                     Continue For
                 End If
@@ -3319,7 +3167,53 @@ Public Class EffectBase
     Public Property DoNotRepeatImageAnimations As Boolean
     Public Property AlreadyPlayedForCurrentBehavior As Boolean
 
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ParseIssue()) As Boolean
+        Return TryLoad(CommaSplitQuoteQualified(iniLine), imageDirectory, pony, result, issues)
+    End Function
+
+    Public Shared Function TryLoad(iniComponents As String(), imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ParseIssue()) As Boolean
+        result = Nothing
+        issues = Nothing
+
+        Dim e = New EffectBase(pony)
+        Dim p As New StringCollectionParser(iniComponents,
+                                            {"Identifier", "Effect Name", "Behavior Name",
+                                             "Right Image", "Left Image", "Duration", "Repeat Delay",
+                                             "Placement Right", "Centering Right",
+                                             "Placement Left", "Centering Left",
+                                             "Follow", "Prevent Repeat"})
+        p.NoParse()
+        e.Name = p.NotNull()
+        e.BehaviorName = p.NotNull()
+        e.RightImagePath = p.NoParse()
+        If p.Assert(e.RightImagePath, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            e.RightImagePath = p.SpecifiedCombinePath(imageDirectory, e.RightImagePath, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.RightImagePath, "Image will not be loaded.")
+        End If
+        e.LeftImagePath = p.NoParse()
+        If p.Assert(e.LeftImagePath, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            e.LeftImagePath = p.SpecifiedCombinePath(imageDirectory, e.LeftImagePath, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.LeftImagePath, "Image will not be loaded.")
+        End If
+        e.Duration = p.ParseDouble(5, 0, 300)
+        e.RepeatDelay = p.ParseDouble(0, 0, 300)
+        e.PlacementDirectionRight = p.Map(DirectionFromIni, Direction.Random)
+        e.CenteringRight = p.Map(DirectionFromIni, Direction.Random)
+        e.PlacementDirectionLeft = p.Map(DirectionFromIni, Direction.Random)
+        e.CenteringLeft = p.Map(DirectionFromIni, Direction.Random)
+        e.Follow = p.ParseBoolean(False)
+        e.DoNotRepeatImageAnimations = p.ParseBoolean(False)
+
+        issues = p.Issues.ToArray()
+        result = e
+        Return p.AllParsingSuccessful
+    End Function
+
     Protected Sub New()
+    End Sub
+
+    Public Sub New(pony As PonyBase)
+        Me.ParentPonyBase = Argument.EnsureNotNull(pony, "pony")
     End Sub
 
     Public Sub New(_name As String, leftImagePath As String, rightImagePath As String)
@@ -3336,6 +3230,8 @@ Public Class EffectBase
                 LeftImageSize = ImageSize.GetSize(LeftImagePath)
             Catch ex As IOException
                 ' Leave size empty by default.
+            Catch ex As UnauthorizedAccessException
+                ' Leave size empty by default.
             End Try
         End If
     End Sub
@@ -3347,6 +3243,8 @@ Public Class EffectBase
             Try
                 RightImageSize = ImageSize.GetSize(RightImagePath)
             Catch ex As IOException
+                ' Leave size empty by default.
+            Catch ex As UnauthorizedAccessException
                 ' Leave size empty by default.
             End Try
         End If
@@ -3658,12 +3556,14 @@ Public Class House
     Friend Sub InitializeVisitorList()
         deployedPonies.Clear()
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-            For Each guest In HouseBase.Visitors
-                If String.Equals(Pony.Directory, guest, StringComparison.OrdinalIgnoreCase) Then
-                    deployedPonies.Add(Pony)
-                    Exit For
-                End If
-            Next
+            SyncLock HouseBase.Visitors
+                For Each guest In HouseBase.Visitors
+                    If String.Equals(Pony.Directory, guest, StringComparison.OrdinalIgnoreCase) Then
+                        deployedPonies.Add(Pony)
+                        Exit For
+                    End If
+                Next
+            End SyncLock
         Next
     End Sub
 
@@ -3707,22 +3607,23 @@ Public Class House
         Dim choices As New List(Of String)
 
         Dim all As Boolean = False
-
-        For Each entry In HouseBase.Visitors
-            If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
-                For Each Pony In ponyBases
-                    choices.Add(Pony.Directory)
-                Next
-                all = True
-                Exit For
-            End If
-        Next
-
-        If all = False Then
-            For Each Pony In HouseBase.Visitors
-                choices.Add(Pony)
+        SyncLock HouseBase.Visitors
+            For Each entry In HouseBase.Visitors
+                If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
+                    For Each ponyBase In ponyBases
+                        choices.Add(ponyBase.Directory)
+                    Next
+                    all = True
+                    Exit For
+                End If
             Next
-        End If
+
+            If all = False Then
+                For Each ponyName In HouseBase.Visitors
+                    choices.Add(ponyName)
+                Next
+            End If
+        End SyncLock
 
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
             choices.Remove(Pony.Directory)
@@ -3783,27 +3684,28 @@ Public Class House
         Dim choices As New List(Of String)
 
         Dim all As Boolean = False
-
-        For Each entry In HouseBase.Visitors
-            If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
-                For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-                    choices.Add(Pony.Directory)
-                Next
-                all = True
-                Exit For
-            End If
-        Next
-
-        If all = False Then
-            For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-                For Each otherpony In HouseBase.Visitors
-                    If Pony.Directory = otherpony Then
+        SyncLock HouseBase.Visitors
+            For Each entry In HouseBase.Visitors
+                If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
+                    For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
                         choices.Add(Pony.Directory)
-                        Exit For
-                    End If
-                Next
+                    Next
+                    all = True
+                    Exit For
+                End If
             Next
-        End If
+
+            If all = False Then
+                For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
+                    For Each otherpony In HouseBase.Visitors
+                        If Pony.Directory = otherpony Then
+                            choices.Add(Pony.Directory)
+                            Exit For
+                        End If
+                    Next
+                Next
+            End If
+        End SyncLock
 
         If choices.Count = 0 Then Exit Sub
 

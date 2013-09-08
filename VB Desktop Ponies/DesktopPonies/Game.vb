@@ -419,7 +419,7 @@ Friend Module Games
 
                 ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
                 Dim handlerBase = New MutablePonyBase()
-                handlerBase.Name = "Ball"
+                handlerBase.DisplayName = "Ball"
                 Handler = New Pony(handlerBase)
 
                 handlerBase.AddBehavior("idle", 100, 99, 99, 0,
@@ -1108,7 +1108,7 @@ Friend Module Games
             End Function
 
             Sub Speak(line As String)
-                Dim new_line As New Behavior.SpeakingLine("Kick", line, True, 0)
+                Dim new_line As New Behavior.SpeakingLine() With {.Name = "Kick", .Text = line, .Skip = True, .Group = 0}
                 Player.PonySpeak(new_line)
             End Sub
 

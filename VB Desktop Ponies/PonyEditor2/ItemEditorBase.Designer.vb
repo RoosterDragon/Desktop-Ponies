@@ -22,8 +22,10 @@ Partial Class ItemEditorBase
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.Source = New System.Windows.Forms.TextBox()
         Me.PropertiesPanel = New System.Windows.Forms.Panel()
+        Me.SourceTextTimer = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
         '
         'Source
@@ -32,7 +34,6 @@ Partial Class ItemEditorBase
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Source.Location = New System.Drawing.Point(3, 277)
         Me.Source.Name = "Source"
-        Me.Source.ReadOnly = True
         Me.Source.Size = New System.Drawing.Size(494, 20)
         Me.Source.TabIndex = 1
         '
@@ -46,6 +47,9 @@ Partial Class ItemEditorBase
         Me.PropertiesPanel.Name = "PropertiesPanel"
         Me.PropertiesPanel.Size = New System.Drawing.Size(494, 268)
         Me.PropertiesPanel.TabIndex = 0
+        '
+        'SourceTextTimer
+        '
         '
         'ItemEditorBase
         '
@@ -62,5 +66,6 @@ Partial Class ItemEditorBase
     End Sub
     Protected WithEvents Source As System.Windows.Forms.TextBox
     Protected WithEvents PropertiesPanel As System.Windows.Forms.Panel
+    Friend WithEvents SourceTextTimer As System.Windows.Forms.Timer
 
 End Class

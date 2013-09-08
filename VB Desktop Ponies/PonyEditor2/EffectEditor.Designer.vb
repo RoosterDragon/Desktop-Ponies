@@ -23,6 +23,11 @@ Partial Class EffectEditor
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.PropertiesTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.BehaviorComboBox = New System.Windows.Forms.ComboBox()
+        Me.PreventLoopCheckBox = New System.Windows.Forms.CheckBox()
+        Me.PreventLoopLabel = New System.Windows.Forms.Label()
+        Me.FollowLabel = New System.Windows.Forms.Label()
+        Me.BehaviorLabel = New System.Windows.Forms.Label()
         Me.RightCenterComboBox = New System.Windows.Forms.ComboBox()
         Me.RightPlacementComboBox = New System.Windows.Forms.ComboBox()
         Me.RightCenterLabel = New System.Windows.Forms.Label()
@@ -43,6 +48,7 @@ Partial Class EffectEditor
         Me.RightImageViewer = New VBDesktopPonies.EffectImageViewer()
         Me.DurationNumber = New System.Windows.Forms.NumericUpDown()
         Me.LeftPlacementComboBox = New System.Windows.Forms.ComboBox()
+        Me.FollowCheckBox = New System.Windows.Forms.CheckBox()
         Me.PropertiesPanel.SuspendLayout()
         Me.PropertiesTable.SuspendLayout()
         Me.SuspendLayout()
@@ -60,6 +66,11 @@ Partial Class EffectEditor
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.PropertiesTable.Controls.Add(Me.BehaviorComboBox, 3, 0)
+        Me.PropertiesTable.Controls.Add(Me.PreventLoopCheckBox, 3, 2)
+        Me.PropertiesTable.Controls.Add(Me.PreventLoopLabel, 2, 2)
+        Me.PropertiesTable.Controls.Add(Me.FollowLabel, 2, 1)
+        Me.PropertiesTable.Controls.Add(Me.BehaviorLabel, 2, 0)
         Me.PropertiesTable.Controls.Add(Me.RightCenterComboBox, 3, 5)
         Me.PropertiesTable.Controls.Add(Me.RightPlacementComboBox, 3, 4)
         Me.PropertiesTable.Controls.Add(Me.RightCenterLabel, 2, 5)
@@ -80,6 +91,7 @@ Partial Class EffectEditor
         Me.PropertiesTable.Controls.Add(Me.RightImageViewer, 2, 7)
         Me.PropertiesTable.Controls.Add(Me.DurationNumber, 1, 1)
         Me.PropertiesTable.Controls.Add(Me.LeftPlacementComboBox, 1, 4)
+        Me.PropertiesTable.Controls.Add(Me.FollowCheckBox, 3, 1)
         Me.PropertiesTable.Location = New System.Drawing.Point(0, 0)
         Me.PropertiesTable.Name = "PropertiesTable"
         Me.PropertiesTable.RowCount = 8
@@ -92,8 +104,68 @@ Partial Class EffectEditor
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
-        Me.PropertiesTable.Size = New System.Drawing.Size(775, 187)
+        Me.PropertiesTable.Size = New System.Drawing.Size(778, 188)
         Me.PropertiesTable.TabIndex = 0
+        '
+        'BehaviorComboBox
+        '
+        Me.BehaviorComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.BehaviorComboBox.DisplayMember = "Name"
+        Me.BehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.BehaviorComboBox.FormattingEnabled = True
+        Me.BehaviorComboBox.Location = New System.Drawing.Point(516, 3)
+        Me.BehaviorComboBox.Name = "BehaviorComboBox"
+        Me.BehaviorComboBox.Size = New System.Drawing.Size(259, 21)
+        Me.BehaviorComboBox.TabIndex = 7
+        Me.BehaviorComboBox.ValueMember = "Name"
+        '
+        'PreventLoopCheckBox
+        '
+        Me.PreventLoopCheckBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.PreventLoopCheckBox.AutoSize = True
+        Me.PreventLoopCheckBox.Location = New System.Drawing.Point(516, 56)
+        Me.PreventLoopCheckBox.Name = "PreventLoopCheckBox"
+        Me.PreventLoopCheckBox.Size = New System.Drawing.Size(15, 20)
+        Me.PreventLoopCheckBox.TabIndex = 11
+        Me.PreventLoopCheckBox.UseVisualStyleBackColor = True
+        '
+        'PreventLoopLabel
+        '
+        Me.PreventLoopLabel.AutoSize = True
+        Me.PreventLoopLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.PreventLoopLabel.Location = New System.Drawing.Point(387, 59)
+        Me.PreventLoopLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.PreventLoopLabel.Name = "PreventLoopLabel"
+        Me.PreventLoopLabel.Size = New System.Drawing.Size(123, 13)
+        Me.PreventLoopLabel.TabIndex = 10
+        Me.PreventLoopLabel.Text = "Prevent Animation Loop:"
+        Me.PreventLoopLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'FollowLabel
+        '
+        Me.FollowLabel.AutoSize = True
+        Me.FollowLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.FollowLabel.Location = New System.Drawing.Point(387, 33)
+        Me.FollowLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.FollowLabel.Name = "FollowLabel"
+        Me.FollowLabel.Size = New System.Drawing.Size(123, 13)
+        Me.FollowLabel.TabIndex = 8
+        Me.FollowLabel.Text = "Effect Follows Pony:"
+        Me.FollowLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'BehaviorLabel
+        '
+        Me.BehaviorLabel.AutoSize = True
+        Me.BehaviorLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.BehaviorLabel.Location = New System.Drawing.Point(387, 6)
+        Me.BehaviorLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.BehaviorLabel.Name = "BehaviorLabel"
+        Me.BehaviorLabel.Size = New System.Drawing.Size(123, 13)
+        Me.BehaviorLabel.TabIndex = 6
+        Me.BehaviorLabel.Text = "Behavior:"
+        Me.BehaviorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'RightCenterComboBox
         '
@@ -101,10 +173,10 @@ Partial Class EffectEditor
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RightCenterComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.RightCenterComboBox.FormattingEnabled = True
-        Me.RightCenterComboBox.Location = New System.Drawing.Point(513, 128)
+        Me.RightCenterComboBox.Location = New System.Drawing.Point(516, 129)
         Me.RightCenterComboBox.Name = "RightCenterComboBox"
         Me.RightCenterComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.RightCenterComboBox.TabIndex = 16
+        Me.RightCenterComboBox.TabIndex = 22
         '
         'RightPlacementComboBox
         '
@@ -112,20 +184,20 @@ Partial Class EffectEditor
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RightPlacementComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.RightPlacementComboBox.FormattingEnabled = True
-        Me.RightPlacementComboBox.Location = New System.Drawing.Point(513, 101)
+        Me.RightPlacementComboBox.Location = New System.Drawing.Point(516, 102)
         Me.RightPlacementComboBox.Name = "RightPlacementComboBox"
         Me.RightPlacementComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.RightPlacementComboBox.TabIndex = 14
+        Me.RightPlacementComboBox.TabIndex = 20
         '
         'RightCenterLabel
         '
         Me.RightCenterLabel.AutoSize = True
         Me.RightCenterLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.RightCenterLabel.Location = New System.Drawing.Point(387, 131)
+        Me.RightCenterLabel.Location = New System.Drawing.Point(387, 132)
         Me.RightCenterLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RightCenterLabel.Name = "RightCenterLabel"
-        Me.RightCenterLabel.Size = New System.Drawing.Size(120, 13)
-        Me.RightCenterLabel.TabIndex = 15
+        Me.RightCenterLabel.Size = New System.Drawing.Size(123, 13)
+        Me.RightCenterLabel.TabIndex = 21
         Me.RightCenterLabel.Text = "Right Image Center:"
         Me.RightCenterLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -133,11 +205,11 @@ Partial Class EffectEditor
         '
         Me.RightPlacementLabel.AutoSize = True
         Me.RightPlacementLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.RightPlacementLabel.Location = New System.Drawing.Point(387, 104)
+        Me.RightPlacementLabel.Location = New System.Drawing.Point(387, 105)
         Me.RightPlacementLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RightPlacementLabel.Name = "RightPlacementLabel"
-        Me.RightPlacementLabel.Size = New System.Drawing.Size(120, 13)
-        Me.RightPlacementLabel.TabIndex = 13
+        Me.RightPlacementLabel.Size = New System.Drawing.Size(123, 13)
+        Me.RightPlacementLabel.TabIndex = 19
         Me.RightPlacementLabel.Text = "Right Image Placement:"
         Me.RightPlacementLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -147,20 +219,20 @@ Partial Class EffectEditor
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.LeftCenterComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.LeftCenterComboBox.FormattingEnabled = True
-        Me.LeftCenterComboBox.Location = New System.Drawing.Point(122, 128)
+        Me.LeftCenterComboBox.Location = New System.Drawing.Point(122, 129)
         Me.LeftCenterComboBox.Name = "LeftCenterComboBox"
         Me.LeftCenterComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.LeftCenterComboBox.TabIndex = 9
+        Me.LeftCenterComboBox.TabIndex = 15
         '
         'LeftCenterLabel
         '
         Me.LeftCenterLabel.AutoSize = True
         Me.LeftCenterLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.LeftCenterLabel.Location = New System.Drawing.Point(3, 131)
+        Me.LeftCenterLabel.Location = New System.Drawing.Point(3, 132)
         Me.LeftCenterLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LeftCenterLabel.Name = "LeftCenterLabel"
         Me.LeftCenterLabel.Size = New System.Drawing.Size(113, 13)
-        Me.LeftCenterLabel.TabIndex = 8
+        Me.LeftCenterLabel.TabIndex = 14
         Me.LeftCenterLabel.Text = "Left Image Center:"
         Me.LeftCenterLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -168,11 +240,11 @@ Partial Class EffectEditor
         '
         Me.LeftPlacementLabel.AutoSize = True
         Me.LeftPlacementLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.LeftPlacementLabel.Location = New System.Drawing.Point(3, 104)
+        Me.LeftPlacementLabel.Location = New System.Drawing.Point(3, 105)
         Me.LeftPlacementLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LeftPlacementLabel.Name = "LeftPlacementLabel"
         Me.LeftPlacementLabel.Size = New System.Drawing.Size(113, 13)
-        Me.LeftPlacementLabel.TabIndex = 6
+        Me.LeftPlacementLabel.TabIndex = 12
         Me.LeftPlacementLabel.Text = "Left Image Placement:"
         Me.LeftPlacementLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -181,7 +253,7 @@ Partial Class EffectEditor
         Me.RepeatDelayNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RepeatDelayNumber.DecimalPlaces = 2
-        Me.RepeatDelayNumber.Location = New System.Drawing.Point(122, 55)
+        Me.RepeatDelayNumber.Location = New System.Drawing.Point(122, 56)
         Me.RepeatDelayNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
         Me.RepeatDelayNumber.Name = "RepeatDelayNumber"
         Me.RepeatDelayNumber.Size = New System.Drawing.Size(259, 20)
@@ -191,7 +263,7 @@ Partial Class EffectEditor
         '
         Me.RepeatDelayLabel.AutoSize = True
         Me.RepeatDelayLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.RepeatDelayLabel.Location = New System.Drawing.Point(3, 58)
+        Me.RepeatDelayLabel.Location = New System.Drawing.Point(3, 59)
         Me.RepeatDelayLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RepeatDelayLabel.Name = "RepeatDelayLabel"
         Me.RepeatDelayLabel.Size = New System.Drawing.Size(113, 13)
@@ -215,25 +287,25 @@ Partial Class EffectEditor
         '
         Me.RightImageFileSelector.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RightImageFileSelector.Location = New System.Drawing.Point(513, 155)
+        Me.RightImageFileSelector.Location = New System.Drawing.Point(516, 156)
         Me.RightImageFileSelector.Name = "RightImageFileSelector"
         Me.RightImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.RightImageFileSelector.TabIndex = 18
+        Me.RightImageFileSelector.TabIndex = 24
         '
         'LeftImageFileSelector
         '
         Me.LeftImageFileSelector.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.LeftImageFileSelector.Location = New System.Drawing.Point(122, 155)
+        Me.LeftImageFileSelector.Location = New System.Drawing.Point(122, 156)
         Me.LeftImageFileSelector.Name = "LeftImageFileSelector"
         Me.LeftImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.LeftImageFileSelector.TabIndex = 11
+        Me.LeftImageFileSelector.TabIndex = 17
         '
         'DurationLabel
         '
         Me.DurationLabel.AutoSize = True
         Me.DurationLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.DurationLabel.Location = New System.Drawing.Point(3, 32)
+        Me.DurationLabel.Location = New System.Drawing.Point(3, 33)
         Me.DurationLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.DurationLabel.Name = "DurationLabel"
         Me.DurationLabel.Size = New System.Drawing.Size(113, 13)
@@ -255,11 +327,11 @@ Partial Class EffectEditor
         '
         Me.LeftImageLabel.AutoSize = True
         Me.LeftImageLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.LeftImageLabel.Location = New System.Drawing.Point(3, 158)
+        Me.LeftImageLabel.Location = New System.Drawing.Point(3, 159)
         Me.LeftImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LeftImageLabel.Name = "LeftImageLabel"
         Me.LeftImageLabel.Size = New System.Drawing.Size(113, 13)
-        Me.LeftImageLabel.TabIndex = 10
+        Me.LeftImageLabel.TabIndex = 16
         Me.LeftImageLabel.Text = "Left Image:"
         Me.LeftImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -267,17 +339,18 @@ Partial Class EffectEditor
         '
         Me.RightImageLabel.AutoSize = True
         Me.RightImageLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.RightImageLabel.Location = New System.Drawing.Point(387, 158)
+        Me.RightImageLabel.Location = New System.Drawing.Point(387, 159)
         Me.RightImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RightImageLabel.Name = "RightImageLabel"
-        Me.RightImageLabel.Size = New System.Drawing.Size(120, 13)
-        Me.RightImageLabel.TabIndex = 17
+        Me.RightImageLabel.Size = New System.Drawing.Size(123, 13)
+        Me.RightImageLabel.TabIndex = 23
         Me.RightImageLabel.Text = "Right Image:"
         Me.RightImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'LeftImageViewer
         '
         Me.LeftImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.LeftImageViewer.Animate = False
         Me.LeftImageViewer.AutoSize = True
         Me.LeftImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.LeftImageViewer.BackColor = System.Drawing.Color.White
@@ -285,15 +358,16 @@ Partial Class EffectEditor
         Me.LeftImageViewer.Centering = VBDesktopPonies.Direction.TopLeft
         Me.PropertiesTable.SetColumnSpan(Me.LeftImageViewer, 2)
         Me.LeftImageViewer.EffectImage = Nothing
-        Me.LeftImageViewer.Location = New System.Drawing.Point(192, 184)
+        Me.LeftImageViewer.Location = New System.Drawing.Point(192, 185)
         Me.LeftImageViewer.Name = "LeftImageViewer"
         Me.LeftImageViewer.Placement = VBDesktopPonies.Direction.TopLeft
         Me.LeftImageViewer.Size = New System.Drawing.Size(0, 0)
-        Me.LeftImageViewer.TabIndex = 12
+        Me.LeftImageViewer.TabIndex = 18
         '
         'RightImageViewer
         '
         Me.RightImageViewer.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RightImageViewer.Animate = False
         Me.RightImageViewer.AutoSize = True
         Me.RightImageViewer.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.RightImageViewer.BackColor = System.Drawing.Color.White
@@ -301,18 +375,18 @@ Partial Class EffectEditor
         Me.RightImageViewer.Centering = VBDesktopPonies.Direction.TopLeft
         Me.PropertiesTable.SetColumnSpan(Me.RightImageViewer, 2)
         Me.RightImageViewer.EffectImage = Nothing
-        Me.RightImageViewer.Location = New System.Drawing.Point(579, 184)
+        Me.RightImageViewer.Location = New System.Drawing.Point(581, 185)
         Me.RightImageViewer.Name = "RightImageViewer"
         Me.RightImageViewer.Placement = VBDesktopPonies.Direction.TopLeft
         Me.RightImageViewer.Size = New System.Drawing.Size(0, 0)
-        Me.RightImageViewer.TabIndex = 19
+        Me.RightImageViewer.TabIndex = 25
         '
         'DurationNumber
         '
         Me.DurationNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.DurationNumber.DecimalPlaces = 2
-        Me.DurationNumber.Location = New System.Drawing.Point(122, 29)
+        Me.DurationNumber.Location = New System.Drawing.Point(122, 30)
         Me.DurationNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
         Me.DurationNumber.Name = "DurationNumber"
         Me.DurationNumber.Size = New System.Drawing.Size(259, 20)
@@ -324,10 +398,21 @@ Partial Class EffectEditor
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.LeftPlacementComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.LeftPlacementComboBox.FormattingEnabled = True
-        Me.LeftPlacementComboBox.Location = New System.Drawing.Point(122, 101)
+        Me.LeftPlacementComboBox.Location = New System.Drawing.Point(122, 102)
         Me.LeftPlacementComboBox.Name = "LeftPlacementComboBox"
         Me.LeftPlacementComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.LeftPlacementComboBox.TabIndex = 7
+        Me.LeftPlacementComboBox.TabIndex = 13
+        '
+        'FollowCheckBox
+        '
+        Me.FollowCheckBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.FollowCheckBox.AutoSize = True
+        Me.FollowCheckBox.Location = New System.Drawing.Point(516, 30)
+        Me.FollowCheckBox.Name = "FollowCheckBox"
+        Me.FollowCheckBox.Size = New System.Drawing.Size(15, 20)
+        Me.FollowCheckBox.TabIndex = 9
+        Me.FollowCheckBox.UseVisualStyleBackColor = True
         '
         'EffectEditor
         '
@@ -363,5 +448,11 @@ Partial Class EffectEditor
     Friend WithEvents RightPlacementComboBox As System.Windows.Forms.ComboBox
     Friend WithEvents RightCenterLabel As System.Windows.Forms.Label
     Friend WithEvents RightPlacementLabel As System.Windows.Forms.Label
+    Friend WithEvents PreventLoopLabel As System.Windows.Forms.Label
+    Friend WithEvents FollowLabel As System.Windows.Forms.Label
+    Friend WithEvents BehaviorLabel As System.Windows.Forms.Label
+    Friend WithEvents FollowCheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents PreventLoopCheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents BehaviorComboBox As System.Windows.Forms.ComboBox
 
 End Class

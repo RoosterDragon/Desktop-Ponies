@@ -23,7 +23,7 @@ Partial Class FileSelector
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.FilePathComboBox = New System.Windows.Forms.ComboBox()
-        Me.FilePathClearButton = New System.Windows.Forms.Button()
+        Me.FilePathDeleteButton = New System.Windows.Forms.Button()
         Me.FilePathChooseButton = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
@@ -39,19 +39,18 @@ Partial Class FileSelector
         Me.FilePathComboBox.Size = New System.Drawing.Size(328, 21)
         Me.FilePathComboBox.TabIndex = 0
         '
-        'FilePathClearButton
+        'FilePathDeleteButton
         '
-        Me.FilePathClearButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.FilePathClearButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.FilePathClearButton.ForeColor = System.Drawing.Color.Firebrick
-        Me.FilePathClearButton.Location = New System.Drawing.Point(370, 0)
-        Me.FilePathClearButton.Margin = New System.Windows.Forms.Padding(3, 0, 3, 0)
-        Me.FilePathClearButton.Name = "FilePathClearButton"
-        Me.FilePathClearButton.Size = New System.Drawing.Size(30, 23)
-        Me.FilePathClearButton.TabIndex = 2
-        Me.FilePathClearButton.Text = "X"
-        Me.FilePathClearButton.UseVisualStyleBackColor = True
-        Me.FilePathClearButton.Visible = False
+        Me.FilePathDeleteButton.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.FilePathDeleteButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.FilePathDeleteButton.ForeColor = System.Drawing.Color.Firebrick
+        Me.FilePathDeleteButton.Location = New System.Drawing.Point(370, 0)
+        Me.FilePathDeleteButton.Margin = New System.Windows.Forms.Padding(3, 0, 3, 0)
+        Me.FilePathDeleteButton.Name = "FilePathDeleteButton"
+        Me.FilePathDeleteButton.Size = New System.Drawing.Size(30, 23)
+        Me.FilePathDeleteButton.TabIndex = 2
+        Me.FilePathDeleteButton.Text = "X"
+        Me.FilePathDeleteButton.UseVisualStyleBackColor = True
         '
         'FilePathChooseButton
         '
@@ -68,7 +67,7 @@ Partial Class FileSelector
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.FilePathClearButton)
+        Me.Controls.Add(Me.FilePathDeleteButton)
         Me.Controls.Add(Me.FilePathComboBox)
         Me.Controls.Add(Me.FilePathChooseButton)
         Me.Name = "FileSelector"
@@ -77,7 +76,7 @@ Partial Class FileSelector
 
     End Sub
     Public WithEvents FilePathComboBox As System.Windows.Forms.ComboBox
-    Public WithEvents FilePathClearButton As System.Windows.Forms.Button
+    Public WithEvents FilePathDeleteButton As System.Windows.Forms.Button
     Public WithEvents FilePathChooseButton As System.Windows.Forms.Button
 
 End Class

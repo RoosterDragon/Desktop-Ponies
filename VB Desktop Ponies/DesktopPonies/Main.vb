@@ -10,7 +10,7 @@ Public Class Main
 
 #Region "Fields and Properties"
     Private initialized As Boolean
-    Private loading As Boolean
+    Private loading As Boolean = True
     Private loadWatch As New Diagnostics.Stopwatch()
 
     Private oldWindowState As FormWindowState
@@ -34,6 +34,8 @@ Public Class Main
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
+
+    Private ponyCollection As PonyCollection
 #End Region
 
 #Region "Initialization"
@@ -54,6 +56,7 @@ Public Class Main
     ''' Read all configuration files and pony folders.
     ''' </summary>
     Private Sub LoadInternal()
+        loading = True
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         PonyPaginationPanel.Enabled = False
@@ -63,8 +66,6 @@ Public Class Main
         Update()
 
         If ProcessCommandLine() Then Return
-
-        loading = True
 
         'temporarily save filter selections, if any, in the case that we are reloading after making a change in the editor.
         '(Loading options resets the filter, and will cause havoc otherwise)
@@ -221,57 +222,48 @@ Public Class Main
     End Sub
 
     Private Sub LoadTemplates(workerObject As Object)
-        Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
-        Array.Sort(ponyBaseDirectories, StringComparer.CurrentCultureIgnoreCase)
-
         Dim worker = DirectCast(workerObject, IdleWorker)
-        worker.QueueTask(Sub() LoadingProgressBar.Maximum = ponyBaseDirectories.Length)
 
-        Dim skipLoadingErrors As Boolean = False
-        For Each folder In Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
+        Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
+
+        ' Load ponies.
+        Dim watch = New Diagnostics.Stopwatch()
+        ponyCollection = New PonyCollection()
+        ponyCollection.LoadAll(
+            Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length),
+            Sub(pony) worker.QueueTask(Sub()
+                                           watch.Start()
+                                           AddToMenu(pony)
+                                           LoadingProgressBar.Value += 1
+                                           watch.Stop()
+                                       End Sub))
+
+        ' Load houses.
+        Dim skipLoadingErrors = False
+        For Each folder In houseDirectories
             skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
+            worker.QueueTask(Sub() LoadingProgressBar.Value += 1)
         Next
 
-        For Each folder In ponyBaseDirectories
-            Dim pony As PonyBase
-            Try
-                pony = New PonyBase(folder)
-            Catch ex As FileNotFoundException
-                My.Application.NotifyUserOfNonFatalException(
-                    ex, String.Format("Found a pony folder but could not find all the required files.{0}" &
-                    "Does the configuration file '{1}' exist?{0}" &
-                    "Do any images and sound files referenced in the configuration file exist?{0}" &
-                    "The folder was '{2}'.{0}" &
-                    "The missing file was '{3}'", Environment.NewLine, PonyBase.ConfigFilename, folder, ex.FileName))
-                Continue For
-            End Try
-            worker.QueueTask(Sub()
-                                 Try
-                                     AddToMenu(pony)
-                                 Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse TypeOf ex Is FileNotFoundException
-                                     If Not skipLoadingErrors Then
-                                         Select Case MessageBox.Show(Me,
-                                                                         "Error: Invalid data in " & PonyBase.ConfigFilename &
-                                                                         " configuration file in " & folder & ControlChars.NewLine &
-                                                                         "Won't load this pony..." & ControlChars.NewLine &
-                                                                         "Do you want to skip seeing these errors? " &
-                                                                         "Press No to see the error for each pony. " &
-                                                                         "Press cancel to quit.", "Invalid Configuration File",
-                                                                         MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)
-                                             Case DialogResult.Yes
-                                                 skipLoadingErrors = True
-                                             Case DialogResult.No
-                                                 'do nothing
-                                             Case DialogResult.Cancel
-                                                 Me.Close()
-                                         End Select
-                                     End If
-                                 End Try
-                                 LoadingProgressBar.Value += 1
-                             End Sub)
-        Next
+        ' Sort controls by name.
+        worker.QueueTask(Sub()
+                             Dim selectionControls = PonySelectionPanel.Controls.Cast(Of PonySelectionControl)().ToArray()
+                             Array.Sort(selectionControls,
+                                        Function(a, b) StringComparer.OrdinalIgnoreCase.Compare(
+                                            a.PonyBase.Directory, b.PonyBase.Directory))
+                             PonySelectionPanel.SuspendLayout()
+                             For i = 0 To selectionControls.Length - 1
+                                 PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
+                             Next
+                             PonySelectionPanel.ResumeLayout()
+                         End Sub)
 
+        ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
+        ponyBases = ponyBases.OrderBy(Function(b) b.Directory, StringComparer.OrdinalIgnoreCase).ToList()
+        Console.WriteLine("AddToMenu Total: {0:0ms} Avg: {1:0ms}",
+                          watch.Elapsed.TotalMilliseconds,
+                          watch.Elapsed.TotalMilliseconds / PonySelectionPanel.Controls.Count)
         If ponyBases.Count = 0 Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
@@ -304,6 +296,7 @@ Public Class Main
                              Next
                          End Sub)
 
+        ' Finish loading.
         worker.QueueTask(Sub()
                              Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
@@ -328,8 +321,8 @@ Public Class Main
                                  AnimationTimer.Enabled = True
                              End If
 
-                             loading = False
                              General.FullCollect()
+                             loading = False
 
                              loadWatch.Stop()
                              Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
@@ -344,14 +337,17 @@ Public Class Main
             Return True
         Catch ex As Exception
             If Not skipErrors Then
-                Select Case MessageBox.Show(Me,
-                                            "Error: Invalid data in " & HouseBase.ConfigFilename &
-                                            " configuration file in " & folder & ControlChars.NewLine &
-                                            "Won't load this house..." & ControlChars.NewLine &
-                                            "Do you want to skip seeing these errors? " &
-                                            "Press No to see the error for each house. " &
-                                            "Press cancel to quit.", "Invalid Configuration File",
-                                            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation)
+                Dim result As DialogResult
+                SmartInvoke(Sub() result =
+                                MessageBox.Show(Me,
+                                                "Error: Invalid data in " & HouseBase.ConfigFilename &
+                                                " configuration file in " & folder & ControlChars.NewLine &
+                                                "Won't load this house..." & ControlChars.NewLine &
+                                                "Do you want to skip seeing these errors? " &
+                                                "Press No to see the error for each house. " &
+                                                "Press cancel to quit.", "Invalid Configuration File",
+                                                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation))
+                Select Case result
                     Case DialogResult.Yes
                         Return True
                     Case DialogResult.No
@@ -967,7 +963,6 @@ Public Class Main
     End Sub
 
     Private Sub PonyLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles PonyLoader.RunWorkerCompleted
-        loading = False
         Dim totalImages = LoadingProgressBar.Maximum
 
         LoadingProgressBar.Value = 0
@@ -983,6 +978,7 @@ Public Class Main
         }
         oldLoader.Dispose()
 
+        loading = False
         If Not e.Cancelled Then
             Reference.PoniesHaveLaunched = True
             TempSaveCounts()

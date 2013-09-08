@@ -23,15 +23,11 @@ Public Class NewSpeechDialog
 
         Dim filename = m_editor.GetFilename(Sound_Textbox.Text)
 
-
-        Dim new_speech As New Behavior.SpeakingLine(m_editor.PreviewPony.Name, _
-                                                          Name_Textbox.Text, _
-                                                          Text_TextBox.Text, _
-                                                          Replace(Sound_Textbox.Text, filename, ""), _
-                                                          filename, _
-                                                          Not Random_Checkbox.Checked, CInt(Group_NumberBox.Value))
-
-        m_editor.PreviewPonyBase.SpeakingLines.Add(new_speech)
+        Dim new_speech = New Behavior.SpeakingLine() With {.Name = Name_Textbox.Text,
+                                                           .Text = Text_TextBox.Text,
+                                                           .Skip = Not Random_Checkbox.Checked,
+                                                           .Group = CInt(Group_NumberBox.Value),
+                                                           .SoundFile = Replace(Sound_Textbox.Text, filename, "") & filename}
 
         Me.Close()
     End Sub
