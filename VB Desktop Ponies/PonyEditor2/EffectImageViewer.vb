@@ -14,10 +14,28 @@ Public Class EffectImageViewer
             Invalidate()
         End Set
     End Property
+    Private _centering As Direction
     <DefaultValue(GetType(Direction), "MiddleCenter")>
     Public Property Centering As Direction
+        Get
+            Return _centering
+        End Get
+        Set(value As Direction)
+            _centering = value
+            Invalidate()
+        End Set
+    End Property
+    Private _placement As Direction
     <DefaultValue(GetType(Direction), "MiddleCenter")>
     Public Property Placement As Direction
+        Get
+            Return _placement
+        End Get
+        Set(value As Direction)
+            _placement = value
+            Invalidate()
+        End Set
+    End Property
 
     Public Overrides Function GetPreferredSize(proposedSize As Size) As Size
         If ErrorLabel.Visible Then

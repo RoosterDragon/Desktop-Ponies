@@ -2,7 +2,7 @@
 
 Public Class PonyEditorForm2
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
-    Private ReadOnly bases As New Dictionary(Of String, PonyBase)
+    Private ReadOnly bases As New Dictionary(Of String, MutablePonyBase)()
 
     Private workingCount As Integer
 
@@ -19,14 +19,17 @@ Public Class PonyEditorForm2
                 Return _pageContent
             End Get
         End Property
-        Public Property ItemName As String
-        Public Sub New(ponyBase As MutablePonyBase, pageContent As PageContent, itemName As String)
+        Public Property Item As IPonyIniSourceable
+        Public Sub New(ponyBase As MutablePonyBase, pageContent As PageContent, item As IPonyIniSourceable)
             _ponyBase = ponyBase
             _pageContent = pageContent
-            Me.ItemName = itemName
+            Me.Item = item
         End Sub
         Public Overrides Function ToString() As String
-            Return String.Join(Path.DirectorySeparatorChar, If(PonyBase IsNot Nothing, PonyBase.Directory, ""), PageContent, ItemName)
+            Return String.Join(Path.DirectorySeparatorChar,
+                               If(PonyBase IsNot Nothing, PonyBase.Directory, ""),
+                               PageContent,
+                               If(Item IsNot Nothing, Item.Name, Nothing))
         End Function
     End Class
 
@@ -84,17 +87,17 @@ Public Class PonyEditorForm2
                     ponyBaseNode.Nodes.Add(speechesNode)
 
                     For Each behavior In pony.Behaviors
-                        Dim ref = New PageRef(pony, PageContent.Behavior, behavior.Name)
+                        Dim ref = New PageRef(pony, PageContent.Behavior, behavior)
                         behaviorsNode.Nodes.Add(New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()})
                     Next
 
                     For Each effect In pony.Effects
-                        Dim ref = New PageRef(pony, PageContent.Effect, effect.Name)
+                        Dim ref = New PageRef(pony, PageContent.Effect, effect)
                         effectsNode.Nodes.Add(New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()})
                     Next
 
                     For Each speech In pony.Speeches
-                        Dim ref = New PageRef(pony, PageContent.Speech, speech.Name)
+                        Dim ref = New PageRef(pony, PageContent.Speech, speech)
                         speechesNode.Nodes.Add(New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()})
                     Next
 
@@ -132,7 +135,7 @@ Public Class PonyEditorForm2
             Case PageContent.Behaviors, PageContent.Effects, PageContent.Speeches
                 Return pageRef.PonyBase.Directory & " - " & pageRef.PageContent.ToString()
             Case PageContent.Behavior, PageContent.Effect, PageContent.Speech
-                Return pageRef.PonyBase.Directory & ": " & pageRef.ItemName
+                Return pageRef.PonyBase.Directory & ": " & pageRef.Item.Name
             Case Else
                 Throw New System.ComponentModel.InvalidEnumArgumentException("Unknown Content in pageRef")
         End Select
@@ -171,7 +174,7 @@ Public Class PonyEditorForm2
                     editor = New SpeechEditor()
             End Select
             If editor IsNot Nothing Then
-                QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.ItemName))
+                QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
                 editor.Dock = DockStyle.Fill
                 tab = New ItemTabPage() With {.Name = pageRefKey, .Text = GetTabText(pageRef), .Tag = pageRef}
                 tab.Controls.Add(editor)
@@ -242,10 +245,10 @@ Public Class PonyEditorForm2
         Dim ref = GetPageRef(Documents.SelectedTab)
         Dim node = DocumentsView.Nodes.Find(ref.ToString(), True)(0)
 
-        ref.ItemName = ActiveItemEditor.ItemName
+        ref.Item = ActiveItemEditor.Item
         Documents.SelectedTab.Text = GetTabText(ref)
         node.Name = ref.ToString()
-        node.Text = ref.ItemName
+        node.Text = ref.Item.Name
 
         EditorStatus.Text = "Saved"
     End Sub

@@ -3,11 +3,13 @@ Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
 Public Interface IPonyIniSourceable
+    Inherits IPonyIniSerializable, IMemberwiseCloneable
     ReadOnly Property SourceIni As String
     Sub UpdateSourceIniTo(newSource As String)
 End Interface
 
 Public Interface IPonyIniSerializable
+    Property Name As String
     Function GetPonyIni() As String
 End Interface
 
@@ -171,8 +173,8 @@ Public Class PonyBase
         End Get
     End Property
 
-    Private _effects As ICollection(Of EffectBase)
-    Public ReadOnly Property Effects() As ICollection(Of EffectBase)
+    Private _effects As IList(Of EffectBase)
+    Public ReadOnly Property Effects() As IList(Of EffectBase)
         Get
             Return _effects
         End Get
@@ -185,8 +187,8 @@ Public Class PonyBase
         End Get
     End Property
 
-    Private _speeches As ICollection(Of Speech)
-    Public ReadOnly Property Speeches() As ICollection(Of Speech)
+    Private _speeches As IList(Of Speech)
+    Public ReadOnly Property Speeches() As IList(Of Speech)
         Get
             Return _speeches
         End Get
@@ -720,7 +722,7 @@ Public Class Interaction
 
     Public Const ConfigFilename = "interactions.ini"
 
-    Public Property Name As String
+    Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property PonyName As String
     Public Property Probability As Double
     Public Property Proximity_Activation_Distance As Double = 125 'the distance to the target inside of which we start the interaction.
@@ -776,12 +778,12 @@ End Enum
 
 #Region "Behavior class"
 Public Class Behavior
-    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of Behavior), IReferential
+    Implements IPonyIniSourceable, IReferential
     Private ReadOnly pony As PonyBase
 
     Public Shared ReadOnly AnyGroup As Integer = 0
 
-    Public Property Name As String
+    Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property ChanceOfOccurence As Double
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
@@ -1047,8 +1049,8 @@ Public Class Behavior
             Group.ToString(CultureInfo.InvariantCulture))
     End Function
 
-    Public Overloads Function MemberwiseClone() As Behavior Implements IMemberwiseCloneable(Of Behavior).MemberwiseClone
-        Return DirectCast(MyBase.MemberwiseClone(), Behavior)
+    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
+        Return MyBase.MemberwiseClone()
     End Function
 
     Public Function GetReferentialIssues() As ParseIssue() Implements IReferential.GetReferentialIssues
@@ -1078,8 +1080,8 @@ End Class
 Public Class BehaviorGroup
     Implements IPonyIniSerializable
 
-    Public Property Name As String = ""
-    Public Property Number As Integer = -1
+    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property Number As Integer
 
     Public Sub New(_name As String, _number As Integer)
         Name = _name
@@ -1093,9 +1095,9 @@ End Class
 #End Region
 
 Public Class Speech
-    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of Speech)
+    Implements IPonyIniSourceable
 
-    Public Property Name As String
+    Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property Text As String = ""
     Public Property SoundFile As String
     Public Property Skip As Boolean = False 'don't use randomly if true
@@ -1162,8 +1164,8 @@ Public Class Speech
         End If
     End Function
 
-    Public Overloads Function MemberwiseClone() As Speech Implements IMemberwiseCloneable(Of Speech).MemberwiseClone
-        Return DirectCast(MyBase.MemberwiseClone(), Speech)
+    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
+        Return MyBase.MemberwiseClone()
     End Function
 
     Private _sourceIni As String
@@ -3170,9 +3172,9 @@ Public Class Pony
 End Class
 
 Public Class EffectBase
-    Implements IPonyIniSourceable, IPonyIniSerializable, IMemberwiseCloneable(Of EffectBase)
+    Implements IPonyIniSourceable
 
-    Public Property Name As String
+    Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property BehaviorName As String
     Public Property ParentPonyBase As PonyBase
     Public Property LeftImagePath As String
@@ -3288,8 +3290,8 @@ Public Class EffectBase
             DoNotRepeatImageAnimations)
     End Function
 
-    Public Overloads Function MemberwiseClone() As EffectBase Implements IMemberwiseCloneable(Of EffectBase).MemberwiseClone
-        Return DirectCast(MyBase.MemberwiseClone(), EffectBase)
+    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
+        Return MyBase.MemberwiseClone()
     End Function
 
     Private _sourceIni As String

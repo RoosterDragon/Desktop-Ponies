@@ -1,76 +1,59 @@
 ﻿Imports System.IO
 
 Friend Class SpeechEditor
-    Private originalSpeech As Speech
-    Private newSpeech As Speech
+    Private Shadows Property Original As Speech
+        Get
+            Return DirectCast(MyBase.Original, Speech)
+        End Get
+        Set(value As Speech)
+            MyBase.Original = value
+        End Set
+    End Property
+    Private Shadows Property Edited As Speech
+        Get
+            Return DirectCast(MyBase.Edited, Speech)
+        End Get
+        Set(value As Speech)
+            MyBase.Edited = value
+        End Set
+    End Property
+    Protected Overrides ReadOnly Property Collection As System.Collections.IList
+        Get
+            Return CType(Base.Speeches, Collections.IList)
+        End Get
+    End Property
+    Protected Overrides ReadOnly Property ItemTypeName As String
+        Get
+            Return "speech"
+        End Get
+    End Property
 
     Public Sub New()
         InitializeComponent()
-        AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() newSpeech.Name = NameTextBox.Text)
-        AddHandler LineTextBox.TextChanged, Sub() UpdateProperty(Sub() newSpeech.Text = LineTextBox.Text)
+        AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
+        AddHandler LineTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Text = LineTextBox.Text)
         AddHandler SoundFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim filePath = If(SoundFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, SoundFileSelector.FilePath))
-                                     newSpeech.SoundFile = filePath
+                                     Edited.SoundFile = filePath
                                  End Sub)
-        AddHandler RandomCheckBox.CheckedChanged, Sub() UpdateProperty(Sub() newSpeech.Skip = Not RandomCheckBox.Checked)
-        AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() newSpeech.Group = CInt(GroupNumber.Value))
+        AddHandler RandomCheckBox.CheckedChanged, Sub() UpdateProperty(Sub() Edited.Skip = Not RandomCheckBox.Checked)
+        AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Group = CInt(GroupNumber.Value))
     End Sub
-
-    Public Overrides ReadOnly Property ItemName As String
-        Get
-            Return originalSpeech.Name
-        End Get
-    End Property
 
     Public Overrides Sub NewItem(name As String)
         ' TODO.
     End Sub
 
-    Public Overrides Sub LoadItem(speechName As String)
-        originalSpeech = Base.Speeches.Single(Function(s) s.Name = speechName)
-        newSpeech = originalSpeech.MemberwiseClone()
-
+    Public Overrides Sub LoadItem()
         Dim sounds =
             Directory.GetFiles(PonyBasePath, "*.mp3").Concat(Directory.GetFiles(PonyBasePath, "*.ogg")).
             Select(Function(filePath) Path.GetFileName(filePath)).ToArray()
         ReplaceItemsInComboBox(SoundFileSelector.FilePathComboBox, sounds, True)
-        If newSpeech.SoundFile IsNot Nothing Then
-            SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(newSpeech.SoundFile))
+        If Edited.SoundFile IsNot Nothing Then
+            SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(Edited.SoundFile))
         End If
-
-        Source.Text = newSpeech.SourceIni
-    End Sub
-
-    Private Sub LoadItemCommon()
-        NameTextBox.Text = newSpeech.Name
-        LineTextBox.Text = newSpeech.Text
-        RandomCheckBox.Checked = Not newSpeech.Skip
-        GroupNumber.Value = newSpeech.Group
-    End Sub
-
-    Public Overrides Sub SaveItem()
-        If Base.Speeches.Any(Function(s) s.Name = newSpeech.Name AndAlso Not Object.ReferenceEquals(s, originalSpeech)) Then
-            MessageBox.Show(Me, "A speech with the name '" & newSpeech.Name &
-                            "' already exists for this pony. Please choose another name.",
-                            "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
-            Return
-        End If
-
-        Base.Speeches.Remove(originalSpeech)
-        Base.Speeches.Add(newSpeech)
-
-        MyBase.SaveItem()
-
-        originalSpeech = newSpeech
-        originalSpeech.UpdateSourceIniTo(Source.Text)
-        newSpeech = originalSpeech.MemberwiseClone()
-    End Sub
-
-    Protected Overrides Sub OnItemPropertyChanged()
-        MyBase.OnItemPropertyChanged()
-        Source.Text = newSpeech.GetPonyIni()
     End Sub
 
     Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
@@ -80,8 +63,12 @@ Friend Class SpeechEditor
     Protected Overrides Sub SourceTextChanged()
         Dim s As Speech = Nothing
         Speech.TryLoad(Source.Text, PonyBasePath, s, ParseIssues)
-        OnIssuesChanged(Me, EventArgs.Empty)
-        newSpeech = s
-        LoadItemCommon()
+        OnIssuesChanged(EventArgs.Empty)
+        Edited = s
+
+        NameTextBox.Text = Edited.Name
+        LineTextBox.Text = Edited.Text
+        RandomCheckBox.Checked = Not Edited.Skip
+        GroupNumber.Value = Edited.Group
     End Sub
 End Class

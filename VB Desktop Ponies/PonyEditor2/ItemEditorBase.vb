@@ -6,6 +6,24 @@ Public Class ItemEditorBase
     Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
     Private lastFocusedControl As Control
 
+    Protected Original As IPonyIniSourceable
+    Protected Edited As IPonyIniSourceable
+    Public ReadOnly Property Item As IPonyIniSourceable
+        Get
+            Return Original
+        End Get
+    End Property
+    Protected Overridable ReadOnly Property Collection As System.Collections.IList
+        Get
+            Throw New NotImplementedException()
+        End Get
+    End Property
+    Protected Overridable ReadOnly Property ItemTypeName As String
+        Get
+            Throw New NotImplementedException()
+        End Get
+    End Property
+
     Private _base As PonyBase
     Protected ReadOnly Property Base As PonyBase
         Get
@@ -53,17 +71,11 @@ Public Class ItemEditorBase
         End Get
     End Property
     Public Event IssuesChanged As EventHandler
-    Protected Overridable Sub OnIssuesChanged(sender As Object, e As EventArgs)
-        RaiseEvent IssuesChanged(sender, e)
+    Protected Overridable Sub OnIssuesChanged(e As EventArgs)
+        RaiseEvent IssuesChanged(Me, e)
     End Sub
 
     Public Event DirtinessChanged As EventHandler
-
-    Public Overridable ReadOnly Property ItemName As String
-        Get
-            Throw New NotImplementedException()
-        End Get
-    End Property
 
     Private Sub SetupItem(ponyBase As PonyBase)
         Argument.EnsureNotNull(ponyBase, "ponyBase")
@@ -83,19 +95,40 @@ Public Class ItemEditorBase
         Throw New NotImplementedException()
     End Sub
 
-    Public Sub LoadItem(ponyBase As PonyBase, name As String)
+    Public Sub LoadItem(ponyBase As PonyBase, item As IPonyIniSourceable)
         _isNewItem = False
         SetupItem(ponyBase)
         LoadingItem = True
-        LoadItem(name)
+        Original = item
+        Edited = DirectCast(item.MemberwiseClone(), IPonyIniSourceable)
+        LoadItem()
+        Source.Text = Edited.SourceIni
         LoadingItem = False
     End Sub
 
-    Public Overridable Sub LoadItem(name As String)
+    Public Overridable Sub LoadItem()
         Throw New NotImplementedException()
     End Sub
 
-    Public Overridable Sub SaveItem()
+    Public Sub SaveItem()
+        If Collection.Cast(Of IPonyIniSourceable).Any(Function(item) item.Name = Edited.Name AndAlso Not Object.ReferenceEquals(item, Original)) Then
+            MessageBox.Show(Me, "A " & ItemTypeName & " with the name '" & Edited.Name &
+                            "' already exists for this pony. Please choose another name.",
+                            "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Return
+        End If
+
+        If Original.Name <> Edited.Name Then
+            If MessageBox.Show(Me, "Changing the name of this " & ItemTypeName & " will break other references. Continue with save?",
+                               "Rename?", MessageBoxButtons.YesNo,
+                               MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No Then
+                Return
+            End If
+        End If
+
+        Dim index = Collection.IndexOf(Original)
+        Collection(index) = Edited
+
         Dim result = DialogResult.None
         Do
             Try
@@ -109,10 +142,10 @@ Public Class ItemEditorBase
                                          MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
             End Try
         Loop While result = DialogResult.Retry
-    End Sub
 
-    Protected Overridable Sub OnItemPropertyChanged()
-        UpdateDirtyFlag(True)
+        Original = Edited
+        Original.UpdateSourceIniTo(Source.Text)
+        Edited = DirectCast(Original.MemberwiseClone(), Behavior)
     End Sub
 
     Public Overridable Sub AnimateImages(animate As Boolean)
@@ -129,6 +162,28 @@ Public Class ItemEditorBase
         If LoadingItem Then Return
         handler()
         OnItemPropertyChanged()
+    End Sub
+
+    Protected Overridable Sub OnItemPropertyChanged()
+        UpdateDirtyFlag(True)
+        Source.Text = Edited.GetPonyIni()
+    End Sub
+
+    Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
+        SourceTextTimer.Stop()
+        SourceTextTimer.Start()
+    End Sub
+
+    Private Sub SourceTextTimer_Tick(sender As Object, e As EventArgs) Handles SourceTextTimer.Tick
+        SourceTextTimer.Stop()
+        LoadingItem = True
+        SourceTextChanged()
+        UpdateDirtyFlag(True)
+        LoadingItem = False
+    End Sub
+
+    Protected Overridable Sub SourceTextChanged()
+        Throw New NotImplementedException()
     End Sub
 
     Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
@@ -283,22 +338,5 @@ Public Class ItemEditorBase
                         End If
                     End Sub)
             End Sub)
-    End Sub
-
-    Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
-        SourceTextTimer.Stop()
-        SourceTextTimer.Start()
-    End Sub
-
-    Private Sub SourceTextTimer_Tick(sender As Object, e As EventArgs) Handles SourceTextTimer.Tick
-        SourceTextTimer.Stop()
-        LoadingItem = True
-        SourceTextChanged()
-        UpdateDirtyFlag(True)
-        LoadingItem = False
-    End Sub
-
-    Protected Overridable Sub SourceTextChanged()
-        Throw New NotImplementedException()
     End Sub
 End Class
