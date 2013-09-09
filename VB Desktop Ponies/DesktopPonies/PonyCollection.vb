@@ -4,7 +4,6 @@ Public Class PonyCollection
     Private ReadOnly ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
 
     Public Sub LoadAll(countCallback As Action(Of Integer), loadCallback As Action(Of MutablePonyBase))
-        Dim watch = Diagnostics.Stopwatch.StartNew()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
@@ -13,9 +12,6 @@ Public Class PonyCollection
                 Dim pony = LoadOne(folder)
                 If loadCallback IsNot Nothing AndAlso pony IsNot Nothing Then loadCallback(pony)
             End Sub)
-        Console.WriteLine("LoadAll templates Total: {0:0ms} Avg {1:0ms}",
-                          watch.Elapsed.TotalMilliseconds,
-                          watch.Elapsed.TotalMilliseconds / ponyBaseDirectories.Length)
     End Sub
 
     Private Function LoadOne(folder As String) As MutablePonyBase

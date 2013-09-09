@@ -227,15 +227,12 @@ Public Class Main
         Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
-        Dim watch = New Diagnostics.Stopwatch()
         ponyCollection = New PonyCollection()
         ponyCollection.LoadAll(
             Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length),
             Sub(pony) worker.QueueTask(Sub()
-                                           watch.Start()
                                            AddToMenu(pony)
                                            LoadingProgressBar.Value += 1
-                                           watch.Stop()
                                        End Sub))
 
         ' Load houses.
@@ -261,9 +258,6 @@ Public Class Main
         ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
         ponyBases = ponyBases.OrderBy(Function(b) b.Directory, StringComparer.OrdinalIgnoreCase).ToList()
-        Console.WriteLine("AddToMenu Total: {0:0ms} Avg: {1:0ms}",
-                          watch.Elapsed.TotalMilliseconds,
-                          watch.Elapsed.TotalMilliseconds / PonySelectionPanel.Controls.Count)
         If ponyBases.Count = 0 Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
