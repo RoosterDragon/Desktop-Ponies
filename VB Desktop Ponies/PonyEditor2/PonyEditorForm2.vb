@@ -3,6 +3,7 @@
 Public Class PonyEditorForm2
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
     Private ReadOnly bases As New Dictionary(Of String, MutablePonyBase)()
+    Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
     Private workingCount As Integer
 
@@ -50,6 +51,13 @@ Public Class PonyEditorForm2
         Dim screenArea = Screen.FromHandle(Handle).WorkingArea.Size
         Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
+        worker.QueueTask(Sub()
+                             Dim images = New ImageList()
+                             images.Images.Add(SystemIcons.Warning)
+                             images.Images.Add(SystemIcons.WinLogo)
+                             images.Images.Add(SystemIcons.Error)
+                             DocumentsView.ImageList = images
+                         End Sub)
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
     End Sub
 
@@ -59,6 +67,7 @@ Public Class PonyEditorForm2
                              poniesNode = New TreeNode("Ponies") With
                                           {.Tag = New PageRef(Nothing, PageContent.Ponies, Nothing)}
                              DocumentsView.Nodes.Add(poniesNode)
+                             nodeLookup(poniesNode.Name) = poniesNode
                              poniesNode.Expand()
                          End Sub)
 
@@ -72,33 +81,43 @@ Public Class PonyEditorForm2
                     Dim ponyBaseNode = New TreeNode(pony.Directory) With
                                        {.Tag = ponyBaseRef, .Name = ponyBaseRef.ToString()}
                     poniesNode.Nodes.Add(ponyBaseNode)
+                    nodeLookup(ponyBaseNode.Name) = ponyBaseNode
 
                     Dim behaviorsRef = New PageRef(pony, PageContent.Behaviors, Nothing)
                     Dim behaviorsNode = New TreeNode("Behaviors") With
                                        {.Tag = behaviorsRef, .Name = behaviorsRef.ToString()}
                     ponyBaseNode.Nodes.Add(behaviorsNode)
+                    nodeLookup(behaviorsNode.Name) = behaviorsNode
                     Dim effectsRef = New PageRef(pony, PageContent.Effects, Nothing)
                     Dim effectsNode = New TreeNode("Effects") With
                                           {.Tag = effectsRef, .Name = effectsRef.ToString()}
                     ponyBaseNode.Nodes.Add(effectsNode)
+                    nodeLookup(effectsNode.Name) = effectsNode
                     Dim speechesRef = New PageRef(pony, PageContent.Speeches, Nothing)
                     Dim speechesNode = New TreeNode("Speeches") With
                                        {.Tag = speechesRef, .Name = speechesRef.ToString()}
                     ponyBaseNode.Nodes.Add(speechesNode)
+                    nodeLookup(speechesNode.Name) = speechesNode
 
                     For Each behavior In pony.Behaviors
                         Dim ref = New PageRef(pony, PageContent.Behavior, behavior)
-                        behaviorsNode.Nodes.Add(New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()})
+                        Dim node = New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()}
+                        behaviorsNode.Nodes.Add(node)
+                        nodeLookup(node.Name) = node
                     Next
 
                     For Each effect In pony.Effects
                         Dim ref = New PageRef(pony, PageContent.Effect, effect)
-                        effectsNode.Nodes.Add(New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()})
+                        Dim node = New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()}
+                        effectsNode.Nodes.Add(node)
+                        nodeLookup(node.Name) = node
                     Next
 
                     For Each speech In pony.Speeches
                         Dim ref = New PageRef(pony, PageContent.Speech, speech)
-                        speechesNode.Nodes.Add(New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()})
+                        Dim node = New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()}
+                        speechesNode.Nodes.Add(node)
+                        nodeLookup(node.Name) = node
                     Next
 
                     EditorProgressBar.Value += 1
@@ -124,7 +143,50 @@ Public Class PonyEditorForm2
                              Enabled = True
                              DocumentsView.Focus()
                          End Sub)
+        worker.WaitOnAllTasks()
+        ValidateBases()
     End Sub
+
+    Private Sub ValidateBases()
+        For Each base In bases.Values.OrderBy(Function(pb) pb.Directory)
+            Dim behaviorsError = False
+            For Each behavior In base.Behaviors
+                Dim ref = New PageRef(base, PageContent.Behavior, behavior)
+                Dim parseIssues As ParseIssue() = Nothing
+                Dim b As Behavior = Nothing
+                Dim behaviorError = Not behavior.TryLoad(
+                    behavior.SourceIni,
+                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                    ref.PonyBase, b, parseIssues) OrElse b.GetReferentialIssues().Length > 0
+                behaviorsError = behaviorsError OrElse behaviorError
+                worker.QueueTask(Sub()
+                                     Dim node = FindNode(ref.ToString())
+                                     node.ImageIndex = If(behaviorError, 2, 1)
+                                 End Sub)
+            Next
+            worker.QueueTask(Sub()
+                                 Dim ref = New PageRef(base, PageContent.Behaviors, Nothing)
+                                 Dim node = FindNode(ref.ToString())
+                                 node.ImageIndex = If(behaviorsError, 2, 1)
+                             End Sub)
+            worker.QueueTask(Sub()
+                                 Dim ref = New PageRef(base, PageContent.Pony, Nothing)
+                                 Dim node = FindNode(ref.ToString())
+                                 node.ImageIndex = If(behaviorsError, 2, 1)
+                                 node.EnsureVisible()
+                             End Sub)
+        Next
+        worker.WaitOnAllTasks()
+    End Sub
+
+    Private Function FindNode(name As String) As TreeNode
+        Dim node As TreeNode = Nothing
+        If nodeLookup.TryGetValue(name, node) Then
+            Return node
+        Else
+            Return DocumentsView.Nodes.Find(name, True).Single()
+        End If
+    End Function
 
     Private Shared Function GetTabText(pageRef As PageRef) As String
         Select Case pageRef.PageContent
