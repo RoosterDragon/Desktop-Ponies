@@ -27,11 +27,15 @@ Public Class IdleWorker
     ''' </summary>
     Private Shared ReadOnly DummyCallback As New MethodInvoker(Sub()
                                                                End Sub)
+    ''' <summary>
+    ''' Indicates if work should be done when idle, otherwise work will be asynchronously invoked.
+    ''' </summary>
+    Private Shared ReadOnly UseIdlePooling As Boolean = OperatingSystemInfo.IsWindows
 
     ''' <summary>
     ''' Maintains a collection of tasks to perform when the application is idle.
     ''' </summary>
-    Private ReadOnly tasks As New Queue(Of MethodInvoker)
+    Private ReadOnly tasks As New Queue(Of MethodInvoker)()
     ''' <summary>
     ''' Indicates when the queue of tasks to perform is empty.
     ''' </summary>
@@ -44,6 +48,10 @@ Public Class IdleWorker
     ''' The thread that owns this instance.
     ''' </summary>
     Private ReadOnly owningThread As Threading.Thread
+    ''' <summary>
+    ''' Keeps track of how long the current batch of tasks has taken.
+    ''' </summary>
+    Private ReadOnly runWatch As New Diagnostics.Stopwatch()
 
     ''' <summary>
     ''' Indicates if we have disposed of the instance.
@@ -63,7 +71,7 @@ Public Class IdleWorker
         owningThread = Threading.Thread.CurrentThread
         control = New Control()
         control.CreateControl()
-        If OperatingSystemInfo.IsWindows Then
+        If UseIdlePooling Then
             AddHandler Application.Idle, AddressOf RunTask
             AddHandler Application.ThreadExit, AddressOf DisposeWorker
         End If
@@ -81,7 +89,7 @@ Public Class IdleWorker
             If control.IsDisposed OrElse Not control.IsHandleCreated Then Return
 
             Try
-                If OperatingSystemInfo.IsWindows Then
+                If UseIdlePooling Then
                     tasks.Enqueue(task)
                     ' If there were previously no tasks in the queue, the application may already be an an idle state.
                     ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is
@@ -90,19 +98,11 @@ Public Class IdleWorker
                         dummyAsyncResult = control.BeginInvoke(DummyCallback)
                         empty.Reset()
                     End If
-                ElseIf OperatingSystemInfo.IsUnix Then
+                Else
                     ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This
                     ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks. This becomes an
                     ' issue if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
                     control.BeginInvoke(task)
-                Else
-                    ' We're running on Mac under Mono. I don't have the ability to test on this platform, but some bug reports suggest
-                    ' neither the idle queue nor BeginInvoke are actually working. Instead, we'll just go right for Invoke.
-                    If control.InvokeRequired Then
-                        control.Invoke(task)
-                    Else
-                        task()
-                    End If
                 End If
             Catch ex As InvalidOperationException
                 ' If the handle was lost after our initial check, it means the message pump was closed from another thread.
@@ -118,10 +118,17 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If Not disposed AndAlso tasks.Count > 0 Then
+            If disposed Then Return
+            Dim i = 0
+            runWatch.Restart()
+            ' For efficiency, run a batch of tasks whilst idle.
+            ' This reduces the message loop overhead in the case of lots of very short tasks.
+            While tasks.Count > 0 AndAlso runWatch.ElapsedMilliseconds < 33
                 tasks.Dequeue().Invoke()
                 If tasks.Count = 0 Then TaskQueueCleared()
-            End If
+                i += 1
+            End While
+            If i > 0 Then Console.WriteLine("Processed " & i & " tasks over " & runWatch.ElapsedMilliseconds & "ms.")
         End SyncLock
     End Sub
 
@@ -131,23 +138,31 @@ Public Class IdleWorker
     Public Sub WaitOnAllTasks()
         If Object.ReferenceEquals(owningThread, Thread.CurrentThread) Then
             ' We are on the UI thread, invoke tasks until all are complete.
-            SyncLock tasks
-                If disposed Then Return
-                While tasks.Count > 0
-                    tasks.Dequeue.Invoke()
-                End While
-                TaskQueueCleared()
-            End SyncLock
+            If UseIdlePooling Then
+                SyncLock tasks
+                    If disposed Then Return
+                    While tasks.Count > 0
+                        tasks.Dequeue.Invoke()
+                    End While
+                    TaskQueueCleared()
+                End SyncLock
+            Else
+                Application.DoEvents()
+            End If
         Else
             SyncLock tasks
                 If disposed Then Return
             End SyncLock
             ' We are on another thread, wait on the UI thread to finish processing our tasks.
-            Try
-                empty.WaitOne()
-            Catch ex As ObjectDisposedException
-                ' This object will be disposed if the UI thread was closed down, in which case we won't be processing events anyway.
-            End Try
+            If UseIdlePooling Then
+                Try
+                    empty.WaitOne()
+                Catch ex As ObjectDisposedException
+                    ' This object will be disposed if the UI thread was closed down, in which case we won't be processing events anyway.
+                End Try
+            Else
+                control.SmartInvoke(DummyCallback)
+            End If
         End If
     End Sub
 
