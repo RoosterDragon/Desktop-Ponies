@@ -1099,14 +1099,18 @@ Public Class Main
         End If
     End Sub
 
+    Private Sub Main_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
+        AnimationTimer.Enabled = Not loading
+    End Sub
+
+    Private Sub Main_Deactivate(sender As Object, e As EventArgs) Handles MyBase.Deactivate
+        AnimationTimer.Enabled = False
+    End Sub
+
     Private Sub AnimationTimer_Tick(sender As Object, e As EventArgs) Handles AnimationTimer.Tick
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
             selectionControl.AdvanceTimeIndex(TimeSpan.FromMilliseconds(AnimationTimer.Interval))
         Next
-    End Sub
-
-    Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
-        AnimationTimer.Enabled = Visible AndAlso Not loading
     End Sub
 
     Private Function PonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
