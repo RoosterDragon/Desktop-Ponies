@@ -23,7 +23,7 @@ Public Class HouseOptionsForm
         Bias_TrackBar.Value = CInt(base.Bias * 10)
 
         Try
-            houseImage = Image.FromFile(base.LeftImagePath)
+            houseImage = Image.FromFile(base.LeftImage.Path)
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Couldn't open the image file for the house.")
             Exit Sub
@@ -177,7 +177,7 @@ Public Class HouseOptionsForm
 
                 Dim cma = ","
 
-                new_ini.WriteLine("image," & base.LeftImagePath.Remove(0, base.LeftImagePath.LastIndexOf(Path.DirectorySeparatorChar) + 1))
+                new_ini.WriteLine("image," & base.LeftImage.Path.Remove(0, base.LeftImage.Path.LastIndexOf(Path.DirectorySeparatorChar) + 1))
                 new_ini.WriteLine("door," &
                                   base.DoorPosition.X.ToString(CultureInfo.InvariantCulture) & cma &
                                   base.DoorPosition.Y.ToString(CultureInfo.InvariantCulture))

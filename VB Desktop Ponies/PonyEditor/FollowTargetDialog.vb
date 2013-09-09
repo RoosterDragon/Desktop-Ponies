@@ -192,7 +192,7 @@
         For Each ponyBase In m_editor.PonyBases
             If ponyBase.Directory = CStr(FollowComboBox.SelectedItem) Then
                 Try
-                    ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImagePath)
+                    ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)
                 Catch ex As Exception
                     My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & ponyBase.Directory)
                 End Try
@@ -204,7 +204,7 @@
         For Each effect In m_editor.GetAllEffects()
             If effect.Name = StringToEffectName(CStr(FollowComboBox.SelectedItem)) Then
                 Try
-                    ponyThumbnail = Image.FromFile(effect.RightImagePath)
+                    ponyThumbnail = Image.FromFile(effect.RightImage.Path)
                 Catch ex As Exception
                     My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for effect " & effect.Name)
                 End Try

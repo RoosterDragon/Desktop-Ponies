@@ -87,7 +87,7 @@ Public Class PonyEditor
                          New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}
 
             'add all possible ponies to the selection window.
-            ponyImageList = GenerateImageList(PonyBases, 50, PonyList.BackColor, Function(b) b.LeftImagePath)
+            ponyImageList = GenerateImageList(PonyBases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
             PonyList.LargeImageList = ponyImageList
             PonyList.SmallImageList = ponyImageList
 
@@ -372,8 +372,8 @@ Public Class PonyEditor
                     behavior.MaxDuration,
                     behavior.MinDuration,
                     behavior.Speed,
-                    GetFilename(behavior.RightImagePath),
-                    GetFilename(behavior.LeftImagePath),
+                    GetFilename(behavior.RightImage.Path),
+                    GetFilename(behavior.LeftImage.Path),
                     AllowedMovesToString(behavior.AllowedMovement),
                     behavior.StartLineName,
                     behavior.EndLineName,
@@ -389,8 +389,8 @@ Public Class PonyEditor
                     effect.Name,
                     effect.Name,
                     effect.BehaviorName,
-                    GetFilename(effect.RightImagePath),
-                    GetFilename(effect.LeftImagePath),
+                    GetFilename(effect.RightImage.Path),
+                    GetFilename(effect.LeftImage.Path),
                     effect.Duration,
                     effect.RepeatDelay,
                     Location_ToString(effect.PlacementDirectionRight),
@@ -628,18 +628,18 @@ Public Class PonyEditor
                     HidePony()
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Right Image...")
                     If Not IsNothing(new_image_path) Then
-                        changed_behavior.SetRightImagePath(new_image_path)
+                        changed_behavior.RightImage.Path = new_image_path
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = GetFilename(new_image_path)
-                        ImageSizeCheck(changed_behavior.RightImageSize)
+                        ImageSizeCheck(changed_behavior.RightImage.Size)
                     End If
                     ShowPony()
                 Case colBehaviorLeftImage.Index
                     HidePony()
                     Dim new_image_path = Add_Picture(PreviewPony.Directory & " Left Image...")
                     If Not IsNothing(new_image_path) Then
-                        changed_behavior.SetLeftImagePath(new_image_path)
+                        changed_behavior.LeftImage.Path = new_image_path
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(new_image_path)
-                        ImageSizeCheck(changed_behavior.LeftImageSize)
+                        ImageSizeCheck(changed_behavior.LeftImage.Size)
                     End If
                     ShowPony()
                 Case colBehaviorFollow.Index
@@ -743,7 +743,7 @@ Public Class PonyEditor
                     HidePony()
                     Dim new_image_path As String = Add_Picture(changed_effect_name & " Right Image...")
                     If Not IsNothing(new_image_path) Then
-                        changed_effect.SetRightImagePath(new_image_path)
+                        changed_effect.RightImage.Path = new_image_path
                         EffectsGrid.Rows(e.RowIndex).Cells(colEffectRightImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If
@@ -752,7 +752,7 @@ Public Class PonyEditor
                     HidePony()
                     Dim new_image_path = Add_Picture(changed_effect_name & " Left Image...")
                     If Not IsNothing(new_image_path) Then
-                        changed_effect.SetLeftImagePath(new_image_path)
+                        changed_effect.LeftImage.Path = new_image_path
                         EffectsGrid.Rows(e.RowIndex).Cells(colEffectLeftImage.Index).Value = GetFilename(new_image_path)
                         changes_made_now = True
                     End If

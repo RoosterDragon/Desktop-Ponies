@@ -498,11 +498,11 @@ Public Class PonyBase
             new_behavior.LinkedBehaviorName = _Linked_Behavior
         End If
 
-        new_behavior.SetLeftImagePath(left_image_path)
-        new_behavior.SetRightImagePath(right_image_path)
+        new_behavior.LeftImage.Path = left_image_path
+        new_behavior.RightImage.Path = right_image_path
 
-        new_behavior.SetRightImageCenter(right_image_center)
-        new_behavior.SetLeftImageCenter(left_image_center)
+        new_behavior.RightImage.CustomCenter = If(right_image_center = Point.Empty, Nothing, right_image_center)
+        new_behavior.LeftImage.CustomCenter = If(left_image_center = Point.Empty, Nothing, left_image_center)
 
         Behaviors.Add(new_behavior)
 
@@ -788,40 +788,16 @@ Public Class Behavior
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
 
-    Private right_image_path As String
-    Private right_image_center As Vector2
-    Private left_image_path As String
-    Private left_image_center As Vector2
-    Private left_image_size As Vector2
-    Private right_image_size As Vector2
-    Public ReadOnly Property LeftImageCenter As Vector2
+    Private ReadOnly _rightImage As New CenterableSpriteImage()
+    Private ReadOnly _leftImage As New CenterableSpriteImage()
+    Public ReadOnly Property RightImage As CenterableSpriteImage
         Get
-            Return If(left_image_center = Vector2.Zero, LeftImageSize / 2, left_image_center)
+            Return _rightImage
         End Get
     End Property
-    Public ReadOnly Property RightImageCenter As Vector2
+    Public ReadOnly Property LeftImage As CenterableSpriteImage
         Get
-            Return If(right_image_center = Vector2.Zero, RightImageSize / 2, right_image_center)
-        End Get
-    End Property
-    Public ReadOnly Property LeftImageSize As Vector2
-        Get
-            Return left_image_size
-        End Get
-    End Property
-    Public ReadOnly Property RightImageSize As Vector2
-        Get
-            Return right_image_size
-        End Get
-    End Property
-    Public ReadOnly Property LeftImagePath As String
-        Get
-            Return left_image_path
-        End Get
-    End Property
-    Public ReadOnly Property RightImagePath As String
-        Get
-            Return right_image_path
+            Return _leftImage
         End Get
     End Property
 
@@ -931,15 +907,15 @@ Public Class Behavior
         b.MaxDuration = p.ParseDouble(15, 0, 300)
         b.MinDuration = p.ParseDouble(5, 0, 300)
         b.Speed = p.ParseDouble(3, 0, 25)
-        b.right_image_path = p.NoParse()
-        If p.Assert(b.right_image_path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
-            b.right_image_path = p.SpecifiedCombinePath(imageDirectory, b.right_image_path, "Image will not be loaded.")
-            p.SpecifiedFileExists(b.right_image_path, "Image will not be loaded.")
+        b.RightImage.Path = p.NoParse()
+        If p.Assert(b.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            b.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, b.RightImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.RightImage.Path, "Image will not be loaded.")
         End If
-        b.left_image_path = p.NoParse()
-        If p.Assert(b.left_image_path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
-            b.left_image_path = p.SpecifiedCombinePath(imageDirectory, b.left_image_path, "Image will not be loaded.")
-            p.SpecifiedFileExists(b.left_image_path, "Image will not be loaded.")
+        b.LeftImage.Path = p.NoParse()
+        If p.Assert(b.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            b.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, b.LeftImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.LeftImage.Path, "Image will not be loaded.")
         End If
         b.AllowedMovement = p.Map(AllowedMovesFromIni, AllowedMoves.All)
         b.LinkedBehaviorName = p.NotNull("").Trim()
@@ -952,54 +928,17 @@ Public Class Behavior
         b.AutoSelectImagesOnFollow = p.ParseBoolean(True)
         b.FollowStoppedBehaviorName = p.NotNull("").Trim()
         b.FollowMovingBehaviorName = p.NotNull("").Trim()
-        b.right_image_center = p.ParseVector2(Vector2.Zero)
-        b.left_image_center = p.ParseVector2(Vector2.Zero)
+        b.RightImage.CustomCenter = p.ParseVector2(Vector2.Zero)
+        b.LeftImage.CustomCenter = p.ParseVector2(Vector2.Zero)
+        If b.RightImage.CustomCenter = Vector2.Zero Then b.RightImage.CustomCenter = Nothing
+        If b.LeftImage.CustomCenter = Vector2.Zero Then b.LeftImage.CustomCenter = Nothing
         b.DoNotRepeatImageAnimations = p.ParseBoolean(False)
         b.Group = p.ParseInt32(AnyGroup, 0, 100)
-
-        b.SetLeftImagePath(b.left_image_path)
-        b.SetRightImagePath(b.right_image_path)
 
         issues = p.Issues.ToArray()
         result = b
         Return p.AllParsingSuccessful
     End Function
-
-    Public Sub SetRightImagePath(path As String)
-        right_image_path = path
-        right_image_size = Vector2.Zero
-        If Not String.IsNullOrEmpty(right_image_path) Then
-            Try
-                right_image_size = New Vector2(ImageSize.GetSize(right_image_path))
-            Catch ex As IOException
-                ' Leave size empty by default.
-            Catch ex As UnauthorizedAccessException
-                ' Leave size empty by default.
-            End Try
-        End If
-    End Sub
-
-    Public Sub SetLeftImagePath(path As String)
-        left_image_path = path
-        left_image_size = Vector2.Zero
-        If Not String.IsNullOrEmpty(left_image_path) Then
-            Try
-                left_image_size = New Vector2(ImageSize.GetSize(left_image_path))
-            Catch ex As IOException
-                ' Leave size empty by default.
-            Catch ex As UnauthorizedAccessException
-                ' Leave size empty by default.
-            End Try
-        End If
-    End Sub
-
-    Public Sub SetRightImageCenter(center As Point)
-        right_image_center = center
-    End Sub
-
-    Public Sub SetLeftImageCenter(center As Point)
-        left_image_center = center
-    End Sub
 
     Public Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
                          direction_right As Direction, centering_right As Direction,
@@ -1021,6 +960,8 @@ Public Class Behavior
     End Sub
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
+        Dim rightCenter = If(RightImage.CustomCenter, Vector2.Zero)
+        Dim leftCenter = If(LeftImage.CustomCenter, Vector2.Zero)
         Return String.Join(
             ",", "Behavior",
             Quoted(Name),
@@ -1028,8 +969,8 @@ Public Class Behavior
             MaxDuration.ToString(CultureInfo.InvariantCulture),
             MinDuration.ToString(CultureInfo.InvariantCulture),
             Speed.ToString(CultureInfo.InvariantCulture),
-            Quoted(Path.GetFileName(RightImagePath)),
-            Quoted(Path.GetFileName(LeftImagePath)),
+            Quoted(Path.GetFileName(RightImage.Path)),
+            Quoted(Path.GetFileName(LeftImage.Path)),
             Space_To_Under(AllowedMovesToString(AllowedMovement)),
             Quoted(LinkedBehaviorName),
             Quoted(StartLineName),
@@ -1041,10 +982,10 @@ Public Class Behavior
             AutoSelectImagesOnFollow,
             FollowStoppedBehaviorName,
             FollowMovingBehaviorName,
-            Quoted(right_image_center.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   right_image_center.Y.ToString(CultureInfo.InvariantCulture)),
-            Quoted(left_image_center.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   left_image_center.Y.ToString(CultureInfo.InvariantCulture)),
+            Quoted(rightCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
+                   rightCenter.Y.ToString(CultureInfo.InvariantCulture)),
+            Quoted(leftCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
+                   leftCenter.Y.ToString(CultureInfo.InvariantCulture)),
             DoNotRepeatImageAnimations,
             Group.ToString(CultureInfo.InvariantCulture))
     End Function
@@ -2507,8 +2448,8 @@ Public Class Pony
                 'Detect here if the destination is between the right and left image centers, which would cause flickering between the two.
                 If paint_stop_now Then
 
-                    If Destination.X >= CurrentBehavior.LeftImageCenter.X + TopLeftLocation.X AndAlso
-                        Destination.X < CurrentBehavior.RightImageCenter.X + TopLeftLocation.X Then
+                    If Destination.X >= CurrentBehavior.LeftImage.Center.X + TopLeftLocation.X AndAlso
+                        Destination.X < CurrentBehavior.RightImage.Center.X + TopLeftLocation.X Then
                         '  Console.WriteLine(Me.Name & " paint stopped")
                         Exit Sub
                     End If
@@ -2537,7 +2478,7 @@ Public Class Pony
             paintStop = False
         End If
 
-        Dim newCenter = Size.Round(If(facingRight, CurrentBehavior.RightImageCenter, CurrentBehavior.LeftImageCenter) * CSng(Scale))
+        Dim newCenter = Size.Round(If(facingRight, CurrentBehavior.RightImage.Center, CurrentBehavior.LeftImage.Center) * CSng(Scale))
 
         If Not isCustomImageCenterDefined Then
             currentCustomImageCenter = newCenter
@@ -2904,8 +2845,8 @@ Public Class Pony
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
                 Dim cursorLoc = New Vector2F(CursorLocation)
-                If Vector2F.Distance(loc + (behavior.LeftImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
-                If Vector2F.Distance(loc + (behavior.RightImageCenter * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
+                If Vector2F.Distance(loc + (behavior.LeftImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
+                If Vector2F.Distance(loc + (behavior.RightImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
             End If
         Next
 
@@ -2932,8 +2873,8 @@ Public Class Pony
     End Function
 
     Friend Function GetDestinationDirectionHorizontal(destination As Vector2) As Direction
-        Dim rightImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.RightImageCenter.X))
-        Dim leftImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.LeftImageCenter.X))
+        Dim rightImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.RightImage.Center.X))
+        Dim leftImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.LeftImage.Center.X))
         If (rightImageCenterX > destination.X AndAlso leftImageCenterX < destination.X) OrElse
             destination.X - CenterLocation.X <= 0 Then
             Return Direction.MiddleLeft
@@ -2943,8 +2884,8 @@ Public Class Pony
     End Function
 
     Friend Function GetDestinationDirectionVertical(destination As Vector2) As Direction
-        Dim rightImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.RightImageCenter.Y))
-        Dim leftImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImageCenter.Y))
+        Dim rightImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.RightImage.Center.Y))
+        Dim leftImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImage.Center.Y))
         If (rightImageCenterY > destination.Y AndAlso leftImageCenterY < destination.Y) OrElse
            (rightImageCenterY < destination.Y AndAlso leftImageCenterY > destination.Y) OrElse
            destination.Y - CenterLocation.Y <= 0 Then
@@ -2957,7 +2898,7 @@ Public Class Pony
     Friend ReadOnly Property CurrentImageSize As Vector2
         Get
             Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
-            Return If(facingRight, behavior.RightImageSize, behavior.LeftImageSize)
+            Return If(facingRight, behavior.RightImage.Size, behavior.LeftImage.Size)
         End Get
     End Property
 
@@ -3101,7 +3042,7 @@ Public Class Pony
     Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
         Get
             Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
-            Dim path = If(facingRight, behavior.RightImagePath, behavior.LeftImagePath)
+            Dim path = If(facingRight, behavior.RightImage.Path, behavior.LeftImage.Path)
             Diagnostics.Debug.Assert(Not String.IsNullOrEmpty(path))
             Return path
         End Get
@@ -3177,10 +3118,18 @@ Public Class EffectBase
     Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property BehaviorName As String
     Public Property ParentPonyBase As PonyBase
-    Public Property LeftImagePath As String
-    Public Property RightImagePath As String
-    Public Property LeftImageSize As Size
-    Public Property RightImageSize As Size
+    Private ReadOnly _leftImage As New SpriteImage()
+    Private ReadOnly _rightImage As New SpriteImage()
+    Public ReadOnly Property LeftImage As SpriteImage
+        Get
+            Return _leftImage
+        End Get
+    End Property
+    Public ReadOnly Property RightImage As SpriteImage
+        Get
+            Return _rightImage
+        End Get
+    End Property
     Public Property Duration As Double
     Public Property RepeatDelay As Double
 
@@ -3208,15 +3157,15 @@ Public Class EffectBase
         p.NoParse()
         e.Name = p.NotNull()
         e.BehaviorName = p.NotNull()
-        e.RightImagePath = p.NoParse()
-        If p.Assert(e.RightImagePath, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
-            e.RightImagePath = p.SpecifiedCombinePath(imageDirectory, e.RightImagePath, "Image will not be loaded.")
-            p.SpecifiedFileExists(e.RightImagePath, "Image will not be loaded.")
+        e.RightImage.Path = p.NoParse()
+        If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            e.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, e.RightImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.RightImage.Path, "Image will not be loaded.")
         End If
-        e.LeftImagePath = p.NoParse()
-        If p.Assert(e.LeftImagePath, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
-            e.LeftImagePath = p.SpecifiedCombinePath(imageDirectory, e.LeftImagePath, "Image will not be loaded.")
-            p.SpecifiedFileExists(e.LeftImagePath, "Image will not be loaded.")
+        e.LeftImage.Path = p.NoParse()
+        If p.Assert(e.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+            e.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, e.LeftImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.LeftImage.Path, "Image will not be loaded.")
         End If
         e.Duration = p.ParseDouble(5, 0, 300)
         e.RepeatDelay = p.ParseDouble(0, 0, 300)
@@ -3241,36 +3190,8 @@ Public Class EffectBase
 
     Public Sub New(_name As String, leftImagePath As String, rightImagePath As String)
         Name = _name
-        SetLeftImagePath(leftImagePath)
-        SetRightImagePath(rightImagePath)
-    End Sub
-
-    Public Sub SetLeftImagePath(path As String)
-        LeftImagePath = path
-        LeftImageSize = Size.Empty
-        If Not String.IsNullOrEmpty(LeftImagePath) Then
-            Try
-                LeftImageSize = ImageSize.GetSize(LeftImagePath)
-            Catch ex As IOException
-                ' Leave size empty by default.
-            Catch ex As UnauthorizedAccessException
-                ' Leave size empty by default.
-            End Try
-        End If
-    End Sub
-
-    Public Sub SetRightImagePath(path As String)
-        RightImagePath = path
-        RightImageSize = Size.Empty
-        If Not String.IsNullOrEmpty(RightImagePath) Then
-            Try
-                RightImageSize = ImageSize.GetSize(RightImagePath)
-            Catch ex As IOException
-                ' Leave size empty by default.
-            Catch ex As UnauthorizedAccessException
-                ' Leave size empty by default.
-            End Try
-        End If
+        LeftImage.Path = leftImagePath
+        RightImage.Path = rightImagePath
     End Sub
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -3278,8 +3199,8 @@ Public Class EffectBase
             ",", "Effect",
             Quoted(Name),
             Quoted(BehaviorName),
-            Quoted(Path.GetFileName(RightImagePath)),
-            Quoted(Path.GetFileName(LeftImagePath)),
+            Quoted(Path.GetFileName(RightImage.Path)),
+            Quoted(Path.GetFileName(LeftImage.Path)),
             Duration.ToString(CultureInfo.InvariantCulture),
             RepeatDelay.ToString(CultureInfo.InvariantCulture),
             Space_To_Under(Location_ToString(PlacementDirectionRight)),
@@ -3376,13 +3297,13 @@ Public Class Effect
 
     Public ReadOnly Property CurrentImagePath() As String
         Get
-            Return If(FacingLeft, Base.LeftImagePath, Base.RightImagePath)
+            Return If(FacingLeft, Base.LeftImage.Path, Base.RightImage.Path)
         End Get
     End Property
 
     Public ReadOnly Property CurrentImageSize() As Size
         Get
-            Return If(FacingLeft, Base.LeftImageSize, Base.RightImageSize)
+            Return If(FacingLeft, Base.LeftImage.Size, Base.RightImage.Size)
         End Get
     End Property
 
@@ -3533,8 +3454,8 @@ Public Class HouseBase
                         If Not File.Exists(imageFilename) Then
                             Throw New FileNotFoundException(imageFilename, imageFilename)
                         Else
-                            SetLeftImagePath(imageFilename)
-                            SetRightImagePath(imageFilename)
+                            LeftImage.Path = imageFilename
+                            RightImage.Path = imageFilename
                         End If
                     Case "door"
                         DoorPosition = New Point(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
@@ -3767,6 +3688,57 @@ Public Class House
         Next
 
     End Sub
+End Class
+
+Public Class SpriteImage
+    Private _path As String
+    Public Property Path As String
+        Get
+            Return _path
+        End Get
+        Set(value As String)
+            _path = value
+            _size = Nothing
+        End Set
+    End Property
+    Public Overridable ReadOnly Property Center As Vector2
+        Get
+            Return Size / 2
+        End Get
+    End Property
+    Private _size As Vector2?
+    Public ReadOnly Property Size As Vector2
+        Get
+            If String.IsNullOrWhiteSpace(Path) Then Return Vector2.Zero
+            If _size Is Nothing Then
+                _size = Vector2.Zero
+                Try
+                    _size = ImageSize.GetSize(Path)
+                Catch ex As ArgumentException
+                    ' Leave size empty by default.
+                Catch ex As IOException
+                    ' Leave size empty by default.
+                Catch ex As UnauthorizedAccessException
+                    ' Leave size empty by default.
+                End Try
+            End If
+            Return _size.Value
+        End Get
+    End Property
+End Class
+
+Public Class CenterableSpriteImage
+    Inherits SpriteImage
+    Public Property CustomCenter As Vector2?
+    Public Overrides ReadOnly Property Center As Vector2
+        Get
+            If CustomCenter IsNot Nothing Then
+                Return CustomCenter.Value
+            Else
+                Return MyBase.Center
+            End If
+        End Get
+    End Property
 End Class
 
 Public Enum Direction

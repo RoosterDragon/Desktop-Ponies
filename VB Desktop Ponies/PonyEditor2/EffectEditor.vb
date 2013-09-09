@@ -79,13 +79,13 @@ Friend Class EffectEditor
             Sub() UpdateProperty(Sub()
                                      Dim filePath = If(LeftImageFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
-                                     Edited.SetLeftImagePath(filePath)
+                                     Edited.LeftImage.Path = filePath
                                  End Sub)
 
         Dim updateLeftImage = Sub(sender As Object, e As EventArgs)
                                   Dim behavior = Base.Behaviors.SingleOrDefault(Function(b) b.Name = Edited.BehaviorName)
                                   Dim behaviorFilePath As String = Nothing
-                                  If behavior IsNot Nothing Then behaviorFilePath = behavior.LeftImagePath
+                                  If behavior IsNot Nothing Then behaviorFilePath = behavior.LeftImage.Path
                                   LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer, BehaviorComboBox, behaviorFilePath)
                               End Sub
         AddHandler LeftImageFileSelector.FilePathSelected, updateLeftImage
@@ -95,13 +95,13 @@ Friend Class EffectEditor
             Sub() UpdateProperty(Sub()
                                      Dim filePath = If(RightImageFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
-                                     Edited.SetRightImagePath(filePath)
+                                     Edited.RightImage.Path = filePath
                                  End Sub)
 
         Dim updateRightImage = Sub(sender As Object, e As EventArgs)
                                    Dim behavior = Base.Behaviors.SingleOrDefault(Function(b) b.Name = Edited.BehaviorName)
                                    Dim behaviorFilePath As String = Nothing
-                                   If behavior IsNot Nothing Then behaviorFilePath = behavior.RightImagePath
+                                   If behavior IsNot Nothing Then behaviorFilePath = behavior.RightImage.Path
                                    LoadNewImageForViewer(RightImageFileSelector, RightImageViewer, BehaviorComboBox, behaviorFilePath)
                                End Sub
         AddHandler RightImageFileSelector.FilePathSelected, updateRightImage
@@ -157,9 +157,9 @@ Friend Class EffectEditor
         SelectItemElseNoneOption(RightCenterComboBox, Edited.CenteringRight)
         SelectOrOvertypeItem(BehaviorComboBox, Edited.BehaviorName)
 
-        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImagePath, AddressOf Edited.SetLeftImagePath,
+        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path, Sub(path) Edited.LeftImage.Path = path,
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
-        SyncTypedImagePath(RightImageFileSelector, Edited.RightImagePath, AddressOf Edited.SetRightImagePath,
+        SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path, Sub(path) Edited.RightImage.Path = path,
                            lastTypedRightFileName, lastTypedRightFileNameMissing)
     End Sub
 

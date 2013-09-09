@@ -39,7 +39,7 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Dim ponyImageList = PonyEditor.GenerateImageList(ponyBases, 75, PonyList.BackColor, Function(b) b.RightImagePath)
+        Dim ponyImageList = PonyEditor.GenerateImageList(ponyBases, 75, PonyList.BackColor, Function(b) b.RightImage.Path)
         PonyList.LargeImageList = ponyImageList
         PonyList.SmallImageList = ponyImageList
 
@@ -56,7 +56,7 @@ Public Class GameSelectionForm
 
         Dim gameImageList As New ImageList() With {.ImageSize = New Size(75, 75)}
         For Each game As Game In games
-            gameImageList.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImagePath))
+            gameImageList.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImage.Path))
         Next
 
         GameList.LargeImageList = gameImageList
@@ -184,9 +184,9 @@ Public Class GameSelectionForm
                     picturebox.Name = pony.Directory
                     Select Case team
                         Case 1
-                            picturebox.Image = Image.FromFile(pony.Behaviors(0).RightImagePath)
+                            picturebox.Image = Image.FromFile(pony.Behaviors(0).RightImage.Path)
                         Case 2
-                            picturebox.Image = Image.FromFile(pony.Behaviors(0).LeftImagePath)
+                            picturebox.Image = Image.FromFile(pony.Behaviors(0).LeftImage.Path)
                     End Select
                     empty_spot_found = True
                     position_picturebox = picturebox

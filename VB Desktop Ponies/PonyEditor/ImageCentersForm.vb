@@ -90,7 +90,7 @@
     Private Sub Left_ImageBox_Click(sender As Object, e As MouseEventArgs) Handles Left_ImageBox.MouseClick
 
         left_center = e.Location
-        previewpony.Behaviors(behavior_index).SetLeftImageCenter(left_center)
+        previewpony.Behaviors(behavior_index).LeftImage.CustomCenter = left_center
         RedrawMarker()
 
     End Sub
@@ -98,7 +98,7 @@
     Private Sub Right_ImageBox_Click(sender As Object, e As MouseEventArgs) Handles Right_ImageBox.MouseClick
 
         right_center = e.Location
-        previewpony.Behaviors(behavior_index).SetRightImageCenter(right_center)
+        previewpony.Behaviors(behavior_index).RightImage.CustomCenter = right_center
         RedrawMarker()
 
     End Sub
@@ -107,8 +107,8 @@
 
         animation_index = 0
 
-        left_image = Image.FromFile(previewpony.Behaviors(index).LeftImagePath)
-        right_image = Image.FromFile(previewpony.Behaviors(index).RightImagePath)
+        left_image = Image.FromFile(previewpony.Behaviors(index).LeftImage.Path)
+        right_image = Image.FromFile(previewpony.Behaviors(index).RightImage.Path)
 
         Try
             left_image_framedimensions = New System.Drawing.Imaging.FrameDimension(left_image.FrameDimensionsList(0))
@@ -125,8 +125,8 @@
             right_image_framecount = 0
         End Try
 
-        left_center = previewpony.Behaviors(index).LeftImageCenter
-        right_center = previewpony.Behaviors(index).RightImageCenter
+        left_center = If(previewpony.Behaviors(index).LeftImage.CustomCenter, previewpony.Behaviors(index).LeftImage.Center)
+        right_center = If(previewpony.Behaviors(index).RightImage.CustomCenter, previewpony.Behaviors(index).RightImage.Center)
         left_previous_center = left_center
         right_previous_center = right_center
 
@@ -192,13 +192,13 @@
 
     Private Sub Right_Image_Set_Button_Click(sender As Object, e As EventArgs) Handles Right_Image_Set_Button.Click
         right_center = right_previous_center
-        previewpony.Behaviors(behavior_index).SetRightImageCenter(right_center)
+        previewpony.Behaviors(behavior_index).RightImage.CustomCenter = right_center
         RedrawMarker()
     End Sub
 
     Private Sub Left_Image_Set_Button_Click(sender As Object, e As EventArgs) Handles Left_Image_Set_Button.Click
         left_center = left_previous_center
-        previewpony.Behaviors(behavior_index).SetLeftImageCenter(left_center)
+        previewpony.Behaviors(behavior_index).LeftImage.CustomCenter = left_center
         RedrawMarker()
     End Sub
 

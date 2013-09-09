@@ -64,14 +64,14 @@ Friend Class BehaviorEditor
             Sub() UpdateProperty(Sub()
                                      Dim leftPath = If(LeftImageFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
-                                     Edited.SetLeftImagePath(leftPath)
+                                     Edited.LeftImage.Path = leftPath
                                  End Sub)
         AddHandler LeftImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer)
         AddHandler RightImageFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim rightPath = If(RightImageFileSelector.FilePath = Nothing,
                                                         Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
-                                     Edited.SetRightImagePath(rightPath)
+                                     Edited.RightImage.Path = rightPath
                                  End Sub)
         AddHandler RightImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
     End Sub
@@ -129,9 +129,9 @@ Friend Class BehaviorEditor
         SelectOrOvertypeItem(EndSpeechComboBox, Edited.EndLineName)
         SelectItemElseNoneOption(LinkedBehaviorComboBox, Edited.LinkedBehavior)
 
-        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImagePath, AddressOf Edited.SetLeftImagePath,
+        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path, Sub(path) Edited.LeftImage.Path = path,
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
-        SyncTypedImagePath(RightImageFileSelector, Edited.RightImagePath, AddressOf Edited.SetRightImagePath,
+        SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path, Sub(path) Edited.RightImage.Path = path,
                            lastTypedRightFileName, lastTypedRightFileNameMissing)
     End Sub
 

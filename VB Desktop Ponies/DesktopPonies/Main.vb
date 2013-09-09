@@ -361,7 +361,7 @@ Public Class Main
 
         If Not ponyBase.Behaviors.Any() Then Return
 
-        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImagePath, False)
+        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = "Random Pony" Then
             ponySelection.NoDuplicates.Visible = True
@@ -908,16 +908,16 @@ Public Class Main
             Dim images As New HashSet(Of String)(StringComparer.Ordinal)
             For Each pony In startupPonies
                 For Each behavior In pony.Behaviors
-                    images.Add(behavior.LeftImagePath)
-                    images.Add(behavior.RightImagePath)
+                    images.Add(behavior.LeftImage.Path)
+                    images.Add(behavior.RightImage.Path)
                     For Each effect In behavior.Effects
-                        images.Add(effect.LeftImagePath)
-                        images.Add(effect.RightImagePath)
+                        images.Add(effect.LeftImage.Path)
+                        images.Add(effect.RightImage.Path)
                     Next
                 Next
             Next
             For Each house In HouseBases
-                images.Add(house.LeftImagePath)
+                images.Add(house.LeftImage.Path)
             Next
 
             SmartInvoke(Sub()

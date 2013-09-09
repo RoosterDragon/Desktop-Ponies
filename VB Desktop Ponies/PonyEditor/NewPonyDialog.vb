@@ -44,8 +44,8 @@ Public Class NewPonyDialog
         End Using
 
         For Each behavior In m_editor.PreviewPony.Behaviors
-            If File.Exists(behavior.RightImagePath) Then
-                Right_ImageBox.Image = Image.FromFile(behavior.RightImagePath)
+            If File.Exists(behavior.RightImage.Path) Then
+                Right_ImageBox.Image = Image.FromFile(behavior.RightImage.Path)
                 Exit For
             End If
         Next
