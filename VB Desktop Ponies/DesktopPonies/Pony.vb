@@ -338,7 +338,7 @@ Public Class PonyBase
                     If Behavior.TryLoad(behaviorLine, fullDirectory, Me, b, issues) Then
                         Behaviors.Add(b)
                     Else
-                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason())
+                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason)
                     End If
                 Catch ex As Exception
                     If Not Reference.AutoStarted Then
@@ -896,12 +896,12 @@ Public Class Behavior
         b.MinDuration = p.ParseDouble(5, 0, 300)
         b.Speed = p.ParseDouble(3, 0, 25)
         b.RightImage.Path = p.NoParse()
-        If p.Assert(b.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+        If p.Assert(b.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             b.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, b.RightImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(b.RightImage.Path, "Image will not be loaded.")
         End If
         b.LeftImage.Path = p.NoParse()
-        If p.Assert(b.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+        If p.Assert(b.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             b.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, b.LeftImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(b.LeftImage.Path, "Image will not be loaded.")
         End If
@@ -3151,12 +3151,12 @@ Public Class EffectBase
         e.Name = p.NotNull()
         e.BehaviorName = p.NotNull()
         e.RightImage.Path = p.NoParse()
-        If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+        If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             e.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, e.RightImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(e.RightImage.Path, "Image will not be loaded.")
         End If
         e.LeftImage.Path = p.NoParse()
-        If p.Assert(e.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", "") Then
+        If p.Assert(e.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             e.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, e.LeftImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(e.LeftImage.Path, "Image will not be loaded.")
         End If
