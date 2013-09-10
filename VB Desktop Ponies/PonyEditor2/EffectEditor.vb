@@ -141,7 +141,7 @@ Friend Class EffectEditor
     Protected Overrides Sub SourceTextChanged()
         Dim e As EffectBase = Nothing
         EffectBase.TryLoad(Source.Text, PonyBasePath, Base, e, ParseIssues)
-        'ReferentialIssues = e.GetReferentialIssues()
+        ReferentialIssues = e.GetReferentialIssues()
         OnIssuesChanged(EventArgs.Empty)
         Edited = e
 

@@ -20,7 +20,7 @@ Public Class Main
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)()
     Private randomPony As PonyBase
-    Private ponyBases As New List(Of PonyBase)()
+    Private ponyBases As ImmutableArray(Of MutablePonyBase)
     Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
@@ -34,8 +34,6 @@ Public Class Main
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
         selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
-
-    Private ponyCollection As PonyCollection
 #End Region
 
 #Region "Initialization"
@@ -227,13 +225,12 @@ Public Class Main
         Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
-        ponyCollection = New PonyCollection()
-        ponyCollection.LoadAll(
+        ponyBases = PonyCollection.LoadAll(
             Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length),
             Sub(pony) worker.QueueTask(Sub()
                                            AddToMenu(pony)
                                            LoadingProgressBar.Value += 1
-                                       End Sub))
+                                       End Sub)).Where(Function(pb) pb.DisplayName <> "Random Pony").ToImmutableArray()
 
         ' Load houses.
         Dim skipLoadingErrors = False
@@ -257,7 +254,6 @@ Public Class Main
 
         ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
-        ponyBases = ponyBases.OrderBy(Function(b) b.Directory, StringComparer.OrdinalIgnoreCase).ToList()
         If ponyBases.Count = 0 Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
@@ -355,10 +351,6 @@ Public Class Main
     End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
-        If ponyBase.Directory <> "Random Pony" Then
-            ponyBases.Add(ponyBase)
-        End If
-
         If Not ponyBase.Behaviors.Any() Then Return
 
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
@@ -1045,7 +1037,7 @@ Public Class Main
     ''' Resets pony selection related controls, which will require them to be reloaded from disk.
     ''' </summary>
     Private Sub ResetPonySelection()
-        ponyBases.Clear()
+        ponyBases = Nothing
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
         PonySelectionPanel.SuspendLayout()

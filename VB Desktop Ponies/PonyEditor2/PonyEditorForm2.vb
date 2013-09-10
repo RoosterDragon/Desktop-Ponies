@@ -71,8 +71,7 @@ Public Class PonyEditorForm2
                              poniesNode.Expand()
                          End Sub)
 
-        Dim ponyCollection = New PonyCollection()
-        ponyCollection.LoadAll(
+        PonyCollection.LoadAll(
             Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
             Sub(pony) worker.QueueTask(
                 Sub()
@@ -169,11 +168,52 @@ Public Class PonyEditorForm2
                                  Dim node = FindNode(ref.ToString())
                                  node.ImageIndex = If(behaviorsError, 2, 1)
                              End Sub)
+            Dim effectsError = False
+            For Each effect In base.Effects
+                Dim ref = New PageRef(base, PageContent.Effect, effect)
+                Dim parseIssues As ParseIssue() = Nothing
+                Dim e As EffectBase = Nothing
+                Dim effectError = Not EffectBase.TryLoad(
+                    effect.SourceIni,
+                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                    ref.PonyBase, e, parseIssues) OrElse e.GetReferentialIssues().Length > 0
+                effectsError = effectsError OrElse effectError
+                worker.QueueTask(Sub()
+                                     Dim node = FindNode(ref.ToString())
+                                     node.ImageIndex = If(effectError, 2, 1)
+                                 End Sub)
+            Next
+            worker.QueueTask(Sub()
+                                 Dim ref = New PageRef(base, PageContent.Effects, Nothing)
+                                 Dim node = FindNode(ref.ToString())
+                                 node.ImageIndex = If(effectsError, 2, 1)
+                             End Sub)
+
+            Dim speechesError = False
+            For Each speech In base.Speeches
+                Dim ref = New PageRef(base, PageContent.Speech, speech)
+                Dim parseIssues As ParseIssue() = Nothing
+                Dim s As Speech = Nothing
+                Dim speechError = Not speech.TryLoad(
+                    speech.SourceIni,
+                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                    speech, parseIssues)
+                speechesError = speechesError OrElse speechError
+                worker.QueueTask(Sub()
+                                     Dim node = FindNode(ref.ToString())
+                                     node.ImageIndex = If(speechError, 2, 1)
+                                 End Sub)
+            Next
+            worker.QueueTask(Sub()
+                                 Dim ref = New PageRef(base, PageContent.Speeches, Nothing)
+                                 Dim node = FindNode(ref.ToString())
+                                 node.ImageIndex = If(speechesError, 2, 1)
+                             End Sub)
+
             worker.QueueTask(Sub()
                                  Dim ref = New PageRef(base, PageContent.Pony, Nothing)
                                  Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(behaviorsError, 2, 1)
-                                 node.EnsureVisible()
+                                 node.ImageIndex = If(behaviorsError OrElse effectsError OrElse speechesError, 2, 1)
                              End Sub)
         Next
         worker.WaitOnAllTasks()

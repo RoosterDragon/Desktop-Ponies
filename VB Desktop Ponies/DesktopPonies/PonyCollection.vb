@@ -1,20 +1,30 @@
 ﻿Imports System.IO
 
-Public Class PonyCollection
-    Private ReadOnly ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
+Public NotInheritable Class PonyCollection
+    Private Sub New()
+    End Sub
 
-    Public Sub LoadAll(countCallback As Action(Of Integer), loadCallback As Action(Of MutablePonyBase))
+    Public Shared Function LoadAll() As ImmutableArray(Of MutablePonyBase)
+        Return LoadAll(Nothing, Nothing)
+    End Function
+
+    Public Shared Function LoadAll(countCallback As Action(Of Integer), loadCallback As Action(Of MutablePonyBase)) As ImmutableArray(Of MutablePonyBase)
+        Dim ponies As New Collections.Concurrent.ConcurrentBag(Of MutablePonyBase)()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
             Sub(folder)
                 Dim pony = LoadOne(folder)
-                If loadCallback IsNot Nothing AndAlso pony IsNot Nothing Then loadCallback(pony)
+                If pony IsNot Nothing Then
+                    ponies.Add(pony)
+                    If loadCallback IsNot Nothing Then loadCallback(pony)
+                End If
             End Sub)
-    End Sub
+        Return ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToImmutableArray()
+    End Function
 
-    Private Function LoadOne(folder As String) As MutablePonyBase
+    Private Shared Function LoadOne(folder As String) As MutablePonyBase
         Dim iniFileName = Path.Combine(folder, PonyBase.ConfigFilename)
         If File.Exists(iniFileName) Then
             Dim reader As StreamReader = Nothing
@@ -29,7 +39,6 @@ Public Class PonyCollection
                     Dim pony = New MutablePonyBase()
                     pony.Directory = folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1)
                     ParsePonyConfig(folder, reader, pony)
-                    ponies.Add(pony)
                     Return pony
                 Finally
                     reader.Dispose()
@@ -39,7 +48,7 @@ Public Class PonyCollection
         Return Nothing
     End Function
 
-    Private Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As MutablePonyBase)
+    Private Shared Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As MutablePonyBase)
         Do Until reader.EndOfStream
             Dim line = reader.ReadLine()
 
@@ -78,7 +87,7 @@ Public Class PonyCollection
         Loop
     End Sub
 
-    Private Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
         Dim result As T
         Dim issues As ParseIssue() = Nothing
         If parseFunc(line, directory, result, issues) Then
@@ -86,7 +95,7 @@ Public Class PonyCollection
         End If
     End Sub
 
-    Private Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
         Dim result As T
         Dim issues As ParseIssue() = Nothing
         If parseFunc(line, directory, pony, result, issues) Then
@@ -95,7 +104,7 @@ Public Class PonyCollection
     End Sub
 End Class
 
-Public Class PonyIniParser
+Public NotInheritable Class PonyIniParser
     Private Sub New()
     End Sub
 

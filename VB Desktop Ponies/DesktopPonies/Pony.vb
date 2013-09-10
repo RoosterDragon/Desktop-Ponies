@@ -2,6 +2,7 @@
 Imports System.IO
 Imports CSDesktopPonies.SpriteManagement
 
+#Region "Interfaces"
 Public Interface IPonyIniSourceable
     Inherits IPonyIniSerializable, IMemberwiseCloneable
     ReadOnly Property SourceIni As String
@@ -32,7 +33,7 @@ Public Class Referential
     Private Shared Function CheckReference(name As String, collection As IEnumerable(Of String)) As ReferenceResult
         Dim count = 0
         For Each candidateName In collection
-            If name = candidateName Then count += 1
+            If String.Equals(name, candidateName, StringComparison.OrdinalIgnoreCase) Then count += 1
             If count >= 2 Then Return ReferenceResult.NotUnique
         Next
         Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Ok)
@@ -43,7 +44,9 @@ Public Class Referential
         NotUnique
     End Enum
 End Class
+#End Region
 
+#Region "MutablePonyBase class"
 Public Class MutablePonyBase
     Inherits PonyBase
 
@@ -114,7 +117,9 @@ Public Class MutablePonyBase
                               target_list, target_selection, behaviorlist, repeat_delay, displaywarnings, ponyBases)
     End Sub
 End Class
+#End Region
 
+#Region "PonyBase class"
 Public Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
@@ -715,6 +720,7 @@ Public Class PonyBase
         File.Delete(tempFileName)
     End Sub
 End Class
+#End Region
 
 #Region "Interaction class"
 Public Class Interaction
@@ -758,24 +764,6 @@ Public Class Interaction
 End Class
 #End Region
 
-''' <summary>
-''' Specifies how the interaction is activated when dealing with multiple targets.
-''' </summary>
-Public Enum TargetActivation
-    ''' <summary>
-    ''' Only one target from the list participates in the interaction.
-    ''' </summary>
-    One
-    ''' <summary>
-    ''' Any available targets participate in the interaction, even if some are not present.
-    ''' </summary>
-    Any
-    ''' <summary>
-    ''' All targets must participate in the interaction, the interaction cannot proceed unless all targets are present.
-    ''' </summary>
-    All
-End Enum
-
 #Region "Behavior class"
 Public Class Behavior
     Implements IPonyIniSourceable, IReferential
@@ -818,7 +806,7 @@ Public Class Behavior
     End Property
     Public ReadOnly Property LinkedBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = LinkedBehaviorName)
+            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, LinkedBehaviorName, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
     Private _startLineName As String = ""
@@ -832,7 +820,7 @@ Public Class Behavior
     End Property
     Public ReadOnly Property StartLine As Speech
         Get
-            Return pony.Speeches.FirstOrDefault(Function(sl) sl.Name = StartLineName)
+            Return pony.Speeches.FirstOrDefault(Function(sl) String.Equals(sl.Name, StartLineName, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
     Private _endLineName As String = ""
@@ -846,7 +834,7 @@ Public Class Behavior
     End Property
     Public ReadOnly Property EndLine As Speech
         Get
-            Return pony.Speeches.FirstOrDefault(Function(sl) sl.Name = EndLineName)
+            Return pony.Speeches.FirstOrDefault(Function(sl) String.Equals(sl.Name, EndLineName, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
 
@@ -864,13 +852,13 @@ Public Class Behavior
     Public Property FollowStoppedBehaviorName As String
     Public ReadOnly Property FollowStoppedBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = FollowStoppedBehaviorName)
+            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
     Public Property FollowMovingBehaviorName As String
     Public ReadOnly Property FollowMovingBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) b.Name = FollowMovingBehaviorName)
+            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
     Public Property AutoSelectImagesOnFollow As Boolean = True
@@ -878,7 +866,7 @@ Public Class Behavior
 
     Public ReadOnly Property Effects As IEnumerable(Of EffectBase)
         Get
-            Return pony.Effects.Where(Function(e) e.BehaviorName = Name)
+            Return pony.Effects.Where(Function(e) String.Equals(e.BehaviorName, Name, StringComparison.OrdinalIgnoreCase))
         End Get
     End Property
 
@@ -1035,6 +1023,7 @@ Public Class BehaviorGroup
 End Class
 #End Region
 
+#Region "Speech class"
 Public Class Speech
     Implements IPonyIniSourceable
 
@@ -1120,7 +1109,9 @@ Public Class Speech
         _sourceIni = newSource
     End Sub
 End Class
+#End Region
 
+#Region "Pony class"
 Public Class Pony
     Implements ISpeakingSprite
 
@@ -3111,9 +3102,11 @@ Public Class Pony
         Return If(SpeedOverride Is Nothing, CurrentBehavior.Speed * Scale, SpeedOverride.Value)
     End Function
 End Class
+#End Region
 
+#Region "EffectBase class"
 Public Class EffectBase
-    Implements IPonyIniSourceable
+    Implements IPonyIniSourceable, IReferential
 
     Public Property Name As String Implements IPonyIniSerializable.Name
     Public Property BehaviorName As String
@@ -3215,6 +3208,12 @@ Public Class EffectBase
         Return MyBase.MemberwiseClone()
     End Function
 
+    Public Function GetReferentialIssues() As ParseIssue() Implements IReferential.GetReferentialIssues
+        Return {Referential.GetIssue("Behavior", BehaviorName, ParentPonyBase.Behaviors.Select(Function(b) b.Name))}.
+            Where(Function(pi) pi.PropertyName IsNot Nothing).
+            ToArray()
+    End Function
+
     Private _sourceIni As String
     Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
         Get
@@ -3226,7 +3225,9 @@ Public Class EffectBase
         _sourceIni = newSource
     End Sub
 End Class
+#End Region
 
+#Region "Effect class"
 Public Class Effect
     Implements ISprite
     Private Shared ReadOnly DirectionCount As Integer = [Enum].GetValues(GetType(Direction)).Length
@@ -3345,7 +3346,9 @@ Public Class Effect
         End Get
     End Property
 End Class
+#End Region
 
+#Region "HouseBase class"
 Public Class HouseBase
     Inherits EffectBase
     Public Const RootDirectory = "Houses"
@@ -3482,7 +3485,9 @@ Public Class HouseBase
         End Using
     End Sub
 End Class
+#End Region
 
+#Region "House class"
 Public Class House
     Inherits Effect
 
@@ -3689,7 +3694,9 @@ Public Class House
 
     End Sub
 End Class
+#End Region
 
+#Region "SpriteImage classes"
 Public Class SpriteImage
     Private _path As String
     Public Property Path As String
@@ -3740,7 +3747,9 @@ Public Class CenterableSpriteImage
         End Get
     End Property
 End Class
+#End Region
 
+#Region "Enums"
 Public Enum Direction
     TopLeft = 0
     TopCenter = 1
@@ -3793,6 +3802,24 @@ Public Enum BehaviorOption
     LeftImageCenter = 20
     DoNotRepeatImageAnimations = 21
     Group = 22
+End Enum
+
+''' <summary>
+''' Specifies how the interaction is activated when dealing with multiple targets.
+''' </summary>
+Public Enum TargetActivation
+    ''' <summary>
+    ''' Only one target from the list participates in the interaction.
+    ''' </summary>
+    One
+    ''' <summary>
+    ''' Any available targets participate in the interaction, even if some are not present.
+    ''' </summary>
+    Any
+    ''' <summary>
+    ''' All targets must participate in the interaction, the interaction cannot proceed unless all targets are present.
+    ''' </summary>
+    All
 End Enum
 
 Public Module EnumConversions
@@ -3883,3 +3910,4 @@ Public Module EnumConversions
         End Select
     End Function
 End Module
+#End Region
