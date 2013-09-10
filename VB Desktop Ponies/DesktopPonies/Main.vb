@@ -32,14 +32,15 @@ Public Class Main
 
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
     Private ponyOffset As Integer
-    Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl) =
-        selectionControlFilter.Where(Function(kvp) kvp.Value).Select(Function(kvp) kvp.Key)
+    Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl)
 #End Region
 
 #Region "Initialization"
     Public Sub New()
         loadWatch.Start()
         InitializeComponent()
+        selectionControlsFilteredVisible =
+            PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
         Icon = My.Resources.Twilight
         Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
         initialized = True
@@ -669,8 +670,8 @@ Public Class Main
                     If compare = 0 Then
                         PonySelectionPanel.ScrollControlIntoView(selectionControl)
                         selectionControl.PonyCount.Focus()
+                        Exit For
                     End If
-                    If compare >= 0 Then Exit For
                 End If
             Next
         ElseIf e.KeyChar = "#"c Then
