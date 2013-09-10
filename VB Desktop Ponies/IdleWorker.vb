@@ -119,16 +119,13 @@ Public Class IdleWorker
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
             If disposed Then Return
-            Dim i = 0
             runWatch.Restart()
             ' For efficiency, run a batch of tasks whilst idle.
             ' This reduces the message loop overhead in the case of lots of very short tasks.
             While tasks.Count > 0 AndAlso runWatch.ElapsedMilliseconds < 33
                 tasks.Dequeue().Invoke()
                 If tasks.Count = 0 Then TaskQueueCleared()
-                i += 1
             End While
-            If i > 0 Then Console.WriteLine("Processed " & i & " tasks over " & runWatch.ElapsedMilliseconds & "ms.")
         End SyncLock
     End Sub
 
