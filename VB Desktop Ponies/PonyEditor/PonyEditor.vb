@@ -1532,10 +1532,21 @@ Public Class PonyEditor
 
     Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles SpeechesGrid.DataError, InteractionsGrid.DataError, EffectsGrid.DataError, BehaviorsGrid.DataError
         Try
-            Dim grid As DataGridView = CType(sender, DataGridView)
+            Dim grid As DataGridView = DirectCast(sender, DataGridView)
+
+            Dim invalidValue As String = DirectCast(grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value, String)
+            If grid.Columns(e.ColumnIndex).CellType = GetType(DataGridViewComboBoxCell) Then
+                ' Combo box cells require a case sensitive match, but we use case-insensitive matching.
+                ' See if a case-insensitive match exists and transparently replace the value.
+                For Each item As String In DirectCast(grid.Rows(e.RowIndex).Cells(e.ColumnIndex), DataGridViewComboBoxCell).Items
+                    If String.Equals(item, invalidValue, StringComparison.OrdinalIgnoreCase) Then
+                        grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value = item
+                        Return
+                    End If
+                Next
+            End If
 
             Dim replacement As String = ""
-
             Select Case grid.Name
                 Case EffectsGrid.Name
                     replacement = ""
@@ -1544,11 +1555,9 @@ Public Class PonyEditor
                 Case Else
                     Throw New Exception("Unhandled error for grid: " & grid.Name)
             End Select
-
-            Dim invalid_value As String = CStr(grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
             grid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value = replacement
 
-            MessageBox.Show(Me, PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalid_value &
+            MessageBox.Show(Me, PonyBase.ConfigFilename & " file appears to have an invalid line: '" & invalidValue &
                             "' is not valid for column '" & grid.Columns(e.ColumnIndex).HeaderText & "'" & ControlChars.NewLine &
                             "Details: Column: " & e.ColumnIndex &
                             " Row: " & e.RowIndex & " - " & e.Exception.Message & ControlChars.NewLine & ControlChars.NewLine &
