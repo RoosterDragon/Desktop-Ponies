@@ -35,7 +35,7 @@ Installation
     Once installed, you can run the program from the command line with "mono 'Desktop Ponies.exe'".
     If the program fails to start, you may need a package named "libmono-microsoft-visualbasic10.0-cil". Use your package manager to install it.
 * Mac
-    You will need mono version 3.0.2 or better. At the time of writing this is currently a beta version.
+    You will need mono version 3.2.1 or better.
     Choose the "Mono MRE Installer" from: http://www.go-mono.com/mono-downloads/download.html
     Once installed, you can run the "RunOnMac.command" file to launch the program.
     (If the program immediately errors when you attempt to run it, you may be missing some required fonts.
@@ -68,6 +68,13 @@ Screensaver
 Change Log
 
 Latest changes:
+
+v1.42.2.9:
+- Fixed bug preventing creation of new profiles.
+- Fixed bug that would crash the program when certain ponies were deployed from houses.
+- Fixed bug preventing Mac systems from loading the program correctly.
+- Lots of minor bug fixes.
+- Several minor performance enhancements.
 
 v1.42.2.8:
 - Fixed bug from 1.42.2.5 that prevented saving ponies if the program was not running on the same drive as the temp folder.

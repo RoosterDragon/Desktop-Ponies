@@ -673,7 +673,7 @@ Public Class Main
                     If compare >= 0 Then Exit For
                 End If
             Next
-        ElseIf e.KeyChar = "#" Then
+        ElseIf e.KeyChar = "#"c Then
 #If DEBUG Then
             Using newEditor = New PonyEditorForm2(ponyBases)
                 newEditor.ShowDialog(Me)
