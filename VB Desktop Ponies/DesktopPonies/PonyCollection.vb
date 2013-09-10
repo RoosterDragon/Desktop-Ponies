@@ -85,6 +85,8 @@ Public NotInheritable Class PonyCollection
                 End Select
             End If
         Loop
+
+        pony.SetLines(pony.Speeches)
     End Sub
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
