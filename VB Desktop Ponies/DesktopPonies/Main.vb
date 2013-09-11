@@ -267,19 +267,6 @@ Public Class Main
         ' Load pony counts.
         worker.QueueTask(AddressOf Options.LoadPonyCounts)
 
-        ' Load interactions, since references to other ponies can now be resolved.
-        worker.QueueTask(Sub()
-                             Try
-                                 Dim bases = PonyBasesWithBehaviors.ToArray()
-                                 For Each pony In ponies.Bases
-                                     pony.LoadInteractions(bases)
-                                 Next
-                             Catch ex As Exception
-                                 My.Application.NotifyUserOfNonFatalException(
-                                         ex, "There was a problem attempting to load interactions.")
-                             End Try
-                         End Sub)
-
         ' Wait for all images to load.
         worker.QueueTask(Sub()
                              For Each control As PonySelectionControl In PonySelectionPanel.Controls
@@ -438,7 +425,7 @@ Public Class Main
 
         Reference.InPreviewMode = True
         Me.Visible = False
-        Using form = New PonyEditor(ponies.Bases)
+        Using form = New PonyEditor(ponies)
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
@@ -466,7 +453,7 @@ Public Class Main
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
             Me.Visible = False
-            Using gameForm As New GameSelectionForm(RandomPlusPonyBasesWithBehaviors)
+            Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog() = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()

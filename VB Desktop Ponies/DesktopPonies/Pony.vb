@@ -51,16 +51,12 @@ Public Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
 
-    Private Enum InteractionParameter
-        Name = 0
-        Initiator = 1  'which pony triggers the interaction?
-        Probability = 2
-        Proximity = 3
-        TargetList = 4
-        TargetSelectionOption = 5  'do we interact with only the pony we ran into, or all of them on the list (even multiple instances)
-        BehaviorList = 6
-        RepeatDelay = 7
-    End Enum
+    Private ReadOnly _collection As PonyCollection
+    Public ReadOnly Property Collection As PonyCollection
+        Get
+            Return _collection
+        End Get
+    End Property
 
     Private _directory As String
     Public ReadOnly Property Directory As String
@@ -94,10 +90,9 @@ Public Class PonyBase
             Return _effects
         End Get
     End Property
-    Private _interactions As New List(Of Interaction)()
-    Public ReadOnly Property Interactions() As List(Of Interaction)
+    Public ReadOnly Property Interactions() As List(Of InteractionBase)
         Get
-            Return _interactions
+            Return Collection.Interactions(Directory)
         End Get
     End Property
     Private _speeches As New List(Of Speech)()
@@ -117,7 +112,8 @@ Public Class PonyBase
         End Get
     End Property
 
-    Private Sub New()
+    Private Sub New(collection As PonyCollection)
+        _collection = Argument.EnsureNotNull(collection, "collection")
     End Sub
 
     Public Function ChangeDirectory(newDirectory As String) As Boolean
@@ -127,6 +123,7 @@ Public Class PonyBase
             Dim currentPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory)
             Dim newPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
+            Collection.ChangePonyDirectory(Directory, newDirectory)
             _directory = newDirectory
             Return True
         Catch ex As Exception
@@ -134,8 +131,8 @@ Public Class PonyBase
         End Try
     End Function
 
-    Public Shared Function CreateInMemory() As PonyBase
-        Return New PonyBase()
+    Public Shared Function CreateInMemory(collection As PonyCollection) As PonyBase
+        Return New PonyBase(collection)
     End Function
 
     Public Shared Function Create(directory As String) As Boolean
@@ -149,13 +146,13 @@ Public Class PonyBase
         End Try
     End Function
 
-    Public Shared Function Load(directory As String) As PonyBase
+    Public Shared Function Load(collection As PonyCollection, directory As String) As PonyBase
         Dim pony As PonyBase = Nothing
         Try
             Dim fullPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, directory)
             Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
-                pony = New PonyBase()
+                pony = New PonyBase(collection)
                 pony._directory = directory
                 pony.DisplayName = directory
                 If File.Exists(iniFileName) Then
@@ -224,83 +221,6 @@ Public Class PonyBase
         End If
     End Sub
 
-    Public Sub LoadInteractions(ponyBases As IEnumerable(Of PonyBase))
-        If Not Options.PonyInteractionsEnabled Then Return
-        Dim displaywarnings =
-            Options.DisplayPonyInteractionsErrors AndAlso
-            Not Reference.AutoStarted AndAlso
-            Not Reference.InScreensaverMode
-        LoadInteractions(ponyBases, displaywarnings)
-    End Sub
-
-    Private Sub LoadInteractions(ponyBases As IEnumerable(Of PonyBase), Optional displayWarnings As Boolean = True)
-        If Not File.Exists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)) Then
-            Options.PonyInteractionsExist = False
-            Exit Sub
-        End If
-
-        Using reader As New StreamReader(
-            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename))
-            Do Until reader.EndOfStream
-                Dim line = reader.ReadLine()
-                If String.IsNullOrWhiteSpace(line) OrElse (line.Length > 0 AndAlso line(0) = "'") Then Continue Do
-
-                Dim columns = CommaSplitBraceQualified(line)
-                Dim ponyName = CommaSplitQuoteQualified(columns(InteractionParameter.Initiator))(0)
-
-                If ponyName = Directory Then
-                    Try
-                        Dim repeatDelay = 60
-                        If UBound(columns) >= InteractionParameter.RepeatDelay Then
-                            repeatDelay = Integer.Parse(columns(InteractionParameter.RepeatDelay), CultureInfo.InvariantCulture)
-                        End If
-
-                        Dim targetsActivated As TargetActivation
-                        Dim activationValue = Trim(columns(InteractionParameter.TargetSelectionOption))
-                        If Not [Enum].TryParse(activationValue, targetsActivated) Then
-                            ' If direct parsing failed, assume we've got some old definitions instead.
-                            ' The old code accepted the following values irrespective of case.
-                            ' It should be noted that title-cased "All" will be recognized as a new value which has stricter semantics.
-                            ' However, the old code used to serialize a Boolean value and thus wrote "True" or "False". The chances of
-                            ' encountering "random" or "all" in practice are therefore almost nil, as they would have to be manually
-                            ' edited in.
-                            If String.Equals(activationValue, "False", StringComparison.OrdinalIgnoreCase) OrElse
-                                String.Equals(activationValue, "random", StringComparison.OrdinalIgnoreCase) Then
-                                targetsActivated = TargetActivation.One
-                            ElseIf String.Equals(activationValue, "True", StringComparison.OrdinalIgnoreCase) OrElse
-                                String.Equals(activationValue, "all", StringComparison.OrdinalIgnoreCase) Then
-                                targetsActivated = TargetActivation.Any
-                            ElseIf Not Reference.InScreensaverMode Then
-                                Throw New InvalidDataException(
-                                    "Invalid option for target selection. Use either 'One', 'Any' or 'All'." & ControlChars.NewLine &
-                                    "Interaction file specified '" & columns(InteractionParameter.TargetSelectionOption) &
-                                    "' for interaction named: " & columns(InteractionParameter.Name))
-                            End If
-                        End If
-
-                        AddInteraction(columns(InteractionParameter.Name),
-                                       ponyName,
-                                       Double.Parse(columns(InteractionParameter.Probability), CultureInfo.InvariantCulture),
-                                       columns(InteractionParameter.Proximity),
-                                       columns(InteractionParameter.TargetList),
-                                       targetsActivated,
-                                       columns(InteractionParameter.BehaviorList),
-                                       repeatDelay,
-                                       displayWarnings, ponyBases)
-                    Catch ex As Exception
-                        If displayWarnings Then
-                            My.Application.NotifyUserOfNonFatalException(ex, "Error loading interaction for Pony: " & Directory &
-                                                                         ControlChars.NewLine & line)
-                        Else
-                            Console.WriteLine("Error loading interaction for Pony: " & Directory & ControlChars.NewLine &
-                                   line & ControlChars.NewLine & ex.Message)
-                        End If
-                    End Try
-                End If
-            Loop
-        End Using
-    End Sub
-
     Public Sub AddBehavior(name As String, chance As Double,
                        max_duration As Double, min_duration As Double, speed As Double,
                        right_image_path As String, left_image_path As String,
@@ -366,111 +286,6 @@ Public Class PonyBase
 
     End Sub
 
-    Public Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
-                   target_list As String, target_selection As TargetActivation, _
-                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
-                   ponyBases As IEnumerable(Of PonyBase))
-        Dim new_interaction As New Interaction
-
-        new_interaction.Name = interaction_name
-        new_interaction.Targets_String = target_list
-        new_interaction.Targets_Activated = target_selection
-        new_interaction.PonyName = name
-        new_interaction.Probability = probability
-        new_interaction.ReactivationDelay = repeat_delay
-
-        Select Case LCase(Trim(proximity))
-            Case "default"
-            Case Else
-                Dim proximityValue As Double
-                If Double.TryParse(proximity, NumberStyles.Float, CultureInfo.InvariantCulture, proximityValue) Then
-                    new_interaction.Proximity_Activation_Distance = proximityValue
-                Else
-                    If Not Reference.InScreensaverMode Then
-                        Throw New ArgumentException("Invalid option for proximity. Enter either a number or 'default'." _
-                                    & " Interaction file specified: '" & proximity & "'", proximity)
-                    Else
-                        Exit Sub
-                    End If
-                End If
-        End Select
-
-        Dim targets = CommaSplitQuoteQualified(target_list)
-        Dim interaction_behaviors = CommaSplitQuoteQualified(behaviorlist)
-
-        For Each iBehavior In interaction_behaviors
-
-            Dim found = False
-
-            For Each Behavior In Me.Behaviors
-                If String.Equals(Trim(Behavior.Name), Trim(iBehavior), StringComparison.OrdinalIgnoreCase) Then
-                    new_interaction.BehaviorList.Add(Behavior)
-                    found = True
-                End If
-            Next
-            If found = False AndAlso Options.DisplayPonyInteractionsErrors AndAlso Not Reference.InScreensaverMode Then
-                MessageBox.Show("Warning: Pony '" & Me.Directory & "' does not have required behavior '" & iBehavior & "' for interaction: '" & _
-                       interaction_name & "'. This interaction is disabled.",
-                       "Missing Or Incorrect Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                Exit Sub
-            End If
-        Next
-
-        Dim ok_targets As New List(Of String)
-
-        For Each target In targets
-
-            Dim ponyfound = False
-
-            For Each ponyBase In ponyBases
-
-                If String.Equals(Trim(target), Trim(ponyBase.Directory), StringComparison.OrdinalIgnoreCase) Then
-                    ponyfound = True
-
-                    ok_targets.Add(ponyBase.Directory)
-
-                    For Each Behavior In interaction_behaviors
-
-                        Dim found = False
-
-                        For Each ponybehavior In ponyBase.Behaviors
-                            If String.Equals(Trim(Behavior), Trim(ponybehavior.Name), StringComparison.OrdinalIgnoreCase) Then
-                                found = True
-                                Exit For
-                            End If
-                        Next
-
-                        If found = False Then
-                            ok_targets.Remove(ponyBase.Directory)
-                            If displaywarnings AndAlso Not Reference.InScreensaverMode Then
-                                MessageBox.Show("Warning: Pony " & ponyBase.DisplayName & " (" & ponyBase.Directory & ") " &
-                                                " does not have required behavior '" & Behavior & "' as specified in interaction " &
-                                                interaction_name & ControlChars.NewLine & "Interaction is disabled for this pony.",
-                                                "Incorrect Or Missing Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                            End If
-                        End If
-
-                    Next
-                End If
-            Next
-
-            If ponyfound = False AndAlso displaywarnings AndAlso Not Reference.InScreensaverMode Then
-                MessageBox.Show("Warning: There is no pony with name " & target & " loaded. Interaction '" & name &
-                                "' has this pony listed as a target.",
-                                "Interaction Target Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            End If
-        Next
-
-        'the displaywarnings = false part of the next line handles the case when we are viewing one pony in the editor.
-        If (ok_targets.Count <> 0 AndAlso new_interaction.BehaviorList.Count <> 0) OrElse displaywarnings = False Then
-            For Each PonyName In ok_targets
-                new_interaction.InteractsWithByDirectory.Add(PonyName)
-            Next
-
-            Interactions.Add(new_interaction)
-        End If
-    End Sub
-
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
         Dim configFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
@@ -512,7 +327,7 @@ Public Class PonyBase
         End Using
         MoveOrReplace(tempFileName, configFilePath)
 
-        Dim interactionsFilePath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Interaction.ConfigFilename)
+        Dim interactionsFilePath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
         Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
@@ -553,47 +368,120 @@ Public Class PonyBase
         File.Replace(tempFileName, destinationFileName, Nothing)
         File.Delete(tempFileName)
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Directory: " & Directory
+    End Function
+End Class
+#End Region
+
+#Region "InteractionBase class"
+Public Class InteractionBase
+    Implements IPonyIniSourceable
+
+    Public Const ConfigFilename = "interactions.ini"
+
+    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property InitiatorName As String
+    Public Property Chance As Double
+    Public Property Proximity As Double
+    Private ReadOnly _targetNames As New HashSet(Of String)()
+    Public ReadOnly Property TargetNames As HashSet(Of String)
+        Get
+            Return _targetNames
+        End Get
+    End Property
+    Public Property Activation As TargetActivation
+    Private ReadOnly _behaviorNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    Public ReadOnly Property BehaviorNames As HashSet(Of String)
+        Get
+            Return _behaviorNames
+        End Get
+    End Property
+    Public Property ReactivationDelay As TimeSpan
+
+    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ParseIssue()) As Boolean
+        result = Nothing
+        issues = Nothing
+
+        Dim i = New InteractionBase()
+        i._sourceIni = iniLine
+        Dim p As New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine),
+                                            {"Name", "Initiator Name", "Chance",
+                                             "Proximity", "Targets", "Target Activation",
+                                             "Behaviors", "Reactivation Delay"})
+        i.Name = p.NotNull()
+        i.InitiatorName = p.NotNull()
+        i.Chance = p.ParseDouble(0, 0, 1)
+        i.Proximity = p.ParseDouble(125, 0, 10000)
+        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")))
+        Try
+            i.Activation = TargetActivationFromString(p.NotNull(TargetActivation.One.ToString()))
+        Catch ex As Exception
+            i.Activation = TargetActivation.One
+        End Try
+        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")))
+        i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
+
+        issues = p.Issues.ToArray()
+        result = i
+        Return p.AllParsingSuccessful
+    End Function
+
+    Public Shadows Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
+        Return MyBase.MemberwiseClone()
+    End Function
+
+    Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
+        Return String.Join(",",
+            Name,
+            Quoted(InitiatorName),
+            Chance.ToString(CultureInfo.InvariantCulture),
+            Proximity.ToString(CultureInfo.InvariantCulture),
+            Braced(String.Join(",", TargetNames.Select(Function(n) Quoted(n)))),
+            Activation.ToString(),
+            Braced(String.Join(",", BehaviorNames.Select(Function(n) Quoted(n)))),
+            ReactivationDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture))
+    End Function
+
+    Private _sourceIni As String
+    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
+        Get
+            Return _sourceIni
+        End Get
+    End Property
+
+    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
+        _sourceIni = newSource
+    End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Name: " & Name
+    End Function
 End Class
 #End Region
 
 #Region "Interaction class"
 Public Class Interaction
-    Implements IPonyIniSerializable, IMemberwiseCloneable(Of Interaction)
 
-    Public Const ConfigFilename = "interactions.ini"
+    Private _base As InteractionBase
+    Public ReadOnly Property Base As InteractionBase
+        Get
+            Return _base
+        End Get
+    End Property
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
-    Public Property PonyName As String
-    Public Property Probability As Double
-    Public Property Proximity_Activation_Distance As Double = 125 'the distance to the target inside of which we start the interaction.
+    Public Property Initiator As Pony
+    Public Property Trigger As Pony
+    Public Property Targets As New HashSet(Of Pony)()
+    Public Property Behaviors As New List(Of Behavior)()
 
-    Public Property Targets_String As String = ""
+    Public Sub New(base As InteractionBase)
+        _base = Argument.EnsureNotNull(base, "base")
+    End Sub
 
-    Public Property Targets_Activated As TargetActivation
-    Public Property BehaviorList As New List(Of Behavior)
-
-    Public Property InteractsWith As New List(Of Pony)
-    Public Property InteractsWithByDirectory As New List(Of String)
-
-    Public Property Trigger As Pony = Nothing  'The pony we ran into that cause us to start
-    Public Property Initiator As Pony = Nothing 'The main pony than runs around waiting until she runs into a target.
-
-    Public Property ReactivationDelay As Integer = 60 'in seconds
-
-    Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
-        Return String.Join(",",
-            Name,
-            Quoted(PonyName),
-            Probability.ToString(CultureInfo.InvariantCulture),
-            Proximity_Activation_Distance.ToString(CultureInfo.InvariantCulture),
-            Braced(Targets_String),
-            Targets_Activated.ToString(),
-            Braced(String.Join(",", BehaviorList.Select(Function(behavior) Quoted(behavior.Name)))),
-            ReactivationDelay.ToString(CultureInfo.InvariantCulture))
-    End Function
-
-    Public Overloads Function MemberwiseClone() As Interaction Implements IMemberwiseCloneable(Of Interaction).MemberwiseClone
-        Return DirectCast(MyBase.MemberwiseClone(), Interaction)
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Base.Name: " & Base.Name
     End Function
 End Class
 #End Region
@@ -831,6 +719,10 @@ Public Class Behavior
     Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
         _sourceIni = newSource
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Name: " & Name
+    End Function
 End Class
 #End Region
 
@@ -848,6 +740,10 @@ Public Class BehaviorGroup
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
         Return String.Join(",", "behaviorgroup", Number, Name)
+    End Function
+
+    Public Overrides Function ToString() As String
+        Return "[" & Number & ", " & If(Name, "") & "]"
     End Function
 End Class
 #End Region
@@ -937,6 +833,10 @@ Public Class Speech
     Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
         _sourceIni = newSource
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Name: " & Name
+    End Function
 End Class
 #End Region
 
@@ -1000,32 +900,24 @@ Public Class Pony
             Return Base.Directory
         End Get
     End Property
-    Public ReadOnly Property Name() As String
+    Public ReadOnly Property DisplayName() As String
         Get
             Return Base.DisplayName
         End Get
     End Property
-    Friend ReadOnly Property Tags() As ISet(Of String)
-        Get
-            Return Base.Tags
-        End Get
-    End Property
-    Friend ReadOnly Property BehaviorGroups() As ICollection(Of BehaviorGroup)
-        Get
-            Return Base.BehaviorGroups
-        End Get
-    End Property
-    Friend ReadOnly Property Behaviors() As ICollection(Of Behavior)
+    Friend ReadOnly Property Behaviors() As List(Of Behavior)
         Get
             Return Base.Behaviors
         End Get
     End Property
-    Friend ReadOnly Property Interactions() As IEnumerable(Of Interaction)
+    Friend ReadOnly Property InteractionBases() As List(Of InteractionBase)
         Get
             Return Base.Interactions
         End Get
     End Property
 #End Region
+
+    Private ReadOnly interactions As New List(Of Interaction)()
 
     Public Property ShouldBeSleeping As Boolean
     Private _sleeping As Boolean
@@ -1389,7 +1281,7 @@ Public Class Pony
         If CurrentInteraction Is Nothing Then Exit Sub
 
         If isInteractionInitiator Then
-            For Each pony In CurrentInteraction.InteractsWith
+            For Each pony In CurrentInteraction.Targets
                 ' Check the target is still running the interaction that the current pony initiated, then cancel it.
                 If Not ReferenceEquals(Me, pony) AndAlso
                     pony.CurrentInteraction IsNot Nothing AndAlso
@@ -1402,7 +1294,7 @@ Public Class Pony
 
         AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
 
-        interactionDelayUntil = internalTime + TimeSpan.FromSeconds(CurrentInteraction.ReactivationDelay)
+        interactionDelayUntil = internalTime + CurrentInteraction.Base.ReactivationDelay
         CurrentInteraction = Nothing
         isInteractionInitiator = False
     End Sub
@@ -1594,7 +1486,7 @@ Public Class Pony
         ' Set the line text to be displayed.
         If Options.PonySpeechEnabled Then
             lastSpeakTime = internalTime
-            lastSpeakLine = Me.Name & ": " & ControlChars.Quote & line.Text & ControlChars.Quote
+            lastSpeakLine = Me.DisplayName & ": " & ControlChars.Quote & line.Text & ControlChars.Quote
         End If
 
         ' Start the sound file playing.
@@ -2220,7 +2112,7 @@ Public Class Pony
             Return "Any"
         End If
 
-        For Each group In BehaviorGroups
+        For Each group In Base.BehaviorGroups
             If group.Number = groupnumber Then
                 Return group.Name
             End If
@@ -2726,68 +2618,67 @@ Public Class Pony
         Return TopLeftLocation + GetImageCenterOffset()
     End Function
 
-    'Make a lists of targets from what ponies exist, and get their references.
-    Friend Sub InitializeInteractions(otherPonies As IEnumerable(Of Pony))
+    ''' <summary>
+    ''' Using the collection of interaction bases available to the base of this pony, generates interactions that can be used depending on
+    ''' the other available sprites that can be interacted with. These interactions will be triggered during update cycles.
+    ''' </summary>
+    ''' <param name="otherPonies">The other ponies available to interact with.</param>
+    Public Sub InitializeInteractions(otherPonies As IEnumerable(Of Pony))
+        Argument.EnsureNotNull(otherPonies, "otherPonies")
 
-        For Each Interaction In Interactions
+        interactions.Clear()
+        For Each interactionBase In InteractionBases
+            Dim interaction = New Interaction(interactionBase)
 
-            Interaction.InteractsWith.Clear()
+            ' Get all actual instances of target ponies.
+            interaction.Targets.UnionWith(otherPonies.Where(Function(p) interactionBase.TargetNames.Contains(p.Directory)))
+            ' If no instances of the target ponies are present, we can forget this interaction.
+            ' Alternatively, if it is specified all targets must be present but some are missing, the interaction cannot be used.
+            If interaction.Targets.Count = 0 OrElse
+                (interaction.Base.Activation = TargetActivation.All AndAlso
+                interaction.Targets.Count <> interaction.Base.TargetNames.Count) Then
+                Continue For
+            End If
 
-            For Each directory As String In Interaction.InteractsWithByDirectory
-                For Each pony In otherPonies
-                    If ReferenceEquals(Me, pony) Then Continue For
-                    If directory = pony.Directory Then
-                        Dim already_added = False
-                        For Each otherPony In Interaction.InteractsWith
-                            If ReferenceEquals(otherPony, pony) Then
-                                already_added = True
-                                Exit For
-                            End If
-                        Next
-
-                        If already_added Then
-                            Continue For
-                        End If
-
-                        Interaction.InteractsWith.Add(pony)
-                    End If
-                Next
+            ' Determine the common set of behaviors by name actually implemented by this pony and all discovered targets.
+            Dim commonBehaviors As New HashSet(Of String)(interactionBase.BehaviorNames, StringComparer.OrdinalIgnoreCase)
+            For Each pony In {Me}.Concat(otherPonies)
+                commonBehaviors.IntersectWith(pony.Base.Behaviors.Select(Function(b) b.Name))
+                If commonBehaviors.Count = 0 Then Exit For
             Next
-        Next
+            ' We need at least one common behavior to exist on all targets, or we cannot run the interaction.
+            If commonBehaviors.Count = 0 Then Continue For
+            ' Keep a copy of behaviors for the current pony for use when the interaction is activated later.
+            interaction.Behaviors.AddRange(Base.Behaviors.Where(Function(b) commonBehaviors.Contains(b.Name)))
 
+            ' We can list this as a possible interaction.
+            interactions.Add(interaction)
+        Next
     End Sub
 
     Private Sub StartInteraction(interaction As Interaction)
-
         isInteractionInitiator = True
+        IsInteracting = True
         CurrentInteraction = interaction
-        SelectBehavior(interaction.BehaviorList(Rng.Next(interaction.BehaviorList.Count)))
+        SelectBehavior(interaction.Behaviors(Rng.Next(interaction.Behaviors.Count)))
+
+        interaction.Initiator = Me
 
         'do we interact with ALL targets, including copies, or just the pony that we ran into?
-        If interaction.Targets_Activated <> TargetActivation.One Then
-            For Each targetPony In interaction.InteractsWith
-                targetPony.StartInteractionAsTarget(CurrentBehavior.Name, Me, interaction)
+        If interaction.Base.Activation <> TargetActivation.One Then
+            For Each targetPony In interaction.Targets
+                targetPony.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
             Next
         Else
-            interaction.Trigger.StartInteractionAsTarget(CurrentBehavior.Name, Me, interaction)
+            interaction.Trigger.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
         End If
-
-        IsInteracting = True
-
     End Sub
 
-    Friend Sub StartInteractionAsTarget(behaviorName As String, initiator As Pony, interaction As Interaction)
-        For Each behavior In Behaviors
-            If behaviorName = behavior.Name Then
-                SelectBehavior(behavior)
-                Exit For
-            End If
-        Next
-
-        interaction.Initiator = initiator
+    Private Sub StartInteractionAsTarget(behaviorName As String, interaction As Interaction)
         isInteractionInitiator = False
-        CurrentInteraction = interaction
         IsInteracting = True
+        CurrentInteraction = interaction
+        SelectBehavior(Behaviors.First(Function(b) b.Name = behaviorName))
     End Sub
 
     Private Function GetReadiedInteraction() As Interaction
@@ -2796,16 +2687,10 @@ Public Class Pony
             Return Nothing
         End If
 
-        For Each interaction In Interactions
-            For Each target As Pony In interaction.InteractsWith
+        For Each interaction In interactions
+            For Each target As Pony In interaction.Targets
                 ' Don't attempt to interact with a busy target, or with self.
                 If target.IsInteracting OrElse ReferenceEquals(Me, target) Then Continue For
-
-                ' Make sure that all targets are present, if all are required.
-                If interaction.Targets_Activated = TargetActivation.All AndAlso
-                    interaction.InteractsWith.Count <> interaction.InteractsWithByDirectory.Count Then
-                    Continue For
-                End If
 
                 ' Get distance between the pony and the possible target.
                 Dim distance = Vector2.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
@@ -2814,7 +2699,7 @@ Public Class Pony
                                                                                  CInt(target.CurrentImageSize.Y / 2)))
 
                 ' Check target is in range, and perform a random check against the chance the interaction can occur.
-                If distance <= interaction.Proximity_Activation_Distance AndAlso Rng.NextDouble() <= interaction.Probability Then
+                If distance <= interaction.Base.Proximity AndAlso Rng.NextDouble() <= interaction.Base.Chance Then
                     interaction.Trigger = target
                     Return interaction
                 End If
@@ -2929,6 +2814,10 @@ Public Class Pony
 
     Private Function ScaledSpeed() As Double
         Return If(SpeedOverride Is Nothing, CurrentBehavior.Speed * Scale, SpeedOverride.Value)
+    End Function
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Base.Directory: " & Base.Directory
     End Function
 End Class
 #End Region
@@ -3053,6 +2942,10 @@ Public Class EffectBase
     Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
         _sourceIni = newSource
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Name: " & Name
+    End Function
 End Class
 #End Region
 
@@ -3174,6 +3067,10 @@ Public Class Effect
             Return New Rectangle(Location, New Size(width, height))
         End Get
     End Property
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Base.Name: " & Base.Name
+    End Function
 End Class
 #End Region
 
@@ -3313,6 +3210,10 @@ Public Class HouseBase
             End If
         End Using
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Name: " & Name
+    End Function
 End Class
 #End Region
 
@@ -3522,6 +3423,10 @@ Public Class House
         Next
 
     End Sub
+
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Base.Name: " & Base.Name
+    End Function
 End Class
 #End Region
 
@@ -3561,6 +3466,9 @@ Public Class SpriteImage
             Return _size.Value
         End Get
     End Property
+    Public Overrides Function ToString() As String
+        Return MyBase.ToString() & ", Path: " & If(Path, "")
+    End Function
 End Class
 
 Public Class CenterableSpriteImage
@@ -3737,6 +3645,28 @@ Public Module EnumConversions
             Case Else
                 Throw New ArgumentException("Invalid movement option: " & movement, "movement")
         End Select
+    End Function
+
+    Public Function TargetActivationFromString(activation As String) As TargetActivation
+        Dim targetsOut As TargetActivation
+        If Not [Enum].TryParse(activation, targetsOut) Then
+            ' If direct parsing failed, assume we've got some old definitions instead.
+            ' The old code accepted the following values irrespective of case.
+            ' It should be noted that title-cased "All" will be recognized as a new value which has stricter semantics.
+            ' However, the old code used to serialize a Boolean value and thus wrote "True" or "False". The chances of
+            ' encountering "random" or "all" in practice are therefore almost nil, as they would have to be manually
+            ' edited in.
+            If String.Equals(activation, "False", StringComparison.OrdinalIgnoreCase) OrElse
+                String.Equals(activation, "random", StringComparison.OrdinalIgnoreCase) Then
+                targetsOut = TargetActivation.One
+            ElseIf String.Equals(activation, "True", StringComparison.OrdinalIgnoreCase) OrElse
+                String.Equals(activation, "all", StringComparison.OrdinalIgnoreCase) Then
+                targetsOut = TargetActivation.Any
+            Else
+                Throw New ArgumentException("Invalid activation value: " & activation, "activation")
+            End If
+        End If
+        Return targetsOut
     End Function
 End Module
 #End Region

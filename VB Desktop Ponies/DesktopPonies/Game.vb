@@ -73,7 +73,7 @@ Friend Module Games
 
         Friend GameScreen As Screen
 
-        Public Sub New(directory As String)
+        Public Sub New(collection As PonyCollection, directory As String)
             Dim gameData As String = Nothing
             Dim descriptionData As String = Nothing
             Dim positionData As New List(Of String)()
@@ -191,7 +191,8 @@ Friend Module Games
                 Dim newBall As New Ball(columns(1),
                                          Trim(columns(2)), Trim(columns(3)), Trim(columns(4)), Trim(columns(5)), Trim(columns(6)),
                                          Integer.Parse(columns(7), CultureInfo.InvariantCulture),
-                                         Integer.Parse(columns(8), CultureInfo.InvariantCulture), directory & Path.DirectorySeparatorChar)
+                                         Integer.Parse(columns(8), CultureInfo.InvariantCulture), directory & Path.DirectorySeparatorChar,
+                                         collection)
                 Balls.Add(newBall)
             Next
 
@@ -415,10 +416,11 @@ Friend Module Games
             Friend Handler As Pony 'the ball is a pony type that move like a pony
 
             Sub New(_type As String, idle_image_filename As String, slow_right_image_filename As String, slow_left_image_filename As String,
-                    fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer, files_path As String)
+                    fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer,
+                    files_path As String, collection As PonyCollection)
 
                 ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
-                Dim handlerBase = PonyBase.CreateInMemory()
+                Dim handlerBase = PonyBase.CreateInMemory(collection)
                 handlerBase.DisplayName = "Ball"
                 Handler = New Pony(handlerBase)
 

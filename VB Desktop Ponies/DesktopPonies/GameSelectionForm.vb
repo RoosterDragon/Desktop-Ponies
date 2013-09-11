@@ -5,12 +5,12 @@ Public Class GameSelectionForm
     Private game As Game
     Private team1 As Game.Team
     Private team2 As Game.Team
-    Private ponyBases As PonyBase()
+    Private ReadOnly ponies As PonyCollection
 
-    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
+    Public Sub New(collection As PonyCollection)
         InitializeComponent()
         Icon = My.Resources.Twilight
-        ponyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
+        ponies = Argument.EnsureNotNull(collection, "collection")
     End Sub
 
     Private Sub GameSelectionForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -26,7 +26,7 @@ Public Class GameSelectionForm
         games = New List(Of Game)(gameDirectories.Length)
         For Each gameDirectory In gameDirectories
             Try
-                games.Add(New Game(gameDirectory))
+                games.Add(New Game(ponies, gameDirectory))
             Catch ex As Exception
                 My.Application.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
             End Try
@@ -39,12 +39,14 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Dim ponyImageList = PonyEditor.GenerateImageList(ponyBases, 75, PonyList.BackColor, Function(b) b.RightImage.Path)
+        Dim ponyImageList = PonyEditor.GenerateImageList(ponies.Bases, 75, PonyList.BackColor, Function(b) b.RightImage.Path)
         PonyList.LargeImageList = ponyImageList
         PonyList.SmallImageList = ponyImageList
 
         Dim ponycount As Integer = 0
-        For Each ponyBase In ponyBases
+        PonyList.Items.Add(New ListViewItem(ponies.RandomBase.Directory, ponycount))
+        ponycount += 1
+        For Each ponyBase In ponies.Bases
             PonyList.Items.Add(New ListViewItem(ponyBase.Directory, ponycount))
             ponycount += 1
         Next
@@ -168,10 +170,10 @@ Public Class GameSelectionForm
         End If
 
         Dim selection As Integer = PonyList.SelectedIndices(0)
-        Do While ponyBases(selection).Directory = "Random Pony"
-            selection = Rng.Next(ponyBases.Count)
+        Do While ponies.Bases(selection).Directory = "Random Pony"
+            selection = Rng.Next(ponies.Bases.Count)
         Loop
-        Dim pony = New Pony(ponyBases(selection))
+        Dim pony = New Pony(ponies.Bases(selection))
 
         Dim empty_spot_found = False
 

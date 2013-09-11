@@ -1,36 +1,43 @@
 ﻿Imports System.IO
 
 Public Class PonyCollection
-    Private ReadOnly _bases As ImmutableArray(Of PonyBase)
+    Private _bases As ImmutableArray(Of PonyBase)
     Public ReadOnly Property Bases As ImmutableArray(Of PonyBase)
         Get
             Return _bases
         End Get
     End Property
-    Private ReadOnly _randomBase As PonyBase
+    Private _randomBase As PonyBase
     Public ReadOnly Property RandomBase As PonyBase
         Get
             Return _randomBase
         End Get
     End Property
+    Private ReadOnly _interactions As New Dictionary(Of String, List(Of InteractionBase))()
+    Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(
+        Function(s) New List(Of InteractionBase)())
 
     Public Sub New()
         Me.New(Nothing, Nothing)
     End Sub
 
     Public Sub New(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
+        Threading.Tasks.Parallel.Invoke(Sub() LoadPonyBases(countCallback, loadCallback), AddressOf LoadInteractions)
+    End Sub
+
+    Private Sub LoadPonyBases(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
         Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
             Sub(folder)
-                Dim pony = PonyBase.Load(folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1))
-                If pony IsNot Nothing Then
-                    ponies.Add(pony)
-                    If loadCallback IsNot Nothing Then loadCallback(pony)
-                End If
-            End Sub)
+                        Dim pony = PonyBase.Load(Me, folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1))
+                        If pony IsNot Nothing Then
+                            ponies.Add(pony)
+                            If loadCallback IsNot Nothing Then loadCallback(pony)
+                        End If
+                    End Sub)
         Dim allBases = ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToList()
         Dim randomIndex = allBases.FindIndex(Function(pb) pb.Directory = "Random Pony")
         If randomIndex <> -1 Then
@@ -38,6 +45,69 @@ Public Class PonyCollection
             allBases.RemoveAt(randomIndex)
         End If
         _bases = allBases.ToImmutableArray()
+    End Sub
+
+    Private Sub LoadInteractions()
+        If Not File.Exists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
+            Options.PonyInteractionsExist = False
+            Exit Sub
+        End If
+        Dim newListFactory = Function(s As String) New List(Of InteractionBase)()
+        Using reader As New StreamReader(
+            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename))
+            Do Until reader.EndOfStream
+                Dim line = reader.ReadLine()
+
+                ' Ignore blank lines, and those commented out with a single quote.
+                If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
+
+                Dim i As InteractionBase = Nothing
+                Dim issues As ParseIssue() = Nothing
+                If InteractionBase.TryLoad(line, i, issues) Then
+                    _interactions.GetOrAdd(i.InitiatorName, newListFactory).Add(i)
+                End If
+            Loop
+        End Using
+    End Sub
+
+    ''' <summary>
+    ''' Registers a change in directory name of a pony. Updates references accordingly.
+    ''' </summary>
+    ''' <param name="oldDirectory">The old directory name.</param>
+    ''' <param name="newDirectory">The new directory name.</param>
+    Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
+        If oldDirectory = newDirectory Then Return
+        If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
+        For Each action In _interactions.Values.SelectMany(Function(list) list)
+            If action.TargetNames.Remove(oldDirectory) Then
+                action.TargetNames.Add(newDirectory)
+            End If
+        Next
+        If _interactions.ContainsKey(oldDirectory) Then
+            Dim actions = _interactions(oldDirectory)
+            _interactions.Remove(oldDirectory)
+            For Each action In actions
+                action.InitiatorName = newDirectory
+            Next
+            _interactions(newDirectory) = actions
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Gets a list of interactions owned by the pony with the given directory identifier. This list may be edited.
+    ''' </summary>
+    ''' <param name="directory">The directory identifier of the pony.</param>
+    ''' <returns>A list of all interactions where this pony is listed as the initiator.</returns>
+    Public Function Interactions(directory As String) As List(Of InteractionBase)
+        Return _interactions.GetOrAdd(directory, newListFactory)
+    End Function
+
+    ''' <summary>
+    ''' Saves interactions owned by the pony with the given directory identifier.
+    ''' </summary>
+    ''' <param name="directory">The directory identifier of the pony.</param>
+    Public Sub SaveInteractions(directory As String)
+        ' TODO: Implement.
     End Sub
 End Class
 

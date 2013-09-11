@@ -2,8 +2,8 @@
     Private Shared typeValues As Object() =
         [Enum].GetValues(GetType(TargetActivation)).Cast(Of Object)().ToArray()
 
-    Private originalInteraction As Interaction
-    Private newInteraction As Interaction
+    Private originalInteraction As InteractionBase
+    Private newInteraction As InteractionBase
 
     Public Sub New()
         InitializeComponent()

@@ -21,7 +21,7 @@ Public Class NewInteractionDialog
             Exit Sub
         End If
 
-        For Each Interaction In m_editor.PreviewPony.Interactions
+        For Each Interaction In m_editor.PreviewPony.InteractionBases
             If Not change_existing_interaction AndAlso
                 String.Equals(Interaction.Name, Trim(Name_Textbox.Text), StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
@@ -75,21 +75,6 @@ Public Class NewInteractionDialog
             Exit Sub
         End If
 
-        Dim targetlist As String = ""
-
-        For Each Pony As String In Targets_Box.CheckedItems
-            targetlist += Quoted(Pony) & ","
-        Next
-
-        targetlist = Mid(targetlist, 1, targetlist.Length - 1)
-
-        Dim behaviorlist As String = ""
-        For Each behavior As String In Behaviors_Box.CheckedItems
-            behaviorlist += behavior & ","
-        Next
-
-        behaviorlist = Mid(behaviorlist, 1, behaviorlist.Length - 1)
-
         If change_existing_interaction Then
             Dim toRemove = m_editor.PreviewPony.Base.Interactions.Where(
                 Function(interaction) interaction.Name = Name_Textbox.Text).ToArray()
@@ -103,15 +88,16 @@ Public Class NewInteractionDialog
         If AnyRadioButton.Checked Then targetsActivated = TargetActivation.Any
         If AllRadioButton.Checked Then targetsActivated = TargetActivation.All
 
-        m_editor.PreviewPony.Base.AddInteraction(Name_Textbox.Text,
-                                                      m_editor.PreviewPony.Directory, _
-                                                      chance / 100,
-                                                      Proximity_Box.Text, _
-                                                      targetlist, _
-                                                      targetsActivated, _
-                                                      behaviorlist, _
-                                                      CInt(reactivationDelay), _
-                                                      False, m_editor.PonyBases)
+        Dim newInteraction = New InteractionBase() With
+                             {.Name = Name_Textbox.Text,
+                              .InitiatorName = m_editor.PreviewPony.Directory,
+                              .Chance = chance / 100,
+                              .Proximity = proximity,
+                              .Activation = targetsActivated,
+                              .ReactivationDelay = TimeSpan.FromSeconds(reactivationDelay)}
+        newInteraction.TargetNames.UnionWith(Targets_Box.CheckedItems.Cast(Of String))
+        newInteraction.BehaviorNames.UnionWith(Behaviors_Box.CheckedItems.Cast(Of String))
+        m_editor.PreviewPony.Base.Interactions.Add(newInteraction)
 
         MessageBox.Show(Me, "Important note:" & Environment.NewLine &
                         "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
@@ -124,7 +110,7 @@ Public Class NewInteractionDialog
         Me.Close()
     End Sub
 
-    Friend Sub ChangeInteraction(interaction As Interaction)
+    Friend Sub ChangeInteraction(interaction As InteractionBase)
         Targets_Box.Items.Clear()
         Behaviors_Box.Items.Clear()
 
@@ -135,7 +121,7 @@ Public Class NewInteractionDialog
                 Behaviors_Box.Items.Add(item)
             Next
 
-            For Each Pony In m_editor.ponyBases
+            For Each Pony In m_editor.Ponies.Bases
                 Targets_Box.Items.Add(Pony.Directory)
             Next
 
@@ -157,7 +143,7 @@ Public Class NewInteractionDialog
 
         Name_Textbox.Enabled = False
         change_existing_interaction = True
-        Select Case interaction.Targets_Activated
+        Select Case interaction.Activation
             Case TargetActivation.One
                 OneRadioButton.Checked = True
             Case TargetActivation.Any
@@ -166,18 +152,16 @@ Public Class NewInteractionDialog
                 AllRadioButton.Checked = True
         End Select
 
-        Chance_Box.Text = CStr(interaction.Probability * 100)
+        Chance_Box.Text = CStr(interaction.Chance * 100)
         Name_Textbox.Text = interaction.Name
-        Proximity_Box.Text = CStr(interaction.Proximity_Activation_Distance)
+        Proximity_Box.Text = CStr(interaction.Proximity)
         Me.Text = "Edit interaction..."
-
-        Dim targets = CommaSplitQuoteQualified(interaction.Targets_String)
 
         Dim target_index_list As New List(Of Integer)
 
-        For Each target In targets
+        For Each target In interaction.TargetNames
             For Each item As String In Targets_Box.Items
-                If String.Equals(Trim(target), Trim(item), StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(Trim(target), Trim(item), StringComparison.Ordinal) Then
                     target_index_list.Add(Targets_Box.Items.IndexOf(item))
                 End If
             Next
@@ -185,9 +169,9 @@ Public Class NewInteractionDialog
 
         Dim behaviors_index_list As New List(Of Integer)
 
-        For Each behavior In interaction.BehaviorList
+        For Each behavior In interaction.BehaviorNames
             For Each item As String In Behaviors_Box.Items
-                If String.Equals(Trim(behavior.Name), Trim(item), StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(Trim(behavior), Trim(item), StringComparison.OrdinalIgnoreCase) Then
                     behaviors_index_list.Add(Behaviors_Box.Items.IndexOf(item))
                 End If
             Next

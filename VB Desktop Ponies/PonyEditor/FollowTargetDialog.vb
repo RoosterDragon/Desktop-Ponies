@@ -61,7 +61,7 @@
     Private Sub Change_Behavior()
         FollowComboBox.Items.Clear()
 
-        For Each Available_Pony In m_editor.PonyBases
+        For Each Available_Pony In m_editor.Ponies.Bases
             FollowComboBox.Items.Add(Available_Pony.Directory)
         Next
 
@@ -189,7 +189,7 @@
 
     Private Sub GetThumbnail()
         If m_editor Is Nothing Then Return
-        For Each ponyBase In m_editor.PonyBases
+        For Each ponyBase In m_editor.Ponies.Bases
             If ponyBase.Directory = CStr(FollowComboBox.SelectedItem) Then
                 Try
                     ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)

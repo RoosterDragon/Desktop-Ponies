@@ -124,13 +124,6 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              poniesNode.TreeView.Sort()
                          End Sub)
-
-        worker.QueueTask(Sub()
-                             Dim basesCopy = bases.Values.ToArray()
-                             For Each base In bases.Values
-                                 base.LoadInteractions(basesCopy)
-                             Next
-                         End Sub)
         worker.QueueTask(Sub()
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1

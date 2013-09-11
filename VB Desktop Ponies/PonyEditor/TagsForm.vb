@@ -11,10 +11,10 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        m_editor.PreviewPony.Tags.Clear()
+        m_editor.PreviewPony.Base.Tags.Clear()
 
         For Each Tag As String In PonyFilterList.CheckedItems
-            m_editor.PreviewPony.Tags.Add(Tag)
+            m_editor.PreviewPony.Base.Tags.Add(Tag)
         Next
 
         Me.Close()
@@ -30,13 +30,11 @@
             PonyFilterList.Items.Add(category)
         Next
 
-        For Each Tag As String In m_editor.PreviewPony.Tags
-            For Each category As String In PonyFilterList.Items
-                If String.Equals(Tag, category, StringComparison.OrdinalIgnoreCase) Then
-                    PonyFilterList.SetItemChecked(PonyFilterList.Items.IndexOf(category), True)
-                    Exit For
-                End If
-            Next
+        For i = 0 To PonyFilterList.Items.Count - 1
+            Dim tag = DirectCast(PonyFilterList.Items(i), String)
+            If m_editor.PreviewPony.Base.Tags.Contains(tag) Then
+                PonyFilterList.SetItemChecked(i, True)
+            End If
         Next
     End Sub
 End Class

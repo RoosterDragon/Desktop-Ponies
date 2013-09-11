@@ -15,7 +15,7 @@ Public Class SpriteDebugForm
         For Each sprite In sprites
             Dim pony = TryCast(sprite, Pony)
             If pony IsNot Nothing Then
-                PonyDataGridView.Rows(i).SetValues(pony.Name, pony.TopLeftLocation, pony.CurrentBehavior.Name,
+                PonyDataGridView.Rows(i).SetValues(pony.DisplayName, pony.TopLeftLocation, pony.CurrentBehavior.Name,
                                           ((pony.BehaviorStartTime + pony.BehaviorDesiredDuration) - pony.internalTime).TotalSeconds.ToString("0.00s"),
                                           pony.destinationCoords, pony.Destination,
                                           pony.CurrentBehavior.OriginalFollowObjectName, pony.followObjectName,

@@ -6,7 +6,7 @@ Public Class PonyEditor
     Private pe_animator As PonyEditorAnimator
     Private pe_interface As ISpriteCollectionView
 
-    Friend PonyBases As ImmutableArray(Of PonyBase)
+    Friend Ponies As PonyCollection
     Private ponyImageList As ImageList
     Private infoGrids As ImmutableArray(Of PonyInfoGrid)
     Private loaded As Boolean
@@ -56,10 +56,10 @@ Public Class PonyEditor
         End Sub
     End Class
 
-    Public Sub New(ponyBases As IEnumerable(Of PonyBase))
+    Public Sub New(collection As PonyCollection)
         InitializeComponent()
         Icon = My.Resources.Twilight
-        Me.PonyBases = Argument.EnsureNotNull(ponyBases, "ponyBases").ToImmutableArray()
+        Ponies = Argument.EnsureNotNull(collection, "collection")
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -78,13 +78,13 @@ Public Class PonyEditor
                          New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}.ToImmutableArray()
 
             'add all possible ponies to the selection window.
-            ponyImageList = GenerateImageList(PonyBases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
+            ponyImageList = GenerateImageList(Ponies.Bases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
             PonyList.LargeImageList = ponyImageList
             PonyList.SmallImageList = ponyImageList
 
             PonyList.SuspendLayout()
-            For i = 0 To PonyBases.Length - 1
-                PonyList.Items.Add(New ListViewItem(PonyBases(i).Directory, i) With {.Tag = PonyBases(i)})
+            For i = 0 To Ponies.Bases.Length - 1
+                PonyList.Items.Add(New ListViewItem(Ponies.Bases(i).Directory, i) With {.Tag = Ponies.Bases(i)})
             Next
             PonyList.ResumeLayout()
 
@@ -96,7 +96,7 @@ Public Class PonyEditor
 
         pe_interface = Options.GetInterface()
         pe_interface.Topmost = True
-        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, PonyBases)
+        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, Ponies.Bases)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
     End Sub
@@ -179,7 +179,6 @@ Public Class PonyEditor
             New Threading.Tasks.Task(
             Sub()
                 _previewPony = New Pony(base)
-                PreviewPony.Base.LoadInteractions(PonyBases)
             End Sub)
         ponyLoadTask.ContinueWith(
             Sub()
@@ -255,7 +254,7 @@ Public Class PonyEditor
             InteractionsGrid.Rows.Clear()
             SpeechesGrid.Rows.Clear()
 
-            PonyName.Text = pony.Name
+            PonyName.Text = pony.DisplayName
 
             CurrentBehaviorValueLabel.Text = "N/A"
             TimeLeftValueLabel.Text = "N/A"
@@ -394,16 +393,16 @@ Public Class PonyEditor
                     effect.DoNotRepeatImageAnimations)
             Next
 
-            For Each interaction In PreviewPony.Interactions
+            For Each interaction In PreviewPony.InteractionBases
                 InteractionsGrid.Rows.Add(
                     interaction.Name,
                     interaction.Name,
-                    interaction.Probability.ToString("P", CultureInfo.CurrentCulture),
-                    interaction.Proximity_Activation_Distance,
+                    interaction.Chance.ToString("P", CultureInfo.CurrentCulture),
+                    interaction.Proximity,
                     "Select...",
-                    interaction.Targets_Activated.ToString(),
+                    interaction.Activation.ToString(),
                     "Select...",
-                    interaction.ReactivationDelay)
+                    interaction.ReactivationDelay.TotalSeconds)
             Next
 
             alreadyUpdating = False
@@ -440,8 +439,8 @@ Public Class PonyEditor
                 Next
             Next
 
-            For Each interaction In pony.Interactions
-                For Each otherinteraction In pony.Interactions
+            For Each interaction In pony.InteractionBases
+                For Each otherinteraction In pony.InteractionBases
                     If ReferenceEquals(interaction, otherinteraction) Then Continue For
 
                     If String.Equals(interaction.Name, otherinteraction.Name, StringComparison.OrdinalIgnoreCase) Then
@@ -503,7 +502,7 @@ Public Class PonyEditor
                 End If
             Next
 
-            For Each ponyBase In PonyBases
+            For Each ponyBase In Ponies.Bases
                 If String.Equals(Trim(ponyBase.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Dim new_pony = New Pony(ponyBase)
                     new_pony.Teleport()
@@ -778,9 +777,9 @@ Public Class PonyEditor
             SaveSortOrder()
 
             Dim changed_interaction_name As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
-            Dim changed_interaction As Interaction = Nothing
+            Dim changed_interaction As InteractionBase = Nothing
 
-            For Each interaction As Interaction In PreviewPony.Interactions
+            For Each interaction As InteractionBase In PreviewPony.InteractionBases
                 If interaction.Name = changed_interaction_name Then
                     changed_interaction = interaction
                     Exit For
@@ -871,7 +870,9 @@ Public Class PonyEditor
                         changed_behavior.Name = new_value
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
                     Case colBehaviorChance.Index
-                        changed_behavior.ChanceOfOccurence = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.CurrentCulture) / 100
+                        changed_behavior.ChanceOfOccurence = Double.Parse(
+                            Trim(Replace(new_value, CultureInfo.CurrentCulture.NumberFormat.PercentSymbol, "")),
+                            CultureInfo.CurrentCulture) / 100
                     Case colBehaviorMaxDuration.Index
                         Dim maxDuration = Double.Parse(new_value, CultureInfo.CurrentCulture)
                         If maxDuration > 0 Then
@@ -923,9 +924,9 @@ Public Class PonyEditor
                         End If
 
                         If PreviewPony.GetBehaviorGroupName(changed_behavior.Group) = "Unnamed" Then
-                            PreviewPony.BehaviorGroups.Add(New BehaviorGroup(new_value, changed_behavior.Group))
+                            PreviewPony.Base.BehaviorGroups.Add(New BehaviorGroup(new_value, changed_behavior.Group))
                         Else
-                            For Each behaviorgroup In PreviewPony.BehaviorGroups
+                            For Each behaviorgroup In PreviewPony.Base.BehaviorGroups
 
                                 If behaviorgroup.Name = new_value Then
                                     MsgBox("Error:  That group name already exists under a different ID.")
@@ -933,7 +934,7 @@ Public Class PonyEditor
                                 End If
                             Next
 
-                            For Each behaviorgroup In PreviewPony.BehaviorGroups
+                            For Each behaviorgroup In PreviewPony.Base.BehaviorGroups
                                 If behaviorgroup.Number = changed_behavior.Group Then
                                     behaviorgroup.Name = new_value
                                 End If
@@ -1013,9 +1014,9 @@ Public Class PonyEditor
                     Case colEffectBehavior.Index
                         changed_effect.BehaviorName = new_value
                     Case colEffectDuration.Index
-                        changed_effect.Duration = Double.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_effect.Duration = Double.Parse(new_value, CultureInfo.CurrentCulture)
                     Case colEffectRepeatDelay.Index
-                        changed_effect.RepeatDelay = Double.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_effect.RepeatDelay = Double.Parse(new_value, CultureInfo.CurrentCulture)
                     Case colEffectLocationRight.Index
                         changed_effect.PlacementDirectionRight = DirectionFromString(new_value)
                     Case colEffectLocationLeft.Index
@@ -1102,7 +1103,7 @@ Public Class PonyEditor
                     Case colSpeechUseRandomly.Index
                         changed_speech.Skip = Not (Boolean.Parse(new_value))
                     Case colSpeechGroup.Index
-                        changed_speech.Group = Integer.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_speech.Group = Integer.Parse(new_value, CultureInfo.CurrentCulture)
                 End Select
 
             Catch ex As Exception
@@ -1136,9 +1137,9 @@ Public Class PonyEditor
             Dim new_value As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value)
 
             Dim changed_interaction_name As String = CStr(InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value)
-            Dim changed_interaction As Interaction = Nothing
+            Dim changed_interaction As InteractionBase = Nothing
 
-            For Each interaction In PreviewPony.Interactions
+            For Each interaction In PreviewPony.InteractionBases
                 If interaction.Name = changed_interaction_name Then
                     changed_interaction = interaction
                     Exit For
@@ -1164,7 +1165,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each Interaction In PreviewPony.Interactions
+                        For Each Interaction In PreviewPony.InteractionBases
                             If String.Equals(Interaction.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists for this pony.  Please select another name.")
                                 InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = changed_interaction_name
@@ -1175,14 +1176,16 @@ Public Class PonyEditor
                         changed_interaction.Name = new_value
                         InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = new_value
                     Case colInteractionChance.Index
-                        changed_interaction.Probability = Double.Parse(Trim(Replace(new_value, "%", "")), CultureInfo.InvariantCulture) / 100
+                        changed_interaction.Chance = Double.Parse(
+                            Trim(Replace(new_value, CultureInfo.CurrentCulture.NumberFormat.PercentSymbol, "")),
+                            CultureInfo.CurrentCulture) / 100
                     Case colInteractionProximity.Index
-                        changed_interaction.Proximity_Activation_Distance = Double.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_interaction.Proximity = Double.Parse(new_value, CultureInfo.CurrentCulture)
                     Case colInteractionInteractWith.Index
-                        changed_interaction.Targets_Activated =
+                        changed_interaction.Activation =
                             CType([Enum].Parse(GetType(TargetActivation), new_value), TargetActivation)
                     Case colInteractionReactivationDelay.Index
-                        changed_interaction.ReactivationDelay = Integer.Parse(new_value, CultureInfo.InvariantCulture)
+                        changed_interaction.ReactivationDelay = TimeSpan.FromSeconds(Double.Parse(new_value, CultureInfo.CurrentCulture))
                 End Select
 
             Catch ex As Exception
@@ -1204,7 +1207,7 @@ Public Class PonyEditor
     End Sub
 
     Friend Function GetAllEffects() As EffectBase()
-        Return PonyBases.SelectMany(Function(pb) pb.Effects).ToArray()
+        Return Ponies.Bases.SelectMany(Function(pb) pb.Effects).ToArray()
     End Function
 
     Private Sub SaveSortOrder()
@@ -1489,8 +1492,8 @@ Public Class PonyEditor
                     PreviewPony.Behaviors.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, InteractionsGrid) Then
-                Dim todelete As Interaction = Nothing
-                For Each interaction In PreviewPony.Interactions
+                Dim todelete As InteractionBase = Nothing
+                For Each interaction In PreviewPony.InteractionBases
                     If CStr(e.Row.Cells(colInteractionName.Index).Value) = interaction.Name Then
                         todelete = interaction
                         Exit For
@@ -1609,7 +1612,7 @@ Public Class PonyEditor
                 previousPony = PreviewPony
             End If
 
-            Dim base = PonyBase.CreateInMemory()
+            Dim base = PonyBase.CreateInMemory(Ponies)
             base.DisplayName = "New Pony"
             _previewPony = New Pony(base)
 
