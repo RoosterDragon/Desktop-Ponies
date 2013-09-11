@@ -2,14 +2,14 @@
 
 Public Class PonyEditorForm2
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
-    Private ReadOnly bases As New Dictionary(Of String, MutablePonyBase)()
+    Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
     Private workingCount As Integer
 
     Private Class PageRef
-        Private ReadOnly _ponyBase As MutablePonyBase
-        Public ReadOnly Property PonyBase As MutablePonyBase
+        Private ReadOnly _ponyBase As PonyBase
+        Public ReadOnly Property PonyBase As PonyBase
             Get
                 Return _ponyBase
             End Get
@@ -21,7 +21,7 @@ Public Class PonyEditorForm2
             End Get
         End Property
         Public Property Item As IPonyIniSourceable
-        Public Sub New(ponyBase As MutablePonyBase, pageContent As PageContent, item As IPonyIniSourceable)
+        Public Sub New(ponyBase As PonyBase, pageContent As PageContent, item As IPonyIniSourceable)
             _ponyBase = ponyBase
             _pageContent = pageContent
             Me.Item = item
@@ -71,7 +71,7 @@ Public Class PonyEditorForm2
                              poniesNode.Expand()
                          End Sub)
 
-        PonyCollection.LoadAll(
+        Dim ponies As New PonyCollection(
             Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
             Sub(pony) worker.QueueTask(
                 Sub()

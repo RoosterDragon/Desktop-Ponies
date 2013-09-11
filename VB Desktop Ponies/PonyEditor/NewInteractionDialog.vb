@@ -91,10 +91,10 @@ Public Class NewInteractionDialog
         behaviorlist = Mid(behaviorlist, 1, behaviorlist.Length - 1)
 
         If change_existing_interaction Then
-            Dim toRemove = m_editor.PreviewPonyBase.Interactions.Where(
+            Dim toRemove = m_editor.PreviewPony.Base.Interactions.Where(
                 Function(interaction) interaction.Name = Name_Textbox.Text).ToArray()
             For Each interaction In toRemove
-                m_editor.PreviewPonyBase.Interactions.Remove(interaction)
+                m_editor.PreviewPony.Base.Interactions.Remove(interaction)
             Next
         End If
 
@@ -103,7 +103,7 @@ Public Class NewInteractionDialog
         If AnyRadioButton.Checked Then targetsActivated = TargetActivation.Any
         If AllRadioButton.Checked Then targetsActivated = TargetActivation.All
 
-        m_editor.PreviewPonyBase.AddInteraction(Name_Textbox.Text,
+        m_editor.PreviewPony.Base.AddInteraction(Name_Textbox.Text,
                                                       m_editor.PreviewPony.Directory, _
                                                       chance / 100,
                                                       Proximity_Box.Text, _

@@ -46,79 +46,6 @@ Public Class Referential
 End Class
 #End Region
 
-#Region "MutablePonyBase class"
-Public Class MutablePonyBase
-    Inherits PonyBase
-
-    Public Overloads Property DisplayName As String
-        Get
-            Return MyBase.DisplayName
-        End Get
-        Set(value As String)
-            MyBase.DisplayName = value
-        End Set
-    End Property
-    Public Overloads Property Directory As String
-        Get
-            Return MyBase.Directory
-        End Get
-        Set(value As String)
-            MyBase.Directory = value
-        End Set
-    End Property
-    Public Overloads Property Scale As Double
-        Get
-            Return MyBase.Scale
-        End Get
-        Set(value As Double)
-            MyBase.Scale = value
-        End Set
-    End Property
-
-    'Public Sub New()
-    'End Sub
-
-    Public Sub New(directory As String)
-        MyBase.New(False)
-        LoadFromIni(directory)
-    End Sub
-
-    Public Sub New()
-        MyBase.New(False)
-    End Sub
-
-    Public Overloads Sub AddBehavior(name As String, chance As Double,
-                       max_duration As Double, min_duration As Double, speed As Double,
-                       right_image_path As String, left_image_path As String,
-                       Allowed_Moves As AllowedMoves, _Linked_Behavior As String,
-                       _Startline As String, _Endline As String, Optional _skip As Boolean = False,
-                       Optional _xcoord As Integer = Nothing, Optional _ycoord As Integer = Nothing,
-                       Optional _object_to_follow As String = "",
-                       Optional _auto_select_images_on_follow As Boolean = True,
-                       Optional _follow_stopped_behavior As String = "",
-                       Optional _follow_moving_behavior As String = "",
-                       Optional right_image_center As Point = Nothing, Optional left_image_center As Point = Nothing,
-                       Optional _dont_repeat_image_animations As Boolean = False, Optional _group As Integer = 0)
-        MyBase.AddBehavior(name, chance, max_duration, min_duration, speed, right_image_path, left_image_path,
-                           Allowed_Moves, _Linked_Behavior, _Startline, _Endline, _skip, _xcoord, _ycoord,
-                           _object_to_follow, _auto_select_images_on_follow, _follow_stopped_behavior, _follow_moving_behavior,
-                           right_image_center, left_image_center, _dont_repeat_image_animations, _group)
-    End Sub
-
-    Public Overloads Sub SetLines(lines As IEnumerable(Of Speech))
-        MyBase.SetLines(lines)
-    End Sub
-
-    Public Overloads Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
-                   target_list As String, target_selection As TargetActivation, _
-                   behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
-                   ponyBases As IEnumerable(Of PonyBase))
-        MyBase.AddInteraction(interaction_name, name, probability, proximity,
-                              target_list, target_selection, behaviorlist, repeat_delay, displaywarnings, ponyBases)
-    End Sub
-End Class
-#End Region
-
 #Region "PonyBase class"
 Public Class PonyBase
     Public Const RootDirectory = "Ponies"
@@ -135,228 +62,166 @@ Public Class PonyBase
         RepeatDelay = 7
     End Enum
 
-    Public Property Directory As String
-
-    Private _displayName As String
-    Public Property DisplayName() As String
+    Private _directory As String
+    Public ReadOnly Property Directory As String
         Get
-            Return _displayName
+            Return _directory
         End Get
-        Protected Set(value As String)
-            _displayName = value
-        End Set
     End Property
-
-    Private _scale As Double
-    Public Property Scale() As Double
-        Get
-            Return _scale
-        End Get
-        Protected Set(value As Double)
-            _scale = value
-        End Set
-    End Property
-
-    Private _tags As ICollection(Of String)
-    Public ReadOnly Property Tags() As ICollection(Of String)
+    Public Property DisplayName As String
+    Public Property Scale As Double
+    Private _tags As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+    Public ReadOnly Property Tags As HashSet(Of String)
         Get
             Return _tags
         End Get
     End Property
-
-    Private _behaviorGroups As ICollection(Of BehaviorGroup)
-    Public ReadOnly Property BehaviorGroups() As ICollection(Of BehaviorGroup)
+    Private _behaviorGroups As New List(Of BehaviorGroup)()
+    Public ReadOnly Property BehaviorGroups() As List(Of BehaviorGroup)
         Get
             Return _behaviorGroups
         End Get
     End Property
-
-    Private _behaviors As IList(Of Behavior)
-    Public ReadOnly Property Behaviors() As IList(Of Behavior)
+    Private _behaviors As New List(Of Behavior)()
+    Public ReadOnly Property Behaviors() As List(Of Behavior)
         Get
             Return _behaviors
         End Get
     End Property
-
-    Private _effects As IList(Of EffectBase)
-    Public ReadOnly Property Effects() As IList(Of EffectBase)
+    Private _effects As New List(Of EffectBase)()
+    Public ReadOnly Property Effects() As List(Of EffectBase)
         Get
             Return _effects
         End Get
     End Property
-
-    Private _interactions As ICollection(Of Interaction)
-    Public ReadOnly Property Interactions() As ICollection(Of Interaction)
+    Private _interactions As New List(Of Interaction)()
+    Public ReadOnly Property Interactions() As List(Of Interaction)
         Get
             Return _interactions
         End Get
     End Property
-
-    Private _speeches As IList(Of Speech)
-    Public ReadOnly Property Speeches() As IList(Of Speech)
+    Private _speeches As New List(Of Speech)()
+    Public ReadOnly Property Speeches() As List(Of Speech)
         Get
             Return _speeches
         End Get
     End Property
-
-    Private _speechesRandom As ICollection(Of Speech)
-    Public ReadOnly Property SpeechesRandom() As ICollection(Of Speech)
+    Public ReadOnly Property SpeechesRandom() As IEnumerable(Of Speech)
         Get
-            Return _speechesRandom
+            Return Speeches.Where(Function(s) Not s.Skip)
+        End Get
+    End Property
+    Public ReadOnly Property SpeechesSpecific() As IEnumerable(Of Speech)
+        Get
+            Return Speeches.Where(Function(s) s.Skip)
         End Get
     End Property
 
-    Private _speechesSpecific As ICollection(Of Speech)
-    Public ReadOnly Property SpeechesSpecific() As ICollection(Of Speech)
-        Get
-            Return _speechesSpecific
-        End Get
-    End Property
-
-    Protected Sub New(makeReadOnly As Boolean)
-        _tags = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-        _behaviorGroups = New List(Of BehaviorGroup)
-        _behaviors = New List(Of Behavior)
-        _effects = New List(Of EffectBase)
-        _speeches = New List(Of Speech)
-        _interactions = New List(Of Interaction)
-        _speechesRandom = New List(Of Speech)
-        _speechesSpecific = New List(Of Speech)
-        If makeReadOnly Then Me.MakeReadOnly()
+    Private Sub New()
     End Sub
 
-    Protected Sub LoadFromIni(directory As String)
-        Argument.EnsureNotNull(directory, "directory")
+    Public Function ChangeDirectory(newDirectory As String) As Boolean
+        If Directory Is Nothing Then Return Create(newDirectory)
+        If String.Equals(Directory, newDirectory, PathComparison.Current) Then Return True
+        Try
+            Dim currentPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory)
+            Dim newPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newDirectory)
+            IO.Directory.Move(currentPath, newPath)
+            _directory = newDirectory
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
 
-        Dim lastSeparator = directory.LastIndexOf(Path.DirectorySeparatorChar)
-        If lastSeparator <> -1 Then
-            Me.Directory = directory.Substring(lastSeparator + 1)
-        Else
-            Me.Directory = directory
-        End If
+    Public Shared Function CreateInMemory() As PonyBase
+        Return New PonyBase()
+    End Function
 
-        Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, directory)
-        Using configFile As New StreamReader(Path.Combine(fullDirectory, ConfigFilename))
-            Dim behaviorLines As New List(Of String)
-            Dim effectLines As New List(Of String)
+    Public Shared Function Create(directory As String) As Boolean
+        Try
+            Dim fullPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, directory)
+            If IO.Directory.Exists(fullPath) Then Return False
+            IO.Directory.CreateDirectory(fullPath)
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
 
-            Do Until configFile.EndOfStream
-                Dim line = configFile.ReadLine
+    Public Shared Function Load(directory As String) As PonyBase
+        Dim pony As PonyBase = Nothing
+        Try
+            Dim fullPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, directory)
+            Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
+            If IO.Directory.Exists(fullPath) Then
+                pony = New PonyBase()
+                pony._directory = directory
+                pony.DisplayName = directory
+                If File.Exists(iniFileName) Then
+                    Using reader = New StreamReader(iniFileName)
+                        ParsePonyConfig(fullPath, reader, pony)
+                    End Using
+                End If
+            End If
+        Catch ex As Exception
+        End Try
+        Return pony
+    End Function
 
-                ' Ignore blank lines, and those commented out with a single quote.
-                If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
+    Private Shared Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As PonyBase)
+        Do Until reader.EndOfStream
+            Dim line = reader.ReadLine()
 
-                Dim columns = CommaSplitQuoteBraceQualified(line)
+            ' Ignore blank lines, and those commented out with a single quote.
+            If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
 
-                If UBound(columns) < 1 Then Continue Do
-
-                Select Case LCase(columns(0))
+            Dim firstComma = line.IndexOf(","c)
+            If firstComma <> -1 Then
+                Select Case line.Substring(0, firstComma).ToLowerInvariant()
                     Case "name"
-                        _displayName = columns(1)
+                        TryParse(Of String)(line, folder, AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
                     Case "scale"
-                        _scale = Double.Parse(columns(1), CultureInfo.InvariantCulture)
+                        TryParse(Of Double)(line, folder, AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
                     Case "behaviorgroup"
-                        BehaviorGroups.Add(New BehaviorGroup(columns(2), Integer.Parse(columns(1), CultureInfo.InvariantCulture)))
+                        TryParse(Of BehaviorGroup)(line, folder, AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
                     Case "behavior"
-                        behaviorLines.Add(line)
+                        TryParse(Of Behavior)(line, folder, pony, AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
+                    Case "effect"
+                        TryParse(Of EffectBase)(line, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
+                    Case "speak"
+                        TryParse(Of Speech)(line, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
                     Case "categories"
+                        Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Count - 1
                             For Each item As String In Main.Instance.FilterOptionsBox.Items
                                 If String.Equals(item, columns(i), StringComparison.OrdinalIgnoreCase) Then
-                                    Tags.Add(columns(i))
+                                    pony.Tags.Add(columns(i))
                                     Exit For
                                 End If
                             Next
                         Next
-                    Case "speak"
-                        'Speak options can be in THREE forms:
-                        '1 line text
-                        'OR
-                        '1 line name
-                        '2 line text
-                        '3 line sound file 
-                        '4 skip for normal use (used for chains or interactions)
-                        'OR
-                        '1 line name
-                        '2 line text
-                        '3 {}'d list of sound files (the first one that works is used - this is to support other ports, like 'Browser Ponies' 
-                        '4 skip for normal use (used for chains or interactions)
-
-                        Try
-                            Dim newLine As Speech = Nothing
-                            Select Case UBound(columns)
-                                Case 1, Is >= 4
-                                    Dim issues As ParseIssue() = Nothing
-                                    If Speech.TryLoad(line, fullDirectory, newLine, issues) Then
-                                        Speeches.Add(newLine)
-                                    Else
-                                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason)
-                                    End If
-                                Case Else
-                                    Throw New InvalidDataException(
-                                        "Speak line contained an invalid number of columns. Valid formats are:" & Environment.NewLine &
-                                        "The text to display, only, e.g." & Environment.NewLine &
-                                        "Speak,""Hello!""" & Environment.NewLine &
-                                        "The name of the speech, the text, the sound file, True/False for preventing random use, e.g." &
-                                        Environment.NewLine &
-                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False" & Environment.NewLine &
-                                        "You can specify multiple sound files inside curly braces. " &
-                                        "The program will choose the first format it recognizes, e.g." & Environment.NewLine &
-                                        "Speak,""Greeting"",""Hello!"",{""Hello.mp3"",""Hello.ogg""},False" & Environment.NewLine &
-                                        "You can leave out sound files if you wish, e.g." & Environment.NewLine &
-                                        "Speak,""Greeting"",""Hello!"",,False" & Environment.NewLine &
-                                        "The behavior group to which the speech belongs can also be added at the end, e.g." & Environment.NewLine &
-                                        "Speak,""Greeting"",""Hello!"",""Hello.mp3"",False,0" & Environment.NewLine &
-                                        Environment.NewLine &
-                                        "The invalid line was: " & line)
-                            End Select
-                        Catch ex As Exception
-                            My.Application.NotifyUserOfNonFatalException(
-                                ex, "Invalid 'speak' line in " & ConfigFilename & " file for pony named " & DisplayName)
-                        End Try
-                    Case "effect"
-                        effectLines.Add(line)
                     Case Else
-                        MessageBox.Show(
-                            "Unknown command in " & ConfigFilename & " for pony " & DisplayName & ": " & columns(0) & ControlChars.NewLine &
-                            "Valid commands are: name, scale, behaviorgroup, behavior, categories, speak, effect" & Environment.NewLine &
-                            "Skipping line: " & ControlChars.NewLine & line,
-                            "Unknown Command", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                        ' TODO: Handle unrecognized identifier, or lack of first comma.
                 End Select
-            Loop
+            End If
+        Loop
+    End Sub
 
-            ' Use the directory name as a fallback if a name was not specified in the configuration file.
-            If DisplayName Is Nothing Then DisplayName = directory
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
+        Dim result As T
+        Dim issues As ParseIssue() = Nothing
+        If parseFunc(line, directory, result, issues) Then
+            onSuccess(result)
+        End If
+    End Sub
 
-            SetLines(Speeches)
-
-            'Now that we have a list of all the behaviors, process them
-            For Each behaviorLine In behaviorLines
-                Try
-                    Dim b As Behavior = Nothing
-                    Dim issues As ParseIssue() = Nothing
-                    If Behavior.TryLoad(behaviorLine, fullDirectory, Me, b, issues) Then
-                        Behaviors.Add(b)
-                    Else
-                        Throw New InvalidDataException(issues.Single(Function(i) i.Fatal).Reason)
-                    End If
-                Catch ex As Exception
-                    If Not Reference.AutoStarted Then
-                        My.Application.NotifyUserOfNonFatalException(ex, "Invalid behavior line in configuration file for pony " &
-                                                                     DisplayName & ":" & ControlChars.NewLine & behaviorLine)
-                    End If
-                    Exit For
-                End Try
-            Next
-
-            For Each effectLine In effectLines
-                Dim issues As ParseIssue() = Nothing
-                Dim effect As EffectBase = Nothing
-                If EffectBase.TryLoad(effectLine, fullDirectory, Me, effect, issues) Then
-                    Effects.Add(effect)
-                End If
-            Next
-        End Using
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
+        Dim result As T
+        Dim issues As ParseIssue() = Nothing
+        If parseFunc(line, directory, pony, result, issues) Then
+            onSuccess(result)
+        End If
     End Sub
 
     Public Sub LoadInteractions(ponyBases As IEnumerable(Of PonyBase))
@@ -436,19 +301,7 @@ Public Class PonyBase
         End Using
     End Sub
 
-    Private Sub MakeReadOnly()
-        '_tags = _tags.AsReadOnly()
-        '_behaviorGroups = _behaviorGroups.AsReadOnly()
-        '_behaviors = _behaviors.AsReadOnly()
-        '_effects = _effects.AsReadOnly()
-        '_speakingLines = _speakingLines.AsReadOnly()
-        '' Interactions can use deferred loading, and should remain editable.
-        ''_interactions = _interactions.AsReadOnly()
-        '_speakingLinesRandom = _speakingLinesRandom.AsReadOnly()
-        '_speakingLinesSpecific = _speakingLinesSpecific.AsReadOnly()
-    End Sub
-
-    Protected Sub AddBehavior(name As String, chance As Double,
+    Public Sub AddBehavior(name As String, chance As Double,
                        max_duration As Double, min_duration As Double, speed As Double,
                        right_image_path As String, left_image_path As String,
                        Allowed_Moves As AllowedMoves, _Linked_Behavior As String,
@@ -513,27 +366,7 @@ Public Class PonyBase
 
     End Sub
 
-    ''' <summary>
-    ''' Resets the specific and random sets of speaking lines and repopulates them from the given collection of speaking lines.
-    ''' </summary>
-    ''' <param name="lines">The collection of speaking lines that should be used to repopulate the specific and random speaking lines.
-    ''' </param>
-    Protected Sub SetLines(lines As IEnumerable(Of Speech))
-        Argument.EnsureNotNull(lines, "lines")
-
-        SpeechesSpecific.Clear()
-        SpeechesRandom.Clear()
-
-        For Each line In lines
-            If line.Skip Then
-                SpeechesSpecific.Add(line)
-            Else
-                SpeechesRandom.Add(line)
-            End If
-        Next
-    End Sub
-
-    Protected Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
+    Public Sub AddInteraction(interaction_name As String, name As String, probability As Double, proximity As String, _
                    target_list As String, target_selection As TargetActivation, _
                    behaviorlist As String, repeat_delay As Integer, displaywarnings As Boolean,
                    ponyBases As IEnumerable(Of PonyBase))
@@ -639,6 +472,7 @@ Public Class PonyBase
     End Sub
 
     Public Sub Save()
+        If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
         Dim configFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
 
         Dim comments As New List(Of String)()
@@ -839,11 +673,6 @@ Public Class Behavior
     End Property
 
     Public Property Skip As Boolean = False
-
-    'Friend destination_xcoord As Integer = 0
-    'Friend destination_ycoord As Integer = 0
-    'Friend follow_object_name As String = ""
-    'Friend follow_object As ISprite
 
     Public Property OriginalDestinationXCoord As Integer = 0
     Public Property OriginalDestinationYCoord As Integer = 0
@@ -1176,7 +1005,7 @@ Public Class Pony
             Return Base.DisplayName
         End Get
     End Property
-    Friend ReadOnly Property Tags() As ICollection(Of String)
+    Friend ReadOnly Property Tags() As ISet(Of String)
         Get
             Return Base.Tags
         End Get
@@ -1191,7 +1020,7 @@ Public Class Pony
             Return Base.Behaviors
         End Get
     End Property
-    Friend ReadOnly Property Interactions() As ICollection(Of Interaction)
+    Friend ReadOnly Property Interactions() As IEnumerable(Of Interaction)
         Get
             Return Base.Interactions
         End Get

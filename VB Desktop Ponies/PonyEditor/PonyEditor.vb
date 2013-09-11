@@ -6,9 +6,9 @@ Public Class PonyEditor
     Private pe_animator As PonyEditorAnimator
     Private pe_interface As ISpriteCollectionView
 
-    Friend PonyBases As PonyBase()
+    Friend PonyBases As ImmutableArray(Of PonyBase)
     Private ponyImageList As ImageList
-    Private infoGrids As PonyInfoGrid()
+    Private infoGrids As ImmutableArray(Of PonyInfoGrid)
     Private loaded As Boolean
 
     ''' <summary>
@@ -43,15 +43,6 @@ Public Class PonyEditor
             Return _previewPony
         End Get
     End Property
-    Public ReadOnly Property PreviewPonyBase As MutablePonyBase
-        Get
-            If PreviewPony IsNot Nothing Then
-                Return DirectCast(PreviewPony.Base, MutablePonyBase)
-            Else
-                Return Nothing
-            End If
-        End Get
-    End Property
 
     ''' <summary>
     ''' Used so we can swap grid positions and keep track of how everything is sorted when we refresh.
@@ -65,10 +56,10 @@ Public Class PonyEditor
         End Sub
     End Class
 
-    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
+    Public Sub New(ponyBases As IEnumerable(Of PonyBase))
         InitializeComponent()
         Icon = My.Resources.Twilight
-        PonyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
+        Me.PonyBases = Argument.EnsureNotNull(ponyBases, "ponyBases").ToImmutableArray()
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -84,7 +75,7 @@ Public Class PonyEditor
             Next
 
             infoGrids = {New PonyInfoGrid(BehaviorsGrid), New PonyInfoGrid(SpeechesGrid),
-                         New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}
+                         New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}.ToImmutableArray()
 
             'add all possible ponies to the selection window.
             ponyImageList = GenerateImageList(PonyBases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
@@ -103,21 +94,6 @@ Public Class PonyEditor
             Me.Close()
         End Try
 
-        ' TEMP: Convert filenames to lowercase.
-        'For i = 0 To Pony_Selection_View.Items.Count - 1
-        '    Pony_Selection_View.SelectedIndices.Clear()
-        '    Pony_Selection_View.SelectedIndices.Add(i)
-        '    For Each behavior As Pony.Behavior In Preview_Pony.Behaviors
-        '        behavior.left_image_path = behavior.left_image_path.ToLowerInvariant().Replace(" ", "_").Replace("-", "_")
-        '        behavior.right_image_path = behavior.right_image_path.ToLowerInvariant().Replace(" ", "_").Replace("-", "_")
-        '        For Each effect As Effect In behavior.Effects
-        '            effect.left_image_path = effect.left_image_path.ToLowerInvariant().Replace(" ", "_").Replace("-", "_")
-        '            effect.right_image_path = effect.right_image_path.ToLowerInvariant().Replace(" ", "_").Replace("-", "_")
-        '        Next
-        '    Next
-        '    Save_Button_Click(sender, e)
-        'Next
-
         pe_interface = Options.GetInterface()
         pe_interface.Topmost = True
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, PonyBases)
@@ -129,23 +105,40 @@ Public Class PonyEditor
                                              pathSelect As Func(Of Behavior, String)) As ImageList
         Dim imageList = New ImageList() With {.ImageSize = New Size(size, size)}
         For Each ponyBase In ponyBases
-            Dim dstImage As Bitmap
-            If ponyBase.Behaviors.Any() Then
-                Dim imagePath = pathSelect(ponyBase.Behaviors(0))
-                dstImage = New Bitmap(size, size)
-                Using srcImage = Bitmap.FromFile(imagePath), g = Graphics.FromImage(dstImage)
-                    g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-                    g.Clear(backColor)
-                    g.DrawImage(srcImage, 0, 0, size, size)
-                End Using
-            Else
-                dstImage = My.Resources.MysteryThumb
-            End If
-
-            imageList.Images.Add(dstImage)
+            Dim image = GetListImage(ponyBase, size, backColor, pathSelect)
+            imageList.Images.Add(image)
         Next
         Return imageList
     End Function
+
+    Private Shared Function GetListImage(ponyBase As PonyBase, size As Integer, backColor As Color,
+                                   pathSelect As Func(Of Behavior, String)) As Bitmap
+        Dim dstImage = New Bitmap(size, size)
+        Using g = Graphics.FromImage(dstImage)
+            g.Clear(backColor)
+            Dim srcImage As Image = Nothing
+            Try
+                srcImage = If(ponyBase.Behaviors.Any(),
+                              Bitmap.FromFile(pathSelect(ponyBase.Behaviors(0))),
+                              My.Resources.RandomPony)
+                g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+                g.DrawImage(srcImage, 0, 0, size, size)
+            Catch ex As Exception
+                ' Ignore errors trying to get the image to load, we'll just leave the area blank.
+            Finally
+                If srcImage IsNot Nothing Then srcImage.Dispose()
+            End Try
+        End Using
+        Return dstImage
+    End Function
+
+    Private Sub UpdatePreviewListImage()
+        Dim newImage = GetListImage(PreviewPony.Base, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
+        Dim oldImage = ponyImageList.Images(PonyList.SelectedIndices(0))
+        ponyImageList.Images(PonyList.SelectedIndices(0)) = newImage
+        PonyList.Refresh()
+        oldImage.Dispose()
+    End Sub
 
     Private Sub PonyList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyList.SelectedIndexChanged
         Try
@@ -181,17 +174,17 @@ Public Class PonyEditor
                              RestoreSortOrder()
                          End Sub)
 
-        Dim directory = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase).Directory
+        Dim base = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase)
         Dim ponyLoadTask =
             New Threading.Tasks.Task(
             Sub()
-                _previewPony = New Pony(New MutablePonyBase(directory))
-                PreviewPonyBase.LoadInteractions(PonyBases)
+                _previewPony = New Pony(base)
+                PreviewPony.Base.LoadInteractions(PonyBases)
             End Sub)
         ponyLoadTask.ContinueWith(
             Sub()
                 worker.QueueTask(Sub()
-                                     If PreviewPonyBase.Behaviors.Any() Then pe_animator.AddPony(PreviewPony)
+                                     If PreviewPony.Base.Behaviors.Any() Then pe_animator.AddPony(PreviewPony)
                                      LoadParameters(PreviewPony)
 
                                      PausePonyButton.Text = "Pause Pony"
@@ -384,7 +377,7 @@ Public Class PonyEditor
                     behavior.DoNotRepeatImageAnimations)
             Next
 
-            For Each effect In PreviewPonyBase.Effects
+            For Each effect In PreviewPony.Base.Effects
                 EffectsGrid.Rows.Add(
                     effect.Name,
                     effect.Name,
@@ -640,6 +633,9 @@ Public Class PonyEditor
                         changed_behavior.LeftImage.Path = new_image_path
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(new_image_path)
                         ImageSizeCheck(changed_behavior.LeftImage.Size)
+                        If Object.ReferenceEquals(changed_behavior, PreviewPony.Behaviors(0)) Then
+                            UpdatePreviewListImage()
+                        End If
                     End If
                     ShowPony()
                 Case colBehaviorFollow.Index
@@ -673,7 +669,7 @@ Public Class PonyEditor
             Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
             Dim changed_speech As Speech = Nothing
 
-            For Each speech In PreviewPonyBase.Speeches
+            For Each speech In PreviewPony.Base.Speeches
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -722,7 +718,7 @@ Public Class PonyEditor
             Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
-            For Each effect In PreviewPonyBase.Effects
+            For Each effect In PreviewPony.Base.Effects
                 If effect.Name = changed_effect_name Then
                     changed_effect = effect
                     Exit For
@@ -978,7 +974,7 @@ Public Class PonyEditor
             Dim changed_effect_name As String = CStr(EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value)
             Dim changed_effect As EffectBase = Nothing
 
-            For Each effect In PreviewPonyBase.Effects
+            For Each effect In PreviewPony.Base.Effects
                 If effect.Name = changed_effect_name Then
                     changed_effect = effect
                     Exit For
@@ -1066,7 +1062,7 @@ Public Class PonyEditor
             Dim changed_speech_name As String = CStr(SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value)
             Dim changed_speech As Speech = Nothing
 
-            For Each speech In PreviewPonyBase.Speeches
+            For Each speech In PreviewPony.Base.Speeches
                 If speech.Name = changed_speech_name Then
                     changed_speech = speech
                     Exit For
@@ -1092,7 +1088,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each speechname In PreviewPonyBase.Speeches
+                        For Each speechname In PreviewPony.Base.Speeches
                             If String.Equals(speechname.Name, new_value, StringComparison.OrdinalIgnoreCase) Then
                                 MsgBox("Speech names must be unique.  Speech '" & new_value & "' already exists.")
                                 SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = changed_speech_name
@@ -1290,7 +1286,10 @@ Public Class PonyEditor
             ShowPony()
 
             If addedNew Then
-                If PreviewPony.Behaviors.Count = 1 Then pe_animator.AddPony(PreviewPony)
+                If PreviewPony.Behaviors.Count = 1 Then
+                    pe_animator.AddPony(PreviewPony)
+                    UpdatePreviewListImage()
+                End If
                 PreviewPony.SelectBehavior(PreviewPony.Behaviors(0))
                 LoadParameters(PreviewPony)
                 hasSaved = False
@@ -1471,9 +1470,9 @@ Public Class PonyEditor
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
             If Object.ReferenceEquals(grid, EffectsGrid) Then
-                Dim effectToRemove = PreviewPonyBase.Effects.Single(
+                Dim effectToRemove = PreviewPony.Base.Effects.Single(
                     Function(effect) effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value))
-                PreviewPonyBase.Effects.Remove(effectToRemove)
+                PreviewPony.Base.Effects.Remove(effectToRemove)
             ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
                 If grid.RowCount = 1 Then
                     e.Cancel = True
@@ -1498,19 +1497,18 @@ Public Class PonyEditor
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPony.Interactions.Remove(todelete)
+                    PreviewPony.Base.Interactions.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, SpeechesGrid) Then
                 Dim todelete As Speech = Nothing
-                For Each speech In PreviewPonyBase.Speeches
+                For Each speech In PreviewPony.Base.Speeches
                     If CStr(e.Row.Cells(colSpeechName.Index).Value) = speech.Name Then
                         todelete = speech
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPonyBase.Speeches.Remove(todelete)
-                    PreviewPonyBase.SetLines(PreviewPonyBase.Speeches)
+                    PreviewPony.Base.Speeches.Remove(todelete)
                 End If
             Else
                 Throw New Exception("Unknown grid when deleting row: " & grid.Name)
@@ -1594,7 +1592,7 @@ Public Class PonyEditor
 
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
         If Not alreadyUpdating Then
-            PreviewPonyBase.DisplayName = PonyName.Text
+            PreviewPony.Base.DisplayName = PonyName.Text
             hasSaved = False
         End If
     End Sub
@@ -1611,9 +1609,9 @@ Public Class PonyEditor
                 previousPony = PreviewPony
             End If
 
-            Dim ponyBase = New MutablePonyBase()
-            ponyBase.DisplayName = "New Pony"
-            _previewPony = New Pony(ponyBase)
+            Dim base = PonyBase.CreateInMemory()
+            base.DisplayName = "New Pony"
+            _previewPony = New Pony(base)
 
             Using form = New NewPonyDialog(Me)
                 If form.ShowDialog() = DialogResult.Cancel Then
@@ -1644,7 +1642,7 @@ Public Class PonyEditor
             PausePonyButton.Enabled = False
             If pe_animator.Started Then pe_animator.Pause(False)
             _changesMade = True
-            PreviewPonyBase.Save()
+            PreviewPony.Base.Save()
             RefreshButton_Click(RefreshButton, EventArgs.Empty)
             If pe_animator.Started Then pe_animator.Resume()
             PausePonyButton.Enabled = True

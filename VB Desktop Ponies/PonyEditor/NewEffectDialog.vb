@@ -87,7 +87,7 @@ Public Class NewEffectDialog
                            DirectionFromString(CStr(R_Centering_Box.SelectedItem)), _
                            DirectionFromString(CStr(L_Placement_Box.SelectedItem)), _
                            DirectionFromString(CStr(L_Centering_Box.SelectedItem)), _
-                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPonyBase)
+                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPony.Base)
         Me.Close()
     End Sub
 

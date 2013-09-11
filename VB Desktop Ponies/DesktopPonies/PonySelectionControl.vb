@@ -24,7 +24,11 @@ Public Class PonySelectionControl
         InitializeComponent()
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
-        imageSize = CSDesktopPonies.Core.ImageSize.GetSize(imagePath)
+        Try
+            imageSize = CSDesktopPonies.Core.ImageSize.GetSize(imagePath)
+        Catch ex As Exception
+            ' Leave size empty if it cannot be determined.
+        End Try
         imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
         flip = flipImage
 
@@ -34,9 +38,14 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub LoadImage(imagePath As Object)
-        PonyImage = New AnimatedImage(Of BitmapFrame)(
-                                                   imagePath.ToString(), Function(file As String) New BitmapFrame(file),
-                                                   BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+        Try
+            PonyImage = New AnimatedImage(Of BitmapFrame)(
+                                                       imagePath.ToString(), Function(file As String) New BitmapFrame(file),
+                                                       BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+        Catch ex As Exception
+            ' Do without an image if it failed to load.
+        End Try
+
         If Disposing OrElse IsDisposed Then
             PonyImage.Dispose()
         Else
@@ -99,6 +108,7 @@ Public Class PonySelectionControl
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
         If ShowPonyImage Then
             Dim ponyImage = GetPonyImage()
+            If ponyImage Is Nothing Then Return
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
             ponyImage(timeIndex).Flip(flip)
             Dim bitmap = ponyImage(timeIndex).Image

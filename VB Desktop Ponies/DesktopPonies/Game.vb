@@ -418,7 +418,7 @@ Friend Module Games
                     fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer, files_path As String)
 
                 ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
-                Dim handlerBase = New MutablePonyBase()
+                Dim handlerBase = PonyBase.CreateInMemory()
                 handlerBase.DisplayName = "Ball"
                 Handler = New Pony(handlerBase)
 

@@ -106,7 +106,7 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        m_editor.PreviewPonyBase.AddBehavior(NameTextbox.Text,
+        m_editor.PreviewPony.Base.AddBehavior(NameTextbox.Text,
                                              chance / 100,
                                              maxDuration,
                                              minDuration,
@@ -242,7 +242,7 @@ Public Class NewBehaviorDialog
 
     Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
 
-        Dim new_behavior As New Behavior(m_editor.PreviewPonyBase)
+        Dim new_behavior As New Behavior(m_editor.PreviewPony.Base)
 
         Using form = New FollowTargetDialog(m_editor, new_behavior)
             form.ShowDialog()

@@ -118,7 +118,7 @@ Public Class GameSelectionForm
 
                 picturebox.SizeMode = PictureBoxSizeMode.StretchImage
                 picturebox.Name = "NotSet"
-                picturebox.Image = My.Resources.MysteryThumb
+                picturebox.Image = My.Resources.RandomPony
                 picturebox.Size = picturebox.Image.Size
 
                 AddHandler picturebox.Click, AddressOf PictureClick
@@ -230,7 +230,7 @@ Public Class GameSelectionForm
         Dim pony_picturebox As PictureBox = CType(sender, PictureBox)
 
         pony_picturebox.Name = "NotSet"
-        pony_picturebox.Image = My.Resources.MysteryThumb
+        pony_picturebox.Image = My.Resources.RandomPony
 
         For Each position As Game.Position In team1.Positions
             If ReferenceEquals(position.SelectionMenuPictureBox, pony_picturebox) Then

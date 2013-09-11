@@ -20,7 +20,7 @@ Public Class Main
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)()
     Private randomPony As PonyBase
-    Private ponyBases As ImmutableArray(Of MutablePonyBase)
+    Private ponies As PonyCollection
     Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
@@ -226,12 +226,12 @@ Public Class Main
         Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
-        ponyBases = PonyCollection.LoadAll(
+        ponies = New PonyCollection(
             Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length),
             Sub(pony) worker.QueueTask(Sub()
                                            AddToMenu(pony)
                                            LoadingProgressBar.Value += 1
-                                       End Sub)).Where(Function(pb) pb.DisplayName <> "Random Pony").ToImmutableArray()
+                                       End Sub))
 
         ' Load houses.
         Dim skipLoadingErrors = False
@@ -255,7 +255,7 @@ Public Class Main
 
         ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
-        If ponyBases.Count = 0 Then
+        If ponies.Bases.Count = 0 Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
                                             "There should have at least been a 'Derpy' folder in the same spot as this program.",
@@ -271,7 +271,7 @@ Public Class Main
         worker.QueueTask(Sub()
                              Try
                                  Dim bases = PonyBasesWithBehaviors.ToArray()
-                                 For Each pony In ponyBases
+                                 For Each pony In ponies.Bases
                                      pony.LoadInteractions(bases)
                                  Next
                              Catch ex As Exception
@@ -438,7 +438,7 @@ Public Class Main
 
         Reference.InPreviewMode = True
         Me.Visible = False
-        Using form = New PonyEditor(ponyBases)
+        Using form = New PonyEditor(ponies.Bases)
             previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
@@ -676,7 +676,7 @@ Public Class Main
             Next
         ElseIf e.KeyChar = "#"c Then
 #If DEBUG Then
-            Using newEditor = New PonyEditorForm2(ponyBases)
+            Using newEditor = New PonyEditorForm2(ponies.Bases)
                 newEditor.ShowDialog(Me)
             End Using
 #End If
@@ -800,7 +800,7 @@ Public Class Main
                     randomPoniesWanted = ponyBaseWanted.Item2
                     Continue For
                 End If
-                Dim base = ponyBases.Single(Function(ponyBase) ponyBase.Directory = ponyBaseWanted.Item1)
+                Dim base = ponies.Bases.Single(Function(ponyBase) ponyBase.Directory = ponyBaseWanted.Item1)
                 ' Add the designated amount of a given pony.
                 For i = 1 To ponyBaseWanted.Item2
                     startupPonies.Add(New Pony(base))
@@ -1038,7 +1038,7 @@ Public Class Main
     ''' Resets pony selection related controls, which will require them to be reloaded from disk.
     ''' </summary>
     Private Sub ResetPonySelection()
-        ponyBases = Nothing
+        ponies = Nothing
         SelectionControlsPanel.Enabled = False
         selectionControlFilter.Clear()
         PonySelectionPanel.SuspendLayout()
@@ -1101,7 +1101,7 @@ Public Class Main
     End Sub
 
     Private Function PonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
-        Return ponyBases.Where(Function(pb) pb.Behaviors.Any())
+        Return ponies.Bases.Where(Function(pb) pb.Behaviors.Any())
     End Function
 
     Private Function RandomPlusPonyBasesWithBehaviors() As IEnumerable(Of PonyBase)

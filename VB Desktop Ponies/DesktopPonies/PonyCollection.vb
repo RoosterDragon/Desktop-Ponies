@@ -1,108 +1,43 @@
 ﻿Imports System.IO
 
-Public NotInheritable Class PonyCollection
-    Private Sub New()
+Public Class PonyCollection
+    Private ReadOnly _bases As ImmutableArray(Of PonyBase)
+    Public ReadOnly Property Bases As ImmutableArray(Of PonyBase)
+        Get
+            Return _bases
+        End Get
+    End Property
+    Private ReadOnly _randomBase As PonyBase
+    Public ReadOnly Property RandomBase As PonyBase
+        Get
+            Return _randomBase
+        End Get
+    End Property
+
+    Public Sub New()
+        Me.New(Nothing, Nothing)
     End Sub
 
-    Public Shared Function LoadAll() As ImmutableArray(Of MutablePonyBase)
-        Return LoadAll(Nothing, Nothing)
-    End Function
-
-    Public Shared Function LoadAll(countCallback As Action(Of Integer), loadCallback As Action(Of MutablePonyBase)) As ImmutableArray(Of MutablePonyBase)
-        Dim ponies As New Collections.Concurrent.ConcurrentBag(Of MutablePonyBase)()
+    Public Sub New(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
+        Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
             Sub(folder)
-                Dim pony = LoadOne(folder)
+                Dim pony = PonyBase.Load(folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1))
                 If pony IsNot Nothing Then
                     ponies.Add(pony)
                     If loadCallback IsNot Nothing Then loadCallback(pony)
                 End If
             End Sub)
-        Return ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToImmutableArray()
-    End Function
-
-    Private Shared Function LoadOne(folder As String) As MutablePonyBase
-        Dim iniFileName = Path.Combine(folder, PonyBase.ConfigFilename)
-        If File.Exists(iniFileName) Then
-            Dim reader As StreamReader = Nothing
-            Try
-                reader = New StreamReader(iniFileName)
-            Catch ex As DirectoryNotFoundException
-            Catch ex As FileNotFoundException
-            End Try
-
-            If reader IsNot Nothing Then
-                Try
-                    Dim pony = New MutablePonyBase()
-                    pony.Directory = folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1)
-                    ParsePonyConfig(folder, reader, pony)
-                    Return pony
-                Finally
-                    reader.Dispose()
-                End Try
-            End If
+        Dim allBases = ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToList()
+        Dim randomIndex = allBases.FindIndex(Function(pb) pb.Directory = "Random Pony")
+        If randomIndex <> -1 Then
+            _randomBase = allBases(randomIndex)
+            allBases.RemoveAt(randomIndex)
         End If
-        Return Nothing
-    End Function
-
-    Private Shared Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As MutablePonyBase)
-        Do Until reader.EndOfStream
-            Dim line = reader.ReadLine()
-
-            ' Ignore blank lines, and those commented out with a single quote.
-            If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
-
-            Dim firstComma = line.IndexOf(","c)
-            If firstComma <> -1 Then
-                Select Case line.Substring(0, firstComma).ToLowerInvariant()
-                    Case "name"
-                        TryParse(Of String)(line, folder, AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
-                    Case "scale"
-                        TryParse(Of Double)(line, folder, AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
-                    Case "behaviorgroup"
-                        TryParse(Of BehaviorGroup)(line, folder, AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
-                    Case "behavior"
-                        TryParse(Of Behavior)(line, folder, pony, AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
-                    Case "effect"
-                        TryParse(Of EffectBase)(line, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
-                    Case "speak"
-                        TryParse(Of Speech)(line, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
-                    Case "categories"
-                        Dim columns = CommaSplitQuoteQualified(line)
-                        For i = 1 To columns.Count - 1
-                            For Each item As String In Main.Instance.FilterOptionsBox.Items
-                                If String.Equals(item, columns(i), StringComparison.OrdinalIgnoreCase) Then
-                                    pony.Tags.Add(columns(i))
-                                    Exit For
-                                End If
-                            Next
-                        Next
-                    Case Else
-                        ' TODO: Handle unrecognized identifier, or lack of first comma.
-                End Select
-            End If
-        Loop
-
-        pony.SetLines(pony.Speeches)
-    End Sub
-
-    Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
-        Dim result As T
-        Dim issues As ParseIssue() = Nothing
-        If parseFunc(line, directory, result, issues) Then
-            onSuccess(result)
-        End If
-    End Sub
-
-    Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
-        Dim result As T
-        Dim issues As ParseIssue() = Nothing
-        If parseFunc(line, directory, pony, result, issues) Then
-            onSuccess(result)
-        End If
+        _bases = allBases.ToImmutableArray()
     End Sub
 End Class
 

@@ -25,10 +25,8 @@ Partial Class NewPonyDialog
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.OK_Button = New System.Windows.Forms.Button()
-        Me.Right_ImageBox = New System.Windows.Forms.PictureBox()
         Me.txtName = New System.Windows.Forms.TextBox()
         Me.lblName = New System.Windows.Forms.Label()
-        Me.First_Behavior_Button = New System.Windows.Forms.Button()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -40,7 +38,7 @@ Partial Class NewPonyDialog
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(9, 230)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(9, 48)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -70,15 +68,6 @@ Partial Class NewPonyDialog
         Me.OK_Button.Text = "OK"
         Me.OK_Button.UseVisualStyleBackColor = False
         '
-        'Right_ImageBox
-        '
-        Me.Right_ImageBox.Location = New System.Drawing.Point(95, 69)
-        Me.Right_ImageBox.Name = "Right_ImageBox"
-        Me.Right_ImageBox.Size = New System.Drawing.Size(150, 150)
-        Me.Right_ImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
-        Me.Right_ImageBox.TabIndex = 2
-        Me.Right_ImageBox.TabStop = False
-        '
         'txtName
         '
         Me.txtName.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
@@ -97,15 +86,6 @@ Partial Class NewPonyDialog
         Me.lblName.TabIndex = 0
         Me.lblName.Text = "Pony Name:"
         '
-        'First_Behavior_Button
-        '
-        Me.First_Behavior_Button.Location = New System.Drawing.Point(117, 40)
-        Me.First_Behavior_Button.Name = "First_Behavior_Button"
-        Me.First_Behavior_Button.Size = New System.Drawing.Size(107, 23)
-        Me.First_Behavior_Button.TabIndex = 2
-        Me.First_Behavior_Button.Text = "Add first behavior"
-        Me.First_Behavior_Button.UseVisualStyleBackColor = True
-        '
         'NewPonyDialog
         '
         Me.AcceptButton = Me.OK_Button
@@ -113,11 +93,9 @@ Partial Class NewPonyDialog
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(341, 271)
-        Me.Controls.Add(Me.First_Behavior_Button)
+        Me.ClientSize = New System.Drawing.Size(341, 89)
         Me.Controls.Add(Me.lblName)
         Me.Controls.Add(Me.txtName)
-        Me.Controls.Add(Me.Right_ImageBox)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
@@ -134,9 +112,7 @@ Partial Class NewPonyDialog
     Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
-    Friend WithEvents Right_ImageBox As System.Windows.Forms.PictureBox
     Friend WithEvents txtName As System.Windows.Forms.TextBox
     Friend WithEvents lblName As System.Windows.Forms.Label
-    Friend WithEvents First_Behavior_Button As System.Windows.Forms.Button
 
 End Class
