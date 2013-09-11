@@ -20,7 +20,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         public static ImmutableArray<T> ToImmutableArray<T>(this IEnumerable<T> source)
         {
-            return new ImmutableArray<T>(source);
+            return source as ImmutableArray<T> ?? new ImmutableArray<T>(source);
         }
     }
 
@@ -148,7 +148,7 @@
         }
         public void CopyTo(T[] array, int arrayIndex)
         {
-            array.CopyTo(array, arrayIndex);
+            this.array.CopyTo(array, arrayIndex);
         }
         private NotSupportedException ReadOnlyException()
         {
