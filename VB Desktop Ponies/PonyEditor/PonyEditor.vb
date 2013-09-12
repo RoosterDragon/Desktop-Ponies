@@ -1477,10 +1477,6 @@ Public Class PonyEditor
                     Function(effect) effect.Name = CStr(e.Row.Cells(colEffectName.Index).Value))
                 PreviewPony.Base.Effects.Remove(effectToRemove)
             ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
-                If grid.RowCount = 1 Then
-                    e.Cancel = True
-                    MsgBox("A pony must have at least 1 behavior.  You can't delete the last one.")
-                End If
                 Dim todelete As Behavior = Nothing
                 For Each behavior In PreviewPony.Behaviors
                     If CStr(e.Row.Cells(colBehaviorName.Index).Value) = behavior.Name Then
