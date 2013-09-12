@@ -5,8 +5,7 @@ Imports CSDesktopPonies.SpriteManagement
 #Region "Interfaces"
 Public Interface IPonyIniSourceable
     Inherits IPonyIniSerializable, IMemberwiseCloneable
-    ReadOnly Property SourceIni As String
-    Sub UpdateSourceIniTo(newSource As String)
+    Property SourceIni As String
 End Interface
 
 Public Interface IPonyIniSerializable
@@ -405,7 +404,7 @@ Public Class InteractionBase
         issues = Nothing
 
         Dim i = New InteractionBase()
-        i._sourceIni = iniLine
+        i.SourceIni = iniLine
         Dim p As New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine),
                                             {"Name", "Initiator Name", "Chance",
                                              "Proximity", "Targets", "Target Activation",
@@ -444,16 +443,7 @@ Public Class InteractionBase
             ReactivationDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture))
     End Function
 
-    Private _sourceIni As String
-    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
-        Get
-            Return _sourceIni
-        End Get
-    End Property
-
-    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
-        _sourceIni = newSource
-    End Sub
+    Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
 
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Name: " & Name
@@ -596,7 +586,7 @@ Public Class Behavior
         issues = Nothing
 
         Dim b = New Behavior(pony)
-        b._sourceIni = iniLine
+        b.SourceIni = iniLine
         Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Name", "Chance",
                                              "Max Duration", "Min Duration", "Speed",
@@ -709,16 +699,7 @@ Public Class Behavior
             ToArray()
     End Function
 
-    Private _sourceIni As String
-    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
-        Get
-            Return _sourceIni
-        End Get
-    End Property
-
-    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
-        _sourceIni = newSource
-    End Sub
+    Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
 
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Name: " & Name
@@ -763,7 +744,7 @@ Public Class Speech
         issues = Nothing
 
         Dim s = New Speech()
-        s._sourceIni = iniLine
+        s.SourceIni = iniLine
         Dim iniComponents = CommaSplitQuoteBraceQualified(iniLine)
         If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
         If iniComponents.Length > 3 Then
@@ -823,16 +804,7 @@ Public Class Speech
         Return MyBase.MemberwiseClone()
     End Function
 
-    Private _sourceIni As String
-    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
-        Get
-            Return _sourceIni
-        End Get
-    End Property
-
-    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
-        _sourceIni = newSource
-    End Sub
+    Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
 
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Name: " & Name
@@ -2858,7 +2830,7 @@ Public Class EffectBase
         issues = Nothing
 
         Dim e = New EffectBase(pony)
-        e._sourceIni = iniLine
+        e.SourceIni = iniLine
         Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Effect Name", "Behavior Name",
                                              "Right Image", "Left Image", "Duration", "Repeat Delay",
@@ -2932,16 +2904,7 @@ Public Class EffectBase
             ToArray()
     End Function
 
-    Private _sourceIni As String
-    Public ReadOnly Property SourceIni As String Implements IPonyIniSourceable.SourceIni
-        Get
-            Return _sourceIni
-        End Get
-    End Property
-
-    Public Sub UpdateSourceIniTo(newSource As String) Implements IPonyIniSourceable.UpdateSourceIniTo
-        _sourceIni = newSource
-    End Sub
+    Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
 
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Name: " & Name

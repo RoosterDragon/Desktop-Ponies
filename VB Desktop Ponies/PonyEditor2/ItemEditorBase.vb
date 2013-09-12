@@ -132,6 +132,7 @@ Public Class ItemEditorBase
         Dim result = DialogResult.None
         Do
             Try
+                Edited.SourceIni = Source.Text
                 Base.Save()
                 _isNewItem = False
                 UpdateDirtyFlag(False)
@@ -144,7 +145,6 @@ Public Class ItemEditorBase
         Loop While result = DialogResult.Retry
 
         Original = Edited
-        Original.UpdateSourceIniTo(Source.Text)
         Edited = DirectCast(Original.MemberwiseClone(), Behavior)
     End Sub
 

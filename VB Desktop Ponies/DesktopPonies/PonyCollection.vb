@@ -101,14 +101,6 @@ Public Class PonyCollection
     Public Function Interactions(directory As String) As List(Of InteractionBase)
         Return _interactions.GetOrAdd(directory, newListFactory)
     End Function
-
-    ''' <summary>
-    ''' Saves interactions owned by the pony with the given directory identifier.
-    ''' </summary>
-    ''' <param name="directory">The directory identifier of the pony.</param>
-    Public Sub SaveInteractions(directory As String)
-        ' TODO: Implement.
-    End Sub
 End Class
 
 Public NotInheritable Class PonyIniParser
