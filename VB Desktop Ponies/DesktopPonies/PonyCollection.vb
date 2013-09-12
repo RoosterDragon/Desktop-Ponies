@@ -2,9 +2,14 @@
 
 Public Class PonyCollection
     Private _bases As ImmutableArray(Of PonyBase)
-    Public ReadOnly Property Bases As ImmutableArray(Of PonyBase)
+    Public ReadOnly Property AllBases As ImmutableArray(Of PonyBase)
         Get
             Return _bases
+        End Get
+    End Property
+    Public ReadOnly Property Bases As IEnumerable(Of PonyBase)
+        Get
+            Return AllBases.Where(Function(base) base.Behaviors.Count > 0)
         End Get
     End Property
     Private _randomBase As PonyBase

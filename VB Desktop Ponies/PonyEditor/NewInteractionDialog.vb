@@ -121,7 +121,7 @@ Public Class NewInteractionDialog
                 Behaviors_Box.Items.Add(item)
             Next
 
-            For Each Pony In m_editor.Ponies.Bases
+            For Each Pony In m_editor.Ponies.AllBases
                 Targets_Box.Items.Add(Pony.Directory)
             Next
 

@@ -257,7 +257,7 @@ Public Class Main
         worker.WaitOnAllTasks()
         If ponies.Bases.Count = 0 Then
             SmartInvoke(Sub()
-                            MessageBox.Show(Me, "Sorry, but you don't seem to have any ponies installed. " &
+                            MessageBox.Show(Me, "Sorry, but you don't seem to have any usable ponies installed. " &
                                             "There should have at least been a 'Derpy' folder in the same spot as this program.",
                                             "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
                             GoButton.Enabled = False
@@ -796,7 +796,7 @@ Public Class Main
 
             ' Add a random amount of ponies.
             If randomPoniesWanted > 0 Then
-                Dim remainingPonyBases = PonyBasesWithBehaviors().ToList()
+                Dim remainingPonyBases = ponies.Bases.ToList()
                 If Options.NoRandomDuplicates Then
                     remainingPonyBases.RemoveAll(Function(pb) ponyBasesWanted.Any(Function(t) t.Item1 = pb.Directory))
                 End If
@@ -912,7 +912,7 @@ Public Class Main
             ponyViewer.LoadImages(images, loaded)
         End If
 
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, PonyBasesWithBehaviors, randomPony, OperatingSystemInfo.IsMacOSX)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies.Bases, randomPony, OperatingSystemInfo.IsMacOSX)
         Pony.CurrentViewer = ponyViewer
         Pony.CurrentAnimator = animator
     End Sub
@@ -1087,12 +1087,8 @@ Public Class Main
         Next
     End Sub
 
-    Private Function PonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
-        Return ponies.Bases.Where(Function(pb) pb.Behaviors.Any())
-    End Function
-
     Private Function RandomPlusPonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
-        Return {randomPony}.Union(PonyBasesWithBehaviors())
+        Return {randomPony}.Union(ponies.Bases)
     End Function
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing

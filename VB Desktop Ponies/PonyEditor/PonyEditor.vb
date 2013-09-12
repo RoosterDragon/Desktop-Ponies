@@ -78,13 +78,13 @@ Public Class PonyEditor
                          New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}.ToImmutableArray()
 
             'add all possible ponies to the selection window.
-            ponyImageList = GenerateImageList(Ponies.Bases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
+            ponyImageList = GenerateImageList(Ponies.AllBases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
             PonyList.LargeImageList = ponyImageList
             PonyList.SmallImageList = ponyImageList
 
             PonyList.SuspendLayout()
-            For i = 0 To Ponies.Bases.Length - 1
-                PonyList.Items.Add(New ListViewItem(Ponies.Bases(i).Directory, i) With {.Tag = Ponies.Bases(i)})
+            For i = 0 To Ponies.AllBases.Length - 1
+                PonyList.Items.Add(New ListViewItem(Ponies.AllBases(i).Directory, i) With {.Tag = Ponies.AllBases(i)})
             Next
             PonyList.ResumeLayout()
 
@@ -96,7 +96,7 @@ Public Class PonyEditor
 
         pe_interface = Options.GetInterface()
         pe_interface.Topmost = True
-        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, Ponies.Bases)
+        pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, Ponies.AllBases)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
     End Sub
@@ -502,7 +502,7 @@ Public Class PonyEditor
                 End If
             Next
 
-            For Each ponyBase In Ponies.Bases
+            For Each ponyBase In Ponies.AllBases
                 If String.Equals(Trim(ponyBase.Directory), Trim(ponyname), StringComparison.OrdinalIgnoreCase) Then
                     Dim new_pony = New Pony(ponyBase)
                     new_pony.Teleport()
@@ -1207,7 +1207,7 @@ Public Class PonyEditor
     End Sub
 
     Friend Function GetAllEffects() As EffectBase()
-        Return Ponies.Bases.SelectMany(Function(pb) pb.Effects).ToArray()
+        Return Ponies.AllBases.SelectMany(Function(pb) pb.Effects).ToArray()
     End Function
 
     Private Sub SaveSortOrder()

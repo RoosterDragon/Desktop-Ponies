@@ -161,6 +161,7 @@ Public Class PonyBase
                 End If
             End If
         Catch ex As Exception
+            Return Nothing
         End Try
         Return pony
     End Function
