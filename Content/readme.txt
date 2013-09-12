@@ -70,11 +70,14 @@ Change Log
 Latest changes:
 
 v1.42.2.9:
+- Added Flash Sentry by Bot-chan.
+- On Windows, running with alpha blending enabled is now just as fast as with it disabled.
+- .ini files with different casing will no longer cause spurious errors messages from the editor.
 - Fixed bug preventing creation of new profiles.
-- Fixed bug that would crash the program when certain ponies were deployed from houses.
-- Fixed bug preventing Mac systems from loading the program correctly.
-- Lots of minor bug fixes.
-- Several minor performance enhancements.
+- Fixed crash that happened when certain ponies were deployed from houses.
+- Fixed a crash that occured when editing a house that was also deploying a new pony.
+- Fixed error that could cause Mac systems to not load the program fully.
+- The program is now much better able to withstand malformed .ini files, and missing images.
 
 v1.42.2.8:
 - Fixed bug from 1.42.2.5 that prevented saving ponies if the program was not running on the same drive as the temp folder.
