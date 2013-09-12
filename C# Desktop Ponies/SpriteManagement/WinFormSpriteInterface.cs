@@ -79,7 +79,8 @@
                     }
 
                 // Force creation of the window handle, so properties may be altered before the form is shown.
-                CreateHandle();
+                if (!this.IsHandleCreated)
+                    CreateHandle();
             }
         }
         #endregion
@@ -485,14 +486,6 @@
         /// </summary>
         public bool IsAlphaBlended { get; private set; }
         /// <summary>
-        /// The bitmap which supports a full alpha channel, used when alpha blending is active.
-        /// </summary>
-        private Bitmap alphaBitmap;
-        /// <summary>
-        /// The graphics surface for the bitmap supporting a full alpha channel. This is used to draw to the bitmap.
-        /// </summary>
-        private Graphics alphaGraphics;
-        /// <summary>
         /// Specifies the palette mapping that maps the transparency key to another color to avoid conflict.
         /// </summary>
         private readonly Dictionary<Color, Color> paletteMapping = new Dictionary<Color, Color>(1);
@@ -843,7 +836,7 @@
             manualRender = (sender, e) =>
             {
                 if (IsAlphaBlended)
-                    form.SetBitmap(alphaBitmap);
+                    form.UpdateBackgroundGraphics();
                 else
                     bufferedGraphics.Render(e.Graphics);
             };
@@ -1101,15 +1094,7 @@
         {
             if (IsAlphaBlended)
             {
-                // Create the surfaces used for per pixel transparency. This also effectively acts as a buffer, since an unmanaged copy
-                // will be made in order to update the window.
-                if (alphaBitmap != null)
-                    alphaBitmap.Dispose();
-                alphaBitmap = new Bitmap(form.Width, form.Height);
-                if (alphaGraphics != null)
-                    alphaGraphics.Dispose();
-                alphaGraphics = Graphics.FromImage(alphaBitmap);
-                alphaGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                form.BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             }
             else
             {
@@ -1209,7 +1194,7 @@
             // Get the target graphics surface.
             Graphics surface;
             if (IsAlphaBlended)
-                surface = alphaGraphics;
+                surface = form.BackgroundGraphics;
             else
                 surface = bufferedGraphics.Graphics;
 
@@ -1271,13 +1256,13 @@
             // Determine the current clipping area required, and clear it of old graphics.
             if (IsAlphaBlended)
             {
-                alphaGraphics.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
-                alphaGraphics.Clear(Color.FromArgb(0));
+                surface.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
+                surface.Clear(Color.FromArgb(0));
             }
             else
             {
                 surface = ResizeGraphicsBuffer();
-                bufferedGraphics.Graphics.Clear(form.TransparencyKey);
+                surface.Clear(form.TransparencyKey);
             }
 
             // Set the clipping area to the region we'll be drawing in for this frame.
@@ -1334,7 +1319,7 @@
 
             // Render the result.
             if (IsAlphaBlended)
-                form.SetBitmap(alphaBitmap);
+                form.UpdateBackgroundGraphics();
             else
                 bufferedGraphics.Render();
         }
@@ -1476,10 +1461,6 @@
                     bufferedGraphics.Dispose();
                 if (bufferedGraphicsContext != null)
                     bufferedGraphicsContext.Dispose();
-                if (alphaBitmap != null)
-                    alphaBitmap.Dispose();
-                if (alphaGraphics != null)
-                    alphaGraphics.Dispose();
                 if (windowIcon != null)
                     windowIcon.Dispose();
 

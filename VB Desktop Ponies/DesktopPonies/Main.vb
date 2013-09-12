@@ -255,7 +255,7 @@ Public Class Main
 
         ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
-        If ponies.Bases.Count = 0 Then
+        If Not ponies.Bases.Any() Then
             SmartInvoke(Sub()
                             MessageBox.Show(Me, "Sorry, but you don't seem to have any usable ponies installed. " &
                                             "There should have at least been a 'Derpy' folder in the same spot as this program.",

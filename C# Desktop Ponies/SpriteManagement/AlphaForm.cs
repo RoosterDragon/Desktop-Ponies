@@ -15,6 +15,49 @@
     internal class AlphaForm : Form
     {
         /// <summary>
+        /// Handle to a device context for the screen.
+        /// </summary>
+        private readonly IntPtr hdcScreen;
+        /// <summary>
+        /// Handle to a device context for the background graphics buffer.
+        /// </summary>
+        private readonly IntPtr hdcBackground;
+        /// <summary>
+        /// Handle to a bitmap for the background buffer.
+        /// </summary>
+        private IntPtr hBitmap;
+        /// <summary>
+        /// Handle to the previous bitmap in the device context of the background buffer.
+        /// </summary>
+        private IntPtr hPrevBitmap;
+        /// <summary>
+        /// Graphics object operating on the background DC.
+        /// </summary>
+        private Graphics backgroundGraphics;
+        /// <summary>
+        /// Graphics buffer which may be drawn upon. Once drawing is complete, calling
+        /// <see cref="M:CSDesktopPonies.SpriteManagement.AlphaForm.UpdateBackgroundGraphics"/> will update the form background with the
+        /// graphics drawn onto this buffer. This buffer is recreated whenever the form is resized.
+        /// </summary>
+        public Graphics BackgroundGraphics
+        {
+            get
+            {
+                // Lazily initialize the graphics buffer.
+                if (backgroundGraphics == null)
+                {
+                    using (var bitmap = new Bitmap(Width, Height))
+                        hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
+                    hPrevBitmap = NativeMethods.SelectObject(hdcBackground, hBitmap);
+                    if (hPrevBitmap == IntPtr.Zero)
+                        throw new Win32Exception();
+                    backgroundGraphics = Graphics.FromHdc(hdcBackground);
+                }
+                return backgroundGraphics;
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="T:CSDesktopPonies.SpriteManagement.AlphaForm"/> class.
         /// </summary>
         /// <exception cref="T:System.PlatformNotSupportedException">The operating system is not Windows.</exception>
@@ -24,6 +67,9 @@
                 throw new PlatformNotSupportedException(
                     "Cannot create an instance of this class on non-Windows platforms due to use of platform invoke.");
             FormBorderStyle = FormBorderStyle.None;
+
+            hdcScreen = NativeMethods.GetDC(IntPtr.Zero);
+            hdcBackground = NativeMethods.CreateCompatibleDC(hdcScreen);
         }
 
         /// <summary>
@@ -40,88 +86,91 @@
         }
 
         /// <summary>
-        /// Displays the 32bpp bitmap as the image of the form. Semi-transparent areas are alpha blended. Colors must use pre-multiplied
-        /// alpha.
+        /// Releases the buffers when the form resizes.
         /// </summary>
-        /// <param name="bitmap">The bitmap to use as the image of the form.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="bitmap"/> is null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <see cref="T:System.Drawing.Imaging.PixelFormat"/> of
-        /// <paramref name="bitmap"/> was not <see cref="P:System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</exception>
-        /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
-        public void SetBitmap(Bitmap bitmap)
+        /// <param name="e">Data about the event.</param>
+        protected override void OnResize(EventArgs e)
         {
-            SetBitmap(bitmap, 255);
+            ReleaseBuffers(true);
+            base.OnResize(e);
         }
 
         /// <summary>
-        /// Displays the 32bpp bitmap as the image of the form. Semi-transparent areas are alpha blended. Colors must use pre-multiplied
-        /// alpha. The transparency of the whole image is also scaled based on the <paramref name="opacity"/> value.
+        /// Releases the buffer resources.
         /// </summary>
-        /// <param name="bitmap">The bitmap to use as the image of the form.</param>
+        /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise, only
+        /// unmanaged resources should be disposed.</param>
+        private void ReleaseBuffers(bool disposing)
+        {
+            if (disposing && backgroundGraphics != null)
+            {
+                backgroundGraphics.Dispose();
+                backgroundGraphics = null;
+            }
+            if (hBitmap != IntPtr.Zero && hPrevBitmap != IntPtr.Zero)
+            {
+                NativeMethods.SelectObject(hdcBackground, hPrevBitmap);
+                NativeMethods.DeleteObject(hBitmap);
+            }
+        }
+
+        /// <summary>
+        /// Updates the form to display the image currently rendered in the
+        /// <see cref="P:CSDesktopPonies.SpriteManagement.AlphaForm.BackgroundGraphics"/> object. Semi-transparent areas will be
+        /// alpha-blended.
+        /// </summary>
+        /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
+        public void UpdateBackgroundGraphics()
+        {
+            UpdateBackgroundGraphics(255);
+        }
+
+        /// <summary>
+        /// Updates the form to display the image currently rendered in the
+        /// <see cref="P:CSDesktopPonies.SpriteManagement.AlphaForm.BackgroundGraphics"/> object. Semi-transparent areas will be
+        /// alpha-blended. The transparency of the whole image is also scaled based on the <paramref name="opacity"/> value.
+        /// </summary>
         /// <param name="opacity">The opacity of the image. Where 255 is opaque, and 0 is transparent.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="bitmap"/> is null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <see cref="T:System.Drawing.Imaging.PixelFormat"/> of
-        /// <paramref name="bitmap"/> was not <see cref="P:System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</exception>
         /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
             Justification = "Following Windows API conventions, which use Hungarian notation.")]
         [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand,
             Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
-        public void SetBitmap(Bitmap bitmap, byte opacity)
+        public void UpdateBackgroundGraphics(byte opacity)
         {
-            Argument.EnsureNotNull(bitmap, "bitmap");
-
-            if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
-                throw new ArgumentException("The PixelFormat of bitmap must be Format32bppArgb.");
-
-            IntPtr hBitmap = IntPtr.Zero;
-            IntPtr hPrevBitmap = IntPtr.Zero;
-            IntPtr screenDC = NativeMethods.GetDC(IntPtr.Zero);
-            IntPtr memDC = NativeMethods.CreateCompatibleDC(screenDC);
-
-            Win32Exception cleanupEx = null;
-            try
-            {
-                hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
-                hPrevBitmap = NativeMethods.SelectObject(memDC, hBitmap);
-                if (hPrevBitmap == IntPtr.Zero)
-                    throw new Win32Exception();
-
-                SIZE dstSize = new SIZE(bitmap.Width, bitmap.Height);
-                UpdateWindow(screenDC, memDC, ref dstSize, opacity);
-            }
-            finally
-            {
-                if (NativeMethods.ReleaseDC(IntPtr.Zero, screenDC) == 0)
-                    cleanupEx = new Win32Exception();
-                if (hBitmap != IntPtr.Zero)
-                {
-                    NativeMethods.SelectObject(memDC, hPrevBitmap);
-                    NativeMethods.DeleteObject(hBitmap);
-                }
-                if (!NativeMethods.DeleteDC(memDC))
-                    cleanupEx = new Win32Exception();
-            }
-            if (cleanupEx != null)
-                throw cleanupEx;
+            POINT dstPos = new POINT(Left, Top);
+            SIZE dstSize = new SIZE(Width, Height);
+            POINT srcPos = POINT.Empty;
+            BLENDFUNCTION blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
+            if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), hdcScreen, ref dstPos, ref dstSize,
+                hdcBackground, ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
+                throw new Win32Exception();
         }
 
         /// <summary>
-        /// Updates the window by applying a new surface graphic.
+        /// Clean up any resources being used.
         /// </summary>
-        /// <param name="screenDC">A handle to the DC for the screen.</param>
-        /// <param name="memDC">A handle to the DC for the surface that defines the window.</param>
-        /// <param name="dstSize">A pointer to a structure that specifies the new size of the window.</param>
-        /// <param name="opacity">Specifies an alpha transparency value to be used on the entire source bitmap.</param>
-        private void UpdateWindow(IntPtr screenDC, IntPtr memDC, ref SIZE dstSize, byte opacity)
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
         {
-            POINT dstPos = new POINT(Left, Top);
-            POINT srcPos = POINT.Empty;
-            BLENDFUNCTION blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
-            if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), screenDC, ref dstPos, ref dstSize,
-                memDC, ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
-                throw new Win32Exception();
+            if (Disposing || IsDisposed)
+                return;
+            try
+            {
+                ReleaseBuffers(disposing);
+                Win32Exception cleanupEx = null; 
+                if (NativeMethods.ReleaseDC(IntPtr.Zero, hdcScreen) == 0)
+                    cleanupEx = new Win32Exception();
+                if (!NativeMethods.DeleteDC(hdcBackground))
+                    cleanupEx = new Win32Exception();
+                if (cleanupEx != null)
+                    throw cleanupEx;
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }
