@@ -143,7 +143,7 @@
                 if (frameDuration == 0 && !(ImageDuration == 0 && sourceFrame == frameCount - 1))
                 {
                     // Dispose of unused frame.
-                    IDisposable disposable = gifImage.Frames[sourceFrame] as IDisposable;
+                    IDisposable disposable = gifImage.Frames[sourceFrame].Image as IDisposable;
                     if (disposable != null)
                         disposable.Dispose();
                     System.Threading.Interlocked.Increment(ref framesDropped);
@@ -206,7 +206,7 @@
             else
             {
                 // Dispose of duplicate frame.
-                IDisposable disposable = frame as IDisposable;
+                IDisposable disposable = frame.Image as IDisposable;
                 if (disposable != null)
                     disposable.Dispose();
                 System.Threading.Interlocked.Increment(ref duplicatesDropped);
