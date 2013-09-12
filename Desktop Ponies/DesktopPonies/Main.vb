@@ -882,6 +882,9 @@ Public Class Main
         AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
         ponyViewer = Options.GetInterface()
         ponyViewer.Topmost = Options.AlwaysOnTop
+        If TypeOf ponyViewer Is WinFormSpriteInterface Then
+            DirectCast(ponyViewer, WinFormSpriteInterface).ShowPerformanceGraph = Options.ShowPerformanceGraph
+        End If
 
         If Not Reference.InPreviewMode Then
             ' Get a collection of all images to be loaded.
