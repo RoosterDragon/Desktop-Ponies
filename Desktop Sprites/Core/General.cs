@@ -1,7 +1,6 @@
 ﻿namespace DesktopSprites.Core
 {
     using System;
-    using System.Runtime;
 
     /// <summary>
     /// General utility methods.
