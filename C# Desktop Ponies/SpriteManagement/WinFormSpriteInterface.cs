@@ -664,7 +664,7 @@
                     {
                         form.DesktopBounds = value;
                         AllocateBuffers();
-                        render();
+                        Render();
                     });
             }
         }

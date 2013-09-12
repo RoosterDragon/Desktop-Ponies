@@ -572,11 +572,76 @@ Public Class Behavior
     Public Property AutoSelectImagesOnFollow As Boolean = True
     Public Property Group As Integer = AnyGroup
 
-    Public ReadOnly Property Effects As IEnumerable(Of EffectBase)
+    Public ReadOnly Property Effects As EffectsEnumerable
         Get
-            Return pony.Effects.Where(Function(e) String.Equals(e.BehaviorName, Name, StringComparison.OrdinalIgnoreCase))
+            Return New EffectsEnumerable(Me)
         End Get
     End Property
+
+#Region "Effects Enumeration"
+    Public Structure EffectsEnumerable
+        Implements IEnumerable(Of EffectBase)
+
+        Private ReadOnly behavior As Behavior
+
+        Public Sub New(behavior As Behavior)
+            Me.behavior = behavior
+        End Sub
+
+        Public Function GetEnumerator() As EffectsEnumerator
+            Return New EffectsEnumerator(behavior)
+        End Function
+
+        Private Function GetEnumerator1() As IEnumerator(Of EffectBase) Implements IEnumerable(Of EffectBase).GetEnumerator
+            Return New EffectsEnumerator(behavior)
+        End Function
+
+        Private Function GetEnumerator2() As Collections.IEnumerator Implements Collections.IEnumerable.GetEnumerator
+            Return GetEnumerator()
+        End Function
+    End Structure
+
+    Public Structure EffectsEnumerator
+        Implements IEnumerator(Of EffectBase)
+
+        Private ReadOnly behaviorName As String
+        Private ReadOnly effects As List(Of EffectBase)
+        Private index As Integer
+
+        Public Sub New(behavior As Behavior)
+            Me.behaviorName = behavior.Name
+            Me.effects = behavior.pony.Effects
+            Me.index = -1
+        End Sub
+
+        Public ReadOnly Property Current As EffectBase Implements IEnumerator(Of EffectBase).Current
+            Get
+                Return effects(index)
+            End Get
+        End Property
+
+        Private ReadOnly Property Current1 As Object Implements Collections.IEnumerator.Current
+            Get
+                Return Current
+            End Get
+        End Property
+
+        Public Function MoveNext() As Boolean Implements Collections.IEnumerator.MoveNext
+            Do
+                index += 1
+            Loop While index < effects.Count AndAlso
+                Not String.Equals(Current.BehaviorName, behaviorName, StringComparison.OrdinalIgnoreCase)
+            Return index < effects.Count
+        End Function
+
+        Public Sub Reset() Implements Collections.IEnumerator.Reset
+            index = -1
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+        End Sub
+    End Structure
+#End Region
 
     Public Sub New(pony As PonyBase)
         Me.pony = Argument.EnsureNotNull(pony, "pony")
