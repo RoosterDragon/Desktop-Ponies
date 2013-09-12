@@ -70,7 +70,7 @@
         /// <summary>
         /// Returns an enumerator that iterates through the immutable array.
         /// </summary>
-        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.ArrayEnumerator"/> that can be used to iterate through the
+        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> that can be used to iterate through the
         /// collection.</returns>
         public Enumerator GetEnumerator()
         {
@@ -79,7 +79,7 @@
         /// <summary>
         /// Returns an enumerator that iterates through the immutable array.
         /// </summary>
-        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.ArrayEnumerator"/> that can be used to iterate through the
+        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> that can be used to iterate through the
         /// collection.</returns>
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -124,7 +124,9 @@
             {
                 get { return immutableArray[index]; }
             }
-
+            /// <summary>
+            /// Releases all resources allocated by the object.
+            /// </summary>
             public void Dispose()
             {
             }
@@ -137,15 +139,38 @@
                 index = -1;
             }
         }
-
+        /// <summary>
+        /// Determines the index of a specific item in the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>.
+        /// </summary>
+        /// <param name="item">The object to locate in the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>.</param>
+        /// <returns>The index of item if found in the list; otherwise, -1.</returns>
         public int IndexOf(T item)
         {
             return array.IndexOf(item);
         }
+        /// <summary>
+        /// Determines whether the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/> contains a specific value.
+        /// </summary>
+        /// <param name="item">The object to locate in the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>.</param>
+        /// <returns>Returns true if item is found in the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>; otherwise, false.
+        /// </returns>
         public bool Contains(T item)
         {
             return array.Contains(item);
         }
+        /// <summary>
+        /// Copies the elements of the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/> to an <see cref="T:System.Array"/>,
+        /// starting at a particular <see cref="T:System.Array"/> index.
+        /// </summary>
+        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from
+        /// <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.
+        /// </param>
+        /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception>
+        /// <exception cref="T:System.ArgumentException">The number of elements in the source
+        /// <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/> is greater than the available space from
+        /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         public void CopyTo(T[] array, int arrayIndex)
         {
             this.array.CopyTo(array, arrayIndex);
@@ -164,14 +189,8 @@
         }
         T IList<T>.this[int index]
         {
-            get
-            {
-                return this[index];
-            }
-            set
-            {
-                throw ReadOnlyException();
-            }
+            get { return this[index]; }
+            set { throw ReadOnlyException(); }
         }
         void ICollection<T>.Add(T item)
         {
