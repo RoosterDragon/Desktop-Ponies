@@ -33,7 +33,7 @@ Public Class FileSelector
             Else
                 Dim i = 0
                 For Each item As String In FilePathComboBox.Items
-                    If String.Equals(value, item, PathComparison.Current) Then
+                    If String.Equals(value, item, PathEquality.Comparison) Then
                         FilePathComboBox.SelectedIndex = i
                         Exit For
                     End If

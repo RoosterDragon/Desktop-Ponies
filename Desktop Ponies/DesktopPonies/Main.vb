@@ -888,7 +888,7 @@ Public Class Main
 
         If Not Reference.InPreviewMode Then
             ' Get a collection of all images to be loaded.
-            Dim images As New HashSet(Of String)(StringComparer.Ordinal)
+            Dim images As New HashSet(Of String)(PathEquality.Comparer)
             For Each pony In startupPonies
                 For Each behavior In pony.Behaviors
                     images.Add(behavior.LeftImage.Path)

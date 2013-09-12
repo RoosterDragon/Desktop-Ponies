@@ -117,7 +117,7 @@ Public Class PonyBase
 
     Public Function ChangeDirectory(newDirectory As String) As Boolean
         If Directory Is Nothing Then Return Create(newDirectory)
-        If String.Equals(Directory, newDirectory, PathComparison.Current) Then Return True
+        If String.Equals(Directory, newDirectory, PathEquality.Comparison) Then Return True
         Try
             Dim currentPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory)
             Dim newPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newDirectory)
@@ -817,7 +817,7 @@ Public Class Speech
             Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
             iniComponents(3) = Nothing
             For Each filePath In soundFilePaths
-                If String.Equals(Path.GetExtension(filePath), ".mp3", PathComparison.Current) Then
+                If String.Equals(Path.GetExtension(filePath), ".mp3", PathEquality.Comparison) Then
                     iniComponents(3) = filePath
                     Exit For
                 End If

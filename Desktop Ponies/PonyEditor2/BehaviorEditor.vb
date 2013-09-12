@@ -143,7 +143,7 @@ Friend Class BehaviorEditor
         typedPath = Path.GetFileName(behaviorImagePath)
         If typedPath = Base.Directory OrElse typedPath = "" Then typedPath = Nothing
         selector.FilePath = typedPath
-        typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathComparison.Current)
+        typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathEquality.Comparison)
         If typedPathMissing Then
             selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Add(typedPath)
         End If
