@@ -667,7 +667,6 @@
         public Point CursorPosition
         {
             get { return Cursor.Position; }
-            private set { }
         }
         #endregion
 
@@ -826,7 +825,6 @@
             RemapKeyConflicts();
 
             // Hook up to form events.
-            form.MouseMove += GraphicsForm_MouseMove;
             form.MouseDown += GraphicsForm_MouseDown;
             form.MouseClick += GraphicsForm_MouseClick;
             form.MouseUp += GraphicsForm_MouseUp;
@@ -981,17 +979,6 @@
         }
 
         /// <summary>
-        /// Raised when the mouse moves.
-        /// Tracks the location of the cursor.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void GraphicsForm_MouseMove(object sender, MouseEventArgs e)
-        {
-            CursorPosition = e.Location;
-        }
-
-        /// <summary>
         /// Toggles the topmost display of the form and recreates the graphics surfaces since they become invalidated.
         /// </summary>
         /// <param name="beginManualPainting">If true, indicates the paint method of the form should be hooked on to in order to ensure the
@@ -1082,7 +1069,6 @@
                 // Reapply this setting, as otherwise it may not be applied when the form first opens.
                 if (form.TopMost)
                     form.TopMost = true;
-                CursorPosition = Cursor.Position;
                 opened = true;
             });
         }
@@ -1181,6 +1167,7 @@
 
             this.sprites = sprites;
             ApplicationInvoke(render);
+            this.sprites = null;
         }
 
         /// <summary>

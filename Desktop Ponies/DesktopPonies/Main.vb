@@ -663,7 +663,7 @@ Public Class Main
             Next
         ElseIf e.KeyChar = "#"c Then
 #If DEBUG Then
-            Using newEditor = New PonyEditorForm2(ponies.Bases)
+            Using newEditor = New PonyEditorForm2()
                 newEditor.ShowDialog(Me)
             End Using
 #End If
@@ -879,7 +879,7 @@ Public Class Main
                         End Sub)
         End If
 
-        AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
+        AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
         ponyViewer = Options.GetInterface()
         ponyViewer.Topmost = Options.AlwaysOnTop
         If TypeOf ponyViewer Is WinFormSpriteInterface Then
@@ -1006,7 +1006,7 @@ Public Class Main
             ponyViewer.Close()
         End If
 
-        RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
+        RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
     End Sub
 
     ''' <summary>
@@ -1090,9 +1090,15 @@ Public Class Main
         Next
     End Sub
 
-    Private Function RandomPlusPonyBasesWithBehaviors() As IEnumerable(Of PonyBase)
-        Return {randomPony}.Union(ponies.Bases)
-    End Function
+    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
+    Private Shared Sub AddHandlerDisplaySettingsChanged(handler As EventHandler)
+        AddHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, handler
+    End Sub
+
+    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
+    Private Shared Sub RemoveHandlerDisplaySettingsChanged(handler As EventHandler)
+        RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, handler
+    End Sub
 
     Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         e.Cancel = loading
@@ -1100,7 +1106,7 @@ Public Class Main
 
     Protected Overrides Sub Dispose(disposing As Boolean)
         Try
-            RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, AddressOf ReturnToMenuOnResolutionChange
+            RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
             If disposing Then
                 If components IsNot Nothing Then components.Dispose()
                 If animator IsNot Nothing Then animator.Dispose()

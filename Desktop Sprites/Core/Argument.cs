@@ -50,7 +50,7 @@
         [DebuggerStepThrough]
         public static string EnsureNotNullOrEmpty([ValidatedNotNull] string arg, string paramName)
         {
-            if (Argument.EnsureNotNull(arg, paramName) == string.Empty)
+            if (Argument.EnsureNotNull(arg, paramName).Length == 0)
                 throw new ArgumentException(paramName + " must not be empty.", paramName);
             return arg;
         }

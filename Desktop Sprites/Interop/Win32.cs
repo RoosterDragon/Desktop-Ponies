@@ -377,8 +377,8 @@
         /// extended error information, call GetLastError.</returns>
         [DllImport(user, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool UpdateLayeredWindow(HandleRef hwnd, IntPtr hdcDst, [In] ref POINT pptDst, [In] ref SIZE psize,
-            IntPtr hdcSrc, [In] ref POINT pptSrc, COLORREF crKey, [In] ref BLENDFUNCTION pblend, UlwFlags dwFlags);
+        public static extern bool UpdateLayeredWindow(HandleRef hwnd, HandleRef hdcDst, [In] ref POINT pptDst, [In] ref SIZE psize,
+            HandleRef hdcSrc, [In] ref POINT pptSrc, COLORREF crKey, [In] ref BLENDFUNCTION pblend, UlwFlags dwFlags);
 
         /// <summary>
         /// The GetDC function retrieves a handle to a device context (DC) for the client area of a specified window or for the entire
@@ -390,7 +390,7 @@
         /// <returns>If the function succeeds, the return value is a handle to the DC for the specified window's client area. If the
         /// function fails, the return value is NULL.</returns>
         [DllImport(user, SetLastError = true)]
-        public static extern IntPtr GetDC(IntPtr hWnd);
+        public static extern IntPtr GetDC(HandleRef hWnd);
 
         /// <summary>
         /// The ReleaseDC function releases a device context (DC), freeing it for use by other applications. The effect of the ReleaseDC
@@ -401,7 +401,7 @@
         /// <returns>The return value indicates whether the DC was released. If the DC was released, the return value is 1. If the DC was
         /// not released, the return value is zero.</returns>
         [DllImport(user, SetLastError = true)]
-        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+        public static extern int ReleaseDC(HandleRef hWnd, HandleRef hDC);
 
         /// <summary>
         /// The CreateCompatibleDC function creates a memory device context (DC) compatible with the specified device.
@@ -411,7 +411,7 @@
         /// <returns>If the function succeeds, the return value is the handle to a memory DC. If the function fails, the return value is
         /// NULL.</returns>
         [DllImport(gdi, SetLastError = true)]
-        public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
+        public static extern IntPtr CreateCompatibleDC(HandleRef hDC);
 
         /// <summary>
         /// The DeleteDC function deletes the specified device context (DC).
@@ -420,7 +420,7 @@
         /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
         [DllImport(gdi, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool DeleteDC(IntPtr hdc);
+        public static extern bool DeleteDC(HandleRef hdc);
 
         /// <summary>
         /// The SelectObject function selects an object into the specified device context (DC). The new object replaces the previous object
@@ -432,7 +432,7 @@
         /// replaced. If the selected object is a region and the function succeeds, a region is returned. If an error occurs and the
         /// selected object is not a region, the return value is NULL. Otherwise, it is HGDI_ERROR.</returns>
         [DllImport(gdi, SetLastError = true)]
-        public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
+        public static extern IntPtr SelectObject(HandleRef hDC, HandleRef hObject);
 
         /// <summary>
         /// The DeleteObject function deletes a logical pen, brush, font, bitmap, region, or palette, freeing all system resources
@@ -443,6 +443,6 @@
         /// into a DC, the return value is zero.</returns>
         [DllImport(gdi, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool DeleteObject(IntPtr hObject);
+        public static extern bool DeleteObject(HandleRef hObject);
     }
 }

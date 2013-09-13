@@ -6,7 +6,7 @@
     /// Represents an ARGB (alpha, red, green, blue) color.
     /// </summary>
     [Serializable]
-    public struct ArgbColor
+    public struct ArgbColor : IEquatable<ArgbColor>
     {
         /// <summary>
         /// Gets the alpha component value of this <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure.
@@ -91,6 +91,18 @@
         public static bool operator !=(ArgbColor left, ArgbColor right)
         {
             return !(left == right);
+        }
+
+        /// <summary>
+        /// Tests whether the specified <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> is equivalent to this
+        /// <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure.
+        /// </summary>
+        /// <param name="other">The color to test.</param>
+        /// <returns>Returns true if <paramref name="other"/> is equivalent to this
+        /// <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure; otherwise, false.</returns>
+        public bool Equals(ArgbColor other)
+        {
+            return this == other;
         }
 
         /// <summary>

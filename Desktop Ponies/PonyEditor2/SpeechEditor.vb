@@ -1,14 +1,6 @@
 ﻿Imports System.IO
 
 Friend Class SpeechEditor
-    Private Shadows Property Original As Speech
-        Get
-            Return DirectCast(MyBase.Original, Speech)
-        End Get
-        Set(value As Speech)
-            MyBase.Original = value
-        End Set
-    End Property
     Private Shadows Property Edited As Speech
         Get
             Return DirectCast(MyBase.Edited, Speech)

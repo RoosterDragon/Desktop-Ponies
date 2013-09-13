@@ -622,10 +622,6 @@ Public Class DesktopPonyAnimator
         End If
     End Sub
 
-    Friend Sub ShowPonyMenu(x As Integer, y As Integer)
-        ponyMenu.Show(x, y)
-    End Sub
-
     Friend Sub DisplayHouseMenu(location As Point)
         Dim i = 0
         houseMenu.Items(i).Text = "Edit " & selectedHouse.HouseBase.Name

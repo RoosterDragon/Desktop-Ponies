@@ -28,7 +28,7 @@
     /// Represents an immutable collection of elements that can be accessed by index.
     /// </summary>
     /// <typeparam name="T">The type of the elements in the immutable array.</typeparam>
-    public class ImmutableArray<T> : IList<T>
+    public sealed class ImmutableArray<T> : IList<T>
     {
         /// <summary>
         /// The underlying array.
@@ -175,7 +175,7 @@
         {
             this.array.CopyTo(array, arrayIndex);
         }
-        private NotSupportedException ReadOnlyException()
+        private static NotSupportedException ReadOnlyException()
         {
             return new NotSupportedException("Collection is read-only.");
         }

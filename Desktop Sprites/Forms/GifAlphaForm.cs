@@ -58,7 +58,7 @@
         /// <summary>
         /// The current color in the source image that is currently being edited or otherwise modified.
         /// </summary>
-        private Color sourceColor;
+        private Color currentColor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.DesktopPonies.GifAlphaForm"/> class.
@@ -145,7 +145,7 @@
             PaletteControls.Enabled = false;
             ColorControls.Enabled = false;
             ErrorLabel.Visible = false;
-            sourceColor = Color.Empty;
+            currentColor = Color.Empty;
 
             FileStream gifStream = null;
             try
@@ -202,7 +202,7 @@
                 sourceSwatches[mappingIndex].BackColor = colorMapping.Key;
                 desiredSwatches[mappingIndex].BackColor = colorMapping.Value;
                 if (mappingIndex == 0)
-                    sourceColor = colorMapping.Key;
+                    currentColor = colorMapping.Key;
                 mappingIndex++;
                 location.X += swatchSize + 1;
             }
@@ -303,9 +303,9 @@
         {
             Panel panel = (Panel)sender;
             if (panel.Parent == ImageSourcePalette)
-                sourceColor = panel.BackColor;
+                currentColor = panel.BackColor;
             else
-                sourceColor = ((Panel)panel.Tag).BackColor;
+                currentColor = ((Panel)panel.Tag).BackColor;
             UpdateColorHex();
             UpdateColorDisplay();
         }
@@ -319,9 +319,9 @@
         private void ImageDesiredColor_Click(object sender, EventArgs e)
         {
             changed = true;
-            ColorDialog.Color = colorMappingTable[sourceColor];
+            ColorDialog.Color = colorMappingTable[currentColor];
             ColorDialog.ShowDialog(this);
-            colorMappingTable[sourceColor] = Color.FromArgb(colorMappingTable[sourceColor].A, ColorDialog.Color);
+            colorMappingTable[currentColor] = Color.FromArgb(colorMappingTable[currentColor].A, ColorDialog.Color);
             UpdateColorHex();
             UpdateColorDisplay();
         }
@@ -331,11 +331,11 @@
         /// </summary>
         private void UpdateColorHex()
         {
-            SourceAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", sourceColor.A);
-            SourceColorCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X6}", sourceColor.ToArgb() & 0x00FFFFFF);
-            DesiredAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", colorMappingTable[sourceColor].A);
+            SourceAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", currentColor.A);
+            SourceColorCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X6}", currentColor.ToArgb() & 0x00FFFFFF);
+            DesiredAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", colorMappingTable[currentColor].A);
             DesiredColorCode.Text =
-                string.Format(CultureInfo.CurrentCulture, "{0:X6}", colorMappingTable[sourceColor].ToArgb() & 0x00FFFFFF);
+                string.Format(CultureInfo.CurrentCulture, "{0:X6}", colorMappingTable[currentColor].ToArgb() & 0x00FFFFFF);
         }
 
         /// <summary>
@@ -343,8 +343,8 @@
         /// </summary>
         private void UpdateColorDisplay()
         {
-            ImageSourceColor.BackColor = sourceColor;
-            ImageDesiredColor.BackColor = colorMappingTable[sourceColor];
+            ImageSourceColor.BackColor = currentColor;
+            ImageDesiredColor.BackColor = colorMappingTable[currentColor];
         }
 
         /// <summary>
@@ -362,16 +362,16 @@
             if (byte.TryParse(DesiredAlphaCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out value))
             {
                 DesiredAlphaCode.ForeColor = Color.Black;
-                Color newColor = Color.FromArgb(value, colorMappingTable[sourceColor]);
-                if (colorMappingTable[sourceColor] != newColor)
+                Color newColor = Color.FromArgb(value, colorMappingTable[currentColor]);
+                if (colorMappingTable[currentColor] != newColor)
                 {
-                    colorMappingTable[sourceColor] = newColor;
+                    colorMappingTable[currentColor] = newColor;
                     changed = true;
                 }
                 foreach (Panel sourcePanel in ImageSourcePalette.Controls)
-                    if (sourcePanel.BackColor == sourceColor && sourcePanel.Tag != null)
+                    if (sourcePanel.BackColor == currentColor && sourcePanel.Tag != null)
                     {
-                        ((Panel)sourcePanel.Tag).BackColor = colorMappingTable[sourceColor];
+                        ((Panel)sourcePanel.Tag).BackColor = colorMappingTable[currentColor];
                         break;
                     }
                 UpdateColorDisplay();
@@ -399,16 +399,16 @@
             if (int.TryParse(DesiredColorCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out value))
             {
                 DesiredColorCode.ForeColor = Color.Black;
-                Color newColor = Color.FromArgb(colorMappingTable[sourceColor].A, value >> 16, value >> 8 & 0xFF, value & 0xFF);
-                if (colorMappingTable[sourceColor] != newColor)
+                Color newColor = Color.FromArgb(colorMappingTable[currentColor].A, value >> 16, value >> 8 & 0xFF, value & 0xFF);
+                if (colorMappingTable[currentColor] != newColor)
                 {
-                    colorMappingTable[sourceColor] = newColor;
+                    colorMappingTable[currentColor] = newColor;
                     changed = true;
                 }
                 foreach (Panel sourcePanel in ImageSourcePalette.Controls)
-                    if (sourcePanel.BackColor == sourceColor && sourcePanel.Tag != null)
+                    if (sourcePanel.BackColor == currentColor && sourcePanel.Tag != null)
                     {
-                        ((Panel)sourcePanel.Tag).BackColor = colorMappingTable[sourceColor];
+                        ((Panel)sourcePanel.Tag).BackColor = colorMappingTable[currentColor];
                         break;
                     }
                 UpdateColorDisplay();
@@ -576,7 +576,7 @@
                     // but can lead to incorrect picks when two desired colors have the same RGB values but different alpha.
                     if (pixel.A == 255 && color.R == pixel.R && color.G == pixel.G && color.B == pixel.B)
                     {
-                        sourceColor = pixel;
+                        currentColor = pixel;
                         UpdateColorHex();
                         UpdateColorDisplay();
                         break;

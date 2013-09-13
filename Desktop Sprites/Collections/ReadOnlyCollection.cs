@@ -84,7 +84,55 @@
         {
             return collection.GetEnumerator();
         }
-        private NotSupportedException ReadOnlyException()
+        /// <summary>
+        /// Tests whether two specified <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structures are equivalent.
+        /// </summary>
+        /// <param name="left">The <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> that is to the left of the equality
+        /// operator.</param>
+        /// <param name="right">The <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> that is to the right of the equality
+        /// operator.</param>
+        /// <returns>Returns true if the two <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structures are equal;
+        /// otherwise, false.</returns>
+        public static bool operator ==(ReadOnlyCollection<T> left, ReadOnlyCollection<T> right)
+        {
+            return left.collection.Equals(right.collection);
+        }
+        /// <summary>
+        /// Tests whether two specified <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structures are different.
+        /// </summary>
+        /// <param name="left">The <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> that is to the left of the inequality
+        /// operator.</param>
+        /// <param name="right">The <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> that is to the right of the inequality
+        /// operator.</param>
+        /// <returns>Returns true if the two <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structures are different;
+        /// otherwise, false.</returns>
+        public static bool operator !=(ReadOnlyCollection<T> left, ReadOnlyCollection<T> right)
+        {
+            return !(left == right);
+        }
+        /// <summary>
+        /// Tests whether the specified object is a <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structure and is
+        /// equivalent to this <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structure.
+        /// </summary>
+        /// <param name="obj">The object to test.</param>
+        /// <returns>Returns true if <paramref name="obj"/> is a <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structure
+        /// equivalent to this <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structure; otherwise, false.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is ReadOnlyCollection<T>))
+                return false;
+            return this == (ReadOnlyCollection<T>)obj;
+        }
+        /// <summary>
+        /// Returns a hash code for this <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structure.
+        /// </summary>
+        /// <returns>An integer value that specifies the hash code for this
+        /// <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/>.</returns>
+        public override int GetHashCode()
+        {
+            return unchecked(collection.GetHashCode() * 7);
+        }
+        private static NotSupportedException ReadOnlyException()
         {
             return new NotSupportedException("Collection is read-only.");
         }

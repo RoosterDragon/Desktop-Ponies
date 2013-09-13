@@ -21,13 +21,15 @@ Public Class NewSpeechDialog
 
         End If
 
-        Dim filename = m_editor.GetFilename(Sound_Textbox.Text)
+        Dim filename = PonyEditor.GetFilename(Sound_Textbox.Text)
 
         Dim new_speech = New Speech() With {.Name = Name_Textbox.Text,
                                                            .Text = Text_TextBox.Text,
                                                            .Skip = Not Random_Checkbox.Checked,
                                                            .Group = CInt(Group_NumberBox.Value),
                                                            .SoundFile = Replace(Sound_Textbox.Text, filename, "") & filename}
+
+        m_editor.PreviewPony.Base.Speeches.Add(new_speech)
 
         Me.Close()
     End Sub
@@ -37,11 +39,10 @@ Public Class NewSpeechDialog
         Me.Close()
     End Sub
 
-    Private Sub New_Behavior_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Private Sub NewSpeechDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Text_TextBox.Text = ""
         Name_Textbox.Text = ""
-
 
     End Sub
 
@@ -62,7 +63,7 @@ Public Class NewSpeechDialog
         End If
 
         Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
-                                       m_editor.PreviewPony.Directory, m_editor.GetFilename(sound_path))
+                                       m_editor.PreviewPony.Directory, PonyEditor.GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not IO.File.Exists(new_path) Then

@@ -9,6 +9,10 @@
     {
 #if DEBUG
         /// <summary>
+        /// Guards access to Buffer.
+        /// </summary>
+        private static readonly object BufferGuard = new object();
+        /// <summary>
         /// Provides a reusable character buffer of sufficient size to write simply formatted signed 64-bit integers.
         /// </summary>
         private static readonly char[] Buffer = new char[(int)Math.Ceiling(Math.Log10(-(double)long.MinValue)) + 1];
@@ -40,7 +44,7 @@
             // As we are outputting to console, we shall lock around the whole collection so as to minimize the interference from
             // multithreaded calls, however other threads are still free to call for collections outside of this method, so this cannot be
             // guaranteed.
-            lock (Buffer)
+            lock (BufferGuard)
             {
                 long beforeCollect = GC.GetTotalMemory(false);
                 GC.Collect();

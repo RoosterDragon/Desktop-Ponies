@@ -5,14 +5,6 @@ Friend Class BehaviorEditor
     Private Shared allowedMovesValues As Object() =
         [Enum].GetValues(GetType(AllowedMoves)).Cast(Of Object)().ToArray()
 
-    Private Shadows Property Original As Behavior
-        Get
-            Return DirectCast(MyBase.Original, Behavior)
-        End Get
-        Set(value As Behavior)
-            MyBase.Original = value
-        End Set
-    End Property
     Private Shadows Property Edited As Behavior
         Get
             Return DirectCast(MyBase.Edited, Behavior)

@@ -16,7 +16,12 @@ Public Class StringCollectionParser
     Private Const FileNotFoundFailureFormat = "This file does not exist, or cannot be accessed: {0}"
     Private Const OutOfRangeFailureFormat = "Value of {0} is out of range. Value must be between {1} and {2} (inclusive)."
 
-    Public ReadOnly Issues As New List(Of ParseIssue)()
+    Private ReadOnly _issues As New List(Of ParseIssue)
+    Public ReadOnly Property Issues As ReadOnlyList(Of ParseIssue)
+        Get
+            Return New ReadOnlyList(Of ParseIssue)(_issues)
+        End Get
+    End Property
     Private items As String()
     Private itemNames As String()
     Private index As Integer
@@ -43,20 +48,20 @@ Public Class StringCollectionParser
             lastParseFailed = parsed.Result = ParseResult.Failed
             If Not (parsed.Source Is Nothing AndAlso parsed.Result = ParseResult.Fallback) Then
                 Dim i = index - 1
-                Issues.Add(New ParseIssue(i,
-                                          If(i < itemNames.Length, itemNames(i), Nothing),
-                                          parsed.Source,
-                                          If(lastParseFailed, Nothing, parsed.Value.ToString()),
-                                          parsed.Reason))
+                _issues.Add(New ParseIssue(i,
+                                           If(i < itemNames.Length, itemNames(i), Nothing),
+                                           parsed.Source,
+                                           If(lastParseFailed, Nothing, parsed.Value.ToString()),
+                                           parsed.Reason))
             End If
         End If
         Return parsed.Value
     End Function
-    Private Function SkipParse(Of T As Structure)(fallback As T?) As T
+    Private Shared Function SkipParse(Of T As Structure)(fallback As T?) As T
         Return If(fallback.HasValue, fallback.Value, Nothing)
         'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, If(fallback.HasValue, fallback.Value, Nothing)))
     End Function
-    Private Function SkipParse(Of T)(fallback As T) As T
+    Private Shared Function SkipParse(Of T)(fallback As T) As T
         Return fallback
         'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, fallback))
     End Function
@@ -70,7 +75,7 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedNotNull(GetNextItem(), fallback))
     End Function
-    Private Function ParsedNotNull(s As String, fallback As String) As Parsed(Of String)
+    Private Shared Function ParsedNotNull(s As String, fallback As String) As Parsed(Of String)
         If s IsNot Nothing Then
             Return Parsed.Success(s)
         ElseIf fallback IsNot Nothing Then
@@ -86,14 +91,16 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of Boolean)(fallback)
         Return HandleParsed(ParsedBoolean(GetNextItem(), fallback))
     End Function
-    Private Function ParsedBoolean(s As String, fallback As Boolean?) As Parsed(Of Boolean)
+    Private Shared Function ParsedBoolean(s As String, fallback As Boolean?) As Parsed(Of Boolean)
         Dim result As Boolean
         If Boolean.TryParse(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(BooleanFailureFormat, s, Boolean.TrueString, Boolean.FalseString))
+            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, BooleanFailureFormat, s,
+                                                                    Boolean.TrueString, Boolean.FalseString))
         Else
-            Return Parsed.Failed(Of Boolean)(s, String.Format(BooleanFailureFormat, s, Boolean.TrueString, Boolean.FalseString))
+            Return Parsed.Failed(Of Boolean)(s, String.Format(CultureInfo.CurrentCulture, BooleanFailureFormat, s,
+                                                              Boolean.TrueString, Boolean.FalseString))
         End If
     End Function
     Public Function ParseInt32() As Integer
@@ -112,15 +119,15 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of Integer)(fallback)
         Return HandleParsed(ParsedInt32(GetNextItem(), fallback, min, max))
     End Function
-    Private Function ParsedInt32(s As String, fallback As Integer?, Optional min As Integer = Integer.MinValue, Optional max As Integer = Integer.MaxValue) As Parsed(Of Integer)
+    Private Shared Function ParsedInt32(s As String, fallback As Integer?, Optional min As Integer = Integer.MinValue, Optional max As Integer = Integer.MaxValue) As Parsed(Of Integer)
         If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
         Dim failReason As String = Nothing
         Dim result As Integer
         If Not Integer.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, result) Then
-            failReason = String.Format(IntegerFailureFormat, s)
+            failReason = String.Format(CultureInfo.CurrentCulture, IntegerFailureFormat, s)
         End If
         If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
-            failReason = String.Format(OutOfRangeFailureFormat, result, min, max)
+            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
         End If
         If failReason Is Nothing Then
             Return Parsed.Success(result)
@@ -146,15 +153,15 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of Double)(fallback)
         Return HandleParsed(ParsedDouble(GetNextItem(), fallback, min, max))
     End Function
-    Private Function ParsedDouble(s As String, fallback As Double?, min As Double, max As Double) As Parsed(Of Double)
+    Private Shared Function ParsedDouble(s As String, fallback As Double?, min As Double, max As Double) As Parsed(Of Double)
         If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
         Dim failReason As String = Nothing
         Dim result As Double
         If Not Double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, result) Then
-            failReason = String.Format(FloatFailureFormat, s)
+            failReason = String.Format(CultureInfo.CurrentCulture, FloatFailureFormat, s)
         End If
         If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
-            failReason = String.Format(OutOfRangeFailureFormat, result, min, max)
+            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
         End If
         If failReason Is Nothing Then
             Return Parsed.Success(result)
@@ -171,14 +178,16 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedMap(GetNextItem(), mapping, fallback))
     End Function
-    Private Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
+    Private Shared Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
         Dim result As T
         If s IsNot Nothing AndAlso mapping.TryGetValue(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(MapFailureFormat, s, String.Join(", ", mapping.Keys)))
+            Return Parsed.Fallback(s, fallback.Value,
+                                   String.Format(CultureInfo.CurrentCulture, MapFailureFormat, s, String.Join(", ", mapping.Keys)))
         Else
-            Return Parsed.Failed(Of T)(s, String.Format(MapFailureFormat, s, String.Join(", ", mapping.Keys)))
+            Return Parsed.Failed(Of T)(s,
+                                       String.Format(CultureInfo.CurrentCulture, MapFailureFormat, s, String.Join(", ", mapping.Keys)))
         End If
     End Function
     Public Function ParseVector2() As Vector2
@@ -188,7 +197,7 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of Vector2)(fallback)
         Return HandleParsed(ParsedVector2(GetNextItem(), fallback))
     End Function
-    Private Function ParsedVector2(s As String, fallback As Vector2?) As Parsed(Of Vector2)
+    Private Shared Function ParsedVector2(s As String, fallback As Vector2?) As Parsed(Of Vector2)
         Dim parts As String() = Nothing
         If s IsNot Nothing Then parts = s.Split(","c)
         Dim x As Integer
@@ -198,9 +207,9 @@ Public Class StringCollectionParser
             Integer.TryParse(parts(1), NumberStyles.Integer, CultureInfo.InvariantCulture, y) Then
             Return Parsed.Success(New Vector2(x, y))
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(Vector2FailureFormat, s))
+            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, Vector2FailureFormat, s))
         Else
-            Return Parsed.Failed(Of Vector2)(s, String.Format(Vector2FailureFormat, s))
+            Return Parsed.Failed(Of Vector2)(s, String.Format(CultureInfo.CurrentCulture, Vector2FailureFormat, s))
         End If
     End Function
     Public Function SpecifiedCombinePath(pathPrefix As String, source As String) As String
@@ -210,7 +219,7 @@ Public Class StringCollectionParser
         If lastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedCombinePath(pathPrefix, source, fallback))
     End Function
-    Private Function ParsedCombinePath(pathPrefix As String, s As String, fallback As String) As Parsed(Of String)
+    Private Shared Function ParsedCombinePath(pathPrefix As String, s As String, fallback As String) As Parsed(Of String)
         Dim failReasonFormat As String = Nothing
         If s Is Nothing Then failReasonFormat = PathNullFailureFormat
         If failReasonFormat Is Nothing AndAlso
@@ -222,9 +231,9 @@ Public Class StringCollectionParser
         If failReasonFormat Is Nothing Then
             Return Parsed.Success(Path.Combine(pathPrefix, s))
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback, String.Format(failReasonFormat, s))
+            Return Parsed.Fallback(s, fallback, String.Format(CultureInfo.CurrentCulture, failReasonFormat, s))
         Else
-            Return Parsed.Failed(Of String)(s, String.Format(failReasonFormat, s))
+            Return Parsed.Failed(Of String)(s, String.Format(CultureInfo.CurrentCulture, failReasonFormat, s))
         End If
     End Function
     Public Sub SpecifiedFileExists(filePath As String)
@@ -235,12 +244,15 @@ Public Class StringCollectionParser
         If File.Exists(filePath) Then
             HandleParsed(Parsed.Success(filePath))
         ElseIf fallback IsNot Nothing Then
-            HandleParsed(Parsed.Fallback(filePath, fallback, String.Format(FileNotFoundFailureFormat, filePath)))
+            HandleParsed(Parsed.Fallback(filePath, fallback,
+                                         String.Format(CultureInfo.CurrentCulture, FileNotFoundFailureFormat, filePath)))
         Else
-            HandleParsed(Parsed.Failed(Of String)(filePath, String.Format(FileNotFoundFailureFormat, filePath)))
+            HandleParsed(Parsed.Failed(Of String)(filePath,
+                                                  String.Format(CultureInfo.CurrentCulture, FileNotFoundFailureFormat, filePath)))
         End If
     End Sub
     Public Function Assert(source As String, condition As Func(Of String, Boolean), reason As String, fallback As String) As Boolean
+        Argument.EnsureNotNull(condition, "condition")
         If lastParseFailed Then Return False
         Dim result = condition(source)
         If result Then

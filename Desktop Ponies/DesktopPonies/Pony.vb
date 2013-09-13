@@ -17,14 +17,16 @@ Public Interface IReferential
     Function GetReferentialIssues() As ParseIssue()
 End Interface
 
-Public Class Referential
+Public NotInheritable Class Referential
+    Private Sub New()
+    End Sub
     Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of String)) As ParseIssue
         If String.IsNullOrEmpty(name) Then Return Nothing
         Dim result = CheckReference(name, collection)
         If CheckReference(name, collection) <> ReferenceResult.Ok Then
             Dim reason = If(result = ReferenceResult.NotFound,
-                            String.Format("There is no element with the name '{0}'.", name),
-                            String.Format("The name '{0}' does not refer to a unique element.", name))
+                            String.Format(CultureInfo.CurrentCulture, "There is no element with the name '{0}'.", name),
+                            String.Format(CultureInfo.CurrentCulture, "The name '{0}' does not refer to a unique element.", name))
             Return New ParseIssue(propertyName, name, "", reason)
         End If
         Return Nothing
@@ -351,7 +353,7 @@ Public Class PonyBase
         MoveOrReplace(tempFileName, interactionsFilePath)
     End Sub
 
-    Private Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
+    Private Shared Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
         If Path.GetPathRoot(Path.GetFullPath(tempFileName)) <> Path.GetPathRoot(Path.GetFullPath(destinationFileName)) Then
             ' We will need to copy the temporary file to the same drive as the destination before we can call File.Replace
             ' This is less safe, but there's not much choice.
@@ -464,8 +466,18 @@ Public Class Interaction
 
     Public Property Initiator As Pony
     Public Property Trigger As Pony
-    Public Property Targets As New HashSet(Of Pony)()
-    Public Property Behaviors As New List(Of Behavior)()
+    Private ReadOnly _targets As New HashSet(Of Pony)()
+    Public ReadOnly Property Targets As HashSet(Of Pony)
+        Get
+            Return _targets
+        End Get
+    End Property
+    Private ReadOnly _behaviors As New List(Of Behavior)()
+    Public ReadOnly Property Behaviors As List(Of Behavior)
+        Get
+            Return _behaviors
+        End Get
+    End Property
 
     Public Sub New(base As InteractionBase)
         _base = Argument.EnsureNotNull(base, "base")
@@ -609,6 +621,7 @@ Public Class Behavior
         Private index As Integer
 
         Public Sub New(behavior As Behavior)
+            Argument.EnsureNotNull(behavior, "behavior")
             Me.behaviorName = behavior.Name
             Me.effects = behavior.pony.Effects
             Me.index = -1
@@ -718,6 +731,7 @@ Public Class Behavior
             .DoNotRepeatImageAnimations = _dont_repeat_image_animations,
             .ParentPonyBase = owner
         }
+        pony.Effects.Add(newEffect)
     End Sub
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -972,7 +986,7 @@ Public Class Pony
 
     Public Property CurrentBehaviorGroup As Integer
 
-    Public Property Interaction_Active As Boolean = False
+    Public Property InteractionActive As Boolean = False
     Private _currentInteraction As Interaction = Nothing
     Public Property CurrentInteraction As Interaction
         Get
@@ -1091,7 +1105,12 @@ Public Class Pony
     ''' </summary>
     Private lastMovement As Vector2F
 
-    Public Property ActiveEffects As New List(Of Effect)
+    Private ReadOnly _activeEffects As New List(Of Effect)()
+    Public ReadOnly Property ActiveEffects As List(Of Effect)
+        Get
+            Return _activeEffects
+        End Get
+    End Property
 
     ' User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
     ' These two options are used for the one-at-a-time option.
@@ -2061,7 +2080,7 @@ Public Class Pony
                     newEffect.OwningPony = Me
 
                     Pony.CurrentAnimator.AddEffect(newEffect)
-                    Me.ActiveEffects.Add(newEffect)
+                    ActiveEffects.Add(newEffect)
 
                     EffectsLastUsed(effect) = currentTime
 
@@ -2243,7 +2262,7 @@ Public Class Pony
 
         effectsToRemove.Clear()
 
-        For Each effect As Effect In Me.ActiveEffects
+        For Each effect In ActiveEffects
             If effect.CloseOnNewBehavior Then
                 If CurrentBehavior.Name <> effect.Base.BehaviorName Then
                     effectsToRemove.Add(effect)
@@ -2252,7 +2271,7 @@ Public Class Pony
         Next
 
         For Each effect In effectsToRemove
-            Me.ActiveEffects.Remove(effect)
+            ActiveEffects.Remove(effect)
         Next
 
     End Sub
@@ -2399,7 +2418,8 @@ Public Class Pony
     End Function
 
     'Test to see if we overlap with another application's window.
-    Function IsPonyEnteringWindow(current_location As Point, new_location As Point, movement As SizeF) As Boolean
+    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
+    Private Function IsPonyEnteringWindow(current_location As Point, new_location As Point, movement As SizeF) As Boolean
         If Not OperatingSystemInfo.IsWindows Then Return False
 
         Try
@@ -3261,18 +3281,13 @@ Public Class House
         End Get
     End Property
 
-    Friend Shared Function ImageScale(size As Size) As Size
-        Dim scale = Options.ScaleFactor
-        Return New Size(CInt(size.Width * scale), CInt(size.Height * scale))
-    End Function
-
     Public Sub New(houseBase As HouseBase)
         MyBase.New(houseBase, True)
         _houseBase = houseBase
         DesiredDuration = TimeSpan.FromDays(100).TotalSeconds
     End Sub
 
-    Friend Sub InitializeVisitorList()
+    Public Sub InitializeVisitorList()
         deployedPonies.Clear()
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
             SyncLock HouseBase.Visitors
@@ -3290,7 +3305,7 @@ Public Class House
     ''' Checks to see if it is time to deploy/recall a pony and does so. 
     ''' </summary>
     ''' <param name="currentTime">The current time.</param>
-    Friend Sub Cycle(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase))
+    Public Sub Cycle(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase))
 
         If currentTime - lastCycleTime > HouseBase.CycleInterval Then
             lastCycleTime = currentTime

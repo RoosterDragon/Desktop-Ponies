@@ -47,7 +47,7 @@
                 {
                     using (var bitmap = new Bitmap(Width, Height))
                         hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
-                    hPrevBitmap = NativeMethods.SelectObject(hdcBackground, hBitmap);
+                    hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
                     if (hPrevBitmap == IntPtr.Zero)
                         throw new Win32Exception();
                     backgroundGraphics = Graphics.FromHdc(hdcBackground);
@@ -67,8 +67,8 @@
                     "Cannot create an instance of this class on non-Windows platforms due to use of platform invoke.");
             FormBorderStyle = FormBorderStyle.None;
 
-            hdcScreen = NativeMethods.GetDC(IntPtr.Zero);
-            hdcBackground = NativeMethods.CreateCompatibleDC(hdcScreen);
+            hdcScreen = NativeMethods.GetDC(new HandleRef(this, IntPtr.Zero));
+            hdcBackground = NativeMethods.CreateCompatibleDC(new HandleRef(this, hdcScreen));
         }
 
         /// <summary>
@@ -108,8 +108,8 @@
             }
             if (hBitmap != IntPtr.Zero && hPrevBitmap != IntPtr.Zero)
             {
-                NativeMethods.SelectObject(hdcBackground, hPrevBitmap);
-                NativeMethods.DeleteObject(hBitmap);
+                NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
+                NativeMethods.DeleteObject(new HandleRef(this, hBitmap));
             }
         }
 
@@ -142,8 +142,8 @@
             SIZE dstSize = new SIZE(Width, Height);
             POINT srcPos = POINT.Empty;
             BLENDFUNCTION blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
-            if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), hdcScreen, ref dstPos, ref dstSize,
-                hdcBackground, ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
+            if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), new HandleRef(this, hdcScreen), ref dstPos, ref dstSize,
+                new HandleRef(this, hdcBackground), ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
                 throw new Win32Exception();
         }
 
@@ -153,18 +153,19 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (Disposing || IsDisposed)
-                return;
             try
             {
-                ReleaseBuffers(disposing);
-                Win32Exception cleanupEx = null; 
-                if (NativeMethods.ReleaseDC(IntPtr.Zero, hdcScreen) == 0)
-                    cleanupEx = new Win32Exception();
-                if (!NativeMethods.DeleteDC(hdcBackground))
-                    cleanupEx = new Win32Exception();
-                if (cleanupEx != null)
-                    throw cleanupEx;
+                if (!Disposing && !IsDisposed)
+                {
+                    ReleaseBuffers(disposing);
+                    Win32Exception cleanupEx = null;
+                    if (NativeMethods.ReleaseDC(new HandleRef(this, IntPtr.Zero), new HandleRef(this, hdcScreen)) == 0)
+                        cleanupEx = new Win32Exception();
+                    if (!NativeMethods.DeleteDC(new HandleRef(this, hdcBackground)))
+                        cleanupEx = new Win32Exception();
+                    if (cleanupEx != null)
+                        throw cleanupEx;
+                }
             }
             finally
             {

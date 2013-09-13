@@ -36,7 +36,7 @@
         /// <param name="theSelector">The selector of the method that handles the message.</param>
         /// <param name="arg">A Boolean argument to the method.</param>
         [DllImport(objc)]
-        public static extern void objc_msgSend(IntPtr theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
+        public static extern void objc_msgSend(HandleRef theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
 
         /// <summary>
         /// Gets the native NSWindow given the pointer to a <see cref="T:Gdk.Window"/> instance.

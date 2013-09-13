@@ -3,7 +3,7 @@
 Public Class ComboBoxCaseSensitive
     Inherits ComboBox
 
-    Public Event ValueChanged(sender As Object, e As EventArgs)
+    Public Event ValueChanged As EventHandler
 
     Public Overrides Property Text As String
         Get

@@ -67,7 +67,8 @@ Public Class IdleWorker
     ''' </summary>
     Private Sub New()
         If Not Application.MessageLoop Then Throw New InvalidOperationException(
-            String.Format("A message loop must be running on this thread before the {0} can be accessed.", GetType(IdleWorker).Name))
+            String.Format(Globalization.CultureInfo.CurrentCulture,
+                "A message loop must be running on this thread before the {0} can be accessed.", GetType(IdleWorker).Name))
         owningThread = Threading.Thread.CurrentThread
         control = New Control()
         control.CreateControl()

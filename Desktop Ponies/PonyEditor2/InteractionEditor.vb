@@ -2,9 +2,6 @@
     Private Shared typeValues As Object() =
         [Enum].GetValues(GetType(TargetActivation)).Cast(Of Object)().ToArray()
 
-    Private originalInteraction As InteractionBase
-    Private newInteraction As InteractionBase
-
     Public Sub New()
         InitializeComponent()
         TypeComboBox.Items.AddRange(typeValues)
@@ -19,7 +16,7 @@
 
     Protected Overrides Sub OnItemPropertyChanged()
         MyBase.OnItemPropertyChanged()
-        Source.Text = newInteraction.GetPonyIni()
+        Source.Text = Edited.GetPonyIni()
     End Sub
 
     Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress

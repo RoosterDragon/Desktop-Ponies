@@ -40,7 +40,7 @@ Public Class PonyEditorForm2
         End Get
     End Property
 
-    Public Sub New(ponyBaseCollection As IEnumerable(Of PonyBase))
+    Public Sub New()
         InitializeComponent()
         Icon = My.Resources.Twilight
         DocumentsView.PathSeparator = Path.DirectorySeparatorChar
@@ -190,7 +190,7 @@ Public Class PonyEditorForm2
                 Dim speechError = Not speech.TryLoad(
                     speech.SourceIni,
                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
-                    speech, parseIssues)
+                    s, parseIssues)
                 speechesError = speechesError OrElse speechError
                 worker.QueueTask(Sub()
                                      Dim node = FindNode(ref.ToString())
@@ -236,11 +236,11 @@ Public Class PonyEditorForm2
         End Select
     End Function
 
-    Private Shadows Function GetPageRef(tab As TabPage) As PageRef
+    Private Shared Shadows Function GetPageRef(tab As TabPage) As PageRef
         Return DirectCast(tab.Tag, PageRef)
     End Function
 
-    Private Shadows Function GetPageRef(node As TreeNode) As PageRef
+    Private Shared Shadows Function GetPageRef(node As TreeNode) As PageRef
         Return DirectCast(node.Tag, PageRef)
     End Function
 

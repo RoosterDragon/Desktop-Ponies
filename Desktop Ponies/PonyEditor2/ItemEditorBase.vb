@@ -6,8 +6,8 @@ Public Class ItemEditorBase
     Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
     Private lastFocusedControl As Control
 
-    Protected Original As IPonyIniSourceable
-    Protected Edited As IPonyIniSourceable
+    Protected Property Original As IPonyIniSourceable
+    Protected Property Edited As IPonyIniSourceable
     Public ReadOnly Property Item As IPonyIniSourceable
         Get
             Return Original
@@ -62,8 +62,8 @@ Public Class ItemEditorBase
         End Set
     End Property
 
-    Protected ParseIssues As ParseIssue()
-    Protected ReferentialIssues As ParseIssue()
+    Protected Property ParseIssues As ParseIssue()
+    Protected Property ReferentialIssues As ParseIssue()
     Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
             Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Union(
@@ -96,6 +96,7 @@ Public Class ItemEditorBase
     End Sub
 
     Public Sub LoadItem(ponyBase As PonyBase, item As IPonyIniSourceable)
+        Argument.EnsureNotNull(item, "item")
         _isNewItem = False
         SetupItem(ponyBase)
         LoadingItem = True
@@ -159,6 +160,7 @@ Public Class ItemEditorBase
     End Sub
 
     Protected Sub UpdateProperty(handler As Action)
+        Argument.EnsureNotNull(handler, "handler")
         If LoadingItem Then Return
         handler()
         OnItemPropertyChanged()

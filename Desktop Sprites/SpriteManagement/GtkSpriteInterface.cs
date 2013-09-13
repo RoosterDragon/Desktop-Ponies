@@ -71,10 +71,8 @@
                     setHasShadowSelector = DesktopSprites.Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
 
                 // Send a message to the window, indicating the set shadow method and specified argument.
-                DesktopSprites.Interop.MacOSX.NativeMethods.objc_msgSend(nativeWindow, setHasShadowSelector, hasShadow);
-
-                // Ensure the managed window remains in scope until all operations on the native handle are completed.
-                System.GC.KeepAlive(window);
+                DesktopSprites.Interop.MacOSX.NativeMethods.objc_msgSend(
+                    new HandleRef(window, nativeWindow), setHasShadowSelector, hasShadow);
             }
         }
         #endregion
@@ -927,12 +925,14 @@
             }
 
             /// <summary>
-            /// Releases all resources used by the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> object.
+            /// Releases all resources used by the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>
+            /// object.
             /// </summary>
             public override void Dispose()
             {
                 foreach (GtkContextMenuItem item in Items)
                     item.Dispose();
+                base.Dispose();
             }
         }
         #endregion

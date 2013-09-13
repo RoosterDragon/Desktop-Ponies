@@ -5,14 +5,6 @@ Friend Class EffectEditor
     Private Shared directionValues As Object() =
         [Enum].GetValues(GetType(Direction)).Cast(Of Object)().ToArray()
 
-    Private Shadows Property Original As EffectBase
-        Get
-            Return DirectCast(MyBase.Original, EffectBase)
-        End Get
-        Set(value As EffectBase)
-            MyBase.Original = value
-        End Set
-    End Property
     Private Shadows Property Edited As EffectBase
         Get
             Return DirectCast(MyBase.Edited, EffectBase)

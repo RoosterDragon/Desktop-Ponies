@@ -1,7 +1,7 @@
 ﻿Imports System.Globalization
 
 Public Class GameSelectionForm
-    Private games As IList(Of Game)
+    Private games As List(Of Game)
     Private game As Game
     Private team1 As Game.Team
     Private team2 As Game.Team

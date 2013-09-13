@@ -6,7 +6,7 @@
     /// Represents an RGB (red, green, blue) color.
     /// </summary>
     [Serializable]
-    public struct RgbColor
+    public struct RgbColor : IEquatable<RgbColor>
     {
         /// <summary>
         /// Gets the red component value of this <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> structure.
@@ -73,6 +73,18 @@
         public static bool operator !=(RgbColor left, RgbColor right)
         {
             return !(left == right);
+        }
+
+        /// <summary>
+        /// Tests whether the specified <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> is equivalent to this
+        /// <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> structure.
+        /// </summary>
+        /// <param name="other">The color to test.</param>
+        /// <returns>Returns true if <paramref name="other"/> is equivalent to this
+        /// <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> structure; otherwise, false.</returns>
+        public bool Equals(RgbColor other)
+        {
+            return this == other;
         }
 
         /// <summary>

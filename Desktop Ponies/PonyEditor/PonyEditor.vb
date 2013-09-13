@@ -9,7 +9,6 @@ Public Class PonyEditor
     Friend Ponies As PonyCollection
     Private ponyImageList As ImageList
     Private infoGrids As ImmutableArray(Of PonyInfoGrid)
-    Private loaded As Boolean
 
     ''' <summary>
     ''' Keep track of when the grids are being updated when loading a pony, otherwise we incorrectly think the user is making changes.
@@ -87,8 +86,6 @@ Public Class PonyEditor
                 PonyList.Items.Add(New ListViewItem(Ponies.AllBases(i).Directory, i) With {.Tag = Ponies.AllBases(i)})
             Next
             PonyList.ResumeLayout()
-
-            loaded = True
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
             Me.Close()
@@ -103,6 +100,7 @@ Public Class PonyEditor
 
     Public Shared Function GenerateImageList(ponyBases As IEnumerable(Of PonyBase), size As Integer, backColor As Color,
                                              pathSelect As Func(Of Behavior, String)) As ImageList
+        Argument.EnsureNotNull(ponyBases, "ponyBases")
         Dim imageList = New ImageList() With {.ImageSize = New Size(size, size)}
         For Each ponyBase In ponyBases
             Dim image = GetListImage(ponyBase, size, backColor, pathSelect)
@@ -1585,7 +1583,7 @@ Public Class PonyEditor
         End Try
     End Sub
 
-    Friend Function GetFilename(path As String) As String
+    Friend Shared Function GetFilename(path As String) As String
         Return IO.Path.GetFileName(path)
     End Function
 
@@ -1647,7 +1645,7 @@ Public Class PonyEditor
             PausePonyButton.Enabled = True
         Catch ex As ArgumentException When ex.ParamName = "text"
             MessageBox.Show(Me, "Some invalid characters were detected. Please remove them." & Environment.NewLine &
-                            ex.Message.Remove(ex.Message.LastIndexOf(Environment.NewLine)),
+                            ex.Message.Remove(ex.Message.LastIndexOf(Environment.NewLine, StringComparison.CurrentCulture)),
                             "Invalid Characters", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return False
         Catch ex As Exception

@@ -153,4 +153,4 @@ End Class
 
 Public Delegate Function TryParse(Of T)(iniLine As String, directory As String, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
 
-Public Delegate Function TryParse(Of T, PonyBase)(iniLine As String, directory As String, pony As PonyBase, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
+Public Delegate Function TryParse(Of T, TPonyBase As PonyBase)(iniLine As String, directory As String, pony As TPonyBase, ByRef result As T, ByRef issues As ParseIssue()) As Boolean

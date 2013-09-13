@@ -163,7 +163,7 @@
 
                 // Calculate the frame hash to check if a duplicate frame exists.
                 // This will update our collection and given hash list appropriately.
-                AddOrReuseFrame(gifImage.Frames[sourceFrame], framesList, durationsList, frameIndexesList, frameHashesList);
+                AddOrReuseFrame(gifImage.Frames[sourceFrame], framesList, frameIndexesList, frameHashesList);
             }
 
             frames = framesList.ToImmutableArray();
@@ -177,11 +177,9 @@
         /// </summary>
         /// <param name="frame">The frame whose image is to be checked.</param>
         /// <param name="frames">The collection of unique frames to which new frames should be added.</param>
-        /// <param name="durations">The collection of durations for each frame.</param>
         /// <param name="frameIndexes">The collection of lookup indexes.</param>
         /// <param name="frameHashes">The collection of hashes for each frame.</param>
-        private void AddOrReuseFrame(GifFrame<T> frame,
-            List<T> frames, List<int> durations, List<int> frameIndexes, List<int> frameHashes)
+        private static void AddOrReuseFrame(GifFrame<T> frame, List<T> frames, List<int> frameIndexes, List<int> frameHashes)
         {
             int frameHash = frame.Image.GetFrameHashCode();
 
