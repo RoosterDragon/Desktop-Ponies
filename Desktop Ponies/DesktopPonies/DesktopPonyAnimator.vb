@@ -385,7 +385,7 @@ Public Class DesktopPonyAnimator
         For Each tag As String In Main.Instance.FilterOptionsBox.Items
             Dim ponyList = New List(Of ISimpleContextMenuItem)
             Dim bases As IEnumerable(Of PonyBase) = ponyBases
-            If randomPony IsNot Nothing Then bases = {randomPony}.Union(ponyBases)
+            If randomPony IsNot Nothing Then bases = {randomPony}.Concat(ponyBases)
             For Each loopPonyBase In bases
                 Dim ponyBase = loopPonyBase
                 For Each ponyTag In ponyBase.Tags

@@ -29,7 +29,7 @@ Public Class NewPonyDialog
         End If
 
         Dim badChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, "{"c, "}"c, ","c}.
-            Union(Path.GetInvalidPathChars()).Union(Path.GetInvalidFileNameChars()).Distinct().ToArray()
+            Concat(Path.GetInvalidPathChars()).Concat(Path.GetInvalidFileNameChars()).Distinct().ToArray()
 
         If newName.IndexOfAny(badChars) <> -1 Then
             MessageBox.Show(Me, "The pony's name cannot contain any of the following characters:" & Environment.NewLine &

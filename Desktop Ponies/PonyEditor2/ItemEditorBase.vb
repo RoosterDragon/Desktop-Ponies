@@ -66,7 +66,7 @@ Public Class ItemEditorBase
     Protected Property ReferentialIssues As ParseIssue()
     Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
-            Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Union(
+            Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
                 If(ReferentialIssues, Linq.Enumerable.Empty(Of ParseIssue)()))
         End Get
     End Property

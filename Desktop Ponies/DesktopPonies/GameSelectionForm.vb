@@ -39,7 +39,8 @@ Public Class GameSelectionForm
             MonitorComboBox.SelectedIndex = 0
         End If
 
-        Dim ponyImageList = PonyEditor.GenerateImageList(ponies.Bases, 75, PonyList.BackColor, Function(b) b.RightImage.Path)
+        Dim ponyImageList = PonyEditor.GenerateImageList(
+            {ponies.RandomBase}.Concat(ponies.Bases), 75, PonyList.BackColor, Function(b) b.RightImage.Path)
         PonyList.LargeImageList = ponyImageList
         PonyList.SmallImageList = ponyImageList
 
@@ -170,9 +171,11 @@ Public Class GameSelectionForm
         End If
 
         Dim selection As Integer = PonyList.SelectedIndices(0)
-        Do While ponies.Bases(selection).Directory = "Random Pony"
-            selection = Rng.Next(ponies.Bases.Count)
-        Loop
+        If selection = 0 Then
+            selection = Rng.Next(ponies.Bases.Count())
+        Else
+            selection -= 1
+        End If
         Dim pony = New Pony(ponies.Bases(selection))
 
         Dim empty_spot_found = False
