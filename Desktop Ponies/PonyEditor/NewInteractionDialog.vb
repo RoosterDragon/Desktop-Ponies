@@ -103,10 +103,12 @@ Public Class NewInteractionDialog
                         "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
                         "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
+        DialogResult = Windows.Forms.DialogResult.OK
         Me.Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
+        DialogResult = Windows.Forms.DialogResult.Cancel
         Me.Close()
     End Sub
 
@@ -155,6 +157,7 @@ Public Class NewInteractionDialog
         Chance_Box.Text = CStr(interaction.Chance * 100)
         Name_Textbox.Text = interaction.Name
         Proximity_Box.Text = CStr(interaction.Proximity)
+        Reactivation_Delay_Textbox.Text = CStr(interaction.ReactivationDelay.TotalSeconds)
         Me.Text = "Edit interaction..."
 
         Dim target_index_list As New List(Of Integer)

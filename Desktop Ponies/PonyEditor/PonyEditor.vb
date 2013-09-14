@@ -791,24 +791,35 @@ Public Class PonyEditor
             End If
 
             Dim changes_made_now = False
-
-
             Select Case e.ColumnIndex
                 Case colInteractionTargets.Index, colInteractionBehaviors.Index
                     HidePony()
                     Using form = New NewInteractionDialog(Me)
                         form.ChangeInteraction(changed_interaction)
                         form.ShowDialog(Me)
+                        changes_made_now = form.DialogResult = Windows.Forms.DialogResult.OK
                     End Using
-                    changes_made_now = True
                     ShowPony()
                 Case Else
                     Exit Sub
             End Select
 
             If changes_made_now Then
-                'Load_Parameters(Preview_Pony)
-                'RestoreSortOrder()
+                For Each interaction As InteractionBase In PreviewPony.InteractionBases
+                    If interaction.Name = changed_interaction_name Then
+                        changed_interaction = interaction
+                        Exit For
+                    End If
+                Next
+
+                InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionChance.Index).Value =
+                    changed_interaction.Chance.ToString("P", CultureInfo.CurrentCulture)
+                InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionProximity.Index).Value =
+                    changed_interaction.Proximity.ToString(CultureInfo.CurrentCulture)
+                InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionInteractWith.Index).Value =
+                    changed_interaction.Activation.ToString()
+                InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionReactivationDelay.Index).Value =
+                    changed_interaction.ReactivationDelay.TotalSeconds.ToString(CultureInfo.CurrentCulture)
                 hasSaved = False
             End If
 
