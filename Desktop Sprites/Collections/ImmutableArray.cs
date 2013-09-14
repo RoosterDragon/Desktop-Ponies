@@ -36,7 +36,8 @@
         private T[] array;
 
         /// <summary>
-        /// Creates an immutable array by making an copy of the specified sequence.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/> class by making an copy of the
+        /// specified sequence.
         /// </summary>
         /// <param name="source">The sequence to copy.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
@@ -100,7 +101,7 @@
             private int index;
 
             /// <summary>
-            /// Creates an enumerator for the specified immutable array.
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> structure.
             /// </summary>
             /// <param name="immutableArray">The immutable array to enumerate.</param>
             internal Enumerator(ImmutableArray<T> immutableArray)
@@ -130,10 +131,16 @@
             public void Dispose()
             {
             }
+            /// <summary>
+            /// Gets the current element in the collection.
+            /// </summary>
             object System.Collections.IEnumerator.Current
             {
                 get { return Current; }
             }
+            /// <summary>
+            /// Sets the enumerator to its initial position, which is before the first element in the collection.
+            /// </summary>
             void System.Collections.IEnumerator.Reset()
             {
                 index = -1;
@@ -175,6 +182,10 @@
         {
             this.array.CopyTo(array, arrayIndex);
         }
+        /// <summary>
+        /// Returns a new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.
+        /// </summary>
+        /// <returns>A new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.</returns>
         private static NotSupportedException ReadOnlyException()
         {
             return new NotSupportedException("Collection is read-only.");

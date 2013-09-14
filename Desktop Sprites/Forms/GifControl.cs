@@ -17,7 +17,7 @@
         private GifFrame<BitmapFrame> frame;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DesktopSprites.DesktopPonies.GifControl"/> class to display the given frame.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.GifControl"/> class to display the given frame.
         /// </summary>
         /// <param name="frame">The frame to be displayed.</param>
         /// <param name="info">The information string to be displayed.</param>

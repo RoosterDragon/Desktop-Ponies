@@ -1,7 +1,6 @@
 ﻿Imports System.Globalization
 Imports System.IO
 Imports System.Text
-Imports System.Collections.ObjectModel
 
 Public NotInheritable Class Options
     Public Const DefaultProfileName = "default"
@@ -88,7 +87,7 @@ Public NotInheritable Class Options
     End Function
 
     Public Shared Sub LoadProfile(profile As String, setAsCurrent As Boolean)
-        If String.IsNullOrEmpty(profile) Then Throw New ArgumentException("profile must not be null or empty.", "profile")
+        Argument.EnsureNotNullOrEmpty(profile, "profile")
 
         If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
             LoadDefaultProfile()

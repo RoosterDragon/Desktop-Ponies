@@ -61,7 +61,7 @@
         private Color currentColor;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DesktopSprites.DesktopPonies.GifAlphaForm"/> class.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.GifAlphaForm"/> class.
         /// </summary>
         /// <param name="path">The path to a directory from which GIF files should be loaded.</param>
         public GifAlphaForm(string path)

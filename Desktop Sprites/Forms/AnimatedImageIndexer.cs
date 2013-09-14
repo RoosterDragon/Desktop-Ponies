@@ -130,7 +130,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DesktopSprites.DesktopPonies.AnimatedImageIndexer"/> class.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.AnimatedImageIndexer"/> class.
         /// </summary>
         public AnimatedImageIndexer()
         {

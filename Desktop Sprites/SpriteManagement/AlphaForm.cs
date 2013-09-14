@@ -34,7 +34,7 @@
         /// </summary>
         private Graphics backgroundGraphics;
         /// <summary>
-        /// Graphics buffer which may be drawn upon. Once drawing is complete, calling
+        /// Gets a graphics buffer which may be drawn upon. Once drawing is complete, calling
         /// <see cref="M:DesktopSprites.SpriteManagement.AlphaForm.UpdateBackgroundGraphics"/> will update the form background with the
         /// graphics drawn onto this buffer. This buffer is recreated whenever the form is resized.
         /// </summary>

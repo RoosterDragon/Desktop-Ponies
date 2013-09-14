@@ -33,7 +33,8 @@
         /// </summary>
         private IList<T> list;
         /// <summary>
-        /// Creates a read-only wrapper around a collection.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/> structure around the specified
+        /// collection.
         /// </summary>
         /// <param name="list">The mutable collection to wrap.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="list"/> is null.</exception>
@@ -152,6 +153,10 @@
         {
             return unchecked(list.GetHashCode() * 7);
         }
+        /// <summary>
+        /// Returns a new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.
+        /// </summary>
+        /// <returns>A new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.</returns>
         private static NotSupportedException ReadOnlyException()
         {
             return new NotSupportedException("Collection is read-only.");
