@@ -2,6 +2,7 @@
 
 Public Class PonyEditorForm2
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
+    Private ponies As PonyCollection
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
@@ -71,7 +72,7 @@ Public Class PonyEditorForm2
                              poniesNode.Expand()
                          End Sub)
 
-        Dim ponies As New PonyCollection(
+        ponies = New PonyCollection(
             Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
             Sub(pony) worker.QueueTask(
                 Sub()
@@ -97,6 +98,11 @@ Public Class PonyEditorForm2
                                        {.Tag = speechesRef, .Name = speechesRef.ToString()}
                     ponyBaseNode.Nodes.Add(speechesNode)
                     nodeLookup(speechesNode.Name) = speechesNode
+                    Dim interactionsRef = New PageRef(pony, PageContent.Interactions, Nothing)
+                    Dim interactionsNode = New TreeNode("Interactions") With
+                                       {.Tag = interactionsRef, .Name = interactionsRef.ToString()}
+                    ponyBaseNode.Nodes.Add(interactionsNode)
+                    nodeLookup(interactionsNode.Name) = interactionsNode
 
                     For Each behavior In pony.Behaviors
                         Dim ref = New PageRef(pony, PageContent.Behavior, behavior)
@@ -116,6 +122,13 @@ Public Class PonyEditorForm2
                         Dim ref = New PageRef(pony, PageContent.Speech, speech)
                         Dim node = New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()}
                         speechesNode.Nodes.Add(node)
+                        nodeLookup(node.Name) = node
+                    Next
+
+                    For Each interaction In pony.Interactions
+                        Dim ref = New PageRef(pony, PageContent.Interaction, interaction)
+                        Dim node = New TreeNode(interaction.Name) With {.Tag = ref, .Name = ref.ToString()}
+                        interactionsNode.Nodes.Add(node)
                         nodeLookup(node.Name) = node
                     Next
 
@@ -141,76 +154,71 @@ Public Class PonyEditorForm2
 
     Private Sub ValidateBases()
         For Each base In bases.Values.OrderBy(Function(pb) pb.Directory)
-            Dim behaviorsError = False
-            For Each behavior In base.Behaviors
-                Dim ref = New PageRef(base, PageContent.Behavior, behavior)
-                Dim parseIssues As ParseIssue() = Nothing
-                Dim b As Behavior = Nothing
-                Dim behaviorError = Not behavior.TryLoad(
-                    behavior.SourceIni,
-                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
-                    ref.PonyBase, b, parseIssues) OrElse b.GetReferentialIssues().Length > 0
-                behaviorsError = behaviorsError OrElse behaviorError
-                worker.QueueTask(Sub()
-                                     Dim node = FindNode(ref.ToString())
-                                     node.ImageIndex = If(behaviorError, 2, 1)
-                                 End Sub)
-            Next
-            worker.QueueTask(Sub()
-                                 Dim ref = New PageRef(base, PageContent.Behaviors, Nothing)
-                                 Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(behaviorsError, 2, 1)
-                             End Sub)
-            Dim effectsError = False
-            For Each effect In base.Effects
-                Dim ref = New PageRef(base, PageContent.Effect, effect)
-                Dim parseIssues As ParseIssue() = Nothing
-                Dim e As EffectBase = Nothing
-                Dim effectError = Not EffectBase.TryLoad(
-                    effect.SourceIni,
-                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
-                    ref.PonyBase, e, parseIssues) OrElse e.GetReferentialIssues().Length > 0
-                effectsError = effectsError OrElse effectError
-                worker.QueueTask(Sub()
-                                     Dim node = FindNode(ref.ToString())
-                                     node.ImageIndex = If(effectError, 2, 1)
-                                 End Sub)
-            Next
-            worker.QueueTask(Sub()
-                                 Dim ref = New PageRef(base, PageContent.Effects, Nothing)
-                                 Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(effectsError, 2, 1)
-                             End Sub)
-
-            Dim speechesError = False
-            For Each speech In base.Speeches
-                Dim ref = New PageRef(base, PageContent.Speech, speech)
-                Dim parseIssues As ParseIssue() = Nothing
-                Dim s As Speech = Nothing
-                Dim speechError = Not speech.TryLoad(
-                    speech.SourceIni,
-                    Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
-                    s, parseIssues)
-                speechesError = speechesError OrElse speechError
-                worker.QueueTask(Sub()
-                                     Dim node = FindNode(ref.ToString())
-                                     node.ImageIndex = If(speechError, 2, 1)
-                                 End Sub)
-            Next
-            worker.QueueTask(Sub()
-                                 Dim ref = New PageRef(base, PageContent.Speeches, Nothing)
-                                 Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(speechesError, 2, 1)
-                             End Sub)
+            Dim validateBehavior = Function(behavior As Behavior)
+                                       Dim b As Behavior = Nothing
+                                       Return behavior.TryLoad(
+                                           behavior.SourceIni,
+                                           Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                           base, b, Nothing) AndAlso b.GetReferentialIssues().Length = 0
+                                   End Function
+            Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
+            Dim validateEffect = Function(effect As EffectBase)
+                                     Dim e As EffectBase = Nothing
+                                     Return EffectBase.TryLoad(
+                                         effect.SourceIni,
+                                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                         base, e, Nothing) AndAlso e.GetReferentialIssues().Length = 0
+                                 End Function
+            Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
+            Dim validateSpeech = Function(speech As Speech)
+                                     Dim ref = New PageRef(base, PageContent.Speech, speech)
+                                     Return speech.TryLoad(
+                                         speech.SourceIni,
+                                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                                         Nothing, Nothing)
+                                 End Function
+            Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)
+            Dim validateInteraction = Function(interaction As InteractionBase)
+                                          Dim ref = New PageRef(base, PageContent.Interaction, interaction)
+                                          Dim i As InteractionBase = Nothing
+                                          Return InteractionBase.TryLoad(
+                                              interaction.SourceIni,
+                                              i, Nothing) AndAlso i.GetReferentialIssues(ponies).Length = 0
+                                      End Function
+            Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
+                                                  PageContent.Interactions, PageContent.Interaction)
 
             worker.QueueTask(Sub()
                                  Dim ref = New PageRef(base, PageContent.Pony, Nothing)
                                  Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(behaviorsError OrElse effectsError OrElse speechesError, 2, 1)
+                                 node.ImageIndex = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
+                                                      1, 2)
                              End Sub)
         Next
         worker.WaitOnAllTasks()
     End Sub
+
+    Private Function ValidateItems(Of T As IPonyIniSourceable)(base As PonyBase, items As IEnumerable(Of T),
+                                                               validateItem As Func(Of T, Boolean),
+                                                               content As PageContent, childContent As PageContent) As Boolean
+        Dim itemsValid = True
+        For Each item In items
+            Dim ref = New PageRef(base, childContent, item)
+            Dim parsedItem As T = Nothing
+            Dim itemValid = validateItem(item)
+            If Not itemValid Then itemsValid = False
+            worker.QueueTask(Sub()
+                                 Dim node = FindNode(ref.ToString())
+                                 node.ImageIndex = If(itemValid, 1, 2)
+                             End Sub)
+        Next
+        worker.QueueTask(Sub()
+                             Dim ref = New PageRef(base, content, Nothing)
+                             Dim node = FindNode(ref.ToString())
+                             node.ImageIndex = If(itemsValid, 1, 2)
+                         End Sub)
+        Return itemsValid
+    End Function
 
     Private Function FindNode(name As String) As TreeNode
         Dim node As TreeNode = Nothing
@@ -227,9 +235,9 @@ Public Class PonyEditorForm2
                 Return PageContent.Ponies.ToString()
             Case PageContent.Pony
                 Return pageRef.PonyBase.Directory
-            Case PageContent.Behaviors, PageContent.Effects, PageContent.Speeches
+            Case PageContent.Behaviors, PageContent.Effects, PageContent.Speeches, PageContent.Interactions
                 Return pageRef.PonyBase.Directory & " - " & pageRef.PageContent.ToString()
-            Case PageContent.Behavior, PageContent.Effect, PageContent.Speech
+            Case PageContent.Behavior, PageContent.Effect, PageContent.Speech, PageContent.Interaction
                 Return pageRef.PonyBase.Directory & ": " & pageRef.Item.Name
             Case Else
                 Throw New System.ComponentModel.InvalidEnumArgumentException("Unknown Content in pageRef")
@@ -267,6 +275,8 @@ Public Class PonyEditorForm2
                     editor = New EffectEditor()
                 Case PageContent.Speech
                     editor = New SpeechEditor()
+                Case PageContent.Interaction
+                    editor = New InteractionEditor()
             End Select
             If editor IsNot Nothing Then
                 QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
@@ -283,7 +293,7 @@ Public Class PonyEditorForm2
             Documents.SelectedTab = tab
             SwitchTab(tab)
             DocumentsView.Select()
-            DocumentsView.SelectedNode = DocumentsView.Nodes.Find(pageRefKey, True)(0)
+            DocumentsView.SelectedNode = FindNode(pageRefKey)
             Return True
         End If
 
@@ -338,7 +348,7 @@ Public Class PonyEditorForm2
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveItemButton.Click
         ActiveItemEditor.SaveItem()
         Dim ref = GetPageRef(Documents.SelectedTab)
-        Dim node = DocumentsView.Nodes.Find(ref.ToString(), True)(0)
+        Dim node = FindNode(ref.ToString())
 
         ref.Item = ActiveItemEditor.Item
         Documents.SelectedTab.Text = GetTabText(ref)

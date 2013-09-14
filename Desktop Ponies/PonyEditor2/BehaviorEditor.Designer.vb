@@ -338,6 +338,7 @@ Partial Class BehaviorEditor
         '
         Me.ChanceNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ChanceNumber.DecimalPlaces = 2
         Me.ChanceNumber.Location = New System.Drawing.Point(69, 55)
         Me.ChanceNumber.Name = "ChanceNumber"
         Me.ChanceNumber.Size = New System.Drawing.Size(259, 20)

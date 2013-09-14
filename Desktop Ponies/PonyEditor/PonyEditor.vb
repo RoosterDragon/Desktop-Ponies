@@ -349,7 +349,7 @@ Public Class PonyEditor
 
                 Dim chance = "N/A"
                 If Not behavior.Skip Then
-                    chance = behavior.ChanceOfOccurence.ToString("P", CultureInfo.CurrentCulture)
+                    chance = behavior.Chance.ToString("P", CultureInfo.CurrentCulture)
                 End If
 
                 BehaviorsGrid.Rows.Add(
@@ -879,7 +879,7 @@ Public Class PonyEditor
                         changed_behavior.Name = new_value
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = new_value
                     Case colBehaviorChance.Index
-                        changed_behavior.ChanceOfOccurence = Double.Parse(
+                        changed_behavior.Chance = Double.Parse(
                             Trim(Replace(new_value, CultureInfo.CurrentCulture.NumberFormat.PercentSymbol, "")),
                             CultureInfo.CurrentCulture) / 100
                     Case colBehaviorMaxDuration.Index

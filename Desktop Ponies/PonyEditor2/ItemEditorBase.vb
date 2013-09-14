@@ -62,8 +62,8 @@ Public Class ItemEditorBase
         End Set
     End Property
 
-    Protected Property ParseIssues As ParseIssue()
-    Protected Property ReferentialIssues As ParseIssue()
+    Protected Property ParseIssues As ImmutableArray(Of ParseIssue)
+    Protected Property ReferentialIssues As ImmutableArray(Of ParseIssue)
     Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
             Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
@@ -146,7 +146,7 @@ Public Class ItemEditorBase
         Loop While result = DialogResult.Retry
 
         Original = Edited
-        Edited = DirectCast(Original.MemberwiseClone(), Behavior)
+        Edited = DirectCast(Original.MemberwiseClone(), IPonyIniSourceable)
     End Sub
 
     Public Overridable Sub AnimateImages(animate As Boolean)

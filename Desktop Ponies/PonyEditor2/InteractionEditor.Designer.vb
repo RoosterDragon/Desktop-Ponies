@@ -20,18 +20,18 @@ Partial Class InteractionEditor
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.PropertiesTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.BehaviorsLabel = New System.Windows.Forms.Label()
+        Me.TargetsLabel = New System.Windows.Forms.Label()
+        Me.TypeComboBox = New System.Windows.Forms.ComboBox()
+        Me.TypeLabel = New System.Windows.Forms.Label()
+        Me.DelayNumber = New System.Windows.Forms.NumericUpDown()
+        Me.DelayLabel = New System.Windows.Forms.Label()
+        Me.ProximityNumber = New System.Windows.Forms.NumericUpDown()
+        Me.ProximityLabel = New System.Windows.Forms.Label()
         Me.NameLabel = New System.Windows.Forms.Label()
         Me.ChanceLabel = New System.Windows.Forms.Label()
         Me.NameTextBox = New System.Windows.Forms.TextBox()
         Me.ChanceNumber = New System.Windows.Forms.NumericUpDown()
-        Me.ProximityLabel = New System.Windows.Forms.Label()
-        Me.ProximityNumber = New System.Windows.Forms.NumericUpDown()
-        Me.DelayLabel = New System.Windows.Forms.Label()
-        Me.DelayNumber = New System.Windows.Forms.NumericUpDown()
-        Me.TypeLabel = New System.Windows.Forms.Label()
-        Me.TypeComboBox = New System.Windows.Forms.ComboBox()
-        Me.TargetsLabel = New System.Windows.Forms.Label()
-        Me.BehaviorsLabel = New System.Windows.Forms.Label()
         Me.TargetsList = New System.Windows.Forms.CheckedListBox()
         Me.BehaviorsList = New System.Windows.Forms.CheckedListBox()
         Me.PropertiesPanel.SuspendLayout()
@@ -79,6 +79,98 @@ Partial Class InteractionEditor
         Me.PropertiesTable.Size = New System.Drawing.Size(754, 224)
         Me.PropertiesTable.TabIndex = 1
         '
+        'BehaviorsLabel
+        '
+        Me.BehaviorsLabel.AutoSize = True
+        Me.BehaviorsLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.BehaviorsLabel.Location = New System.Drawing.Point(350, 85)
+        Me.BehaviorsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.BehaviorsLabel.Name = "BehaviorsLabel"
+        Me.BehaviorsLabel.Size = New System.Drawing.Size(136, 13)
+        Me.BehaviorsLabel.TabIndex = 35
+        Me.BehaviorsLabel.Text = "Behaviors:"
+        Me.BehaviorsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'TargetsLabel
+        '
+        Me.TargetsLabel.AutoSize = True
+        Me.TargetsLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.TargetsLabel.Location = New System.Drawing.Point(3, 85)
+        Me.TargetsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.TargetsLabel.Name = "TargetsLabel"
+        Me.TargetsLabel.Size = New System.Drawing.Size(76, 13)
+        Me.TargetsLabel.TabIndex = 34
+        Me.TargetsLabel.Text = "Targets:"
+        Me.TargetsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'TypeComboBox
+        '
+        Me.TypeComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.TypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.TypeComboBox.FormattingEnabled = True
+        Me.TypeComboBox.Location = New System.Drawing.Point(85, 55)
+        Me.TypeComboBox.Name = "TypeComboBox"
+        Me.TypeComboBox.Size = New System.Drawing.Size(259, 21)
+        Me.TypeComboBox.TabIndex = 33
+        '
+        'TypeLabel
+        '
+        Me.TypeLabel.AutoSize = True
+        Me.TypeLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.TypeLabel.Location = New System.Drawing.Point(3, 58)
+        Me.TypeLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.TypeLabel.Name = "TypeLabel"
+        Me.TypeLabel.Size = New System.Drawing.Size(76, 13)
+        Me.TypeLabel.TabIndex = 32
+        Me.TypeLabel.Text = "Interacts With:"
+        Me.TypeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'DelayNumber
+        '
+        Me.DelayNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.DelayNumber.DecimalPlaces = 2
+        Me.DelayNumber.Location = New System.Drawing.Point(492, 29)
+        Me.DelayNumber.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
+        Me.DelayNumber.Name = "DelayNumber"
+        Me.DelayNumber.Size = New System.Drawing.Size(259, 20)
+        Me.DelayNumber.TabIndex = 31
+        '
+        'DelayLabel
+        '
+        Me.DelayLabel.AutoSize = True
+        Me.DelayLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.DelayLabel.Location = New System.Drawing.Point(350, 32)
+        Me.DelayLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.DelayLabel.Name = "DelayLabel"
+        Me.DelayLabel.Size = New System.Drawing.Size(136, 13)
+        Me.DelayLabel.TabIndex = 30
+        Me.DelayLabel.Text = "Reactivation Delay (sec):"
+        Me.DelayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'ProximityNumber
+        '
+        Me.ProximityNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ProximityNumber.Location = New System.Drawing.Point(492, 3)
+        Me.ProximityNumber.Maximum = New Decimal(New Integer() {10000, 0, 0, 0})
+        Me.ProximityNumber.Name = "ProximityNumber"
+        Me.ProximityNumber.Size = New System.Drawing.Size(259, 20)
+        Me.ProximityNumber.TabIndex = 29
+        '
+        'ProximityLabel
+        '
+        Me.ProximityLabel.AutoSize = True
+        Me.ProximityLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.ProximityLabel.Location = New System.Drawing.Point(350, 6)
+        Me.ProximityLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.ProximityLabel.Name = "ProximityLabel"
+        Me.ProximityLabel.Size = New System.Drawing.Size(136, 13)
+        Me.ProximityLabel.TabIndex = 28
+        Me.ProximityLabel.Text = "Activation Proximity (pixels):"
+        Me.ProximityLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
         'NameLabel
         '
         Me.NameLabel.AutoSize = True
@@ -117,108 +209,17 @@ Partial Class InteractionEditor
         '
         Me.ChanceNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ChanceNumber.DecimalPlaces = 2
         Me.ChanceNumber.Location = New System.Drawing.Point(85, 29)
         Me.ChanceNumber.Name = "ChanceNumber"
         Me.ChanceNumber.Size = New System.Drawing.Size(259, 20)
         Me.ChanceNumber.TabIndex = 5
         '
-        'ProximityLabel
-        '
-        Me.ProximityLabel.AutoSize = True
-        Me.ProximityLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.ProximityLabel.Location = New System.Drawing.Point(350, 6)
-        Me.ProximityLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
-        Me.ProximityLabel.Name = "ProximityLabel"
-        Me.ProximityLabel.Size = New System.Drawing.Size(136, 13)
-        Me.ProximityLabel.TabIndex = 28
-        Me.ProximityLabel.Text = "Activation Proximity (pixels):"
-        Me.ProximityLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'ProximityNumber
-        '
-        Me.ProximityNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.ProximityNumber.DecimalPlaces = 2
-        Me.ProximityNumber.Location = New System.Drawing.Point(492, 3)
-        Me.ProximityNumber.Maximum = New Decimal(New Integer() {25, 0, 0, 0})
-        Me.ProximityNumber.Name = "ProximityNumber"
-        Me.ProximityNumber.Size = New System.Drawing.Size(259, 20)
-        Me.ProximityNumber.TabIndex = 29
-        '
-        'DelayLabel
-        '
-        Me.DelayLabel.AutoSize = True
-        Me.DelayLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.DelayLabel.Location = New System.Drawing.Point(350, 32)
-        Me.DelayLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
-        Me.DelayLabel.Name = "DelayLabel"
-        Me.DelayLabel.Size = New System.Drawing.Size(136, 13)
-        Me.DelayLabel.TabIndex = 30
-        Me.DelayLabel.Text = "Reactivation Delay (sec):"
-        Me.DelayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'DelayNumber
-        '
-        Me.DelayNumber.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.DelayNumber.DecimalPlaces = 2
-        Me.DelayNumber.Location = New System.Drawing.Point(492, 29)
-        Me.DelayNumber.Maximum = New Decimal(New Integer() {25, 0, 0, 0})
-        Me.DelayNumber.Name = "DelayNumber"
-        Me.DelayNumber.Size = New System.Drawing.Size(259, 20)
-        Me.DelayNumber.TabIndex = 31
-        '
-        'TypeLabel
-        '
-        Me.TypeLabel.AutoSize = True
-        Me.TypeLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.TypeLabel.Location = New System.Drawing.Point(3, 58)
-        Me.TypeLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
-        Me.TypeLabel.Name = "TypeLabel"
-        Me.TypeLabel.Size = New System.Drawing.Size(76, 13)
-        Me.TypeLabel.TabIndex = 32
-        Me.TypeLabel.Text = "Interacts With:"
-        Me.TypeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'TypeComboBox
-        '
-        Me.TypeComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.TypeComboBox.FormattingEnabled = True
-        Me.TypeComboBox.Location = New System.Drawing.Point(85, 55)
-        Me.TypeComboBox.Name = "TypeComboBox"
-        Me.TypeComboBox.Size = New System.Drawing.Size(259, 21)
-        Me.TypeComboBox.TabIndex = 33
-        '
-        'TargetsLabel
-        '
-        Me.TargetsLabel.AutoSize = True
-        Me.TargetsLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.TargetsLabel.Location = New System.Drawing.Point(3, 85)
-        Me.TargetsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
-        Me.TargetsLabel.Name = "TargetsLabel"
-        Me.TargetsLabel.Size = New System.Drawing.Size(76, 13)
-        Me.TargetsLabel.TabIndex = 34
-        Me.TargetsLabel.Text = "Targets:"
-        Me.TargetsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'BehaviorsLabel
-        '
-        Me.BehaviorsLabel.AutoSize = True
-        Me.BehaviorsLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.BehaviorsLabel.Location = New System.Drawing.Point(350, 85)
-        Me.BehaviorsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
-        Me.BehaviorsLabel.Name = "BehaviorsLabel"
-        Me.BehaviorsLabel.Size = New System.Drawing.Size(136, 13)
-        Me.BehaviorsLabel.TabIndex = 35
-        Me.BehaviorsLabel.Text = "Behaviors:"
-        Me.BehaviorsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
         'TargetsList
         '
         Me.TargetsList.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.TargetsList.CheckOnClick = True
         Me.TargetsList.FormattingEnabled = True
         Me.TargetsList.Location = New System.Drawing.Point(85, 82)
         Me.TargetsList.Name = "TargetsList"
@@ -229,6 +230,7 @@ Partial Class InteractionEditor
         '
         Me.BehaviorsList.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.BehaviorsList.CheckOnClick = True
         Me.BehaviorsList.FormattingEnabled = True
         Me.BehaviorsList.Location = New System.Drawing.Point(492, 82)
         Me.BehaviorsList.Name = "BehaviorsList"

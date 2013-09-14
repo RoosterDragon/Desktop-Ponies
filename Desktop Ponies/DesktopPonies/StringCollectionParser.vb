@@ -3,11 +3,12 @@ Imports System.IO
 
 Public Class StringCollectionParser
     Private Const NotParsed = "This value was not parsed due to an earlier parsing failure."
-    Private Const NullFailure = "This value has not been specified."
+    Private Const NullFailure = "This value is missing."
     Private Const BooleanFailureFormat = "Could not interpret '{0}' as a Boolean value. Valid values are '{1}' or '{2}'."
     Private Const IntegerFailureFormat = "Could not interpret '{0}' as a integer value."
     Private Const FloatFailureFormat = "Could not interpret '{0}' as a decimal value."
-    Private Const MapFailureFormat = "'{0}' is not a valid value. Valid values are: {1}."
+    Private Const MapFailureFormat = "'{0}' is not valid. Valid values are: {1}."
+    Private Const ProjectFailureFormat = "'{0}' is not valid. Error: {1}"
     Private Const Vector2FailureFormat =
         "Could not interpret '{0}' as a point. Points consist of two integers separated by a comma, e.g. '0,0'."
     Private Const PathNullFailureFormat = "The specified path was null."
@@ -172,13 +173,14 @@ Public Class StringCollectionParser
         End If
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T)) As T
-        Return Map(Of T)(mapping, Nothing)
+        Return Map(mapping, Nothing)
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T), fallback As T?) As T
         If lastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedMap(GetNextItem(), mapping, fallback))
     End Function
     Private Shared Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
+        Argument.EnsureNotNull(mapping, "mapping")
         Dim result As T
         If s IsNot Nothing AndAlso mapping.TryGetValue(s, result) Then
             Return Parsed.Success(result)
@@ -188,6 +190,34 @@ Public Class StringCollectionParser
         Else
             Return Parsed.Failed(Of T)(s,
                                        String.Format(CultureInfo.CurrentCulture, MapFailureFormat, s, String.Join(", ", mapping.Keys)))
+        End If
+    End Function
+    Public Function Project(Of T As Structure)(projection As Func(Of String, T)) As T
+        Return Project(projection, Nothing)
+    End Function
+    Public Function Project(Of T As Structure)(projection As Func(Of String, T), fallback As T?) As T
+        If lastParseFailed Then Return SkipParse(Of T)(fallback)
+        Return HandleParsed(ParsedProject(GetNextItem(), projection, fallback))
+    End Function
+    Private Shared Function ParsedProject(Of T As Structure)(s As String, projection As Func(Of String, T), fallback As T?) As Parsed(Of T)
+        Argument.EnsureNotNull(projection, "projection")
+        Dim result As T?
+        Dim message As String = Nothing
+        Try
+            result = projection(s)
+        Catch ex As Exception
+            message = ex.Message
+            Dim index = message.IndexOf(Environment.NewLine)
+            If index <> -1 Then
+                message = message.Substring(0, index)
+            End If
+        End Try
+        If result IsNot Nothing Then
+            Return Parsed.Success(result.Value)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, ProjectFailureFormat, s, message))
+        Else
+            Return Parsed.Failed(Of T)(s, String.Format(CultureInfo.CurrentCulture, ProjectFailureFormat, s, message))
         End If
     End Function
     Public Function ParseVector2() As Vector2

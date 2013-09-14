@@ -14,7 +14,7 @@ Public Interface IPonyIniSerializable
 End Interface
 
 Public Interface IReferential
-    Function GetReferentialIssues() As ParseIssue()
+    Function GetReferentialIssues() As ImmutableArray(Of ParseIssue)
 End Interface
 
 Public NotInheritable Class Referential
@@ -209,16 +209,14 @@ Public Class PonyBase
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
         Dim result As T
-        Dim issues As ParseIssue() = Nothing
-        If parseFunc(line, directory, result, issues) Then
+        If parseFunc(line, directory, result, Nothing) Then
             onSuccess(result)
         End If
     End Sub
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
         Dim result As T
-        Dim issues As ParseIssue() = Nothing
-        If parseFunc(line, directory, pony, result, issues) Then
+        If parseFunc(line, directory, pony, result, Nothing) Then
             onSuccess(result)
         End If
     End Sub
@@ -247,7 +245,7 @@ Public Class PonyBase
         End If
 
         new_behavior.Name = Trim(name)
-        new_behavior.ChanceOfOccurence = chance
+        new_behavior.Chance = chance
         new_behavior.MaxDuration = max_duration
         new_behavior.MinDuration = min_duration
         new_behavior.Speed = speed
@@ -402,30 +400,26 @@ Public Class InteractionBase
     End Property
     Public Property ReactivationDelay As TimeSpan
 
-    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         result = Nothing
         issues = Nothing
 
         Dim i = New InteractionBase()
         i.SourceIni = iniLine
         Dim p As New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine),
-                                            {"Name", "Initiator Name", "Chance",
+                                            {"Name", "Initiator", "Chance",
                                              "Proximity", "Targets", "Target Activation",
                                              "Behaviors", "Reactivation Delay"})
         i.Name = p.NotNull()
         i.InitiatorName = p.NotNull()
         i.Chance = p.ParseDouble(0, 0, 1)
         i.Proximity = p.ParseDouble(125, 0, 10000)
-        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")))
-        Try
-            i.Activation = TargetActivationFromString(p.NotNull(TargetActivation.One.ToString()))
-        Catch ex As Exception
-            i.Activation = TargetActivation.One
-        End Try
-        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")))
+        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0))
+        i.Activation = p.Project(AddressOf TargetActivationFromString, TargetActivation.One)
+        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0))
         i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
 
-        issues = p.Issues.ToArray()
+        issues = p.Issues.ToImmutableArray()
         result = i
         Return p.AllParsingSuccessful
     End Function
@@ -445,6 +439,33 @@ Public Class InteractionBase
             Braced(String.Join(",", BehaviorNames.Select(Function(n) Quoted(n)))),
             ReactivationDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture))
     End Function
+
+    Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue)
+        Dim issues As New List(Of ParseIssue)()
+        CheckInteractionReference(ponies, InitiatorName, "Initiator", issues)
+
+        For Each targetName In TargetNames
+            CheckInteractionReference(ponies, targetName, "Targets", issues)
+        Next
+        Return issues.ToImmutableArray()
+    End Function
+
+    Private Sub CheckInteractionReference(ponies As PonyCollection, directory As String,
+                                               propertyName As String, issues As List(Of ParseIssue))
+        Dim base = ponies.AllBases.FirstOrDefault(Function(pb) pb.Directory = directory)
+        If base Is Nothing Then
+            issues.Add(New ParseIssue(propertyName, directory, "", String.Format("No pony named '{0}' exists.", directory)))
+        Else
+            For Each behaviorName In BehaviorNames
+                Dim behavior = base.Behaviors.FirstOrDefault(
+                    Function(b) String.Equals(b.Name, behaviorName, StringComparison.OrdinalIgnoreCase))
+                If behavior Is Nothing Then
+                    issues.Add(New ParseIssue("Behaviors", behaviorName, "",
+                                              String.Format("'{0}' is missing behavior '{1}'.", directory, behaviorName)))
+                End If
+            Next
+        End If
+    End Sub
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
 
@@ -497,7 +518,7 @@ Public Class Behavior
     Public Shared ReadOnly AnyGroup As Integer = 0
 
     Public Property Name As String Implements IPonyIniSerializable.Name
-    Public Property ChanceOfOccurence As Double
+    Public Property Chance As Double
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
 
@@ -660,7 +681,7 @@ Public Class Behavior
         Me.pony = Argument.EnsureNotNull(pony, "pony")
     End Sub
 
-    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         result = Nothing
         issues = Nothing
 
@@ -677,7 +698,7 @@ Public Class Behavior
                                              "Prevent Animation Loop", "Group"})
         p.NoParse()
         b.Name = p.NotNull()
-        b.ChanceOfOccurence = p.ParseDouble(0, 0, 1)
+        b.Chance = p.ParseDouble(0, 0, 1)
         b.MaxDuration = p.ParseDouble(15, 0, 300)
         b.MinDuration = p.ParseDouble(5, 0, 300)
         b.Speed = p.ParseDouble(3, 0, 25)
@@ -709,7 +730,7 @@ Public Class Behavior
         b.DoNotRepeatImageAnimations = p.ParseBoolean(False)
         b.Group = p.ParseInt32(AnyGroup, 0, 100)
 
-        issues = p.Issues.ToArray()
+        issues = p.Issues.ToImmutableArray()
         result = b
         Return p.AllParsingSuccessful
     End Function
@@ -740,7 +761,7 @@ Public Class Behavior
         Return String.Join(
             ",", "Behavior",
             Quoted(Name),
-            ChanceOfOccurence.ToString(CultureInfo.InvariantCulture),
+            Chance.ToString(CultureInfo.InvariantCulture),
             MaxDuration.ToString(CultureInfo.InvariantCulture),
             MinDuration.ToString(CultureInfo.InvariantCulture),
             Speed.ToString(CultureInfo.InvariantCulture),
@@ -769,14 +790,13 @@ Public Class Behavior
         Return MyBase.MemberwiseClone()
     End Function
 
-    Public Function GetReferentialIssues() As ParseIssue() Implements IReferential.GetReferentialIssues
+    Public Function GetReferentialIssues() As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.GetIssue("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
                 Referential.GetIssue("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
                 Referential.GetIssue("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
                 Referential.GetIssue("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
                 Referential.GetIssue("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name))}.
-            Where(Function(pi) pi.PropertyName IsNot Nothing).
-            ToArray()
+            Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
@@ -819,7 +839,7 @@ Public Class Speech
     Public Property Skip As Boolean = False 'don't use randomly if true
     Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
 
-    Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As Speech, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As Speech, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         result = Nothing
         issues = Nothing
 
@@ -850,7 +870,7 @@ Public Class Speech
         s.Skip = p.ParseBoolean(False)
         s.Group = p.ParseInt32(Behavior.AnyGroup, 0, 100)
 
-        issues = p.Issues.ToArray()
+        issues = p.Issues.ToImmutableArray()
         result = s
         Return p.AllParsingSuccessful
     End Function
@@ -1379,7 +1399,7 @@ Public Class Pony
                 ' Then, do a random test against the chance the behavior can occur.
                 If Not potentialBehavior.Skip AndAlso
                     (potentialBehavior.Group = CurrentBehaviorGroup OrElse potentialBehavior.Group = Behavior.AnyGroup) AndAlso
-                    Rng.NextDouble() <= potentialBehavior.ChanceOfOccurence Then
+                    Rng.NextDouble() <= potentialBehavior.Chance Then
 
                     ' See if the behavior specifies that we follow another object.
                     followObjectName = potentialBehavior.OriginalFollowObjectName
@@ -2913,7 +2933,7 @@ Public Class EffectBase
     Public Property DoNotRepeatImageAnimations As Boolean
     Public Property AlreadyPlayedForCurrentBehavior As Boolean
 
-    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         result = Nothing
         issues = Nothing
 
@@ -2947,7 +2967,7 @@ Public Class EffectBase
         e.Follow = p.ParseBoolean(False)
         e.DoNotRepeatImageAnimations = p.ParseBoolean(False)
 
-        issues = p.Issues.ToArray()
+        issues = p.Issues.ToImmutableArray()
         result = e
         Return p.AllParsingSuccessful
     End Function
@@ -2986,10 +3006,9 @@ Public Class EffectBase
         Return MyBase.MemberwiseClone()
     End Function
 
-    Public Function GetReferentialIssues() As ParseIssue() Implements IReferential.GetReferentialIssues
+    Public Function GetReferentialIssues() As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.GetIssue("Behavior", BehaviorName, ParentPonyBase.Behaviors.Select(Function(b) b.Name))}.
-            Where(Function(pi) pi.PropertyName IsNot Nothing).
-            ToArray()
+            Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
@@ -3709,7 +3728,8 @@ Public Module EnumConversions
                 String.Equals(activation, "all", StringComparison.OrdinalIgnoreCase) Then
                 targetsOut = TargetActivation.Any
             Else
-                Throw New ArgumentException("Invalid activation value: " & activation, "activation")
+                Throw New ArgumentException("Invalid value. Valid values are: " &
+                                            String.Join(", ", [Enum].GetNames(GetType(TargetActivation))), "activation")
             End If
         End If
         Return targetsOut

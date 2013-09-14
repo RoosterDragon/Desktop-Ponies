@@ -67,8 +67,7 @@ Public Class PonyCollection
                 If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
 
                 Dim i As InteractionBase = Nothing
-                Dim issues As ParseIssue() = Nothing
-                If InteractionBase.TryLoad(line, i, issues) Then
+                If InteractionBase.TryLoad(line, i, Nothing) Then
                     _interactions.GetOrAdd(i.InitiatorName, newListFactory).Add(i)
                 End If
             Loop
@@ -112,15 +111,15 @@ Public NotInheritable Class PonyIniParser
     Private Sub New()
     End Sub
 
-    Private Shared Function TryParse(Of T)(ByRef result As T, ByRef issues As ParseIssue(),
+    Private Shared Function TryParse(Of T)(ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue),
                                                   parser As StringCollectionParser,
                                                   parse As Func(Of StringCollectionParser, T)) As Boolean
         result = parse(parser)
-        issues = parser.Issues.ToArray()
+        issues = parser.Issues.ToImmutableArray()
         Return parser.AllParsingSuccessful
     End Function
 
-    Public Shared Function TryParseName(iniLine As String, directory As String, ByRef result As String, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseName(iniLine As String, directory As String, ByRef result As String, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         Return TryParse(result, issues,
                                 New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Name"}),
                                 Function(p)
@@ -129,7 +128,7 @@ Public NotInheritable Class PonyIniParser
                                 End Function)
     End Function
 
-    Public Shared Function TryParseScale(iniLine As String, directory As String, ByRef result As Double, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseScale(iniLine As String, directory As String, ByRef result As Double, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         Return TryParse(result, issues,
                                    New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Scale"}),
                                    Function(p)
@@ -138,7 +137,7 @@ Public NotInheritable Class PonyIniParser
                                    End Function)
     End Function
 
-    Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String, ByRef result As BehaviorGroup, ByRef issues As ParseIssue()) As Boolean
+    Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String, ByRef result As BehaviorGroup, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         Return TryParse(result, issues,
                                    New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
                                    Function(p)
@@ -151,6 +150,8 @@ Public NotInheritable Class PonyIniParser
     End Function
 End Class
 
-Public Delegate Function TryParse(Of T)(iniLine As String, directory As String, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
+Public Delegate Function TryParse(Of T)(iniLine As String, directory As String,
+                                        ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
 
-Public Delegate Function TryParse(Of T, TPonyBase As PonyBase)(iniLine As String, directory As String, pony As TPonyBase, ByRef result As T, ByRef issues As ParseIssue()) As Boolean
+Public Delegate Function TryParse(Of T, TPonyBase As PonyBase)(iniLine As String, directory As String, pony As TPonyBase,
+                                                               ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean

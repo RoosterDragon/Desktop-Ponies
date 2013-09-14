@@ -7,4 +7,6 @@
     Effect
     Speeches
     Speech
+    Interactions
+    Interaction
 End Enum

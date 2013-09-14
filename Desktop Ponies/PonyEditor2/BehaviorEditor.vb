@@ -31,7 +31,7 @@ Friend Class BehaviorEditor
         MovementComboBox.Items.AddRange(allowedMovesValues)
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
         AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Group = CInt(GroupNumber.Value))
-        AddHandler ChanceNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.ChanceOfOccurence = ChanceNumber.Value / 100)
+        AddHandler ChanceNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.Chance = ChanceNumber.Value / 100)
         AddHandler SpeedNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.Speed = SpeedNumber.Value)
         AddHandler MovementComboBox.SelectedIndexChanged,
             Sub() UpdateProperty(Sub() Edited.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves))
@@ -111,7 +111,7 @@ Friend Class BehaviorEditor
 
         NameTextBox.Text = Edited.Name
         GroupNumber.Value = Edited.Group
-        ChanceNumber.Value = CDec(Edited.ChanceOfOccurence) * 100
+        ChanceNumber.Value = CDec(Edited.Chance) * 100
         SpeedNumber.Value = CDec(Edited.Speed)
         MovementComboBox.SelectedItem = Edited.AllowedMovement
         MinDurationNumber.Value = CDec(Edited.MinDuration)
