@@ -19,7 +19,6 @@ Public Class Main
     Private animator As DesktopPonyAnimator
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)()
-    Private randomPony As PonyBase
     Private ponies As PonyCollection
     Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
@@ -347,7 +346,6 @@ Public Class Main
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
-            randomPony = ponyBase
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
@@ -479,7 +477,11 @@ Public Class Main
         Dim profiles = Options.GetKnownProfiles()
         If profiles IsNot Nothing Then ProfileComboBox.Items.AddRange(profiles)
         Dim profileIndex = ProfileComboBox.Items.IndexOf(profileToAttemptToLoad)
-        If profileIndex <> -1 Then ProfileComboBox.SelectedIndex = profileIndex
+        If profileIndex <> -1 Then
+            ProfileComboBox.SelectedIndex = profileIndex
+        Else
+            ProfileComboBox.SelectedIndex = 0 ' Default profile.
+        End If
     End Sub
 
     Private Sub CopyProfileButton_Click(sender As Object, e As EventArgs) Handles CopyProfileButton.Click
@@ -915,7 +917,7 @@ Public Class Main
             ponyViewer.LoadImages(images, loaded)
         End If
 
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies.Bases, randomPony, OperatingSystemInfo.IsMacOSX)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies.Bases, ponies.RandomBase, OperatingSystemInfo.IsMacOSX)
         Pony.CurrentViewer = ponyViewer
         Pony.CurrentAnimator = animator
     End Sub

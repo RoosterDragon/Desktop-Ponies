@@ -47,7 +47,7 @@ Public Class PonySelectionControl
         End Try
 
         If Disposing OrElse IsDisposed Then
-            PonyImage.Dispose()
+            If PonyImage IsNot Nothing Then PonyImage.Dispose()
         Else
             imageLoaded.Set()
             If Not IsHandleCreated Then Return
