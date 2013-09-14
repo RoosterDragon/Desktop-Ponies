@@ -110,7 +110,7 @@ Public Class Main
             ShowInTaskbar = False
             WindowState = FormWindowState.Minimized
             Try
-                Options.LoadProfile("screensaver")
+                Options.LoadProfile("screensaver", False)
             Catch
                 Options.LoadDefaultProfile()
             End Try
@@ -145,7 +145,7 @@ Public Class Main
                         ShowInTaskbar = False
 
                         Try
-                            Options.LoadProfile("autostart")
+                            Options.LoadProfile("autostart", False)
                         Catch
                             Options.LoadDefaultProfile()
                         End Try
@@ -168,7 +168,7 @@ Public Class Main
                         WindowState = FormWindowState.Minimized
 
                         Try
-                            Options.LoadProfile("screensaver")
+                            Options.LoadProfile("screensaver", False)
                         Catch
                             Options.LoadDefaultProfile()
                         End Try
@@ -406,7 +406,7 @@ Public Class Main
     End Sub
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
-        Options.LoadProfile(ProfileComboBox.Text)
+        Options.LoadProfile(ProfileComboBox.Text, True)
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
@@ -527,7 +527,7 @@ Public Class Main
 
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not preventLoadProfile Then
-            Options.LoadProfile(ProfileComboBox.Text)
+            Options.LoadProfile(ProfileComboBox.Text, True)
         End If
     End Sub
 

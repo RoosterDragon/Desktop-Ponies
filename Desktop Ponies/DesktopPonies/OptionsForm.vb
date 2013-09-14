@@ -147,7 +147,7 @@
                 profile = Main.Instance.ProfileComboBox.Text.Trim()
             End If
 
-            Options.LoadProfile(profile)
+            Options.LoadProfile(profile, True)
 
             RefreshOptions()
             If Main.Instance.FilterOptionsBox.Items.Count = 0 Then
@@ -157,12 +157,6 @@
             SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
             My.Application.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
-        End Try
-        Try
-            IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"), profile, System.Text.Encoding.UTF8)
-        Catch ex As IO.IOException
-            ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
-            Console.WriteLine("Warning: Failed to save current.txt file.")
         End Try
     End Sub
 
@@ -187,7 +181,12 @@
             Exit Sub
         End If
 
-        Options.SaveProfile(profile)
+        Try
+            Options.SaveProfile(profile)
+            MessageBox.Show(Me, "Profile '" & profile & "' saved.", "Profile Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to save this profile.")
+        End Try
     End Sub
 
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click

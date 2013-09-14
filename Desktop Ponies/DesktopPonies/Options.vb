@@ -87,7 +87,7 @@ Public NotInheritable Class Options
         End Try
     End Function
 
-    Public Shared Sub LoadProfile(profile As String)
+    Public Shared Sub LoadProfile(profile As String, setAsCurrent As Boolean)
         If String.IsNullOrEmpty(profile) Then Throw New ArgumentException("profile must not be null or empty.", "profile")
 
         If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
@@ -154,6 +154,15 @@ Public NotInheritable Class Options
 
         LoadPonyCounts()
         LoadCustomTags()
+
+        If setAsCurrent Then
+            Try
+                IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"), profile, System.Text.Encoding.UTF8)
+            Catch ex As IO.IOException
+                ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
+                Console.WriteLine("Warning: Failed to save current.txt file.")
+            End Try
+        End If
     End Sub
 
     Public Shared Sub LoadDefaultProfile()
