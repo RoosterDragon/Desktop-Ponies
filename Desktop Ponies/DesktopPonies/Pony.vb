@@ -2684,6 +2684,8 @@ Public Class Pony
     Public Sub InitializeInteractions(otherPonies As IEnumerable(Of Pony))
         Argument.EnsureNotNull(otherPonies, "otherPonies")
 
+        If Directory Is Nothing Then Return
+
         interactions.Clear()
         For Each interactionBase In InteractionBases
             Dim interaction = New Interaction(interactionBase)

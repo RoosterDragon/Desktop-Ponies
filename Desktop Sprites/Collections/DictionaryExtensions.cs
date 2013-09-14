@@ -19,7 +19,8 @@
         /// <param name="value">The value to be added, if the key does not already exist.</param>
         /// <returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or
         /// the new value if the key was not in the dictionary.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="dictionary"/> is null.-or-<paramref name="key"/> is null.
+        /// </exception>
         /// <exception cref="T:System.NotSupportedException">An attempt at adding was made, but the
         /// <see cref="T:System.Collections.Generic.IDictionary`2"/> is read-only.</exception>
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
@@ -48,8 +49,8 @@
         /// <param name="valueFactory">The function used to generate a value for the key.</param>
         /// <returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or
         /// the new value for the key as returned by <paramref name="valueFactory"/> if the key was not in the dictionary.</returns>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.-or-<paramref name="valueFactory"/> is null.
-        /// </exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="dictionary"/> is null.-or-<paramref name="key"/> is null.-or-
+        /// <paramref name="valueFactory"/> is null.</exception>
         /// <exception cref="T:System.NotSupportedException">An attempt at adding was made, but the
         /// <see cref="T:System.Collections.Generic.IDictionary`2"/> is read-only.</exception>
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueFactory)
