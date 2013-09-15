@@ -812,7 +812,6 @@
             while (!Disposed && running.WaitOne() && !Stopped)
             {
                 // Run an update and draw cycle for one frame.
-                
                 Tick();
 
 #if DEBUG

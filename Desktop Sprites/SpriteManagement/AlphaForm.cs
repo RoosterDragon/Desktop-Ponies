@@ -11,6 +11,9 @@
     /// <summary>
     /// Extends a <see cref="T:System.Windows.Forms.Form"/> to provide the ability to use alpha blending.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+        Justification = "Following Windows API conventions, which use Hungarian notation.")]
     internal class AlphaForm : Form
     {
         /// <summary>
