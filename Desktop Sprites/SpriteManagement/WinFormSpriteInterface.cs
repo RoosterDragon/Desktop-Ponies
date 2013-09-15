@@ -642,7 +642,7 @@
             set { ApplicationInvoke(() => form.ShowInTaskbar = value); }
         }
         /// <summary>
-        /// Gets or sets the display boundary of the form.
+        /// Gets or sets the display boundary of the form. When setting, the form will be cleared of any drawn sprites.
         /// </summary>
         public Rectangle DisplayBounds
         {
@@ -657,7 +657,6 @@
                     {
                         form.DesktopBounds = value;
                         AllocateBuffers();
-                        Render();
                     });
             }
         }
@@ -1165,9 +1164,9 @@
             if (paused)
                 return;
 
-            this.sprites = sprites;
+            Interlocked.Exchange(ref this.sprites, sprites);
             ApplicationInvoke(render);
-            this.sprites = null;
+            Interlocked.Exchange(ref this.sprites, null);
         }
 
         /// <summary>

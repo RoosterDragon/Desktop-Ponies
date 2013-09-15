@@ -859,7 +859,7 @@
         /// <summary>
         /// Draws the sprites.
         /// </summary>
-        protected virtual void Draw()
+        private void Draw()
         {
             Viewer.Draw(Sprites);
         }
