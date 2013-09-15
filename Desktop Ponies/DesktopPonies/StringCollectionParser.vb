@@ -5,7 +5,7 @@ Public Class StringCollectionParser
     Private Const NotParsed = "This value was not parsed due to an earlier parsing failure."
     Private Const NullFailure = "This value is missing."
     Private Const BooleanFailureFormat = "Could not interpret '{0}' as a Boolean value. Valid values are '{1}' or '{2}'."
-    Private Const IntegerFailureFormat = "Could not interpret '{0}' as a integer value."
+    Private Const IntegerFailureFormat = "Could not interpret '{0}' as an integer value."
     Private Const FloatFailureFormat = "Could not interpret '{0}' as a decimal value."
     Private Const MapFailureFormat = "'{0}' is not valid. Valid values are: {1}."
     Private Const ProjectFailureFormat = "'{0}' is not valid. Error: {1}"
@@ -26,10 +26,15 @@ Public Class StringCollectionParser
     Private items As String()
     Private itemNames As String()
     Private index As Integer
-    Private lastParseFailed As Boolean
+    Private _lastParseFailed As Boolean
+    Protected ReadOnly Property LastParseFailed As Boolean
+        Get
+            Return _lastParseFailed
+        End Get
+    End Property
     Public ReadOnly Property AllParsingSuccessful As Boolean
         Get
-            Return Not lastParseFailed
+            Return Not LastParseFailed
         End Get
     End Property
     Public Sub New(itemsToParse As String(), itemNames As String())
@@ -38,31 +43,31 @@ Public Class StringCollectionParser
         items = itemsToParse
         Me.itemNames = itemNames
     End Sub
-    Private Function GetNextItem() As String
+    Protected Function GetNextItem() As String
         Dim item As String = Nothing
         If index < items.Length Then item = items(index)
         index += 1
         Return item
     End Function
-    Private Function HandleParsed(Of T)(parsed As Parsed(Of T)) As T
+    Protected Function HandleParsed(Of T)(parsed As Parsed(Of T)) As T
         If parsed.Result <> ParseResult.Success Then
-            lastParseFailed = parsed.Result = ParseResult.Failed
+            _lastParseFailed = parsed.Result = ParseResult.Failed
             If Not (parsed.Source Is Nothing AndAlso parsed.Result = ParseResult.Fallback) Then
                 Dim i = index - 1
                 _issues.Add(New ParseIssue(i,
                                            If(i < itemNames.Length, itemNames(i), Nothing),
                                            parsed.Source,
-                                           If(lastParseFailed, Nothing, parsed.Value.ToString()),
+                                           If(LastParseFailed, Nothing, parsed.Value.ToString()),
                                            parsed.Reason))
             End If
         End If
         Return parsed.Value
     End Function
-    Private Shared Function SkipParse(Of T As Structure)(fallback As T?) As T
+    Protected Shared Function SkipParse(Of T As Structure)(fallback As T?) As T
         Return If(fallback.HasValue, fallback.Value, Nothing)
         'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, If(fallback.HasValue, fallback.Value, Nothing)))
     End Function
-    Private Shared Function SkipParse(Of T)(fallback As T) As T
+    Protected Shared Function SkipParse(Of T)(fallback As T) As T
         Return fallback
         'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, fallback))
     End Function
@@ -73,7 +78,7 @@ Public Class StringCollectionParser
         Return NotNull(Nothing)
     End Function
     Public Function NotNull(fallback As String) As String
-        If lastParseFailed Then Return SkipParse(Of String)(fallback)
+        If LastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedNotNull(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedNotNull(s As String, fallback As String) As Parsed(Of String)
@@ -89,7 +94,7 @@ Public Class StringCollectionParser
         Return ParseBoolean(Nothing)
     End Function
     Public Function ParseBoolean(fallback As Boolean?) As Boolean
-        If lastParseFailed Then Return SkipParse(Of Boolean)(fallback)
+        If LastParseFailed Then Return SkipParse(Of Boolean)(fallback)
         Return HandleParsed(ParsedBoolean(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedBoolean(s As String, fallback As Boolean?) As Parsed(Of Boolean)
@@ -117,7 +122,7 @@ Public Class StringCollectionParser
         Return ParseInt32Internal(fallback, min, max)
     End Function
     Private Function ParseInt32Internal(fallback As Integer?, min As Integer, max As Integer) As Integer
-        If lastParseFailed Then Return SkipParse(Of Integer)(fallback)
+        If LastParseFailed Then Return SkipParse(Of Integer)(fallback)
         Return HandleParsed(ParsedInt32(GetNextItem(), fallback, min, max))
     End Function
     Private Shared Function ParsedInt32(s As String, fallback As Integer?, Optional min As Integer = Integer.MinValue, Optional max As Integer = Integer.MaxValue) As Parsed(Of Integer)
@@ -151,7 +156,7 @@ Public Class StringCollectionParser
         Return ParseDoubleInternal(fallback, min, max)
     End Function
     Private Function ParseDoubleInternal(fallback As Double?, min As Double, max As Double) As Double
-        If lastParseFailed Then Return SkipParse(Of Double)(fallback)
+        If LastParseFailed Then Return SkipParse(Of Double)(fallback)
         Return HandleParsed(ParsedDouble(GetNextItem(), fallback, min, max))
     End Function
     Private Shared Function ParsedDouble(s As String, fallback As Double?, min As Double, max As Double) As Parsed(Of Double)
@@ -176,7 +181,7 @@ Public Class StringCollectionParser
         Return Map(mapping, Nothing)
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T), fallback As T?) As T
-        If lastParseFailed Then Return SkipParse(Of T)(fallback)
+        If LastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedMap(GetNextItem(), mapping, fallback))
     End Function
     Private Shared Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
@@ -196,7 +201,7 @@ Public Class StringCollectionParser
         Return Project(projection, Nothing)
     End Function
     Public Function Project(Of T As Structure)(projection As Func(Of String, T), fallback As T?) As T
-        If lastParseFailed Then Return SkipParse(Of T)(fallback)
+        If LastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedProject(GetNextItem(), projection, fallback))
     End Function
     Private Shared Function ParsedProject(Of T As Structure)(s As String, projection As Func(Of String, T), fallback As T?) As Parsed(Of T)
@@ -224,7 +229,7 @@ Public Class StringCollectionParser
         Return ParseVector2(Nothing)
     End Function
     Public Function ParseVector2(fallback As Vector2?) As Vector2
-        If lastParseFailed Then Return SkipParse(Of Vector2)(fallback)
+        If LastParseFailed Then Return SkipParse(Of Vector2)(fallback)
         Return HandleParsed(ParsedVector2(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedVector2(s As String, fallback As Vector2?) As Parsed(Of Vector2)
@@ -246,7 +251,7 @@ Public Class StringCollectionParser
         Return SpecifiedCombinePath(pathPrefix, source, Nothing)
     End Function
     Public Function SpecifiedCombinePath(pathPrefix As String, source As String, fallback As String) As String
-        If lastParseFailed Then Return SkipParse(Of String)(fallback)
+        If LastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedCombinePath(pathPrefix, source, fallback))
     End Function
     Private Shared Function ParsedCombinePath(pathPrefix As String, s As String, fallback As String) As Parsed(Of String)
@@ -270,7 +275,7 @@ Public Class StringCollectionParser
         SpecifiedFileExists(filePath, Nothing)
     End Sub
     Public Sub SpecifiedFileExists(filePath As String, fallback As String)
-        If lastParseFailed Then Return
+        If LastParseFailed Then Return
         If File.Exists(filePath) Then
             HandleParsed(Parsed.Success(filePath))
         ElseIf fallback IsNot Nothing Then
@@ -283,7 +288,7 @@ Public Class StringCollectionParser
     End Sub
     Public Function Assert(source As String, condition As Func(Of String, Boolean), reason As String, fallback As String) As Boolean
         Argument.EnsureNotNull(condition, "condition")
-        If lastParseFailed Then Return False
+        If LastParseFailed Then Return False
         Dim result = condition(source)
         If result Then
             HandleParsed(Parsed.Success(source))
@@ -295,12 +300,12 @@ Public Class StringCollectionParser
         Return result
     End Function
 
-    Private Enum ParseResult
+    Protected Enum ParseResult
         Success
         Fallback
         Failed
     End Enum
-    Private Class Parsed
+    Protected NotInheritable Class Parsed
         Private Sub New()
         End Sub
         Public Shared Function Success(Of T)(value As T) As Parsed(Of T)
@@ -313,7 +318,7 @@ Public Class StringCollectionParser
             Return New Parsed(Of T)(source, reason, fallback)
         End Function
     End Class
-    Private Structure Parsed(Of T)
+    Protected Structure Parsed(Of T)
         Private _source As String
         Private _value As T
         Private _reason As String

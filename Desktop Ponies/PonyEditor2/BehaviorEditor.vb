@@ -77,8 +77,6 @@ Friend Class BehaviorEditor
         RightImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
         AddHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
         AddHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
-        'SelectItemElseAddItem(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.LeftImagePath))
-        'SelectItemElseAddItem(RightImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.RightImagePath))
 
         Dim speeches = Base.Speeches.Select(Function(s) s.Name).ToArray()
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
