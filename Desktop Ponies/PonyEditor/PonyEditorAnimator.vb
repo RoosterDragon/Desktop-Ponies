@@ -14,6 +14,11 @@ Public Class PonyEditorAnimator
         AddHandler Viewer.InterfaceClosed, Sub(sender As Object, e As EventArgs) Finish()
     End Sub
 
+    Public Overrides Sub Pause(hide As Boolean)
+        If hide Then Draw()
+        MyBase.Pause(hide)
+    End Sub
+
     Protected Overrides Sub Update()
         MyBase.Update()
         If Not m_editor.IsClosing Then

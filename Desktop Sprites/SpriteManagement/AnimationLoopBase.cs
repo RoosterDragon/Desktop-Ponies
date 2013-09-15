@@ -598,9 +598,24 @@
         /// </summary>
         private readonly ManualResetEvent running = new ManualResetEvent(true);
         /// <summary>
+        /// The total elapsed time that animation has been running.
+        /// </summary>
+        private TimeSpan elapsedTime;
+        /// <summary>
         /// Gets the total elapsed time that animation has been running.
         /// </summary>
-        public TimeSpan ElapsedTime { get; private set; }
+        public TimeSpan ElapsedTime
+        {
+            get 
+            {
+                lock (tickSync)
+                    return elapsedTime;
+            }
+        }
+        /// <summary>
+        /// Synchronization object for locking methods which may be accessed on this class from its owner, but also the animation thread.
+        /// </summary>
+        private readonly object tickSync = new object();
 
         /// <summary>
         /// Gets the collection of sprites.
@@ -797,7 +812,7 @@
             while (!Disposed && running.WaitOne() && !Stopped)
             {
                 // Run an update and draw cycle for one frame.
-                ElapsedTime = elapsedWatch.Elapsed;
+                
                 Tick();
 
 #if DEBUG
@@ -852,16 +867,21 @@
         /// </summary>
         protected virtual void Update()
         {
-            foreach (ISprite sprite in Sprites)
-                sprite.Update(ElapsedTime);
+            lock (tickSync)
+            {
+                elapsedTime = elapsedWatch.Elapsed;
+                foreach (ISprite sprite in Sprites)
+                    sprite.Update(ElapsedTime);
+            }
         }
 
         /// <summary>
         /// Draws the sprites.
         /// </summary>
-        private void Draw()
+        protected virtual void Draw()
         {
-            Viewer.Draw(Sprites);
+            lock (tickSync)
+                Viewer.Draw(Sprites);
         }
 
         /// <summary>
