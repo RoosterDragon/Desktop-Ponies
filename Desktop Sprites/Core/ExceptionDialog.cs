@@ -58,7 +58,7 @@
             var screen = owner != null ? Screen.FromHandle(owner.Handle) : Screen.FromControl(this);
             MaximumSize = Rectangle.Intersect(screen.WorkingArea, screen.Bounds).Size;
             ExceptionText.Text = ex.ToString();
-            if (OperatingSystemInfo.IsWindows)
+            if (!Runtime.IsMono)
             {
                 Size oldSize = Size.Empty;
                 Size preferredSize = ExceptionText.GetPreferredSize(Size.Empty);

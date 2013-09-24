@@ -326,13 +326,21 @@ Public NotInheritable Class Options
         If Screens.Count = 0 Then Screens.AddRange(Screen.AllScreens)
 
         Dim viewer As DesktopSprites.SpriteManagement.ISpriteCollectionView
-        If OperatingSystemInfo.IsWindows Then
+        If GetInterfaceType() = GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface) Then
             viewer = New DesktopSprites.SpriteManagement.WinFormSpriteInterface(GetCombinedScreenArea(), AlphaBlendingEnabled)
         Else
             viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface(AlphaBlendingEnabled)
         End If
         viewer.ShowInTaskbar = ShowInTaskbar
         Return viewer
+    End Function
+
+    Public Shared Function GetInterfaceType() As Type
+        If OperatingSystemInfo.IsWindows AndAlso Not Runtime.IsMono Then
+            Return GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface)
+        Else
+            Return GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface)
+        End If
     End Function
 
 End Class

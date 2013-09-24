@@ -16,7 +16,6 @@ Public Class PonySelectionControl
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
-    Private imageLoaded As New Threading.ManualResetEvent(False)
 
     Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         Argument.EnsureNotNull(ponyTemplate, "ponyTemplate")
@@ -42,6 +41,7 @@ Public Class PonySelectionControl
             PonyImage = New AnimatedImage(Of BitmapFrame)(
                                                        imagePath.ToString(), Function(file As String) New BitmapFrame(file),
                                                        BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+            Threading.Thread.MemoryBarrier()
         Catch ex As Exception
             ' Do without an image if it failed to load.
         End Try
@@ -49,7 +49,6 @@ Public Class PonySelectionControl
         If Disposing OrElse IsDisposed Then
             If PonyImage IsNot Nothing Then PonyImage.Dispose()
         Else
-            imageLoaded.Set()
             If Not IsHandleCreated Then Return
             BeginInvoke(New MethodInvoker(Sub()
                                               ResizeToFit()
@@ -57,12 +56,6 @@ Public Class PonySelectionControl
                                           End Sub))
         End If
     End Sub
-
-    Public Function GetPonyImage() As AnimatedImage(Of BitmapFrame)
-        If Disposing OrElse IsDisposed Then Throw New ObjectDisposedException(Me.GetType().FullName)
-        imageLoaded.WaitOne()
-        Return PonyImage
-    End Function
 
     Public Sub AdvanceTimeIndex(amount As TimeSpan)
         If PonyImage Is Nothing Then
@@ -107,11 +100,11 @@ Public Class PonySelectionControl
 
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
         If ShowPonyImage Then
-            Dim ponyImage = GetPonyImage()
-            If ponyImage Is Nothing Then Return
+            Dim image = PonyImage
+            If image Is Nothing Then Return
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
-            ponyImage(timeIndex).Flip(flip)
-            Dim bitmap = ponyImage(timeIndex).Image
+            image(timeIndex).Flip(flip)
+            Dim bitmap = image(timeIndex).Image
             e.Graphics.DrawImage(bitmap, 0, 0, bitmap.Width * Options.ScaleFactor, bitmap.Height * Options.ScaleFactor)
         End If
     End Sub
@@ -161,7 +154,6 @@ Public Class PonySelectionControl
             If disposing Then
                 If components IsNot Nothing Then components.Dispose()
                 If PonyImage IsNot Nothing Then PonyImage.Dispose()
-                imageLoaded.Dispose()
             End If
         Finally
             MyBase.Dispose(disposing)

@@ -30,7 +30,7 @@ Public Class IdleWorker
     ''' <summary>
     ''' Indicates if work should be done when idle, otherwise work will be asynchronously invoked.
     ''' </summary>
-    Private Shared ReadOnly UseIdlePooling As Boolean = OperatingSystemInfo.IsWindows
+    Private Shared ReadOnly UseIdlePooling As Boolean = Not Runtime.IsMono
 
     ''' <summary>
     ''' Maintains a collection of tasks to perform when the application is idle.
@@ -66,7 +66,7 @@ Public Class IdleWorker
     ''' Initializes a new instance of the <see cref="IdleWorker"/> class on the current thread.
     ''' </summary>
     Private Sub New()
-        If Not Application.MessageLoop Then Throw New InvalidOperationException(
+        If Not Runtime.IsMono AndAlso Not Application.MessageLoop Then Throw New InvalidOperationException(
             String.Format(Globalization.CultureInfo.CurrentCulture,
                 "A message loop must be running on this thread before the {0} can be accessed.", GetType(IdleWorker).Name))
         owningThread = Threading.Thread.CurrentThread
@@ -87,7 +87,9 @@ Public Class IdleWorker
         SyncLock tasks
             ' If the control is disposed or the handle has been lost, then the message pump on this thread has been shut down. We will drop
             ' all new tasks since they can't be processed anyway.
-            If control.IsDisposed OrElse Not control.IsHandleCreated Then Return
+            If control.Disposing OrElse control.IsDisposed OrElse Not control.IsHandleCreated Then
+                Return
+            End If
 
             Try
                 If UseIdlePooling Then

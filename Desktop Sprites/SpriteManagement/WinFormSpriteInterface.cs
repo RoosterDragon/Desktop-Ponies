@@ -1164,9 +1164,9 @@
             if (paused)
                 return;
 
-            this.sprites = sprites;
+            Interlocked.Exchange(ref this.sprites, sprites);
             ApplicationInvoke(render);
-            this.sprites = null;
+            Interlocked.Exchange(ref this.sprites, null);
         }
 
         /// <summary>

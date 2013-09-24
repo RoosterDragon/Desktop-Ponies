@@ -11,11 +11,11 @@
         /// <summary>
         /// Contains information about the current operating system.
         /// </summary>
-        private static OperatingSystem osInfo = Environment.OSVersion;
+        private static readonly OperatingSystem osInfo = Environment.OSVersion;
         /// <summary>
         /// Indicates whether the current operating system is Macintosh.
         /// </summary>
-        private static bool isMacOSX;
+        private static readonly bool isMacOSX;
 
         /// <summary>
         /// Initializes static members of the <see cref="T:DesktopSprites.Core.OperatingSystemInfo"/> class.

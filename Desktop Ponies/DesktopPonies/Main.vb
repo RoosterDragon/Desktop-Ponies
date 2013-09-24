@@ -226,11 +226,17 @@ Public Class Main
 
         ' Load ponies.
         ponies = New PonyCollection(
-            Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length),
-            Sub(pony) worker.QueueTask(Sub()
-                                           AddToMenu(pony)
-                                           LoadingProgressBar.Value += 1
-                                       End Sub))
+            Sub(count)
+                worker.QueueTask(Sub()
+                                     LoadingProgressBar.Maximum = count + houseDirectories.Length
+                                 End Sub)
+            End Sub,
+            Sub(pony)
+                worker.QueueTask(Sub()
+                                     AddToMenu(pony)
+                                     LoadingProgressBar.Value += 1
+                                 End Sub)
+            End Sub)
 
         ' Load houses.
         Dim skipLoadingErrors = False
@@ -280,7 +286,7 @@ Public Class Main
                              PonyPaginationLabel.Text = String.Format(
                                      CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
 
-                             If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+                             If Not Runtime.IsMono Then LoadingProgressBar.Visible = False
                              LoadingProgressBar.Value = 0
                              LoadingProgressBar.Maximum = 1
 
@@ -947,7 +953,7 @@ Public Class Main
         LoadingProgressBar.Value = 0
         LoadingProgressBar.Maximum = 1
         SelectionControlsPanel.Enabled = True
-        If OperatingSystemInfo.IsWindows Then LoadingProgressBar.Visible = False
+        If Not Runtime.IsMono Then LoadingProgressBar.Visible = False
 
         Dim oldLoader = PonyLoader
         PonyLoader = New System.ComponentModel.BackgroundWorker() With {

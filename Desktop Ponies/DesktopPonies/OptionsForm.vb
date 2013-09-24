@@ -46,7 +46,7 @@
         SuspendForFullscreenApp.Enabled = False
         Options.SuspendForFullscreenApplication = False
 
-        If Not OperatingSystemInfo.IsWindows Then
+        If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
             ShowViewerInTaskbar.Checked = False
             ShowViewerInTaskbar.Enabled = False
             ShowPerformanceGraph.Checked = False
