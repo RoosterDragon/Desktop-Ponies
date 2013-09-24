@@ -352,9 +352,12 @@ Public Class PonyBase
     End Sub
 
     Private Shared Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
-        If Path.GetPathRoot(Path.GetFullPath(tempFileName)) <> Path.GetPathRoot(Path.GetFullPath(destinationFileName)) Then
-            ' We will need to copy the temporary file to the same drive as the destination before we can call File.Replace
-            ' This is less safe, but there's not much choice.
+        ' File.Replace cannot be used across different partitions - we must move the temporary file to the same partition first.
+        ' We can skip this step on Windows if the root drive is the same, but on Mac/Unix it's easiest to just blindly do the move.
+        ' The disadvantage of making the move is that the temporary file might get left behind in our destination directory if something
+        ' goes wrong, rather than the OS temporary directory which wouldn't really matter.
+        If Not OperatingSystemInfo.IsWindows OrElse
+            Path.GetPathRoot(Path.GetFullPath(tempFileName)) <> Path.GetPathRoot(Path.GetFullPath(destinationFileName)) Then
             Dim tempFileNameInSameDirectory As String
             Dim destinationDirectory = Path.GetDirectoryName(destinationFileName)
             Do
