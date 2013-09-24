@@ -18,9 +18,12 @@ Public Class GameSelectionForm
     End Sub
 
     Private Sub LoadInternal()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+        UseWaitCursor = True
         Enabled = False
         Update()
         Application.DoEvents()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
 
         Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(Options.InstallLocation, game.RootDirectory))
         games = New List(Of Game)(gameDirectories.Length)
@@ -76,6 +79,7 @@ Public Class GameSelectionForm
         SetStage(1)
 
         Enabled = True
+        UseWaitCursor = False
     End Sub
 
     Private Sub GameList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles GameList.SelectedIndexChanged

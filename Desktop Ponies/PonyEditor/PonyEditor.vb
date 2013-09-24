@@ -66,8 +66,13 @@ Public Class PonyEditor
     End Sub
 
     Private Sub LoadInternal()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+        UseWaitCursor = True
         Enabled = False
         Update()
+        Application.DoEvents()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+
         Try
             For Each value In DirectCast([Enum].GetValues(GetType(TargetActivation)), TargetActivation())
                 colInteractionInteractWith.Items.Add(value.ToString())
@@ -96,6 +101,7 @@ Public Class PonyEditor
         pe_animator = New PonyEditorAnimator(Me, pe_interface, Nothing, Ponies.AllBases)
         AddHandler pe_animator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
+        UseWaitCursor = False
     End Sub
 
     Public Shared Function GenerateImageList(ponyBases As IEnumerable(Of PonyBase), size As Integer, backColor As Color,

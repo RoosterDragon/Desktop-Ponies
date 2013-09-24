@@ -10,7 +10,7 @@ Public Class Main
 
 #Region "Fields and Properties"
     Private initialized As Boolean
-    Private loading As Boolean = True
+    Private loading As Boolean
     Private loadWatch As New Diagnostics.Stopwatch()
 
     Private oldWindowState As FormWindowState
@@ -54,6 +54,8 @@ Public Class Main
     ''' Read all configuration files and pony folders.
     ''' </summary>
     Private Sub LoadInternal()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+        UseWaitCursor = True
         loading = True
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
@@ -85,7 +87,6 @@ Public Class Main
         End Try
         GetProfiles(profile)
 
-        Dim loadTemplates = True
         Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
         If startedAsScr Then
             Dim screensaverPath = Reference.TryGetScreensaverPath()
@@ -101,9 +102,8 @@ Public Class Main
                     MessageBox.Show(Me, "Restart Desktop Ponies for the new settings to take effect.",
                                     "Configuration Successful", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 End If
-                loadTemplates = False
-                loading = False
                 Close()
+                Return
             End If
             ' Start in a minimized state to load, and attempt to open the screensaver profile.
             ShowInTaskbar = False
@@ -120,9 +120,7 @@ Public Class Main
         Application.DoEvents()
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-        If loadTemplates Then
-            Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates, IdleWorker.CurrentThreadWorker)
-        End If
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates, IdleWorker.CurrentThreadWorker)
     End Sub
 
     Private Function ProcessCommandLine() As Boolean
@@ -272,7 +270,7 @@ Public Class Main
         ' Load pony counts.
         worker.QueueTask(AddressOf Options.LoadPonyCounts)
 
-        ' Wait for all images to load.
+        ' Show images in unison (although images still loading will appear as they become available).
         worker.QueueTask(Sub()
                              For Each control As PonySelectionControl In PonySelectionPanel.Controls
                                  control.ShowPonyImage = True
@@ -306,6 +304,7 @@ Public Class Main
 
                              General.FullCollect()
                              loading = False
+                             UseWaitCursor = False
 
                              loadWatch.Stop()
                              Console.WriteLine("Loaded in {0:0.00s} ({1} templates)",
@@ -1106,10 +1105,6 @@ Public Class Main
     <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
     Private Shared Sub RemoveHandlerDisplaySettingsChanged(handler As EventHandler)
         RemoveHandler Microsoft.Win32.SystemEvents.DisplaySettingsChanged, handler
-    End Sub
-
-    Private Sub Main_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        e.Cancel = loading
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)

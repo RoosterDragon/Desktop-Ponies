@@ -13,8 +13,12 @@
     End Sub
 
     Private Sub LoadInternal()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+        UseWaitCursor = True
         Enabled = False
         Update()
+        Application.DoEvents()
+        Windows.Forms.Cursor.Current = Cursors.WaitCursor
 
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
@@ -66,6 +70,7 @@
         RefreshOptions()
 
         Enabled = True
+        UseWaitCursor = False
     End Sub
 
     Private Sub RefreshOptions()

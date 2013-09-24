@@ -9,8 +9,10 @@ Public Class PonySelectionControl
             Return _showPonyImage
         End Get
         Set(value As Boolean)
-            _showPonyImage = value
-            InvalidatePonyImageArea()
+            If _showPonyImage <> value Then
+                _showPonyImage = value
+                InvalidatePonyImageArea()
+            End If
         End Set
     End Property
     Private imageSize As Size
