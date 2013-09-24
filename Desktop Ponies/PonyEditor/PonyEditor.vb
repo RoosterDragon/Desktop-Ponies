@@ -905,7 +905,11 @@ Public Class PonyEditor
                     Case colBehaviorSpeed.Index
                         changed_behavior.Speed = Double.Parse(new_value, CultureInfo.CurrentCulture)
                     Case colBehaviorMovement.Index
-                        changed_behavior.AllowedMovement = AllowedMovesFromString(new_value)
+                        If new_value = "" Then
+                            changed_behavior.AllowedMovement = AllowedMoves.None
+                        Else
+                            changed_behavior.AllowedMovement = AllowedMovesFromString(new_value)
+                        End If
                     Case colBehaviorStartSpeech.Index
                         If new_value = "None" Then
                             changed_behavior.StartLineName = ""
@@ -1292,7 +1296,8 @@ Public Class PonyEditor
         Try
 
             If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
+                MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
 
@@ -1323,7 +1328,8 @@ Public Class PonyEditor
     Private Sub NewSpeechButton_Click(sender As Object, e As EventArgs) Handles NewSpeechButton.Click
         Try
             If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
+                MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
 
@@ -1347,7 +1353,8 @@ Public Class PonyEditor
         Try
 
             If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
+                MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
 
@@ -1371,7 +1378,8 @@ Public Class PonyEditor
         Try
 
             If IsNothing(PreviewPony) Then
-                MsgBox("Select a pony or create a new one first,")
+                MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
             End If
 
@@ -1708,7 +1716,8 @@ Public Class PonyEditor
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
 
         If IsNothing(PreviewPony) Then
-            MessageBox.Show(Me, "You need to select a pony first.", "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
@@ -1724,7 +1733,8 @@ Public Class PonyEditor
     Private Sub SetImageCentersButton_Click(sender As Object, e As EventArgs) Handles SetImageCentersButton.Click
 
         If IsNothing(PreviewPony) Then
-            MessageBox.Show(Me, "You need to select a pony first.", "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
         HidePony()
