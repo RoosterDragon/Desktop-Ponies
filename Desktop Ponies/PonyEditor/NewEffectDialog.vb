@@ -146,7 +146,7 @@ Public Class NewEffectDialog
             Left_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.Add_Picture()
+        Dim path = m_editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Left_ImageBox.Image = Image.FromFile(path)
 
@@ -171,7 +171,7 @@ Public Class NewEffectDialog
             Right_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.Add_Picture()
+        Dim path = m_editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Right_ImageBox.Image = Image.FromFile(path)
 
