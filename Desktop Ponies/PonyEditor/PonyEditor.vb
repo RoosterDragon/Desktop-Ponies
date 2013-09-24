@@ -902,13 +902,13 @@ Public Class PonyEditor
                         changed_behavior.AllowedMovement = AllowedMovesFromString(new_value)
                     Case colBehaviorStartSpeech.Index
                         If new_value = "None" Then
-                            changed_behavior.StartLineName = Nothing
+                            changed_behavior.StartLineName = ""
                         Else
                             changed_behavior.StartLineName = new_value
                         End If
                     Case colBehaviorEndSpeech.Index
                         If new_value = "None" Then
-                            changed_behavior.EndLineName = Nothing
+                            changed_behavior.EndLineName = ""
                         Else
                             changed_behavior.EndLineName = new_value
                         End If
