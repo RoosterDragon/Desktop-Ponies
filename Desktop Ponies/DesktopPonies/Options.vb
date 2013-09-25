@@ -3,7 +3,11 @@ Imports System.IO
 Imports System.Text
 
 Public NotInheritable Class Options
-    Public Const DefaultProfileName = "default"
+    Public Shared ReadOnly Property DefaultProfileName As CaseInsensitiveString
+        Get
+            Return "default"
+        End Get
+    End Property
 
     Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
 
@@ -68,7 +72,7 @@ Public NotInheritable Class Options
 
     Private Shared Sub ValidateProfileName(profile As String)
         If String.IsNullOrEmpty(profile) Then Throw New ArgumentException("profile must not be null or empty.", "profile")
-        If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If profile = DefaultProfileName Then
             Throw New ArgumentException("profile must not match the default profile name.", "profile")
         End If
     End Sub
@@ -89,7 +93,7 @@ Public NotInheritable Class Options
     Public Shared Sub LoadProfile(profile As String, setAsCurrent As Boolean)
         Argument.EnsureNotNullOrEmpty(profile, "profile")
 
-        If String.Equals(profile, DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If profile = DefaultProfileName Then
             LoadDefaultProfile()
         Else
             Using reader As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
@@ -214,9 +218,9 @@ Public NotInheritable Class Options
 
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
             If PonyCounts.ContainsKey(ponyPanel.PonyName.Text) Then
-                ponyPanel.PonyCount.Text = CStr(PonyCounts(ponyPanel.PonyBase.Directory))
+                ponyPanel.Count = PonyCounts(ponyPanel.PonyBase.Directory)
             Else
-                ponyPanel.PonyCount.Text = "0"
+                ponyPanel.Count = 0
             End If
         Next
     End Sub
@@ -268,16 +272,15 @@ Public NotInheritable Class Options
             GetPonyCounts()
 
             For Each screen In Screens
-                file.WriteLine(String.Join(",", "monitor", ControlChars.Quote & screen.DeviceName & ControlChars.Quote))
+                file.WriteLine(String.Join(",", "monitor", Quoted(screen.DeviceName)))
             Next
 
             For Each entry In PonyCounts
-                file.WriteLine(String.Join(",", "count", ControlChars.Quote & entry.Key & ControlChars.Quote,
-                                           entry.Value.ToString(CultureInfo.InvariantCulture)))
+                file.WriteLine(String.Join(",", "count", Quoted(entry.Key), entry.Value.ToString(CultureInfo.InvariantCulture)))
             Next
 
             For Each tag In CustomTags
-                file.WriteLine(String.Join(",", "tag", ControlChars.Quote & tag & ControlChars.Quote))
+                file.WriteLine(String.Join(",", "tag", Quoted(tag)))
             Next
         End Using
     End Sub
@@ -302,10 +305,7 @@ Public NotInheritable Class Options
     Private Shared Sub GetPonyCounts()
         PonyCounts.Clear()
         For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
-            Dim count As Integer
-            If Integer.TryParse(ponyPanel.PonyCount.Text, count) AndAlso count > 0 Then
-                PonyCounts.Add(ponyPanel.PonyBase.Directory, count)
-            End If
+            PonyCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
         Next
     End Sub
 

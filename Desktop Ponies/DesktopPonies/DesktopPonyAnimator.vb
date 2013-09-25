@@ -389,7 +389,7 @@ Public Class DesktopPonyAnimator
             For Each loopPonyBase In bases
                 Dim ponyBase = loopPonyBase
                 For Each ponyTag In ponyBase.Tags
-                    If String.Equals(tag, ponyTag, StringComparison.OrdinalIgnoreCase) OrElse
+                    If tag = ponyTag OrElse
                         (ponyBase.Tags.Count = 0 AndAlso tag = "Not Tagged") Then
                         ponyList.Add(New SimpleContextMenuItem(ponyBase.Directory, Sub() AddPonySelection(ponyBase.Directory)))
                     End If

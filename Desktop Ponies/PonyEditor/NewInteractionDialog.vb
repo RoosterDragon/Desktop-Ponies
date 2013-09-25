@@ -4,10 +4,10 @@ Public Class NewInteractionDialog
 
     Dim change_existing_interaction As Boolean = False
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -21,9 +21,8 @@ Public Class NewInteractionDialog
             Exit Sub
         End If
 
-        For Each Interaction In m_editor.PreviewPony.InteractionBases
-            If Not change_existing_interaction AndAlso
-                String.Equals(Interaction.Name, Trim(Name_Textbox.Text), StringComparison.OrdinalIgnoreCase) Then
+        For Each Interaction In _editor.PreviewPony.InteractionBases
+            If Not change_existing_interaction AndAlso Interaction.Name = Trim(Name_Textbox.Text) Then
                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
                 Exit Sub
             End If
@@ -76,10 +75,10 @@ Public Class NewInteractionDialog
         End If
 
         If change_existing_interaction Then
-            Dim toRemove = m_editor.PreviewPony.Base.Interactions.Where(
+            Dim toRemove = _editor.PreviewPony.Base.Interactions.Where(
                 Function(interaction) interaction.Name = Name_Textbox.Text).ToArray()
             For Each interaction In toRemove
-                m_editor.PreviewPony.Base.Interactions.Remove(interaction)
+                _editor.PreviewPony.Base.Interactions.Remove(interaction)
             Next
         End If
 
@@ -90,14 +89,14 @@ Public Class NewInteractionDialog
 
         Dim newInteraction = New InteractionBase() With
                              {.Name = Name_Textbox.Text,
-                              .InitiatorName = m_editor.PreviewPony.Directory,
+                              .InitiatorName = _editor.PreviewPony.Directory,
                               .Chance = chance / 100,
                               .Proximity = proximity,
                               .Activation = targetsActivated,
                               .ReactivationDelay = TimeSpan.FromSeconds(reactivationDelay)}
         newInteraction.TargetNames.UnionWith(Targets_Box.CheckedItems.Cast(Of String))
-        newInteraction.BehaviorNames.UnionWith(Behaviors_Box.CheckedItems.Cast(Of String))
-        m_editor.PreviewPony.Base.Interactions.Add(newInteraction)
+        newInteraction.BehaviorNames.UnionWith(Behaviors_Box.CheckedItems.Cast(Of String).Select(Function(s) New CaseInsensitiveString(s)))
+        _editor.PreviewPony.Base.Interactions.Add(newInteraction)
 
         MessageBox.Show(Me, "Important note:" & Environment.NewLine &
                         "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
@@ -116,14 +115,14 @@ Public Class NewInteractionDialog
         Targets_Box.Items.Clear()
         Behaviors_Box.Items.Clear()
 
-        With m_editor
+        With _editor
 
             Dim linked_behavior_list = .colBehaviorLinked
             For Each item In linked_behavior_list.Items
                 Behaviors_Box.Items.Add(item)
             Next
 
-            For Each Pony In m_editor.Ponies.AllBases
+            For Each Pony In _editor.Ponies.AllBases
                 Targets_Box.Items.Add(Pony.Directory)
             Next
 
@@ -154,17 +153,17 @@ Public Class NewInteractionDialog
                 AllRadioButton.Checked = True
         End Select
 
-        Chance_Box.Text = CStr(interaction.Chance * 100)
+        Chance_Box.Text = (interaction.Chance * 100).ToString(CultureInfo.CurrentCulture)
         Name_Textbox.Text = interaction.Name
-        Proximity_Box.Text = CStr(interaction.Proximity)
-        Reactivation_Delay_Textbox.Text = CStr(interaction.ReactivationDelay.TotalSeconds)
+        Proximity_Box.Text = interaction.Proximity.ToString(CultureInfo.CurrentCulture)
+        Reactivation_Delay_Textbox.Text = interaction.ReactivationDelay.TotalSeconds.ToString(CultureInfo.CurrentCulture)
         Me.Text = "Edit interaction..."
 
         Dim target_index_list As New List(Of Integer)
 
         For Each target In interaction.TargetNames
             For Each item As String In Targets_Box.Items
-                If String.Equals(Trim(target), Trim(item), StringComparison.Ordinal) Then
+                If Trim(target) = Trim(item) Then
                     target_index_list.Add(Targets_Box.Items.IndexOf(item))
                 End If
             Next
@@ -172,9 +171,9 @@ Public Class NewInteractionDialog
 
         Dim behaviors_index_list As New List(Of Integer)
 
-        For Each behavior In interaction.BehaviorNames
+        For Each behaviorName In interaction.BehaviorNames
             For Each item As String In Behaviors_Box.Items
-                If String.Equals(Trim(behavior), Trim(item), StringComparison.OrdinalIgnoreCase) Then
+                If behaviorName = item Then
                     behaviors_index_list.Add(Behaviors_Box.Items.IndexOf(item))
                 End If
             Next

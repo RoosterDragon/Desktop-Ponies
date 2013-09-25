@@ -2,6 +2,18 @@
 
 Public Class PonySelectionControl
     Friend PonyBase As PonyBase
+    Private _count As Integer
+    Friend Property Count As Integer
+        Get
+            Return _count
+        End Get
+        Set(value As Integer)
+            Argument.EnsureNonnegative(value, "value")
+            If value > 99999 Then Throw New ArgumentOutOfRangeException("value", "value must be no more than 99999.")
+            _count = value
+            PonyCount.Text = _count.ToString(Globalization.CultureInfo.CurrentCulture)
+        End Set
+    End Property
     Friend PonyImage As AnimatedImage(Of BitmapFrame)
     Private _showPonyImage As Boolean
     Public Property ShowPonyImage As Boolean
@@ -112,23 +124,17 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub MinusButton_Click(sender As Object, e As EventArgs) Handles MinusButton.Click
-        Dim count As Integer
-        If Integer.TryParse(PonyCount.Text, count) Then PonyCount.Text = CStr((count - 1))
+        Count -= 1
     End Sub
 
     Private Sub PlusButton_Click(sender As Object, e As EventArgs) Handles PlusButton.Click
-        Dim count As Integer
-        If Integer.TryParse(PonyCount.Text, count) Then PonyCount.Text = CStr((count + 1))
+        Count += 1
     End Sub
 
     Private Sub PonyCount_TextChanged(sender As Object, e As EventArgs) Handles PonyCount.TextChanged
-        Dim count As Integer
-        Dim parsed = Integer.TryParse(PonyCount.Text, count)
-        If parsed AndAlso count = 0 Then
-            MinusButton.Enabled = False
-        Else
-            MinusButton.Enabled = True
-        End If
+        _count = Integer.Parse(PonyCount.Text, Globalization.NumberStyles.None, Globalization.CultureInfo.CurrentCulture)
+        MinusButton.Enabled = _count > 0
+        PlusButton.Enabled = _count < 99999
     End Sub
 
     Private Sub PonyCount_KeyPress(sender As Object, e As KeyPressEventArgs) Handles PonyCount.KeyPress

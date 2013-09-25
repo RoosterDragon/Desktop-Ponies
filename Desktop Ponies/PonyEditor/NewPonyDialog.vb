@@ -2,10 +2,10 @@
 Imports System.IO
 
 Public Class NewPonyDialog
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -38,15 +38,15 @@ Public Class NewPonyDialog
             Return False
         End If
 
-        For Each ponyBase In m_editor.Ponies.AllBases
+        For Each ponyBase In _editor.Ponies.AllBases
             If String.Equals(ponyBase.Directory, newName, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("A pony with this name already exists!  Please select another name or rename the other pony.")
                 Return False
             End If
         Next
 
-        If m_editor.PreviewPony.Base.ChangeDirectory(newName) Then
-            m_editor.PreviewPony.Base.DisplayName = newName
+        If _editor.PreviewPony.Base.ChangeDirectory(newName) Then
+            _editor.PreviewPony.Base.DisplayName = newName
             Return True
         Else
             MessageBox.Show(Me, "Failed to create this pony. Try again, or perhaps try another name.",

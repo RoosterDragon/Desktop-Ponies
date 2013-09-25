@@ -30,28 +30,22 @@
             Sub() UpdateProperty(Sub() Edited.Activation = DirectCast(TypeComboBox.SelectedItem, TargetActivation))
         AddHandler ProximityNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Proximity = ProximityNumber.Value)
         AddHandler DelayNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.ReactivationDelay = TimeSpan.FromSeconds(DelayNumber.Value))
-        AddHandler TargetsList.ItemCheck,
-            Sub(sender, e) UpdateProperty(Sub()
-                                              Edited.TargetNames.Clear()
-                                              Edited.TargetNames.UnionWith(TargetsList.CheckedItems.Cast(Of String))
-                                              Dim item = DirectCast(TargetsList.Items(e.Index), String)
-                                              If e.NewValue <> CheckState.Unchecked Then
-                                                  Edited.TargetNames.Add(item)
-                                              Else
-                                                  Edited.TargetNames.Remove(item)
-                                              End If
-                                          End Sub)
-        AddHandler BehaviorsList.ItemCheck,
-            Sub(sender, e) UpdateProperty(Sub()
-                                              Edited.BehaviorNames.Clear()
-                                              Edited.BehaviorNames.UnionWith(BehaviorsList.CheckedItems.Cast(Of String))
-                                              Dim item = DirectCast(BehaviorsList.Items(e.Index), String)
-                                              If e.NewValue <> CheckState.Unchecked Then
-                                                  Edited.BehaviorNames.Add(item)
-                                              Else
-                                                  Edited.BehaviorNames.Remove(item)
-                                              End If
-                                          End Sub)
+        AddHandler TargetsList.ItemCheck, Sub(sender, e) UpdateCheckedListBox(sender, e, Edited.TargetNames)
+        AddHandler BehaviorsList.ItemCheck, Sub(sender, e) UpdateCheckedListBox(sender, e, Edited.BehaviorNames)
+    End Sub
+
+    Private Sub UpdateCheckedListBox(Of T)(sender As Object, e As ItemCheckEventArgs, names As HashSet(Of T))
+        UpdateProperty(Sub()
+                           Dim listBox = DirectCast(sender, CheckedListBox)
+                           names.Clear()
+                           names.UnionWith(listBox.CheckedItems.Cast(Of T))
+                           Dim item = DirectCast(listBox.Items(e.Index), T)
+                           If e.NewValue <> CheckState.Unchecked Then
+                               names.Add(item)
+                           Else
+                               names.Remove(item)
+                           End If
+                       End Sub)
     End Sub
 
     Public Overrides Sub NewItem(name As String)
@@ -62,7 +56,7 @@
         TargetsList.Items.Clear()
         TargetsList.Items.AddRange(Base.Collection.AllBases.Select(Function(pb) pb.Directory).ToArray())
         BehaviorsList.Items.Clear()
-        BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).ToArray())
+        BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).Cast(Of Object).ToArray())
     End Sub
 
     Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
@@ -86,10 +80,10 @@
         UpdateList(BehaviorsList, Edited.BehaviorNames)
     End Sub
 
-    Private Sub UpdateList(list As CheckedListBox, values As HashSet(Of String))
+    Private Sub UpdateList(Of T)(list As CheckedListBox, values As HashSet(Of T))
         list.SuspendLayout()
         For i = 0 To list.Items.Count - 1
-            list.SetItemChecked(i, values.Contains(DirectCast(list.Items(i), String)))
+            list.SetItemChecked(i, values.Contains(DirectCast(list.Items(i), T)))
         Next
         list.ResumeLayout()
     End Sub

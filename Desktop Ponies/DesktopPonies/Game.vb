@@ -435,15 +435,15 @@ Public Class Game
             handlerBase.AddBehavior("idle", 100, 99, 99, 0,
                                     files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
                                     files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.None, "", "", "")
+                                    AllowedMoves.None, "", "", "", "", "")
             handlerBase.AddBehavior("slow", 100, 99, 99, 3,
                                     files_path & Replace(slow_right_image_filename, ControlChars.Quote, ""),
                                     files_path & Replace(slow_left_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.All, "", "", "")
+                                    AllowedMoves.All, "", "", "", "", "")
             handlerBase.AddBehavior("fast", 100, 99, 99, 5,
                                     files_path & Replace(fast_right_image_filename, ControlChars.Quote, ""),
                                     files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.All, "", "", "")
+                                    AllowedMoves.All, "", "", "", "", "")
 
             initialPosition = New Point(x_location, y_location)
 
@@ -907,8 +907,8 @@ Public Class Game
 
                 Case PlayerActionType.Idle
                     If CurrentAction = PlayerActionType.Idle Then Exit Sub
-                    Player.followObject = Nothing
-                    Player.followObjectName = ""
+                    Player.followTarget = Nothing
+                    Player.followTargetName = ""
 
                     If Player.ManualControlPlayerOne Then Exit Sub
                     If Player.ManualControlPlayerTwo Then Exit Sub
@@ -976,15 +976,15 @@ Public Class Game
 
             Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
             'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
-            Player.followObject = Nothing
-            Player.followObjectName = ""
+            Player.followTarget = Nothing
+            Player.followTargetName = ""
 
             If returnToStart Then
                 Player.destinationCoords = startLocation
                 Exit Sub
             Else
-                Player.followObjectName = targetName
-                Player.followObject = target
+                Player.followTargetName = If(targetName, "")
+                Player.followTarget = target
                 Player.destinationCoords = Point.Empty
                 If leadTarget Then
                     Player.leadTarget = True

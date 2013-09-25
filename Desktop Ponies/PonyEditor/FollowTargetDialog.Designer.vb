@@ -66,6 +66,7 @@ Partial Class FollowTargetDialog
         'Cancel_Button
         '
         Me.Cancel_Button.Anchor = System.Windows.Forms.AnchorStyles.Bottom
+        Me.Cancel_Button.DialogResult = System.Windows.Forms.DialogResult.Cancel
         Me.Cancel_Button.Location = New System.Drawing.Point(309, 3)
         Me.Cancel_Button.Name = "Cancel_Button"
         Me.Cancel_Button.Size = New System.Drawing.Size(96, 23)
@@ -89,10 +90,10 @@ Partial Class FollowTargetDialog
         Me.FollowOption.Checked = True
         Me.FollowOption.Location = New System.Drawing.Point(154, 25)
         Me.FollowOption.Name = "FollowOption"
-        Me.FollowOption.Size = New System.Drawing.Size(165, 17)
+        Me.FollowOption.Size = New System.Drawing.Size(123, 17)
         Me.FollowOption.TabIndex = 1
         Me.FollowOption.TabStop = True
-        Me.FollowOption.Text = "Follow another pony or effect."
+        Me.FollowOption.Text = "Follow another pony."
         Me.FollowOption.UseVisualStyleBackColor = True
         '
         'GoToPointOption
@@ -178,18 +179,18 @@ Partial Class FollowTargetDialog
         Me.FollowLabel.AutoSize = True
         Me.FollowLabel.Location = New System.Drawing.Point(109, 112)
         Me.FollowLabel.Name = "FollowLabel"
-        Me.FollowLabel.Size = New System.Drawing.Size(109, 13)
+        Me.FollowLabel.Size = New System.Drawing.Size(76, 13)
         Me.FollowLabel.TabIndex = 4
-        Me.FollowLabel.Text = "Pony/Effect to follow:"
+        Me.FollowLabel.Text = "Pony to follow:"
         '
         'RelativeToLabel
         '
         Me.RelativeToLabel.AutoSize = True
         Me.RelativeToLabel.Location = New System.Drawing.Point(48, 427)
         Me.RelativeToLabel.Name = "RelativeToLabel"
-        Me.RelativeToLabel.Size = New System.Drawing.Size(155, 13)
+        Me.RelativeToLabel.Size = New System.Drawing.Size(123, 13)
         Me.RelativeToLabel.TabIndex = 18
-        Me.RelativeToLabel.Text = "(Relative to pony/effect center)"
+        Me.RelativeToLabel.Text = "(Relative to pony center)"
         '
         'NoTargetOption
         '

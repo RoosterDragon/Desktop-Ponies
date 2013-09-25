@@ -5,11 +5,11 @@
     Private ponyThumbnail As Image
     Private behaviorToChange As Behavior
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor, behavior As Behavior)
         Argument.EnsureNotNull(behavior, "behavior")
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
         behaviorToChange = behavior
         Text = "Select following parameters for " & behaviorToChange.Name
     End Sub
@@ -61,18 +61,18 @@
     Private Sub Change_Behavior()
         FollowComboBox.Items.Clear()
 
-        For Each Available_Pony In m_editor.Ponies.AllBases
+        For Each Available_Pony In _editor.Ponies.AllBases
             FollowComboBox.Items.Add(Available_Pony.Directory)
         Next
 
-        For Each effect In m_editor.GetAllEffects()
-            FollowComboBox.Items.Add(effect.ParentPonyBase.DisplayName & "'s " & effect.Name)
-        Next
+        'For Each effect In _editor.GetAllEffects()
+        '    FollowComboBox.Items.Add(effect.ParentPonyBase.DisplayName & "'s " & effect.Name)
+        'Next
 
         MovingComboBox.Items.Clear()
         StoppedComboBox.Items.Clear()
 
-        For Each otherbehavior In m_editor.PreviewPony.Behaviors
+        For Each otherbehavior In _editor.PreviewPony.Behaviors
             MovingComboBox.Items.Add(otherbehavior.Name)
             StoppedComboBox.Items.Add(otherbehavior.Name)
         Next
@@ -90,26 +90,26 @@
             point = True
         End If
 
-        If (Not IsNothing(behaviorToChange.OriginalFollowObjectName) AndAlso behaviorToChange.OriginalFollowObjectName <> "") Then
+        If behaviorToChange.OriginalFollowTargetName <> "" Then
             pony = True
             For Each item As String In FollowComboBox.Items
-                If String.Equals(StringToEffectName(item), behaviorToChange.OriginalFollowObjectName, StringComparison.OrdinalIgnoreCase) Then
+                If FollowComboBoxStringToName(item) = behaviorToChange.OriginalFollowTargetName Then
                     FollowComboBox.SelectedItem = item
                 End If
             Next
         End If
 
         If (Not IsNothing(behaviorToChange.FollowMovingBehavior) AndAlso behaviorToChange.FollowMovingBehaviorName <> "") Then
-            For Each item As String In MovingComboBox.Items
-                If String.Equals(item, behaviorToChange.FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase) Then
+            For Each item As CaseInsensitiveString In MovingComboBox.Items
+                If item = behaviorToChange.FollowMovingBehaviorName Then
                     MovingComboBox.SelectedItem = item
                 End If
             Next
         End If
 
-        If (Not IsNothing(behaviorToChange.FollowStoppedBehavior) AndAlso behaviorToChange.FollowStoppedBehaviorName <> Nothing) Then
-            For Each item As String In StoppedComboBox.Items
-                If String.Equals(item, behaviorToChange.FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase) Then
+        If (Not IsNothing(behaviorToChange.FollowStoppedBehavior) AndAlso behaviorToChange.FollowStoppedBehaviorName <> "") Then
+            For Each item As CaseInsensitiveString In StoppedComboBox.Items
+                If item = behaviorToChange.FollowStoppedBehaviorName Then
                     StoppedComboBox.SelectedItem = item
                 End If
             Next
@@ -154,7 +154,7 @@
         PointX.Enabled = True
         PointY.Enabled = True
         FollowComboBox.Enabled = True
-        RelativeToLabel.Text = "(Relative to pony/effect center)"
+        RelativeToLabel.Text = "(Relative to pony center)"
         UnitsLabel.Text = "Location (X/Y) (in pixels)"
     End Sub
 
@@ -188,9 +188,9 @@
     End Sub
 
     Private Sub GetThumbnail()
-        If m_editor Is Nothing Then Return
-        For Each ponyBase In m_editor.Ponies.AllBases
-            If ponyBase.Directory = CStr(FollowComboBox.SelectedItem) Then
+        If _editor Is Nothing Then Return
+        For Each ponyBase In _editor.Ponies.AllBases
+            If ponyBase.Directory = DirectCast(FollowComboBox.SelectedItem, String) Then
                 Try
                     ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)
                 Catch ex As Exception
@@ -201,29 +201,30 @@
             End If
         Next
 
-        For Each effect In m_editor.GetAllEffects()
-            If effect.Name = StringToEffectName(CStr(FollowComboBox.SelectedItem)) Then
-                Try
-                    ponyThumbnail = Image.FromFile(effect.RightImage.Path)
-                Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for effect " & effect.Name)
-                End Try
-                RedrawFollowPoint()
-                Exit Sub
-            End If
-        Next
+        'Dim selectedEffectName = FollowComboBoxStringToName(DirectCast(FollowComboBox.SelectedItem, String))
+        'For Each effect In _editor.GetAllEffects()
+        '    If effect.Name = selectedEffectName Then
+        '        Try
+        '            ponyThumbnail = Image.FromFile(effect.RightImage.Path)
+        '        Catch ex As Exception
+        '            My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for effect " & effect.Name)
+        '        End Try
+        '        RedrawFollowPoint()
+        '        Exit Sub
+        '    End If
+        'Next
     End Sub
 
     Private Sub Point_Loc_ValueChanged(sender As Object, e As EventArgs) Handles PointX.ValueChanged, PointY.ValueChanged
         RedrawFollowPoint()
     End Sub
 
-    Private Function StringToEffectName(name As String) As String
-        For Each effect In m_editor.GetAllEffects()
-            If (effect.ParentPonyBase.DisplayName & "'s " & effect.Name) = name Then
-                Return effect.Name
-            End If
-        Next
+    Private Function FollowComboBoxStringToName(name As String) As String
+        'For Each effect In _editor.GetAllEffects()
+        '    If (effect.ParentPonyBase.DisplayName & "'s " & effect.Name) = name Then
+        '        Return effect.Name
+        '    End If
+        'Next
         Return name
     End Function
 
@@ -244,7 +245,7 @@
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If AutoSelectImageCheckbox.Checked = False AndAlso
-            (CStr(MovingComboBox.SelectedItem) = "" OrElse CStr(StoppedComboBox.SelectedItem) = "") Then
+            (MovingComboBox.SelectedItem.ToString() = "" OrElse StoppedComboBox.SelectedItem.ToString() = "") Then
             MessageBox.Show(Me, "If you disable auto-selection of images, " &
                             "then you must specify a moving behavior and a stopped behavior to get the images from." &
                             ControlChars.NewLine &
@@ -262,17 +263,17 @@
         End If
 
         If FollowOption.Checked Then
-            behaviorToChange.OriginalFollowObjectName = StringToEffectName(CStr(FollowComboBox.SelectedItem))
+            behaviorToChange.OriginalFollowTargetName = FollowComboBoxStringToName(DirectCast(FollowComboBox.SelectedItem, String))
         Else
-            behaviorToChange.OriginalFollowObjectName = ""
+            behaviorToChange.OriginalFollowTargetName = ""
         End If
 
         If AutoSelectImageCheckbox.Checked Then
             behaviorToChange.AutoSelectImagesOnFollow = True
         Else
             behaviorToChange.AutoSelectImagesOnFollow = False
-            behaviorToChange.FollowMovingBehaviorName = CStr(MovingComboBox.SelectedItem)
-            behaviorToChange.FollowStoppedBehaviorName = CStr(StoppedComboBox.SelectedItem)
+            behaviorToChange.FollowMovingBehaviorName = DirectCast(MovingComboBox.SelectedItem, CaseInsensitiveString)
+            behaviorToChange.FollowStoppedBehaviorName = DirectCast(StoppedComboBox.SelectedItem, CaseInsensitiveString)
         End If
 
         Me.Close()

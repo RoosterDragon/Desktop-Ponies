@@ -2,10 +2,10 @@
 
 Public Class NewSpeechDialog
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -29,7 +29,7 @@ Public Class NewSpeechDialog
                                                            .Group = CInt(Group_NumberBox.Value),
                                                            .SoundFile = Replace(Sound_Textbox.Text, filename, "") & filename}
 
-        m_editor.PreviewPony.Base.Speeches.Add(new_speech)
+        _editor.PreviewPony.Base.Speeches.Add(new_speech)
 
         Me.Close()
     End Sub
@@ -50,7 +50,7 @@ Public Class NewSpeechDialog
     Private Sub SetSound_Button_Click(sender As Object, e As EventArgs) Handles SetSound_Button.Click
 
         OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-        OpenSoundDialog.InitialDirectory = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, m_editor.PreviewPony.Directory)
+        OpenSoundDialog.InitialDirectory = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, _editor.PreviewPony.Directory)
 
         Dim sound_path As String = Nothing
 
@@ -63,7 +63,7 @@ Public Class NewSpeechDialog
         End If
 
         Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
-                                       m_editor.PreviewPony.Directory, PonyEditor.GetFilename(sound_path))
+                                       _editor.PreviewPony.Directory, PonyEditor.GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not IO.File.Exists(new_path) Then

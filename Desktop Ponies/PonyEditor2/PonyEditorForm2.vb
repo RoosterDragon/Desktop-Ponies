@@ -154,48 +154,51 @@ Public Class PonyEditorForm2
 
     Private Sub ValidateBases()
         For Each base In bases.Values.OrderBy(Function(pb) pb.Directory)
-            Dim validateBehavior = Function(behavior As Behavior)
-                                       Dim b As Behavior = Nothing
-                                       Return behavior.TryLoad(
-                                           behavior.SourceIni,
-                                           Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                           base, b, Nothing) AndAlso b.GetReferentialIssues().Length = 0
-                                   End Function
-            Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
-            Dim validateEffect = Function(effect As EffectBase)
-                                     Dim e As EffectBase = Nothing
-                                     Return EffectBase.TryLoad(
-                                         effect.SourceIni,
-                                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                         base, e, Nothing) AndAlso e.GetReferentialIssues().Length = 0
-                                 End Function
-            Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
-            Dim validateSpeech = Function(speech As Speech)
-                                     Dim ref = New PageRef(base, PageContent.Speech, speech)
-                                     Return speech.TryLoad(
-                                         speech.SourceIni,
-                                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
-                                         Nothing, Nothing)
-                                 End Function
-            Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)
-            Dim validateInteraction = Function(interaction As InteractionBase)
-                                          Dim ref = New PageRef(base, PageContent.Interaction, interaction)
-                                          Dim i As InteractionBase = Nothing
-                                          Return InteractionBase.TryLoad(
-                                              interaction.SourceIni,
-                                              i, Nothing) AndAlso i.GetReferentialIssues(ponies).Length = 0
-                                      End Function
-            Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
-                                                  PageContent.Interactions, PageContent.Interaction)
-
-            worker.QueueTask(Sub()
-                                 Dim ref = New PageRef(base, PageContent.Pony, Nothing)
-                                 Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
-                                                      1, 2)
-                             End Sub)
+            ValidateBase(base)
         Next
-        worker.WaitOnAllTasks()
+    End Sub
+
+    Private Sub ValidateBase(base As PonyBase)
+        Dim validateBehavior = Function(behavior As Behavior)
+                                   Dim b As Behavior = Nothing
+                                   Return behavior.TryLoad(
+                                       behavior.SourceIni,
+                                       Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                       base, b, Nothing) AndAlso b.GetReferentialIssues(ponies).Length = 0
+                               End Function
+        Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
+        Dim validateEffect = Function(effect As EffectBase)
+                                 Dim e As EffectBase = Nothing
+                                 Return EffectBase.TryLoad(
+                                     effect.SourceIni,
+                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                     base, e, Nothing) AndAlso e.GetReferentialIssues(ponies).Length = 0
+                             End Function
+        Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
+        Dim validateSpeech = Function(speech As Speech)
+                                 Dim ref = New PageRef(base, PageContent.Speech, speech)
+                                 Return speech.TryLoad(
+                                     speech.SourceIni,
+                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                                     Nothing, Nothing)
+                             End Function
+        Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)
+        Dim validateInteraction = Function(interaction As InteractionBase)
+                                      Dim ref = New PageRef(base, PageContent.Interaction, interaction)
+                                      Dim i As InteractionBase = Nothing
+                                      Return InteractionBase.TryLoad(
+                                          interaction.SourceIni,
+                                          i, Nothing) AndAlso i.GetReferentialIssues(ponies).Length = 0
+                                  End Function
+        Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
+                                              PageContent.Interactions, PageContent.Interaction)
+
+        worker.QueueTask(Sub()
+                             Dim ref = New PageRef(base, PageContent.Pony, Nothing)
+                             Dim node = FindNode(ref.ToString())
+                             node.ImageIndex = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
+                                                  1, 2)
+                         End Sub)
     End Sub
 
     Private Function ValidateItems(Of T As IPonyIniSourceable)(base As PonyBase, items As IEnumerable(Of T),
@@ -356,6 +359,8 @@ Public Class PonyEditorForm2
         node.Text = ref.Item.Name
 
         EditorStatus.Text = "Saved"
+
+        Threading.ThreadPool.QueueUserWorkItem(Sub() ValidateBases())
     End Sub
 
     Private Sub CloseTabButton_Click(sender As Object, e As EventArgs) Handles CloseTabButton.Click

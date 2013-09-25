@@ -1,8 +1,10 @@
-﻿Public Class ImageCentersForm
+﻿Imports System.Globalization
+
+Public Class ImageCentersForm
 
     Dim previewpony As Pony
     Dim behavior_index As Integer = 0
-    Dim animation_index As Integer = 0
+    Dim animationIndex As Integer = 0
     Dim max_frame As Integer = 0
 
     Dim left_previous_center As New Point
@@ -20,20 +22,20 @@
     Dim left_image_framedimensions As Imaging.FrameDimension
     Dim left_image_framecount As Integer
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
         Icon = My.Resources.Twilight
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub Image_Centers_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        previewpony = m_editor.PreviewPony
+        previewpony = _editor.PreviewPony
         Me.Text = "Image Centering for " & previewpony.Directory
 
         behavior_index = 0
-        animation_index = 0
+        animationIndex = 0
         left_previous_center = Point.Empty
         right_previous_center = Point.Empty
 
@@ -105,7 +107,7 @@
 
     Sub LoadBehavior(index As Integer)
 
-        animation_index = 0
+        animationIndex = 0
 
         left_image = Image.FromFile(previewpony.Behaviors(index).LeftImage.Path)
         right_image = Image.FromFile(previewpony.Behaviors(index).RightImage.Path)
@@ -113,11 +115,11 @@
         Try
             left_image_framedimensions = New System.Drawing.Imaging.FrameDimension(left_image.FrameDimensionsList(0))
             left_image_framecount = left_image.GetFrameCount(left_image_framedimensions)
-            left_image.SelectActiveFrame(left_image_framedimensions, animation_index)
+            left_image.SelectActiveFrame(left_image_framedimensions, animationIndex)
 
             right_image_framedimensions = New System.Drawing.Imaging.FrameDimension(right_image.FrameDimensionsList(0))
             right_image_framecount = right_image.GetFrameCount(right_image_framedimensions)
-            right_image.SelectActiveFrame(right_image_framedimensions, animation_index)
+            right_image.SelectActiveFrame(right_image_framedimensions, animationIndex)
         Catch ex As Exception
             left_image_framedimensions = Nothing
             right_image_framedimensions = Nothing
@@ -135,7 +137,7 @@
 
         behavior_name_label.Text = previewpony.Behaviors(index).Name
 
-        frame_label.Text = CStr(animation_index)
+        frame_label.Text = animationIndex.ToString(CultureInfo.CurrentCulture)
 
         If left_image_framecount < right_image_framecount Then
             max_frame = left_image_framecount
@@ -180,11 +182,11 @@
 
     Private Sub Frame_Slider_Scroll(sender As Object, e As EventArgs) Handles frame_slider.Scroll
 
-        animation_index = frame_slider.Value
-        frame_label.Text = CStr(animation_index)
+        animationIndex = frame_slider.Value
+        frame_label.Text = animationIndex.ToString(CultureInfo.CurrentCulture)
 
-        right_image.SelectActiveFrame(right_image_framedimensions, animation_index)
-        left_image.SelectActiveFrame(left_image_framedimensions, animation_index)
+        right_image.SelectActiveFrame(right_image_framedimensions, animationIndex)
+        left_image.SelectActiveFrame(left_image_framedimensions, animationIndex)
 
         RedrawMarker()
 

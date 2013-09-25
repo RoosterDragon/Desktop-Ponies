@@ -41,7 +41,7 @@ Public Class HouseOptionsForm
             For Each visitor In base.Visitors
                 Dim index = 0
 
-                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
+                If "all" = visitor Then
                     For i = 0 To Visitors_CheckedListBox.Items.Count - 1
                         Visitors_CheckedListBox.SetItemChecked(i, True)
                     Next
@@ -49,7 +49,7 @@ Public Class HouseOptionsForm
                 End If
 
                 For Each item As String In Visitors_CheckedListBox.Items
-                    If String.Equals(item, visitor, StringComparison.OrdinalIgnoreCase) Then
+                    If item = visitor Then
                         ponies_to_check.Add(index)
                     End If
                     index += 1

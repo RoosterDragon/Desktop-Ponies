@@ -13,8 +13,13 @@
     End Sub
 
     Private Sub Save_Button_Click(sender As Object, e As EventArgs) Handles Save_Button.Click
+        Dim lines = Filters_Box.Lines.ToList()
+        If lines.RemoveAll(Function(line) line.IndexOf(ControlChars.Quote) <> -1) > 0 Then
+            MessageBox.Show(Me, "You cannot use the quote character in custom tags. Any tags with this character have been removed.",
+                            "Invalid Tags", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End If
         Options.CustomTags.Clear()
-        Options.CustomTags.AddRange(Filters_Box.Lines)
+        Options.CustomTags.AddRange(lines)
         Me.Close()
     End Sub
 End Class

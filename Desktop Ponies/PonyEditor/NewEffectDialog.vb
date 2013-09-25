@@ -5,10 +5,10 @@ Public Class NewEffectDialog
     Dim left_image_path As String = ""
     Dim right_image_path As String = ""
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -18,9 +18,9 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        For Each effect In m_editor.GetAllEffects()
-            If String.Equals(effect.Name, Name_Textbox.Text, StringComparison.OrdinalIgnoreCase) Then
-                MsgBox("Effect names must be unique.  Effect '" & Name_Textbox.Text & "' already exists.  Please select a different name.")
+        For Each effect In _editor.GetAllEffects()
+            If effect.Name = Name_Textbox.Text Then
+                MsgBox("Effect names must be unique. Effect '" & Name_Textbox.Text & "' already exists. Please select a different name.")
                 Exit Sub
             End If
         Next
@@ -54,40 +54,39 @@ Public Class NewEffectDialog
             Exit Sub
         End If
 
-        Dim linked_behavior = ""
+        Dim linkedBehaviorName As CaseInsensitiveString = ""
         If Behavior_Box.SelectedIndex <> -1 Then
-            linked_behavior = CStr(Behavior_Box.SelectedItem)
+            linkedBehaviorName = DirectCast(Behavior_Box.SelectedItem, CaseInsensitiveString)
         End If
 
-        If linked_behavior = "" Then
+        If linkedBehaviorName = "" Then
             MsgBox("You need to select a behavior to trigger this effect")
             Exit Sub
         End If
 
-        Dim behavior As Behavior = Nothing
+        Dim parentBehavior As Behavior = Nothing
 
-        For Each behavior In m_editor.PreviewPony.Behaviors
-            If String.Equals(behavior.Name, CStr(Behavior_Box.SelectedItem), StringComparison.OrdinalIgnoreCase) Then
-                behavior = behavior
+        For Each behavior In _editor.PreviewPony.Behaviors
+            If behavior.Name = DirectCast(Behavior_Box.SelectedItem, CaseInsensitiveString) Then
+                parentBehavior = behavior
                 Exit For
             End If
         Next
 
-        If IsNothing(behavior) Then
+        If IsNothing(parentBehavior) Then
             Throw New Exception("Couldn't find behavior to link effect to!")
         End If
 
-
-        behavior.AddEffect(Name_Textbox.Text, _
-                           right_image_path, _
-                           left_image_path, _
-                           duration, _
-                           repeatDelay, _
-                           DirectionFromString(CStr(R_Placement_Box.SelectedItem)), _
-                           DirectionFromString(CStr(R_Centering_Box.SelectedItem)), _
-                           DirectionFromString(CStr(L_Placement_Box.SelectedItem)), _
-                           DirectionFromString(CStr(L_Centering_Box.SelectedItem)), _
-                           follow_checkbox.Checked, DontRepeat_CheckBox.Checked, m_editor.PreviewPony.Base)
+        parentBehavior.AddEffect(Name_Textbox.Text,
+                                 right_image_path,
+                                 left_image_path,
+                                 duration,
+                                 repeatDelay,
+                                 DirectionFromString(DirectCast(R_Placement_Box.SelectedItem, String)),
+                                 DirectionFromString(DirectCast(R_Centering_Box.SelectedItem, String)),
+                                 DirectionFromString(DirectCast(L_Placement_Box.SelectedItem, String)),
+                                 DirectionFromString(DirectCast(L_Centering_Box.SelectedItem, String)),
+                                 follow_checkbox.Checked, DontRepeat_CheckBox.Checked, _editor.PreviewPony.Base)
         Me.Close()
     End Sub
 
@@ -112,14 +111,14 @@ Public Class NewEffectDialog
         Right_ImageBox.Image = Nothing
         Left_ImageBox.Image = Nothing
 
-        With m_editor
+        With _editor
 
             Dim linked_behavior_list = .colBehaviorLinked
             For Each item In linked_behavior_list.Items
                 Behavior_Box.Items.Add(item)
             Next
 
-            Behavior_Box.Items.Remove("None")
+            Behavior_Box.Items.Remove(New CaseInsensitiveString("None"))
 
             Dim movement_list = CType(.EffectsGrid.Columns(.colEffectLocationRight.Index), DataGridViewComboBoxColumn)
             For Each item In movement_list.Items
@@ -146,7 +145,7 @@ Public Class NewEffectDialog
             Left_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.AddPicture()
+        Dim path = _editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Left_ImageBox.Image = Image.FromFile(path)
 
@@ -157,7 +156,7 @@ Public Class NewEffectDialog
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
                 If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                    Duration_Box.Text = CStr(runtime)
+                    Duration_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
         End If
@@ -171,7 +170,7 @@ Public Class NewEffectDialog
             Right_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.AddPicture()
+        Dim path = _editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Right_ImageBox.Image = Image.FromFile(path)
 
@@ -182,7 +181,7 @@ Public Class NewEffectDialog
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
                 If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                    Duration_Box.Text = CStr(runtime)
+                    Duration_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
         End If

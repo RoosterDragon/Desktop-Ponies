@@ -8,10 +8,10 @@ Public Class NewBehaviorDialog
     Dim left_image_path As String = ""
     Dim right_image_path As String = ""
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
-        m_editor = editor
+        _editor = editor
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -22,8 +22,8 @@ Public Class NewBehaviorDialog
             Exit Sub
         End If
 
-        For Each behavior In m_editor.PreviewPony.Behaviors
-            If String.Equals(behavior.Name, NameTextbox.Text, StringComparison.OrdinalIgnoreCase) Then
+        For Each behavior In _editor.PreviewPony.Behaviors
+            If behavior.Name = NameTextbox.Text Then
                 MessageBox.Show(Me, "Behavior '" & behavior.Name & "' already exists for this pony. Please select another name.",
                                 "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
@@ -95,35 +95,35 @@ Public Class NewBehaviorDialog
 
         Dim start_line = ""
         If StartSpeech_Box.SelectedIndex <> -1 Then
-            start_line = CStr(StartSpeech_Box.SelectedItem)
+            start_line = DirectCast(StartSpeech_Box.SelectedItem, CaseInsensitiveString)
         End If
         If start_line = "None" Then start_line = ""
 
         Dim end_line = ""
         If EndSpeech_Box.SelectedIndex <> -1 Then
-            end_line = CStr(EndSpeech_Box.SelectedItem)
+            end_line = DirectCast(EndSpeech_Box.SelectedItem, CaseInsensitiveString)
         End If
 
         If end_line = "None" Then end_line = ""
 
-        m_editor.PreviewPony.Base.AddBehavior(NameTextbox.Text,
+        _editor.PreviewPony.Base.AddBehavior(NameTextbox.Text,
                                              chance / 100,
                                              maxDuration,
                                              minDuration,
                                              speed,
                                              right_image_path,
                                              left_image_path,
-                                             AllowedMovesFromString(CStr(Movement_Combobox.SelectedItem)),
+                                             AllowedMovesFromString(DirectCast(Movement_Combobox.SelectedItem, String)),
                                              linked_behavior,
                                              start_line,
                                              end_line,
+                                             "",
+                                             "",
                                              skip,
                                              follow_x,
                                              follow_y,
                                              follow_name,
                                              False,
-                                             "",
-                                             "",
                                              Nothing,
                                              Nothing,
                                              DontRepeat_CheckBox.Checked,
@@ -160,7 +160,7 @@ Public Class NewBehaviorDialog
         Right_ImageBox.Image = Nothing
         Left_ImageBox.Image = Nothing
 
-        With m_editor
+        With _editor
 
             Dim linked_behavior_list = .colBehaviorLinked
             For Each item In linked_behavior_list.Items
@@ -191,21 +191,21 @@ Public Class NewBehaviorDialog
             Left_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.AddPicture()
+        Dim path = _editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Left_ImageBox.Image = Image.FromFile(path)
 
         left_image_path = path
 
-        m_editor.ImageSizeCheck(Left_ImageBox.Image.Size)
+        _editor.ImageSizeCheck(Left_ImageBox.Image.Size)
 
         Dim runtime = GetGifTotalRuntime(Left_ImageBox.Image)
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
                 If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                    Min_Box.Text = CStr(runtime)
-                    Max_Box.Text = CStr(runtime)
+                    Min_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
+                    Max_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
         End If
@@ -219,21 +219,21 @@ Public Class NewBehaviorDialog
             Right_ImageBox.Image = Nothing
         End If
 
-        Dim path = m_editor.AddPicture()
+        Dim path = _editor.AddPicture()
         If IsNothing(path) Then Exit Sub
         Right_ImageBox.Image = Image.FromFile(path)
 
         right_image_path = path
 
-        m_editor.ImageSizeCheck(Right_ImageBox.Image.Size)
+        _editor.ImageSizeCheck(Right_ImageBox.Image.Size)
 
         Dim runtime = GetGifTotalRuntime(Right_ImageBox.Image)
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
                 If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
-                    Min_Box.Text = CStr(runtime)
-                    Max_Box.Text = CStr(runtime)
+                    Min_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
+                    Max_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
         End If
@@ -242,14 +242,14 @@ Public Class NewBehaviorDialog
 
     Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
 
-        Dim new_behavior As New Behavior(m_editor.PreviewPony.Base)
+        Dim new_behavior As New Behavior(_editor.PreviewPony.Base)
 
-        Using form = New FollowTargetDialog(m_editor, new_behavior)
+        Using form = New FollowTargetDialog(_editor, new_behavior)
             form.ShowDialog()
         End Using
 
-        If new_behavior.OriginalFollowObjectName <> "" Then
-            follow_name = new_behavior.OriginalFollowObjectName
+        If new_behavior.OriginalFollowTargetName <> "" Then
+            follow_name = new_behavior.OriginalFollowTargetName
         Else
             If new_behavior.OriginalDestinationXCoord <> 0 AndAlso new_behavior.OriginalDestinationYCoord <> 0 Then
                 follow_name = new_behavior.OriginalDestinationXCoord & " , " & new_behavior.OriginalDestinationYCoord
@@ -257,7 +257,7 @@ Public Class NewBehaviorDialog
         End If
 
         Follow_Box.Text = follow_name
-        follow_name = new_behavior.OriginalFollowObjectName
+        follow_name = new_behavior.OriginalFollowTargetName
         follow_x = new_behavior.OriginalDestinationXCoord
         follow_y = new_behavior.OriginalDestinationYCoord
 

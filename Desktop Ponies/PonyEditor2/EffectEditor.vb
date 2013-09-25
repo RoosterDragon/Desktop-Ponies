@@ -112,7 +112,7 @@ Friend Class EffectEditor
         'SelectItemElseAddItem(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.LeftImagePath))
         'SelectItemElseAddItem(RightImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.RightImagePath))
 
-        Dim behaviors = Base.Behaviors.Select(Function(b) b.Name).ToArray()
+        Dim behaviors = Base.Behaviors.Select(Function(b) b.Name).Cast(Of Object).ToArray()
         ReplaceItemsInComboBox(BehaviorComboBox, behaviors, True)
     End Sub
 
@@ -133,7 +133,7 @@ Friend Class EffectEditor
     Protected Overrides Sub SourceTextChanged()
         Dim e As EffectBase = Nothing
         EffectBase.TryLoad(Source.Text, PonyBasePath, Base, e, ParseIssues)
-        ReferentialIssues = e.GetReferentialIssues()
+        ReferentialIssues = e.GetReferentialIssues(Base.Collection)
         OnIssuesChanged(EventArgs.Empty)
         Edited = e
 

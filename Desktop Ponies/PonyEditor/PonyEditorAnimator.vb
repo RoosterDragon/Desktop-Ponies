@@ -4,13 +4,13 @@ Imports DesktopSprites.SpriteManagement
 Public Class PonyEditorAnimator
     Inherits DesktopPonyAnimator
 
-    Private m_editor As PonyEditor
+    Private _editor As PonyEditor
 
     Public Sub New(editor As PonyEditor, spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
                    ponyBaseCollection As IEnumerable(Of PonyBase))
         MyBase.New(spriteViewer, spriteCollection, ponyBaseCollection, Nothing, False)
         ExitWhenNoSprites = False
-        m_editor = editor
+        _editor = editor
         AddHandler Viewer.InterfaceClosed, Sub(sender As Object, e As EventArgs) Finish()
     End Sub
 
@@ -21,23 +21,23 @@ Public Class PonyEditorAnimator
 
     Protected Overrides Sub Update()
         MyBase.Update()
-        If Not m_editor.IsClosing Then
-            m_editor.BeginInvoke(New MethodInvoker(
+        If Not _editor.IsClosing Then
+            _editor.BeginInvoke(New MethodInvoker(
                                  Sub()
-                                     If m_editor.IsClosing Then Exit Sub
-                                     If m_editor.PreviewPony Is Nothing Then
-                                         m_editor.CurrentBehaviorValueLabel.Text = ""
-                                         m_editor.GroupValueLabel.Text = ""
-                                         m_editor.TimeLeftValueLabel.Text = ""
+                                     If _editor.IsClosing Then Exit Sub
+                                     If _editor.PreviewPony Is Nothing Then
+                                         _editor.CurrentBehaviorValueLabel.Text = ""
+                                         _editor.GroupValueLabel.Text = ""
+                                         _editor.TimeLeftValueLabel.Text = ""
                                      Else
-                                         If m_editor.PreviewPony.CurrentBehavior IsNot Nothing Then
-                                             m_editor.CurrentBehaviorValueLabel.Text = m_editor.PreviewPony.CurrentBehavior.Name
+                                         If _editor.PreviewPony.CurrentBehavior IsNot Nothing Then
+                                             _editor.CurrentBehaviorValueLabel.Text = _editor.PreviewPony.CurrentBehavior.Name
                                          End If
-                                         m_editor.GroupValueLabel.Text =
-                                             m_editor.PreviewPony.CurrentBehaviorGroup & " - " &
-                                             m_editor.PreviewPony.GetBehaviorGroupName(m_editor.PreviewPony.CurrentBehaviorGroup)
-                                         m_editor.TimeLeftValueLabel.Text =
-                                             (m_editor.PreviewPony.BehaviorDesiredDuration - m_editor.PreviewPony.CurrentTime).
+                                         _editor.GroupValueLabel.Text =
+                                             _editor.PreviewPony.CurrentBehaviorGroup & " - " &
+                                             _editor.PreviewPony.GetBehaviorGroupName(_editor.PreviewPony.CurrentBehaviorGroup)
+                                         _editor.TimeLeftValueLabel.Text =
+                                             (_editor.PreviewPony.BehaviorDesiredDuration - _editor.PreviewPony.CurrentTime).
                                              TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
                                      End If
                                  End Sub))

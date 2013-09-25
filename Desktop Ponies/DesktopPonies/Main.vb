@@ -363,13 +363,7 @@ Public Class Main
     End Sub
 
     Private Sub CountSelectedPonies()
-        Dim totalPonies As Integer = 0
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            Dim count As Integer
-            If Integer.TryParse(ponyPanel.PonyCount.Text, NumberStyles.Integer, CultureInfo.CurrentCulture, count) Then
-                totalPonies += count
-            End If
-        Next
+        Dim totalPonies = PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Sum(Function(psc) psc.Count)
         PonyCountValueLabel.Text = totalPonies.ToString(CultureInfo.CurrentCulture)
     End Sub
 #End Region
@@ -377,7 +371,7 @@ Public Class Main
 #Region "Selection"
     Private Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            ponyPanel.PonyCount.Text = "0"
+            ponyPanel.Count = 0
         Next
     End Sub
 
@@ -389,7 +383,7 @@ Public Class Main
             Exit Sub
         End If
 
-        If String.Equals(profileToSave, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If profileToSave = Options.DefaultProfileName Then
             MessageBox.Show(
                 Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. " &
                 "To create a new profile, type a new name for the profile into the box. You will then be able to save the profile.",
@@ -414,7 +408,7 @@ Public Class Main
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            ponyPanel.PonyCount.Text = "1"
+            ponyPanel.Count = 1
         Next
     End Sub
 
@@ -476,7 +470,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private Sub GetProfiles(profileToAttemptToLoad As String)
+    Private Sub GetProfiles(profileToAttemptToLoad As CaseInsensitiveString)
         ProfileComboBox.Items.Clear()
         ProfileComboBox.Items.Add(Options.DefaultProfileName)
         Dim profiles = Options.GetKnownProfiles()
@@ -500,7 +494,7 @@ Public Class Main
             Exit Sub
         End If
 
-        If String.Equals(copiedProfileName, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If copiedProfileName = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot copy over the '" & Options.DefaultProfileName & "' profile. Please choose another name.",
                             "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
@@ -513,7 +507,7 @@ Public Class Main
     End Sub
 
     Private Sub DeleteProfileButton_Click(sender As Object, e As EventArgs) Handles DeleteProfileButton.Click
-        If String.Equals(ProfileComboBox.Text, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If ProfileComboBox.Text = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot delete the '" & Options.DefaultProfileName & "' profile.",
                             "Invalid Profile", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
@@ -719,7 +713,7 @@ Public Class Main
     Private Sub FilterOptionsBox_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles FilterOptionsBox.ItemCheck
         Dim tags = FilterOptionsBox.CheckedItems.Cast(Of String).ToList()
         If e.CurrentValue <> e.NewValue Then
-            Dim changedTag = CStr(FilterOptionsBox.Items(e.Index))
+            Dim changedTag = DirectCast(FilterOptionsBox.Items(e.Index), String)
             If e.NewValue = CheckState.Checked Then
                 tags.Add(changedTag)
             Else

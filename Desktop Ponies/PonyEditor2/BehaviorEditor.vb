@@ -50,7 +50,7 @@ Friend Class BehaviorEditor
         AddHandler LinkedBehaviorComboBox.SelectedIndexChanged,
             Sub() UpdateProperty(Sub()
                                      Dim behavior = TryCast(LinkedBehaviorComboBox.SelectedItem, Behavior)
-                                     Edited.LinkedBehaviorName = If(behavior Is Nothing, "", behavior.Name)
+                                     Edited.LinkedBehaviorName = If(behavior Is Nothing, CaseInsensitiveString.Empty, behavior.Name)
                                  End Sub)
         AddHandler LeftImageFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
@@ -78,7 +78,7 @@ Friend Class BehaviorEditor
         AddHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
         AddHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
 
-        Dim speeches = Base.Speeches.Select(Function(s) s.Name).ToArray()
+        Dim speeches = Base.Speeches.Select(Function(s) s.Name).Cast(Of Object).ToArray()
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
         ReplaceItemsInComboBox(EndSpeechComboBox, speeches, True)
 
@@ -103,7 +103,7 @@ Friend Class BehaviorEditor
     Protected Overrides Sub SourceTextChanged()
         Dim b As Behavior = Nothing
         Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, ParseIssues)
-        ReferentialIssues = b.GetReferentialIssues()
+        ReferentialIssues = b.GetReferentialIssues(Base.Collection)
         OnIssuesChanged(EventArgs.Empty)
         Edited = b
 

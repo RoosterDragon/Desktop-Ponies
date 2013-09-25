@@ -9,18 +9,18 @@ Public Interface IPonyIniSourceable
 End Interface
 
 Public Interface IPonyIniSerializable
-    Property Name As String
+    Property Name As CaseInsensitiveString
     Function GetPonyIni() As String
 End Interface
 
 Public Interface IReferential
-    Function GetReferentialIssues() As ImmutableArray(Of ParseIssue)
+    Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue)
 End Interface
 
 Public NotInheritable Class Referential
     Private Sub New()
     End Sub
-    Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of String)) As ParseIssue
+    Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of IEquatable(Of String))) As ParseIssue
         If String.IsNullOrEmpty(name) Then Return Nothing
         Dim result = CheckReference(name, collection)
         If CheckReference(name, collection) <> ReferenceResult.Ok Then
@@ -31,10 +31,10 @@ Public NotInheritable Class Referential
         End If
         Return Nothing
     End Function
-    Private Shared Function CheckReference(name As String, collection As IEnumerable(Of String)) As ReferenceResult
+    Private Shared Function CheckReference(name As String, collection As IEnumerable(Of IEquatable(Of String))) As ReferenceResult
         Dim count = 0
         For Each candidateName In collection
-            If String.Equals(name, candidateName, StringComparison.OrdinalIgnoreCase) Then count += 1
+            If candidateName.Equals(name) Then count += 1
             If count >= 2 Then Return ReferenceResult.NotUnique
         Next
         Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Ok)
@@ -67,8 +67,8 @@ Public Class PonyBase
     End Property
     Public Property DisplayName As String
     Public Property Scale As Double
-    Private _tags As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-    Public ReadOnly Property Tags As HashSet(Of String)
+    Private _tags As New HashSet(Of CaseInsensitiveString)()
+    Public ReadOnly Property Tags As HashSet(Of CaseInsensitiveString)
         Get
             Return _tags
         End Get
@@ -193,9 +193,10 @@ Public Class PonyBase
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Count - 1
+                            Dim category As CaseInsensitiveString = columns(i)
                             For Each item As String In Main.Instance.FilterOptionsBox.Items
-                                If String.Equals(item, columns(i), StringComparison.OrdinalIgnoreCase) Then
-                                    pony.Tags.Add(columns(i))
+                                If New CaseInsensitiveString(item) = category Then
+                                    pony.Tags.Add(category)
                                     Exit For
                                 End If
                             Next
@@ -221,68 +222,64 @@ Public Class PonyBase
         End If
     End Sub
 
-    Public Sub AddBehavior(name As String, chance As Double,
-                       max_duration As Double, min_duration As Double, speed As Double,
-                       right_image_path As String, left_image_path As String,
-                       Allowed_Moves As AllowedMoves, _Linked_Behavior As String,
-                       _Startline As String, _Endline As String, Optional _skip As Boolean = False,
-                       Optional _xcoord As Integer = Nothing, Optional _ycoord As Integer = Nothing,
-                       Optional _object_to_follow As String = "",
-                       Optional _auto_select_images_on_follow As Boolean = True,
-                       Optional _follow_stopped_behavior As String = "",
-                       Optional _follow_moving_behavior As String = "",
-                       Optional right_image_center As Point = Nothing, Optional left_image_center As Point = Nothing,
-                       Optional _dont_repeat_image_animations As Boolean = False, Optional _group As Integer = 0)
+    Public Sub AddBehavior(name As CaseInsensitiveString, chance As Double,
+                       maxDuration As Double, minDuration As Double, speed As Double,
+                       rightImagePath As String, leftImagePath As String,
+                       allowedMoves As AllowedMoves, linkedBehaviorName As CaseInsensitiveString,
+                       startLineName As CaseInsensitiveString, endLineName As CaseInsensitiveString,
+                       followStoppedBehaviorName As CaseInsensitiveString,
+                       followMovingBehaviorName As CaseInsensitiveString,
+                       Optional skip As Boolean = False,
+                       Optional xCoord As Integer = Nothing, Optional yCoord As Integer = Nothing,
+                       Optional followObjectName As String = "",
+                       Optional autoSelectImagesOnFollow As Boolean = True,
+                       Optional rightImageCenter As Point = Nothing, Optional leftImageCenter As Point = Nothing,
+                       Optional doNotRepeatImageAnimations As Boolean = False, Optional group As Integer = 0)
 
-        Dim new_behavior As New Behavior(Me)
+        Dim newBehavior As New Behavior(Me)
 
-        If Not File.Exists(right_image_path) Then
-            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & right_image_path)
+        If Not File.Exists(rightImagePath) Then
+            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & rightImagePath)
         End If
 
-        If Not File.Exists(left_image_path) Then
-            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & left_image_path)
+        If Not File.Exists(leftImagePath) Then
+            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & leftImagePath)
         End If
 
-        new_behavior.Name = Trim(name)
-        new_behavior.Chance = chance
-        new_behavior.MaxDuration = max_duration
-        new_behavior.MinDuration = min_duration
-        new_behavior.Speed = speed
-        new_behavior.AllowedMovement = Allowed_Moves
-        new_behavior.DoNotRepeatImageAnimations = _dont_repeat_image_animations
-        new_behavior.StartLineName = _Startline
-        new_behavior.EndLineName = _Endline
-        new_behavior.Group = _group
-        new_behavior.Skip = _skip
+        newBehavior.Name = name
+        newBehavior.Chance = chance
+        newBehavior.MaxDuration = maxDuration
+        newBehavior.MinDuration = minDuration
+        newBehavior.Speed = speed
+        newBehavior.AllowedMovement = allowedMoves
+        newBehavior.DoNotRepeatImageAnimations = doNotRepeatImageAnimations
+        newBehavior.StartLineName = startLineName
+        newBehavior.EndLineName = endLineName
+        newBehavior.Group = group
+        newBehavior.Skip = skip
 
         'These coordinates are either a position on the screen to go to, if no object to follow is specified,
         'or, the offset from the center of the object to go to (upper left, below, etc)
-        new_behavior.AutoSelectImagesOnFollow = _auto_select_images_on_follow
+        newBehavior.AutoSelectImagesOnFollow = autoSelectImagesOnFollow
 
         'When the pony if off-screen we overwrite the follow parameters to get them onscreen again.
         'we save the original parameters here.
-        new_behavior.OriginalDestinationXCoord = _xcoord
-        new_behavior.OriginalDestinationYCoord = _ycoord
-        new_behavior.OriginalFollowObjectName = _object_to_follow
+        newBehavior.OriginalDestinationXCoord = xCoord
+        newBehavior.OriginalDestinationYCoord = yCoord
+        newBehavior.OriginalFollowTargetName = followObjectName
 
-        new_behavior.FollowMovingBehaviorName = _follow_moving_behavior
-        new_behavior.FollowStoppedBehaviorName = _follow_stopped_behavior
+        newBehavior.FollowMovingBehaviorName = followMovingBehaviorName
+        newBehavior.FollowStoppedBehaviorName = followStoppedBehaviorName
 
-        If _Linked_Behavior <> Nothing Then
-            'We just record the name of the linked behavior for now
-            'Later, when we call "Link_Behaviors()" from the main form, we 
-            'will get references to the actual behaviors.
-            new_behavior.LinkedBehaviorName = _Linked_Behavior
-        End If
+        newBehavior.LinkedBehaviorName = linkedBehaviorName
 
-        new_behavior.LeftImage.Path = left_image_path
-        new_behavior.RightImage.Path = right_image_path
+        newBehavior.LeftImage.Path = leftImagePath
+        newBehavior.RightImage.Path = rightImagePath
 
-        new_behavior.RightImage.CustomCenter = If(right_image_center = Point.Empty, Nothing, right_image_center)
-        new_behavior.LeftImage.CustomCenter = If(left_image_center = Point.Empty, Nothing, left_image_center)
+        newBehavior.RightImage.CustomCenter = If(rightImageCenter = Point.Empty, Nothing, rightImageCenter)
+        newBehavior.LeftImage.CustomCenter = If(leftImageCenter = Point.Empty, Nothing, leftImageCenter)
 
-        Behaviors.Add(new_behavior)
+        Behaviors.Add(newBehavior)
 
     End Sub
 
@@ -380,11 +377,11 @@ End Class
 
 #Region "InteractionBase class"
 Public Class InteractionBase
-    Implements IPonyIniSourceable
+    Implements IPonyIniSourceable, IReferential
 
     Public Const ConfigFilename = "interactions.ini"
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property InitiatorName As String
     Public Property Chance As Double
     Public Property Proximity As Double
@@ -395,8 +392,8 @@ Public Class InteractionBase
         End Get
     End Property
     Public Property Activation As TargetActivation
-    Private ReadOnly _behaviorNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-    Public ReadOnly Property BehaviorNames As HashSet(Of String)
+    Private ReadOnly _behaviorNames As New HashSet(Of CaseInsensitiveString)()
+    Public ReadOnly Property BehaviorNames As HashSet(Of CaseInsensitiveString)
         Get
             Return _behaviorNames
         End Get
@@ -419,7 +416,8 @@ Public Class InteractionBase
         i.Proximity = p.ParseDouble(125, 0, 10000)
         i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0))
         i.Activation = p.Project(AddressOf TargetActivationFromString, TargetActivation.One)
-        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0))
+        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0).
+                                  Select(Function(s) New CaseInsensitiveString(s)))
         i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
 
         issues = p.Issues.ToImmutableArray()
@@ -443,7 +441,7 @@ Public Class InteractionBase
             ReactivationDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture))
     End Function
 
-    Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue)
+    Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Dim issues As New List(Of ParseIssue)()
         CheckInteractionReference(ponies, InitiatorName, "Initiator", issues)
 
@@ -460,8 +458,7 @@ Public Class InteractionBase
             issues.Add(New ParseIssue(propertyName, directory, "", String.Format("No pony named '{0}' exists.", directory)))
         Else
             For Each behaviorName In BehaviorNames
-                Dim behavior = base.Behaviors.FirstOrDefault(
-                    Function(b) String.Equals(b.Name, behaviorName, StringComparison.OrdinalIgnoreCase))
+                Dim behavior = base.Behaviors.OnlyOrDefault(Function(b) b.Name = behaviorName)
                 If behavior Is Nothing Then
                     issues.Add(New ParseIssue("Behaviors", behaviorName, "",
                                               String.Format("'{0}' is missing behavior '{1}'.", directory, behaviorName)))
@@ -520,7 +517,7 @@ Public Class Behavior
 
     Public Shared ReadOnly AnyGroup As Integer = 0
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Chance As Double
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
@@ -544,46 +541,46 @@ Public Class Behavior
 
     Public Property AllowedMovement As AllowedMoves
 
-    Private _linkedBehaviorName As String = ""
-    Public Property LinkedBehaviorName As String
+    Private _linkedBehaviorName As CaseInsensitiveString = ""
+    Public Property LinkedBehaviorName As CaseInsensitiveString
         Get
             Return _linkedBehaviorName
         End Get
-        Set(value As String)
+        Set(value As CaseInsensitiveString)
             _linkedBehaviorName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
     Public ReadOnly Property LinkedBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, LinkedBehaviorName, StringComparison.OrdinalIgnoreCase))
+            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = LinkedBehaviorName)
         End Get
     End Property
-    Private _startLineName As String = ""
-    Public Property StartLineName As String
+    Private _startLineName As CaseInsensitiveString = ""
+    Public Property StartLineName As CaseInsensitiveString
         Get
             Return _startLineName
         End Get
-        Set(value As String)
+        Set(value As CaseInsensitiveString)
             _startLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
     Public ReadOnly Property StartLine As Speech
         Get
-            Return pony.Speeches.FirstOrDefault(Function(sl) String.Equals(sl.Name, StartLineName, StringComparison.OrdinalIgnoreCase))
+            Return pony.Speeches.OnlyOrDefault(Function(sl) sl.Name = StartLineName)
         End Get
     End Property
-    Private _endLineName As String = ""
-    Public Property EndLineName As String
+    Private _endLineName As CaseInsensitiveString = ""
+    Public Property EndLineName As CaseInsensitiveString
         Get
             Return _endLineName
         End Get
-        Set(value As String)
+        Set(value As CaseInsensitiveString)
             _endLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
     Public ReadOnly Property EndLine As Speech
         Get
-            Return pony.Speeches.FirstOrDefault(Function(sl) String.Equals(sl.Name, EndLineName, StringComparison.OrdinalIgnoreCase))
+            Return pony.Speeches.OnlyOrDefault(Function(sl) sl.Name = EndLineName)
         End Get
     End Property
 
@@ -591,18 +588,26 @@ Public Class Behavior
 
     Public Property OriginalDestinationXCoord As Integer = 0
     Public Property OriginalDestinationYCoord As Integer = 0
-    Public Property OriginalFollowObjectName As String = ""
+    Private _originalFollowTargetName As String = ""
+    Public Property OriginalFollowTargetName As String
+        Get
+            Return _originalFollowTargetName
+        End Get
+        Set(value As String)
+            _originalFollowTargetName = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
 
-    Public Property FollowStoppedBehaviorName As String
+    Public Property FollowStoppedBehaviorName As CaseInsensitiveString
     Public ReadOnly Property FollowStoppedBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, FollowStoppedBehaviorName, StringComparison.OrdinalIgnoreCase))
+            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = FollowStoppedBehaviorName)
         End Get
     End Property
-    Public Property FollowMovingBehaviorName As String
+    Public Property FollowMovingBehaviorName As CaseInsensitiveString
     Public ReadOnly Property FollowMovingBehavior As Behavior
         Get
-            Return pony.Behaviors.FirstOrDefault(Function(b) String.Equals(b.Name, FollowMovingBehaviorName, StringComparison.OrdinalIgnoreCase))
+            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = FollowMovingBehaviorName)
         End Get
     End Property
     Public Property AutoSelectImagesOnFollow As Boolean = True
@@ -640,7 +645,7 @@ Public Class Behavior
     Public Structure EffectsEnumerator
         Implements IEnumerator(Of EffectBase)
 
-        Private ReadOnly behaviorName As String
+        Private ReadOnly behaviorName As CaseInsensitiveString
         Private ReadOnly effects As List(Of EffectBase)
         Private index As Integer
 
@@ -666,8 +671,7 @@ Public Class Behavior
         Public Function MoveNext() As Boolean Implements Collections.IEnumerator.MoveNext
             Do
                 index += 1
-            Loop While index < effects.Count AndAlso
-                Not String.Equals(Current.BehaviorName, behaviorName, StringComparison.OrdinalIgnoreCase)
+            Loop While index < effects.Count AndAlso Current.BehaviorName <> behaviorName
             Return index < effects.Count
         End Function
 
@@ -722,7 +726,7 @@ Public Class Behavior
         b.Skip = p.ParseBoolean(False)
         b.OriginalDestinationXCoord = p.ParseInt32(0)
         b.OriginalDestinationYCoord = p.ParseInt32(0)
-        b.OriginalFollowObjectName = p.NotNull("").Trim()
+        b.OriginalFollowTargetName = p.NotNull("").Trim()
         b.AutoSelectImagesOnFollow = p.ParseBoolean(True)
         b.FollowStoppedBehaviorName = p.NotNull("").Trim()
         b.FollowMovingBehaviorName = p.NotNull("").Trim()
@@ -777,7 +781,7 @@ Public Class Behavior
             Skip,
             OriginalDestinationXCoord.ToString(CultureInfo.InvariantCulture),
             OriginalDestinationYCoord.ToString(CultureInfo.InvariantCulture),
-            Quoted(OriginalFollowObjectName),
+            Quoted(OriginalFollowTargetName),
             AutoSelectImagesOnFollow,
             FollowStoppedBehaviorName,
             FollowMovingBehaviorName,
@@ -793,13 +797,14 @@ Public Class Behavior
         Return MyBase.MemberwiseClone()
     End Function
 
-    Public Function GetReferentialIssues() As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
+    Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.GetIssue("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
                 Referential.GetIssue("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
                 Referential.GetIssue("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
                 Referential.GetIssue("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.GetIssue("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name))}.
-            Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
+                Referential.GetIssue("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.GetIssue("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory))}.
+        Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
@@ -814,10 +819,10 @@ End Class
 Public Class BehaviorGroup
     Implements IPonyIniSerializable
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Number As Integer
 
-    Public Sub New(_name As String, _number As Integer)
+    Public Sub New(_name As CaseInsensitiveString, _number As Integer)
         Name = _name
         Number = _number
     End Sub
@@ -827,7 +832,7 @@ Public Class BehaviorGroup
     End Function
 
     Public Overrides Function ToString() As String
-        Return "[" & Number & ", " & If(Name, "") & "]"
+        Return "[" & Number & ", " & Name & "]"
     End Function
 End Class
 #End Region
@@ -836,7 +841,7 @@ End Class
 Public Class Speech
     Implements IPonyIniSourceable
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
+    Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Text As String = ""
     Public Property SoundFile As String
     Public Property Skip As Boolean = False 'don't use randomly if true
@@ -1160,8 +1165,8 @@ Public Class Pony
     Private ReadOnly EffectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)
 
     Public Property destinationCoords As Point
-    Public Property followObjectName As String = ""
-    Public Property followObject As ISprite
+    Public Property followTargetName As String = ""
+    Public Property followTarget As ISprite
     'Try to get the point where an object is going to, and go to that instead of where it is currently at.
     Public Property leadTarget As Boolean
 
@@ -1298,7 +1303,8 @@ Public Class Pony
                     If CurrentBehavior.EndLine IsNot Nothing Then PonySpeak(CurrentBehavior.EndLine)
                     ' Use the next behavior in the chain if one is specified, else select one at random.
                     AddUpdateRecord("Switching to the next behavior in the chain. Linked: ",
-                                    If(CurrentBehavior.LinkedBehavior IsNot Nothing, CurrentBehavior.LinkedBehavior.Name, "<null>"))
+                                    If(CurrentBehavior.LinkedBehavior IsNot Nothing,
+                                       CurrentBehavior.LinkedBehavior.Name.ToString(), "<null>"))
                     SelectBehavior(CurrentBehavior.LinkedBehavior)
                 End If
             End If
@@ -1388,8 +1394,8 @@ Public Class Pony
         If IsInteracting AndAlso isInteractionInitiator AndAlso specifiedBehavior Is Nothing Then CancelInteraction()
 
         ' Clear following state.
-        followObject = Nothing
-        followObjectName = ""
+        followTarget = Nothing
+        followTargetName = ""
 
         If specifiedBehavior Is Nothing Then
             ' Pick a behavior at random. If a valid behavior cannot be selected after an arbitrary number of tries, just continue using the
@@ -1405,13 +1411,13 @@ Public Class Pony
                     Rng.NextDouble() <= potentialBehavior.Chance Then
 
                     ' See if the behavior specifies that we follow another object.
-                    followObjectName = potentialBehavior.OriginalFollowObjectName
+                    followTargetName = potentialBehavior.OriginalFollowTargetName
                     Destination = DetermineDestination()
 
                     ' The behavior specifies an object to follow, but no instance of that object is present.
                     ' We can't use this behavior, so we'll have to choose another.
-                    If Not hasDestination AndAlso potentialBehavior.OriginalFollowObjectName <> "" Then
-                        followObjectName = ""
+                    If Not hasDestination AndAlso potentialBehavior.OriginalFollowTargetName <> "" Then
+                        followTargetName = ""
                         Continue For
                     End If
 
@@ -1438,12 +1444,12 @@ Public Class Pony
                     CurrentBehavior.Name)
             End If
         Else
-            followObjectName = specifiedBehavior.OriginalFollowObjectName
+            followTargetName = specifiedBehavior.OriginalFollowTargetName
             Destination = DetermineDestination()
 
             ' The behavior specifies an object to follow, but no instance of that object is present.
             ' We can't use this behavior, so we'll have to choose another at random.
-            If Not hasDestination AndAlso specifiedBehavior.OriginalFollowObjectName <> "" AndAlso
+            If Not hasDestination AndAlso specifiedBehavior.OriginalFollowTargetName <> "" AndAlso
                 Not Reference.InPreviewMode Then
                 SelectBehavior()
                 Exit Sub
@@ -1470,7 +1476,7 @@ Public Class Pony
         ' later.
         If CurrentBehavior.StartLine IsNot Nothing Then
             PonySpeak(CurrentBehavior.StartLine)
-        ElseIf CurrentBehavior.EndLine Is Nothing AndAlso followObjectName = "" AndAlso
+        ElseIf CurrentBehavior.EndLine Is Nothing AndAlso followTargetName = "" AndAlso
             Not IsInteracting AndAlso Rng.NextDouble() <= Options.PonySpeechChance Then
             PonySpeak()
         End If
@@ -1886,7 +1892,7 @@ Public Class Pony
             TopLeftLocation = newTopLeftLocation
             lastMovement = movement
 
-            Dim useVisualOverride = (followObject IsNot Nothing AndAlso
+            Dim useVisualOverride = (followTarget IsNot Nothing AndAlso
                                      (CurrentBehavior.AutoSelectImagesOnFollow OrElse
                                       CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
                                       CurrentBehavior.FollowStoppedBehavior IsNot Nothing)) OrElse
@@ -1939,8 +1945,8 @@ Public Class Pony
                     CurrentBehavior = GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
                 End If
 
-                followObject = Nothing
-                followObjectName = ""
+                followTarget = Nothing
+                followTargetName = ""
                 destinationCoords = safespot
 
                 Paint(False)
@@ -1959,7 +1965,7 @@ Public Class Pony
             Paint()
             AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
         Else
-            If IsNothing(followObject) Then
+            If IsNothing(followTarget) Then
                 speed = 0
             Else
                 'do nothing but stare longingly in the direction of the object we want to follow...
@@ -1978,19 +1984,18 @@ Public Class Pony
         If GoingHome Then Return Destination
 
         ' If we should be following something, but we don't know what yet, select a pony/effect to follow.
-        If (followObjectName <> "" AndAlso IsNothing(followObject)) Then
+        If (followTargetName <> "" AndAlso IsNothing(followTarget)) Then
             ' If we are interacting, and the name of the pony we should be following matches that of the trigger, follow that one.
             ' Otherwise, we may end up following the wrong copy if there are more than one.
-            If IsInteracting AndAlso
-                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Trigger.Directory), StringComparison.OrdinalIgnoreCase) Then
-                followObject = CurrentInteraction.Trigger
+            If IsInteracting AndAlso followTargetName = CurrentInteraction.Trigger.Directory Then
+                followTarget = CurrentInteraction.Trigger
                 Return New Point(CurrentInteraction.Trigger.CenterLocation.X + destinationCoords.X,
                                  CurrentInteraction.Trigger.CenterLocation.Y + destinationCoords.Y)
             End If
             ' For the reverse case of a trigger pony trying to find out which initiator to follow when interacting.
             If IsInteracting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
-                String.Equals(Trim(followObjectName), Trim(CurrentInteraction.Initiator.Directory), StringComparison.OrdinalIgnoreCase) Then
-                followObject = CurrentInteraction.Initiator
+                followTargetName = CurrentInteraction.Initiator.Directory Then
+                followTarget = CurrentInteraction.Initiator
                 Return New Point(CurrentInteraction.Initiator.TopLeftLocation.X + destinationCoords.X,
                                  CurrentInteraction.Initiator.TopLeftLocation.Y + destinationCoords.Y)
             End If
@@ -1998,39 +2003,24 @@ Public Class Pony
             ' If not interacting, or following a different pony, we need to figure out which ones and follow one at random.
             Dim poniesToFollow As New List(Of Pony)
             For Each ponyToFollow In CurrentAnimator.Ponies()
-                If String.Equals(ponyToFollow.Directory, followObjectName, StringComparison.OrdinalIgnoreCase) Then
+                If ponyToFollow.Directory = followTargetName Then
                     poniesToFollow.Add(ponyToFollow)
                 End If
             Next
             If poniesToFollow.Count <> 0 Then
                 Dim ponyToFollow = poniesToFollow(Rng.Next(poniesToFollow.Count))
-                followObject = ponyToFollow
+                followTarget = ponyToFollow
                 Return New Point(ponyToFollow.TopLeftLocation.X + destinationCoords.X,
                                  ponyToFollow.TopLeftLocation.Y + destinationCoords.Y)
-            End If
-
-
-            ' We may be following an effect instead.
-            Dim effectsToFollow As New List(Of Effect)
-            For Each effect In CurrentAnimator.Effects()
-                If String.Equals(effect.Base.Name, followObjectName, StringComparison.OrdinalIgnoreCase) Then
-                    effectsToFollow.Add(effect)
-                End If
-            Next
-            If effectsToFollow.Count <> 0 Then
-                Dim dice = Rng.Next(effectsToFollow.Count)
-                followObject = effectsToFollow(dice)
-                Return New Point(effectsToFollow(dice).Location.X + destinationCoords.X,
-                                 effectsToFollow(dice).Location.Y + destinationCoords.Y)
             End If
 
             ' We can't find the object to follow, so specify no destination.
             Return Point.Empty
         End If
 
-        If followObject IsNot Nothing Then
+        If followTarget IsNot Nothing Then
             ' We've already selected an object to follow previously.
-            Dim followPony = TryCast(followObject, Pony)
+            Dim followPony = TryCast(followTarget, Pony)
             If followPony IsNot Nothing Then
                 If leadTarget Then
                     Return followPony.FutureLocation()
@@ -2039,7 +2029,7 @@ Public Class Pony
                                      CInt(followPony.CenterLocation.Y + (followPony.Scale * destinationCoords.Y)))
                 End If
             Else
-                Dim followEffect As Effect = DirectCast(followObject, Effect)
+                Dim followEffect As Effect = DirectCast(followTarget, Effect)
                 Return New Point(followEffect.Center.X + destinationCoords.X, followEffect.Center.Y + destinationCoords.Y)
             End If
         End If
@@ -2058,7 +2048,7 @@ Public Class Pony
     Private Sub StopReturningToScreenArea()
         ReturningToScreenArea = False
         destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord, CurrentBehavior.OriginalDestinationYCoord)
-        followObjectName = CurrentBehavior.OriginalFollowObjectName
+        followTargetName = CurrentBehavior.OriginalFollowTargetName
         Paint()
     End Sub
 
@@ -2398,7 +2388,7 @@ Public Class Pony
                 End If
 
                 'if this behavior has a destination or an object to follow, don't use it.
-                If (destinationCoords.X <> 0 OrElse destinationCoords.Y <> 0 OrElse followObjectName <> "") AndAlso
+                If (destinationCoords.X <> 0 OrElse destinationCoords.Y <> 0 OrElse followTargetName <> "") AndAlso
                     Not PlayingGame AndAlso
                     Not ReturningToScreenArea Then
                     Continue For
@@ -2724,7 +2714,7 @@ Public Class Pony
             End If
 
             ' Determine the common set of behaviors by name actually implemented by this pony and all discovered targets.
-            Dim commonBehaviors As New HashSet(Of String)(interactionBase.BehaviorNames, StringComparer.OrdinalIgnoreCase)
+            Dim commonBehaviors As New HashSet(Of CaseInsensitiveString)(interactionBase.BehaviorNames)
             For Each pony In {Me}.Concat(otherPonies)
                 commonBehaviors.IntersectWith(pony.Base.Behaviors.Select(Function(b) b.Name))
                 If commonBehaviors.Count = 0 Then Exit For
@@ -2757,7 +2747,7 @@ Public Class Pony
         End If
     End Sub
 
-    Private Sub StartInteractionAsTarget(behaviorName As String, interaction As Interaction)
+    Private Sub StartInteractionAsTarget(behaviorName As CaseInsensitiveString, interaction As Interaction)
         isInteractionInitiator = False
         IsInteracting = True
         CurrentInteraction = interaction
@@ -2838,6 +2828,9 @@ Public Class Pony
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
+            ' TODO: This assert can be triggered, if the AsyncLinkedList defers the addition of a sprite until between the update and draw
+            ' cycles. This is unlikely but possible. Rework design to remove this class and delegate queued add/remove stuff to
+            ' AnimationLoopBase.
             Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
             Dim width = CInt(CurrentImageSize.X * Options.ScaleFactor)
             Dim height = CInt(CurrentImageSize.Y * Options.ScaleFactor)
@@ -2909,8 +2902,8 @@ End Class
 Public Class EffectBase
     Implements IPonyIniSourceable, IReferential
 
-    Public Property Name As String Implements IPonyIniSerializable.Name
-    Public Property BehaviorName As String
+    Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
+    Public Property BehaviorName As CaseInsensitiveString
     Public Property ParentPonyBase As PonyBase
     Private ReadOnly _leftImage As New SpriteImage()
     Private ReadOnly _rightImage As New SpriteImage()
@@ -3009,7 +3002,7 @@ Public Class EffectBase
         Return MyBase.MemberwiseClone()
     End Function
 
-    Public Function GetReferentialIssues() As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
+    Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.GetIssue("Behavior", BehaviorName, ParentPonyBase.Behaviors.Select(Function(b) b.Name))}.
             Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
@@ -3213,7 +3206,7 @@ Public Class HouseBase
     End Property
 
     Private ReadOnly _visitors As New List(Of String)
-    Public ReadOnly Property Visitors() As IList(Of String)
+    Public ReadOnly Property Visitors() As List(Of String)
         Get
             Return _visitors
         End Get
@@ -3316,7 +3309,7 @@ Public Class House
         For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
             SyncLock HouseBase.Visitors
                 For Each guest In HouseBase.Visitors
-                    If String.Equals(Pony.Directory, guest, StringComparison.OrdinalIgnoreCase) Then
+                    If Pony.Directory = guest Then
                         deployedPonies.Add(Pony)
                         Exit For
                     End If
@@ -3367,7 +3360,7 @@ Public Class House
         Dim all As Boolean = False
         SyncLock HouseBase.Visitors
             For Each entry In HouseBase.Visitors
-                If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
+                If entry = "all" Then
                     For Each ponyBase In ponyBases
                         choices.Add(ponyBase.Directory)
                     Next
@@ -3383,8 +3376,8 @@ Public Class House
             End If
         End SyncLock
 
-        For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
-            choices.Remove(Pony.Directory)
+        For Each p In Pony.CurrentAnimator.Ponies()
+            choices.Remove(p.Directory)
         Next
 
         choices.Remove("Random Pony")
@@ -3444,7 +3437,7 @@ Public Class House
         Dim all As Boolean = False
         SyncLock HouseBase.Visitors
             For Each entry In HouseBase.Visitors
-                If String.Equals(entry, "all", StringComparison.OrdinalIgnoreCase) Then
+                If entry = "all" Then
                     For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
                         choices.Add(Pony.Directory)
                     Next
@@ -3636,11 +3629,11 @@ Public Module EnumConversions
                 Return AllowedMoves.HorizontalOnly
             Case "Vertical Only"
                 Return AllowedMoves.VerticalOnly
-            Case "Horizontal Vertical"
+            Case "Horizontal/Vertical"
                 Return AllowedMoves.HorizontalVertical
             Case "Diagonal Only"
                 Return AllowedMoves.DiagonalOnly
-            Case "Diagonal/horizontal"
+            Case "Diagonal/Horizontal"
                 Return AllowedMoves.DiagonalHorizontal
             Case "Diagonal/Vertical"
                 Return AllowedMoves.DiagonalVertical
@@ -3695,11 +3688,11 @@ Public Module EnumConversions
             Case AllowedMoves.VerticalOnly
                 Return "Vertical Only"
             Case AllowedMoves.HorizontalVertical
-                Return "Horizontal Vertical"
+                Return "Horizontal/Vertical"
             Case AllowedMoves.DiagonalOnly
                 Return "Diagonal Only"
             Case AllowedMoves.DiagonalHorizontal
-                Return "Diagonal/horizontal"
+                Return "Diagonal/Horizontal"
             Case AllowedMoves.DiagonalVertical
                 Return "Diagonal/Vertical"
             Case AllowedMoves.All

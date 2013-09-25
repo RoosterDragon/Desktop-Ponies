@@ -66,8 +66,8 @@ Public Class ItemEditorBase
     Protected Property ReferentialIssues As ImmutableArray(Of ParseIssue)
     Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
-            Return If(ParseIssues, Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
-                If(ReferentialIssues, Linq.Enumerable.Empty(Of ParseIssue)()))
+            Return If(ParseIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
+                If(ReferentialIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()))
         End Get
     End Property
     Public Event IssuesChanged As EventHandler

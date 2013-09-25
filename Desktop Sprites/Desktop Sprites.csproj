@@ -107,6 +107,7 @@
     <Compile Include="Core\ExceptionDialog.Designer.cs">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\Linq.cs" />
     <Compile Include="Core\Runtime.cs" />
     <Compile Include="Forms\AnimatedImageIndexer.cs">
       <SubType>UserControl</SubType>

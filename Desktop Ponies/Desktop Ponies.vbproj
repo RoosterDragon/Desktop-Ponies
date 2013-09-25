@@ -118,6 +118,13 @@
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Monitoring\PonyLogForm.Designer.vb">
+      <DependentUpon>PonyLogForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Monitoring\PonyLogForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DesktopPonies\CaseInsensitiveString.vb" />
     <Compile Include="DesktopPonies\DesktopControlForm.Designer.vb">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </Compile>
@@ -134,12 +141,6 @@
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
     <Compile Include="IdleWorker.vb" />
     <Compile Include="IMemberwiseCloneable.vb" />
-    <Compile Include="Monitoring\PonyLogForm.Designer.vb">
-      <DependentUpon>PonyLogForm.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Monitoring\PonyLogForm.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -346,6 +347,9 @@
     <Compile Include="DesktopPonies\DesktopPonyAnimator.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Monitoring\PonyLogForm.resx">
+      <DependentUpon>PonyLogForm.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\GameTeamControl.resx">
       <DependentUpon>GameTeamControl.vb</DependentUpon>
     </EmbeddedResource>
@@ -378,9 +382,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\SpeechEditor.resx">
       <DependentUpon>SpeechEditor.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Monitoring\PonyLogForm.resx">
-      <DependentUpon>PonyLogForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\PonySelectionControl.resx">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>

@@ -1,4 +1,6 @@
-﻿Public Class OptionsForm
+﻿Imports System.Globalization
+
+Public Class OptionsForm
     Private selectingMonitors As Boolean
     Private avoidanceZonePreviewGraphics As Graphics
     Private initializing As Boolean = True
@@ -17,7 +19,6 @@
         UseWaitCursor = True
         Enabled = False
         Update()
-        Application.DoEvents()
         Windows.Forms.Cursor.Current = Cursors.WaitCursor
 
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
@@ -132,7 +133,7 @@
         For Each monitorLoop In Options.Screens
             Dim monitor = monitorLoop
             For i = 0 To MonitorsSelection.Items.Count - 1
-                If CStr(MonitorsSelection.Items(i)) = monitor.DeviceName Then
+                If DirectCast(MonitorsSelection.Items(i), String) = monitor.DeviceName Then
                     MonitorsSelection.SetSelected(i, True)
                 End If
             Next
@@ -146,7 +147,7 @@
     End Sub
 
     Private Sub LoadProfile()
-        Dim profile = Options.DefaultProfileName
+        Dim profile As String = Options.DefaultProfileName
         Try
             If Not String.IsNullOrWhiteSpace(Main.Instance.ProfileComboBox.Text) Then
                 profile = Main.Instance.ProfileComboBox.Text.Trim()
@@ -172,7 +173,7 @@
             Exit Sub
         End If
 
-        Dim profile = Options.DefaultProfileName
+        Dim profile As String = Options.DefaultProfileName
 
         If Not IsNothing(sender) Then
             If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
@@ -180,7 +181,7 @@
             End If
         End If
 
-        If String.Equals(profile, Options.DefaultProfileName, StringComparison.OrdinalIgnoreCase) Then
+        If profile = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. Create a new profile first.",
                             "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
@@ -231,7 +232,7 @@
         Options.Screens.Clear()
         For i = 0 To MonitorsSelection.SelectedItems.Count - 1
             For Each monitor In Screen.AllScreens
-                If monitor.DeviceName = CStr(MonitorsSelection.SelectedItems(i)) Then
+                If monitor.DeviceName = DirectCast(MonitorsSelection.SelectedItems(i), String) Then
                     Options.Screens.Add(monitor)
                 End If
             Next
@@ -285,7 +286,7 @@
         'SoundVolume = CInt(4342 * Math.Log(Volume.Value / 100) - 10000)
         Options.SoundVolume = CSng(Volume.Value / 1000)
 
-        VolumeValueLabel.Text = CStr(Volume.Value / 100)
+        VolumeValueLabel.Text = (Volume.Value / 100).ToString(CultureInfo.CurrentCulture)
     End Sub
 
     Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
