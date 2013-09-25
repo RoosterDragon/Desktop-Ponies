@@ -18,6 +18,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="list"/> is null.</exception>
         public static ReadOnlyList<T> AsReadOnly<T>(this IList<T> list)
         {
+            if (list is ReadOnlyList<T>)
+                return (ReadOnlyList<T>)list;
             return new ReadOnlyList<T>(list);
         }
     }

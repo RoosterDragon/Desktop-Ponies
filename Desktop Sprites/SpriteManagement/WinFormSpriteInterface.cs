@@ -504,7 +504,11 @@
         /// <summary>
         /// Collection of sprites to be rendered.
         /// </summary>
-        private AsyncLinkedList<ISprite> sprites;
+        private ReadOnlyCollection<ISprite> sprites;
+        /// <summary>
+        /// Synchronizes access to the sprites field.
+        /// </summary>
+        private readonly object spritesGuard = new object();
 
         /// <summary>
         /// List of <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
@@ -1157,16 +1161,18 @@
         /// </summary>
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
-        public void Draw(AsyncLinkedList<ISprite> sprites)
+        public void Draw(ReadOnlyCollection<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
 
             if (paused)
                 return;
 
-            Interlocked.Exchange(ref this.sprites, sprites);
+            lock (spritesGuard)
+                this.sprites = sprites;
             ApplicationInvoke(render);
-            Interlocked.Exchange(ref this.sprites, null);
+            lock (spritesGuard)
+                this.sprites = new ReadOnlyCollection<ISprite>();
         }
 
         /// <summary>
@@ -1174,134 +1180,137 @@
         /// </summary>
         private void Render()
         {
-            if (sprites == null)
-                return;
-
-            // Get the target graphics surface.
-            Graphics surface;
-            if (IsAlphaBlended)
-                surface = form.BackgroundGraphics;
-            else
-                surface = bufferedGraphics.Graphics;
-
-            // Translation offset so the top-left of the form and drawing surface coincide.
-            Size translate = new Size(-form.Left, -form.Top);
-
-            // Save the invalid region from last frame.
-            preUpdateInvalidRegion.MakeEmpty();
-            preUpdateInvalidRegion.Union(postUpdateInvalidRegion);
-
-            // Reset the post-update clipping region.
-            postUpdateInvalidRegion.MakeEmpty();
-
-            #region Timings Graph Area
-            Rectangle timingsArea = Rectangle.Empty;
-            string timingsInfo = null;
-            if (Collector != null && ShowPerformanceGraph && Collector.Count != 0)
+            lock (spritesGuard)
             {
-                // Create info string.
-                timingsInfo = "fps: " +
-                    Collector.FramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + "/" +
-                    Collector.AchievableFramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
-                Size timingsSize = Size.Ceiling(surface.MeasureString(timingsInfo, font));
+                if (sprites == null)
+                    return;
 
-                // Set location and get area of graph draw.
-                Point offset = new Point(10, 10) + translate;
-                Point graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
-                Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
-                postUpdateInvalidRegion.Union(recorderGraphArea);
+                // Get the target graphics surface.
+                Graphics surface;
+                if (IsAlphaBlended)
+                    surface = form.BackgroundGraphics;
+                else
+                    surface = bufferedGraphics.Graphics;
 
-                // Set location of info string draw.
-                timingsArea = new Rectangle(
-                    recorderGraphArea.Left, recorderGraphArea.Top - timingsSize.Height - 1,
-                    timingsSize.Width + 1, timingsSize.Height + 1);
-                postUpdateInvalidRegion.Union(timingsArea);
-            }
-            #endregion
+                // Translation offset so the top-left of the form and drawing surface coincide.
+                Size translate = new Size(-form.Left, -form.Top);
 
-            // Determine and apply the clipping area, this is only beneficial when there are few sprites on screen. As more are added
-            // the cost of hit testing that combined area becomes larger, and so it's just cheaper to redraw everything than to perform
-            // hit testing on a complex area, and then end up redrawing most everything anyway.
-            const int Threshold = 15;
-            if (sprites.Count < Threshold)
-            {
+                // Save the invalid region from last frame.
+                preUpdateInvalidRegion.MakeEmpty();
+                preUpdateInvalidRegion.Union(postUpdateInvalidRegion);
+
+                // Reset the post-update clipping region.
+                postUpdateInvalidRegion.MakeEmpty();
+
+                #region Timings Graph Area
+                Rectangle timingsArea = Rectangle.Empty;
+                string timingsInfo = null;
+                if (Collector != null && ShowPerformanceGraph && Collector.Count != 0)
+                {
+                    // Create info string.
+                    timingsInfo = "fps: " +
+                        Collector.FramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + "/" +
+                        Collector.AchievableFramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
+                    Size timingsSize = Size.Ceiling(surface.MeasureString(timingsInfo, font));
+
+                    // Set location and get area of graph draw.
+                    Point offset = new Point(10, 10) + translate;
+                    Point graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
+                    Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
+                    postUpdateInvalidRegion.Union(recorderGraphArea);
+
+                    // Set location of info string draw.
+                    timingsArea = new Rectangle(
+                        recorderGraphArea.Left, recorderGraphArea.Top - timingsSize.Height - 1,
+                        timingsSize.Width + 1, timingsSize.Height + 1);
+                    postUpdateInvalidRegion.Union(timingsArea);
+                }
+                #endregion
+
+                // Determine and apply the clipping area, this is only beneficial when there are few sprites on screen. As more are added
+                // the cost of hit testing that combined area becomes larger, and so it's just cheaper to redraw everything than to perform
+                // hit testing on a complex area, and then end up redrawing most everything anyway.
+                const int Threshold = 15;
+                if (sprites.Count < Threshold)
+                {
+                    foreach (ISprite sprite in sprites)
+                    {
+                        postUpdateInvalidRegion.Union(OffsetRectangle(sprite.Region, translate));
+                        ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
+                        if (speakingSprite != null && speakingSprite.IsSpeaking)
+                            postUpdateInvalidRegion.Union(OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate));
+                    }
+                    postUpdateInvalidRegion.Intersect(OffsetRectangle(DisplayBounds, translate));
+                }
+                else
+                {
+                    postUpdateInvalidRegion.Union(OffsetRectangle(DisplayBounds, translate));
+                }
+
+                // Determine the current clipping area required, and clear it of old graphics.
+                if (IsAlphaBlended)
+                {
+                    surface.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
+                    surface.Clear(Color.FromArgb(0));
+                }
+                else
+                {
+                    surface = ResizeGraphicsBuffer();
+                    surface.Clear(form.TransparencyKey);
+                }
+
+                // Set the clipping area to the region we'll be drawing in for this frame.
+                surface.SetClip(postUpdateInvalidRegion, CombineMode.Replace);
+
+                #region Show Clipping Region
+                if (ShowClippingRegion)
+                {
+                    // Get the clipping region as a series of non-overlapping rectangles.
+                    RectangleF[] invalidRectangles = postUpdateInvalidRegion.GetRegionScans(identityMatrix);
+
+                    // Display the clipping rectangles.
+                    foreach (RectangleF invalidRectangleF in invalidRectangles)
+                    {
+                        Rectangle invalidRectangle = new Rectangle(
+                            (int)invalidRectangleF.X, (int)invalidRectangleF.Y,
+                            (int)invalidRectangleF.Width - 1, (int)invalidRectangleF.Height - 1);
+                        surface.DrawRectangle(Pens.Blue, invalidRectangle);
+                    }
+                }
+                #endregion
+
+                // Draw all the sprites.
                 foreach (ISprite sprite in sprites)
                 {
-                    postUpdateInvalidRegion.Union(OffsetRectangle(sprite.Region, translate));
+                    // Draw the sprite image.
+                    BitmapFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
+                    frame.Flip(sprite.FlipImage);
+                    surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
+
+                    // Draw a speech bubble for a speaking sprite.
                     ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
                     if (speakingSprite != null && speakingSprite.IsSpeaking)
-                        postUpdateInvalidRegion.Union(OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate));
+                    {
+                        Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate);
+                        surface.FillRectangle(whiteBrush, bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
+                        surface.DrawRectangle(blackPen,
+                            new Rectangle(bubble.X, bubble.Y, bubble.Width - 1, bubble.Height - 1));
+                        surface.DrawString(speakingSprite.SpeechText, font, blackBrush, bubble.Location);
+                    }
                 }
-                postUpdateInvalidRegion.Intersect(OffsetRectangle(DisplayBounds, translate));
-            }
-            else
-            {
-                postUpdateInvalidRegion.Union(OffsetRectangle(DisplayBounds, translate));
-            }
 
-            // Determine the current clipping area required, and clear it of old graphics.
-            if (IsAlphaBlended)
-            {
-                surface.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
-                surface.Clear(Color.FromArgb(0));
-            }
-            else
-            {
-                surface = ResizeGraphicsBuffer();
-                surface.Clear(form.TransparencyKey);
-            }
-
-            // Set the clipping area to the region we'll be drawing in for this frame.
-            surface.SetClip(postUpdateInvalidRegion, CombineMode.Replace);
-
-            #region Show Clipping Region
-            if (ShowClippingRegion)
-            {
-                // Get the clipping region as a series of non-overlapping rectangles.
-                RectangleF[] invalidRectangles = postUpdateInvalidRegion.GetRegionScans(identityMatrix);
-
-                // Display the clipping rectangles.
-                foreach (RectangleF invalidRectangleF in invalidRectangles)
+                #region Timings Graph
+                if (Collector != null && ShowPerformanceGraph && Collector.Count != 0)
                 {
-                    Rectangle invalidRectangle = new Rectangle(
-                        (int)invalidRectangleF.X, (int)invalidRectangleF.Y,
-                        (int)invalidRectangleF.Width - 1, (int)invalidRectangleF.Height - 1);
-                    surface.DrawRectangle(Pens.Blue, invalidRectangle);
+                    // Display a graph of frame times and garbage collections.
+                    Collector.DrawGraph(surface);
+
+                    // Display how long this frame took.
+                    surface.FillRectangle(blackBrush, timingsArea);
+                    surface.DrawString(timingsInfo, font, whiteBrush, timingsArea.Left, timingsArea.Top);
                 }
+                #endregion
             }
-            #endregion
-
-            // Draw all the sprites.
-            foreach (ISprite sprite in sprites)
-            {
-                // Draw the sprite image.
-                BitmapFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
-                frame.Flip(sprite.FlipImage);
-                surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
-
-                // Draw a speech bubble for a speaking sprite.
-                ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                if (speakingSprite != null && speakingSprite.IsSpeaking)
-                {
-                    Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate);
-                    surface.FillRectangle(whiteBrush, bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
-                    surface.DrawRectangle(blackPen,
-                        new Rectangle(bubble.X, bubble.Y, bubble.Width - 1, bubble.Height - 1));
-                    surface.DrawString(speakingSprite.SpeechText, font, blackBrush, bubble.Location);
-                }
-            }
-
-            #region Timings Graph
-            if (Collector != null && ShowPerformanceGraph && Collector.Count != 0)
-            {
-                // Display a graph of frame times and garbage collections.
-                Collector.DrawGraph(surface);
-
-                // Display how long this frame took.
-                surface.FillRectangle(blackBrush, timingsArea);
-                surface.DrawString(timingsInfo, font, whiteBrush, timingsArea.Left, timingsArea.Top);
-            }
-            #endregion
 
             // Render the result.
             if (IsAlphaBlended)

@@ -2828,9 +2828,6 @@ Public Class Pony
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
-            ' TODO: This assert can be triggered, if the AsyncLinkedList defers the addition of a sprite until between the update and draw
-            ' cycles. This is unlikely but possible. Rework design to remove this class and delegate queued add/remove stuff to
-            ' AnimationLoopBase.
             Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
             Dim width = CInt(CurrentImageSize.X * Options.ScaleFactor)
             Dim height = CInt(CurrentImageSize.Y * Options.ScaleFactor)
@@ -3418,11 +3415,6 @@ Public Class House
                 deployedPonies.Add(deployed_pony)
 
                 Console.WriteLine(Me.Base.Name & " - Deployed " & ponyBase.Directory)
-
-                For Each other_Pony In Pony.CurrentAnimator.Ponies()
-                    'we need to set up interactions again to account for new ponies.
-                    other_Pony.InitializeInteractions(Pony.CurrentAnimator.Ponies())
-                Next
 
                 Exit Sub
             End If

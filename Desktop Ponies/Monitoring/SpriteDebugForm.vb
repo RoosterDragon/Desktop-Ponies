@@ -6,7 +6,7 @@ Public Class SpriteDebugForm
         Icon = My.Resources.Twilight
     End Sub
 
-    Public Sub UpdateSprites(sprites As AsyncLinkedList(Of ISprite))
+    Public Sub UpdateSprites(sprites As ReadOnlyCollection(Of ISprite))
         PonyDataGridView.SuspendLayout()
         If PonyDataGridView.Rows.Count < sprites.Count Then
             PonyDataGridView.Rows.Add(sprites.Count - PonyDataGridView.Rows.Count)

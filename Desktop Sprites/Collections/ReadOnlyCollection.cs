@@ -18,6 +18,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
         public static ReadOnlyCollection<T> AsReadOnly<T>(this ICollection<T> collection)
         {
+            if (collection is ReadOnlyCollection<T>)
+                return (ReadOnlyCollection<T>)collection;
             return new ReadOnlyCollection<T>(collection);
         }
     }

@@ -52,11 +52,16 @@ Public Class DesktopPonyAnimator
         If createDesktopControlForm Then
             Main.Instance.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
             controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(Ponies.ToArray()))
-            AddHandler Sprites.ItemAdded, AddressOf ControlFormItemAdded
-            AddHandler Sprites.ItemsAdded, AddressOf ControlFormItemsAdded
-            AddHandler Sprites.ItemRemoved, AddressOf ControlFormItemRemoved
-            AddHandler Sprites.ItemsRemoved, AddressOf ControlFormItemsRemoved
+            AddHandler SpriteAdded, AddressOf ControlFormItemAdded
+            AddHandler SpritesAdded, AddressOf ControlFormItemsAdded
+            AddHandler SpriteRemoved, AddressOf ControlFormItemRemoved
+            AddHandler SpritesRemoved, AddressOf ControlFormItemsRemoved
         End If
+
+        AddHandler SpriteAdded, AddressOf SpriteChanged
+        AddHandler SpritesAdded, AddressOf SpritesChanged
+        AddHandler SpriteRemoved, AddressOf SpriteChanged
+        AddHandler SpritesRemoved, AddressOf SpritesChanged
 
         ponyBases = Argument.EnsureNotNull(ponyBaseCollection, "ponyBaseCollection").ToArray()
         randomPony = randomPonyBase
@@ -107,6 +112,14 @@ Public Class DesktopPonyAnimator
                 controlForm.SmartInvoke(method)
             End If
         End SyncLock
+    End Sub
+
+    Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
+        If TypeOf e.Item Is Pony Then ReinitializeInteractions()
+    End Sub
+
+    Private Sub SpritesChanged(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
+        If e.Items.Any(Function(s) TypeOf s Is Pony) Then ReinitializeInteractions()
     End Sub
 
     Public Overrides Sub Start()
@@ -161,7 +174,7 @@ Public Class DesktopPonyAnimator
             If effect Is Nothing Then Continue For
             If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
                 effect.OwningPony.ActiveEffects.Remove(effect)
-                Sprites.Remove(effect)
+                QueueRemove(effect)
             End If
         Next
 
@@ -180,7 +193,7 @@ Public Class DesktopPonyAnimator
         End If
 
         MyBase.Update()
-        Sprites.Sort(zOrder)
+        Sort(zOrder)
 
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
@@ -215,12 +228,16 @@ Public Class DesktopPonyAnimator
                     controlForm.BeginInvoke(New MethodInvoker(AddressOf controlForm.ForceClose))
                 End If
             End SyncLock
-            RemoveHandler Sprites.ItemAdded, AddressOf ControlFormItemAdded
-            RemoveHandler Sprites.ItemsAdded, AddressOf ControlFormItemsAdded
-            RemoveHandler Sprites.ItemRemoved, AddressOf ControlFormItemRemoved
-            RemoveHandler Sprites.ItemsRemoved, AddressOf ControlFormItemsRemoved
+            RemoveHandler SpriteAdded, AddressOf ControlFormItemAdded
+            RemoveHandler SpritesAdded, AddressOf ControlFormItemsAdded
+            RemoveHandler SpriteRemoved, AddressOf ControlFormItemRemoved
+            RemoveHandler SpritesRemoved, AddressOf ControlFormItemsRemoved
             controlForm = Nothing
         End If
+        RemoveHandler SpriteAdded, AddressOf SpriteChanged
+        RemoveHandler SpritesAdded, AddressOf SpritesChanged
+        RemoveHandler SpriteRemoved, AddressOf SpriteChanged
+        RemoveHandler SpritesRemoved, AddressOf SpritesChanged
         If spriteDebugForm IsNot Nothing Then
             Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Close)
             spriteDebugForm = Nothing
@@ -236,19 +253,15 @@ Public Class DesktopPonyAnimator
                 Sub()
                     Main.Instance.SmartInvoke(
                         Sub()
-                            Sprites.RemoveAll(Function(sprite)
-                                                  If Object.ReferenceEquals(sprite, selectedPony) Then Return True
-                                                  Dim effect = TryCast(sprite, Effect)
-                                                  If effect IsNot Nothing AndAlso
-                                                      Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
-                                                      Return True
-                                                  End If
-                                                  Return False
-                                              End Function)
-                            For Each other_pony In Sprites.OfType(Of Pony)()
-                                'we need to set up interactions again to account for removed ponies.
-                                other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-                            Next
+                            QueueRemove(Function(sprite)
+                                            If Object.ReferenceEquals(sprite, selectedPony) Then Return True
+                                            Dim effect = TryCast(sprite, Effect)
+                                            If effect IsNot Nothing AndAlso
+                                                Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
+                                                Return True
+                                            End If
+                                            Return False
+                                        End Function)
                         End Sub)
                 End Sub))
         menuItems.AddLast(
@@ -257,22 +270,18 @@ Public Class DesktopPonyAnimator
                 Sub()
                     Main.Instance.SmartInvoke(
                         Sub()
-                            Sprites.RemoveAll(Function(sprite)
-                                                  Dim pony = TryCast(sprite, Pony)
-                                                  If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
-                                                      Return True
-                                                  End If
-                                                  Dim effect = TryCast(sprite, Effect)
-                                                  If effect IsNot Nothing AndAlso
-                                                      effect.OwningPony.Directory = selectedPony.Directory Then
-                                                      Return True
-                                                  End If
-                                                  Return False
-                                              End Function)
-                            For Each other_pony In Sprites.OfType(Of Pony)()
-                                'we need to set up interactions again to account for removed ponies.
-                                other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-                            Next
+                            QueueRemove(Function(sprite)
+                                            Dim pony = TryCast(sprite, Pony)
+                                            If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
+                                                Return True
+                                            End If
+                                            Dim effect = TryCast(sprite, Effect)
+                                            If effect IsNot Nothing AndAlso
+                                                effect.OwningPony.Directory = selectedPony.Directory Then
+                                                Return True
+                                            End If
+                                            Return False
+                                        End Function)
                         End Sub)
                 End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
@@ -435,15 +444,11 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Friend Sub AddPony(pony As Pony)
-        Sprites.AddLast(pony)
-        For Each other_pony In Sprites.OfType(Of Pony)()
-            'we need to set up interactions again to account for added ponies.
-            other_pony.InitializeInteractions(Sprites.OfType(Of Pony)())
-        Next
+        QueueAddAndStart(pony)
     End Sub
 
     Friend Sub AddHouse(house As House)
-        Sprites.AddLast(house)
+        QueueAddAndStart(house)
     End Sub
 
     Friend Sub RemovePony(pony As Pony)
@@ -452,9 +457,9 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub RemovePonyOnly(pony As Pony)
-        Sprites.Remove(pony)
+        QueueRemove(pony)
         For Each effect In pony.ActiveEffects
-            Sprites.Remove(effect)
+            QueueRemove(effect)
         Next
     End Sub
 
@@ -466,19 +471,19 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Friend Sub AddEffect(effect As Effect)
-        Sprites.AddLast(effect)
+        QueueAddAndStart(effect)
     End Sub
 
     Friend Sub RemoveEffect(effect As Effect)
-        Sprites.Remove(effect)
+        QueueRemove(effect)
     End Sub
 
     Friend Sub AddSprites(_sprites As IEnumerable(Of ISprite))
-        Sprites.AddRangeLast(_sprites)
+        QueueAddRangeAndStart(_sprites)
     End Sub
 
     Friend Sub Clear()
-        Sprites.Clear()
+        QueueClear()
     End Sub
 
     Friend Function Ponies() As IEnumerable(Of Pony)
@@ -494,7 +499,7 @@ Public Class DesktopPonyAnimator
                                       Dim newHouse = New House(houseBase)
                                       newHouse.InitializeVisitorList()
                                       newHouse.Teleport()
-                                      Sprites.AddLast(newHouse)
+                                      QueueAddAndStart(newHouse)
                                   End Sub)
     End Sub
 

@@ -1503,7 +1503,7 @@
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
-        public void Draw(AsyncLinkedList<ISprite> sprites)
+        public void Draw(ReadOnlyCollection<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
 

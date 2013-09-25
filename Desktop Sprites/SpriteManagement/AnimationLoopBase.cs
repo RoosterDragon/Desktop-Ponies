@@ -618,9 +618,17 @@
         private readonly object tickSync = new object();
 
         /// <summary>
-        /// Gets the collection of sprites.
+        /// The collection of active sprites.
         /// </summary>
-        protected AsyncLinkedList<ISprite> Sprites { get; private set; }
+        private readonly LinkedList<ISprite> sprites;
+        /// <summary>
+        /// Queue of actions to be performed on the active sprite collection during the next update cycle.
+        /// </summary>
+        private readonly Queue<Action> queuedSpriteActions = new Queue<Action>();
+        /// <summary>
+        /// Gets the collection of active sprites.
+        /// </summary>
+        protected ReadOnlyCollection<ISprite> Sprites { get; private set; }
         /// <summary>
         /// Gets the viewer for the sprite collection.
         /// </summary>
@@ -667,6 +675,22 @@
         /// Occurs when animation has finished.
         /// </summary>
         public event EventHandler AnimationFinished;
+        /// <summary>
+        /// Occurs when a single sprite is added to the collection.
+        /// </summary>
+        protected event EventHandler<CollectionItemChangedEventArgs<ISprite>> SpriteAdded;
+        /// <summary>
+        /// Occurs when a single sprite is successfully removed from the collection.
+        /// </summary>
+        protected event EventHandler<CollectionItemChangedEventArgs<ISprite>> SpriteRemoved;
+        /// <summary>
+        /// Occurs when multiple sprites are added to the collection.
+        /// </summary>
+        protected event EventHandler<CollectionItemsChangedEventArgs<ISprite>> SpritesAdded;
+        /// <summary>
+        /// Occurs when multiple sprites are successfully removed from the collection.
+        /// </summary>
+        protected event EventHandler<CollectionItemsChangedEventArgs<ISprite>> SpritesRemoved;
         #endregion
 
         /// <summary>
@@ -691,17 +715,10 @@
 
             // Create an asynchronous collection, so it can be safely exposed to derived classes.
             if (spriteCollection == null)
-                Sprites = new AsyncLinkedList<ISprite>();
+                sprites = new LinkedList<ISprite>();
             else
-                Sprites = new AsyncLinkedList<ISprite>(spriteCollection);
-
-            // Whenever a new sprite is added, call Start on the sprite automatically.
-            Sprites.ItemAdded += (sender, e) => e.Item.Start(ElapsedTime);
-            Sprites.ItemsAdded += (sender, e) =>
-            {
-                foreach (var sprite in e.Items)
-                    sprite.Start(ElapsedTime);
-            };
+                sprites = new LinkedList<ISprite>(spriteCollection);
+            Sprites = sprites.AsReadOnly();
 
             // Stop the animator when the viewer is closed.
             Viewer.InterfaceClosed += (sender, e) => Finish();
@@ -793,6 +810,142 @@
         }
 
         /// <summary>
+        /// Queues a sprite to be added to the collection of active sprites at the start of the next update cycle.
+        /// </summary>
+        /// <param name="sprite">The sprite to add to the collection. Start will be called on this sprite when it is added.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="sprite"/> is null.</exception>
+        protected void QueueAddAndStart(ISprite sprite)
+        {
+            Argument.EnsureNotNull(sprite, "sprite");
+            queuedSpriteActions.Enqueue(() =>
+            {
+                sprites.AddLast(sprite);
+                sprite.Start(ElapsedTime);
+                SpriteAdded.Raise(this, () => new CollectionItemChangedEventArgs<ISprite>(sprite));
+            });
+        }
+
+        /// <summary>
+        /// Queues a collection of sprites to be added to the active sprites at the start of the next update cycle.
+        /// </summary>
+        /// <param name="sprites">The collection of sprites to add. Start will be called on these sprite when they are added.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="sprites"/> contained a sprite that was null.</exception>
+        protected void QueueAddRangeAndStart(IEnumerable<ISprite> sprites)
+        {
+            Argument.EnsureNotNull(sprites, "sprites");
+            var items = sprites.ToImmutableArray();
+            foreach (ISprite sprite in items)
+                if (sprite == null)
+                    throw new ArgumentException("sprites contained a sprite that was null.", "sprites");
+            queuedSpriteActions.Enqueue(() =>
+            {
+                foreach (ISprite sprite in items)
+                {
+                    this.sprites.AddLast(sprite);
+                    sprite.Start(ElapsedTime);
+                }
+                SpritesAdded.Raise(this, () => new CollectionItemsChangedEventArgs<ISprite>(items));
+            });
+        }
+
+        /// <summary>
+        /// Queues a sprite to be removed from the collection of active sprites at the start of the next update cycle.
+        /// </summary>
+        /// <param name="sprite">The sprite to remove from the collection.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="sprite"/> is null.</exception>
+        protected void QueueRemove(ISprite sprite)
+        {
+            Argument.EnsureNotNull(sprite, "sprite");
+            queuedSpriteActions.Enqueue(() =>
+            {
+                if (sprites.Remove(sprite))
+                    SpriteRemoved.Raise(this, () => new CollectionItemChangedEventArgs<ISprite>(sprite));
+            });
+        }
+
+        /// <summary>
+        /// Queues a removal of sprites according to the specified predicate from the collection of active sprites at the start of the next
+        /// update cycle.
+        /// </summary>
+        /// <param name="predicate">A function that determines the sprites to remove from the collection.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="predicate"/> is null.</exception>
+        protected void QueueRemove(Predicate<ISprite> predicate)
+        {
+            Argument.EnsureNotNull(predicate, "predicate");
+            queuedSpriteActions.Enqueue(() =>
+            {
+                var spritesRemoved = SpritesRemoved;
+                List<ISprite> items = spritesRemoved != null ? new List<ISprite>() : null;
+                LinkedListNode<ISprite> node = sprites.First;
+                while (node != null)
+                {
+                    LinkedListNode<ISprite> nextNode = node.Next;
+                    if (predicate(node.Value))
+                    {
+                        sprites.Remove(node);
+                        if (spritesRemoved != null)
+                            items.Add(node.Value);
+                    }
+                    node = nextNode;
+                }
+                if (spritesRemoved != null && items.Count != 0)
+                    spritesRemoved(this, new CollectionItemsChangedEventArgs<ISprite>(items));
+            });
+        }
+
+        /// <summary>
+        /// Queues a removal of all sprites from the collection of active sprites at the start of the next update cycle.
+        /// </summary>
+        protected void QueueClear()
+        {
+            queuedSpriteActions.Enqueue(() =>
+            {
+                var spritesRemoved = SpritesRemoved;
+                var items = spritesRemoved != null ? sprites.ToImmutableArray() : null;
+                sprites.Clear();
+                if (spritesRemoved != null && items.Length != 0)
+                    spritesRemoved(this, new CollectionItemsChangedEventArgs<ISprite>(items));
+            });
+        }
+
+        /// <summary>
+        /// Sorts the active sprites using the default comparer.
+        /// </summary>
+        /// <exception cref="T:System.InvalidOperationException">The default comparer
+        /// <see cref="P:System.Collections.Generic.Comparer`1.Default"/> cannot find an implementation of the
+        /// <see cref="T:System.IComparable`1"/> generic interface or the <see cref="T:System.IComparable"/> interface for type
+        /// ISprite.</exception>
+        protected void Sort()
+        {
+            sprites.Sort();
+        }
+
+        /// <summary>
+        /// Sorts the active sprites using the specified <see cref="T:System.Comparison`1"/>.
+        /// </summary>
+        /// <param name="comparison">The <see cref="T:System.Comparison`1"/> to use when comparing elements.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
+        protected void Sort(Comparison<ISprite> comparison)
+        {
+            sprites.Sort(comparison);
+        }
+
+        /// <summary>
+        /// Sorts the active sprites using the specified comparer.
+        /// </summary>
+        /// <param name="comparer">The <see cref="T:System.Collections.Generic.IComparer`1"/> implementation to use when comparing
+        /// elements, or null to use the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>.</param>
+        /// <exception cref="T:System.InvalidOperationException"><paramref name="comparer"/> is null, and the default comparer
+        /// <see cref="P:System.Collections.Generic.Comparer`1.Default"/> cannot find implementation of the
+        /// <see cref="T:System.IComparable`1"/> generic interface or the <see cref="T:System.IComparable"/> interface for type
+        /// ISprite.</exception>
+        protected void Sort(IComparer<ISprite> comparer)
+        {
+            sprites.Sort(comparer);
+        }
+
+        /// <summary>
         /// Runs frame cycles continuously and tracks animation timings.
         /// </summary>
         private void Run()
@@ -869,6 +1022,8 @@
             lock (tickSync)
             {
                 elapsedTime = elapsedWatch.Elapsed;
+                while (queuedSpriteActions.Count > 0)
+                    queuedSpriteActions.Dequeue().Invoke();
                 foreach (ISprite sprite in Sprites)
                     sprite.Update(ElapsedTime);
             }
