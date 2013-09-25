@@ -29,13 +29,29 @@
             Return fileVersion.ToString(versionFields)
         End Function
 
+        Private exceptionHandlersAttached As Boolean
+
         Protected Overrides Function OnInitialize(commandLineArgs As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
                                                   ) As Boolean
-            AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
-            AddHandler System.Windows.Forms.Application.ThreadException, AddressOf Application_ThreadException
-            AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
+            ' This is the first method that fires, allowing exception handlers to be set up.
+            AttachExceptionHandlers()
             Return MyBase.OnInitialize(commandLineArgs)
         End Function
+
+        Protected Overrides Sub OnRun()
+            ' Mono doesn't fire all the methods in this class, so we'll wait for this one (which does fire) to attach handlers.
+            AttachExceptionHandlers()
+            MyBase.OnRun()
+        End Sub
+
+        Private Sub AttachExceptionHandlers()
+            If Not exceptionHandlersAttached Then
+                AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
+                AddHandler System.Windows.Forms.Application.ThreadException, AddressOf Application_ThreadException
+                AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
+                exceptionHandlersAttached = True
+            End If
+        End Sub
 
         Private Sub TaskScheduler_UnobservedTaskException(sender As Object, e As Threading.Tasks.UnobservedTaskExceptionEventArgs)
             ' If a debugger is attached, this event is not raised (instead the exception is allowed to propagate to the debugger),
