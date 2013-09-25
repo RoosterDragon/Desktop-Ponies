@@ -3625,7 +3625,7 @@ Public Module EnumConversions
                 Return AllowedMoves.HorizontalVertical
             Case "Diagonal Only"
                 Return AllowedMoves.DiagonalOnly
-            Case "Diagonal/Horizontal"
+            Case "Diagonal/horizontal"
                 Return AllowedMoves.DiagonalHorizontal
             Case "Diagonal/Vertical"
                 Return AllowedMoves.DiagonalVertical
@@ -3684,7 +3684,7 @@ Public Module EnumConversions
             Case AllowedMoves.DiagonalOnly
                 Return "Diagonal Only"
             Case AllowedMoves.DiagonalHorizontal
-                Return "Diagonal/Horizontal"
+                Return "Diagonal/horizontal"
             Case AllowedMoves.DiagonalVertical
                 Return "Diagonal/Vertical"
             Case AllowedMoves.All

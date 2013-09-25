@@ -31,7 +31,7 @@ Public Class PonyEditorForm2
             Return String.Join(Path.DirectorySeparatorChar,
                                If(PonyBase IsNot Nothing, PonyBase.Directory, ""),
                                PageContent,
-                               If(Item IsNot Nothing, Item.Name, Nothing))
+                               If(Item IsNot Nothing, Item.Name.ToString(), ""))
         End Function
     End Class
 
@@ -48,11 +48,11 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub PonyEditorForm2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Enabled = False
         Dim screenArea = Screen.FromHandle(Handle).WorkingArea.Size
         Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
         worker.QueueTask(Sub()
+                             EnableWaitCursor(True, True)
                              Dim images = New ImageList()
                              images.Images.Add(SystemIcons.Warning)
                              images.Images.Add(SystemIcons.WinLogo)
@@ -134,9 +134,7 @@ Public Class PonyEditorForm2
 
                     EditorProgressBar.Value += 1
                 End Sub))
-        worker.QueueTask(Sub()
-                             poniesNode.TreeView.Sort()
-                         End Sub)
+        worker.QueueTask(Sub() poniesNode.TreeView.Sort())
         worker.QueueTask(Sub()
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1

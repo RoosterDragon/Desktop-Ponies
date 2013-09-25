@@ -862,7 +862,7 @@ Partial Class PonyEditor
         'colBehaviorMovement
         '
         Me.colBehaviorMovement.HeaderText = "Movement Allowed"
-        Me.colBehaviorMovement.Items.AddRange(New Object() {"None", "Horizontal Only", "Vertical Only", "Horizontal/Vertical", "Diagonal Only", "Diagonal/Horizontal", "Diagonal/Vertical", "All", "MouseOver", "Sleep", "Dragged"})
+        Me.colBehaviorMovement.Items.AddRange(New Object() {"None", "Horizontal Only", "Vertical Only", "Horizontal/Vertical", "Diagonal Only", "Diagonal/horizontal", "Diagonal/Vertical", "All", "MouseOver", "Sleep", "Dragged"})
         Me.colBehaviorMovement.Name = "colBehaviorMovement"
         Me.colBehaviorMovement.Width = 103
         '

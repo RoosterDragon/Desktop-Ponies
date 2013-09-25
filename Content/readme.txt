@@ -71,7 +71,9 @@ Latest changes:
 
 v1.42.2.9:
 - Added Flash Sentry by Bot-chan.
+- Ponies may no longer follow effects. (This stops the program getting confused between following a pony and effect with the same name.)
 - On Windows, running with alpha blending enabled is now just as fast as with it disabled.
+- When changing linked behaviors in the editor, the "link order" column will now update as changes are made.
 - The editor now handles config files that use different casing when it is allowed, rather than giving warnings.
 - Fixed some issues related to editing interactions.
 - Fixed bug preventing creation of new profiles.

@@ -126,7 +126,6 @@
     <Compile Include="SpriteManagement\BitDepths.cs" />
     <Compile Include="Core\BitmapColors.cs" />
     <Compile Include="SpriteManagement\BitmapFrame.cs" />
-    <Compile Include="Collections\AsyncLinkedList.cs" />
     <Compile Include="Forms\GifAlphaForm.cs">
       <SubType>Form</SubType>
     </Compile>

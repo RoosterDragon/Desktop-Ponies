@@ -61,18 +61,15 @@ Partial Class PonyEditorForm2
         'EditingArea.Panel1
         '
         Me.EditingArea.Panel1.Controls.Add(Me.Documents)
-        Me.EditingArea.Panel1.UseWaitCursor = True
         Me.EditingArea.Panel1MinSize = 400
         '
         'EditingArea.Panel2
         '
         Me.EditingArea.Panel2.Controls.Add(Me.DocumentsView)
-        Me.EditingArea.Panel2.UseWaitCursor = True
         Me.EditingArea.Panel2MinSize = 100
         Me.EditingArea.Size = New System.Drawing.Size(784, 253)
         Me.EditingArea.SplitterDistance = 550
         Me.EditingArea.TabIndex = 0
-        Me.EditingArea.UseWaitCursor = True
         '
         'Documents
         '
@@ -82,7 +79,6 @@ Partial Class PonyEditorForm2
         Me.Documents.SelectedIndex = 0
         Me.Documents.Size = New System.Drawing.Size(550, 253)
         Me.Documents.TabIndex = 0
-        Me.Documents.UseWaitCursor = True
         '
         'DocumentsView
         '
@@ -93,7 +89,6 @@ Partial Class PonyEditorForm2
         Me.DocumentsView.Name = "DocumentsView"
         Me.DocumentsView.Size = New System.Drawing.Size(230, 253)
         Me.DocumentsView.TabIndex = 0
-        Me.DocumentsView.UseWaitCursor = True
         '
         'EditorToolStrip
         '
@@ -104,7 +99,6 @@ Partial Class PonyEditorForm2
         Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
         Me.EditorToolStrip.TabIndex = 0
         Me.EditorToolStrip.Text = "Item Operations"
-        Me.EditorToolStrip.UseWaitCursor = True
         '
         'SaveItemButton
         '
@@ -137,7 +131,6 @@ Partial Class PonyEditorForm2
         Me.EditorStatusStrip.Size = New System.Drawing.Size(784, 22)
         Me.EditorStatusStrip.TabIndex = 2
         Me.EditorStatusStrip.Text = "StatusStrip1"
-        Me.EditorStatusStrip.UseWaitCursor = True
         '
         'EditorStatus
         '
@@ -166,7 +159,6 @@ Partial Class PonyEditorForm2
         Me.Output.SelectedIndex = 0
         Me.Output.Size = New System.Drawing.Size(784, 200)
         Me.Output.TabIndex = 3
-        Me.Output.UseWaitCursor = True
         '
         'IssuesPage
         '
@@ -178,7 +170,6 @@ Partial Class PonyEditorForm2
         Me.IssuesPage.TabIndex = 1
         Me.IssuesPage.Text = "Errors"
         Me.IssuesPage.UseVisualStyleBackColor = True
-        Me.IssuesPage.UseWaitCursor = True
         '
         'IssuesGrid
         '
@@ -195,7 +186,6 @@ Partial Class PonyEditorForm2
         Me.IssuesGrid.ShowEditingIcon = False
         Me.IssuesGrid.Size = New System.Drawing.Size(770, 168)
         Me.IssuesGrid.TabIndex = 0
-        Me.IssuesGrid.UseWaitCursor = True
         '
         'colFatal
         '
@@ -251,7 +241,6 @@ Partial Class PonyEditorForm2
         Me.Name = "PonyEditorForm2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Pony Editor - Desktop Ponies"
-        Me.UseWaitCursor = True
         Me.EditingArea.Panel1.ResumeLayout(False)
         Me.EditingArea.Panel2.ResumeLayout(False)
         Me.EditingArea.ResumeLayout(False)

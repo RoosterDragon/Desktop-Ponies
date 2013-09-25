@@ -66,12 +66,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub LoadInternal()
-        Windows.Forms.Cursor.Current = Cursors.WaitCursor
-        UseWaitCursor = True
-        Enabled = False
-        Update()
-        Application.DoEvents()
-        Windows.Forms.Cursor.Current = Cursors.WaitCursor
+        EnableWaitCursor(True, True)
 
         Try
             For Each value In DirectCast([Enum].GetValues(GetType(TargetActivation)), TargetActivation())
@@ -159,11 +154,7 @@ Public Class PonyEditor
     Private Sub LoadPony()
         Dim worker = IdleWorker.CurrentThreadWorker
         worker.QueueTask(Sub()
-                             Windows.Forms.Cursor.Current = Cursors.WaitCursor
-                             UseWaitCursor = True
-                             Enabled = False
-                             Update()
-                             Windows.Forms.Cursor.Current = Cursors.WaitCursor
+                             EnableWaitCursor(True, False)
 
                              Pony.CurrentViewer = editorInterface
                              Pony.CurrentAnimator = editorAnimator
@@ -176,7 +167,7 @@ Public Class PonyEditor
                              End If
                          End Sub)
         worker.QueueTask(Sub()
-                             Windows.Forms.Cursor.Current = Cursors.WaitCursor
+                             EnableWaitCursor(False, False)
 
                              SaveSortOrder()
                              RestoreSortOrder()
@@ -187,7 +178,7 @@ Public Class PonyEditor
             Sub()
                 _previewPony = New Pony(base)
                 worker.QueueTask(Sub()
-                                     Windows.Forms.Cursor.Current = Cursors.WaitCursor
+                                     EnableWaitCursor(False, True)
 
                                      If PreviewPony.Base.Behaviors.Any() Then editorAnimator.AddPony(PreviewPony)
                                      LoadPonyInfo()

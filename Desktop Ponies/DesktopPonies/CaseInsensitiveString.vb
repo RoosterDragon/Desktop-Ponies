@@ -1,6 +1,6 @@
 ﻿<Diagnostics.DebuggerDisplay("{str}")>
 Public NotInheritable Class CaseInsensitiveString
-    Implements IComparable(Of CaseInsensitiveString), IComparable(Of String), IEquatable(Of CaseInsensitiveString), IEquatable(Of String)
+    Implements IComparable(Of CaseInsensitiveString), IEquatable(Of CaseInsensitiveString), IEquatable(Of String)
     Public Shared ReadOnly Empty As CaseInsensitiveString = New CaseInsensitiveString(String.Empty)
     Private str As String
     Public Sub New(value As String)
@@ -64,7 +64,7 @@ Public NotInheritable Class CaseInsensitiveString
     Public Function CompareTo(other As CaseInsensitiveString) As Integer Implements IComparable(Of CaseInsensitiveString).CompareTo
         Return Compare(Me, other)
     End Function
-    Public Function CompareTo(other As String) As Integer Implements IComparable(Of String).CompareTo
+    Public Function CompareTo(other As String) As Integer
         Return Compare(Me, other)
     End Function
     Public Overloads Function Equals(other As CaseInsensitiveString) As Boolean Implements IEquatable(Of CaseInsensitiveString).Equals

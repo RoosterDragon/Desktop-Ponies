@@ -54,7 +54,6 @@ Public Class Main
     ''' Read all configuration files and pony folders.
     ''' </summary>
     Private Sub LoadInternal()
-        Windows.Forms.Cursor.Current = Cursors.WaitCursor
         UseWaitCursor = True
         loading = True
         Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
@@ -117,7 +116,7 @@ Public Class Main
 
         ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
         ' fully drawn.
-        Application.DoEvents()
+        'Application.DoEvents()
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates, IdleWorker.CurrentThreadWorker)
@@ -225,9 +224,7 @@ Public Class Main
         ' Load ponies.
         ponies = New PonyCollection(
             Sub(count)
-                worker.QueueTask(Sub()
-                                     LoadingProgressBar.Maximum = count + houseDirectories.Length
-                                 End Sub)
+                worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length)
             End Sub,
             Sub(pony)
                 worker.QueueTask(Sub()
@@ -470,7 +467,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private Sub GetProfiles(profileToAttemptToLoad As CaseInsensitiveString)
+    Private Sub GetProfiles(profileToAttemptToLoad As String)
         ProfileComboBox.Items.Clear()
         ProfileComboBox.Items.Add(Options.DefaultProfileName)
         Dim profiles = Options.GetKnownProfiles()

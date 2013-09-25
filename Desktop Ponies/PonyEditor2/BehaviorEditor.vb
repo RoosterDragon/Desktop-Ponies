@@ -40,7 +40,7 @@ Friend Class BehaviorEditor
         AddHandler StartSpeechComboBox.ValueChanged,
             Sub() UpdateProperty(Sub()
                                      Edited.StartLineName =
-                                         If(StartSpeechComboBox.SelectedIndex <> 0, StartSpeechComboBox.Text, Nothing)
+                                         If(StartSpeechComboBox.SelectedIndex <> 0, StartSpeechComboBox.Text, "")
                                  End Sub)
         AddHandler EndSpeechComboBox.SelectedIndexChanged,
             Sub() UpdateProperty(Sub()
