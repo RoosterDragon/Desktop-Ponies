@@ -279,6 +279,11 @@ Public Class PonyEditor
                 colBehaviorEndSpeech.Items.Add(speech.Name)
             Next
 
+            For Each behavior In PreviewPony.Behaviors
+                colBehaviorLinked.Items.Add(behavior.Name)
+                colEffectBehavior.Items.Add(behavior.Name)
+            Next
+
             Dim behaviorSequencesByName = DetermineBehaviorSequences()
             For Each behavior In PreviewPony.Behaviors
                 Dim followName As String = ""
@@ -317,8 +322,6 @@ Public Class PonyEditor
                     behaviorSequencesByName(behavior.Name),
                     behavior.Skip,
                     behavior.DoNotRepeatImageAnimations)
-                colBehaviorLinked.Items.Add(behavior.Name)
-                colEffectBehavior.Items.Add(behavior.Name)
             Next
 
             For Each effect In PreviewPony.Base.Effects

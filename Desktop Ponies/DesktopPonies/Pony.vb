@@ -3356,8 +3356,8 @@ Public Class House
 
         Dim all As Boolean = False
         SyncLock HouseBase.Visitors
-            For Each entry In HouseBase.Visitors
-                If entry = "all" Then
+            For Each visitor In HouseBase.Visitors
+                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
                     For Each ponyBase In ponyBases
                         choices.Add(ponyBase.Directory)
                     Next
@@ -3428,8 +3428,8 @@ Public Class House
 
         Dim all As Boolean = False
         SyncLock HouseBase.Visitors
-            For Each entry In HouseBase.Visitors
-                If entry = "all" Then
+            For Each visitor In HouseBase.Visitors
+                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
                     For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
                         choices.Add(Pony.Directory)
                     Next

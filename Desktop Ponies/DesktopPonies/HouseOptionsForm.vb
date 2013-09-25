@@ -41,11 +41,11 @@ Public Class HouseOptionsForm
             For Each visitor In base.Visitors
                 Dim index = 0
 
-                If "all" = visitor Then
+                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
                     For i = 0 To Visitors_CheckedListBox.Items.Count - 1
                         Visitors_CheckedListBox.SetItemChecked(i, True)
                     Next
-                    Exit For
+                    Return
                 End If
 
                 For Each item As String In Visitors_CheckedListBox.Items
@@ -187,7 +187,7 @@ Public Class HouseOptionsForm
                 new_ini.WriteLine("bias," & base.Bias.ToString(CultureInfo.InvariantCulture))
 
                 If Visitors_CheckedListBox.Items.Count = Visitors_CheckedListBox.CheckedItems.Count Then
-                    new_ini.WriteLine("ALL")
+                    new_ini.WriteLine("all")
                 Else
                     SyncLock base.Visitors
                         For Each entry In base.Visitors
