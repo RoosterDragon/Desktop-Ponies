@@ -38,6 +38,7 @@
             this.DesiredAlphaCode = new System.Windows.Forms.TextBox();
             this.SaveCommand = new System.Windows.Forms.Button();
             this.FrameControls = new System.Windows.Forms.GroupBox();
+            this.Indexer = new DesktopSprites.Forms.AnimatedImageIndexer();
             this.ImageNameLabel = new System.Windows.Forms.Label();
             this.ColorControls = new System.Windows.Forms.GroupBox();
             this.ResetCommand = new System.Windows.Forms.Button();
@@ -50,7 +51,6 @@
             this.DesiredPaletteLabel = new System.Windows.Forms.Label();
             this.SourcePaletteLabel = new System.Windows.Forms.Label();
             this.ErrorLabel = new System.Windows.Forms.Label();
-            this.Indexer = new DesktopSprites.Forms.AnimatedImageIndexer();
             this.ImageComparison.SuspendLayout();
             this.FrameControls.SuspendLayout();
             this.ColorControls.SuspendLayout();
@@ -176,6 +176,16 @@
             this.FrameControls.TabIndex = 2;
             this.FrameControls.TabStop = false;
             this.FrameControls.Text = "Frame";
+            // 
+            // Indexer
+            // 
+            this.Indexer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Indexer.Enabled = false;
+            this.Indexer.Location = new System.Drawing.Point(3, 16);
+            this.Indexer.Name = "Indexer";
+            this.Indexer.Size = new System.Drawing.Size(214, 114);
+            this.Indexer.TabIndex = 0;
+            this.Indexer.IndexChanged += new System.EventHandler(this.Indexer_IndexChanged);
             // 
             // ImageNameLabel
             // 
@@ -321,16 +331,6 @@
             this.ErrorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.ErrorLabel.Visible = false;
             // 
-            // Indexer
-            // 
-            this.Indexer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Indexer.Enabled = false;
-            this.Indexer.Location = new System.Drawing.Point(3, 16);
-            this.Indexer.Name = "Indexer";
-            this.Indexer.Size = new System.Drawing.Size(214, 114);
-            this.Indexer.TabIndex = 0;
-            this.Indexer.IndexChanged += new System.EventHandler(this.Indexer_IndexChanged);
-            // 
             // GifAlphaForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -345,8 +345,8 @@
             this.Controls.Add(this.ImageSelector);
             this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "GifAlphaForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gif with Alpha - C# Desktop Ponies";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "GIF Alpha";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GifAlphaForm_FormClosing);
             this.Load += new System.EventHandler(this.GifAlphaForm_Load);
             this.ImageComparison.ResumeLayout(false);

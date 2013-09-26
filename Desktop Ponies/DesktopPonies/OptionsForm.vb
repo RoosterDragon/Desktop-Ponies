@@ -286,11 +286,13 @@ Public Class OptionsForm
     End Sub
 
     Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
-        FiltersForm.ShowDialog()
+        Using form = New FiltersForm()
+            form.ShowDialog(Me)
+        End Using
     End Sub
 
     Private Sub ScreensaverColorButton_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
-        Using dialog As New ColorDialog
+        Using dialog As New ColorDialog()
             dialog.Color = Options.ScreensaverBackgroundColor
             If dialog.ShowDialog() = DialogResult.OK Then
                 Options.ScreensaverBackgroundColor = dialog.Color

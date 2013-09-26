@@ -1070,8 +1070,8 @@ Public Class PonyEditor
 
             HidePony()
             Dim addedNew As Boolean
-            Using form = New NewBehaviorDialog(Me)
-                addedNew = (form.ShowDialog() = Windows.Forms.DialogResult.OK)
+            Using dialog = New NewBehaviorDialog(Me)
+                addedNew = (dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK)
             End Using
             ShowPony()
 
@@ -1102,8 +1102,8 @@ Public Class PonyEditor
 
             HidePony()
 
-            Using form = New NewSpeechDialog(Me)
-                form.ShowDialog()
+            Using dialog = New NewSpeechDialog(Me)
+                dialog.ShowDialog(Me)
             End Using
 
             ShowPony()
@@ -1127,8 +1127,8 @@ Public Class PonyEditor
 
             HidePony()
 
-            Using form = New NewEffectDialog(Me)
-                form.ShowDialog()
+            Using dialog = New NewEffectDialog(Me)
+                dialog.ShowDialog(Me)
             End Using
 
             ShowPony()
@@ -1151,9 +1151,9 @@ Public Class PonyEditor
             End If
 
             HidePony()
-            Using form = New NewInteractionDialog(Me)
-                form.ChangeInteraction(Nothing)
-                form.ShowDialog()
+            Using dialog = New NewInteractionDialog(Me)
+                dialog.ChangeInteraction(Nothing)
+                dialog.ShowDialog(Me)
             End Using
             ShowPony()
 
@@ -1367,8 +1367,8 @@ Public Class PonyEditor
 
             HidePony()
 
-            Using form = New FollowTargetDialog(Me, behavior)
-                form.ShowDialog()
+            Using dialog = New FollowTargetDialog(Me, behavior)
+                dialog.ShowDialog(Me)
             End Using
             LoadPonyInfo()
 
@@ -1408,8 +1408,8 @@ Public Class PonyEditor
             base.DisplayName = "New Pony"
             _previewPony = New Pony(base)
 
-            Using form = New NewPonyDialog(Me)
-                If form.ShowDialog() = DialogResult.Cancel Then
+            Using dialog = New NewPonyDialog(Me)
+                If dialog.ShowDialog(Me) = DialogResult.Cancel Then
                     If Not IsNothing(previousPony) Then
                         _previewPony = previousPony
                         ShowPony()
@@ -1495,29 +1495,45 @@ Public Class PonyEditor
         End If
 
         HidePony()
-        Using form = New TagsForm(Me)
-            form.ShowDialog()
+        Using dialog = New TagsDialog(Me)
+            If dialog.ShowDialog(Me) = DialogResult.OK Then hasSaved = False
         End Using
-        hasSaved = False
         ShowPony()
 
     End Sub
 
-    Private Sub SetImageCentersButton_Click(sender As Object, e As EventArgs) Handles SetImageCentersButton.Click
-
-        If IsNothing(PreviewPony) Then
+    Private Sub ImagesButton_Click(sender As Object, e As EventArgs) Handles ImagesButton.Click
+        If PreviewPony Is Nothing Then
             MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Exit Sub
+        Else
+            ImagesContextMenu.Show(ImagesButton, Point.Empty)
         End If
+    End Sub
 
+    Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
         HidePony()
-        Using form = New ImageCentersForm(Me)
-            form.ShowDialog()
-        End Using
-        hasSaved = False
+        If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
+            Using form = New ImageCentersForm(Me)
+                form.ShowDialog(Me)
+            End Using
+            hasSaved = False
+        ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
+            Using form = New DesktopSprites.Forms.GifAlphaForm(
+                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
+                form.Icon = Icon
+                form.Text &= " - Desktop Ponies"
+                form.ShowDialog(Me)
+            End Using
+        ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
+            Using form = New DesktopSprites.Forms.GifFramesForm(
+                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
+                form.Icon = Icon
+                form.Text &= " - Desktop Ponies"
+                form.ShowDialog(Me)
+            End Using
+        End If
         ShowPony()
-
     End Sub
 
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click

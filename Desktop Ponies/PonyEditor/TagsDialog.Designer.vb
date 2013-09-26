@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class TagsForm
+Partial Class TagsDialog
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -73,7 +73,7 @@ Partial Class TagsForm
     "n the options menu by selecting ""Custom Filters""."
         Me.InstructionsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
-        'TagsForm
+        'TagsDialog
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -83,8 +83,10 @@ Partial Class TagsForm
         Me.Controls.Add(Me.OK_Button)
         Me.Controls.Add(Me.Cancel_Button)
         Me.Controls.Add(Me.PonyFilterList)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MinimumSize = New System.Drawing.Size(300, 200)
-        Me.Name = "TagsForm"
+        Me.Name = "TagsDialog"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Tags for..."
         Me.ResumeLayout(False)
 

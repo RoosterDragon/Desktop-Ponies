@@ -1058,7 +1058,7 @@ Partial Class OptionsForm
         Me.Controls.Add(Me.CloseButton)
         Me.MinimumSize = New System.Drawing.Size(400, 300)
         Me.Name = "OptionsForm"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Options - Desktop Ponies"
         Me.AvoidanceZoneGroup.ResumeLayout(False)
         Me.AvoidanceZoneGroup.PerformLayout()

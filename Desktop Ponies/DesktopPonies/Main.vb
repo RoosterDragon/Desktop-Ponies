@@ -448,7 +448,7 @@ Public Class Main
         Try
             Me.Visible = False
             Using gameForm As New GameSelectionForm(ponies)
-                If gameForm.ShowDialog() = DialogResult.OK Then
+                If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()
                     Game.CurrentGame.Setup()

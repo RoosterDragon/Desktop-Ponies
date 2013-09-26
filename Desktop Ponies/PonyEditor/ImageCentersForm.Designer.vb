@@ -22,218 +22,218 @@ Partial Class ImageCentersForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.Right_Image_Set_Button = New System.Windows.Forms.Button()
-        Me.Left_Image_Set_Button = New System.Windows.Forms.Button()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Right_ImageBox = New System.Windows.Forms.PictureBox()
-        Me.Left_ImageBox = New System.Windows.Forms.PictureBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.OK_Button = New System.Windows.Forms.Button()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.behavior_name_label = New System.Windows.Forms.Label()
-        Me.Prev_Button = New System.Windows.Forms.Button()
-        Me.Next_Button = New System.Windows.Forms.Button()
-        Me.left_center_label = New System.Windows.Forms.Label()
-        Me.right_center_label = New System.Windows.Forms.Label()
-        Me.frame_slider = New System.Windows.Forms.TrackBar()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.frame_label = New System.Windows.Forms.Label()
-        Me.BG_Black_Radio = New System.Windows.Forms.RadioButton()
-        Me.BG_White_Radio = New System.Windows.Forms.RadioButton()
-        Me.Label6 = New System.Windows.Forms.Label()
+        Me.RightImageResetButton = New System.Windows.Forms.Button()
+        Me.LeftImageResetButton = New System.Windows.Forms.Button()
+        Me.RightImageLabel = New System.Windows.Forms.Label()
+        Me.LeftImageLabel = New System.Windows.Forms.Label()
+        Me.RightImageBox = New System.Windows.Forms.PictureBox()
+        Me.LeftImageBox = New System.Windows.Forms.PictureBox()
+        Me.InfoLabel = New System.Windows.Forms.Label()
+        Me.OKButton = New System.Windows.Forms.Button()
+        Me.BehaviorLabel = New System.Windows.Forms.Label()
+        Me.BehaviorNameLabel = New System.Windows.Forms.Label()
+        Me.PreviousButton = New System.Windows.Forms.Button()
+        Me.NextButton = New System.Windows.Forms.Button()
+        Me.LeftCenterLabel = New System.Windows.Forms.Label()
+        Me.RightCenterLabel = New System.Windows.Forms.Label()
+        Me.FrameSlider = New System.Windows.Forms.TrackBar()
+        Me.FrameLabel = New System.Windows.Forms.Label()
+        Me.FrameIndexLabel = New System.Windows.Forms.Label()
+        Me.BackgroundOptionBlack = New System.Windows.Forms.RadioButton()
+        Me.BackgroundOptionWhite = New System.Windows.Forms.RadioButton()
+        Me.BackgroundColorLabel = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
-        'Right_Image_Set_Button
+        'RightImageResetButton
         '
-        Me.Right_Image_Set_Button.Location = New System.Drawing.Point(611, 438)
-        Me.Right_Image_Set_Button.Name = "Right_Image_Set_Button"
-        Me.Right_Image_Set_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Right_Image_Set_Button.TabIndex = 10
-        Me.Right_Image_Set_Button.Text = "Reset"
-        Me.Right_Image_Set_Button.UseVisualStyleBackColor = True
+        Me.RightImageResetButton.Location = New System.Drawing.Point(611, 438)
+        Me.RightImageResetButton.Name = "RightImageResetButton"
+        Me.RightImageResetButton.Size = New System.Drawing.Size(75, 23)
+        Me.RightImageResetButton.TabIndex = 10
+        Me.RightImageResetButton.Text = "Reset"
+        Me.RightImageResetButton.UseVisualStyleBackColor = True
         '
-        'Left_Image_Set_Button
+        'LeftImageResetButton
         '
-        Me.Left_Image_Set_Button.Location = New System.Drawing.Point(57, 438)
-        Me.Left_Image_Set_Button.Name = "Left_Image_Set_Button"
-        Me.Left_Image_Set_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Left_Image_Set_Button.TabIndex = 4
-        Me.Left_Image_Set_Button.Text = "Reset"
-        Me.Left_Image_Set_Button.UseVisualStyleBackColor = True
+        Me.LeftImageResetButton.Location = New System.Drawing.Point(57, 438)
+        Me.LeftImageResetButton.Name = "LeftImageResetButton"
+        Me.LeftImageResetButton.Size = New System.Drawing.Size(75, 23)
+        Me.LeftImageResetButton.TabIndex = 4
+        Me.LeftImageResetButton.Text = "Reset"
+        Me.LeftImageResetButton.UseVisualStyleBackColor = True
         '
-        'Label3
+        'RightImageLabel
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(396, 114)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(67, 13)
-        Me.Label3.TabIndex = 7
-        Me.Label3.Text = "Right Image:"
+        Me.RightImageLabel.AutoSize = True
+        Me.RightImageLabel.Location = New System.Drawing.Point(396, 114)
+        Me.RightImageLabel.Name = "RightImageLabel"
+        Me.RightImageLabel.Size = New System.Drawing.Size(67, 13)
+        Me.RightImageLabel.TabIndex = 7
+        Me.RightImageLabel.Text = "Right Image:"
         '
-        'Label2
+        'LeftImageLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(40, 114)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(60, 13)
-        Me.Label2.TabIndex = 3
-        Me.Label2.Text = "Left Image:"
+        Me.LeftImageLabel.AutoSize = True
+        Me.LeftImageLabel.Location = New System.Drawing.Point(40, 114)
+        Me.LeftImageLabel.Name = "LeftImageLabel"
+        Me.LeftImageLabel.Size = New System.Drawing.Size(60, 13)
+        Me.LeftImageLabel.TabIndex = 3
+        Me.LeftImageLabel.Text = "Left Image:"
         '
-        'Right_ImageBox
+        'RightImageBox
         '
-        Me.Right_ImageBox.BackColor = System.Drawing.Color.Black
-        Me.Right_ImageBox.Location = New System.Drawing.Point(399, 132)
-        Me.Right_ImageBox.Name = "Right_ImageBox"
-        Me.Right_ImageBox.Size = New System.Drawing.Size(300, 300)
-        Me.Right_ImageBox.TabIndex = 10
-        Me.Right_ImageBox.TabStop = False
+        Me.RightImageBox.BackColor = System.Drawing.Color.Black
+        Me.RightImageBox.Location = New System.Drawing.Point(399, 132)
+        Me.RightImageBox.Name = "RightImageBox"
+        Me.RightImageBox.Size = New System.Drawing.Size(300, 300)
+        Me.RightImageBox.TabIndex = 10
+        Me.RightImageBox.TabStop = False
         '
-        'Left_ImageBox
+        'LeftImageBox
         '
-        Me.Left_ImageBox.BackColor = System.Drawing.Color.Black
-        Me.Left_ImageBox.Location = New System.Drawing.Point(43, 132)
-        Me.Left_ImageBox.Name = "Left_ImageBox"
-        Me.Left_ImageBox.Size = New System.Drawing.Size(300, 300)
-        Me.Left_ImageBox.TabIndex = 9
-        Me.Left_ImageBox.TabStop = False
+        Me.LeftImageBox.BackColor = System.Drawing.Color.Black
+        Me.LeftImageBox.Location = New System.Drawing.Point(43, 132)
+        Me.LeftImageBox.Name = "LeftImageBox"
+        Me.LeftImageBox.Size = New System.Drawing.Size(300, 300)
+        Me.LeftImageBox.TabIndex = 9
+        Me.LeftImageBox.TabStop = False
         '
-        'Label1
+        'InfoLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(201, 67)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(307, 20)
-        Me.Label1.TabIndex = 2
-        Me.Label1.Text = "Click the center of the pony in each image:"
+        Me.InfoLabel.AutoSize = True
+        Me.InfoLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.InfoLabel.Location = New System.Drawing.Point(201, 67)
+        Me.InfoLabel.Name = "InfoLabel"
+        Me.InfoLabel.Size = New System.Drawing.Size(307, 20)
+        Me.InfoLabel.TabIndex = 2
+        Me.InfoLabel.Text = "Click the center of the pony in each image:"
         '
-        'OK_Button
+        'OKButton
         '
-        Me.OK_Button.Anchor = System.Windows.Forms.AnchorStyles.None
-        Me.OK_Button.BackColor = System.Drawing.SystemColors.Control
-        Me.OK_Button.Location = New System.Drawing.Point(632, 496)
-        Me.OK_Button.Name = "OK_Button"
-        Me.OK_Button.Size = New System.Drawing.Size(67, 23)
-        Me.OK_Button.TabIndex = 17
-        Me.OK_Button.Text = "OK"
-        Me.OK_Button.UseVisualStyleBackColor = False
+        Me.OKButton.Anchor = System.Windows.Forms.AnchorStyles.None
+        Me.OKButton.BackColor = System.Drawing.SystemColors.Control
+        Me.OKButton.Location = New System.Drawing.Point(632, 496)
+        Me.OKButton.Name = "OKButton"
+        Me.OKButton.Size = New System.Drawing.Size(67, 23)
+        Me.OKButton.TabIndex = 17
+        Me.OKButton.Text = "OK"
+        Me.OKButton.UseVisualStyleBackColor = False
         '
-        'Label4
+        'BehaviorLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label4.Location = New System.Drawing.Point(231, 31)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(75, 20)
-        Me.Label4.TabIndex = 0
-        Me.Label4.Text = "Behavior:"
+        Me.BehaviorLabel.AutoSize = True
+        Me.BehaviorLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BehaviorLabel.Location = New System.Drawing.Point(231, 31)
+        Me.BehaviorLabel.Name = "BehaviorLabel"
+        Me.BehaviorLabel.Size = New System.Drawing.Size(75, 20)
+        Me.BehaviorLabel.TabIndex = 0
+        Me.BehaviorLabel.Text = "Behavior:"
         '
-        'behavior_name_label
+        'BehaviorNameLabel
         '
-        Me.behavior_name_label.AutoSize = True
-        Me.behavior_name_label.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.behavior_name_label.Location = New System.Drawing.Point(373, 31)
-        Me.behavior_name_label.Name = "behavior_name_label"
-        Me.behavior_name_label.Size = New System.Drawing.Size(118, 20)
-        Me.behavior_name_label.TabIndex = 1
-        Me.behavior_name_label.Text = "behavior_name"
+        Me.BehaviorNameLabel.AutoSize = True
+        Me.BehaviorNameLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.BehaviorNameLabel.Location = New System.Drawing.Point(373, 31)
+        Me.BehaviorNameLabel.Name = "BehaviorNameLabel"
+        Me.BehaviorNameLabel.Size = New System.Drawing.Size(118, 20)
+        Me.BehaviorNameLabel.TabIndex = 1
+        Me.BehaviorNameLabel.Text = "behavior_name"
         '
-        'Prev_Button
+        'PreviousButton
         '
-        Me.Prev_Button.Location = New System.Drawing.Point(268, 438)
-        Me.Prev_Button.Name = "Prev_Button"
-        Me.Prev_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Prev_Button.TabIndex = 6
-        Me.Prev_Button.Text = "Previous"
-        Me.Prev_Button.UseVisualStyleBackColor = True
+        Me.PreviousButton.Location = New System.Drawing.Point(268, 438)
+        Me.PreviousButton.Name = "PreviousButton"
+        Me.PreviousButton.Size = New System.Drawing.Size(75, 23)
+        Me.PreviousButton.TabIndex = 6
+        Me.PreviousButton.Text = "Previous"
+        Me.PreviousButton.UseVisualStyleBackColor = True
         '
-        'Next_Button
+        'NextButton
         '
-        Me.Next_Button.Location = New System.Drawing.Point(399, 438)
-        Me.Next_Button.Name = "Next_Button"
-        Me.Next_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Next_Button.TabIndex = 8
-        Me.Next_Button.Text = "Next"
-        Me.Next_Button.UseVisualStyleBackColor = True
+        Me.NextButton.Location = New System.Drawing.Point(399, 438)
+        Me.NextButton.Name = "NextButton"
+        Me.NextButton.Size = New System.Drawing.Size(75, 23)
+        Me.NextButton.TabIndex = 8
+        Me.NextButton.Text = "Next"
+        Me.NextButton.UseVisualStyleBackColor = True
         '
-        'left_center_label
+        'LeftCenterLabel
         '
-        Me.left_center_label.AutoSize = True
-        Me.left_center_label.Location = New System.Drawing.Point(163, 443)
-        Me.left_center_label.Name = "left_center_label"
-        Me.left_center_label.Size = New System.Drawing.Size(67, 13)
-        Me.left_center_label.TabIndex = 5
-        Me.left_center_label.Text = "Right Image:"
+        Me.LeftCenterLabel.AutoSize = True
+        Me.LeftCenterLabel.Location = New System.Drawing.Point(163, 443)
+        Me.LeftCenterLabel.Name = "LeftCenterLabel"
+        Me.LeftCenterLabel.Size = New System.Drawing.Size(67, 13)
+        Me.LeftCenterLabel.TabIndex = 5
+        Me.LeftCenterLabel.Text = "Right Image:"
         '
-        'right_center_label
+        'RightCenterLabel
         '
-        Me.right_center_label.AutoSize = True
-        Me.right_center_label.Location = New System.Drawing.Point(508, 443)
-        Me.right_center_label.Name = "right_center_label"
-        Me.right_center_label.Size = New System.Drawing.Size(67, 13)
-        Me.right_center_label.TabIndex = 9
-        Me.right_center_label.Text = "Right Image:"
+        Me.RightCenterLabel.AutoSize = True
+        Me.RightCenterLabel.Location = New System.Drawing.Point(508, 443)
+        Me.RightCenterLabel.Name = "RightCenterLabel"
+        Me.RightCenterLabel.Size = New System.Drawing.Size(67, 13)
+        Me.RightCenterLabel.TabIndex = 9
+        Me.RightCenterLabel.Text = "Right Image:"
         '
-        'frame_slider
+        'FrameSlider
         '
-        Me.frame_slider.LargeChange = 15
-        Me.frame_slider.Location = New System.Drawing.Point(257, 474)
-        Me.frame_slider.Maximum = 500
-        Me.frame_slider.Name = "frame_slider"
-        Me.frame_slider.Size = New System.Drawing.Size(217, 45)
-        Me.frame_slider.TabIndex = 14
-        Me.frame_slider.TickFrequency = 25
-        Me.frame_slider.TickStyle = System.Windows.Forms.TickStyle.TopLeft
+        Me.FrameSlider.LargeChange = 15
+        Me.FrameSlider.Location = New System.Drawing.Point(257, 474)
+        Me.FrameSlider.Maximum = 500
+        Me.FrameSlider.Name = "FrameSlider"
+        Me.FrameSlider.Size = New System.Drawing.Size(217, 45)
+        Me.FrameSlider.TabIndex = 14
+        Me.FrameSlider.TickFrequency = 25
+        Me.FrameSlider.TickStyle = System.Windows.Forms.TickStyle.TopLeft
         '
-        'Label5
+        'FrameLabel
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(265, 509)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(133, 13)
-        Me.Label5.TabIndex = 15
-        Me.Label5.Text = "Animation Frame selection:"
+        Me.FrameLabel.AutoSize = True
+        Me.FrameLabel.Location = New System.Drawing.Point(265, 509)
+        Me.FrameLabel.Name = "FrameLabel"
+        Me.FrameLabel.Size = New System.Drawing.Size(133, 13)
+        Me.FrameLabel.TabIndex = 15
+        Me.FrameLabel.Text = "Animation Frame selection:"
         '
-        'frame_label
+        'FrameIndexLabel
         '
-        Me.frame_label.AutoSize = True
-        Me.frame_label.Location = New System.Drawing.Point(417, 509)
-        Me.frame_label.Name = "frame_label"
-        Me.frame_label.Size = New System.Drawing.Size(17, 13)
-        Me.frame_label.TabIndex = 16
-        Me.frame_label.Text = "xx"
+        Me.FrameIndexLabel.AutoSize = True
+        Me.FrameIndexLabel.Location = New System.Drawing.Point(417, 509)
+        Me.FrameIndexLabel.Name = "FrameIndexLabel"
+        Me.FrameIndexLabel.Size = New System.Drawing.Size(17, 13)
+        Me.FrameIndexLabel.TabIndex = 16
+        Me.FrameIndexLabel.Text = "xx"
         '
-        'BG_Black_Radio
+        'BackgroundOptionBlack
         '
-        Me.BG_Black_Radio.AutoSize = True
-        Me.BG_Black_Radio.Checked = True
-        Me.BG_Black_Radio.Location = New System.Drawing.Point(112, 474)
-        Me.BG_Black_Radio.Name = "BG_Black_Radio"
-        Me.BG_Black_Radio.Size = New System.Drawing.Size(52, 17)
-        Me.BG_Black_Radio.TabIndex = 12
-        Me.BG_Black_Radio.TabStop = True
-        Me.BG_Black_Radio.Text = "Black"
-        Me.BG_Black_Radio.UseVisualStyleBackColor = True
+        Me.BackgroundOptionBlack.AutoSize = True
+        Me.BackgroundOptionBlack.Checked = True
+        Me.BackgroundOptionBlack.Location = New System.Drawing.Point(112, 474)
+        Me.BackgroundOptionBlack.Name = "BackgroundOptionBlack"
+        Me.BackgroundOptionBlack.Size = New System.Drawing.Size(52, 17)
+        Me.BackgroundOptionBlack.TabIndex = 12
+        Me.BackgroundOptionBlack.TabStop = True
+        Me.BackgroundOptionBlack.Text = "Black"
+        Me.BackgroundOptionBlack.UseVisualStyleBackColor = True
         '
-        'BG_White_Radio
+        'BackgroundOptionWhite
         '
-        Me.BG_White_Radio.AutoSize = True
-        Me.BG_White_Radio.Location = New System.Drawing.Point(112, 502)
-        Me.BG_White_Radio.Name = "BG_White_Radio"
-        Me.BG_White_Radio.Size = New System.Drawing.Size(53, 17)
-        Me.BG_White_Radio.TabIndex = 13
-        Me.BG_White_Radio.Text = "White"
-        Me.BG_White_Radio.UseVisualStyleBackColor = True
+        Me.BackgroundOptionWhite.AutoSize = True
+        Me.BackgroundOptionWhite.Location = New System.Drawing.Point(112, 502)
+        Me.BackgroundOptionWhite.Name = "BackgroundOptionWhite"
+        Me.BackgroundOptionWhite.Size = New System.Drawing.Size(53, 17)
+        Me.BackgroundOptionWhite.TabIndex = 13
+        Me.BackgroundOptionWhite.Text = "White"
+        Me.BackgroundOptionWhite.UseVisualStyleBackColor = True
         '
-        'Label6
+        'BackgroundColorLabel
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(12, 487)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(94, 13)
-        Me.Label6.TabIndex = 11
-        Me.Label6.Text = "Background color:"
+        Me.BackgroundColorLabel.AutoSize = True
+        Me.BackgroundColorLabel.Location = New System.Drawing.Point(12, 487)
+        Me.BackgroundColorLabel.Name = "BackgroundColorLabel"
+        Me.BackgroundColorLabel.Size = New System.Drawing.Size(94, 13)
+        Me.BackgroundColorLabel.TabIndex = 11
+        Me.BackgroundColorLabel.Text = "Background color:"
         '
         'ImageCentersForm
         '
@@ -241,50 +241,51 @@ Partial Class ImageCentersForm
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.ClientSize = New System.Drawing.Size(745, 531)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.BG_White_Radio)
-        Me.Controls.Add(Me.BG_Black_Radio)
-        Me.Controls.Add(Me.frame_label)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.frame_slider)
-        Me.Controls.Add(Me.right_center_label)
-        Me.Controls.Add(Me.left_center_label)
-        Me.Controls.Add(Me.Next_Button)
-        Me.Controls.Add(Me.Prev_Button)
-        Me.Controls.Add(Me.behavior_name_label)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.OK_Button)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Right_Image_Set_Button)
-        Me.Controls.Add(Me.Left_Image_Set_Button)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.Right_ImageBox)
-        Me.Controls.Add(Me.Left_ImageBox)
+        Me.Controls.Add(Me.BackgroundColorLabel)
+        Me.Controls.Add(Me.BackgroundOptionWhite)
+        Me.Controls.Add(Me.BackgroundOptionBlack)
+        Me.Controls.Add(Me.FrameIndexLabel)
+        Me.Controls.Add(Me.FrameLabel)
+        Me.Controls.Add(Me.FrameSlider)
+        Me.Controls.Add(Me.RightCenterLabel)
+        Me.Controls.Add(Me.LeftCenterLabel)
+        Me.Controls.Add(Me.NextButton)
+        Me.Controls.Add(Me.PreviousButton)
+        Me.Controls.Add(Me.BehaviorNameLabel)
+        Me.Controls.Add(Me.BehaviorLabel)
+        Me.Controls.Add(Me.OKButton)
+        Me.Controls.Add(Me.InfoLabel)
+        Me.Controls.Add(Me.RightImageResetButton)
+        Me.Controls.Add(Me.LeftImageResetButton)
+        Me.Controls.Add(Me.RightImageLabel)
+        Me.Controls.Add(Me.LeftImageLabel)
+        Me.Controls.Add(Me.RightImageBox)
+        Me.Controls.Add(Me.LeftImageBox)
         Me.Name = "ImageCentersForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Image Centers - Desktop Ponies"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents Right_Image_Set_Button As System.Windows.Forms.Button
-    Friend WithEvents Left_Image_Set_Button As System.Windows.Forms.Button
-    Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Right_ImageBox As System.Windows.Forms.PictureBox
-    Friend WithEvents Left_ImageBox As System.Windows.Forms.PictureBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents OK_Button As System.Windows.Forms.Button
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents behavior_name_label As System.Windows.Forms.Label
-    Friend WithEvents Prev_Button As System.Windows.Forms.Button
-    Friend WithEvents Next_Button As System.Windows.Forms.Button
-    Friend WithEvents left_center_label As System.Windows.Forms.Label
-    Friend WithEvents right_center_label As System.Windows.Forms.Label
-    Friend WithEvents frame_slider As System.Windows.Forms.TrackBar
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents frame_label As System.Windows.Forms.Label
-    Friend WithEvents BG_Black_Radio As System.Windows.Forms.RadioButton
-    Friend WithEvents BG_White_Radio As System.Windows.Forms.RadioButton
-    Friend WithEvents Label6 As System.Windows.Forms.Label
+    Friend WithEvents RightImageResetButton As System.Windows.Forms.Button
+    Friend WithEvents LeftImageResetButton As System.Windows.Forms.Button
+    Friend WithEvents RightImageLabel As System.Windows.Forms.Label
+    Friend WithEvents LeftImageLabel As System.Windows.Forms.Label
+    Friend WithEvents RightImageBox As System.Windows.Forms.PictureBox
+    Friend WithEvents LeftImageBox As System.Windows.Forms.PictureBox
+    Friend WithEvents InfoLabel As System.Windows.Forms.Label
+    Friend WithEvents OKButton As System.Windows.Forms.Button
+    Friend WithEvents BehaviorLabel As System.Windows.Forms.Label
+    Friend WithEvents BehaviorNameLabel As System.Windows.Forms.Label
+    Friend WithEvents PreviousButton As System.Windows.Forms.Button
+    Friend WithEvents NextButton As System.Windows.Forms.Button
+    Friend WithEvents LeftCenterLabel As System.Windows.Forms.Label
+    Friend WithEvents RightCenterLabel As System.Windows.Forms.Label
+    Friend WithEvents FrameSlider As System.Windows.Forms.TrackBar
+    Friend WithEvents FrameLabel As System.Windows.Forms.Label
+    Friend WithEvents FrameIndexLabel As System.Windows.Forms.Label
+    Friend WithEvents BackgroundOptionBlack As System.Windows.Forms.RadioButton
+    Friend WithEvents BackgroundOptionWhite As System.Windows.Forms.RadioButton
+    Friend WithEvents BackgroundColorLabel As System.Windows.Forms.Label
 End Class

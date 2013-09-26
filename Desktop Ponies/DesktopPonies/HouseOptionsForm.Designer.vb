@@ -228,6 +228,7 @@ Partial Class HouseOptionsForm
         Me.Controls.Add(Me.Visitors_CheckedListBox)
         Me.MinimumSize = New System.Drawing.Size(540, 434)
         Me.Name = "HouseOptionsForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "House Options - Desktop Ponies"
         Me.ResumeLayout(False)
         Me.PerformLayout()

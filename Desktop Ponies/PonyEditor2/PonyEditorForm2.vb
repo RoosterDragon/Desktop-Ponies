@@ -1,6 +1,9 @@
 ﻿Imports System.IO
 
 Public Class PonyEditorForm2
+    Private Shared ReadOnly ErrorBitmap As Bitmap = SystemIcons.Error.ToBitmap()
+    Private Shared ReadOnly WarningBitmap As Bitmap = SystemIcons.Warning.ToBitmap()
+
     Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
     Private ponies As PonyCollection
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
@@ -336,7 +339,7 @@ Public Class PonyEditorForm2
         IssuesGrid.Rows.Clear()
         If ActiveItemEditor IsNot Nothing Then
             For Each issue In ActiveItemEditor.Issues
-                IssuesGrid.Rows.Add(If(issue.Fatal, SystemIcons.Error, SystemIcons.Warning),
+                IssuesGrid.Rows.Add(If(issue.Fatal, ErrorBitmap, WarningBitmap),
                                     If(issue.PropertyName, "Element " & issue.Index + 1),
                                     issue.Reason,
                                     issue.FallbackValue,

@@ -73,9 +73,9 @@ Partial Class FiltersForm
         Me.Label2.Size = New System.Drawing.Size(468, 13)
         Me.Label2.TabIndex = 4
         Me.Label2.Text = "Note that you still need to save your settings on the options menu to make the ch" & _
-            "ange permanent!"
+    "ange permanent!"
         '
-        'Filters_Form
+        'FiltersForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -86,7 +86,8 @@ Partial Class FiltersForm
         Me.Controls.Add(Me.Save_Button)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.Filters_Box)
-        Me.Name = "Filters_Form"
+        Me.Name = "FiltersForm"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Edit Filters/Tags..."
         Me.ResumeLayout(False)
         Me.PerformLayout()

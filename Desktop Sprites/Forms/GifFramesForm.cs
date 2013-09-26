@@ -3,6 +3,7 @@
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Windows.Forms;
     using DesktopSprites.Collections;
     using DesktopSprites.Core;
@@ -11,7 +12,7 @@
     /// <summary>
     /// Displays the individual frames and other information about gif files.
     /// </summary>
-    public partial class GifForm : Form
+    public partial class GifFramesForm : Form
     {
         /// <summary>
         /// Location of directory from which to load GIF files.
@@ -22,7 +23,7 @@
         /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.GifForm"/> class.
         /// </summary>
         /// <param name="path">The path to a directory from which GIF files should be loaded.</param>
-        public GifForm(string path)
+        public GifFramesForm(string path)
         {
             InitializeComponent();
             filesPath = Argument.EnsureNotNull(path, "path");
@@ -30,14 +31,23 @@
 
         /// <summary>
         /// Raised when the form has loaded.
-        /// Gets a list of all gif files in <see cref="P:DesktopSprites.DesktopPonies.Program.PonyDirectory"/>.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
         private void GifForm_Load(object sender, EventArgs e)
         {
-            foreach (string filePath in Directory.GetFiles(filesPath, "*.gif", SearchOption.AllDirectories))
-                ImageSelector.Items.Add(filePath);
+            BeginInvoke(new MethodInvoker(LoadInternal));
+        }
+
+        /// <summary>
+        /// Gets the collection of GIF files to be accessed.
+        /// </summary>
+        private void LoadInternal()
+        {
+            ImageSelector.Items.AddRange(
+                Directory.GetFiles(filesPath, "*.gif", SearchOption.AllDirectories)
+                .Select(path => path.Substring(filesPath.Length + 1))
+                .ToArray());
             if (ImageSelector.Items.Count != 0)
                 ImageSelector.SelectedIndex = 0;
             else
@@ -96,7 +106,7 @@
         /// <param name="e">The event data.</param>
         private void ImageSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
-            LoadGif((string)ImageSelector.Items[ImageSelector.SelectedIndex]);
+            LoadGif(Path.Combine(filesPath, (string)ImageSelector.Items[ImageSelector.SelectedIndex]));
         }
 
         /// <summary>

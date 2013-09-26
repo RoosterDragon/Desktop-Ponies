@@ -203,7 +203,7 @@ Public Class NewBehaviorDialog
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
-                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
                     Min_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                     Max_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
@@ -231,7 +231,7 @@ Public Class NewBehaviorDialog
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
-                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
                     Min_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                     Max_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
@@ -244,8 +244,8 @@ Public Class NewBehaviorDialog
 
         Dim new_behavior As New Behavior(_editor.PreviewPony.Base)
 
-        Using form = New FollowTargetDialog(_editor, new_behavior)
-            form.ShowDialog()
+        Using dialog = New FollowTargetDialog(_editor, new_behavior)
+            dialog.ShowDialog(Me)
         End Using
 
         If new_behavior.OriginalFollowTargetName <> "" Then

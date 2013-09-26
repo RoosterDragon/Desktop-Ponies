@@ -6,6 +6,7 @@
     using System.Drawing.Imaging;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Windows.Forms;
     using DesktopSprites.Core;
     using DesktopSprites.SpriteManagement;
@@ -82,13 +83,23 @@
 
         /// <summary>
         /// Raised when the form has loaded.
-        /// Gets a list of all gif files in <see cref="P:DesktopSprites.DesktopPonies.Program.PonyDirectory"/>, and sets up form controls.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
         private void GifAlphaForm_Load(object sender, EventArgs e)
         {
-            ImageSelector.Items.AddRange(Directory.GetFiles(filesPath, "*.gif", SearchOption.AllDirectories));
+            BeginInvoke(new MethodInvoker(LoadInternal));
+        }
+
+        /// <summary>
+        /// Gets the collection of GIF files to be accessed.
+        /// </summary>
+        private void LoadInternal()
+        {
+            ImageSelector.Items.AddRange(
+                Directory.GetFiles(filesPath, "*.gif", SearchOption.AllDirectories)
+                .Select(path => path.Substring(filesPath.Length + 1))
+                .ToArray());
             if (ImageSelector.Items.Count != 0)
                 ImageSelector.SelectedIndex = 0;
             else
@@ -110,7 +121,7 @@
 
             loaded = false;
             changed = false;
-            filePath = (string)ImageSelector.Items[ImageSelector.SelectedIndex];
+            filePath = Path.Combine(filesPath, (string)ImageSelector.Items[ImageSelector.SelectedIndex]);
 
             if (gifImage != null)
                 foreach (GifFrame<Bitmap> frame in gifImage.Frames)

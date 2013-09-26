@@ -28,8 +28,12 @@ Partial Class GameSelectionForm
         Me.Team2AddButton = New System.Windows.Forms.Button()
         Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
         Me.TeamTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.GameTeam2 = New DesktopPonies.GameTeamControl()
+        Me.GameTeam1 = New DesktopPonies.GameTeamControl()
         Me.GameGroup = New System.Windows.Forms.GroupBox()
+        Me.GameDescriptionLabel = New System.Windows.Forms.Label()
         Me.CommandsPanel = New System.Windows.Forms.Panel()
+        Me.MonitorComboBox = New System.Windows.Forms.ComboBox()
         Me.Transition3Label = New System.Windows.Forms.Label()
         Me.Transition2Label = New System.Windows.Forms.Label()
         Me.Transition1Label = New System.Windows.Forms.Label()
@@ -38,10 +42,6 @@ Partial Class GameSelectionForm
         Me.SelectGameLabel = New System.Windows.Forms.Label()
         Me.MonitorLabel = New System.Windows.Forms.Label()
         Me.PlayButton = New System.Windows.Forms.Button()
-        Me.MonitorComboBox = New System.Windows.Forms.ComboBox()
-        Me.GameTeam2 = New DesktopPonies.GameTeamControl()
-        Me.GameTeam1 = New DesktopPonies.GameTeamControl()
-        Me.GameDescriptionLabel = New System.Windows.Forms.Label()
         Me.LayoutTable.SuspendLayout()
         Me.TeamTable.SuspendLayout()
         Me.GameGroup.SuspendLayout()
@@ -146,6 +146,26 @@ Partial Class GameSelectionForm
         Me.TeamTable.Size = New System.Drawing.Size(942, 449)
         Me.TeamTable.TabIndex = 2
         '
+        'GameTeam2
+        '
+        Me.GameTeam2.AutoSize = True
+        Me.GameTeam2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GameTeam2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.GameTeam2.Location = New System.Drawing.Point(795, 3)
+        Me.GameTeam2.Name = "GameTeam2"
+        Me.GameTeam2.Size = New System.Drawing.Size(144, 443)
+        Me.GameTeam2.TabIndex = 4
+        '
+        'GameTeam1
+        '
+        Me.GameTeam1.AutoSize = True
+        Me.GameTeam1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GameTeam1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.GameTeam1.Location = New System.Drawing.Point(3, 3)
+        Me.GameTeam1.Name = "GameTeam1"
+        Me.GameTeam1.Size = New System.Drawing.Size(144, 443)
+        Me.GameTeam1.TabIndex = 0
+        '
         'GameGroup
         '
         Me.GameGroup.AutoSize = True
@@ -159,6 +179,16 @@ Partial Class GameSelectionForm
         Me.GameGroup.TabIndex = 1
         Me.GameGroup.TabStop = False
         Me.GameGroup.Text = "Select Game"
+        '
+        'GameDescriptionLabel
+        '
+        Me.GameDescriptionLabel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GameDescriptionLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.GameDescriptionLabel.Location = New System.Drawing.Point(6, 123)
+        Me.GameDescriptionLabel.Name = "GameDescriptionLabel"
+        Me.GameDescriptionLabel.Size = New System.Drawing.Size(927, 48)
+        Me.GameDescriptionLabel.TabIndex = 1
         '
         'CommandsPanel
         '
@@ -178,6 +208,16 @@ Partial Class GameSelectionForm
         Me.CommandsPanel.Name = "CommandsPanel"
         Me.CommandsPanel.Size = New System.Drawing.Size(942, 36)
         Me.CommandsPanel.TabIndex = 0
+        '
+        'MonitorComboBox
+        '
+        Me.MonitorComboBox.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.MonitorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.MonitorComboBox.FormattingEnabled = True
+        Me.MonitorComboBox.Location = New System.Drawing.Point(818, 9)
+        Me.MonitorComboBox.Name = "MonitorComboBox"
+        Me.MonitorComboBox.Size = New System.Drawing.Size(121, 21)
+        Me.MonitorComboBox.TabIndex = 10
         '
         'Transition3Label
         '
@@ -263,46 +303,6 @@ Partial Class GameSelectionForm
         Me.PlayButton.TabIndex = 6
         Me.PlayButton.Text = "PLAY"
         Me.PlayButton.UseVisualStyleBackColor = True
-        '
-        'MonitorComboBox
-        '
-        Me.MonitorComboBox.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.MonitorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.MonitorComboBox.FormattingEnabled = True
-        Me.MonitorComboBox.Location = New System.Drawing.Point(818, 9)
-        Me.MonitorComboBox.Name = "MonitorComboBox"
-        Me.MonitorComboBox.Size = New System.Drawing.Size(121, 21)
-        Me.MonitorComboBox.TabIndex = 10
-        '
-        'GameTeam2
-        '
-        Me.GameTeam2.AutoSize = True
-        Me.GameTeam2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.GameTeam2.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.GameTeam2.Location = New System.Drawing.Point(795, 3)
-        Me.GameTeam2.Name = "GameTeam2"
-        Me.GameTeam2.Size = New System.Drawing.Size(144, 443)
-        Me.GameTeam2.TabIndex = 4
-        '
-        'GameTeam1
-        '
-        Me.GameTeam1.AutoSize = True
-        Me.GameTeam1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.GameTeam1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.GameTeam1.Location = New System.Drawing.Point(3, 3)
-        Me.GameTeam1.Name = "GameTeam1"
-        Me.GameTeam1.Size = New System.Drawing.Size(144, 443)
-        Me.GameTeam1.TabIndex = 0
-        '
-        'GameDescriptionLabel
-        '
-        Me.GameDescriptionLabel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.GameDescriptionLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GameDescriptionLabel.Location = New System.Drawing.Point(6, 123)
-        Me.GameDescriptionLabel.Name = "GameDescriptionLabel"
-        Me.GameDescriptionLabel.Size = New System.Drawing.Size(927, 48)
-        Me.GameDescriptionLabel.TabIndex = 1
         '
         'GameSelectionForm
         '

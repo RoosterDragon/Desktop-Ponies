@@ -1,6 +1,6 @@
 ﻿namespace DesktopSprites.Forms
 {
-    partial class GifForm
+    partial class GifFramesForm
     {
         /// <summary>
         /// Required designer variable.
@@ -77,7 +77,7 @@
             this.ImageInfo.Size = new System.Drawing.Size(0, 13);
             this.ImageInfo.TabIndex = 2;
             // 
-            // GifForm
+            // GifFramesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -85,9 +85,9 @@
             this.Controls.Add(this.ControlsContainer);
             this.Controls.Add(this.FramesDisplayPanel);
             this.MinimumSize = new System.Drawing.Size(600, 400);
-            this.Name = "GifForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gif Viewer - C# Desktop Ponies";
+            this.Name = "GifFramesForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "GIF Viewer";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GifForm_FormClosed);
             this.Load += new System.EventHandler(this.GifForm_Load);
             this.ControlsContainer.ResumeLayout(false);

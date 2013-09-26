@@ -143,11 +143,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SpriteManagement\GifImage.cs" />
-    <Compile Include="Forms\GifForm.cs">
+    <Compile Include="Forms\GifFramesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\GifForm.Designer.cs">
-      <DependentUpon>GifForm.cs</DependentUpon>
+    <Compile Include="Forms\GifFramesForm.Designer.cs">
+      <DependentUpon>GifFramesForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SpriteManagement\Frame.cs" />
     <Compile Include="Core\SafeEvent.cs" />
@@ -192,8 +192,8 @@
     <EmbeddedResource Include="Forms\GifControl.resx">
       <DependentUpon>GifControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\GifForm.resx">
-      <DependentUpon>GifForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\GifFramesForm.resx">
+      <DependentUpon>GifFramesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

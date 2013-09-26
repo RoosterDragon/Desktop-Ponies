@@ -1,4 +1,4 @@
-﻿Public Class TagsForm
+﻿Public Class TagsDialog
     Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
@@ -7,6 +7,7 @@
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
+        DialogResult = DialogResult.Cancel
         Me.Close()
     End Sub
 
@@ -17,6 +18,7 @@
             _editor.PreviewPony.Base.Tags.Add(Tag)
         Next
 
+        DialogResult = DialogResult.OK
         Me.Close()
     End Sub
 

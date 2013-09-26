@@ -155,7 +155,7 @@ Public Class NewEffectDialog
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
-                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
                     Duration_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
@@ -180,7 +180,7 @@ Public Class NewEffectDialog
 
         If runtime <> 0 Then
             Using dialog As New GifRuntimeDialog()
-                If dialog.ShowDialog() = Windows.Forms.DialogResult.OK Then
+                If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
                     Duration_Box.Text = runtime.ToString(CultureInfo.CurrentCulture)
                 End If
             End Using
