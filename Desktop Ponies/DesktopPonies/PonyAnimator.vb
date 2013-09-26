@@ -63,13 +63,6 @@ Public Class PonyAnimator
     Public Overrides Sub Start()
         InitializeInteractions()
         MyBase.Start()
-        If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
-            Main.Instance.SmartInvoke(Sub()
-                                          spriteDebugForm = New SpriteDebugForm()
-                                          spriteDebugForm.Show()
-                                      End Sub)
-            AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
-        End If
     End Sub
 
     ''' <summary>

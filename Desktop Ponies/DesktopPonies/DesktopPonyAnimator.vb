@@ -26,6 +26,14 @@ Public Class DesktopPonyAnimator
             AddHandler SpritesRemoved, AddressOf ControlFormItemsRemoved
         End If
 
+        If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
+            Main.Instance.SmartInvoke(Sub()
+                                          spriteDebugForm = New SpriteDebugForm()
+                                          spriteDebugForm.Show()
+                                      End Sub)
+            AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
+        End If
+
         AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
 
         CreatePonyMenu()
