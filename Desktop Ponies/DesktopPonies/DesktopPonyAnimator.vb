@@ -19,7 +19,7 @@ Public Class DesktopPonyAnimator
 
         If OperatingSystemInfo.IsMacOSX Then
             Main.Instance.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
-            controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(Ponies.ToArray()))
+            controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(Ponies().ToArray()))
             AddHandler SpriteAdded, AddressOf ControlFormItemAdded
             AddHandler SpritesAdded, AddressOf ControlFormItemsAdded
             AddHandler SpriteRemoved, AddressOf ControlFormItemRemoved

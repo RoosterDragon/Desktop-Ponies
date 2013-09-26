@@ -810,13 +810,6 @@ Public Class Main
                 Next
             End If
 
-            If Options.PonyInteractionsEnabled Then
-                Try
-                    InitializeInteractions()
-                Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(ex, "Unable to initialize interactions.")
-                End Try
-            End If
             PonyStartup(worker)
             LoadPoniesAsyncEnd(worker, False)
         Catch ex As Exception
@@ -828,17 +821,6 @@ Public Class Main
         End Try
     End Sub
 
-    ''' <summary>
-    ''' After all of the ponies, and all of their interactions are loaded, we need to go through and see
-    ''' which interactions can actually be used with which ponies are loaded, and see which ponies each 
-    ''' interaction should interact with.
-    ''' </summary>
-    ''' <remarks></remarks>
-    Private Sub InitializeInteractions()
-        For Each pony In startupPonies
-            pony.InitializeInteractions(startupPonies)
-        Next
-    End Sub
     Private Sub PonyStartup(worker As IdleWorker)
         If Reference.InScreensaverMode Then
             SmartInvoke(Sub()

@@ -46,21 +46,22 @@ Public Class PonyAnimator
     End Sub
 
     Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
-        If TypeOf e.Item Is Pony Then ReinitializeInteractions()
+        If TypeOf e.Item Is Pony Then InitializeInteractions()
     End Sub
 
     Private Sub SpritesChanged(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
-        If e.Items.Any(Function(s) TypeOf s Is Pony) Then ReinitializeInteractions()
+        If e.Items.Any(Function(s) TypeOf s Is Pony) Then InitializeInteractions()
     End Sub
 
-    Protected Sub ReinitializeInteractions()
-        Dim ponies = Sprites.OfType(Of Pony)()
-        For Each pony In ponies
-            pony.InitializeInteractions(ponies)
+    Private Sub InitializeInteractions()
+        Dim currentPonies = Ponies()
+        For Each pony In currentPonies
+            pony.InitializeInteractions(currentPonies)
         Next
     End Sub
 
     Public Overrides Sub Start()
+        InitializeInteractions()
         MyBase.Start()
         If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
             Main.Instance.SmartInvoke(Sub()
@@ -98,7 +99,7 @@ Public Class PonyAnimator
                 poniesRemoved = True
             End If
         Next
-        If poniesRemoved Then ReinitializeInteractions()
+        If poniesRemoved Then InitializeInteractions()
 
         If Not IsNothing(Game.CurrentGame) Then
             Game.CurrentGame.Update()
@@ -149,7 +150,7 @@ Public Class PonyAnimator
 
     Public Sub RemovePonyAndReinitializeInteractions(pony As Pony)
         RemovePony(pony)
-        ReinitializeInteractions()
+        InitializeInteractions()
     End Sub
 
     Protected Friend Sub AddEffect(effect As Effect)
@@ -260,7 +261,8 @@ Public Class PonyAnimator
             If Not Options.PonyDraggingEnabled Then Exit Sub
 
             Dim selectedForDragPony = GetClosestUnderPoint(Of Pony)(e.Location)
-            If selectedForDragPony IsNot Nothing Then                selectedForDragPony.BeingDragged = True
+            If selectedForDragPony IsNot Nothing Then
+                selectedForDragPony.BeingDragged = True
                 draggedPony = selectedForDragPony
                 draggingPonyOrEffect = True
                 If Not Paused Then
