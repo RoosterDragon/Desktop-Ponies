@@ -330,7 +330,7 @@ Public Class Game
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        Pony.CurrentAnimator.RemovePony(ball.Handler)
+                        Pony.CurrentAnimator.RemovePonyAndReinitializeInteractions(ball.Handler)
                     Next
 
                     For Each team In Teams

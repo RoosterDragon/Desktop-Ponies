@@ -241,7 +241,7 @@ Public Class DesktopControlForm
         Dim selected As ISprite = TryCast(PonyComboBox.SelectedItem, ISprite)
         If selected IsNot Nothing Then
             Dim center = Point.Round(selected.Region.Center())
-            animator.Viewer_MouseDown(sender, New SimpleMouseEventArgs(SimpleMouseButtons.Right, center.X, center.Y))
+            animator.EmulateMouseDown(New SimpleMouseEventArgs(SimpleMouseButtons.Right, center.X, center.Y))
         End If
     End Sub
 

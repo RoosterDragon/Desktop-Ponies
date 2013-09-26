@@ -3,7 +3,7 @@ Imports System.IO
 Imports DesktopSprites.SpriteManagement
 
 Public Class PonyEditor
-    Private editorAnimator As PonyEditorAnimator
+    Private editorAnimator As EditorPonyAnimator
     Private editorInterface As ISpriteCollectionView
 
     Friend Ponies As PonyCollection
@@ -93,7 +93,7 @@ Public Class PonyEditor
 
         editorInterface = Options.GetInterface()
         editorInterface.Topmost = True
-        editorAnimator = New PonyEditorAnimator(Me, editorInterface, Nothing, Ponies.AllBases)
+        editorAnimator = New EditorPonyAnimator(editorInterface, Ponies, Me)
         AddHandler editorAnimator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
         UseWaitCursor = False
@@ -388,6 +388,8 @@ Public Class PonyEditor
             EffectsGrid.ResumeLayout()
             InteractionsGrid.ResumeLayout()
             SpeechesGrid.ResumeLayout()
+
+            editorAnimator.CreateEditorMenu(PreviewPony.Base)
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
             Me.Close()
@@ -482,6 +484,32 @@ Public Class PonyEditor
         Return Nothing
     End Function
 
+    Public Sub RunBehavior(behavior As Behavior)
+        Argument.EnsureNotNull(behavior, "behavior")
+        Dim poniesToRemove = editorAnimator.Ponies().Where(Function(p) Not Object.ReferenceEquals(p, PreviewPony)).ToArray()
+            For Each pony In poniesToRemove
+                editorAnimator.RemovePonyAndReinitializeInteractions(pony)
+            Next
+
+            PreviewPony.ActiveEffects.Clear()
+
+            Dim followTarget As Pony = Nothing
+            If behavior.OriginalFollowTargetName <> "" Then
+                followTarget = AddPony(behavior.OriginalFollowTargetName)
+
+                If followTarget Is Nothing Then
+                    MessageBox.Show("The specified pony to follow (" & behavior.OriginalFollowTargetName &
+                                    ") for this behavior (" & behavior.Name &
+                                    ") does not exist, or has no behaviors. Please review this setting.",
+                                    "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    Return
+                End If
+            End If
+
+            PreviewPony.SelectBehavior(behavior)
+            PreviewPony.followTarget = followTarget
+    End Sub
+
     Private Function GetGridItem(Of TPonyIniSerializable As IPonyIniSerializable)(sender As Object, e As DataGridViewCellEventArgs,
                                                                               column As DataGridViewTextBoxColumn,
                                                                               items As IEnumerable(Of TPonyIniSerializable)
@@ -509,28 +537,7 @@ Public Class PonyEditor
 
             Select Case e.ColumnIndex
                 Case colBehaviorActivate.Index
-                    Dim poniesToRemove = editorAnimator.Ponies().Where(Function(p) Not Object.ReferenceEquals(p, PreviewPony)).ToArray()
-                    For Each pony In poniesToRemove
-                        editorAnimator.RemovePony(pony)
-                    Next
-
-                    PreviewPony.ActiveEffects.Clear()
-
-                    Dim followTarget As Pony = Nothing
-                    If behavior.OriginalFollowTargetName <> "" Then
-                        followTarget = AddPony(behavior.OriginalFollowTargetName)
-
-                        If followTarget Is Nothing Then
-                            MessageBox.Show("The specified pony to follow (" & behavior.OriginalFollowTargetName &
-                                            ") for this behavior (" & behavior.Name &
-                                            ") does not exist, or has no behaviors. Please review this setting.",
-                                            "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                            Return
-                        End If
-                    End If
-
-                    PreviewPony.SelectBehavior(behavior)
-                    PreviewPony.followTarget = followTarget
+                    RunBehavior(behavior)
 
                 Case colBehaviorRightImage.Index
                     HidePony()

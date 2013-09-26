@@ -137,6 +137,7 @@
     <Compile Include="DesktopPonies\GameTeamControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
     <Compile Include="IdleWorker.vb" />
@@ -212,7 +213,7 @@
     <Compile Include="PonyEditor2\SpeechEditor.vb">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PonyEditor\PonyEditorAnimator.vb" />
+    <Compile Include="PonyEditor\EditorPonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonySelectionControl.Designer.vb">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
     </Compile>

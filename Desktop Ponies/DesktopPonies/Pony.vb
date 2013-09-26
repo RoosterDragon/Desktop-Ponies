@@ -930,7 +930,7 @@ Public Class Pony
     Private Const StepRate = 1000.0 / 30.0
 
     Public Shared Property CursorLocation As Point
-    Public Shared Property CurrentAnimator As DesktopPonyAnimator
+    Public Shared Property CurrentAnimator As PonyAnimator
     Public Shared Property CurrentViewer As ISpriteCollectionView
     Public Shared Property PreviewWindowRectangle As Rectangle
 
