@@ -450,7 +450,7 @@ Public Class Main
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     startupPonies.Clear()
-                    PonyStartup()
+                    PonyStartup(IdleWorker.CurrentThreadWorker)
                     Game.CurrentGame.Setup()
                     animator.Start()
                 Else
@@ -727,19 +727,15 @@ Public Class Main
     End Sub
 
     Private Sub LoadPonies()
-        If PonyLoader.IsBusy Then
-            MessageBox.Show(Me, "Already busy loading ponies. Cannot start any more at this time.",
-                            "Busy", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        Else
-            loading = True
-            SelectionControlsPanel.Enabled = False
-            LoadingProgressBar.Visible = True
-            loadWatch.Restart()
-            PonyLoader.RunWorkerAsync()
-        End If
+        loading = True
+        SelectionControlsPanel.Enabled = False
+        LoadingProgressBar.Visible = True
+        loadWatch.Restart()
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadPoniesAsync, IdleWorker.CurrentThreadWorker)
     End Sub
 
-    Private Sub PonyLoader_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles PonyLoader.DoWork
+    Private Sub LoadPoniesAsync(idleWorkerObject As Object)
+        Dim worker = DirectCast(idleWorkerObject, IdleWorker)
         Try
             ' Note down the number of each pony that is wanted.
             Dim totalPonies As Integer
@@ -758,22 +754,28 @@ Public Class Main
                     ponyBasesWanted.Add(Tuple.Create("Random Pony", 1))
                     totalPonies = 1
                 Else
-                    MessageBox.Show("You haven't selected any ponies! Choose some ponies to roam your desktop first.",
-                                    "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                    e.Cancel = True
+                    LoadPoniesAsyncEnd(
+                        worker, True,
+                        Sub()
+                            MessageBox.Show(Me, "You haven't selected any ponies! Choose some ponies to roam your desktop first.",
+                                            "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        End Sub)
                     Return
                 End If
             End If
 
             If totalPonies > Options.MaxPonyCount Then
-                MessageBox.Show(String.Format(
-                                CultureInfo.CurrentCulture,
-                                "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
-                                "Try choosing no more than {2} in total.{0}" &
-                                "(or, you can increase the limit via the options menu)",
-                                Environment.NewLine, totalPonies, Options.MaxPonyCount),
-                            "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                e.Cancel = True
+                LoadPoniesAsyncEnd(
+                    worker, True,
+                    Sub()
+                        MessageBox.Show(Me, String.Format(
+                            CultureInfo.CurrentCulture,
+                            "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
+                            "Try choosing no more than {2} in total.{0}" &
+                            "(or, you can increase the limit via the options menu)",
+                            Environment.NewLine, totalPonies, Options.MaxPonyCount),
+                        "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    End Sub)
                 Return
             End If
 
@@ -815,11 +817,11 @@ Public Class Main
                     My.Application.NotifyUserOfNonFatalException(ex, "Unable to initialize interactions.")
                 End Try
             End If
-
-            PonyStartup()
+            PonyStartup(worker)
+            LoadPoniesAsyncEnd(worker, False)
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
-            e.Cancel = True
+            LoadPoniesAsyncEnd(worker, True)
 #If DEBUG Then
             Throw
 #End If
@@ -837,8 +839,7 @@ Public Class Main
             pony.InitializeInteractions(startupPonies)
         Next
     End Sub
-
-    Private Sub PonyStartup()
+    Private Sub PonyStartup(worker As IdleWorker)
         If Reference.InScreensaverMode Then
             SmartInvoke(Sub()
                             If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
@@ -901,16 +902,11 @@ Public Class Main
                 images.Add(house.LeftImage.Path)
             Next
 
-            SmartInvoke(Sub()
-                            LoadingProgressBar.Value = 0
-                            LoadingProgressBar.Maximum = images.Count
-                        End Sub)
-            Dim imagesLoaded = 0
-            Dim loaded = Sub(sender As Object, e As EventArgs)
-                             imagesLoaded += 1
-                             PonyLoader.ReportProgress(imagesLoaded)
-                         End Sub
-            ponyViewer.LoadImages(images, loaded)
+            worker.QueueTask(Sub()
+                                 LoadingProgressBar.Value = 0
+                                 LoadingProgressBar.Maximum = images.Count
+                             End Sub)
+            ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
         End If
 
         animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
@@ -930,38 +926,28 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub PonyLoader_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles PonyLoader.ProgressChanged
-        ' Lazy solution to invoking issues and deadlocking the main thread.
-        If Not InvokeRequired Then
-            LoadingProgressBar.Value = e.ProgressPercentage
-        End If
-    End Sub
+    Private Sub LoadPoniesAsyncEnd(worker As IdleWorker, cancelled As Boolean, Optional uiAction As Action = Nothing)
+        worker.QueueTask(
+            Sub()
+                Dim totalImages = LoadingProgressBar.Maximum
 
-    Private Sub PonyLoader_RunWorkerCompleted(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles PonyLoader.RunWorkerCompleted
-        Dim totalImages = LoadingProgressBar.Maximum
+                LoadingProgressBar.Value = 0
+                LoadingProgressBar.Maximum = 1
+                If Not Runtime.IsMono Then LoadingProgressBar.Visible = False
 
-        LoadingProgressBar.Value = 0
-        LoadingProgressBar.Maximum = 1
-        SelectionControlsPanel.Enabled = True
-        If Not Runtime.IsMono Then LoadingProgressBar.Visible = False
+                If uiAction IsNot Nothing Then uiAction()
+                SelectionControlsPanel.Enabled = True
 
-        Dim oldLoader = PonyLoader
-        PonyLoader = New System.ComponentModel.BackgroundWorker() With {
-            .Site = oldLoader.Site,
-            .WorkerReportsProgress = oldLoader.WorkerReportsProgress,
-            .WorkerSupportsCancellation = oldLoader.WorkerSupportsCancellation
-        }
-        oldLoader.Dispose()
-
-        loading = False
-        If Not e.Cancelled Then
-            Reference.PoniesHaveLaunched = True
-            TempSaveCounts()
-            Visible = False
-            animator.Start()
-            loadWatch.Stop()
-            Console.WriteLine("Loaded in {0:0.00s} ({1} images)", loadWatch.Elapsed.TotalSeconds, totalImages)
-        End If
+                loading = False
+                If Not cancelled Then
+                    Reference.PoniesHaveLaunched = True
+                    TempSaveCounts()
+                    Visible = False
+                    animator.Start()
+                    loadWatch.Stop()
+                    Console.WriteLine("Loaded in {0:0.00s} ({1} images)", loadWatch.Elapsed.TotalSeconds, totalImages)
+                End If
+            End Sub)
     End Sub
 #End Region
 
