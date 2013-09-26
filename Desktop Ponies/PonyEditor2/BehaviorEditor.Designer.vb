@@ -26,8 +26,8 @@ Partial Class BehaviorEditor
         Me.TargetLabel = New System.Windows.Forms.Label()
         Me.LinkedBehaviorComboBox = New System.Windows.Forms.ComboBox()
         Me.LinkedBehaviorLabel = New System.Windows.Forms.Label()
-        Me.EndSpeechComboBox = New DesktopPonies.ComboBoxCaseSensitive()
-        Me.StartSpeechComboBox = New DesktopPonies.ComboBoxCaseSensitive()
+        Me.EndSpeechComboBox = New System.Windows.Forms.ComboBox()
+        Me.StartSpeechComboBox = New System.Windows.Forms.ComboBox()
         Me.EndSpeechLabel = New System.Windows.Forms.Label()
         Me.StartSpeechLabel = New System.Windows.Forms.Label()
         Me.NameLabel = New System.Windows.Forms.Label()
@@ -462,8 +462,8 @@ Partial Class BehaviorEditor
     Friend WithEvents GroupNumber As System.Windows.Forms.NumericUpDown
     Friend WithEvents LeftImageViewer As DesktopPonies.AnimatedImageViewer
     Friend WithEvents RightImageViewer As DesktopPonies.AnimatedImageViewer
-    Friend WithEvents EndSpeechComboBox As DesktopPonies.ComboBoxCaseSensitive
-    Friend WithEvents StartSpeechComboBox As DesktopPonies.ComboBoxCaseSensitive
+    Friend WithEvents EndSpeechComboBox As System.Windows.Forms.ComboBox
+    Friend WithEvents StartSpeechComboBox As System.Windows.Forms.ComboBox
     Friend WithEvents EndSpeechLabel As System.Windows.Forms.Label
     Friend WithEvents StartSpeechLabel As System.Windows.Forms.Label
     Friend WithEvents LinkedBehaviorComboBox As System.Windows.Forms.ComboBox

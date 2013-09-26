@@ -161,9 +161,6 @@
     <Compile Include="PonyEditor2\BehaviorEditor.vb">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PonyEditor2\ComboBoxCaseSensitive.vb">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PonyEditor2\EffectEditor.Designer.vb">
       <DependentUpon>EffectEditor.vb</DependentUpon>
     </Compile>

@@ -200,9 +200,10 @@ Public Class ItemEditorBase
     Protected Shared Sub SelectOrOvertypeItem(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
         If TypeOf item Is String AndAlso String.IsNullOrEmpty(DirectCast(item, String)) Then
-            comboBox.SelectedIndex = 0
+            If comboBox.SelectedIndex <> 0 Then comboBox.SelectedIndex = 0
         Else
-            comboBox.Text = If(item IsNot Nothing, item.ToString(), Nothing)
+            Dim itemText = If(item IsNot Nothing, item.ToString(), Nothing)
+            If comboBox.Text <> itemText Then comboBox.Text = itemText
         End If
     End Sub
 

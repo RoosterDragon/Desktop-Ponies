@@ -37,16 +37,10 @@ Friend Class BehaviorEditor
             Sub() UpdateProperty(Sub() Edited.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves))
         AddHandler MinDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MinDuration = MinDurationNumber.Value)
         AddHandler MaxDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MaxDuration = MaxDurationNumber.Value)
-        AddHandler StartSpeechComboBox.ValueChanged,
-            Sub() UpdateProperty(Sub()
-                                     Edited.StartLineName =
-                                         If(StartSpeechComboBox.SelectedIndex <> 0, StartSpeechComboBox.Text, "")
-                                 End Sub)
-        AddHandler EndSpeechComboBox.SelectedIndexChanged,
-            Sub() UpdateProperty(Sub()
-                                     Edited.EndLineName =
-                                         If(EndSpeechComboBox.SelectedIndex <> 0, EndSpeechComboBox.Text, "")
-                                 End Sub)
+        AddHandler StartSpeechComboBox.TextChanged, Sub() UpdateStartSpeech()
+        'AddHandler StartSpeechComboBox.SelectedIndexChanged, Sub() UpdateStartSpeech()
+        AddHandler EndSpeechComboBox.TextChanged, Sub() UpdateEndSpeech()
+        'AddHandler EndSpeechComboBox.SelectedIndexChanged, Sub() UpdateEndSpeech()
         AddHandler LinkedBehaviorComboBox.SelectedIndexChanged,
             Sub() UpdateProperty(Sub()
                                      Dim behavior = TryCast(LinkedBehaviorComboBox.SelectedItem, Behavior)
@@ -66,6 +60,14 @@ Friend Class BehaviorEditor
                                      Edited.RightImage.Path = rightPath
                                  End Sub)
         AddHandler RightImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
+    End Sub
+
+    Private Sub UpdateStartSpeech()
+        UpdateProperty(Sub() Edited.StartLineName = If(StartSpeechComboBox.SelectedIndex <> 0, StartSpeechComboBox.Text, ""))
+    End Sub
+
+    Private Sub UpdateEndSpeech()
+        UpdateProperty(Sub() Edited.EndLineName = If(EndSpeechComboBox.SelectedIndex <> 0, EndSpeechComboBox.Text, ""))
     End Sub
 
     Public Overrides Sub NewItem(name As String)
