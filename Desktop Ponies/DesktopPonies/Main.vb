@@ -27,8 +27,6 @@ Public Class Main
 
     Private preventLoadProfile As Boolean
 
-    Private previewWindowRectangle As Func(Of Rectangle)
-
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl)
@@ -420,7 +418,6 @@ Public Class Main
         Reference.InPreviewMode = True
         Me.Visible = False
         Using form = New PonyEditor(ponies)
-            previewWindowRectangle = AddressOf form.GetPreviewWindowScreenRectangle
             form.ShowDialog(Me)
 
             PonyShutdown()
@@ -439,10 +436,6 @@ Public Class Main
         End Using
 
     End Sub
-
-    Friend Function GetPreviewWindowRectangle() As Rectangle
-        Return previewWindowRectangle()
-    End Function
 
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
@@ -661,9 +654,11 @@ Public Class Main
             Next
         ElseIf e.KeyChar = "#"c Then
 #If DEBUG Then
+            Reference.InPreviewMode = True
             Using newEditor = New PonyEditorForm2()
                 newEditor.ShowDialog(Me)
             End Using
+            Reference.InPreviewMode = False
 #End If
         End If
     End Sub

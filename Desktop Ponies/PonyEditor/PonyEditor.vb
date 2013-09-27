@@ -191,26 +191,6 @@ Public Class PonyEditor
             End Sub)
     End Sub
 
-    Friend Function GetPreviewWindowScreenRectangle() As Rectangle
-        ' Traverses the parent controls to find the total offset.
-        ' Equivalent to the below, but does not require invoking:
-        'Return PonyPreviewPanel.RectangleToScreen(PonyPreviewPanel.ClientRectangle)
-        Dim location = PonyPreviewPanel.Location
-        Dim container = PonyPreviewPanel.Parent
-        While container IsNot Nothing
-            location += New Size(container.Location)
-            If Object.ReferenceEquals(Me, container) Then
-                location.X += SystemInformation.Border3DSize.Width
-                location.Y += SystemInformation.CaptionHeight + SystemInformation.Border3DSize.Height
-            Else
-                Dim borderSize = container.Size - container.ClientSize
-                location += New Size(CInt(borderSize.Width / 2), CInt(borderSize.Height / 2))
-            End If
-            container = container.Parent
-        End While
-        Return New Rectangle(location, PonyPreviewPanel.Size)
-    End Function
-
     'This is used to keep track of the links in each behavior chain.
     Private Structure ChainLink
         Public ReadOnly LinkedBehaviorName As CaseInsensitiveString
@@ -1559,8 +1539,8 @@ Public Class PonyEditor
         End If
         _isClosing = True
         If editorAnimator IsNot Nothing AndAlso Not editorAnimator.Disposed Then
-            If editorAnimator.Started Then editorAnimator.Pause(True)
             RemoveHandler editorAnimator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
+            If editorAnimator.Started Then editorAnimator.Finish()
         End If
     End Sub
 

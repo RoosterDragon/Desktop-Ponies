@@ -117,10 +117,6 @@ Public Class PonyAnimator
             house.Cycle(ElapsedTime, PonyCollection.Bases)
         Next
 
-        If Reference.InPreviewMode Then
-            Pony.PreviewWindowRectangle = Main.Instance.GetPreviewWindowRectangle()
-        End If
-
         MyBase.Update()
         If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then ReturnToMenu()
         Sort(zOrder)

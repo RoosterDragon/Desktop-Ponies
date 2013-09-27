@@ -9,6 +9,8 @@ Public Class PonyEditorForm2
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
+    Private preview As PonyPreview
+
     Private workingCount As Integer
 
     Private Class PageRef
@@ -40,7 +42,11 @@ Public Class PonyEditorForm2
 
     Private ReadOnly Property ActiveItemEditor As ItemEditorBase
         Get
-            Return If(Documents.SelectedTab Is Nothing, Nothing, DirectCast(Documents.SelectedTab.Controls(0), ItemEditorBase))
+            If Documents.SelectedTab Is Nothing OrElse Documents.SelectedTab.Controls.Count = 0 Then
+                Return Nothing
+            Else
+                Return TryCast(Documents.SelectedTab.Controls(0), ItemEditorBase)
+            End If
         End Get
     End Property
 
@@ -139,6 +145,7 @@ Public Class PonyEditorForm2
                 End Sub))
         worker.QueueTask(Sub() poniesNode.TreeView.Sort())
         worker.QueueTask(Sub()
+                             preview = New PonyPreview(ponies)
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1
                              EditorProgressBar.Maximum = 1
@@ -271,22 +278,29 @@ Public Class PonyEditorForm2
         Dim tab = Documents.TabPages.Item(pageRefKey)
 
         If tab Is Nothing Then
-            Dim editor As ItemEditorBase = Nothing
+            Dim childControl As Control = Nothing
             Select Case pageRef.PageContent
-                Case PageContent.Behavior
-                    editor = New BehaviorEditor()
-                Case PageContent.Effect
-                    editor = New EffectEditor()
-                Case PageContent.Speech
-                    editor = New SpeechEditor()
-                Case PageContent.Interaction
-                    editor = New InteractionEditor()
+                Case PageContent.Pony
+                    childControl = preview
+                Case PageContent.Behavior, PageContent.Effect, PageContent.Speech, PageContent.Interaction
+                    Dim editor As ItemEditorBase = Nothing
+                    Select Case pageRef.PageContent
+                        Case PageContent.Behavior
+                            editor = New BehaviorEditor()
+                        Case PageContent.Effect
+                            editor = New EffectEditor()
+                        Case PageContent.Speech
+                            editor = New SpeechEditor()
+                        Case PageContent.Interaction
+                            editor = New InteractionEditor()
+                    End Select
+                    QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
+                    childControl = editor
             End Select
-            If editor IsNot Nothing Then
-                QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
-                editor.Dock = DockStyle.Fill
+            If childControl IsNot Nothing Then
+                childControl.Dock = DockStyle.Fill
                 tab = New ItemTabPage() With {.Name = pageRefKey, .Text = GetTabText(pageRef), .Tag = pageRef}
-                tab.Controls.Add(editor)
+                tab.Controls.Add(childControl)
                 Documents.TabPages.Add(tab)
                 CloseTabButton.Enabled = True
                 CloseAllTabsButton.Enabled = True
@@ -309,7 +323,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub SwitchTab(newTab As TabPage)
-        If Documents.SelectedTab IsNot Nothing Then
+        If ActiveItemEditor IsNot Nothing Then
             RemoveHandler ActiveItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
             RemoveHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
             ActiveItemEditor.AnimateImages(False)
@@ -317,13 +331,26 @@ Public Class PonyEditorForm2
 
         Documents.SelectedTab = newTab
 
-        If Documents.SelectedTab IsNot Nothing Then
+        If ActiveItemEditor IsNot Nothing Then
             ActiveItemEditor.AnimateImages(True)
             AddHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
             AddHandler ActiveItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
         End If
         ActiveItemEditor_DirtinessChanged(Me, EventArgs.Empty)
         ActiveItemEditor_IssuesChanged(Me, EventArgs.Empty)
+
+        Dim pageRef As PageRef = Nothing
+        If newTab IsNot Nothing Then
+            pageRef = GetPageRef(newTab)
+            If pageRef.PageContent = PageContent.Pony Then
+                newTab.Controls.Add(preview)
+                preview.RestartForPony(pageRef.PonyBase)
+                preview.ShowPreview()
+            Else
+                pageRef = Nothing
+            End If
+        End If
+        If pageRef Is Nothing Then preview.HidePreview()
     End Sub
 
     Private Sub ActiveItemEditor_DirtinessChanged(sender As Object, e As EventArgs)
@@ -378,6 +405,7 @@ Public Class PonyEditorForm2
 
     Private Sub RemoveTab(tab As TabPage)
         Documents.TabPages.Remove(tab)
+        tab.Controls.Remove(preview)
         tab.Dispose()
         CloseTabButton.Enabled = Documents.TabPages.Count > 0
         CloseAllTabsButton.Enabled = Documents.TabPages.Count > 0
@@ -402,7 +430,9 @@ Public Class PonyEditorForm2
 
     Private Sub PonyEditorForm2_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         ' TODO: Change IdleWorker to allow it be depend on a specified control, and drop remaining tasks if the control is destroyed.
-        ' Until then, we'll make sure we process any tasks before closing to prevent errors.
+        ' Until then, we'll make sure we process any tasks before closing to try and prevent errors.
         worker.WaitOnAllTasks()
+        If preview.Parent IsNot Nothing Then preview.Parent.Controls.Remove(preview)
+        preview.Dispose()
     End Sub
 End Class

@@ -27,12 +27,26 @@ Public Class EditorPonyAnimator
         End If
     End Sub
 
+    Public Overrides Sub Start()
+        editor.SmartInvoke(Sub() Pony.PreviewWindowRectangle =
+                               editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle))
+        MyBase.Start()
+    End Sub
+
     Public Overrides Sub Pause(hide As Boolean)
         If hide Then Draw()
         MyBase.Pause(hide)
     End Sub
 
     Protected Overrides Sub Update()
+        If Not editor.IsClosing Then
+            editor.BeginInvoke(New MethodInvoker(
+                                Sub()
+                                    If editor.IsClosing Then Exit Sub
+                                    Pony.PreviewWindowRectangle =
+                                        editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle)
+                                End Sub))
+        End If
         MyBase.Update()
         If Not editor.IsClosing Then
             editor.BeginInvoke(New MethodInvoker(

@@ -161,6 +161,7 @@
     <Compile Include="PonyEditor2\BehaviorEditor.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="PonyEditor2\Editor2PonyAnimator.vb" />
     <Compile Include="PonyEditor2\EffectEditor.Designer.vb">
       <DependentUpon>EffectEditor.vb</DependentUpon>
     </Compile>
@@ -203,6 +204,12 @@
     </Compile>
     <Compile Include="PonyEditor2\PonyEditorForm2.vb">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\PonyPreview.Designer.vb">
+      <DependentUpon>PonyPreview.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\PonyPreview.vb">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PonyEditor2\SpeechEditor.Designer.vb">
       <DependentUpon>SpeechEditor.vb</DependentUpon>
@@ -377,6 +384,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\PonyEditorForm2.resx">
       <DependentUpon>PonyEditorForm2.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\PonyPreview.resx">
+      <DependentUpon>PonyPreview.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\SpeechEditor.resx">
       <DependentUpon>SpeechEditor.vb</DependentUpon>
