@@ -154,6 +154,11 @@ Public Class DesktopPonyAnimator
                 Sub()
                     Main.Instance.SmartInvoke(
                         Sub()
+                            If Game.CurrentGame IsNot Nothing Then
+                                MessageBox.Show("Cannot remove ponies during a game.",
+                                                "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                Return
+                            End If
                             QueueRemove(Function(sprite)
                                             If Object.ReferenceEquals(sprite, selectedPony) Then Return True
                                             Dim effect = TryCast(sprite, Effect)
@@ -171,6 +176,11 @@ Public Class DesktopPonyAnimator
                 Sub()
                     Main.Instance.SmartInvoke(
                         Sub()
+                            If Game.CurrentGame IsNot Nothing Then
+                                MessageBox.Show("Cannot remove ponies during a game.",
+                                                "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                Return
+                            End If
                             QueueRemove(Function(sprite)
                                             Dim pony = TryCast(sprite, Pony)
                                             If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
@@ -178,6 +188,7 @@ Public Class DesktopPonyAnimator
                                             End If
                                             Dim effect = TryCast(sprite, Effect)
                                             If effect IsNot Nothing AndAlso
+                                                effect.OwningPony IsNot Nothing AndAlso
                                                 effect.OwningPony.Directory = selectedPony.Directory Then
                                                 Return True
                                             End If
@@ -187,16 +198,19 @@ Public Class DesktopPonyAnimator
                 End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 If selectedPony Is Nothing Then Return
+                                                                 If Game.CurrentGame IsNot Nothing OrElse
+                                                                     selectedPony Is Nothing Then Return
                                                                  selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
                                                              End Sub))
         Dim allSleeping = False
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(Sub()
-                                                                                                 allSleeping = Not allSleeping
-                                                                                                 For Each pony In Me.Ponies()
-                                                                                                     pony.ShouldBeSleeping = allSleeping
-                                                                                                 Next
-                                                                                             End Sub)))
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(
+                                                                 Sub()
+                                                                     If Game.CurrentGame IsNot Nothing Then Return
+                                                                     allSleeping = Not allSleeping
+                                                                     For Each pony In Me.Ponies()
+                                                                         pony.ShouldBeSleeping = allSleeping
+                                                                     Next
+                                                                 End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem())
         Dim ponies As IEnumerable(Of ISimpleContextMenuItem) = Nothing
         Main.Instance.SmartInvoke(Sub() ponies = PonySelectionList())
@@ -340,6 +354,11 @@ Public Class DesktopPonyAnimator
 
     Private Sub AddPonySelection(ponyName As String)
         Main.Instance.SmartInvoke(Sub()
+                                      If Game.CurrentGame IsNot Nothing Then
+                                          MessageBox.Show("Cannot add ponies during a game.",
+                                                          "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                          Return
+                                      End If
                                       If ponyName = "Random Pony" Then
                                           Dim selection = Rng.Next(PonyCollection.Bases.Count())
                                           ponyName = PonyCollection.Bases(selection).Directory
@@ -355,6 +374,11 @@ Public Class DesktopPonyAnimator
 
     Private Sub AddHouseSelection(houseBase As HouseBase)
         Main.Instance.SmartInvoke(Sub()
+                                      If Game.CurrentGame IsNot Nothing Then
+                                          MessageBox.Show("Cannot add houses during a game.",
+                                                          "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                          Return
+                                      End If
                                       Dim newHouse = New House(houseBase)
                                       newHouse.InitializeVisitorList()
                                       newHouse.Teleport()
