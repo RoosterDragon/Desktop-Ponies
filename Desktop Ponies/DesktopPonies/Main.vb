@@ -349,7 +349,7 @@ Public Class Main
         End If
         If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
-        selectionControlFilter.Add(ponySelection, ponySelection.Visible)
+        selectionControlFilter.Add(ponySelection, True)
         PonySelectionPanel.Controls.Add(ponySelection)
     End Sub
 
