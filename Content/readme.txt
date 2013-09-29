@@ -76,6 +76,8 @@ v1.42.2.9:
 - On Windows, running with alpha blending enabled is now just as fast as with it disabled.
 - When changing linked behaviors in the editor, the "link order" column will now update as changes are made.
 - The editor now handles config files that use different casing when it is allowed, rather than giving warnings.
+- Prevented addition/removal/sleeping of ponies during games.
+- Interaction target names are now case sensitive - for consistancy.
 - Fixed some issues related to editing interactions.
 - Fixed bug preventing creation of new profiles.
 - Fixed crash that happened when certain ponies were deployed from houses.
