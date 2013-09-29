@@ -20,7 +20,7 @@ Public NotInheritable Class CaseInsensitiveString
         Return str
     End Function
     Public Overloads Shared Widening Operator CType(value As CaseInsensitiveString) As String
-        Return value.str
+        Return If(value Is Nothing, Nothing, value.str)
     End Operator
     Public Overloads Shared Widening Operator CType(value As String) As CaseInsensitiveString
         Return If(value Is Nothing, Nothing, New CaseInsensitiveString(value))
