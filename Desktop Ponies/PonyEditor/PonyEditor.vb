@@ -6,6 +6,7 @@ Public Class PonyEditor
     Private editorAnimator As EditorPonyAnimator
     Private editorInterface As ISpriteCollectionView
 
+    Private ReadOnly worker As New IdleWorker(Me)
     Friend Ponies As PonyCollection
     Private ponyImageList As ImageList
     Private infoGrids As ImmutableArray(Of PonyInfoGrid)
@@ -152,7 +153,6 @@ Public Class PonyEditor
     End Sub
 
     Private Sub LoadPony()
-        Dim worker = IdleWorker.CurrentThreadWorker
         worker.QueueTask(Sub()
                              EnableWaitCursor(True, False)
 
@@ -1500,6 +1500,7 @@ Public Class PonyEditor
 
     Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
         HidePony()
+        ImagesContextMenu.Hide()
         If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
             Using form = New ImageCentersForm(Me)
                 form.ShowDialog(Me)

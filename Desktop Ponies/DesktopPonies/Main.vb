@@ -12,6 +12,7 @@ Public Class Main
     Private initialized As Boolean
     Private loading As Boolean
     Private loadWatch As New Diagnostics.Stopwatch()
+    Private ReadOnly worker As New IdleWorker(Me)
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -117,7 +118,7 @@ Public Class Main
         'Application.DoEvents()
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates, IdleWorker.CurrentThreadWorker)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates)
     End Sub
 
     Private Function ProcessCommandLine() As Boolean
@@ -214,9 +215,7 @@ Public Class Main
         Next
     End Sub
 
-    Private Sub LoadTemplates(workerObject As Object)
-        Dim worker = DirectCast(workerObject, IdleWorker)
-
+    Private Sub LoadTemplates(o As Object)
         Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
@@ -443,7 +442,7 @@ Public Class Main
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     startupPonies.Clear()
-                    PonyStartup(IdleWorker.CurrentThreadWorker)
+                    PonyStartup()
                     Game.CurrentGame.Setup()
                     animator.Start()
                 Else
@@ -726,11 +725,10 @@ Public Class Main
         SelectionControlsPanel.Enabled = False
         LoadingProgressBar.Visible = True
         loadWatch.Restart()
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadPoniesAsync, IdleWorker.CurrentThreadWorker)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadPoniesAsync)
     End Sub
 
-    Private Sub LoadPoniesAsync(idleWorkerObject As Object)
-        Dim worker = DirectCast(idleWorkerObject, IdleWorker)
+    Private Sub LoadPoniesAsync(o As Object)
         Try
             ' Note down the number of each pony that is wanted.
             Dim totalPonies As Integer
@@ -750,7 +748,7 @@ Public Class Main
                     totalPonies = 1
                 Else
                     LoadPoniesAsyncEnd(
-                        worker, True,
+                        True,
                         Sub()
                             MessageBox.Show(Me, "You haven't selected any ponies! Choose some ponies to roam your desktop first.",
                                             "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -761,7 +759,7 @@ Public Class Main
 
             If totalPonies > Options.MaxPonyCount Then
                 LoadPoniesAsyncEnd(
-                    worker, True,
+                    True,
                     Sub()
                         MessageBox.Show(Me, String.Format(
                             CultureInfo.CurrentCulture,
@@ -805,18 +803,18 @@ Public Class Main
                 Next
             End If
 
-            PonyStartup(worker)
-            LoadPoniesAsyncEnd(worker, False)
+            PonyStartup()
+            LoadPoniesAsyncEnd(False)
         Catch ex As Exception
             My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
-            LoadPoniesAsyncEnd(worker, True)
+            LoadPoniesAsyncEnd(True)
 #If DEBUG Then
             Throw
 #End If
         End Try
     End Sub
 
-    Private Sub PonyStartup(worker As IdleWorker)
+    Private Sub PonyStartup()
         If Reference.InScreensaverMode Then
             SmartInvoke(Sub()
                             If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
@@ -903,7 +901,7 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub LoadPoniesAsyncEnd(worker As IdleWorker, cancelled As Boolean, Optional uiAction As Action = Nothing)
+    Private Sub LoadPoniesAsyncEnd(cancelled As Boolean, Optional uiAction As Action = Nothing)
         worker.QueueTask(
             Sub()
                 Dim totalImages = LoadingProgressBar.Maximum

@@ -1,27 +1,10 @@
 ﻿Imports System.Threading
 
 ''' <summary>
-''' Processes UI dependant tasks on the UI thread when the application is idle.
+''' Processes UI dependant tasks on the UI thread when it becomes idle.
 ''' </summary>
-''' <remarks>When the application exits, any tasks queued for execution are abandoned.</remarks>
+''' <remarks>When the control is disposed, any tasks queued for execution are abandoned.</remarks>
 Public Class IdleWorker
-
-    ''' <summary>
-    ''' The idle worker for this thread.
-    ''' </summary>
-    <ThreadStatic>
-    Private Shared worker As IdleWorker
-
-    ''' <summary>
-    ''' Gets the idle worker for this thread.
-    ''' </summary>
-    Public Shared ReadOnly Property CurrentThreadWorker As IdleWorker
-        Get
-            If worker Is Nothing Then worker = New IdleWorker()
-            Return worker
-        End Get
-    End Property
-
     ''' <summary>
     ''' A method that does nothing.
     ''' </summary>
@@ -41,40 +24,39 @@ Public Class IdleWorker
     ''' </summary>
     Private ReadOnly empty As New Threading.ManualResetEvent(True)
     ''' <summary>
-    ''' A control, from which the UI thread can be invoked.
+    ''' The control from which the UI thread is to be invoked.
     ''' </summary>
     Private ReadOnly control As Control
-    ''' <summary>
-    ''' The thread that owns this instance.
-    ''' </summary>
-    Private ReadOnly owningThread As Threading.Thread
     ''' <summary>
     ''' Keeps track of how long the current batch of tasks has taken.
     ''' </summary>
     Private ReadOnly runWatch As New Diagnostics.Stopwatch()
 
     ''' <summary>
-    ''' Indicates if we have disposed of the instance.
+    ''' Indicates if the control has been disposed.
     ''' </summary>
-    Private disposed As Boolean
+    Private ReadOnly Property controlDisposed As Boolean
+        Get
+            Return control.Disposing OrElse control.IsDisposed
+        End Get
+    End Property
     ''' <summary>
     ''' Async result returned from dummy callback, held so the wait handle may be disposed.
     ''' </summary>
     Private dummyAsyncResult As IAsyncResult
 
     ''' <summary>
-    ''' Initializes a new instance of the <see cref="IdleWorker"/> class on the current thread.
+    ''' Initializes a new instance of the <see cref="IdleWorker"/> class for the specified control.
     ''' </summary>
-    Private Sub New()
-        If Not Runtime.IsMono AndAlso Not Application.MessageLoop Then Throw New InvalidOperationException(
-            String.Format(Globalization.CultureInfo.CurrentCulture,
-                "A message loop must be running on this thread before the {0} can be accessed.", GetType(IdleWorker).Name))
-        owningThread = Threading.Thread.CurrentThread
-        control = New Control()
-        control.CreateControl()
+    ''' <param name="control">The control on which tasks are dependant.</param>
+    ''' <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.</exception>
+    ''' <exception cref="T:System.ArgumentException"><paramref name="control"/> has been disposed.</exception>
+    Public Sub New(control As Control)
+        Me.control = Argument.EnsureNotNull(control, "control")
+        AddHandler control.Disposed, AddressOf Control_Disposed
+        If controlDisposed Then Throw New ArgumentException("control must not be disposed.", "control")
         If UseIdlePooling Then
-            AddHandler Application.Idle, AddressOf RunTask
-            AddHandler Application.ThreadExit, AddressOf DisposeWorker
+            control.SmartInvoke(Sub() AddHandler Application.Idle, AddressOf RunTask)
         End If
     End Sub
 
@@ -85,32 +67,26 @@ Public Class IdleWorker
     Public Sub QueueTask(task As MethodInvoker)
         Argument.EnsureNotNull(task, "task")
         SyncLock tasks
-            ' If the control is disposed or the handle has been lost, then the message pump on this thread has been shut down. We will drop
-            ' all new tasks since they can't be processed anyway.
-            If control.Disposing OrElse control.IsDisposed OrElse Not control.IsHandleCreated Then
+            ' If the control is disposed or the handle has been lost, we will drop all new tasks since they can't be processed anyway.
+            If controlDisposed OrElse Not control.IsHandleCreated Then
                 Return
             End If
 
-            Try
-                If UseIdlePooling Then
-                    tasks.Enqueue(task)
-                    ' If there were previously no tasks in the queue, the application may already be an an idle state.
-                    ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is
-                    ' cleared.
-                    If tasks.Count = 1 Then
-                        dummyAsyncResult = control.BeginInvoke(DummyCallback)
-                        empty.Reset()
-                    End If
-                Else
-                    ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This
-                    ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks. This becomes an
-                    ' issue if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
-                    control.BeginInvoke(task)
+            If UseIdlePooling Then
+                tasks.Enqueue(task)
+                ' If there were previously no tasks in the queue, the application may already be an an idle state.
+                ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is
+                ' cleared.
+                If tasks.Count = 1 Then
+                    dummyAsyncResult = control.BeginInvoke(DummyCallback)
+                    empty.Reset()
                 End If
-            Catch ex As InvalidOperationException
-                ' If the handle was lost after our initial check, it means the message pump was closed from another thread.
-                ' Again, we will just drop any new tasks.
-            End Try
+            Else
+                ' Mono does not handle the idle event in the same way. Instead we'll just lump the request onto the message queue. This
+                ' means the caller is still not blocked, but that user interaction will be delayed behind queued tasks. This becomes an
+                ' issue if a lot of tasks are added under Mono, since they must complete before the UI becomes responsive again.
+                control.BeginInvoke(task)
+            End If
         End SyncLock
     End Sub
 
@@ -121,7 +97,7 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If disposed Then Return
+            If controlDisposed Then Return
             runWatch.Restart()
             ' For efficiency, run a batch of tasks whilst idle.
             ' This reduces the message loop overhead in the case of lots of very short tasks.
@@ -136,11 +112,11 @@ Public Class IdleWorker
     ''' Waits until all tasks queued by this worker have been processed.
     ''' </summary>
     Public Sub WaitOnAllTasks()
-        If Object.ReferenceEquals(owningThread, Thread.CurrentThread) Then
+        If Not control.InvokeRequired Then
             ' We are on the UI thread, invoke tasks until all are complete.
             If UseIdlePooling Then
                 SyncLock tasks
-                    If disposed Then Return
+                    If controlDisposed Then Return
                     While tasks.Count > 0
                         tasks.Dequeue.Invoke()
                     End While
@@ -151,18 +127,19 @@ Public Class IdleWorker
             End If
         Else
             SyncLock tasks
-                If disposed Then Return
+                If controlDisposed Then Return
             End SyncLock
             ' We are on another thread, wait on the UI thread to finish processing our tasks.
-            If UseIdlePooling Then
-                Try
+            Try
+                If UseIdlePooling Then
                     empty.WaitOne()
-                Catch ex As ObjectDisposedException
-                    ' This object will be disposed if the UI thread was closed down, in which case we won't be processing events anyway.
-                End Try
-            Else
-                control.SmartInvoke(DummyCallback)
-            End If
+                Else
+                    control.SmartInvoke(DummyCallback)
+                End If
+            Catch ex As ObjectDisposedException
+                ' If the control is disposed after our check, we swallow the exception. We have finished waiting on tasks since the control
+                ' is closing down.
+            End Try
         End If
     End Sub
 
@@ -186,18 +163,12 @@ Public Class IdleWorker
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">Data about the event.</param>
-    Private Sub DisposeWorker(sender As Object, e As EventArgs)
+    Private Sub Control_Disposed(sender As Object, e As EventArgs)
         SyncLock tasks
-            If Object.ReferenceEquals(owningThread, Threading.Thread.CurrentThread) Then
-                disposed = True
-                RemoveHandler Application.ThreadExit, AddressOf DisposeWorker
-                RemoveHandler Application.Idle, AddressOf RunTask
-                empty.Set()
-                empty.Dispose()
-                control.SmartInvoke(AddressOf control.Dispose)
-                If dummyAsyncResult IsNot Nothing Then dummyAsyncResult.AsyncWaitHandle.Dispose()
-                worker = Nothing
-            End If
+            RemoveHandler Application.Idle, AddressOf RunTask
+            empty.Set()
+            empty.Dispose()
+            If dummyAsyncResult IsNot Nothing Then dummyAsyncResult.AsyncWaitHandle.Dispose()
         End SyncLock
     End Sub
 End Class

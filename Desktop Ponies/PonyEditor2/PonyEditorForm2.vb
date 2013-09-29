@@ -4,7 +4,7 @@ Public Class PonyEditorForm2
     Private Shared ReadOnly ErrorBitmap As Bitmap = SystemIcons.Error.ToBitmap()
     Private Shared ReadOnly WarningBitmap As Bitmap = SystemIcons.Warning.ToBitmap()
 
-    Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
+    Private ReadOnly worker As New IdleWorker(Me)
     Private ponies As PonyCollection
     Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
@@ -429,9 +429,6 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub PonyEditorForm2_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        ' TODO: Change IdleWorker to allow it be depend on a specified control, and drop remaining tasks if the control is destroyed.
-        ' Until then, we'll make sure we process any tasks before closing to try and prevent errors.
-        worker.WaitOnAllTasks()
         If preview.Parent IsNot Nothing Then preview.Parent.Controls.Remove(preview)
         preview.Dispose()
     End Sub

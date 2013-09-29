@@ -2,7 +2,7 @@
 Imports System.IO
 
 Public Class ItemEditorBase
-    Private ReadOnly worker As IdleWorker = IdleWorker.CurrentThreadWorker
+    Private ReadOnly worker As New IdleWorker(Me)
     Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
     Private lastFocusedControl As Control
 
