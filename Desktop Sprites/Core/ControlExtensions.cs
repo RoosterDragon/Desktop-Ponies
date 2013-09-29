@@ -149,32 +149,26 @@
         /// <param name="control">The control to use a wait cursor on.</param>
         /// <param name="disable">If set, the control will be disabled. You will need to re-enable the control once work is finished in
         /// this case.</param>
-        /// <param name="allowDoEvents">When running under mono, a call to Application.DoEvents is required to force the cursor to appear
-        /// if you will be blocking the UI thread. If this will cause unacceptable side effects, or you are not blocking the UI thread, you
-        /// can leave this parameter unset. If the runtime is not mono, this parameter is ignored and Application.DoEvents is never called.
-        /// </param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.</exception>
-        public static void EnableWaitCursor(this Control control, bool disable, bool allowDoEvents)
+        public static void EnableWaitCursor(this Control control, bool disable)
         {
             Argument.EnsureNotNull(control, "control");
-            // Set the cursor directly. This is required on native .NET when the method is called from the UI thread before a blocking
-            // operation occurs. As soon the UI thread is freed it will reassess the cursor and revert back to the default. However whilst
-            // the UI thread is blocked, the cursor remains.
+            // Mono is basically useless at doing this with any consistency - we'll only bother for native .NET on Windows.
+            if (!OperatingSystemInfo.IsWindows || Runtime.IsMono)
+                return;
+            // Set the cursor directly. This is required when the method is called from the UI thread before a blocking operation occurs.
+            // As soon the UI thread is freed it will reassess the cursor and revert back to the default. However whilst the UI thread is
+            // blocked, the cursor remains.
             Cursor.Current = Cursors.WaitCursor;
-            // Enable the wait cursor. This is required by mono in general, and native .NET when the UI will be freed but a background
-            // thread is working. The wait cursor does not appear until the UI has a few moments free to process the update, making it
-            // useless in a blocking UI context. Mono requires it for setting the cursor without being immediately lost.
+            // Enable the wait cursor. This is required when the UI will be freed but a background thread is working. The wait cursor does
+            // not appear until the UI has a few moments free to process the update, making it useless in a blocking UI context.
             control.UseWaitCursor = true;
             // If the control should be disabled whilst working, do that now so we can update the form and cursor with one update.
             if (disable)
                 control.Enabled = false;
-            // Force an update to the control, which ensures the cursor appears under native .NET, and also handily repaints ensuring the
-            // disabled UI is drawn.
+            // Force an update to the control, which ensures the cursor appears, and also handily repaints ensuring the disabled UI is
+            // drawn.
             control.Update();
-            // Calling Update on mono will not be sufficient to get the cursor to appear, instead messages must be forcibly pumped. Since
-            // that can cause evil side effects (particularly under mono) we let the caller decide if that is sensible.
-            if (allowDoEvents && Runtime.IsMono)
-                Application.DoEvents();
         }
     }
 }

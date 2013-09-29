@@ -61,7 +61,7 @@ Public Class PonyEditorForm2
         Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
         worker.QueueTask(Sub()
-                             EnableWaitCursor(True, True)
+                             EnableWaitCursor(True)
                              Dim images = New ImageList()
                              images.Images.Add(SystemIcons.Warning)
                              images.Images.Add(SystemIcons.WinLogo)

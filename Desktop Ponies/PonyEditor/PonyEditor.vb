@@ -67,7 +67,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub LoadInternal()
-        EnableWaitCursor(True, True)
+        EnableWaitCursor(True)
 
         Try
             For Each value In DirectCast([Enum].GetValues(GetType(TargetActivation)), TargetActivation())
@@ -154,7 +154,7 @@ Public Class PonyEditor
 
     Private Sub LoadPony()
         worker.QueueTask(Sub()
-                             EnableWaitCursor(True, False)
+                             EnableWaitCursor(True)
 
                              Pony.CurrentViewer = editorInterface
                              Pony.CurrentAnimator = editorAnimator
@@ -167,7 +167,7 @@ Public Class PonyEditor
                              End If
                          End Sub)
         worker.QueueTask(Sub()
-                             EnableWaitCursor(False, False)
+                             EnableWaitCursor(False)
 
                              SaveSortOrder()
                              RestoreSortOrder()
@@ -178,7 +178,7 @@ Public Class PonyEditor
             Sub()
                 _previewPony = New Pony(base)
                 worker.QueueTask(Sub()
-                                     EnableWaitCursor(False, True)
+                                     EnableWaitCursor(False)
 
                                      If PreviewPony.Base.Behaviors.Any() Then editorAnimator.AddPony(PreviewPony)
                                      LoadPonyInfo()

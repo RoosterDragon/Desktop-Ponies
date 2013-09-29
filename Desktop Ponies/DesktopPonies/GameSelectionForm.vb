@@ -18,7 +18,7 @@ Public Class GameSelectionForm
     End Sub
 
     Private Sub LoadInternal()
-        EnableWaitCursor(True, True)
+        EnableWaitCursor(True)
 
         Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(Options.InstallLocation, game.RootDirectory))
         games = New List(Of Game)(gameDirectories.Length)

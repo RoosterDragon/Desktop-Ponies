@@ -15,7 +15,7 @@ Public Class OptionsForm
     End Sub
 
     Private Sub LoadInternal()
-        EnableWaitCursor(True, False)
+        EnableWaitCursor(True)
 
         AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
         avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
