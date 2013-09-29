@@ -4,8 +4,9 @@ Imports DesktopSprites.SpriteManagement
 
 #Region "Interfaces"
 Public Interface IPonyIniSourceable
-    Inherits IPonyIniSerializable, IMemberwiseCloneable
+    Inherits IPonyIniSerializable
     Property SourceIni As String
+    Function Clone() As IPonyIniSourceable
 End Interface
 
 Public Interface IPonyIniSerializable
@@ -385,14 +386,14 @@ Public Class InteractionBase
     Public Property InitiatorName As String
     Public Property Chance As Double
     Public Property Proximity As Double
-    Private ReadOnly _targetNames As New HashSet(Of String)()
+    Private _targetNames As New HashSet(Of String)()
     Public ReadOnly Property TargetNames As HashSet(Of String)
         Get
             Return _targetNames
         End Get
     End Property
     Public Property Activation As TargetActivation
-    Private ReadOnly _behaviorNames As New HashSet(Of CaseInsensitiveString)()
+    Private _behaviorNames As New HashSet(Of CaseInsensitiveString)()
     Public ReadOnly Property BehaviorNames As HashSet(Of CaseInsensitiveString)
         Get
             Return _behaviorNames
@@ -425,8 +426,11 @@ Public Class InteractionBase
         Return p.AllParsingSuccessful
     End Function
 
-    Public Shadows Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
-        Return MyBase.MemberwiseClone()
+    Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
+        Dim copy = DirectCast(MyBase.MemberwiseClone(), InteractionBase)
+        copy._targetNames = New HashSet(Of String)(_targetNames)
+        copy._behaviorNames = New HashSet(Of CaseInsensitiveString)(_behaviorNames)
+        Return copy
     End Function
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -522,8 +526,8 @@ Public Class Behavior
     Public Property MaxDuration As Double 'seconds
     Public Property MinDuration As Double 'seconds
 
-    Private ReadOnly _rightImage As New CenterableSpriteImage()
-    Private ReadOnly _leftImage As New CenterableSpriteImage()
+    Private _rightImage As New CenterableSpriteImage()
+    Private _leftImage As New CenterableSpriteImage()
     Public ReadOnly Property RightImage As CenterableSpriteImage
         Get
             Return _rightImage
@@ -793,8 +797,15 @@ Public Class Behavior
             Group.ToString(CultureInfo.InvariantCulture))
     End Function
 
-    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
-        Return MyBase.MemberwiseClone()
+    Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
+        Dim copy = DirectCast(MyBase.MemberwiseClone(), Behavior)
+        copy._leftImage = New CenterableSpriteImage()
+        copy._leftImage.Path = _leftImage.Path
+        copy._leftImage.CustomCenter = _leftImage.CustomCenter
+        copy._rightImage = New CenterableSpriteImage()
+        copy._rightImage.Path = _rightImage.Path
+        copy._rightImage.CustomCenter = _rightImage.CustomCenter
+        Return copy
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
@@ -908,8 +919,8 @@ Public Class Speech
         End If
     End Function
 
-    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
-        Return MyBase.MemberwiseClone()
+    Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
+        Return DirectCast(MyBase.MemberwiseClone(), Speech)
     End Function
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
@@ -2902,8 +2913,8 @@ Public Class EffectBase
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property BehaviorName As CaseInsensitiveString
     Public Property ParentPonyBase As PonyBase
-    Private ReadOnly _leftImage As New SpriteImage()
-    Private ReadOnly _rightImage As New SpriteImage()
+    Private _leftImage As New SpriteImage()
+    Private _rightImage As New SpriteImage()
     Public ReadOnly Property LeftImage As SpriteImage
         Get
             Return _leftImage
@@ -2995,8 +3006,13 @@ Public Class EffectBase
             DoNotRepeatImageAnimations)
     End Function
 
-    Public Overloads Function MemberwiseClone() As Object Implements IMemberwiseCloneable.MemberwiseClone
-        Return MyBase.MemberwiseClone()
+    Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
+        Dim copy = DirectCast(MyBase.MemberwiseClone(), EffectBase)
+        copy._leftImage = New CenterableSpriteImage()
+        copy._leftImage.Path = _leftImage.Path
+        copy._rightImage = New CenterableSpriteImage()
+        copy._rightImage.Path = _rightImage.Path
+        Return copy
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues

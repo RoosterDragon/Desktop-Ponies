@@ -101,7 +101,7 @@ Public Class ItemEditorBase
         SetupItem(ponyBase)
         LoadingItem = True
         Original = item
-        Edited = DirectCast(item.MemberwiseClone(), IPonyIniSourceable)
+        Edited = item.Clone()
         LoadItem()
         Source.Text = Edited.SourceIni
         LoadingItem = False
@@ -146,7 +146,7 @@ Public Class ItemEditorBase
         Loop While result = DialogResult.Retry
 
         Original = Edited
-        Edited = DirectCast(Original.MemberwiseClone(), IPonyIniSourceable)
+        Edited = Original.Clone()
     End Sub
 
     Public Overridable Sub AnimateImages(animate As Boolean)
