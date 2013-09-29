@@ -1173,7 +1173,8 @@ Public Class Pony
 
     Private effectsToRemove As New List(Of Effect)
 
-    Private ReadOnly EffectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)
+    Private ReadOnly effectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)()
+    Private ReadOnly effectsAlreadyPlayedForBehavior As New HashSet(Of EffectBase)()
 
     Public Property destinationCoords As Point
     Public Property followTargetName As String = ""
@@ -1474,10 +1475,7 @@ Public Class Pony
         CurrentBehaviorGroup = CurrentBehavior.Group
 
         ' Reset effects.
-        ' TODO: Make an immutable effect base from which new instances are spawned, as they are currently cloned...
-        For Each effect In CurrentBehavior.Effects
-            effect.AlreadyPlayedForCurrentBehavior = False
-        Next
+        effectsAlreadyPlayedForBehavior.Clear()
 
         BehaviorStartTime = internalTime
         BehaviorDesiredDuration = TimeSpan.FromSeconds(
@@ -1658,9 +1656,7 @@ Public Class Pony
                 If behavior.Group <> CurrentBehaviorGroup Then Continue For
                 If behavior.AllowedMovement = AllowedMoves.MouseOver Then
                     CurrentBehavior = behavior
-                    For Each effect In CurrentBehavior.Effects
-                        effect.AlreadyPlayedForCurrentBehavior = False
-                    Next
+                    effectsAlreadyPlayedForBehavior.Clear()
                     Exit For
                 End If
             Next
@@ -2070,16 +2066,16 @@ Public Class Pony
             Not BeingDragged AndAlso
             Not ReturningToScreenArea Then
             For Each effect In CurrentBehavior.Effects
-                If Not EffectsLastUsed.ContainsKey(effect) Then
-                    EffectsLastUsed(effect) = TimeSpan.Zero
+                If Not effectsLastUsed.ContainsKey(effect) Then
+                    effectsLastUsed(effect) = TimeSpan.Zero
                 End If
-                If (currentTime - EffectsLastUsed(effect)).TotalMilliseconds >= effect.RepeatDelay * 1000 Then
+                If (currentTime - effectsLastUsed(effect)).TotalMilliseconds >= effect.RepeatDelay * 1000 Then
 
                     If effect.RepeatDelay = 0 Then
-                        If effect.AlreadyPlayedForCurrentBehavior Then Continue For
+                        If effectsAlreadyPlayedForBehavior.Contains(effect) Then Continue For
                     End If
 
-                    effect.AlreadyPlayedForCurrentBehavior = True
+                    effectsAlreadyPlayedForBehavior.Add(effect)
 
                     Dim newEffect = New Effect(effect, Not facingRight)
 
@@ -2106,7 +2102,7 @@ Public Class Pony
                     Pony.CurrentAnimator.AddEffect(newEffect)
                     ActiveEffects.Add(newEffect)
 
-                    EffectsLastUsed(effect) = currentTime
+                    effectsLastUsed(effect) = currentTime
 
                 End If
             Next
@@ -2935,7 +2931,6 @@ Public Class EffectBase
 
     Public Property Follow As Boolean
     Public Property DoNotRepeatImageAnimations As Boolean
-    Public Property AlreadyPlayedForCurrentBehavior As Boolean
 
     Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
         result = Nothing
