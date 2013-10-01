@@ -24,7 +24,7 @@ Public NotInheritable Class Referential
     Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of IEquatable(Of String))) As ParseIssue
         If String.IsNullOrEmpty(name) Then Return Nothing
         Dim result = CheckReference(name, collection)
-        If CheckReference(name, collection) <> ReferenceResult.Ok Then
+        If result <> ReferenceResult.Ok Then
             Dim reason = If(result = ReferenceResult.NotFound,
                             String.Format(CultureInfo.CurrentCulture, "There is no element with the name '{0}'.", name),
                             String.Format(CultureInfo.CurrentCulture, "The name '{0}' does not refer to a unique element.", name))
@@ -35,8 +35,10 @@ Public NotInheritable Class Referential
     Private Shared Function CheckReference(name As String, collection As IEnumerable(Of IEquatable(Of String))) As ReferenceResult
         Dim count = 0
         For Each candidateName In collection
-            If candidateName.Equals(name) Then count += 1
-            If count >= 2 Then Return ReferenceResult.NotUnique
+            If candidateName.Equals(name) Then
+                count += 1
+                If count >= 2 Then Return ReferenceResult.NotUnique
+            End If
         Next
         Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Ok)
     End Function
