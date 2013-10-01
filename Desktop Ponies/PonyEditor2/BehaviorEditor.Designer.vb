@@ -420,7 +420,6 @@ Partial Class BehaviorEditor
         '
         Me.TargetButton.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TargetButton.Enabled = False
         Me.TargetButton.Location = New System.Drawing.Point(69, 136)
         Me.TargetButton.Name = "TargetButton"
         Me.TargetButton.Size = New System.Drawing.Size(259, 23)

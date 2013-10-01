@@ -24,9 +24,11 @@ Friend Class BehaviorEditor
         End Get
     End Property
 
+    Private ReadOnly ponies As PonyCollection
     Private imageListCrossRefreshNeeded As Boolean
 
-    Public Sub New()
+    Public Sub New(ponies As PonyCollection)
+        Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
         InitializeComponent()
         MovementComboBox.Items.AddRange(allowedMovesValues)
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
@@ -157,6 +159,10 @@ Friend Class BehaviorEditor
     End Sub
 
     Private Sub TargetButton_Click(sender As Object, e As EventArgs) Handles TargetButton.Click
-        ' TODO: Make FollowTargetDialog usable from here.
+        Using dialog As New FollowTargetDialog(ponies, Edited)
+            If dialog.ShowDialog(Me) = DialogResult.OK Then
+                OnItemPropertyChanged()
+            End If
+        End Using
     End Sub
 End Class

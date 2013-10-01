@@ -518,6 +518,11 @@ End Class
 Public Class Behavior
     Implements IPonyIniSourceable, IReferential
     Private ReadOnly pony As PonyBase
+    Public ReadOnly Property Base As PonyBase
+        Get
+            Return pony
+        End Get
+    End Property
 
     Public Shared ReadOnly AnyGroup As Integer = 0
 
@@ -978,7 +983,7 @@ Public Class Pony
 #End Region
 
 #Region "Fields"
-    Private _base As PonyBase
+    Private ReadOnly _base As PonyBase
     Public ReadOnly Property Base() As PonyBase
         Get
             Return _base
@@ -1209,8 +1214,7 @@ Public Class Pony
     End Property
 
     Public Sub New(base As PonyBase)
-        Argument.EnsureNotNull(base, "base")
-        _base = base
+        _base = Argument.EnsureNotNull(base, "base")
         If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
     End Sub
 

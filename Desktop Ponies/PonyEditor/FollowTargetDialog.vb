@@ -1,16 +1,15 @@
 ﻿Public Class FollowTargetDialog
 
+    Private ReadOnly ponies As PonyCollection
     Private previewPoint As Vector2
     Private previewGraphics As Graphics
     Private ponyThumbnail As Image
     Private behaviorToChange As Behavior
 
-    Private _editor As PonyEditor
-    Public Sub New(editor As PonyEditor, behavior As Behavior)
-        Argument.EnsureNotNull(behavior, "behavior")
+    Public Sub New(ponies As PonyCollection, behavior As Behavior)
+        Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
+        behaviorToChange = Argument.EnsureNotNull(behavior, "behavior")
         InitializeComponent()
-        _editor = editor
-        behaviorToChange = behavior
         Text = "Select following parameters for " & behaviorToChange.Name
     End Sub
 
@@ -61,7 +60,7 @@
     Private Sub Change_Behavior()
         FollowComboBox.Items.Clear()
 
-        For Each Available_Pony In _editor.Ponies.AllBases
+        For Each Available_Pony In ponies.AllBases
             FollowComboBox.Items.Add(Available_Pony.Directory)
         Next
 
@@ -72,7 +71,7 @@
         MovingComboBox.Items.Clear()
         StoppedComboBox.Items.Clear()
 
-        For Each otherbehavior In _editor.PreviewPony.Behaviors
+        For Each otherbehavior In behaviorToChange.Base.Behaviors
             MovingComboBox.Items.Add(otherbehavior.Name)
             StoppedComboBox.Items.Add(otherbehavior.Name)
         Next
@@ -188,8 +187,7 @@
     End Sub
 
     Private Sub GetThumbnail()
-        If _editor Is Nothing Then Return
-        For Each ponyBase In _editor.Ponies.AllBases
+        For Each ponyBase In ponies.AllBases
             If ponyBase.Directory = DirectCast(FollowComboBox.SelectedItem, String) Then
                 Try
                     ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)
@@ -239,6 +237,7 @@
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
+        DialogResult = DialogResult.Cancel
         Me.Close()
     End Sub
 
@@ -276,6 +275,7 @@
             behaviorToChange.FollowStoppedBehaviorName = DirectCast(StoppedComboBox.SelectedItem, CaseInsensitiveString)
         End If
 
+        DialogResult = DialogResult.OK
         Me.Close()
 
     End Sub
