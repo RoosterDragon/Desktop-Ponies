@@ -16,7 +16,6 @@ Public NotInheritable Class Reference
     ''' Are ponies currently walking around the desktop?
     ''' </summary>
     Public Shared Property PoniesHaveLaunched As Boolean
-    Public Shared Property AutoStarted As Boolean
     Public Shared Property InScreensaverMode As Boolean
     Public Shared Property InPreviewMode As Boolean
 

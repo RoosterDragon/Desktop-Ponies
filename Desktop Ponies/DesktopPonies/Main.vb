@@ -17,6 +17,8 @@ Public Class Main
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
 
+    Private autoStarted As Boolean
+
     Private animator As DesktopPonyAnimator
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)()
@@ -136,7 +138,7 @@ Public Class Main
             If My.Application.CommandLineArgs.Count >= 1 Then
                 Select Case Split(args(1).Trim(), ":")(0).ToLowerInvariant()
                     Case "autostart"
-                        Reference.AutoStarted = True
+                        autoStarted = True
                         ShowInTaskbar = False
 
                         Try
@@ -158,7 +160,7 @@ Public Class Main
 
                         Options.InstallLocation = path
                         Reference.InScreensaverMode = True
-                        Reference.AutoStarted = True
+                        autoStarted = True
                         ShowInTaskbar = False
                         WindowState = FormWindowState.Minimized
 
@@ -282,7 +284,7 @@ Public Class Main
                              LoadingProgressBar.Value = 0
                              LoadingProgressBar.Maximum = 1
 
-                             If Reference.AutoStarted Then
+                             If autoStarted Then
                                  LoadPonies()
                              Else
                                  CountSelectedPonies()
