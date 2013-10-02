@@ -1092,7 +1092,7 @@
         /// <summary>
         /// This array is a buffer to hold the data read in from an image data sub block.
         /// </summary>
-        private byte[] block = new byte[256];
+        private readonly byte[] block = new byte[256];
         #endregion
 
         /// <summary>
@@ -1281,7 +1281,7 @@
         private void ReadHeader()
         {
             const string SignatureExpected = "GIF";
-            string signature = new string(reader.ReadChars(3));
+            string signature = new string(reader.ReadCharsExact(3));
             if (signature != SignatureExpected)
                 throw new InvalidDataException(
                     string.Format(CultureInfo.CurrentCulture, "Invalid signature in header. Expected '{0}'. Read '{1}'.",
@@ -1289,7 +1289,7 @@
 
             const string Version87a = "87a";
             const string Version89a = "89a";
-            string version = new string(reader.ReadChars(3));
+            string version = new string(reader.ReadCharsExact(3));
             if (version != Version87a && version != Version89a)
                 throw new InvalidDataException(
                     string.Format(CultureInfo.CurrentCulture, "Invalid version in header. Expected '{0}' or '{1}'. Read '{2}'.",
@@ -1471,8 +1471,8 @@
             if (reader.ReadByte() != 11)
                 throw new InvalidDataException("Unexpected block length for an application extension.");
 
-            string applicationIdentifier = new string(reader.ReadChars(8));
-            string applicationAuthenticationCode = new string(reader.ReadChars(3));
+            string applicationIdentifier = new string(reader.ReadCharsExact(8));
+            string applicationAuthenticationCode = new string(reader.ReadCharsExact(3));
 
             if (applicationIdentifier == "NETSCAPE" && applicationAuthenticationCode == "2.0")
                 ReadNetscapeApplicationExtension();
@@ -1506,7 +1506,7 @@
             do
             {
                 blockSize = reader.ReadByte();
-                reader.ReadBytes(blockSize);
+                reader.ReadExact(block, 0, blockSize);
             }
             while (blockSize > 0);
         }
@@ -1522,7 +1522,7 @@
                 return;
 
             // Read block data.
-            reader.ReadBytes(blockSize);
+            reader.ReadExact(block, 0, blockSize);
 
             // Skip data sub blocks.
             SkipDataSubBlocks();
@@ -1692,7 +1692,7 @@
                         {
                             // Read a new data block.
                             bytesLeftInBlock = reader.ReadByte();
-                            block = reader.ReadBytes(bytesLeftInBlock);
+                            reader.ReadExact(block, 0, bytesLeftInBlock);
                             blockIndex = 0;
 
                             // If we happen to read the block terminator, we are done reading image data.

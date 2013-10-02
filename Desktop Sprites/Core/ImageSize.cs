@@ -153,7 +153,7 @@
         /// <returns>The image dimensions for this bitmap image.</returns>
         private static Size DecodeBitmap(BinaryReader binaryReader)
         {
-            binaryReader.ReadBytes(16);
+            binaryReader.ReadBytesExact(16);
             return new Size(binaryReader.ReadInt32(), binaryReader.ReadInt32());
         }
 
@@ -174,7 +174,7 @@
         /// <returns>The image dimensions for this PNG image.</returns>
         private static Size DecodePng(BinaryReader binaryReader)
         {
-            binaryReader.ReadBytes(8);
+            binaryReader.ReadBytesExact(8);
             return new Size(binaryReader.ReadLittleEndianInt32(), binaryReader.ReadLittleEndianInt32());
         }
 
@@ -199,11 +199,11 @@
                 if (chunkLength < 0)
                 {
                     ushort uchunkLength = (ushort)chunkLength;
-                    binaryReader.ReadBytes(uchunkLength - 2);
+                    binaryReader.ReadBytesExact(uchunkLength - 2);
                 }
                 else
                 {
-                    binaryReader.ReadBytes(chunkLength - 2);
+                    binaryReader.ReadBytesExact(chunkLength - 2);
                 }
             }
 

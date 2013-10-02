@@ -109,6 +109,7 @@
     </Compile>
     <Compile Include="Core\Linq.cs" />
     <Compile Include="Core\Runtime.cs" />
+    <Compile Include="Core\IOExtensions.cs" />
     <Compile Include="Forms\AnimatedImageIndexer.cs">
       <SubType>UserControl</SubType>
     </Compile>
