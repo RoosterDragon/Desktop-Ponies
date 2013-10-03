@@ -11,11 +11,7 @@
         /// <summary>
         /// Contains information about the current operating system.
         /// </summary>
-        private static readonly OperatingSystem osInfo = Environment.OSVersion;
-        /// <summary>
-        /// Indicates whether the current operating system is Macintosh.
-        /// </summary>
-        private static readonly bool isMacOSX;
+        private static readonly OperatingSystem OsInfo = Environment.OSVersion;
 
         /// <summary>
         /// Initializes static members of the <see cref="T:DesktopSprites.Core.OperatingSystemInfo"/> class.
@@ -31,7 +27,7 @@
                 {
                     // The buffer contains 5 or 6 null-terminated char arrays, we will marshal the first one, containing the system name.
                     string osName = Marshal.PtrToStringAnsi(buffer);
-                    isMacOSX = osName == "Darwin";
+                    IsMacOSX = osName == "Darwin";
                 }
             }
             catch (Exception)
@@ -50,7 +46,7 @@
         /// </summary>
         public static Version OSVersion
         {
-            get { return osInfo.Version; }
+            get { return OsInfo.Version; }
         }
 
         /// <summary>
@@ -61,32 +57,29 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT ||
-                    osInfo.Platform == PlatformID.Win32S ||
-                    osInfo.Platform == PlatformID.Win32Windows ||
-                    osInfo.Platform == PlatformID.WinCE;
+                    OsInfo.Platform == PlatformID.Win32NT ||
+                    OsInfo.Platform == PlatformID.Win32S ||
+                    OsInfo.Platform == PlatformID.Win32Windows ||
+                    OsInfo.Platform == PlatformID.WinCE;
             }
         }
         /// <summary>
         /// Gets a value indicating whether the current operating system is Macintosh.
         /// </summary>
-        public static bool IsMacOSX
-        {
-            get { return isMacOSX; }
-        }
+        public static bool IsMacOSX { get; private set; }
         /// <summary>
         /// Gets a value indicating whether the current operating system is Unix.
         /// </summary>
         public static bool IsUnix
         {
-            get { return osInfo.Platform == PlatformID.Unix; }
+            get { return OsInfo.Platform == PlatformID.Unix; }
         }
         /// <summary>
         /// Gets a value indicating whether the current operating system is Xbox 360.
         /// </summary>
         public static bool IsXbox
         {
-            get { return osInfo.Platform == PlatformID.Xbox; }
+            get { return OsInfo.Platform == PlatformID.Xbox; }
         }
 
         /// <summary>
@@ -97,8 +90,8 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32Windows &&
-                    osInfo.Version.Minor == 0;
+                    OsInfo.Platform == PlatformID.Win32Windows &&
+                    OsInfo.Version.Minor == 0;
             }
         }
         /// <summary>
@@ -109,8 +102,8 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32Windows &&
-                    osInfo.Version.Minor == 10;
+                    OsInfo.Platform == PlatformID.Win32Windows &&
+                    OsInfo.Version.Minor == 10;
             }
         }
         /// <summary>
@@ -121,8 +114,8 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32Windows &&
-                    osInfo.Version.Minor == 90;
+                    OsInfo.Platform == PlatformID.Win32Windows &&
+                    OsInfo.Version.Minor == 90;
             }
         }
         /// <summary>
@@ -133,8 +126,8 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    (osInfo.Version.Major == 3 || osInfo.Version.Major == 4);
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    (OsInfo.Version.Major == 3 || OsInfo.Version.Major == 4);
             }
         }
         /// <summary>
@@ -145,9 +138,9 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    osInfo.Version.Major == 5 &&
-                    osInfo.Version.Minor == 0;
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    OsInfo.Version.Major == 5 &&
+                    OsInfo.Version.Minor == 0;
             }
         }
         /// <summary>
@@ -158,9 +151,9 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    osInfo.Version.Major == 5 &&
-                    (osInfo.Version.Minor == 1 || osInfo.Version.Minor == 2);
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    OsInfo.Version.Major == 5 &&
+                    (OsInfo.Version.Minor == 1 || OsInfo.Version.Minor == 2);
             }
         }
         /// <summary>
@@ -171,9 +164,9 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    osInfo.Version.Major == 6 &&
-                    osInfo.Version.Minor == 0;
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    OsInfo.Version.Major == 6 &&
+                    OsInfo.Version.Minor == 0;
             }
         }
         /// <summary>
@@ -184,9 +177,9 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    osInfo.Version.Major == 6 &&
-                    osInfo.Version.Minor == 1;
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    OsInfo.Version.Major == 6 &&
+                    OsInfo.Version.Minor == 1;
             }
         }
         /// <summary>
@@ -197,9 +190,9 @@
             get
             {
                 return
-                    osInfo.Platform == PlatformID.Win32NT &&
-                    osInfo.Version.Major == 6 &&
-                    osInfo.Version.Minor == 2;
+                    OsInfo.Platform == PlatformID.Win32NT &&
+                    OsInfo.Version.Major == 6 &&
+                    OsInfo.Version.Minor == 2;
             }
         }
     }

@@ -20,7 +20,7 @@
         private readonly string filesPath;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.GifForm"/> class.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Forms.GifFramesForm"/> class.
         /// </summary>
         /// <param name="path">The path to a directory from which GIF files should be loaded.</param>
         public GifFramesForm(string path)

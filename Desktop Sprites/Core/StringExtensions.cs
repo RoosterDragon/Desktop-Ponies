@@ -73,7 +73,7 @@
                 // Determine the positions of the next separator and qualifier.
                 int seperatorIndex = source.IndexOfAny(separators, index);
                 int qualifierIndex = source.IndexOfAny(openingQualifiers, index);
-                // Specify the index of characters that could be located to be the end of the source string.
+                // Specify the index of characters that couldn't be located to be the end of the source string.
                 if (seperatorIndex == -1)
                     seperatorIndex = source.Length;
                 if (qualifierIndex == -1)
