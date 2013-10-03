@@ -1065,30 +1065,6 @@
         /// Indicates if any frame so far has used transparency, and thus there might be a transparent region in the buffer.
         /// </summary>
         private bool anyTransparencyUsed = true;
-
-        // The values read in are variable length codewords, which can be of any length.
-        // The gif specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
-        // Thus we need to maintain a dictionary of up to 4096 codewords (which each can be of any length).
-        // These codewords have a property that make them easy to store however.
-        // If some word w plus some character c is in the dictionary, then the word w will be in the dictionary.
-        // Thus the prefix word w can be used to lookup the character at the end of its length.
-        // The suffix character c on this word maps to an actual value that is added to the pixel stack.
-        /// <summary>
-        /// The maximum number of codewords that can occur according to the GIF specification.
-        /// </summary>
-        private const int MaxCodeWords = 4096;
-        /// <summary>
-        /// The lookup array of "prefix" words. The value is the index of the "suffix" character at the end of the given codeword.
-        /// </summary>
-        private readonly short[] prefix = new short[MaxCodeWords];
-        /// <summary>
-        /// The lookup array of "suffix" characters. This holds the actual decompressed byte value for the given code character.
-        /// </summary>
-        private readonly byte[] suffix = new byte[MaxCodeWords];
-        /// <summary>
-        /// This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
-        /// </summary>
-        private readonly byte[] pixelStack = new byte[MaxCodeWords + 1];
         /// <summary>
         /// This array is a buffer to hold the data read in from an image data sub block.
         /// </summary>
@@ -1643,6 +1619,23 @@
             // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
+
+            // The values read in are variable length codewords, which can be of any length.
+            // The gif specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
+            // Thus we need to maintain a dictionary of up to 4096 codewords (which each can be of any length).
+            // These codewords have a property that make them easy to store however.
+            // If some word w plus some character c is in the dictionary, then the word w will be in the dictionary.
+            // Thus the prefix word w can be used to lookup the character at the end of its length.
+            // The suffix character c on this word maps to an actual value that is added to the pixel stack.
+
+            // The maximum number of codewords that can occur according to the GIF specification.
+            const int MaxCodeWords = 4096;
+            // The lookup array of "prefix" words. The value is the index of the "suffix" character at the end of the given codeword.
+            short[] prefix = new short[MaxCodeWords];
+            // The lookup array of "suffix" characters. This holds the actual decompressed byte value for the given code character.
+            byte[] suffix = new byte[MaxCodeWords];
+            // This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
+            byte[] pixelStack = new byte[MaxCodeWords + 1];
 
             // Indicates a null codeword.
             const int NullCode = -1;
