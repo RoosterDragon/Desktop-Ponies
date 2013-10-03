@@ -747,7 +747,7 @@
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Started = true;
 
-            foreach (ISprite sprite in Sprites)
+            foreach (ISprite sprite in sprites)
                 sprite.Start(ElapsedTime);
 
             runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
@@ -1024,7 +1024,7 @@
                 elapsedTime = elapsedWatch.Elapsed;
                 while (queuedSpriteActions.Count > 0)
                     queuedSpriteActions.Dequeue().Invoke();
-                foreach (ISprite sprite in Sprites)
+                foreach (ISprite sprite in sprites)
                     sprite.Update(ElapsedTime);
             }
         }
