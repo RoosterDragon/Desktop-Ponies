@@ -119,7 +119,7 @@
         /// <returns>A new <see cref="T:System.IO.IOException"/>.</returns>
         private static IOException InsufficientDataAvailableException()
         {
-            return new IOException("Attempted to read more data into a buffer than were available.");
+            return new IOException("Attempted to read more data into a buffer than was available.");
         }
     }
 }

@@ -1690,11 +1690,8 @@
                         // Read in a new data block if we exhausted the block buffer.
                         if (bytesLeftInBlock == 0)
                         {
-                            // Read a new data block.
+                            // Get size of the next data block.
                             bytesLeftInBlock = reader.ReadByte();
-                            reader.ReadExact(block, 0, bytesLeftInBlock);
-                            blockIndex = 0;
-
                             // If we happen to read the block terminator, we are done reading image data.
                             if (bytesLeftInBlock == 0)
                             {
@@ -1702,10 +1699,12 @@
                                 skipDataSubBlocks = false;
                                 break;
                             }
+                            // Read the data block of given size.
+                            reader.ReadExact(block, 0, bytesLeftInBlock);
+                            blockIndex = 0;
                         }
-                        bitBuffer += (int)block[blockIndex] << bitsBuffered;
+                        bitBuffer += (int)block[blockIndex++] << bitsBuffered;
                         bitsBuffered += 8;
-                        blockIndex++;
                         bytesLeftInBlock--;
                         continue;
                     }
