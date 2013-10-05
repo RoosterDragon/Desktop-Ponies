@@ -62,17 +62,17 @@ Public Class AnimatedImageViewer
     End Function
 
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
-        PaintImageInCenter(e)
+        PaintImageInCenter(Image, e)
     End Sub
 
-    Protected Sub PaintImageInCenter(e As PaintEventArgs)
+    Protected Sub PaintImageInCenter(image As AnimatedImage(Of BitmapFrame), e As PaintEventArgs)
         Argument.EnsureNotNull(e, "e")
-        If Image Is Nothing Then Return
+        If image Is Nothing Then Return
 
-        Dim loopTime = TimeSpan.FromMilliseconds(Image.ImageDuration)
+        Dim loopTime = TimeSpan.FromMilliseconds(image.ImageDuration)
         If Time > loopTime Then Time -= loopTime
 
-        Dim bitmap = Image(Time).Image
+        Dim bitmap = image(Time).Image
         Dim controlCenter = New Size(CInt(Width / 2), CInt(Height / 2))
         Dim imageCenter = New Size(CInt(bitmap.Width / 2), CInt(bitmap.Height / 2))
         Dim location = New Point(controlCenter.Width - imageCenter.Width, controlCenter.Height - imageCenter.Height)

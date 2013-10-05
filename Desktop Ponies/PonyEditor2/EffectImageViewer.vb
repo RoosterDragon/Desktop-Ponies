@@ -53,14 +53,15 @@ Public Class EffectImageViewer
 
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
         If EffectImage Is Nothing Then
-            PaintImageInCenter(e)
+            PaintImageInCenter(Image, e)
+            Return
+        ElseIf Image Is Nothing Then
+            PaintImageInCenter(EffectImage, e)
             Return
         End If
 
-        If Image Is Nothing Then Return
-
         Dim loopTime = TimeSpan.FromMilliseconds(Math.Max(Image.ImageDuration, EffectImage.ImageDuration))
-        If Time > loopTime Then Time -= loopTime
+        If Time > loopTime Then Time = TimeSpan.Zero
 
         Dim imageLocation = Point.Empty
         Dim effectLocation = Pony.GetEffectLocation(EffectImage.Size, Placement, imageLocation, Image.Size, Centering, 1)
