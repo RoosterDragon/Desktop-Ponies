@@ -129,9 +129,9 @@ Partial Class FollowTargetDialog
         Me.PointLabel.AutoSize = True
         Me.PointLabel.Location = New System.Drawing.Point(39, 319)
         Me.PointLabel.Name = "PointLabel"
-        Me.PointLabel.Size = New System.Drawing.Size(179, 13)
+        Me.PointLabel.Size = New System.Drawing.Size(147, 13)
         Me.PointLabel.TabIndex = 14
-        Me.PointLabel.Text = "Point Relative to pony/effect center:"
+        Me.PointLabel.Text = "Point Relative to pony center:"
         '
         'PointPreviewLabel
         '

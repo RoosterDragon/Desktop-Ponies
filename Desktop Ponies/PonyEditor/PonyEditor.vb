@@ -1354,7 +1354,7 @@ Public Class PonyEditor
 
             HidePony()
 
-            Using dialog = New FollowTargetDialog(Ponies, behavior)
+            Using dialog = New FollowTargetDialog(behavior)
                 dialog.ShowDialog(Me)
             End Using
             LoadPonyInfo()

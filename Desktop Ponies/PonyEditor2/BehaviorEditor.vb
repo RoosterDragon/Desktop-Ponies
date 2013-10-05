@@ -145,7 +145,7 @@ Friend Class BehaviorEditor
     End Sub
 
     Private Sub TargetButton_Click(sender As Object, e As EventArgs) Handles TargetButton.Click
-        Using dialog As New FollowTargetDialog(Base.Collection, Edited)
+        Using dialog As New FollowTargetDialog(Edited)
             If dialog.ShowDialog(Me) = DialogResult.OK Then
                 OnItemPropertyChanged()
             End If

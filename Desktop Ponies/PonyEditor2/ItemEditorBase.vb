@@ -121,7 +121,7 @@ Public Class ItemEditorBase
         End If
 
         If Original.Name <> Edited.Name Then
-            If MessageBox.Show(Me, "Changing the name of this " & ItemTypeName & " will break other references. Continue with save?",
+            If MessageBox.Show(Me, "Renaming this " & ItemTypeName & " will break other references. Continue with save?",
                                "Rename?", MessageBoxButtons.YesNo,
                                MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No Then
                 Return

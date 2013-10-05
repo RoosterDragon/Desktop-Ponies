@@ -244,7 +244,7 @@ Public Class NewBehaviorDialog
 
         Dim new_behavior As New Behavior(_editor.PreviewPony.Base)
 
-        Using dialog = New FollowTargetDialog(_editor.Ponies, new_behavior)
+        Using dialog = New FollowTargetDialog(new_behavior)
             dialog.ShowDialog(Me)
         End Using
 
