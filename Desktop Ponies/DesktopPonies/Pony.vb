@@ -21,10 +21,26 @@ End Interface
 Public NotInheritable Class Referential
     Private Sub New()
     End Sub
-    Public Shared Function GetIssue(propertyName As String, name As String, collection As IEnumerable(Of IEquatable(Of String))) As ParseIssue
+    Public Shared Function CheckNotCircular(Of T)(propertyName As String, name As String, start As T, nextElement As Func(Of T, T),
+                                                  elementName As Func(Of T, IEquatable(Of String))) As ParseIssue
+        If String.IsNullOrEmpty(name) Then Return Nothing
+        If start Is Nothing Then Return Nothing
+        Dim currentElement = start
+        Dim currentName = elementName(currentElement)
+        Do While currentName IsNot Nothing
+            If currentName.Equals(name) Then
+                Return New ParseIssue(propertyName, name, "", "A circular loop has been detected.")
+            End If
+            currentElement = nextElement(currentElement)
+            If currentElement Is Nothing Then Exit Do
+            currentName = elementName(currentElement)
+        Loop
+        Return Nothing
+    End Function
+    Public Shared Function CheckUnique(propertyName As String, name As String, collection As IEnumerable(Of IEquatable(Of String))) As ParseIssue
         If String.IsNullOrEmpty(name) Then Return Nothing
         Dim result = CheckReference(name, collection)
-        If result <> ReferenceResult.Ok Then
+        If result <> ReferenceResult.Unique Then
             Dim reason = If(result = ReferenceResult.NotFound,
                             String.Format(CultureInfo.CurrentCulture, "There is no element with the name '{0}'.", name),
                             String.Format(CultureInfo.CurrentCulture, "The name '{0}' does not refer to a unique element.", name))
@@ -40,10 +56,10 @@ Public NotInheritable Class Referential
                 If count >= 2 Then Return ReferenceResult.NotUnique
             End If
         Next
-        Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Ok)
+        Return If(count = 0, ReferenceResult.NotFound, ReferenceResult.Unique)
     End Function
     Private Enum ReferenceResult
-        Ok
+        Unique
         NotFound
         NotUnique
     End Enum
@@ -816,12 +832,14 @@ Public Class Behavior
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
-        Return {Referential.GetIssue("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.GetIssue("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
-                Referential.GetIssue("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
-                Referential.GetIssue("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.GetIssue("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.GetIssue("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory))}.
+        Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.CheckNotCircular("Linked Behavior", Name, LinkedBehavior,
+                                             Function(b) b.LinkedBehavior, Function(b) b.Name),
+                Referential.CheckUnique("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
+                Referential.CheckUnique("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
+                Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.CheckUnique("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+                Referential.CheckUnique("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory))}.
         Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
@@ -3017,7 +3035,7 @@ Public Class EffectBase
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
-        Return {Referential.GetIssue("Behavior", BehaviorName, ParentPonyBase.Behaviors.Select(Function(b) b.Name))}.
+        Return {Referential.CheckUnique("Behavior", BehaviorName, ParentPonyBase.Behaviors.Select(Function(b) b.Name))}.
             Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
