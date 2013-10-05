@@ -127,8 +127,6 @@ Partial Class BehaviorEditor
         '
         Me.LinkedBehaviorComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.LinkedBehaviorComboBox.DisplayMember = "Name"
-        Me.LinkedBehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.LinkedBehaviorComboBox.FormattingEnabled = True
         Me.LinkedBehaviorComboBox.Location = New System.Drawing.Point(439, 109)
         Me.LinkedBehaviorComboBox.Name = "LinkedBehaviorComboBox"

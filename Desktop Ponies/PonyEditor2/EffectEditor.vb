@@ -1,5 +1,4 @@
 ﻿Imports System.IO
-Imports DesktopSprites.SpriteManagement
 
 Friend Class EffectEditor
     Private Shared directionValues As Object() =
@@ -25,6 +24,10 @@ Friend Class EffectEditor
     End Property
 
     Private imageListCrossRefreshNeeded As Boolean
+    Private leftBehaviorImagePath As String
+    Private leftEffectImagePath As String
+    Private rightBehaviorImagePath As String
+    Private rightEffectImagePath As String
 
     Public Sub New()
         InitializeComponent()
@@ -32,72 +35,37 @@ Friend Class EffectEditor
         LeftCenterComboBox.Items.AddRange(directionValues)
         RightPlacementComboBox.Items.AddRange(directionValues)
         RightCenterComboBox.Items.AddRange(directionValues)
+        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
         AddHandler DurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Duration = DurationNumber.Value)
         AddHandler RepeatDelayNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.RepeatDelay = RepeatDelayNumber.Value)
-        AddHandler BehaviorComboBox.SelectedIndexChanged,
-            Sub() UpdateProperty(Sub()
-                                     Dim behavior = TryCast(BehaviorComboBox.SelectedItem, Behavior)
-                                     Edited.BehaviorName = If(behavior Is Nothing, Nothing, behavior.Name)
-                                 End Sub)
+        AddHandler BehaviorComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler BehaviorComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.BehaviorName = BehaviorComboBox.Text)
+        AddHandler BehaviorComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.BehaviorName = BehaviorComboBox.Text)
         AddHandler FollowCheckBox.CheckedChanged, Sub() UpdateProperty(Sub() Edited.Follow = FollowCheckBox.Checked)
         AddHandler PreventLoopCheckBox.CheckedChanged,
             Sub() UpdateProperty(Sub() Edited.DoNotRepeatImageAnimations = PreventLoopCheckBox.Checked)
         AddHandler LeftPlacementComboBox.SelectedIndexChanged,
-            Sub()
-                Dim direction = DirectCast(LeftPlacementComboBox.SelectedItem, Direction)
-                LeftImageViewer.Placement = direction
-                Edited.PlacementDirectionLeft = direction
-            End Sub
+            Sub() UpdateProperty(Sub() Edited.PlacementDirectionLeft = DirectCast(LeftPlacementComboBox.SelectedItem, Direction))
         AddHandler RightPlacementComboBox.SelectedIndexChanged,
-            Sub()
-                Dim direction = DirectCast(RightPlacementComboBox.SelectedItem, Direction)
-                RightImageViewer.Placement = direction
-                Edited.PlacementDirectionRight = direction
-            End Sub
+            Sub() UpdateProperty(Sub() Edited.PlacementDirectionRight = DirectCast(RightPlacementComboBox.SelectedItem, Direction))
         AddHandler LeftCenterComboBox.SelectedIndexChanged,
-            Sub()
-                Dim direction = DirectCast(LeftCenterComboBox.SelectedItem, Direction)
-                LeftImageViewer.Centering = direction
-                Edited.CenteringLeft = direction
-            End Sub
+            Sub() UpdateProperty(Sub() Edited.CenteringLeft = DirectCast(LeftCenterComboBox.SelectedItem, Direction))
         AddHandler RightCenterComboBox.SelectedIndexChanged,
-            Sub()
-                Dim direction = DirectCast(RightCenterComboBox.SelectedItem, Direction)
-                RightImageViewer.Centering = direction
-                Edited.CenteringRight = direction
-            End Sub
+            Sub() UpdateProperty(Sub() Edited.CenteringRight = DirectCast(RightCenterComboBox.SelectedItem, Direction))
+
         AddHandler LeftImageFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim filePath = If(LeftImageFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
                                      Edited.LeftImage.Path = filePath
                                  End Sub)
-
-        Dim updateLeftImage = Sub(sender As Object, e As EventArgs)
-                                  Dim behavior = Base.Behaviors.SingleOrDefault(Function(b) b.Name = Edited.BehaviorName)
-                                  Dim behaviorFilePath As String = Nothing
-                                  If behavior IsNot Nothing Then behaviorFilePath = behavior.LeftImage.Path
-                                  LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer, BehaviorComboBox, behaviorFilePath)
-                              End Sub
-        AddHandler LeftImageFileSelector.FilePathSelected, updateLeftImage
-        AddHandler BehaviorComboBox.SelectedIndexChanged, updateLeftImage
-
         AddHandler RightImageFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim filePath = If(RightImageFileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
                                      Edited.RightImage.Path = filePath
                                  End Sub)
-
-        Dim updateRightImage = Sub(sender As Object, e As EventArgs)
-                                   Dim behavior = Base.Behaviors.SingleOrDefault(Function(b) b.Name = Edited.BehaviorName)
-                                   Dim behaviorFilePath As String = Nothing
-                                   If behavior IsNot Nothing Then behaviorFilePath = behavior.RightImage.Path
-                                   LoadNewImageForViewer(RightImageFileSelector, RightImageViewer, BehaviorComboBox, behaviorFilePath)
-                               End Sub
-        AddHandler RightImageFileSelector.FilePathSelected, updateRightImage
-        AddHandler BehaviorComboBox.SelectedIndexChanged, updateRightImage
     End Sub
 
     Public Overrides Sub NewItem(name As String)
@@ -109,20 +77,14 @@ Friend Class EffectEditor
         RightImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
         AddHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
         AddHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
-        'SelectItemElseAddItem(LeftImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.LeftImagePath))
-        'SelectItemElseAddItem(RightImageFileSelector.FilePathComboBox, Path.GetFileName(Edited.RightImagePath))
 
-        Dim behaviors = Base.Behaviors.Select(Function(b) b.Name).Cast(Of Object).ToArray()
+        Dim behaviors = Base.Behaviors.Select(Function(b) b.Name).ToArray()
         ReplaceItemsInComboBox(BehaviorComboBox, behaviors, True)
     End Sub
 
     Public Overrides Sub AnimateImages(animate As Boolean)
         LeftImageViewer.Animate = animate
         RightImageViewer.Animate = animate
-    End Sub
-
-    Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
-        e.Handled = (e.KeyChar = """"c)
     End Sub
 
     Private lastTypedLeftFileName As String
@@ -153,6 +115,28 @@ Friend Class EffectEditor
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
         SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path, Sub(path) Edited.RightImage.Path = path,
                            lastTypedRightFileName, lastTypedRightFileNameMissing)
+        LeftImageViewer.Placement = Edited.PlacementDirectionLeft
+        LeftImageViewer.Centering = Edited.CenteringLeft
+        RightImageViewer.Placement = Edited.PlacementDirectionRight
+        RightImageViewer.Centering = Edited.CenteringRight
+
+        Dim behavior = Base.Behaviors.OnlyOrDefault(Function(b) b.Name = Edited.BehaviorName)
+
+        Dim newLeftBehaviorImagePath As String = Nothing
+        If behavior IsNot Nothing Then newLeftBehaviorImagePath = behavior.LeftImage.Path
+        If leftBehaviorImagePath <> newLeftBehaviorImagePath OrElse leftEffectImagePath <> LeftImageFileSelector.FilePath Then
+            leftBehaviorImagePath = newLeftBehaviorImagePath
+            leftEffectImagePath = LeftImageFileSelector.FilePath
+            UpdateImageDisplay(LeftImageFileSelector, LeftImageViewer, leftBehaviorImagePath)
+        End If
+
+        Dim newRightBehaviorImagePath As String = Nothing
+        If behavior IsNot Nothing Then newRightBehaviorImagePath = behavior.RightImage.Path
+        If rightBehaviorImagePath <> newRightBehaviorImagePath OrElse rightEffectImagePath <> RightImageFileSelector.FilePath Then
+            rightBehaviorImagePath = newRightBehaviorImagePath
+            rightEffectImagePath = RightImageFileSelector.FilePath
+            UpdateImageDisplay(RightImageFileSelector, RightImageViewer, rightBehaviorImagePath)
+        End If
     End Sub
 
     Private Sub SyncTypedImagePath(selector As FileSelector, behaviorImagePath As String, setPath As Action(Of String),
@@ -169,6 +153,10 @@ Friend Class EffectEditor
             selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Count - 1
         End If
         setPath(selector.FilePath)
+    End Sub
+
+    Private Sub UpdateImageDisplay(selector As FileSelector, viewer As EffectImageViewer, behaviorImagePath As String)
+        LoadNewImageForViewer(selector, viewer, BehaviorComboBox, behaviorImagePath)
     End Sub
 
     Private Sub LeftImageFileSelector_ListRefreshed(sender As Object, e As EventArgs)

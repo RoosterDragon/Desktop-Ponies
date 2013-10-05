@@ -111,14 +111,11 @@ Partial Class EffectEditor
         '
         Me.BehaviorComboBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.BehaviorComboBox.DisplayMember = "Name"
-        Me.BehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.BehaviorComboBox.FormattingEnabled = True
         Me.BehaviorComboBox.Location = New System.Drawing.Point(516, 3)
         Me.BehaviorComboBox.Name = "BehaviorComboBox"
         Me.BehaviorComboBox.Size = New System.Drawing.Size(259, 21)
         Me.BehaviorComboBox.TabIndex = 7
-        Me.BehaviorComboBox.ValueMember = "Name"
         '
         'PreventLoopCheckBox
         '

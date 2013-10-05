@@ -286,7 +286,7 @@ Public Class PonyEditorForm2
                     Dim editor As ItemEditorBase = Nothing
                     Select Case pageRef.PageContent
                         Case PageContent.Behavior
-                            editor = New BehaviorEditor(ponies)
+                            editor = New BehaviorEditor()
                         Case PageContent.Effect
                             editor = New EffectEditor()
                         Case PageContent.Speech

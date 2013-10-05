@@ -24,6 +24,7 @@
     Public Sub New()
         InitializeComponent()
         TypeComboBox.Items.AddRange(typeValues)
+        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
         AddHandler ChanceNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Chance = ChanceNumber.Value / 100)
         AddHandler TypeComboBox.SelectedIndexChanged,
@@ -56,11 +57,7 @@
         TargetsList.Items.Clear()
         TargetsList.Items.AddRange(Base.Collection.AllBases.Select(Function(pb) pb.Directory).ToArray())
         BehaviorsList.Items.Clear()
-        BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).Cast(Of Object).ToArray())
-    End Sub
-
-    Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
-        e.Handled = (e.KeyChar = """"c)
+        BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).ToArray())
     End Sub
 
     Protected Overrides Sub SourceTextChanged()

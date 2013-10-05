@@ -1,5 +1,4 @@
 ﻿Imports System.IO
-Imports DesktopSprites.SpriteManagement
 
 Friend Class BehaviorEditor
     Private Shared allowedMovesValues As Object() =
@@ -24,13 +23,12 @@ Friend Class BehaviorEditor
         End Get
     End Property
 
-    Private ReadOnly ponies As PonyCollection
     Private imageListCrossRefreshNeeded As Boolean
 
-    Public Sub New(ponies As PonyCollection)
-        Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
+    Public Sub New()
         InitializeComponent()
         MovementComboBox.Items.AddRange(allowedMovesValues)
+        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
         AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Group = CInt(GroupNumber.Value))
         AddHandler ChanceNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.Chance = ChanceNumber.Value / 100)
@@ -39,15 +37,15 @@ Friend Class BehaviorEditor
             Sub() UpdateProperty(Sub() Edited.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves))
         AddHandler MinDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MinDuration = MinDurationNumber.Value)
         AddHandler MaxDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MaxDuration = MaxDurationNumber.Value)
-        AddHandler StartSpeechComboBox.TextChanged, Sub() UpdateStartSpeech()
-        'AddHandler StartSpeechComboBox.SelectedIndexChanged, Sub() UpdateStartSpeech()
-        AddHandler EndSpeechComboBox.TextChanged, Sub() UpdateEndSpeech()
-        'AddHandler EndSpeechComboBox.SelectedIndexChanged, Sub() UpdateEndSpeech()
-        AddHandler LinkedBehaviorComboBox.SelectedIndexChanged,
-            Sub() UpdateProperty(Sub()
-                                     Dim behavior = TryCast(LinkedBehaviorComboBox.SelectedItem, Behavior)
-                                     Edited.LinkedBehaviorName = If(behavior Is Nothing, CaseInsensitiveString.Empty, behavior.Name)
-                                 End Sub)
+        AddHandler StartSpeechComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler StartSpeechComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.StartLineName = StartSpeechComboBox.Text)
+        AddHandler StartSpeechComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.StartLineName = StartSpeechComboBox.Text)
+        AddHandler EndSpeechComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler EndSpeechComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.EndLineName = EndSpeechComboBox.Text)
+        AddHandler EndSpeechComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.EndLineName = EndSpeechComboBox.Text)
+        AddHandler LinkedBehaviorComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler LinkedBehaviorComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.LinkedBehaviorName = LinkedBehaviorComboBox.Text)
+        AddHandler LinkedBehaviorComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.LinkedBehaviorName = LinkedBehaviorComboBox.Text)
         AddHandler LeftImageFileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim leftPath = If(LeftImageFileSelector.FilePath = Nothing,
@@ -64,14 +62,6 @@ Friend Class BehaviorEditor
         AddHandler RightImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
     End Sub
 
-    Private Sub UpdateStartSpeech()
-        UpdateProperty(Sub() Edited.StartLineName = If(StartSpeechComboBox.SelectedIndex <> 0, StartSpeechComboBox.Text, ""))
-    End Sub
-
-    Private Sub UpdateEndSpeech()
-        UpdateProperty(Sub() Edited.EndLineName = If(EndSpeechComboBox.SelectedIndex <> 0, EndSpeechComboBox.Text, ""))
-    End Sub
-
     Public Overrides Sub NewItem(name As String)
         ' TODO.
     End Sub
@@ -82,21 +72,17 @@ Friend Class BehaviorEditor
         AddHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
         AddHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
 
-        Dim speeches = Base.Speeches.Select(Function(s) s.Name).Cast(Of Object).ToArray()
+        Dim speeches = Base.Speeches.Select(Function(s) s.Name).ToArray()
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
         ReplaceItemsInComboBox(EndSpeechComboBox, speeches, True)
 
-        Dim behaviors = Base.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, Edited)).ToArray()
+        Dim behaviors = Base.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, Edited)).Select(Function(s) s.Name).ToArray()
         ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors, True)
     End Sub
 
     Public Overrides Sub AnimateImages(animate As Boolean)
         LeftImageViewer.Animate = animate
         RightImageViewer.Animate = animate
-    End Sub
-
-    Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
-        e.Handled = (e.KeyChar = """"c)
     End Sub
 
     Private lastTypedLeftFileName As String
@@ -121,7 +107,7 @@ Friend Class BehaviorEditor
 
         SelectOrOvertypeItem(StartSpeechComboBox, Edited.StartLineName)
         SelectOrOvertypeItem(EndSpeechComboBox, Edited.EndLineName)
-        SelectItemElseNoneOption(LinkedBehaviorComboBox, Edited.LinkedBehavior)
+        SelectOrOvertypeItem(LinkedBehaviorComboBox, Edited.LinkedBehaviorName)
 
         SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path, Sub(path) Edited.LeftImage.Path = path,
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
@@ -159,7 +145,7 @@ Friend Class BehaviorEditor
     End Sub
 
     Private Sub TargetButton_Click(sender As Object, e As EventArgs) Handles TargetButton.Click
-        Using dialog As New FollowTargetDialog(ponies, Edited)
+        Using dialog As New FollowTargetDialog(Base.Collection, Edited)
             If dialog.ShowDialog(Me) = DialogResult.OK Then
                 OnItemPropertyChanged()
             End If

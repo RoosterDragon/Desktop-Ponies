@@ -168,7 +168,7 @@ Partial Class PonyEditorForm2
         Me.IssuesPage.Padding = New System.Windows.Forms.Padding(3)
         Me.IssuesPage.Size = New System.Drawing.Size(776, 174)
         Me.IssuesPage.TabIndex = 1
-        Me.IssuesPage.Text = "Errors"
+        Me.IssuesPage.Text = "Issues"
         Me.IssuesPage.UseVisualStyleBackColor = True
         '
         'IssuesGrid
@@ -189,7 +189,7 @@ Partial Class PonyEditorForm2
         '
         'colFatal
         '
-        Me.colFatal.HeaderText = "Fatal"
+        Me.colFatal.HeaderText = ""
         Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
         Me.colFatal.Name = "colFatal"
         Me.colFatal.ReadOnly = True
@@ -202,7 +202,6 @@ Partial Class PonyEditorForm2
         Me.colIndex.Name = "colIndex"
         Me.colIndex.ReadOnly = True
         Me.colIndex.ToolTipText = "What setting is causing the issue?"
-        Me.colIndex.Width = 80
         '
         'colDescription
         '
@@ -210,7 +209,7 @@ Partial Class PonyEditorForm2
         Me.colDescription.Name = "colDescription"
         Me.colDescription.ReadOnly = True
         Me.colDescription.ToolTipText = "A description of the issue."
-        Me.colDescription.Width = 300
+        Me.colDescription.Width = 350
         '
         'colFallback
         '
@@ -226,7 +225,7 @@ Partial Class PonyEditorForm2
         Me.colSource.Name = "colSource"
         Me.colSource.ReadOnly = True
         Me.colSource.ToolTipText = "The source text that has an issue."
-        Me.colSource.Width = 300
+        Me.colSource.Width = 250
         '
         'PonyEditorForm2
         '

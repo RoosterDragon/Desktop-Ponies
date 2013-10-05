@@ -22,6 +22,7 @@ Friend Class SpeechEditor
 
     Public Sub New()
         InitializeComponent()
+        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
         AddHandler LineTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Text = LineTextBox.Text)
         AddHandler SoundFileSelector.FilePathSelected,
@@ -46,10 +47,6 @@ Friend Class SpeechEditor
         If Edited.SoundFile IsNot Nothing Then
             SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(Edited.SoundFile))
         End If
-    End Sub
-
-    Private Sub NameTextBox_KeyPress(sender As Object, e As KeyPressEventArgs) Handles NameTextBox.KeyPress
-        e.Handled = (e.KeyChar = """"c)
     End Sub
 
     Protected Overrides Sub SourceTextChanged()

@@ -61,10 +61,11 @@ Public Class ItemEditorBase
             UseWaitCursor = _loadingItem
         End Set
     End Property
+    Private propertyUpdating As Boolean
 
     Protected Property ParseIssues As ImmutableArray(Of ParseIssue)
     Protected Property ReferentialIssues As ImmutableArray(Of ParseIssue)
-    Public Overridable ReadOnly Property Issues As IEnumerable(Of ParseIssue)
+    Public ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
             Return If(ParseIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
                 If(ReferentialIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()))
@@ -162,8 +163,10 @@ Public Class ItemEditorBase
     Protected Sub UpdateProperty(handler As Action)
         Argument.EnsureNotNull(handler, "handler")
         If LoadingItem Then Return
+        propertyUpdating = True
         handler()
         OnItemPropertyChanged()
+        propertyUpdating = False
     End Sub
 
     Protected Overridable Sub OnItemPropertyChanged()
@@ -172,6 +175,12 @@ Public Class ItemEditorBase
     End Sub
 
     Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
+        If LoadingItem OrElse propertyUpdating Then
+            LoadingItem = True
+            SourceTextChanged()
+            LoadingItem = False
+            Return
+        End If
         SourceTextTimer.Stop()
         SourceTextTimer.Start()
     End Sub
@@ -188,23 +197,23 @@ Public Class ItemEditorBase
         Throw New NotImplementedException()
     End Sub
 
+    Protected Shared Sub IgnoreQuoteCharacter(sender As Object, e As KeyPressEventArgs)
+        e.Handled = e.KeyChar = """"c
+    End Sub
+
     Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.BeginUpdate()
         comboBox.Items.Clear()
-        If includeNoneOption Then comboBox.Items.Add("[None]")
+        If includeNoneOption Then comboBox.Items.Add("")
         comboBox.Items.AddRange(items)
         comboBox.EndUpdate()
     End Sub
 
     Protected Shared Sub SelectOrOvertypeItem(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
-        If TypeOf item Is String AndAlso String.IsNullOrEmpty(DirectCast(item, String)) Then
-            If comboBox.SelectedIndex <> 0 Then comboBox.SelectedIndex = 0
-        Else
-            Dim itemText = If(item IsNot Nothing, item.ToString(), Nothing)
-            If comboBox.Text <> itemText Then comboBox.Text = itemText
-        End If
+        Dim itemText = If(item IsNot Nothing, item.ToString(), "")
+        If comboBox.Text.Trim() <> itemText.Trim() Then comboBox.Text = itemText
     End Sub
 
     Protected Shared Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
@@ -279,6 +288,12 @@ Public Class ItemEditorBase
         Argument.EnsureNotNull(viewer, "viewer")
         Argument.EnsureNotNull(behaviorCombo, "behaviorCombo")
         Dim behaviorComboHasFocus = behaviorCombo.Focused
+        Dim selectionStart As Integer
+        Dim selectionLength As Integer
+        If behaviorComboHasFocus Then
+            selectionStart = behaviorCombo.SelectionStart
+            selectionLength = behaviorCombo.SelectionLength
+        End If
         Dim hadFocus = selector.ContainsFocus OrElse behaviorComboHasFocus
         selector.Enabled = False
         behaviorCombo.Enabled = False
@@ -336,6 +351,11 @@ Public Class ItemEditorBase
                             If hadFocus AndAlso lastFocusedControl IsNot Nothing AndAlso
                                 Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
                                 lastFocusedControl.Focus()
+                                If behaviorComboHasFocus Then
+                                    Dim lastFocusedComboBox = DirectCast(lastFocusedControl, ComboBox)
+                                    lastFocusedComboBox.SelectionStart = selectionStart
+                                    lastFocusedComboBox.SelectionLength = selectionLength
+                                End If
                                 lastFocusedControl = Nothing
                             End If
                         End If
