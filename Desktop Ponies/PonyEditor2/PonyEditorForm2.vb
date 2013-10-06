@@ -10,6 +10,9 @@ Public Class PonyEditorForm2
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
     Private preview As PonyPreview
+    Private previewStartBehavior As Behavior
+    Private contextRef As PageRef
+    Private previousItemEditor As ItemEditorBase
 
     Private workingCount As Integer
 
@@ -26,11 +29,37 @@ Public Class PonyEditorForm2
                 Return _pageContent
             End Get
         End Property
+        Private _item As IPonyIniSourceable
         Public Property Item As IPonyIniSourceable
-        Public Sub New(ponyBase As PonyBase, pageContent As PageContent, item As IPonyIniSourceable)
-            _ponyBase = ponyBase
+            Get
+                Return _item
+            End Get
+            Set(value As IPonyIniSourceable)
+                If value IsNot Nothing AndAlso Not _pageContent.IsItem() Then
+                    Throw New InvalidOperationException("This PageRef may not refer to an Item.")
+                End If
+                _item = Argument.EnsureNotNull(value, "value")
+            End Set
+        End Property
+        Public Sub New()
+            _pageContent = DesktopPonies.PageContent.Ponies
+        End Sub
+        Public Sub New(ponyBase As PonyBase)
+            _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
+            _pageContent = DesktopPonies.PageContent.Pony
+        End Sub
+        Public Sub New(ponyBase As PonyBase, pageContent As PageContent)
+            _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
+            If Not pageContent.IsItemCollection() Then
+                Throw New ArgumentException("pageContent must refer to an item collection.", "pageContent")
+            End If
             _pageContent = pageContent
-            Me.Item = item
+        End Sub
+        Public Sub New(ponyBase As PonyBase, pageContent As PageContent, item As IPonyIniSourceable)
+            _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
+            If Not pageContent.IsItem() Then Throw New ArgumentException("pageContent must refer to an item.", "pageContent")
+            _pageContent = pageContent
+            _item = Argument.EnsureNotNull(item, "item")
         End Sub
         Public Overrides Function ToString() As String
             Return String.Join(Path.DirectorySeparatorChar,
@@ -75,7 +104,7 @@ Public Class PonyEditorForm2
         Dim poniesNode As TreeNode = Nothing
         worker.QueueTask(Sub()
                              poniesNode = New TreeNode("Ponies") With
-                                          {.Tag = New PageRef(Nothing, PageContent.Ponies, Nothing)}
+                                          {.Tag = New PageRef()}
                              DocumentsView.Nodes.Add(poniesNode)
                              nodeLookup(poniesNode.Name) = poniesNode
                              poniesNode.Expand()
@@ -86,28 +115,28 @@ Public Class PonyEditorForm2
             Sub(pony) worker.QueueTask(
                 Sub()
                     bases.Add(pony.Directory, pony)
-                    Dim ponyBaseRef = New PageRef(pony, PageContent.Pony, Nothing)
+                    Dim ponyBaseRef = New PageRef(pony)
                     Dim ponyBaseNode = New TreeNode(pony.Directory) With
                                        {.Tag = ponyBaseRef, .Name = ponyBaseRef.ToString()}
                     poniesNode.Nodes.Add(ponyBaseNode)
                     nodeLookup(ponyBaseNode.Name) = ponyBaseNode
 
-                    Dim behaviorsRef = New PageRef(pony, PageContent.Behaviors, Nothing)
+                    Dim behaviorsRef = New PageRef(pony, PageContent.Behaviors)
                     Dim behaviorsNode = New TreeNode("Behaviors") With
                                        {.Tag = behaviorsRef, .Name = behaviorsRef.ToString()}
                     ponyBaseNode.Nodes.Add(behaviorsNode)
                     nodeLookup(behaviorsNode.Name) = behaviorsNode
-                    Dim effectsRef = New PageRef(pony, PageContent.Effects, Nothing)
+                    Dim effectsRef = New PageRef(pony, PageContent.Effects)
                     Dim effectsNode = New TreeNode("Effects") With
                                           {.Tag = effectsRef, .Name = effectsRef.ToString()}
                     ponyBaseNode.Nodes.Add(effectsNode)
                     nodeLookup(effectsNode.Name) = effectsNode
-                    Dim speechesRef = New PageRef(pony, PageContent.Speeches, Nothing)
+                    Dim speechesRef = New PageRef(pony, PageContent.Speeches)
                     Dim speechesNode = New TreeNode("Speeches") With
                                        {.Tag = speechesRef, .Name = speechesRef.ToString()}
                     ponyBaseNode.Nodes.Add(speechesNode)
                     nodeLookup(speechesNode.Name) = speechesNode
-                    Dim interactionsRef = New PageRef(pony, PageContent.Interactions, Nothing)
+                    Dim interactionsRef = New PageRef(pony, PageContent.Interactions)
                     Dim interactionsNode = New TreeNode("Interactions") With
                                        {.Tag = interactionsRef, .Name = interactionsRef.ToString()}
                     ponyBaseNode.Nodes.Add(interactionsNode)
@@ -184,15 +213,13 @@ Public Class PonyEditorForm2
                              End Function
         Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
         Dim validateSpeech = Function(speech As Speech)
-                                 Dim ref = New PageRef(base, PageContent.Speech, speech)
                                  Return speech.TryLoad(
                                      speech.SourceIni,
-                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, ref.PonyBase.Directory),
+                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
                                      Nothing, Nothing)
                              End Function
         Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)
         Dim validateInteraction = Function(interaction As InteractionBase)
-                                      Dim ref = New PageRef(base, PageContent.Interaction, interaction)
                                       Dim i As InteractionBase = Nothing
                                       Return InteractionBase.TryLoad(
                                           interaction.SourceIni,
@@ -202,10 +229,12 @@ Public Class PonyEditorForm2
                                               PageContent.Interactions, PageContent.Interaction)
 
         worker.QueueTask(Sub()
-                             Dim ref = New PageRef(base, PageContent.Pony, Nothing)
+                             Dim ref = New PageRef(base)
                              Dim node = FindNode(ref.ToString())
-                             node.ImageIndex = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
+                             Dim index = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
                                                   1, 2)
+                             node.ImageIndex = index
+                             node.SelectedImageIndex = index
                          End Sub)
     End Sub
 
@@ -220,13 +249,17 @@ Public Class PonyEditorForm2
             If Not itemValid Then itemsValid = False
             worker.QueueTask(Sub()
                                  Dim node = FindNode(ref.ToString())
-                                 node.ImageIndex = If(itemValid, 1, 2)
+                                 Dim index = If(itemValid, 1, 2)
+                                 node.ImageIndex = index
+                                 node.SelectedImageIndex = index
                              End Sub)
         Next
         worker.QueueTask(Sub()
-                             Dim ref = New PageRef(base, content, Nothing)
+                             Dim ref = New PageRef(base, content)
                              Dim node = FindNode(ref.ToString())
-                             node.ImageIndex = If(itemsValid, 1, 2)
+                             Dim index = If(itemsValid, 1, 2)
+                             node.ImageIndex = index
+                             node.SelectedImageIndex = index
                          End Sub)
         Return itemsValid
     End Function
@@ -263,8 +296,42 @@ Public Class PonyEditorForm2
         Return DirectCast(node.Tag, PageRef)
     End Function
 
+    Private Sub DocumentsView_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseClick
+        If e.Button = Windows.Forms.MouseButtons.Right Then
+            contextRef = GetPageRef(e.Node)
+            Select Case contextRef.PageContent
+                Case PageContent.Pony
+                    PonyNodeContextMenu.Show(DocumentsView, e.Location)
+            End Select
+        End If
+    End Sub
+
+    Private Sub Preview_Click(sender As Object, e As EventArgs) Handles PreviewMenuItem.Click, PreviewButton.Click
+        If contextRef.PageContent = PageContent.Behavior Then
+            previewStartBehavior = DirectCast(contextRef.Item, Behavior)
+        End If
+        OpenTab(New PageRef(contextRef.PonyBase))
+    End Sub
+
+    Private Sub BehaviorsMenuItem_Click(sender As Object, e As EventArgs) Handles BehaviorsContextMenuItem.Click, BehaviorsMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Behaviors))
+    End Sub
+
+    Private Sub EffectsMenuItem_Click(sender As Object, e As EventArgs) Handles EffectsContextMenuItem.Click, EffectsMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Effects))
+    End Sub
+
+    Private Sub InteractionsMenuItem_Click(sender As Object, e As EventArgs) Handles InteractionsContextMenuItem.Click, InteractionsMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Interactions))
+    End Sub
+
+    Private Sub SpeechesMenuItem_Click(sender As Object, e As EventArgs) Handles SpeechesContextMenuItem.Click, SpeechesMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Speeches))
+    End Sub
+
     Private Sub DocumentsView_NodeMouseDoubleClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseDoubleClick
-        OpenTab(GetPageRef(e.Node))
+        Dim ref = GetPageRef(e.Node)
+        If ref.PageContent.IsItem() Then OpenTab(ref)
     End Sub
 
     Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
@@ -277,39 +344,57 @@ Public Class PonyEditorForm2
         Dim pageRefKey = pageRef.ToString()
         Dim tab = Documents.TabPages.Item(pageRefKey)
 
+        Dim isFirstTab = False
         If tab Is Nothing Then
             Dim childControl As Control = Nothing
-            Select Case pageRef.PageContent
-                Case PageContent.Pony
-                    childControl = preview
-                Case PageContent.Behavior, PageContent.Effect, PageContent.Speech, PageContent.Interaction
-                    Dim editor As ItemEditorBase = Nothing
-                    Select Case pageRef.PageContent
-                        Case PageContent.Behavior
-                            editor = New BehaviorEditor()
-                        Case PageContent.Effect
-                            editor = New EffectEditor()
-                        Case PageContent.Speech
-                            editor = New SpeechEditor()
-                        Case PageContent.Interaction
-                            editor = New InteractionEditor()
-                    End Select
-                    QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
-                    childControl = editor
-            End Select
+            If pageRef.PageContent = PageContent.Pony Then
+                childControl = preview
+            ElseIf pageRef.PageContent.IsItemCollection() Then
+                ' TODO.
+                Dim viewer As ItemsViewerBase = Nothing
+                Select Case pageRef.PageContent
+                    Case PageContent.Behaviors
+                        viewer = New BehaviorsViewer()
+                    Case PageContent.Effects
+                        viewer = New BehaviorsViewer()
+                    Case PageContent.Interactions
+                        viewer = New BehaviorsViewer()
+                    Case PageContent.Speeches
+                        viewer = New BehaviorsViewer()
+                End Select
+                QueueWorkItem(Sub() viewer.LoadFor(pageRef.PonyBase))
+                AddHandler viewer.PreviewRequested, AddressOf Viewer_PreviewRequested
+                AddHandler viewer.EditRequested, AddressOf Viewer_EditRequested
+                childControl = viewer
+            ElseIf pageRef.PageContent.IsItem() Then
+                Dim editor As ItemEditorBase = Nothing
+                Select Case pageRef.PageContent
+                    Case PageContent.Behavior
+                        editor = New BehaviorEditor()
+                    Case PageContent.Effect
+                        editor = New EffectEditor()
+                    Case PageContent.Interaction
+                        editor = New InteractionEditor()
+                    Case PageContent.Speech
+                        editor = New SpeechEditor()
+                End Select
+                QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
+                childControl = editor
+            End If
             If childControl IsNot Nothing Then
+                childControl.Tag = pageRef
                 childControl.Dock = DockStyle.Fill
                 tab = New ItemTabPage() With {.Name = pageRefKey, .Text = GetTabText(pageRef), .Tag = pageRef}
                 tab.Controls.Add(childControl)
+                isFirstTab = Documents.TabPages.Count = 0
                 Documents.TabPages.Add(tab)
-                CloseTabButton.Enabled = True
-                CloseAllTabsButton.Enabled = True
+                EnableEditorToolStripButtons(True)
             End If
         End If
 
         If tab IsNot Nothing Then
             Documents.SelectedTab = tab
-            SwitchTab(tab)
+            If isFirstTab Then SwitchTab(tab)
             DocumentsView.Select()
             DocumentsView.SelectedNode = FindNode(pageRefKey)
             Return True
@@ -323,15 +408,14 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub SwitchTab(newTab As TabPage)
-        If ActiveItemEditor IsNot Nothing Then
-            RemoveHandler ActiveItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
-            RemoveHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
-            ActiveItemEditor.AnimateImages(False)
+        If previousItemEditor IsNot Nothing Then
+            RemoveHandler previousItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
+            RemoveHandler previousItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
+            previousItemEditor.AnimateImages(False)
         End If
 
-        Documents.SelectedTab = newTab
-
         If ActiveItemEditor IsNot Nothing Then
+            previousItemEditor = ActiveItemEditor
             ActiveItemEditor.AnimateImages(True)
             AddHandler ActiveItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
             AddHandler ActiveItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
@@ -339,18 +423,28 @@ Public Class PonyEditorForm2
         ActiveItemEditor_DirtinessChanged(Me, EventArgs.Empty)
         ActiveItemEditor_IssuesChanged(Me, EventArgs.Empty)
 
-        Dim pageRef As PageRef = Nothing
+        contextRef = Nothing
         If newTab IsNot Nothing Then
-            pageRef = GetPageRef(newTab)
-            If pageRef.PageContent = PageContent.Pony Then
+            contextRef = GetPageRef(newTab)
+            If contextRef.PageContent = PageContent.Pony Then
                 newTab.Controls.Add(preview)
-                preview.RestartForPony(pageRef.PonyBase)
+                preview.RestartForPony(contextRef.PonyBase, previewStartBehavior)
+                previewStartBehavior = Nothing
                 preview.ShowPreview()
-            Else
-                pageRef = Nothing
             End If
         End If
-        If pageRef Is Nothing Then preview.HidePreview()
+        If contextRef Is Nothing OrElse contextRef.PageContent <> PageContent.Pony Then preview.HidePreview()
+    End Sub
+
+    Private Sub Viewer_PreviewRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)
+        Dim ref = DirectCast(DirectCast(sender, Control).Tag, PageRef)
+        previewStartBehavior = DirectCast(e.Item, Behavior)
+        OpenTab(New PageRef(ref.PonyBase))
+    End Sub
+
+    Private Sub Viewer_EditRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)
+        Dim ref = DirectCast(DirectCast(sender, Control).Tag, PageRef)
+        OpenTab(New PageRef(ref.PonyBase, ref.PageContent.ItemCollectionToItem(), e.Item))
     End Sub
 
     Private Sub ActiveItemEditor_DirtinessChanged(sender As Object, e As EventArgs)
@@ -376,6 +470,13 @@ Public Class PonyEditorForm2
         IssuesGrid.ResumeLayout()
     End Sub
 
+    Private Sub EnableEditorToolStripButtons(enable As Boolean)
+        PreviewButton.Enabled = enable
+        ItemsButton.Enabled = enable
+        CloseTabButton.Enabled = enable
+        CloseAllTabsButton.Enabled = enable
+    End Sub
+
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveItemButton.Click
         ActiveItemEditor.SaveItem()
         Dim ref = GetPageRef(Documents.SelectedTab)
@@ -393,22 +494,19 @@ Public Class PonyEditorForm2
 
     Private Sub CloseTabButton_Click(sender As Object, e As EventArgs) Handles CloseTabButton.Click
         RemoveTab(Documents.SelectedTab)
-        SwitchTab(Documents.SelectedTab)
     End Sub
 
     Private Sub CloseAllTabsButton_Click(sender As Object, e As EventArgs) Handles CloseAllTabsButton.Click
         For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
             RemoveTab(t)
         Next
-        SwitchTab(Documents.SelectedTab)
     End Sub
 
     Private Sub RemoveTab(tab As TabPage)
         Documents.TabPages.Remove(tab)
         tab.Controls.Remove(preview)
         tab.Dispose()
-        CloseTabButton.Enabled = Documents.TabPages.Count > 0
-        CloseAllTabsButton.Enabled = Documents.TabPages.Count > 0
+        EnableEditorToolStripButtons(Documents.TabPages.Count > 0)
     End Sub
 
     Private Sub QueueWorkItem(item As MethodInvoker)

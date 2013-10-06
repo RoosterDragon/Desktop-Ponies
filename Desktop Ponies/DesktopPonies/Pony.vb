@@ -1254,9 +1254,9 @@ Public Class Pony
     ''' Teleport the pony to a random location within bounds.
     ''' </summary>
     Friend Sub Teleport()
-        ' If we are in preview mode, just teleport into the top-left corner for consistency.
+        ' If we are in preview mode, just teleport into the center for consistency.
         If Reference.InPreviewMode Then
-            TopLeftLocation = Point.Add(Pony.PreviewWindowRectangle.Location, New Size(10, 10))
+            TopLeftLocation = Vector2.Truncate(New Vector2F(Pony.PreviewWindowRectangle.Center()) - (CurrentImageSize / 2.0F))
             Exit Sub
         End If
 

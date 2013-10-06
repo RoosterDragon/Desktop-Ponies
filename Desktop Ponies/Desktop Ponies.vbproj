@@ -160,6 +160,12 @@
     <Compile Include="PonyEditor2\BehaviorEditor.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="PonyEditor2\BehaviorsViewer.Designer.vb">
+      <DependentUpon>BehaviorsViewer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\BehaviorsViewer.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="PonyEditor2\Editor2PonyAnimator.vb" />
     <Compile Include="PonyEditor2\EffectEditor.Designer.vb">
       <DependentUpon>EffectEditor.vb</DependentUpon>
@@ -189,6 +195,12 @@
       <DependentUpon>ItemEditorBase.vb</DependentUpon>
     </Compile>
     <Compile Include="PonyEditor2\ItemEditorBase.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PonyEditor2\ItemsViewerBase.Designer.vb">
+      <DependentUpon>ItemsViewerBase.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\ItemsViewerBase.vb">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PonyEditor2\ItemTabControl.vb">
@@ -369,6 +381,9 @@
     <EmbeddedResource Include="PonyEditor2\BehaviorEditor.resx">
       <DependentUpon>BehaviorEditor.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\BehaviorsViewer.resx">
+      <DependentUpon>BehaviorsViewer.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\EffectEditor.resx">
       <DependentUpon>EffectEditor.vb</DependentUpon>
     </EmbeddedResource>
@@ -380,6 +395,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\ItemEditorBase.resx">
       <DependentUpon>ItemEditorBase.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\ItemsViewerBase.resx">
+      <DependentUpon>ItemsViewerBase.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\PonyEditorForm2.resx">
       <DependentUpon>PonyEditorForm2.vb</DependentUpon>

@@ -41,7 +41,7 @@ Public Class EffectImageViewer
         If ErrorLabel.Visible Then
             Return ErrorLabel.GetPreferredSize(proposedSize)
         ElseIf Image IsNot Nothing AndAlso EffectImage IsNot Nothing Then
-            Return New Size(Image.Width + EffectImage.Width, Image.Height + EffectImage.Height)
+            Return New Size(Image.Width + EffectImage.Width + 12, Image.Height + EffectImage.Height + 12)
         ElseIf EffectImage IsNot Nothing Then
             Return EffectImage.Size
         ElseIf Image IsNot Nothing Then
