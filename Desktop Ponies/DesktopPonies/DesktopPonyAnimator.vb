@@ -318,7 +318,7 @@ Public Class DesktopPonyAnimator
 
         Dim tagList = New List(Of ISimpleContextMenuItem)
 
-        For Each tag As String In Main.Instance.FilterOptionsBox.Items
+        For Each tag As CaseInsensitiveString In Main.Instance.FilterOptionsBox.Items
             Dim ponyList = New List(Of ISimpleContextMenuItem)
             Dim bases As IEnumerable(Of PonyBase) = PonyCollection.Bases
             If PonyCollection.RandomBase IsNot Nothing Then bases = {PonyCollection.RandomBase}.Concat(PonyCollection.Bases)
