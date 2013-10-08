@@ -98,29 +98,25 @@ Public Class EffectImageViewer
     End Sub
 
     Private Shared Sub PaintCrosses(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
-        Using thinPen As New Pen(color, 1)
-            Using thickPen As New Pen(color, 2)
-                For direct = Direction.TopLeft To Direction.BottomRight
-                    Dim point = GetDirectionOnRectangle(rect, direct)
-                    Const radius = 3
-                    Dim pen = If(direct = chosenDirection, thickPen, thinPen)
-                    g.DrawLine(pen, point.X - radius, point.Y - radius, point.X + radius, point.Y + radius)
-                    g.DrawLine(pen, point.X - radius, point.Y + radius, point.X + radius, point.Y - radius)
-                Next
-            End Using
+        Using thinPen As New Pen(color, 1), thickPen As New Pen(color, 2)
+            For direct = Direction.TopLeft To Direction.BottomRight
+                Dim point = GetDirectionOnRectangle(rect, direct)
+                Const radius = 3
+                Dim pen = If(direct = chosenDirection, thickPen, thinPen)
+                g.DrawLine(pen, point.X - radius, point.Y - radius, point.X + radius, point.Y + radius)
+                g.DrawLine(pen, point.X - radius, point.Y + radius, point.X + radius, point.Y - radius)
+            Next
         End Using
     End Sub
 
     Private Shared Sub PaintCircles(g As Graphics, rect As Rectangle, color As Color, chosenDirection As Direction)
-        Using thinPen As New Pen(color, 1)
-            Using thickPen As New Pen(color, 2)
-                For direct = Direction.TopLeft To Direction.BottomRight
-                    Dim point = GetDirectionOnRectangle(rect, direct)
-                    Const radius = 5
-                    Dim pen = If(direct = chosenDirection, thickPen, thinPen)
-                    g.DrawEllipse(pen, point.X - radius, point.Y - radius, radius * 2, radius * 2)
-                Next
-            End Using
+        Using thinPen As New Pen(color, 1), thickPen As New Pen(color, 2)
+            For direct = Direction.TopLeft To Direction.BottomRight
+                Dim point = GetDirectionOnRectangle(rect, direct)
+                Const radius = 5
+                Dim pen = If(direct = chosenDirection, thickPen, thinPen)
+                g.DrawEllipse(pen, point.X - radius, point.Y - radius, radius * 2, radius * 2)
+            Next
         End Using
     End Sub
 

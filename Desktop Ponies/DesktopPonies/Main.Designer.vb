@@ -201,7 +201,6 @@ Partial Class Main
         Me.FilterOptionsBox.CheckOnClick = True
         Me.FilterOptionsBox.Enabled = False
         Me.FilterOptionsBox.FormattingEnabled = True
-        Me.FilterOptionsBox.Items.AddRange(New Object() {"Ponies", "Supporting Ponies", "Alternate Art", "Fillies", "Pets", "Stallions", "Mares", "Alicorns", "Unicorns", "Pegasi", "Earth Ponies", "Non-Ponies", "Not Tagged"})
         Me.FilterOptionsBox.Location = New System.Drawing.Point(112, 14)
         Me.FilterOptionsBox.Name = "FilterOptionsBox"
         Me.FilterOptionsBox.Size = New System.Drawing.Size(170, 94)

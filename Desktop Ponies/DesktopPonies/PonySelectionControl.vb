@@ -151,7 +151,7 @@ Public Class PonySelectionControl
             For Each control As Control In Controls
                 control.Visible = Visible
             Next
-            If PonyName.Text <> "Random Pony" Then
+            If PonyName.Text <> PonyBase.RandomDirectory Then
                 NoDuplicates.Visible = False
             End If
         End If

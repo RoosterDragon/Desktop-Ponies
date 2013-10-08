@@ -6,7 +6,6 @@ Public Class PonyEditorForm2
 
     Private ReadOnly worker As New IdleWorker(Me)
     Private ponies As PonyCollection
-    Private ReadOnly bases As New Dictionary(Of String, PonyBase)()
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
     Private preview As PonyPreview
@@ -71,11 +70,7 @@ Public Class PonyEditorForm2
 
     Private ReadOnly Property ActiveItemEditor As ItemEditorBase
         Get
-            If Documents.SelectedTab Is Nothing OrElse Documents.SelectedTab.Controls.Count = 0 Then
-                Return Nothing
-            Else
-                Return TryCast(Documents.SelectedTab.Controls(0), ItemEditorBase)
-            End If
+            Return GetItemEditor(Documents.SelectedTab)
         End Get
     End Property
 
@@ -107,80 +102,24 @@ Public Class PonyEditorForm2
                                           {.Tag = New PageRef()}
                              DocumentsView.Nodes.Add(poniesNode)
                              nodeLookup(poniesNode.Name) = poniesNode
-                             poniesNode.Expand()
                          End Sub)
 
         ponies = New PonyCollection(
             Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
-            Sub(pony) worker.QueueTask(
+            Sub(base) worker.QueueTask(
                 Sub()
-                    bases.Add(pony.Directory, pony)
-                    Dim ponyBaseRef = New PageRef(pony)
-                    Dim ponyBaseNode = New TreeNode(pony.Directory) With
-                                       {.Tag = ponyBaseRef, .Name = ponyBaseRef.ToString()}
-                    poniesNode.Nodes.Add(ponyBaseNode)
-                    nodeLookup(ponyBaseNode.Name) = ponyBaseNode
-
-                    Dim behaviorsRef = New PageRef(pony, PageContent.Behaviors)
-                    Dim behaviorsNode = New TreeNode("Behaviors") With
-                                       {.Tag = behaviorsRef, .Name = behaviorsRef.ToString()}
-                    ponyBaseNode.Nodes.Add(behaviorsNode)
-                    nodeLookup(behaviorsNode.Name) = behaviorsNode
-                    Dim effectsRef = New PageRef(pony, PageContent.Effects)
-                    Dim effectsNode = New TreeNode("Effects") With
-                                          {.Tag = effectsRef, .Name = effectsRef.ToString()}
-                    ponyBaseNode.Nodes.Add(effectsNode)
-                    nodeLookup(effectsNode.Name) = effectsNode
-                    Dim speechesRef = New PageRef(pony, PageContent.Speeches)
-                    Dim speechesNode = New TreeNode("Speeches") With
-                                       {.Tag = speechesRef, .Name = speechesRef.ToString()}
-                    ponyBaseNode.Nodes.Add(speechesNode)
-                    nodeLookup(speechesNode.Name) = speechesNode
-                    Dim interactionsRef = New PageRef(pony, PageContent.Interactions)
-                    Dim interactionsNode = New TreeNode("Interactions") With
-                                       {.Tag = interactionsRef, .Name = interactionsRef.ToString()}
-                    ponyBaseNode.Nodes.Add(interactionsNode)
-                    nodeLookup(interactionsNode.Name) = interactionsNode
-
-                    For Each behavior In pony.Behaviors
-                        Dim ref = New PageRef(pony, PageContent.Behavior, behavior)
-                        Dim node = New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()}
-                        behaviorsNode.Nodes.Add(node)
-                        nodeLookup(node.Name) = node
-                    Next
-
-                    For Each effect In pony.Effects
-                        Dim ref = New PageRef(pony, PageContent.Effect, effect)
-                        Dim node = New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()}
-                        effectsNode.Nodes.Add(node)
-                        nodeLookup(node.Name) = node
-                    Next
-
-                    For Each speech In pony.Speeches
-                        Dim ref = New PageRef(pony, PageContent.Speech, speech)
-                        Dim node = New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()}
-                        speechesNode.Nodes.Add(node)
-                        nodeLookup(node.Name) = node
-                    Next
-
-                    For Each interaction In pony.Interactions
-                        Dim ref = New PageRef(pony, PageContent.Interaction, interaction)
-                        Dim node = New TreeNode(interaction.Name) With {.Tag = ref, .Name = ref.ToString()}
-                        interactionsNode.Nodes.Add(node)
-                        nodeLookup(node.Name) = node
-                    Next
-
+                    AddPonyBaseToDocumentsView(base)
                     EditorProgressBar.Value += 1
                 End Sub))
-        worker.QueueTask(Sub() poniesNode.TreeView.Sort())
+        worker.QueueTask(Sub() DocumentsView.Sort())
         worker.QueueTask(Sub()
+                             poniesNode.Expand()
                              preview = New PonyPreview(ponies)
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1
                              EditorProgressBar.Maximum = 1
                              EditorProgressBar.Style = ProgressBarStyle.Marquee
                              EditorProgressBar.Visible = False
-                             DocumentsView.TopNode.Expand()
                              UseWaitCursor = False
                              Enabled = True
                              DocumentsView.Focus()
@@ -189,8 +128,67 @@ Public Class PonyEditorForm2
         ValidateBases()
     End Sub
 
+    Private Sub AddPonyBaseToDocumentsView(base As PonyBase)
+        If base.Directory = PonyBase.RandomDirectory Then Return
+
+        Dim ponyBaseRef = New PageRef(base)
+        Dim ponyBaseNode = New TreeNode(base.Directory) With
+                           {.Tag = ponyBaseRef, .Name = ponyBaseRef.ToString()}
+        DocumentsView.Nodes(0).Nodes.Add(ponyBaseNode)
+        nodeLookup(ponyBaseNode.Name) = ponyBaseNode
+
+        Dim behaviorsRef = New PageRef(base, PageContent.Behaviors)
+        Dim behaviorsNode = New TreeNode("Behaviors") With
+                           {.Tag = behaviorsRef, .Name = behaviorsRef.ToString()}
+        ponyBaseNode.Nodes.Add(behaviorsNode)
+        nodeLookup(behaviorsNode.Name) = behaviorsNode
+        Dim effectsRef = New PageRef(base, PageContent.Effects)
+        Dim effectsNode = New TreeNode("Effects") With
+                              {.Tag = effectsRef, .Name = effectsRef.ToString()}
+        ponyBaseNode.Nodes.Add(effectsNode)
+        nodeLookup(effectsNode.Name) = effectsNode
+        Dim speechesRef = New PageRef(base, PageContent.Speeches)
+        Dim speechesNode = New TreeNode("Speeches") With
+                           {.Tag = speechesRef, .Name = speechesRef.ToString()}
+        ponyBaseNode.Nodes.Add(speechesNode)
+        nodeLookup(speechesNode.Name) = speechesNode
+        Dim interactionsRef = New PageRef(base, PageContent.Interactions)
+        Dim interactionsNode = New TreeNode("Interactions") With
+                           {.Tag = interactionsRef, .Name = interactionsRef.ToString()}
+        ponyBaseNode.Nodes.Add(interactionsNode)
+        nodeLookup(interactionsNode.Name) = interactionsNode
+
+        For Each behavior In base.Behaviors
+            Dim ref = New PageRef(base, PageContent.Behavior, behavior)
+            Dim node = New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()}
+            behaviorsNode.Nodes.Add(node)
+            nodeLookup(node.Name) = node
+        Next
+
+        For Each effect In base.Effects
+            Dim ref = New PageRef(base, PageContent.Effect, effect)
+            Dim node = New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()}
+            effectsNode.Nodes.Add(node)
+            nodeLookup(node.Name) = node
+        Next
+
+        For Each speech In base.Speeches
+            Dim ref = New PageRef(base, PageContent.Speech, speech)
+            Dim node = New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()}
+            speechesNode.Nodes.Add(node)
+            nodeLookup(node.Name) = node
+        Next
+
+        For Each interaction In base.Interactions
+            Dim ref = New PageRef(base, PageContent.Interaction, interaction)
+            Dim node = New TreeNode(interaction.Name) With {.Tag = ref, .Name = ref.ToString()}
+            interactionsNode.Nodes.Add(node)
+            nodeLookup(node.Name) = node
+        Next
+    End Sub
+
     Private Sub ValidateBases()
-        For Each base In bases.Values.OrderBy(Function(pb) pb.Directory)
+        For Each base In ponies.AllBases.OrderBy(Function(pb) pb.Directory)
             ValidateBase(base)
         Next
     End Sub
@@ -296,6 +294,32 @@ Public Class PonyEditorForm2
         Return DirectCast(node.Tag, PageRef)
     End Function
 
+    Private Shared Function GetItemEditor(tab As TabPage) As ItemEditorBase
+        If tab Is Nothing OrElse tab.Controls.Count = 0 Then
+            Return Nothing
+        Else
+            Return TryCast(tab.Controls(0), ItemEditorBase)
+        End If
+    End Function
+
+    Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
+        If e.KeyChar = ChrW(Keys.Enter) Then
+            e.Handled = True
+            OpenTabFromNode(DocumentsView.SelectedNode)
+        End If
+    End Sub
+
+    Private Sub DocumentsView_NodeMouseDoubleClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseDoubleClick
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            OpenTabFromNode(e.Node)
+        End If
+    End Sub
+
+    Private Sub OpenTabFromNode(node As TreeNode)
+        contextRef = GetPageRef(node)
+        If contextRef.PageContent.IsItem() Then OpenTab(contextRef)
+    End Sub
+
     Private Sub DocumentsView_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseClick
         If e.Button = Windows.Forms.MouseButtons.Right Then
             contextRef = GetPageRef(e.Node)
@@ -306,11 +330,61 @@ Public Class PonyEditorForm2
         End If
     End Sub
 
-    Private Sub Preview_Click(sender As Object, e As EventArgs) Handles PreviewMenuItem.Click, PreviewButton.Click
+    Private Sub Preview_Click(sender As Object, e As EventArgs) Handles PreviewContextMenuItem.Click, PreviewButton.Click
         If contextRef.PageContent = PageContent.Behavior Then
             previewStartBehavior = DirectCast(contextRef.Item, Behavior)
         End If
         OpenTab(New PageRef(contextRef.PonyBase))
+    End Sub
+
+    Private Sub DetailsMenuItem_Click(sender As Object, e As EventArgs) Handles DetailsContextMenuItem.Click, DetailsMenuItem.Click
+        Dim contextBase = contextRef.PonyBase
+        For Each tab As TabPage In Documents.TabPages
+            If Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase) Then
+                If MessageBox.Show(Me, String.Format(
+                                   "All open documents about {0} must be closed before editing details, would you like to do this?",
+                                   contextBase.Directory),
+                               "Close Documents?", MessageBoxButtons.OKCancel,
+                               MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) = DialogResult.OK Then
+                    For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
+                        If Object.ReferenceEquals(GetPageRef(t).PonyBase, contextBase) Then
+                            RemoveTab(t)
+                        End If
+                    Next
+                    Exit For
+                Else
+                    Return
+                End If
+            End If
+        Next
+        Using dialog As New PonyDetailsDialog(contextBase)
+            Dim ref = New PageRef(contextBase)
+            Dim refOriginalName = ref.ToString()
+            If dialog.ShowDialog(Me) = DialogResult.OK Then
+                Dim node = FindNode(refOriginalName)
+                Dim refNewName = ref.ToString()
+                If refOriginalName <> refNewName Then
+                    nodeLookup.Clear()
+                    node.Name = refNewName
+                    node.Text = contextBase.Directory
+                    RenameNodes(DocumentsView.Nodes)
+                    DocumentsView.Sort()
+                    For Each t As TabPage In Documents.TabPages
+                        Dim editor = GetItemEditor(t)
+                        If editor IsNot Nothing Then editor.RefreshReferentialIssues()
+                    Next
+                    EditorStatus.Text = "Saved"
+                    Threading.ThreadPool.QueueUserWorkItem(Sub() ValidateBases())
+                End If
+            End If
+        End Using
+    End Sub
+
+    Private Sub RenameNodes(nodeCollection As TreeNodeCollection)
+        For Each node As TreeNode In nodeCollection
+            RenameNodes(node.Nodes)
+            node.Name = DirectCast(node.Tag, PageRef).ToString()
+        Next
     End Sub
 
     Private Sub BehaviorsMenuItem_Click(sender As Object, e As EventArgs) Handles BehaviorsContextMenuItem.Click, BehaviorsMenuItem.Click
@@ -327,17 +401,6 @@ Public Class PonyEditorForm2
 
     Private Sub SpeechesMenuItem_Click(sender As Object, e As EventArgs) Handles SpeechesContextMenuItem.Click, SpeechesMenuItem.Click
         OpenTab(New PageRef(contextRef.PonyBase, PageContent.Speeches))
-    End Sub
-
-    Private Sub DocumentsView_NodeMouseDoubleClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseDoubleClick
-        Dim ref = GetPageRef(e.Node)
-        If ref.PageContent.IsItem() Then OpenTab(ref)
-    End Sub
-
-    Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
-        If e.KeyChar = ChrW(Keys.Enter) Then
-            e.Handled = OpenTab(GetPageRef(DocumentsView.SelectedNode))
-        End If
     End Sub
 
     Private Function OpenTab(pageRef As PageRef) As Boolean
@@ -482,10 +545,12 @@ Public Class PonyEditorForm2
         Dim ref = GetPageRef(Documents.SelectedTab)
         Dim node = FindNode(ref.ToString())
 
+        nodeLookup.Remove(node.Name)
         ref.Item = ActiveItemEditor.Item
         Documents.SelectedTab.Text = GetTabText(ref)
         node.Name = ref.ToString()
         node.Text = ref.Item.Name
+        nodeLookup.Add(node.Name, node)
 
         EditorStatus.Text = "Saved"
 
@@ -503,8 +568,10 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub RemoveTab(tab As TabPage)
-        Documents.TabPages.Remove(tab)
+        Dim index = Documents.TabPages.IndexOf(Documents.SelectedTab)
         tab.Controls.Remove(preview)
+        If index > 0 Then Documents.SelectedIndex = index - 1
+        Documents.TabPages.Remove(tab)
         tab.Dispose()
         EnableEditorToolStripButtons(Documents.TabPages.Count > 0)
     End Sub

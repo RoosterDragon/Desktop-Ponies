@@ -359,7 +359,7 @@ Public Class DesktopPonyAnimator
                                                           "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                           Return
                                       End If
-                                      If ponyName = "Random Pony" Then
+                                      If ponyName = PonyBase.RandomDirectory Then
                                           Dim selection = Rng.Next(PonyCollection.Bases.Count())
                                           ponyName = PonyCollection.Bases(selection).Directory
                                       End If

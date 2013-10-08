@@ -27,7 +27,7 @@
 
         Me.Text = "Tags for " & _editor.PreviewPony.Directory
 
-        For Each category As String In Main.Instance.FilterOptionsBox.Items
+        For Each category As CaseInsensitiveString In Main.Instance.FilterOptionsBox.Items
             If category = "Not Tagged" Then Continue For
             PonyFilterList.Items.Add(category)
         Next

@@ -44,7 +44,7 @@ Public Class PonyCollection
                         End If
                     End Sub)
         Dim allBases = ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToList()
-        Dim randomIndex = allBases.FindIndex(Function(pb) pb.Directory = "Random Pony")
+        Dim randomIndex = allBases.FindIndex(Function(pb) pb.Directory = PonyBase.RandomDirectory)
         If randomIndex <> -1 Then
             _randomBase = allBases(randomIndex)
             allBases.RemoveAt(randomIndex)
@@ -82,11 +82,11 @@ Public Class PonyCollection
     Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
         If oldDirectory = newDirectory Then Return
         If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
-        For Each action In _interactions.Values.SelectMany(Function(list) list)
-            If action.TargetNames.Remove(oldDirectory) Then
-                action.TargetNames.Add(newDirectory)
-            End If
-        Next
+        'For Each action In _interactions.Values.SelectMany(Function(list) list)
+        '    If action.TargetNames.Remove(oldDirectory) Then
+        '        action.TargetNames.Add(newDirectory)
+        '    End If
+        'Next
         If _interactions.ContainsKey(oldDirectory) Then
             Dim actions = _interactions(oldDirectory)
             _interactions.Remove(oldDirectory)

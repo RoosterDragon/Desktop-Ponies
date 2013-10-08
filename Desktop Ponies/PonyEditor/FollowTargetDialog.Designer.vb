@@ -30,7 +30,6 @@ Partial Class FollowTargetDialog
         Me.GoToPointOption = New System.Windows.Forms.RadioButton()
         Me.TargetModeLabel = New System.Windows.Forms.Label()
         Me.UnitsLabel = New System.Windows.Forms.Label()
-        Me.PointLabel = New System.Windows.Forms.Label()
         Me.PointPreviewLabel = New System.Windows.Forms.Label()
         Me.PointY = New System.Windows.Forms.NumericUpDown()
         Me.PointX = New System.Windows.Forms.NumericUpDown()
@@ -118,20 +117,11 @@ Partial Class FollowTargetDialog
         'UnitsLabel
         '
         Me.UnitsLabel.AutoSize = True
-        Me.UnitsLabel.Location = New System.Drawing.Point(24, 368)
+        Me.UnitsLabel.Location = New System.Drawing.Point(35, 363)
         Me.UnitsLabel.Name = "UnitsLabel"
-        Me.UnitsLabel.Size = New System.Drawing.Size(74, 13)
+        Me.UnitsLabel.Size = New System.Drawing.Size(48, 13)
         Me.UnitsLabel.TabIndex = 15
-        Me.UnitsLabel.Text = "Location (X,Y)"
-        '
-        'PointLabel
-        '
-        Me.PointLabel.AutoSize = True
-        Me.PointLabel.Location = New System.Drawing.Point(39, 319)
-        Me.PointLabel.Name = "PointLabel"
-        Me.PointLabel.Size = New System.Drawing.Size(147, 13)
-        Me.PointLabel.TabIndex = 14
-        Me.PointLabel.Text = "Point Relative to pony center:"
+        Me.UnitsLabel.Text = "Location"
         '
         'PointPreviewLabel
         '
@@ -144,14 +134,14 @@ Partial Class FollowTargetDialog
         '
         'PointY
         '
-        Me.PointY.Location = New System.Drawing.Point(134, 384)
+        Me.PointY.Location = New System.Drawing.Point(145, 379)
         Me.PointY.Name = "PointY"
         Me.PointY.Size = New System.Drawing.Size(46, 20)
         Me.PointY.TabIndex = 17
         '
         'PointX
         '
-        Me.PointX.Location = New System.Drawing.Point(61, 384)
+        Me.PointX.Location = New System.Drawing.Point(72, 379)
         Me.PointX.Name = "PointX"
         Me.PointX.Size = New System.Drawing.Size(46, 20)
         Me.PointX.TabIndex = 16
@@ -159,6 +149,8 @@ Partial Class FollowTargetDialog
         'PointPreviewArea
         '
         Me.PointPreviewArea.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PointPreviewArea.ErrorImage = Nothing
+        Me.PointPreviewArea.InitialImage = Nothing
         Me.PointPreviewArea.Location = New System.Drawing.Point(251, 328)
         Me.PointPreviewArea.Name = "PointPreviewArea"
         Me.PointPreviewArea.Size = New System.Drawing.Size(227, 123)
@@ -186,11 +178,11 @@ Partial Class FollowTargetDialog
         'RelativeToLabel
         '
         Me.RelativeToLabel.AutoSize = True
-        Me.RelativeToLabel.Location = New System.Drawing.Point(48, 427)
+        Me.RelativeToLabel.Location = New System.Drawing.Point(69, 402)
         Me.RelativeToLabel.Name = "RelativeToLabel"
-        Me.RelativeToLabel.Size = New System.Drawing.Size(123, 13)
+        Me.RelativeToLabel.Size = New System.Drawing.Size(118, 13)
         Me.RelativeToLabel.TabIndex = 18
-        Me.RelativeToLabel.Text = "(Relative to pony center)"
+        Me.RelativeToLabel.Text = "(relative to pony center)"
         '
         'NoTargetOption
         '
@@ -280,7 +272,6 @@ Partial Class FollowTargetDialog
         Me.Controls.Add(Me.FollowLabel)
         Me.Controls.Add(Me.FollowComboBox)
         Me.Controls.Add(Me.UnitsLabel)
-        Me.Controls.Add(Me.PointLabel)
         Me.Controls.Add(Me.PointPreviewLabel)
         Me.Controls.Add(Me.PointY)
         Me.Controls.Add(Me.PointX)
@@ -309,7 +300,6 @@ Partial Class FollowTargetDialog
     Friend WithEvents GoToPointOption As System.Windows.Forms.RadioButton
     Friend WithEvents TargetModeLabel As System.Windows.Forms.Label
     Friend WithEvents UnitsLabel As System.Windows.Forms.Label
-    Friend WithEvents PointLabel As System.Windows.Forms.Label
     Friend WithEvents PointPreviewLabel As System.Windows.Forms.Label
     Friend WithEvents PointY As System.Windows.Forms.NumericUpDown
     Friend WithEvents PointX As System.Windows.Forms.NumericUpDown

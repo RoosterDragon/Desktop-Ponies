@@ -50,7 +50,7 @@ Public NotInheritable Class Options
 
     Public Shared ReadOnly Screens As New List(Of Screen)()
     Public Shared ReadOnly PonyCounts As New Dictionary(Of String, Integer)()
-    Public Shared ReadOnly CustomTags As New List(Of String)()
+    Public Shared ReadOnly CustomTags As New HashSet(Of CaseInsensitiveString)()
 
     Public Shared EnablePonyLogs As Boolean
     Public Shared ShowPerformanceGraph As Boolean

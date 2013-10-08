@@ -28,7 +28,7 @@ Public Class NewPonyDialog
             Return False
         End If
 
-        Dim badChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, "{"c, "}"c, ","c}.
+        Dim badChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, "{"c, "}"c, ","c, """"c}.
             Concat(Path.GetInvalidPathChars()).Concat(Path.GetInvalidFileNameChars()).Distinct().ToArray()
 
         If newName.IndexOfAny(badChars) <> -1 Then

@@ -70,6 +70,7 @@ End Class
 Public Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
+    Public Const RandomDirectory = "Random Pony"
 
     Private ReadOnly _collection As PonyCollection
     Public ReadOnly Property Collection As PonyCollection
@@ -131,24 +132,38 @@ Public Class PonyBase
             Return Speeches.Where(Function(s) s.Skip)
         End Get
     End Property
+    Private ReadOnly commentLines As New List(Of String)()
+    Private ReadOnly invalidLines As New List(Of String)()
 
     Private Sub New(collection As PonyCollection)
         _collection = Argument.EnsureNotNull(collection, "collection")
     End Sub
 
     Public Function ChangeDirectory(newDirectory As String) As Boolean
+        If newDirectory = RandomDirectory Then Throw New ArgumentException("Cannot change directory to the random pony directory.")
         If Directory Is Nothing Then Return Create(newDirectory)
         If String.Equals(Directory, newDirectory, PathEquality.Comparison) Then Return True
         Try
             Dim currentPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory)
             Dim newPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
-            Collection.ChangePonyDirectory(Directory, newDirectory)
-            _directory = newDirectory
-            Return True
         Catch ex As Exception
             Return False
         End Try
+        Collection.ChangePonyDirectory(Directory, newDirectory)
+        For Each behavior In Behaviors
+            behavior.LeftImage.Path = behavior.LeftImage.Path.Replace(Directory, newDirectory)
+            behavior.RightImage.Path = behavior.RightImage.Path.Replace(Directory, newDirectory)
+        Next
+        For Each effect In Effects
+            effect.LeftImage.Path = effect.LeftImage.Path.Replace(Directory, newDirectory)
+            effect.RightImage.Path = effect.RightImage.Path.Replace(Directory, newDirectory)
+        Next
+        For Each speech In Speeches
+            If speech.SoundFile IsNot Nothing Then speech.SoundFile = speech.SoundFile.Replace(Directory, newDirectory)
+        Next
+        _directory = newDirectory
+        Return True
     End Function
 
     Public Shared Function CreateInMemory(collection As PonyCollection) As PonyBase
@@ -191,8 +206,13 @@ Public Class PonyBase
         Do Until reader.EndOfStream
             Dim line = reader.ReadLine()
 
-            ' Ignore blank lines, and those commented out with a single quote.
-            If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
+            ' Ignore blank lines.
+            If String.IsNullOrWhiteSpace(line) Then Continue Do
+            ' Lines starting with a single quote are comments.
+            If line(0) = "'" Then
+                pony.commentLines.Add(line)
+                Continue Do
+            End If
 
             Dim firstComma = line.IndexOf(","c)
             If firstComma <> -1 Then
@@ -212,16 +232,10 @@ Public Class PonyBase
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Count - 1
-                            Dim category As CaseInsensitiveString = columns(i)
-                            For Each item As String In Main.Instance.FilterOptionsBox.Items
-                                If New CaseInsensitiveString(item) = category Then
-                                    pony.Tags.Add(category)
-                                    Exit For
-                                End If
-                            Next
+                            pony.Tags.Add(columns(i))
                         Next
                     Case Else
-                        ' TODO: Handle unrecognized identifier, or lack of first comma.
+                        pony.invalidLines.Add(line)
                 End Select
             End If
         Loop
@@ -306,20 +320,10 @@ Public Class PonyBase
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
         Dim configFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
 
-        Dim comments As New List(Of String)()
-        If File.Exists(configFilePath) Then
-            Using reader As New StreamReader(configFilePath)
-                Do Until reader.EndOfStream
-                    Dim line = reader.ReadLine()
-                    If line.Length > 0 AndAlso line(0) = "'" Then comments.Add(line)
-                Loop
-            End Using
-        End If
-
         Dim tempFileName = Path.GetTempFileName()
         Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
-            For Each comment In comments
-                writer.WriteLine(comment)
+            For Each commentLine In commentLines
+                writer.WriteLine(commentLine)
             Next
 
             writer.WriteLine(String.Join(",", "Name", DisplayName))
@@ -339,6 +343,10 @@ Public Class PonyBase
 
             For Each speech In Speeches
                 writer.WriteLine(speech.GetPonyIni())
+            Next
+
+            For Each invalidLine In invalidLines
+                writer.WriteLine(invalidLine)
             Next
         End Using
         MoveOrReplace(tempFileName, configFilePath)
@@ -3412,7 +3420,7 @@ Public Class House
             choices.Remove(p.Directory)
         Next
 
-        choices.Remove("Random Pony")
+        choices.Remove(PonyBase.RandomDirectory)
 
         If choices.Count = 0 Then
             Exit Sub

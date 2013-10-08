@@ -5,7 +5,7 @@
     End Sub
 
     Private Sub Filters_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Filters_Box.Lines = Options.CustomTags.ToArray()
+        Filters_Box.Lines = Options.CustomTags.Select(Function(tag) tag.ToString()).ToArray()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
@@ -19,7 +19,7 @@
                             "Invalid Tags", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
         Options.CustomTags.Clear()
-        Options.CustomTags.AddRange(lines)
+        Options.CustomTags.UnionWith(lines.Select(Function(tag) New CaseInsensitiveString(tag)))
         Me.Close()
     End Sub
 End Class

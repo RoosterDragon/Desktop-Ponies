@@ -20,9 +20,7 @@
 
         PointPreviewArea.Image = New Bitmap(PointPreviewArea.Size.Width, PointPreviewArea.Size.Height)
         previewGraphics = Graphics.FromImage(PointPreviewArea.Image)
-        RedrawFollowPoint()
 
-        FollowComboBox.Items.Clear()
         FollowComboBox.BeginUpdate()
         For Each base In behaviorToChange.Base.Collection.AllBases
             FollowComboBox.Items.Add(base.Directory)
@@ -71,6 +69,8 @@
             ponyThumbnail = Nothing
         End If
 
+        RedrawFollowPoint()
+
         Enabled = True
     End Sub
 
@@ -90,74 +90,82 @@
         If ponyThumbnail IsNot Nothing Then
             previewGraphics.DrawImage(ponyThumbnail, New Vector2(PointPreviewArea.Image.Size) / 2 - New Vector2(ponyThumbnail.Size) / 2)
         End If
-        Using pen As New System.Drawing.Pen(Color.Red, 2)
-            previewGraphics.DrawLine(pen,
-                                     New Point(previewPoint.X - 5, previewPoint.Y - 5),
-                                     New Point(previewPoint.X + 5, previewPoint.Y + 5))
-            previewGraphics.DrawLine(pen,
-                                     New Point(previewPoint.X + 5, previewPoint.Y - 5),
-                                     New Point(previewPoint.X - 5, previewPoint.Y + 5))
-        End Using
+        If Not NoTargetOption.Checked Then
+            Using pen As New Pen(Color.Red, 2)
+                previewGraphics.DrawLine(pen,
+                                         New Point(previewPoint.X - 5, previewPoint.Y - 5),
+                                         New Point(previewPoint.X + 5, previewPoint.Y + 5))
+                previewGraphics.DrawLine(pen,
+                                         New Point(previewPoint.X + 5, previewPoint.Y - 5),
+                                         New Point(previewPoint.X - 5, previewPoint.Y + 5))
+            End Using
+        End If
 
         PointPreviewArea.Invalidate()
     End Sub
 
-    Private Sub FollowOption_CheckedChanged(sender As Object, e As EventArgs) Handles FollowOption.CheckedChanged
-        If Not FollowOption.Checked Then Return
-        GetThumbnail()
-        PointX.Maximum = 500
-        PointX.Minimum = -500
-        PointX.Value = 0
-        PointY.Maximum = 500
-        PointY.Minimum = -500
-        PointY.Value = 0
-        PointX.Enabled = True
-        PointY.Enabled = True
-        FollowComboBox.Enabled = True
-        RelativeToLabel.Text = "(Relative to pony center)"
-        UnitsLabel.Text = "Location (X/Y) (in pixels)"
-    End Sub
+    Private Sub FollowOption_CheckedChanged(sender As Object, e As EventArgs) Handles FollowOption.CheckedChanged,
+        GoToPointOption.CheckedChanged, NoTargetOption.CheckedChanged
+        If Not DirectCast(sender, RadioButton).Checked Then Return
+        If FollowOption.Checked Then
+            UpdateThumbnail()
+        Else
+            ponyThumbnail = Nothing
+        End If
+        FollowComboBox.Enabled = FollowOption.Checked
 
-    Private Sub GoToPointOption_CheckedChanged(sender As Object, e As EventArgs) Handles GoToPointOption.CheckedChanged
-        If Not GoToPointOption.Checked Then Return
-        ponyThumbnail = Nothing
-        PointX.Maximum = 100
-        PointX.Minimum = 0
-        PointX.Value = 50
-        PointY.Maximum = 100
-        PointY.Minimum = 0
-        PointY.Value = 50
-        PointX.Enabled = True
-        PointY.Enabled = True
-        FollowComboBox.Enabled = False
-        RelativeToLabel.Text = "(Relative to top right of screen)"
-        UnitsLabel.Text = "Location (X/Y) (in % of screen height/width)"
-    End Sub
+        AutoSelectImageCheckbox.Enabled = Not NoTargetOption.Checked
+        Dim enableBehaviorCombo = Not NoTargetOption.Checked AndAlso Not AutoSelectImageCheckbox.Checked
+        StoppedComboBox.Enabled = enableBehaviorCombo
+        MovingComboBox.Enabled = enableBehaviorCombo
 
-    Private Sub NoTargetOption_CheckedChanged(sender As Object, e As EventArgs) Handles NoTargetOption.CheckedChanged
-        If Not NoTargetOption.Checked Then Return
-        ponyThumbnail = Nothing
-        PointX.Enabled = False
-        PointY.Enabled = False
-        FollowComboBox.Enabled = False
+        PointX.Enabled = Not NoTargetOption.Checked
+        PointY.Enabled = Not NoTargetOption.Checked
+
+        Dim min = If(FollowOption.Checked, -500, 0)
+        Dim max = If(FollowOption.Checked, 500, 100)
+        Dim value = If(FollowOption.Checked, 0, 50)
+        PointX.Minimum = min
+        PointX.Maximum = max
+        PointX.Value = value
+        PointY.Minimum = min
+        PointY.Maximum = max
+        PointY.Value = value
+
+        Dim relativeTo = ""
+        Dim units = ""
+        If FollowOption.Checked Then
+            relativeTo = "(relative to pony center)"
+            units = "Offset in pixels"
+        ElseIf GoToPointOption.Checked Then
+            relativeTo = "(relative to screen)"
+            units = "Location in % of width/height"
+        End If
+        RelativeToLabel.Text = relativeTo
+        UnitsLabel.Text = units
+
         RedrawFollowPoint()
     End Sub
 
     Private Sub FollowComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles FollowComboBox.SelectedIndexChanged
-        GetThumbnail()
+        UpdateThumbnail()
+        RedrawFollowPoint()
     End Sub
 
-    Private Sub GetThumbnail()
+    Private Sub UpdateThumbnail()
         For Each ponyBase In behaviorToChange.Base.Collection.AllBases
             If ponyBase.Directory = DirectCast(FollowComboBox.SelectedItem, String) Then
                 Try
-                    ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)
+                    If ponyBase.Behaviors.Count > 0 Then
+                        ponyThumbnail = Image.FromFile(ponyBase.Behaviors(0).RightImage.Path)
+                    Else
+                        ponyThumbnail = Nothing
+                    End If
                 Catch ex As Exception
                     ponyThumbnail = Nothing
                     My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & ponyBase.Directory)
                 End Try
-                RedrawFollowPoint()
-                Exit Sub
+                Return
             End If
         Next
     End Sub
@@ -177,13 +185,17 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If AutoSelectImageCheckbox.Checked = False AndAlso
-            (MovingComboBox.SelectedItem.ToString() = "" OrElse StoppedComboBox.SelectedItem.ToString() = "") Then
+        If Not AutoSelectImageCheckbox.Checked AndAlso
+            (MovingComboBox.SelectedItem Is Nothing OrElse StoppedComboBox.SelectedItem Is Nothing) Then
             MessageBox.Show(Me, "If you disable auto-selection of images, " &
                             "then you must specify a moving behavior and a stopped behavior to get the images from." &
                             ControlChars.NewLine &
                             "(You can select the behavior you are editing once you have saved it first.)",
                             "Images Undefined", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        ElseIf FollowOption.Checked AndAlso FollowComboBox.SelectedItem Is Nothing Then
+            MessageBox.Show(Me, "Please choose a pony to follow, or chose a different mode.",
+                            "No Target Defined", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 

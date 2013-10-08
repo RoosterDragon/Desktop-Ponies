@@ -197,6 +197,14 @@ Public Class ItemEditorBase
         Throw New NotImplementedException()
     End Sub
 
+    Public Sub RefreshReferentialIssues()
+        Dim referential = TryCast(Edited, IReferential)
+        If referential IsNot Nothing Then
+            ReferentialIssues = referential.GetReferentialIssues(Base.Collection)
+            OnIssuesChanged(EventArgs.Empty)
+        End If
+    End Sub
+
     Protected Shared Sub IgnoreQuoteCharacter(sender As Object, e As KeyPressEventArgs)
         e.Handled = e.KeyChar = """"c
     End Sub

@@ -39,6 +39,7 @@ Public Class Main
     Public Sub New()
         loadWatch.Start()
         InitializeComponent()
+        ResetToDefaultFilterCategories()
         selectionControlsFilteredVisible =
             PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
         Icon = My.Resources.Twilight
@@ -343,7 +344,7 @@ Public Class Main
 
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
-        If ponyBase.Directory = "Random Pony" Then
+        If ponyBase.Directory = ponyBase.RandomDirectory Then
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
@@ -544,8 +545,8 @@ Public Class Main
         End If
     End Sub
 
-    Private Sub RefilterSelection(Optional tags As IEnumerable(Of String) = Nothing)
-        If tags Is Nothing Then tags = FilterOptionsBox.CheckedItems.Cast(Of String)()
+    Private Sub RefilterSelection(Optional tags As IEnumerable(Of CaseInsensitiveString) = Nothing)
+        If tags Is Nothing Then tags = FilterOptionsBox.CheckedItems.Cast(Of CaseInsensitiveString)()
 
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
             'reshow all ponies in show all mode.
@@ -704,9 +705,9 @@ Public Class Main
     End Sub
 
     Private Sub FilterOptionsBox_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles FilterOptionsBox.ItemCheck
-        Dim tags = FilterOptionsBox.CheckedItems.Cast(Of String).ToList()
+        Dim tags = FilterOptionsBox.CheckedItems.Cast(Of CaseInsensitiveString).ToList()
         If e.CurrentValue <> e.NewValue Then
-            Dim changedTag = DirectCast(FilterOptionsBox.Items(e.Index), String)
+            Dim changedTag = DirectCast(FilterOptionsBox.Items(e.Index), CaseInsensitiveString)
             If e.NewValue = CheckState.Checked Then
                 tags.Add(changedTag)
             Else
@@ -746,7 +747,7 @@ Public Class Main
 
             If totalPonies = 0 Then
                 If Reference.InScreensaverMode Then
-                    ponyBasesWanted.Add(Tuple.Create("Random Pony", 1))
+                    ponyBasesWanted.Add(Tuple.Create(PonyBase.RandomDirectory, 1))
                     totalPonies = 1
                 Else
                     LoadPoniesAsyncEnd(
@@ -778,7 +779,7 @@ Public Class Main
             startupPonies.Clear()
             Dim randomPoniesWanted As Integer
             For Each ponyBaseWanted In ponyBasesWanted
-                If ponyBaseWanted.Item1 = "Random Pony" Then
+                If ponyBaseWanted.Item1 = PonyBase.RandomDirectory Then
                     randomPoniesWanted = ponyBaseWanted.Item2
                     Continue For
                 End If
@@ -1004,7 +1005,7 @@ Public Class Main
         FilterOptionsBox.SuspendLayout()
         FilterOptionsBox.Items.Clear()
         FilterOptionsBox.Items.AddRange(
-            {"Main Ponies",
+            New CaseInsensitiveString() {"Main Ponies",
              "Supporting Ponies",
              "Alternate Art",
              "Fillies",

@@ -210,6 +210,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="PonyEditor2\PageContent.vb" />
+    <Compile Include="PonyEditor2\PonyDetailsDialog.Designer.vb">
+      <DependentUpon>PonyDetailsDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\PonyDetailsDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PonyEditor2\PonyEditorForm2.Designer.vb">
       <DependentUpon>PonyEditorForm2.vb</DependentUpon>
     </Compile>
@@ -398,6 +404,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\ItemsViewerBase.resx">
       <DependentUpon>ItemsViewerBase.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\PonyDetailsDialog.resx">
+      <DependentUpon>PonyDetailsDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\PonyEditorForm2.resx">
       <DependentUpon>PonyEditorForm2.vb</DependentUpon>
