@@ -26,8 +26,6 @@ Public Class Main
     Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
-    Private tempFilterOptions As String()
-
     Private preventLoadProfile As Boolean
 
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
@@ -67,11 +65,6 @@ Public Class Main
         Update()
 
         If ProcessCommandLine() Then Return
-
-        'temporarily save filter selections, if any, in the case that we are reloading after making a change in the editor.
-        '(Loading options resets the filter, and will cause havoc otherwise)
-        SaveFilterSelections()
-        LoadFilterSelections()
 
         ' Load the profile that was last in use by this user.
         Dim profile = Options.DefaultProfileName
@@ -121,7 +114,7 @@ Public Class Main
         'Application.DoEvents()
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf Me.LoadTemplates)
+        Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
     End Sub
 
     Private Function ProcessCommandLine() As Boolean
@@ -204,21 +197,7 @@ Public Class Main
         Return False
     End Function
 
-    Private Sub SaveFilterSelections()
-        tempFilterOptions = FilterOptionsBox.CheckedItems.Cast(Of String).ToArray()
-    End Sub
-
-    Private Sub LoadFilterSelections()
-        For Each item In tempFilterOptions
-            Try
-                FilterOptionsBox.SetItemChecked(FilterOptionsBox.Items.IndexOf(item), True)
-            Catch ex As Exception
-                ' Filter is not valid at time of restoring.  Do nothing.
-            End Try
-        Next
-    End Sub
-
-    Private Sub LoadTemplates(o As Object)
+    Private Sub LoadTemplates()
         Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
