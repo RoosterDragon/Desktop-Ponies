@@ -513,7 +513,7 @@ Public Class Game
         Public Sub Kick(_speed As Double, _angle As Double, kicker As Position)
             LastHandledBy = kicker
 
-            Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
+            Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
             speed = _speed
             Handler.Diagonal = _angle
         End Sub
@@ -974,7 +974,7 @@ Public Class Game
 
             SpeedOverride(True)
 
-            Player.CurrentBehavior = Player.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
+            Player.CurrentBehavior = Player.GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
             'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
             Player.followTarget = Nothing
             Player.followTargetName = ""

@@ -1683,7 +1683,7 @@ Public Class Pony
             previousBehavior = CurrentBehavior
 
             ' Select a stationary behavior, or if possible a dedicated mouseover behavior.
-            CurrentBehavior = GetAppropriateBehaviorOrCurrent(AllowedMoves.None, False)
+            CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)
             For Each behavior In Behaviors
                 If behavior.Group <> CurrentBehaviorGroup Then Continue For
                 If behavior.AllowedMovement = AllowedMoves.MouseOver Then
@@ -1906,7 +1906,7 @@ Public Class Pony
             If Not hasDestination Then
                 Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             Else
-                CurrentBehavior = GetAppropriateBehaviorOrCurrent(CurrentBehavior.AllowedMovement, False)
+                CurrentBehavior = GetAppropriateBehaviorOrFallback(CurrentBehavior.AllowedMovement, False)
             End If
             AddUpdateRecord("Avoiding cursor.")
             Exit Sub
@@ -1981,7 +1981,7 @@ Public Class Pony
                 ReturningToScreenArea = True
 
                 If CurrentBehavior.Speed = 0 Then
-                    CurrentBehavior = GetAppropriateBehaviorOrCurrent(AllowedMoves.All, True)
+                    CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
                 End If
 
                 followTarget = Nothing
@@ -2291,7 +2291,7 @@ Public Class Pony
                     appropriateBehavior = CurrentBehavior.FollowMovingBehavior
                 End If
                 If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
-                    appropriateBehavior = GetAppropriateBehaviorOrCurrent(allowedMovement, True)
+                    appropriateBehavior = GetAppropriateBehaviorOrFallback(allowedMovement, True)
                 End If
                 visualOverrideBehavior = appropriateBehavior
             End If
@@ -2386,7 +2386,8 @@ Public Class Pony
     End Function
 
     Private Function GetAppropriateBehavior(movement As AllowedMoves, speed As Boolean,
-                                           Optional suggestedBehavior As Behavior = Nothing) As Behavior
+                                           Optional suggestedBehavior As Behavior = Nothing,
+                                           Optional currentGroupOnly As Boolean = True) As Behavior
         'does the current behavior work?
         If CurrentBehavior IsNot Nothing Then
             If movement = AllowedMoves.All OrElse (CurrentBehavior.AllowedMovement And movement) = movement Then
@@ -2396,7 +2397,7 @@ Public Class Pony
         End If
 
         For Each behavior In Behaviors
-            If behavior.Group <> CurrentBehaviorGroup Then Continue For
+            If currentGroupOnly AndAlso behavior.Group <> CurrentBehaviorGroup Then Continue For
 
             If behavior.AllowedMovement = AllowedMoves.Sleep AndAlso
                 movement <> AllowedMoves.Sleep AndAlso
@@ -2445,21 +2446,24 @@ Public Class Pony
         Return Nothing
     End Function
 
-    'Pick a behavior that matches the speed (fast or slow) and direction we want to go in.
-    'Use the specified behavior if it works.
     ''' <summary>
-    ''' Returns a behavior that best matches the desired allowable movement and speed, or else the current behavior.
+    ''' Returns a behavior that best matches the desired allowable movement and speed. If no such behavior exists, a suitable fallback is 
+    ''' returned (typically the current behavior).
     ''' </summary>
     ''' <param name="movement">The movement to match (as best as possible).</param>
     ''' <param name="speed">Is the user pressing the "speed" override key.</param>
     ''' <param name="suggestedBehavior">A suggested behavior to test first. This will be returned if it meets the requirements
     ''' sufficiently.</param>
     ''' <returns>The suggested behavior, if it meets the requirements, otherwise any behavior with meets the requirements sufficiently. If 
-    ''' no behavior matches sufficiently the current behavior is returned.
+    ''' no behavior matches sufficiently a fallback is returned, typically the current behavior.
     ''' </returns>
-    Friend Function GetAppropriateBehaviorOrCurrent(movement As AllowedMoves, speed As Boolean,
+    Friend Function GetAppropriateBehaviorOrFallback(movement As AllowedMoves, speed As Boolean,
                                            Optional suggestedBehavior As Behavior = Nothing) As Behavior
-        Return If(GetAppropriateBehavior(movement, speed, suggestedBehavior), CurrentBehavior)
+        Dim behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior)
+        If behavior Is Nothing Then behavior = CurrentBehavior
+        If behavior Is Nothing Then behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior, False)
+        If behavior Is Nothing Then behavior = Behaviors(Rng.Next(Behaviors.Count))
+        Return behavior
     End Function
 
     Shared Function GetScreenContainingPoint(point As Point) As Screen
@@ -2917,7 +2921,7 @@ Public Class Pony
         If appropriateMovement = (AllowedMoves.HorizontalOnly Or AllowedMoves.VerticalOnly) Then
             appropriateMovement = AllowedMoves.DiagonalOnly
         End If
-        CurrentBehavior = GetAppropriateBehaviorOrCurrent(appropriateMovement, ponySpeed)
+        CurrentBehavior = GetAppropriateBehaviorOrFallback(appropriateMovement, ponySpeed)
         Dim speedupFactor = If(ponySpeed, 2, 1)
         Return If(appropriateMovement = AllowedMoves.None, 0, ScaledSpeed() * speedupFactor)
     End Function
@@ -3507,7 +3511,7 @@ Public Class House
 
                 pony.Destination = instance.Location + New Size(HouseBase.DoorPosition)
                 pony.GoingHome = True
-                pony.CurrentBehavior = pony.GetAppropriateBehaviorOrCurrent(AllowedMoves.All, False)
+                pony.CurrentBehavior = pony.GetAppropriateBehaviorOrFallback(AllowedMoves.All, False)
                 pony.BehaviorDesiredDuration = TimeSpan.FromMinutes(5)
 
                 deployedPonies.Remove(pony)
