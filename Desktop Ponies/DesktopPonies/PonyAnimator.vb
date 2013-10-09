@@ -186,10 +186,6 @@ Public Class PonyAnimator
         RemoveHandler SpritesAdded, AddressOf SpritesChanged
         RemoveHandler SpriteRemoved, AddressOf SpriteChanged
         RemoveHandler SpritesRemoved, AddressOf SpritesChanged
-        If spriteDebugForm IsNot Nothing Then
-            Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Close)
-            spriteDebugForm = Nothing
-        End If
         MyBase.Finish()
     End Sub
 

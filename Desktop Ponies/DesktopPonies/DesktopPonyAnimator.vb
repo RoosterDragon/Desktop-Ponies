@@ -305,6 +305,10 @@ Public Class DesktopPonyAnimator
                     controlForm.BeginInvoke(New MethodInvoker(AddressOf controlForm.ForceClose))
                 End If
             End SyncLock
+            If spriteDebugForm IsNot Nothing Then
+                Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Close)
+                spriteDebugForm = Nothing
+            End If
             RemoveHandler SpriteAdded, AddressOf ControlFormItemAdded
             RemoveHandler SpritesAdded, AddressOf ControlFormItemsAdded
             RemoveHandler SpriteRemoved, AddressOf ControlFormItemRemoved
