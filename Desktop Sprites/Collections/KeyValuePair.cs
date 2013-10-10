@@ -17,7 +17,7 @@
         /// <param name="key">The object defined in each key/value pair.</param>
         /// <param name="value">The definition associated with key.</param>
         /// <returns>A new <see cref="T:System.Collections.Generic.KeyValuePair`2"/>.</returns>
-        public static KeyValuePair<TKey, TValue> From<TKey, TValue>(TKey key, TValue value)
+        public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value)
         {
             return new KeyValuePair<TKey, TValue>(key, value);
         }

@@ -5,7 +5,7 @@
     using System.Threading;
     using DesktopSprites.Core;
 
-    /// <summary> 
+    /// <summary>
     /// Represents a collection of keys and lazily-initialized values.
     /// </summary>
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
@@ -385,7 +385,7 @@
                 if (!kvp.Value.IsValueCreated)
                     InitializedCount++;
 
-                yield return KeyValuePair.From(kvp.Key, kvp.Value.Value);
+                yield return KeyValuePair.Create(kvp.Key, kvp.Value.Value);
             }
         }
         /// <summary>
@@ -417,7 +417,7 @@
                     throw new InvalidOperationException("Values were initialized during enumeration of the collection.");
 
                 if (kvp.Value.IsValueCreated)
-                    yield return KeyValuePair.From(kvp.Key, kvp.Value.Value);
+                    yield return KeyValuePair.Create(kvp.Key, kvp.Value.Value);
             }
         }
         /// <summary>
@@ -670,7 +670,7 @@
                     int i = 0;
                     foreach (var kvp in lazyDictionary.dictionary)
                         if (kvp.Value.IsValueCreated)
-                            array[i++] = KeyValuePair.From(kvp.Key, kvp.Value.Value);
+                            array[i++] = KeyValuePair.Create(kvp.Key, kvp.Value.Value);
                         else
                             array[i++] = new KeyUnit() { Key = kvp.Key };
                     return array;
