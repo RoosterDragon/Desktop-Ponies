@@ -122,7 +122,7 @@
         End Sub
 
         Private Sub LogErrorToDisk(ex As Exception)
-            Dim path = IO.Path.Combine(Options.InstallLocation, "error.txt")
+            Dim path = IO.Path.Combine(EvilGlobals.InstallLocation, "error.txt")
             Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
                 errorFile.WriteLine(
                     "Unhandled error in Desktop Ponies v" & GetProgramVersion() & " occurred " & DateTime.UtcNow.ToString("u"))

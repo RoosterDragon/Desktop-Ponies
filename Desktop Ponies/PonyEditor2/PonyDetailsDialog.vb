@@ -11,7 +11,7 @@ Public Class PonyDetailsDialog
 
         NameTextBox.Text = base.Directory
         DisplayNameTextBox.Text = base.DisplayName
-        TagsList.Items.AddRange(Main.Instance.FilterOptionsBox.Items)
+        TagsList.Items.AddRange(EvilGlobals.Main.FilterOptionsBox.Items)
         For i = 0 To TagsList.Items.Count - 1
             If base.Tags.Contains(DirectCast(TagsList.Items(i), CaseInsensitiveString)) Then
                 TagsList.SetItemChecked(i, True)

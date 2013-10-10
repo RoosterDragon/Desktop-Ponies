@@ -3,11 +3,9 @@ Imports System.IO
 Imports DesktopSprites.SpriteManagement
 
 ''' <summary>
-''' This is the Main form that handles startup and pony selection.
+''' This is the form that handles startup and pony selection.
 ''' </summary>
-Public Class Main
-    Friend Shared Instance As Main
-
+Public Class MainForm
 #Region "Fields and Properties"
     Private initialized As Boolean
     Private loading As Boolean
@@ -43,7 +41,7 @@ Public Class Main
         Icon = My.Resources.Twilight
         Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
         initialized = True
-        Instance = Me
+        EvilGlobals.Main = Me
     End Sub
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -83,12 +81,12 @@ Public Class Main
 
         Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
         If startedAsScr Then
-            Dim screensaverPath = Reference.TryGetScreensaverPath()
+            Dim screensaverPath = EvilGlobals.TryGetScreensaverPath()
             If screensaverPath Is Nothing Then
                 MessageBox.Show(
                     Me, "The screensaver has not yet been configured, or the previous configuration is invalid. Please reconfigure now.",
                     "Configuration Missing", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                Dim result = Reference.SetScreensaverPath()
+                Dim result = EvilGlobals.SetScreensaverPath()
                 If Not result Then
                     MessageBox.Show(Me, "You will be unable to run Desktop Ponies as a screensaver until it is configured.",
                                     "Configuration Aborted", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -123,7 +121,7 @@ Public Class Main
 
             If args.Length = 1 AndAlso args(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase) Then
                 'for some versions of windows, starting with no parameters is the same as /c (configure)
-                Reference.SetScreensaverPath()
+                EvilGlobals.SetScreensaverPath()
                 Me.Close()
                 Return True
             End If
@@ -143,7 +141,7 @@ Public Class Main
 
                         'windows is telling us "start as a screensaver"
                     Case "/s"
-                        Dim path = Reference.TryGetScreensaverPath()
+                        Dim path = EvilGlobals.TryGetScreensaverPath()
                         If path Is Nothing Then
                             MessageBox.Show(Me, "The screensaver path has not been configured correctly." &
                                             " Until it has been set, the screensaver mode cannot be used.",
@@ -152,8 +150,8 @@ Public Class Main
                             Return True
                         End If
 
-                        Options.InstallLocation = path
-                        Reference.InScreensaverMode = True
+                        EvilGlobals.InstallLocation = path
+                        EvilGlobals.InScreensaverMode = True
                         autoStarted = True
                         ShowInTaskbar = False
                         WindowState = FormWindowState.Minimized
@@ -170,7 +168,7 @@ Public Class Main
                         Return True
                         'windows says:  "configure screensaver"
                     Case "/c"
-                        Reference.SetScreensaverPath()
+                        EvilGlobals.SetScreensaverPath()
                         Me.Close()
                         Return True
                     Case Else
@@ -198,7 +196,7 @@ Public Class Main
     End Function
 
     Private Sub LoadTemplates()
-        Dim houseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, HouseBase.RootDirectory))
+        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
 
         ' Load ponies.
         ponies = New PonyCollection(
@@ -396,14 +394,14 @@ Public Class Main
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
 
-        Reference.InPreviewMode = True
+        EvilGlobals.InPreviewMode = True
         Me.Visible = False
         Using form = New PonyEditor(ponies)
             form.ShowDialog(Me)
 
             PonyShutdown()
 
-            Reference.InPreviewMode = False
+            EvilGlobals.InPreviewMode = False
             If Not Me.IsDisposed Then
                 Me.Visible = True
             End If
@@ -425,7 +423,7 @@ Public Class Main
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     startupPonies.Clear()
                     PonyStartup()
-                    Game.CurrentGame.Setup()
+                    EvilGlobals.CurrentGame.Setup()
                     animator.Start()
                 Else
                     If Me.IsDisposed = False Then
@@ -635,11 +633,11 @@ Public Class Main
             Next
         ElseIf e.KeyChar = "#"c Then
 #If DEBUG Then
-            Reference.InPreviewMode = True
+            EvilGlobals.InPreviewMode = True
             Using newEditor = New PonyEditorForm2()
                 newEditor.ShowDialog(Me)
             End Using
-            Reference.InPreviewMode = False
+            EvilGlobals.InPreviewMode = False
 #End If
         End If
     End Sub
@@ -725,7 +723,7 @@ Public Class Main
             Next
 
             If totalPonies = 0 Then
-                If Reference.InScreensaverMode Then
+                If EvilGlobals.InScreensaverMode Then
                     ponyBasesWanted.Add(Tuple.Create(PonyBase.RandomDirectory, 1))
                     totalPonies = 1
                 Else
@@ -797,7 +795,7 @@ Public Class Main
     End Sub
 
     Private Sub PonyStartup()
-        If Reference.InScreensaverMode Then
+        If EvilGlobals.InScreensaverMode Then
             SmartInvoke(Sub()
                             If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
                                 screensaverForms = New List(Of ScreensaverBackgroundForm)()
@@ -842,7 +840,7 @@ Public Class Main
             DirectCast(ponyViewer, WinFormSpriteInterface).ShowPerformanceGraph = Options.ShowPerformanceGraph
         End If
 
-        If Not Reference.InPreviewMode Then
+        If Not EvilGlobals.InPreviewMode Then
             ' Get a collection of all images to be loaded.
             Dim images As New HashSet(Of String)(PathEquality.Comparer)
             For Each pony In startupPonies
@@ -867,19 +865,19 @@ Public Class Main
         End If
 
         animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
-        Pony.CurrentViewer = ponyViewer
-        Pony.CurrentAnimator = animator
+        EvilGlobals.CurrentViewer = ponyViewer
+        EvilGlobals.CurrentAnimator = animator
     End Sub
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         If Not Disposing AndAlso Not IsDisposed Then
             PonyShutdown()
-            Main.Instance.SmartInvoke(Sub()
-                                          MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
-                                                          "Resolution Changed - Desktop Ponies",
-                                                          MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                          Main.Instance.Show()
-                                      End Sub)
+            EvilGlobals.Main.SmartInvoke(Sub()
+                                             MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
+                                                             "Resolution Changed - Desktop Ponies",
+                                                             MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                             EvilGlobals.Main.Show()
+                                         End Sub)
         End If
     End Sub
 
@@ -897,7 +895,7 @@ Public Class Main
 
                 loading = False
                 If Not cancelled Then
-                    Reference.PoniesHaveLaunched = True
+                    EvilGlobals.PoniesHaveLaunched = True
                     TempSaveCounts()
                     Visible = False
                     animator.Start()
@@ -923,12 +921,12 @@ Public Class Main
 
     Friend Sub PonyShutdown()
         If Not IsNothing(animator) Then animator.Finish()
-        Reference.PoniesHaveLaunched = False
+        EvilGlobals.PoniesHaveLaunched = False
         If Not IsNothing(animator) Then animator.Clear()
 
-        If Not IsNothing(Game.CurrentGame) Then
-            Game.CurrentGame.CleanUp()
-            Game.CurrentGame = Nothing
+        If Not IsNothing(EvilGlobals.CurrentGame) Then
+            EvilGlobals.CurrentGame.CleanUp()
+            EvilGlobals.CurrentGame = Nothing
         End If
 
         If screensaverForms IsNot Nothing Then
@@ -938,8 +936,8 @@ Public Class Main
             screensaverForms = Nothing
         End If
 
-        If Object.ReferenceEquals(animator, Pony.CurrentAnimator) Then
-            Pony.CurrentAnimator = Nothing
+        If Object.ReferenceEquals(animator, EvilGlobals.CurrentAnimator) Then
+            EvilGlobals.CurrentAnimator = Nothing
         End If
         animator = Nothing
 

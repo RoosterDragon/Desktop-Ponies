@@ -140,6 +140,7 @@
     <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
+    <Compile Include="EvilGlobals.vb" />
     <Compile Include="IdleWorker.vb" />
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -247,7 +248,6 @@
     <Compile Include="Monitoring\SpriteDebugForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Reference.vb" />
     <Compile Include="Win32.vb" />
     <Compile Include="DesktopPonies\HouseOptionsForm.Designer.vb">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
@@ -286,11 +286,11 @@
     <Compile Include="DesktopPonies\Pony.vb" />
     <Compile Include="IniLineParser.vb" />
     <Compile Include="KeyboardState.vb" />
-    <Compile Include="DesktopPonies\Main.vb">
+    <Compile Include="DesktopPonies\MainForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DesktopPonies\Main.Designer.vb">
-      <DependentUpon>Main.vb</DependentUpon>
+    <Compile Include="DesktopPonies\MainForm.Designer.vb">
+      <DependentUpon>MainForm.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -429,8 +429,8 @@
     <EmbeddedResource Include="DesktopPonies\GameSelectionForm.resx">
       <DependentUpon>GameSelectionForm.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DesktopPonies\Main.resx">
-      <DependentUpon>Main.vb</DependentUpon>
+    <EmbeddedResource Include="DesktopPonies\MainForm.resx">
+      <DependentUpon>MainForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>

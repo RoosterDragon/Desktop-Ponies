@@ -63,14 +63,6 @@ Public Class StringCollectionParser
         End If
         Return parsed.Value
     End Function
-    Protected Shared Function SkipParse(Of T As Structure)(fallback As T?) As T
-        Return If(fallback.HasValue, fallback.Value, Nothing)
-        'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, If(fallback.HasValue, fallback.Value, Nothing)))
-    End Function
-    Protected Shared Function SkipParse(Of T)(fallback As T) As T
-        Return fallback
-        'Return HandleParsed(Parsed.Failed(Of T)(GetNextItem(), NotParsed, fallback))
-    End Function
     Public Function NoParse() As String
         Return HandleParsed(Parsed.Success(GetNextItem()))
     End Function
@@ -78,7 +70,6 @@ Public Class StringCollectionParser
         Return NotNull(Nothing)
     End Function
     Public Function NotNull(fallback As String) As String
-        'If LastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedNotNull(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedNotNull(s As String, fallback As String) As Parsed(Of String)
@@ -94,7 +85,6 @@ Public Class StringCollectionParser
         Return ParseBoolean(Nothing)
     End Function
     Public Function ParseBoolean(fallback As Boolean?) As Boolean
-        'If LastParseFailed Then Return SkipParse(Of Boolean)(fallback)
         Return HandleParsed(ParsedBoolean(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedBoolean(s As String, fallback As Boolean?) As Parsed(Of Boolean)
@@ -122,7 +112,6 @@ Public Class StringCollectionParser
         Return ParseInt32Internal(fallback, min, max)
     End Function
     Private Function ParseInt32Internal(fallback As Integer?, min As Integer, max As Integer) As Integer
-        'If LastParseFailed Then Return SkipParse(Of Integer)(fallback)
         Return HandleParsed(ParsedInt32(GetNextItem(), fallback, min, max))
     End Function
     Private Shared Function ParsedInt32(s As String, fallback As Integer?, Optional min As Integer = Integer.MinValue, Optional max As Integer = Integer.MaxValue) As Parsed(Of Integer)
@@ -156,7 +145,6 @@ Public Class StringCollectionParser
         Return ParseDoubleInternal(fallback, min, max)
     End Function
     Private Function ParseDoubleInternal(fallback As Double?, min As Double, max As Double) As Double
-        'If LastParseFailed Then Return SkipParse(Of Double)(fallback)
         Return HandleParsed(ParsedDouble(GetNextItem(), fallback, min, max))
     End Function
     Private Shared Function ParsedDouble(s As String, fallback As Double?, min As Double, max As Double) As Parsed(Of Double)
@@ -181,7 +169,6 @@ Public Class StringCollectionParser
         Return Map(mapping, Nothing)
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T), fallback As T?) As T
-        'If LastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedMap(GetNextItem(), mapping, fallback))
     End Function
     Private Shared Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
@@ -201,7 +188,6 @@ Public Class StringCollectionParser
         Return Project(projection, Nothing)
     End Function
     Public Function Project(Of T As Structure)(projection As Func(Of String, T), fallback As T?) As T
-        'If LastParseFailed Then Return SkipParse(Of T)(fallback)
         Return HandleParsed(ParsedProject(GetNextItem(), projection, fallback))
     End Function
     Private Shared Function ParsedProject(Of T As Structure)(s As String, projection As Func(Of String, T), fallback As T?) As Parsed(Of T)
@@ -229,7 +215,6 @@ Public Class StringCollectionParser
         Return ParseVector2(Nothing)
     End Function
     Public Function ParseVector2(fallback As Vector2?) As Vector2
-        'If LastParseFailed Then Return SkipParse(Of Vector2)(fallback)
         Return HandleParsed(ParsedVector2(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedVector2(s As String, fallback As Vector2?) As Parsed(Of Vector2)
@@ -251,7 +236,6 @@ Public Class StringCollectionParser
         Return SpecifiedCombinePath(pathPrefix, source, Nothing)
     End Function
     Public Function SpecifiedCombinePath(pathPrefix As String, source As String, fallback As String) As String
-        'If LastParseFailed Then Return SkipParse(Of String)(fallback)
         Return HandleParsed(ParsedCombinePath(pathPrefix, source, fallback))
     End Function
     Private Shared Function ParsedCombinePath(pathPrefix As String, s As String, fallback As String) As Parsed(Of String)
@@ -275,7 +259,6 @@ Public Class StringCollectionParser
         SpecifiedFileExists(filePath, Nothing)
     End Sub
     Public Sub SpecifiedFileExists(filePath As String, fallback As String)
-        'If LastParseFailed Then Return
         If File.Exists(filePath) Then
             HandleParsed(Parsed.Success(filePath))
         ElseIf fallback IsNot Nothing Then
@@ -288,7 +271,6 @@ Public Class StringCollectionParser
     End Sub
     Public Function Assert(source As String, condition As Func(Of String, Boolean), reason As String, fallback As String) As Boolean
         Argument.EnsureNotNull(condition, "condition")
-        'If LastParseFailed Then Return False
         Dim result = condition(source)
         If result Then
             HandleParsed(Parsed.Success(source))

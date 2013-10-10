@@ -144,8 +144,8 @@ Public Class PonyBase
         If Directory Is Nothing Then Return Create(newDirectory)
         If String.Equals(Directory, newDirectory, PathEquality.Comparison) Then Return True
         Try
-            Dim currentPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory)
-            Dim newPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, newDirectory)
+            Dim currentPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory)
+            Dim newPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
         Catch ex As Exception
             Return False
@@ -172,7 +172,7 @@ Public Class PonyBase
 
     Public Shared Function Create(directory As String) As Boolean
         Try
-            Dim fullPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, directory)
+            Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
             If IO.Directory.Exists(fullPath) Then Return False
             IO.Directory.CreateDirectory(fullPath)
             Return True
@@ -184,7 +184,7 @@ Public Class PonyBase
     Public Shared Function Load(collection As PonyCollection, directory As String) As PonyBase
         Dim pony As PonyBase = Nothing
         Try
-            Dim fullPath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, directory)
+            Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
             Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
                 pony = New PonyBase(collection)
@@ -318,7 +318,7 @@ Public Class PonyBase
 
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
-        Dim configFilePath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
+        Dim configFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
 
         Dim tempFileName = Path.GetTempFileName()
         Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
@@ -351,7 +351,7 @@ Public Class PonyBase
         End Using
         MoveOrReplace(tempFileName, configFilePath)
 
-        Dim interactionsFilePath = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)
+        Dim interactionsFilePath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
         Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
@@ -973,13 +973,6 @@ Public Class Pony
     ''' </summary>
     Private Const StepRate = 1000.0 / 30.0
 
-    Public Shared Property CursorLocation As Point
-    Public Shared Property CurrentAnimator As PonyAnimator
-    Public Shared Property CurrentViewer As ISpriteCollectionView
-    Public Shared Property PreviewWindowRectangle As Rectangle
-
-    Private Shared audioErrorShown As Boolean
-
 #Region "Update Records"
     Friend UpdateRecord As List(Of Record)
 
@@ -1054,11 +1047,11 @@ Public Class Pony
         End Set
     End Property
 
-    Public Property BeingDragged() As Boolean
+    Public Property BeingDragged As Boolean
 
     Public Property CurrentBehaviorGroup As Integer
 
-    Public Property InteractionActive As Boolean = False
+    Public Property InteractionActive As Boolean
     Private _currentInteraction As Interaction = Nothing
     Public Property CurrentInteraction As Interaction
         Get
@@ -1070,12 +1063,12 @@ Public Class Pony
     End Property
     Private isInteractionInitiator As Boolean
 
-    Public Property IsInteracting As Boolean = False
-    Public Property PlayingGame As Boolean = False
+    Public Property IsInteracting As Boolean
+    Public Property PlayingGame As Boolean
 
-    Private verticalMovementAllowed As Boolean = False
-    Private horizontalMovementAllowed As Boolean = False
-    Public Property facingUp As Boolean = False
+    Private verticalMovementAllowed As Boolean
+    Private horizontalMovementAllowed As Boolean
+    Public Property facingUp As Boolean
     Public Property facingRight As Boolean = True
     ''' <summary>
     ''' The angle to travel in, if moving diagonally (in radians).
@@ -1121,7 +1114,7 @@ Public Class Pony
     ''' </summary>
     Public Property visualOverrideBehavior As Behavior
 
-    Private _returningToScreenArea As Boolean = False
+    Private _returningToScreenArea As Boolean
     Public Property ReturningToScreenArea As Boolean
         Get
             Return _returningToScreenArea
@@ -1134,28 +1127,28 @@ Public Class Pony
     ''' <summary>
     ''' Used when going back "in" houses.
     ''' </summary>
-    Public Property GoingHome As Boolean = False
+    Public Property GoingHome As Boolean
     ''' <summary>
     ''' Used when a pony has been recalled and is just about to "enter" a house
     ''' </summary>
-    Public Property OpeningDoor As Boolean = False
+    Public Property OpeningDoor As Boolean
 
     ''' <summary>
     ''' Should we stop because the cursor is hovered over?
     ''' </summary>
-    Private CursorOverPony As Boolean = False
+    Private CursorOverPony As Boolean
 
     ''' <summary>
     ''' Are we actually halted now?
     ''' </summary>
-    Private HaltedForCursor As Boolean = False
+    Private HaltedForCursor As Boolean
     ''' <summary>
     ''' Number of ticks for which the pony is immune to cursor interaction.
     ''' </summary>
     Private CursorImmunity As Integer = 0
 
     Public Property Destination As Vector2
-    Public Property AtDestination As Boolean = False
+    Public Property AtDestination As Boolean
     Private ReadOnly Property hasDestination As Boolean
         Get
             Return Destination <> Vector2.Zero
@@ -1165,7 +1158,7 @@ Public Class Pony
     ''' <summary>
     ''' Used in the Paint() sub to help stop flickering between left and right images under certain circumstances.
     ''' </summary>
-    Private paintStop As Boolean = False
+    Private paintStop As Boolean
 
     ''' <summary>
     ''' The location on the screen.
@@ -1184,10 +1177,6 @@ Public Class Pony
         End Get
     End Property
 
-    ' User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
-    ' These two options are used for the one-at-a-time option.
-    Private Shared AnyAudioLastPlayed As Date = DateTime.UtcNow
-    Private Shared LastLengthAnyAudio As Integer
     ' These two options are used for the one-per-pony option.
     Private AudioLastPlayed As Date = DateTime.UtcNow
     Private LastLengthAudio As Integer
@@ -1233,13 +1222,15 @@ Public Class Pony
     Private lastUpdateTime As TimeSpan
 
     Private ReadOnly possibleMoveModes As New List(Of AllowedMoves)(3)
-#End Region
 
     Public ReadOnly Property Scale() As Double
         Get
             Return If(Base.Scale <> 0, Base.Scale, Options.ScaleFactor)
         End Get
     End Property
+#End Region
+
+    ' TODO: Review accessibility.
 
     Public Sub New(base As PonyBase)
         _base = Argument.EnsureNotNull(base, "base")
@@ -1263,8 +1254,8 @@ Public Class Pony
     ''' </summary>
     Friend Sub Teleport()
         ' If we are in preview mode, just teleport into the center for consistency.
-        If Reference.InPreviewMode Then
-            TopLeftLocation = Vector2.Truncate(New Vector2F(Pony.PreviewWindowRectangle.Center()) - (CurrentImageSize / 2.0F))
+        If EvilGlobals.InPreviewMode Then
+            TopLeftLocation = Vector2.Truncate(New Vector2F(EvilGlobals.PreviewWindowRectangle.Center()) - (CurrentImageSize / 2.0F))
             Exit Sub
         End If
 
@@ -1312,7 +1303,7 @@ Public Class Pony
         ' Handle switching pony between active and asleep.
         If ShouldBeSleeping Then
             If Sleeping Then
-                If BeingDragged Then TopLeftLocation = CursorLocation - GetImageCenterOffset()
+                If BeingDragged Then TopLeftLocation = EvilGlobals.CursorLocation - GetImageCenterOffset()
             Else
                 Sleep()
             End If
@@ -1494,7 +1485,7 @@ Public Class Pony
             ' The behavior specifies an object to follow, but no instance of that object is present.
             ' We can't use this behavior, so we'll have to choose another at random.
             If Not hasDestination AndAlso specifiedBehavior.OriginalFollowTargetName <> "" AndAlso
-                Not Reference.InPreviewMode Then
+                Not EvilGlobals.InPreviewMode Then
                 SelectBehavior()
                 Exit Sub
             End If
@@ -1617,7 +1608,7 @@ Public Class Pony
         End If
 
         ' Start the sound file playing.
-        If line.SoundFile <> "" AndAlso Reference.DirectXSoundAvailable Then
+        If line.SoundFile <> "" AndAlso EvilGlobals.DirectXSoundAvailable Then
             PlaySound(line.SoundFile)
         End If
     End Sub
@@ -1629,13 +1620,13 @@ Public Class Pony
     Private Sub PlaySound(filePath As String)
         ' Sound must be enabled for the mode we are in.
         If Not Options.SoundEnabled Then Exit Sub
-        If Reference.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
+        If EvilGlobals.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
 
         ' Don't play sounds over other ones - wait until they finish.
         If Not Options.SoundSingleChannelOnly Then
-            If DateTime.UtcNow.Subtract(Me.AudioLastPlayed).TotalMilliseconds <= Me.LastLengthAudio Then Exit Sub
+            If DateTime.UtcNow.Subtract(AudioLastPlayed).TotalMilliseconds <= LastLengthAudio Then Exit Sub
         Else
-            If DateTime.UtcNow.Subtract(AnyAudioLastPlayed).TotalMilliseconds <= LastLengthAnyAudio Then Exit Sub
+            If DateTime.UtcNow.Subtract(EvilGlobals.AnyAudioLastPlayed).TotalMilliseconds <= EvilGlobals.LastLengthAnyAudio Then Exit Sub
         End If
 
         ' Quick sanity check that the file exists on disk.
@@ -1646,7 +1637,7 @@ Public Class Pony
             ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
             ' We use DirectX now so that we can use MP3 instead of WAV files
             Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filePath)
-            CurrentAnimator.ActiveSounds.Add(audio)
+            EvilGlobals.CurrentAnimator.ActiveSounds.Add(audio)
 
             ' Volume is between -10000 and 0, with 0 being the loudest.
             audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
@@ -1656,12 +1647,12 @@ Public Class Pony
                 Me.LastLengthAudio = CInt(audio.Duration * 1000)
                 Me.AudioLastPlayed = DateTime.UtcNow
             Else
-                LastLengthAnyAudio = CInt(audio.Duration * 1000) 'to milliseconds
-                AnyAudioLastPlayed = DateTime.UtcNow
+                EvilGlobals.LastLengthAnyAudio = CInt(audio.Duration * 1000) 'to milliseconds
+                EvilGlobals.AnyAudioLastPlayed = DateTime.UtcNow
             End If
         Catch ex As Exception
-            If Not audioErrorShown AndAlso Not Reference.InScreensaverMode Then
-                audioErrorShown = True
+            If Not EvilGlobals.AudioErrorShown AndAlso Not EvilGlobals.InScreensaverMode Then
+                EvilGlobals.AudioErrorShown = True
                 My.Application.NotifyUserOfNonFatalException(
                     ex, String.Format(CultureInfo.CurrentCulture,
                                       "There was an error trying to play a sound. Maybe the file is corrupt?{0}" &
@@ -1723,9 +1714,9 @@ Public Class Pony
 
         Dim speed As Double = ScaledSpeed()
 
-        If Game.CurrentGame Is Nothing OrElse
-            (Game.CurrentGame IsNot Nothing AndAlso
-             Game.CurrentGame.Status <> Game.GameStatus.Setup) Then
+        If EvilGlobals.CurrentGame Is Nothing OrElse
+            (EvilGlobals.CurrentGame IsNot Nothing AndAlso
+             EvilGlobals.CurrentGame.Status <> Game.GameStatus.Setup) Then
             ' User input will dictate our movement.
             If ManualControlPlayerOne Then
                 speed = ManualControl(KeyboardState.IsKeyPressed(Keys.RControlKey),
@@ -1753,7 +1744,7 @@ Public Class Pony
         Dim distance As Double
         If hasDestination AndAlso
             ((Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
-             (Game.CurrentGame IsNot Nothing AndAlso Game.CurrentGame.Status = Game.GameStatus.Setup)) Then
+             (EvilGlobals.CurrentGame IsNot Nothing AndAlso EvilGlobals.CurrentGame.Status = Game.GameStatus.Setup)) Then
             ' A destination has been specified and the pony should head there.
             distance = Vector2.Distance(CenterLocation, Destination)
             ' Avoid division by zero.
@@ -1863,7 +1854,7 @@ Public Class Pony
 
         ' TODO: Refactor and extract.
         'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
-        '    Game.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
+        '    EvilGlobals.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
         '    Not IsPonyInBox(newTopLeftLocation, Game.Position.Allowed_Area)
         Dim playingGameAndOutOfBounds = False
 
@@ -1935,7 +1926,7 @@ Public Class Pony
                                      (CurrentBehavior.AutoSelectImagesOnFollow OrElse
                                       CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
                                       CurrentBehavior.FollowStoppedBehavior IsNot Nothing)) OrElse
-                              (Game.CurrentGame IsNot Nothing AndAlso AtDestination)
+                              (EvilGlobals.CurrentGame IsNot Nothing AndAlso AtDestination)
             Paint(useVisualOverride)
             AddUpdateRecord("Standard paint. VisualOverride: ", useVisualOverride.ToString())
 
@@ -1971,7 +1962,7 @@ Public Class Pony
             ' Sanity check time - are we even on screen now?
             If isInAvoidanceZoneNow OrElse Not isOnscreenNow Then
                 'we are no where! Find out where it is safe to be and run!
-                If Reference.InPreviewMode OrElse Options.PonyTeleportEnabled Then
+                If EvilGlobals.InPreviewMode OrElse Options.PonyTeleportEnabled Then
                     Teleport()
                     AddUpdateRecord("Teleporting back onscreen.")
                     Exit Sub
@@ -2041,7 +2032,7 @@ Public Class Pony
 
             ' If not interacting, or following a different pony, we need to figure out which ones and follow one at random.
             Dim poniesToFollow As New List(Of Pony)
-            For Each ponyToFollow In CurrentAnimator.Ponies()
+            For Each ponyToFollow In EvilGlobals.CurrentAnimator.Ponies()
                 If ponyToFollow.Directory = followTargetName Then
                     poniesToFollow.Add(ponyToFollow)
                 End If
@@ -2131,7 +2122,7 @@ Public Class Pony
 
                     newEffect.OwningPony = Me
 
-                    Pony.CurrentAnimator.AddEffect(newEffect)
+                    EvilGlobals.CurrentAnimator.AddEffect(newEffect)
                     ActiveEffects.Add(newEffect)
 
                     effectsLastUsed(effect) = currentTime
@@ -2233,7 +2224,7 @@ Public Class Pony
 
     'Return our future location in one second if we go straight in the current direction
     Friend Function FutureLocation(Optional ticks As Integer = 1000) As Point
-        Dim Number_Of_Interations = ticks / (1000.0F / Pony.CurrentAnimator.MaximumFramesPerSecond)  'get the # of intervals in one second
+        Dim Number_Of_Interations = ticks / (1000.0F / EvilGlobals.CurrentAnimator.MaximumFramesPerSecond)  'get the # of intervals in one second
         Return Point.Round(CType(TopLeftLocation, Vector2) + lastMovement * Number_Of_Interations)
     End Function
 
@@ -2466,7 +2457,7 @@ Public Class Pony
         Return behavior
     End Function
 
-    Shared Function GetScreenContainingPoint(point As Point) As Screen
+    Private Shared Function GetScreenContainingPoint(point As Point) As Screen
         For Each screen In Options.Screens
             If screen.WorkingArea.Contains(point) Then Return screen
         Next
@@ -2479,7 +2470,7 @@ Public Class Pony
         If Not OperatingSystemInfo.IsWindows Then Return False
 
         Try
-            If Reference.InPreviewMode Then Return False
+            If EvilGlobals.InPreviewMode Then Return False
             If Not Options.WindowAvoidanceEnabled Then Return False
 
             If movement = SizeF.Empty Then Return False
@@ -2597,19 +2588,19 @@ Public Class Pony
     End Function
 
     Private Function IsLocationInRect(location As Point, rect As Rectangle) As Boolean
-        If Reference.InPreviewMode Then Return True
+        If EvilGlobals.InPreviewMode Then Return True
         Return rect.Contains(New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
     End Function
 
-    Shared Function IsPonyInBox(location As Point, box As Rectangle) As Boolean
+    Public Shared Function IsPonyInBox(location As Point, box As Rectangle) As Boolean
         Return box.IsEmpty OrElse box.Contains(location)
     End Function
 
     ''are we inside the user specified "Everfree Forest"?
-    Function InAvoidanceArea(new_location As Point) As Boolean
+    Private Function InAvoidanceArea(new_location As Point) As Boolean
 
-        If Reference.InPreviewMode Then
-            Dim previewArea = Pony.PreviewWindowRectangle
+        If EvilGlobals.InPreviewMode Then
+            Dim previewArea = EvilGlobals.PreviewWindowRectangle
 
             If CurrentImageSize.Y > previewArea.Height OrElse _
                 CurrentImageSize.X > previewArea.Width Then
@@ -2659,9 +2650,9 @@ Public Class Pony
         Return False
     End Function
 
-    Function IsPonyNearMouseCursor(location As Point) As Boolean
+    Private Function IsPonyNearMouseCursor(location As Point) As Boolean
         If Not Options.CursorAvoidanceEnabled Then Return False
-        If Reference.InScreensaverMode Then Return False
+        If EvilGlobals.InScreensaverMode Then Return False
         If CursorImmunity > 0 Then Return False
         If IsInteracting Then Return False
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
@@ -2670,7 +2661,7 @@ Public Class Pony
             If behavior.AllowedMovement = AllowedMoves.MouseOver Then
                 Dim loc = New Vector2F(location)
                 Dim s = CSng(Scale)
-                Dim cursorLoc = New Vector2F(CursorLocation)
+                Dim cursorLoc = New Vector2F(EvilGlobals.CursorLocation)
                 If Vector2F.Distance(loc + (behavior.LeftImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
                 If Vector2F.Distance(loc + (behavior.RightImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
             End If
@@ -2685,7 +2676,7 @@ Public Class Pony
     ''' <returns>The center of the preview area in preview mode, otherwise a random location within the allowable region, if one can be
     ''' found; otherwise Point.Empty.</returns>
     Friend Function FindSafeDestination() As Point
-        If Reference.InPreviewMode Then Return Point.Round(Pony.PreviewWindowRectangle.Center())
+        If EvilGlobals.InPreviewMode Then Return Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
 
         For i = 0 To 300
             Dim randomScreen = Options.Screens(Rng.Next(Options.Screens.Count))
@@ -3148,7 +3139,7 @@ Public Class Effect
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
         If BeingDragged Then
-            Location = Pony.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
+            Location = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
     End Sub
 
@@ -3190,6 +3181,7 @@ Public Class HouseBase
     Public Const RootDirectory = "Houses"
     Public Const ConfigFilename = "house.ini"
 
+    ' TODO: Move this somewhere sensible.
     Friend OptionsForm As HouseOptionsForm
 
     Private ReadOnly _directory As String
@@ -3270,7 +3262,7 @@ Public Class HouseBase
     End Sub
 
     Private Sub LoadFromIni()
-        Dim fullDirectory = Path.Combine(Options.InstallLocation, RootDirectory, Directory)
+        Dim fullDirectory = Path.Combine(EvilGlobals.InstallLocation, RootDirectory, Directory)
         Dim imageFilename As String = Nothing
         Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
             Do Until configFile.EndOfStream
@@ -3331,7 +3323,7 @@ End Class
 Public Class House
     Inherits Effect
 
-    Private deployedPonies As New List(Of Pony)
+    Private ReadOnly deployedPonies As New List(Of Pony)()
 
     Private lastCycleTime As TimeSpan
 
@@ -3350,7 +3342,7 @@ Public Class House
 
     Public Sub InitializeVisitorList()
         deployedPonies.Clear()
-        For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
+        For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
             SyncLock HouseBase.Visitors
                 For Each guest In HouseBase.Visitors
                     If Pony.Directory = guest Then
@@ -3380,13 +3372,13 @@ Public Class House
             End If
 
             If Rng.NextDouble() < HouseBase.Bias Then
-                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Pony.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
+                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso EvilGlobals.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
                     DeployPony(Me, ponyBases)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
                 End If
             Else
-                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Pony.CurrentAnimator.Ponies().Count > 1 Then
+                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso EvilGlobals.CurrentAnimator.Ponies().Count > 1 Then
                     RecallPony(Me)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
@@ -3420,7 +3412,7 @@ Public Class House
             End If
         End SyncLock
 
-        For Each p In Pony.CurrentAnimator.Ponies()
+        For Each p In EvilGlobals.CurrentAnimator.Ponies()
             choices.Remove(p.Directory)
         Next
 
@@ -3458,7 +3450,7 @@ Public Class House
                     deployed_pony.SelectBehavior(Alternate_Group_Behaviors(Rng.Next(Alternate_Group_Behaviors.Count)))
                 End If
 
-                Pony.CurrentAnimator.AddPony(deployed_pony)
+                EvilGlobals.CurrentAnimator.AddPony(deployed_pony)
                 deployedPonies.Add(deployed_pony)
 
                 Console.WriteLine(Me.Base.Name & " - Deployed " & ponyBase.Directory)
@@ -3477,7 +3469,7 @@ Public Class House
         SyncLock HouseBase.Visitors
             For Each visitor In HouseBase.Visitors
                 If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                    For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
+                    For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
                         choices.Add(Pony.Directory)
                     Next
                     all = True
@@ -3486,7 +3478,7 @@ Public Class House
             Next
 
             If all = False Then
-                For Each Pony As Pony In Pony.CurrentAnimator.Ponies()
+                For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
                     For Each otherpony In HouseBase.Visitors
                         If Pony.Directory = otherpony Then
                             choices.Add(Pony.Directory)
@@ -3501,7 +3493,7 @@ Public Class House
 
         Dim selected_name = choices(Rng.Next(choices.Count))
 
-        For Each pony As Pony In pony.CurrentAnimator.Ponies()
+        For Each pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
             If pony.Directory = selected_name Then
 
                 If pony.IsInteracting Then Exit Sub

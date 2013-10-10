@@ -20,7 +20,7 @@ Public Class GameSelectionForm
     Private Sub LoadInternal()
         EnableWaitCursor(True)
 
-        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(Options.InstallLocation, game.RootDirectory))
+        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(EvilGlobals.InstallLocation, game.RootDirectory))
         games = New List(Of Game)(gameDirectories.Length)
         For Each gameDirectory In gameDirectories
             Try
@@ -312,7 +312,7 @@ Public Class GameSelectionForm
         game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
 
         Me.DialogResult = DialogResult.OK
-        Game.CurrentGame = game
+        EvilGlobals.CurrentGame = game
     End Sub
 
     Private Sub SetStage(stage As Byte)

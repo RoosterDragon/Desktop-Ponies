@@ -6,8 +6,6 @@ Public Class Game
     Public Const RootDirectory = "Games"
     Public Const ConfigFilename = "game.ini"
 
-    Public Shared Property CurrentGame As Game
-
     Public Enum BallType
         Soccer = 0 'Is pushed around and slows to a stop.  No Gravity
         Baseball = 1 'Is thrown and arcs, then slows if not caught.
@@ -213,7 +211,7 @@ Public Class Game
             activeBalls.Remove(Ball)
         Next
 
-        Pony.CurrentAnimator.Clear()
+        EvilGlobals.CurrentAnimator.Clear()
 
         'For Each goal In Goals
         '    goal.Visible = False
@@ -240,14 +238,14 @@ Public Class Game
         For Each goal In goals
             goal.Initialize(GameScreen)
             goal.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
-            Pony.CurrentAnimator.AddEffect(goal.HostEffect)
+            EvilGlobals.CurrentAnimator.AddEffect(goal.HostEffect)
         Next
 
         scoreboard.Initialize(GameScreen)
         scoreboard.SetScores(Teams(0), Teams(1))
         scoreboard.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
-        Pony.CurrentAnimator.AddEffect(scoreboard.HostEffect)
-        Pony.CurrentAnimator.AddSprites(scoreboard.ScoreDisplays)
+        EvilGlobals.CurrentAnimator.AddEffect(scoreboard.HostEffect)
+        EvilGlobals.CurrentAnimator.AddSprites(scoreboard.ScoreDisplays)
 
         For Each team In Teams
             Dim positionsToRemove As New List(Of Position)
@@ -255,7 +253,7 @@ Public Class Game
                 position.Initialize(GameScreen)
                 If position.Player IsNot Nothing Then
                     position.Player.PlayingGame = True
-                    Pony.CurrentAnimator.AddPony(position.Player)
+                    EvilGlobals.CurrentAnimator.AddPony(position.Player)
                     allPlayers.Add(position)
                 Else
                     positionsToRemove.Add(position)
@@ -303,7 +301,7 @@ Public Class Game
 
                 For Each ball In Balls
                     activeBalls.Add(ball)
-                    Pony.CurrentAnimator.AddPony(ball.Handler)
+                    EvilGlobals.CurrentAnimator.AddPony(ball.Handler)
                     ball.Handler.CurrentBehavior = ball.Handler.Behaviors(1)
                     ball.Handler.TopLeftLocation = ball.StartPosition
                     ball.Update()
@@ -317,9 +315,9 @@ Public Class Game
             Case GameStatus.InProgress
                 For Each team In Teams
                     For Each position In team.Positions
-                        position.DecideOnAction(Game.CurrentGame)
+                        position.DecideOnAction(EvilGlobals.CurrentGame)
                         position.PushBackOverlappingPonies(allPlayers)
-                        'Position.Player.Update(Pony.CurrentAnimator.ElapsedTime)
+                        'Position.Player.Update(EvilGlobals.CurrentAnimator.ElapsedTime)
                     Next
                 Next
 
@@ -330,16 +328,16 @@ Public Class Game
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        Pony.CurrentAnimator.RemovePonyAndReinitializeInteractions(ball.Handler)
+                        EvilGlobals.CurrentAnimator.RemovePonyAndReinitializeInteractions(ball.Handler)
                     Next
 
                     For Each team In Teams
                         If team.Score >= maxScore Then
                             Status = GameStatus.Completed
-                            Pony.CurrentAnimator.Pause(False)
+                            EvilGlobals.CurrentAnimator.Pause(False)
                             MessageBox.Show(team.Name & " won!", "Winner", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                            Main.Instance.PonyShutdown()
-                            Main.Instance.SmartInvoke(Sub() Main.Instance.Visible = True)
+                            EvilGlobals.Main.PonyShutdown()
+                            EvilGlobals.Main.SmartInvoke(Sub() EvilGlobals.Main.Visible = True)
                             Exit Sub
                         End If
                     Next
@@ -917,7 +915,7 @@ Public Class Game
                     SpeedOverride(True)
 
                 Case Else
-                    Pony.CurrentAnimator.Pause(False)
+                    EvilGlobals.CurrentAnimator.Pause(False)
                     Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selected_action)
             End Select
 
@@ -947,7 +945,7 @@ Public Class Game
 
         Private Function GetOtherTeamGoal() As GoalArea
 
-            For Each goal In Game.CurrentGame.goals
+            For Each goal In EvilGlobals.CurrentGame.goals
                 If goal.TeamNumber <> TeamNumber Then
                     Return goal
                 End If
@@ -959,7 +957,7 @@ Public Class Game
 
         Private Function GetTeamGoal() As GoalArea
 
-            For Each goal In Game.CurrentGame.goals
+            For Each goal In EvilGlobals.CurrentGame.goals
                 If goal.TeamNumber = TeamNumber Then
                     Return goal
                 End If
@@ -990,7 +988,7 @@ Public Class Game
                     Player.leadTarget = True
                 End If
 
-                'If Main.Instance.current_game.Name = "Ping Pong Pony" Then
+                'If EvilGlobals.Main.current_game.Name = "Ping Pong Pony" Then
                 '    Player.current_behavior.speed = Player.current_behavior.original_speed * 1.5
                 'End If
             End If
@@ -1028,7 +1026,7 @@ Public Class Game
         End Sub
 
         Private Sub BounceBall(ball As Ball, speed As Double, kicker As Position, line As String)
-            If Game.CurrentGame.Name = "Ping Pong Pony" Then
+            If EvilGlobals.CurrentGame.Name = "Ping Pong Pony" Then
                 'avoid boucing the ball back into our own goal.
                 If Not IsNothing(ball.LastHandledBy) AndAlso ReferenceEquals(ball.LastHandledBy, Me) Then
                     Exit Sub
@@ -1038,7 +1036,7 @@ Public Class Game
             Speak(line)
 
             Dim angle As Double
-            Dim gamescreen = Game.CurrentGame.GameScreen
+            Dim gamescreen = EvilGlobals.CurrentGame.GameScreen
 
             If ball.Handler.Diagonal < (Math.PI / 2) OrElse ball.Handler.Diagonal > (3 / 2) * Math.PI Then
                 'ball is going to the right, it will 'bounce' to the left.
@@ -1185,7 +1183,7 @@ Public Class Game
             Dim change = New Size(xchange, ychange)
             Dim new_location = pony1.TopLeftLocation + change
 
-            If pony1.IsPonyOnScreen(new_location, Game.CurrentGame.GameScreen) AndAlso
+            If pony1.IsPonyOnScreen(new_location, EvilGlobals.CurrentGame.GameScreen) AndAlso
                 (Not allowedArea.HasValue OrElse Pony.IsPonyInBox(new_location, allowedArea.Value)) Then
                 pony1.TopLeftLocation = new_location
             End If
@@ -1218,7 +1216,7 @@ Public Class Game
                 End If
 
                 Dim open = True
-                For Each other_position As Position In Game.CurrentGame.allPlayers
+                For Each other_position As Position In EvilGlobals.CurrentGame.allPlayers
                     If other_position.Team.Name = Me.Team.Name Then
                         Continue For
                     End If
@@ -1245,7 +1243,7 @@ Public Class Game
 
         Private Sub SpeedOverride(enable As Boolean)
             If enable Then
-                Player.SpeedOverride = If(Game.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
+                Player.SpeedOverride = If(EvilGlobals.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
             Else
                 Player.SpeedOverride = Nothing
             End If

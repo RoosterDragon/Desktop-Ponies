@@ -7,7 +7,7 @@ Public Class HouseOptionsForm
     Dim houseImage As Image
     Dim doorLocation As Point
 
-    Friend Sub New(_house As House, ponyBases As IEnumerable(Of PonyBase))
+    Public Sub New(_house As House, ponyBases As IEnumerable(Of PonyBase))
         InitializeComponent()
         Icon = My.Resources.Twilight
 
@@ -154,7 +154,7 @@ Public Class HouseOptionsForm
             Dim base = house.HouseBase
 
             Dim comments As New List(Of String)
-            Dim ini_file_path = Path.Combine(Options.InstallLocation, HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
+            Dim ini_file_path = Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory, base.Directory, HouseBase.ConfigFilename)
             If File.Exists(ini_file_path) Then
                 Using existing_ini As New StreamReader(ini_file_path)
                     Do Until existing_ini.EndOfStream

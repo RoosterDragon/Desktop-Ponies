@@ -20,10 +20,10 @@ Public Class ScreensaverBackgroundForm
             initialMouseLocation = e.Location
         Else
             If initialMouseLocation = e.Location Then Return
-            If Pony.CurrentAnimator IsNot Nothing Then Pony.CurrentAnimator.Finish()
-            Main.Instance.SmartInvoke(Sub()
-                                          Main.Instance.PonyShutdown()
-                                          Main.Instance.Close()
+            If EvilGlobals.CurrentAnimator IsNot Nothing Then EvilGlobals.CurrentAnimator.Finish()
+            EvilGlobals.Main.SmartInvoke(Sub()
+                                          EvilGlobals.Main.PonyShutdown()
+                                          EvilGlobals.Main.Close()
                                       End Sub)
         End If
     End Sub

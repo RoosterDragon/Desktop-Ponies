@@ -1,9 +1,9 @@
 ﻿Imports DesktopSprites.SpriteManagement
 
 Public Class PonySelectionControl
-    Friend PonyBase As PonyBase
+    Public PonyBase As PonyBase
     Private _count As Integer
-    Friend Property Count As Integer
+    Public Property Count As Integer
         Get
             Return _count
         End Get
@@ -14,7 +14,7 @@ Public Class PonySelectionControl
             PonyCount.Text = _count.ToString(Globalization.CultureInfo.CurrentCulture)
         End Set
     End Property
-    Friend PonyImage As AnimatedImage(Of BitmapFrame)
+    Public PonyImage As AnimatedImage(Of BitmapFrame)
     Private _showPonyImage As Boolean
     Public Property ShowPonyImage As Boolean
         Get
@@ -31,7 +31,7 @@ Public Class PonySelectionControl
     Private timeIndex As TimeSpan
     Private flip As Boolean
 
-    Friend Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
+    Public Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         Argument.EnsureNotNull(ponyTemplate, "ponyTemplate")
         Argument.EnsureNotNull(imagePath, "imagePath")
         InitializeComponent()

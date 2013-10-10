@@ -80,7 +80,7 @@ Public Class ItemEditorBase
 
     Private Sub SetupItem(ponyBase As PonyBase)
         Argument.EnsureNotNull(ponyBase, "ponyBase")
-        _ponyBasePath = Path.Combine(Options.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
+        _ponyBasePath = Path.Combine(EvilGlobals.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
         _base = ponyBase
         Enabled = True
     End Sub

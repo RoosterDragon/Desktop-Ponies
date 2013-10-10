@@ -16,7 +16,7 @@ Public Class PonyAnimator
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
     ''' </summary>
     Private Shared ReadOnly zOrder As Comparison(Of ISprite) = Function(a, b)
-                                                                   If Game.CurrentGame IsNot Nothing Then
+                                                                   If EvilGlobals.CurrentGame IsNot Nothing Then
                                                                        Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
                                                                        Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
                                                                        If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
@@ -33,7 +33,7 @@ Public Class PonyAnimator
 
         MaximumFramesPerSecond = 30
         Viewer.WindowTitle = "Desktop Ponies"
-        Viewer.WindowIconFilePath = IO.Path.Combine(Options.InstallLocation, "Twilight.ico")
+        Viewer.WindowIconFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, "Twilight.ico")
 
         AddHandler Viewer.MouseUp, AddressOf Viewer_MouseUp
         AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
@@ -69,8 +69,8 @@ Public Class PonyAnimator
     ''' Updates the ponies and effect. Cycles houses.
     ''' </summary>
     Protected Overrides Sub Update()
-        Pony.CursorLocation = Viewer.CursorPosition
-        If Reference.InScreensaverMode Then
+        EvilGlobals.CursorLocation = Viewer.CursorPosition
+        If EvilGlobals.InScreensaverMode Then
             'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
             If cursorPosition.IsEmpty Then
                 cursorPosition = Cursor.Position
@@ -78,7 +78,7 @@ Public Class PonyAnimator
 
             If cursorPosition <> Cursor.Position Then
                 Finish()
-                Main.Instance.SmartInvoke(AddressOf Main.Instance.Close)
+                EvilGlobals.Main.SmartInvoke(AddressOf EvilGlobals.Main.Close)
                 Exit Sub
             End If
         End If
@@ -94,8 +94,8 @@ Public Class PonyAnimator
         Next
         If poniesRemoved Then InitializeInteractions()
 
-        If Not IsNothing(Game.CurrentGame) Then
-            Game.CurrentGame.Update()
+        If Not IsNothing(EvilGlobals.CurrentGame) Then
+            EvilGlobals.CurrentGame.Update()
         End If
 
         For Each sprite In Sprites
@@ -107,7 +107,7 @@ Public Class PonyAnimator
             End If
         Next
 
-        If Reference.DirectXSoundAvailable Then
+        If EvilGlobals.DirectXSoundAvailable Then
             CleanupSounds()
         End If
 
@@ -191,10 +191,10 @@ Public Class PonyAnimator
 
     Protected Sub ReturnToMenu()
         FinishViewer()
-        Main.Instance.SmartInvoke(Sub()
-                                      Main.Instance.PonyShutdown()
-                                      Main.Instance.Opacity = 100 'for when autostarted
-                                      Main.Instance.Show()
+        EvilGlobals.Main.SmartInvoke(Sub()
+                                      EvilGlobals.Main.PonyShutdown()
+                                      EvilGlobals.Main.Opacity = 100 'for when autostarted
+                                      EvilGlobals.Main.Show()
                                   End Sub)
     End Sub
 

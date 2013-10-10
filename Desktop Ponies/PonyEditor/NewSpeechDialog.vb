@@ -50,7 +50,7 @@ Public Class NewSpeechDialog
     Private Sub SetSound_Button_Click(sender As Object, e As EventArgs) Handles SetSound_Button.Click
 
         OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-        OpenSoundDialog.InitialDirectory = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, _editor.PreviewPony.Directory)
+        OpenSoundDialog.InitialDirectory = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, _editor.PreviewPony.Directory)
 
         Dim sound_path As String = Nothing
 
@@ -62,7 +62,7 @@ Public Class NewSpeechDialog
             Exit Sub
         End If
 
-        Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
+        Dim new_path = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
                                        _editor.PreviewPony.Directory, PonyEditor.GetFilename(sound_path))
 
         If new_path <> sound_path Then

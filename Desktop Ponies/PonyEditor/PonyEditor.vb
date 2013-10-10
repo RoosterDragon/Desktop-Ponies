@@ -156,8 +156,8 @@ Public Class PonyEditor
         worker.QueueTask(Sub()
                              EnableWaitCursor(True)
 
-                             Pony.CurrentViewer = editorInterface
-                             Pony.CurrentAnimator = editorAnimator
+                             EvilGlobals.CurrentViewer = editorInterface
+                             EvilGlobals.CurrentAnimator = editorAnimator
                              If Not editorAnimator.Started Then
                                  editorAnimator.Start()
                                  PausePonyButton.Enabled = True
@@ -1157,7 +1157,7 @@ Public Class PonyEditor
         Try
             OpenPictureDialog.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|All Files (*.*)|*.*"
             OpenPictureDialog.FilterIndex = 4
-            OpenPictureDialog.InitialDirectory = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
+            OpenPictureDialog.InitialDirectory = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
 
             If text Is Nothing Then
                 OpenPictureDialog.Title = "Select picture..."
@@ -1176,7 +1176,7 @@ Public Class PonyEditor
             ' Try to load this image.
             Image.FromFile(imagePath)
 
-            Dim desiredPath = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
+            Dim desiredPath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
                                            PreviewPony.Directory, GetFilename(imagePath))
 
             If desiredPath <> imagePath Then
@@ -1208,7 +1208,7 @@ Public Class PonyEditor
 
         Using dialog = New NewSpeechDialog(Me)
             dialog.OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-            dialog.OpenSoundDialog.InitialDirectory = Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
+            dialog.OpenSoundDialog.InitialDirectory = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory)
             If dialog.OpenSoundDialog.ShowDialog() = DialogResult.OK Then
                 sound_path = dialog.OpenSoundDialog.FileName
             End If
@@ -1218,7 +1218,7 @@ Public Class PonyEditor
             Return ""
         End If
 
-        Dim new_path = IO.Path.Combine(Options.InstallLocation, PonyBase.RootDirectory,
+        Dim new_path = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
                                        PreviewPony.Directory, GetFilename(sound_path))
 
         If new_path <> sound_path Then
@@ -1508,14 +1508,14 @@ Public Class PonyEditor
             hasSaved = False
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(
-                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
+                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
             Using form = New DesktopSprites.Forms.GifFramesForm(
-                         Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
+                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
@@ -1552,8 +1552,8 @@ Public Class PonyEditor
                 If editorAnimator IsNot Nothing AndAlso Not editorAnimator.Disposed Then
                     editorAnimator.Finish()
                     editorAnimator.Dispose()
-                    If Object.ReferenceEquals(editorAnimator, Pony.CurrentAnimator) Then
-                        Pony.CurrentAnimator = Nothing
+                    If Object.ReferenceEquals(editorAnimator, EvilGlobals.CurrentAnimator) Then
+                        EvilGlobals.CurrentAnimator = Nothing
                     End If
                 End If
                 If ponyImageList IsNot Nothing Then ponyImageList.Dispose()

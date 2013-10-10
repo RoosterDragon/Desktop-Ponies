@@ -28,7 +28,7 @@ Public Class SelectFilesPathDialog
                             "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             _selectedPath = Nothing
             Return
-        ElseIf Not Reference.ValidatePossibleScreensaverPath(_selectedPath) Then
+        ElseIf Not EvilGlobals.ValidatePossibleScreensaverPath(_selectedPath) Then
             MessageBox.Show(Me, "The screensaver expects the '" & PonyBase.RootDirectory & "', '" & HouseBase.RootDirectory & "' and '" &
                             Game.RootDirectory & "' directories to exist in this location." &
                             " The path you selected does not contain these directories. Please review your selection.",

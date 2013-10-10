@@ -9,8 +9,6 @@ Public NotInheritable Class Options
         End Get
     End Property
 
-    Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
-
     Private Const OptionsCount = 30
     Public Shared ProfileName As String
 
@@ -57,7 +55,7 @@ Public NotInheritable Class Options
 
     Public Shared ReadOnly Property ProfileDirectory As String
         Get
-            Return Path.Combine(Options.InstallLocation, "Profiles")
+            Return Path.Combine(EvilGlobals.InstallLocation, "Profiles")
         End Get
     End Property
 
@@ -107,6 +105,7 @@ Public NotInheritable Class Options
 
                     Select Case columns(0)
                         Case "options"
+                            ' TODO: Change to a lenient parser.
                             If columns.Length - 1 < OptionsCount Then Throw New InvalidDataException(
                                 String.Format(CultureInfo.CurrentCulture, "Expected at least {0} options on the options line.", OptionsCount))
                             PonySpeechEnabled = Boolean.Parse(columns(1))
@@ -214,9 +213,9 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadPonyCounts()
-        If Reference.PoniesHaveLaunched Then Exit Sub
+        If EvilGlobals.PoniesHaveLaunched Then Exit Sub
 
-        For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
+        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             If PonyCounts.ContainsKey(ponyPanel.PonyName.Text) Then
                 ponyPanel.Count = PonyCounts(ponyPanel.PonyBase.Directory)
             Else
@@ -226,10 +225,10 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadCustomTags()
-        If Reference.PoniesHaveLaunched Then Exit Sub
+        If EvilGlobals.PoniesHaveLaunched Then Exit Sub
 
-        Main.Instance.ResetToDefaultFilterCategories()
-        Main.Instance.FilterOptionsBox.Items.AddRange(CustomTags.ToArray())
+        EvilGlobals.Main.ResetToDefaultFilterCategories()
+        EvilGlobals.Main.FilterOptionsBox.Items.AddRange(CustomTags.ToArray())
     End Sub
 
     Public Shared Sub SaveProfile(profile As String)
@@ -304,7 +303,7 @@ Public NotInheritable Class Options
 
     Private Shared Sub GetPonyCounts()
         PonyCounts.Clear()
-        For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
+        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             PonyCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
         Next
     End Sub

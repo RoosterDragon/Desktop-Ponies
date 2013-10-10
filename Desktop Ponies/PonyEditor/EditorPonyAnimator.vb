@@ -28,7 +28,7 @@ Public Class EditorPonyAnimator
     End Sub
 
     Public Overrides Sub Start()
-        editor.SmartInvoke(Sub() Pony.PreviewWindowRectangle =
+        editor.SmartInvoke(Sub() EvilGlobals.PreviewWindowRectangle =
                                editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle))
         MyBase.Start()
     End Sub
@@ -43,7 +43,7 @@ Public Class EditorPonyAnimator
             editor.BeginInvoke(New MethodInvoker(
                                 Sub()
                                     If editor.IsClosing Then Exit Sub
-                                    Pony.PreviewWindowRectangle =
+                                    EvilGlobals.PreviewWindowRectangle =
                                         editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle)
                                 End Sub))
         End If

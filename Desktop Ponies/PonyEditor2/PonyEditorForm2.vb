@@ -198,7 +198,7 @@ Public Class PonyEditorForm2
                                    Dim b As Behavior = Nothing
                                    Return behavior.TryLoad(
                                        behavior.SourceIni,
-                                       Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                       Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
                                        base, b, Nothing) AndAlso b.GetReferentialIssues(ponies).Length = 0
                                End Function
         Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
@@ -206,14 +206,14 @@ Public Class PonyEditorForm2
                                  Dim e As EffectBase = Nothing
                                  Return EffectBase.TryLoad(
                                      effect.SourceIni,
-                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                     Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
                                      base, e, Nothing) AndAlso e.GetReferentialIssues(ponies).Length = 0
                              End Function
         Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
         Dim validateSpeech = Function(speech As Speech)
                                  Return speech.TryLoad(
                                      speech.SourceIni,
-                                     Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                     Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
                                      Nothing, Nothing)
                              End Function
         Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)

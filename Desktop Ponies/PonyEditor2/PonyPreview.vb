@@ -17,7 +17,7 @@ Public Class PonyPreview
         InitializeComponent()
         AddHandler Disposed, Sub()
                                  If editorAnimator IsNot Nothing Then editorAnimator.Finish()
-                                 Pony.CurrentAnimator = Nothing
+                                 EvilGlobals.CurrentAnimator = Nothing
                              End Sub
     End Sub
 
@@ -45,7 +45,7 @@ Public Class PonyPreview
 
     Private Sub DetermineScreenLocation(sender As Object, e As EventArgs)
         Dim bounds = PreviewPanel.RectangleToScreen(PreviewPanel.ClientRectangle)
-        Pony.PreviewWindowRectangle = bounds
+        EvilGlobals.PreviewWindowRectangle = bounds
         If TypeOf editorInterface Is WinFormSpriteInterface Then
             DirectCast(editorInterface, WinFormSpriteInterface).DisplayBounds = bounds
         End If
@@ -64,7 +64,7 @@ Public Class PonyPreview
         editorInterface.Topmost = True
         DetermineParentsAndScreenLocation(Me, EventArgs.Empty)
         editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, Me)
-        Pony.CurrentAnimator = editorAnimator
+        EvilGlobals.CurrentAnimator = editorAnimator
         editorAnimator.Start()
         loaded = True
     End Sub

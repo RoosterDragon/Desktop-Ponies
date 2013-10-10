@@ -32,7 +32,7 @@ Public Class PonyCollection
 
     Private Sub LoadPonyBases(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
         Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
-        Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory))
+        Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
@@ -53,13 +53,13 @@ Public Class PonyCollection
     End Sub
 
     Private Sub LoadInteractions()
-        If Not File.Exists(Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
+        If Not File.Exists(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
             Options.PonyInteractionsExist = False
             Exit Sub
         End If
         Dim newListFactory = Function(s As String) New List(Of InteractionBase)()
         Using reader As New StreamReader(
-            Path.Combine(Options.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename))
+            Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename))
             Do Until reader.EndOfStream
                 Dim line = reader.ReadLine()
 
@@ -82,11 +82,6 @@ Public Class PonyCollection
     Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
         If oldDirectory = newDirectory Then Return
         If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
-        'For Each action In _interactions.Values.SelectMany(Function(list) list)
-        '    If action.TargetNames.Remove(oldDirectory) Then
-        '        action.TargetNames.Add(newDirectory)
-        '    End If
-        'Next
         If _interactions.ContainsKey(oldDirectory) Then
             Dim actions = _interactions(oldDirectory)
             _interactions.Remove(oldDirectory)

@@ -1,10 +1,39 @@
 ﻿Imports System.IO
+Imports DesktopSprites.SpriteManagement
 
-Public NotInheritable Class Reference
+''' <summary>
+''' Application global properties.
+''' </summary>
+''' <remarks>
+''' TODO: Remove or relocate these globals as it becomes possible.
+''' Also evil: Most everything in Options.
+''' </remarks>
+Friend NotInheritable Class EvilGlobals
     Private Sub New()
     End Sub
+    Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
+    Friend Shared Property Main As MainForm
+
+    Public Shared Property CursorLocation As Point
+    Public Shared Property CurrentAnimator As PonyAnimator
+    Public Shared Property CurrentViewer As ISpriteCollectionView
+    Public Shared Property CurrentGame As Game
+    Public Shared Property PreviewWindowRectangle As Rectangle
+
+    ' User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
+    ' These two options are used for the one-at-a-time option.
+    Friend Shared Property AnyAudioLastPlayed As Date = DateTime.UtcNow
+    Friend Shared Property LastLengthAnyAudio As Integer
+    Friend Shared Property AudioErrorShown As Boolean
 
     Private Shared screensaverSettingsPath As String = Path.Combine(Path.GetTempPath, "DesktopPonies_ScreenSaver_Settings.ini")
+
+    ''' <summary>
+    ''' Are ponies currently walking around the desktop?
+    ''' </summary>
+    Public Shared Property PoniesHaveLaunched As Boolean
+    Public Shared Property InScreensaverMode As Boolean
+    Public Shared Property InPreviewMode As Boolean
 
     Private Shared _directXSoundAvailable As Boolean
     Public Shared ReadOnly Property DirectXSoundAvailable As Boolean
@@ -12,12 +41,6 @@ Public NotInheritable Class Reference
             Return _directXSoundAvailable
         End Get
     End Property
-    ''' <summary>
-    ''' Are ponies currently walking around the desktop?
-    ''' </summary>
-    Public Shared Property PoniesHaveLaunched As Boolean
-    Public Shared Property InScreensaverMode As Boolean
-    Public Shared Property InPreviewMode As Boolean
 
     Shared Sub New()
         ' Check to see if the right version of DirectX is installed for sounds.

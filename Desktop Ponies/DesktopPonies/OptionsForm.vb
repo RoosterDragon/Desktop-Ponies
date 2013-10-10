@@ -26,7 +26,7 @@ Public Class OptionsForm
             MonitorsSelection.SetSelected(i, True)
         Next
 
-        If Not Reference.DirectXSoundAvailable Then
+        If Not EvilGlobals.DirectXSoundAvailable Then
             SoundDisabledLabel.Visible = True
             Sound.Enabled = False
             Sound.Checked = False
@@ -37,7 +37,7 @@ Public Class OptionsForm
             Sound.Enabled = True
         End If
 
-        Main.Instance.ResetToDefaultFilterCategories()
+        EvilGlobals.Main.ResetToDefaultFilterCategories()
 
         ' Set initial volume value, event handler will update values as needed.
         Volume.Value = 650
@@ -145,15 +145,15 @@ Public Class OptionsForm
     Private Sub LoadProfile()
         Dim profile As String = Options.DefaultProfileName
         Try
-            If Not String.IsNullOrWhiteSpace(Main.Instance.ProfileComboBox.Text) Then
-                profile = Main.Instance.ProfileComboBox.Text.Trim()
+            If Not String.IsNullOrWhiteSpace(EvilGlobals.Main.ProfileComboBox.Text) Then
+                profile = EvilGlobals.Main.ProfileComboBox.Text.Trim()
             End If
 
             Options.LoadProfile(profile, True)
 
             RefreshOptions()
-            If Main.Instance.FilterOptionsBox.Items.Count = 0 Then
-                Main.Instance.ResetToDefaultFilterCategories()
+            If EvilGlobals.Main.FilterOptionsBox.Items.Count = 0 Then
+                EvilGlobals.Main.ResetToDefaultFilterCategories()
             End If
 
             SizeScale_ValueChanged(Nothing, Nothing)
@@ -172,8 +172,8 @@ Public Class OptionsForm
         Dim profile As String = Options.DefaultProfileName
 
         If Not IsNothing(sender) Then
-            If Trim(Main.Instance.ProfileComboBox.Text) <> "" Then
-                profile = Trim(Main.Instance.ProfileComboBox.Text)
+            If Trim(EvilGlobals.Main.ProfileComboBox.Text) <> "" Then
+                profile = Trim(EvilGlobals.Main.ProfileComboBox.Text)
             End If
         End If
 
@@ -194,7 +194,7 @@ Public Class OptionsForm
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
         Options.PonyCounts.Clear()
 
-        For Each ponyPanel As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
+        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
         Next
     End Sub
@@ -234,12 +234,12 @@ Public Class OptionsForm
             Next
         Next
 
-        If IsNothing(Pony.CurrentViewer) Then
+        If IsNothing(EvilGlobals.CurrentViewer) Then
             'done
             Exit Sub
-        ElseIf TypeOf Pony.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
+        ElseIf TypeOf EvilGlobals.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
             Dim area = Options.GetCombinedScreenArea()
-            DirectCast(Pony.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
+            DirectCast(EvilGlobals.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
         End If
 
     End Sub
@@ -264,12 +264,12 @@ Public Class OptionsForm
     Private Sub SizeScale_MouseUp(sender As Object, e As EventArgs) Handles SizeScale.MouseUp
         If initializing Then Return
         Options.ScaleFactor = SizeScale.Value / 100.0F
-        Main.Instance.PonySelectionPanel.SuspendLayout()
-        For Each control As PonySelectionControl In Main.Instance.PonySelectionPanel.Controls
+        EvilGlobals.Main.PonySelectionPanel.SuspendLayout()
+        For Each control As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             control.ResizeToFit()
             control.Invalidate()
         Next
-        Main.Instance.PonySelectionPanel.ResumeLayout()
+        EvilGlobals.Main.PonySelectionPanel.ResumeLayout()
     End Sub
 
     Private Sub Volume_ValueChanged(sender As Object, e As EventArgs) Handles Volume.ValueChanged
@@ -349,16 +349,16 @@ Public Class OptionsForm
     Private Sub ShowInTaskbar_CheckedChanged(sender As Object, e As EventArgs) Handles ShowViewerInTaskbar.CheckedChanged
         If initializing Then Return
         Options.ShowInTaskbar = ShowViewerInTaskbar.Checked
-        If Pony.CurrentViewer IsNot Nothing Then
-            Pony.CurrentViewer.ShowInTaskbar = Options.ShowInTaskbar
+        If EvilGlobals.CurrentViewer IsNot Nothing Then
+            EvilGlobals.CurrentViewer.ShowInTaskbar = Options.ShowInTaskbar
         End If
     End Sub
 
     Private Sub AlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
         If initializing Then Return
         Options.AlwaysOnTop = AlwaysOnTop.Checked
-        If Not IsNothing(Pony.CurrentViewer) Then
-            Pony.CurrentViewer.Topmost = Options.AlwaysOnTop
+        If Not IsNothing(EvilGlobals.CurrentViewer) Then
+            EvilGlobals.CurrentViewer.Topmost = Options.AlwaysOnTop
         End If
     End Sub
 
@@ -468,9 +468,9 @@ Public Class OptionsForm
     Private Sub PerformanceGraph_CheckedChanged(sender As Object, e As EventArgs) Handles ShowPerformanceGraph.CheckedChanged
         If initializing Then Return
         Options.ShowPerformanceGraph = ShowPerformanceGraph.Checked
-        If Pony.CurrentViewer IsNot Nothing AndAlso
-            TypeOf Pony.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
-            DirectCast(Pony.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).ShowPerformanceGraph =
+        If EvilGlobals.CurrentViewer IsNot Nothing AndAlso
+            TypeOf EvilGlobals.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
+            DirectCast(EvilGlobals.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).ShowPerformanceGraph =
                 Options.ShowPerformanceGraph
         End If
     End Sub

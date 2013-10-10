@@ -18,7 +18,7 @@ Public Class DesktopPonyAnimator
         MyBase.New(spriteViewer, spriteCollection, ponyCollection)
 
         If OperatingSystemInfo.IsMacOSX Then
-            Main.Instance.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
+            EvilGlobals.Main.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
             controlForm.SmartInvoke(Sub() controlForm.PonyComboBox.Items.AddRange(Ponies().ToArray()))
             AddHandler SpriteAdded, AddressOf ControlFormItemAdded
             AddHandler SpritesAdded, AddressOf ControlFormItemsAdded
@@ -26,11 +26,11 @@ Public Class DesktopPonyAnimator
             AddHandler SpritesRemoved, AddressOf ControlFormItemsRemoved
         End If
 
-        If Options.EnablePonyLogs AndAlso Not Reference.InPreviewMode Then
-            Main.Instance.SmartInvoke(Sub()
-                                          spriteDebugForm = New SpriteDebugForm()
-                                          spriteDebugForm.Show()
-                                      End Sub)
+        If Options.EnablePonyLogs AndAlso Not EvilGlobals.InPreviewMode Then
+            EvilGlobals.Main.SmartInvoke(Sub()
+                                             spriteDebugForm = New SpriteDebugForm()
+                                             spriteDebugForm.Show()
+                                         End Sub)
             AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
         End If
 
@@ -97,7 +97,7 @@ Public Class DesktopPonyAnimator
                 Exit Sub
             End If
 
-            If Reference.InScreensaverMode Then Main.Instance.Close()
+            If EvilGlobals.InScreensaverMode Then EvilGlobals.Main.Close()
 
             Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
             Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.ShouldBeSleeping)
@@ -152,9 +152,9 @@ Public Class DesktopPonyAnimator
             New SimpleContextMenuItem(
                 Nothing,
                 Sub()
-                    Main.Instance.SmartInvoke(
+                    EvilGlobals.Main.SmartInvoke(
                         Sub()
-                            If Game.CurrentGame IsNot Nothing Then
+                            If EvilGlobals.CurrentGame IsNot Nothing Then
                                 MessageBox.Show("Cannot remove ponies during a game.",
                                                 "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                 Return
@@ -174,9 +174,9 @@ Public Class DesktopPonyAnimator
             New SimpleContextMenuItem(
                 Nothing,
                 Sub()
-                    Main.Instance.SmartInvoke(
+                    EvilGlobals.Main.SmartInvoke(
                         Sub()
-                            If Game.CurrentGame IsNot Nothing Then
+                            If EvilGlobals.CurrentGame IsNot Nothing Then
                                 MessageBox.Show("Cannot remove ponies during a game.",
                                                 "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                 Return
@@ -198,14 +198,14 @@ Public Class DesktopPonyAnimator
                 End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 If Game.CurrentGame IsNot Nothing OrElse
+                                                                 If EvilGlobals.CurrentGame IsNot Nothing OrElse
                                                                      selectedPony Is Nothing Then Return
                                                                  selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
                                                              End Sub))
         Dim allSleeping = False
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() Main.Instance.SmartInvoke(
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() EvilGlobals.Main.SmartInvoke(
                                                                  Sub()
-                                                                     If Game.CurrentGame IsNot Nothing Then Return
+                                                                     If EvilGlobals.CurrentGame IsNot Nothing Then Return
                                                                      allSleeping = Not allSleeping
                                                                      For Each pony In Me.Ponies()
                                                                          pony.ShouldBeSleeping = allSleeping
@@ -213,10 +213,10 @@ Public Class DesktopPonyAnimator
                                                                  End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem())
         Dim ponies As IEnumerable(Of ISimpleContextMenuItem) = Nothing
-        Main.Instance.SmartInvoke(Sub() ponies = PonySelectionList())
+        EvilGlobals.Main.SmartInvoke(Sub() ponies = PonySelectionList())
         menuItems.AddLast(New SimpleContextMenuItem("Add Pony", ponies))
         Dim houses As IEnumerable(Of ISimpleContextMenuItem) = Nothing
-        Main.Instance.SmartInvoke(Sub() houses = HouseSelectionList())
+        EvilGlobals.Main.SmartInvoke(Sub() houses = HouseSelectionList())
         menuItems.AddLast(New SimpleContextMenuItem("Add House", houses))
         menuItems.AddLast(New SimpleContextMenuItem())
 
@@ -240,14 +240,14 @@ Public Class DesktopPonyAnimator
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
 
-        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() Main.Instance.SmartInvoke(Sub()
+        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() EvilGlobals.Main.SmartInvoke(Sub()
                                                                                                         Dim form = New OptionsForm()
                                                                                                         form.Show()
                                                                                                     End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
                                                                 FinishViewer()
-                                                                Main.Instance.SmartInvoke(AddressOf Main.Instance.Close)
+                                                                EvilGlobals.Main.SmartInvoke(AddressOf EvilGlobals.Main.Close)
                                                             End Sub))
         If controlForm Is Nothing Then
             ponyMenu = Viewer.CreateContextMenu(menuItems)
@@ -262,7 +262,7 @@ Public Class DesktopPonyAnimator
             New SimpleContextMenuItem(
                 Nothing,
                 Sub()
-                    Main.Instance.SmartInvoke(
+                    EvilGlobals.Main.SmartInvoke(
                         Sub()
                             If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
                                 selectedHouse.HouseBase.OptionsForm.BringToFront()
@@ -293,7 +293,7 @@ Public Class DesktopPonyAnimator
         MyBase.Update()
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
-            Main.Instance.SmartInvoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
+            EvilGlobals.Main.SmartInvoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
             countSinceLastDebug = 0
         End If
     End Sub
@@ -306,7 +306,7 @@ Public Class DesktopPonyAnimator
                 End If
             End SyncLock
             If spriteDebugForm IsNot Nothing Then
-                Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Close)
+                EvilGlobals.Main.SmartInvoke(AddressOf spriteDebugForm.Close)
                 spriteDebugForm = Nothing
             End If
             RemoveHandler SpriteAdded, AddressOf ControlFormItemAdded
@@ -322,7 +322,7 @@ Public Class DesktopPonyAnimator
 
         Dim tagList = New List(Of ISimpleContextMenuItem)
 
-        For Each tag As CaseInsensitiveString In Main.Instance.FilterOptionsBox.Items
+        For Each tag As CaseInsensitiveString In EvilGlobals.Main.FilterOptionsBox.Items
             Dim ponyList = New List(Of ISimpleContextMenuItem)
             Dim bases As IEnumerable(Of PonyBase) = PonyCollection.Bases
             If PonyCollection.RandomBase IsNot Nothing Then bases = {PonyCollection.RandomBase}.Concat(PonyCollection.Bases)
@@ -346,7 +346,7 @@ Public Class DesktopPonyAnimator
     Private Function HouseSelectionList() As List(Of ISimpleContextMenuItem)
         Dim houseBaseList = New List(Of ISimpleContextMenuItem)
 
-        For Each loopHouseBase As HouseBase In Main.Instance.HouseBases
+        For Each loopHouseBase As HouseBase In EvilGlobals.Main.HouseBases
             Dim houseBase = loopHouseBase
             houseBaseList.Add(New SimpleContextMenuItem(houseBase.Name, Sub(sender, e)
                                                                             AddHouseSelection(houseBase)
@@ -357,8 +357,8 @@ Public Class DesktopPonyAnimator
     End Function
 
     Private Sub AddPonySelection(ponyName As String)
-        Main.Instance.SmartInvoke(Sub()
-                                      If Game.CurrentGame IsNot Nothing Then
+        EvilGlobals.Main.SmartInvoke(Sub()
+                                      If EvilGlobals.CurrentGame IsNot Nothing Then
                                           MessageBox.Show("Cannot add ponies during a game.",
                                                           "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                           Return
@@ -377,8 +377,8 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub AddHouseSelection(houseBase As HouseBase)
-        Main.Instance.SmartInvoke(Sub()
-                                      If Game.CurrentGame IsNot Nothing Then
+        EvilGlobals.Main.SmartInvoke(Sub()
+                                      If EvilGlobals.CurrentGame IsNot Nothing Then
                                           MessageBox.Show("Cannot add houses during a game.",
                                                           "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                           Return
@@ -394,7 +394,7 @@ Public Class DesktopPonyAnimator
         MyBase.Dispose(disposing)
         If disposing Then
             If controlForm IsNot Nothing Then ControlFormInvoke(AddressOf controlForm.Dispose)
-            If spriteDebugForm IsNot Nothing Then Main.Instance.SmartInvoke(AddressOf spriteDebugForm.Dispose)
+            If spriteDebugForm IsNot Nothing Then EvilGlobals.Main.SmartInvoke(AddressOf spriteDebugForm.Dispose)
         End If
     End Sub
 End Class
