@@ -789,6 +789,10 @@
         /// </summary>
         private readonly ManualResetEvent spritesCanBeMutated = new ManualResetEvent(false);
         /// <summary>
+        /// Indicates when the flags indicating enumeration/mutation safety have been disposed.
+        /// </summary>
+        private bool spriteFlagsDisposed;
+        /// <summary>
         /// Synchronizes access to spritesEnumerationCount.
         /// </summary>
         private readonly object spritesEnumerationCountGuard = new object();
@@ -1196,7 +1200,7 @@
         {
             lock (spritesEnumerationGuard)
             {
-                EnsureNotDisposed();
+                EnsureFlagsNotDisposed();
                 spritesCanBeEnumerated.Reset();
                 spritesCanBeMutated.WaitOne();
             }
@@ -1215,7 +1219,7 @@
                 spritesEnumerationCount++;
             lock (spritesEnumerationGuard)
             {
-                EnsureNotDisposed();
+                EnsureFlagsNotDisposed();
                 spritesCanBeMutated.Reset();
                 spritesCanBeEnumerated.WaitOne();
             }
@@ -1267,6 +1271,15 @@
         }
 
         /// <summary>
+        /// Ensures the sprite flags have not been disposed.
+        /// </summary>
+        private void EnsureFlagsNotDisposed()
+        {
+            if (spriteFlagsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise, only
@@ -1288,6 +1301,7 @@
                 running.Dispose();
                 lock (spritesEnumerationGuard)
                 {
+                    spriteFlagsDisposed = true;
                     spritesCanBeEnumerated.Dispose();
                     spritesCanBeMutated.Dispose();
                 }
