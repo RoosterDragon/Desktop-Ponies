@@ -928,14 +928,8 @@
             EnsureNotDisposed();
 
             Console.WriteLine(GetType() + " is starting an animation loop...");
-            Started = true;
-
             runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
-            foreach (ISprite sprite in sprites)
-                sprite.Start(ElapsedTime);
             Viewer.Open();
-            Draw();
-            AnimationStarted.Raise(this);
 
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
@@ -1136,10 +1130,6 @@
             // Keeps a count of frames since performance information was last displayed.
             int performanceDelayCount = 0;
 
-            // Start timers to track total elapsed time and interval time.
-            elapsedWatch.Start();
-            intervalWatch.Start();
-
             // Loop whilst not disposed, paused or stopped.
             while (!Disposed && running.WaitOne() && !Stopped)
             {
@@ -1187,9 +1177,28 @@
         /// </summary>
         private void Tick()
         {
-            Update();
+            if (!Started)
+                StartInternal();
+            else
+                Update();
             if (!Disposed)
                 Draw();
+        }
+
+        /// <summary>
+        /// Starts timers and calls Start on all sprites in the collection.
+        /// </summary>
+        private void StartInternal()
+        {
+            // Start timers to track total elapsed time and interval time.
+            elapsedWatch.Start();
+            intervalWatch.Start();
+            // Notify the outside world that animation has started.
+            Started = true;
+            AnimationStarted.Raise(this);
+            // Start all the sprites.
+            foreach (ISprite sprite in sprites)
+                sprite.Start(ElapsedTime);
         }
 
         /// <summary>
