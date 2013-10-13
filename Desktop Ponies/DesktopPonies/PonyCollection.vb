@@ -18,6 +18,7 @@ Public Class PonyCollection
             Return _randomBase
         End Get
     End Property
+    Private ReadOnly _interactionsGuard As New Object()
     Private ReadOnly _interactions As New Dictionary(Of String, List(Of InteractionBase))()
     Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(
         Function(s) New List(Of InteractionBase)())
@@ -81,15 +82,17 @@ Public Class PonyCollection
     ''' <param name="newDirectory">The new directory name.</param>
     Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
         If oldDirectory = newDirectory Then Return
-        If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
-        If _interactions.ContainsKey(oldDirectory) Then
-            Dim actions = _interactions(oldDirectory)
-            _interactions.Remove(oldDirectory)
-            For Each action In actions
-                action.InitiatorName = newDirectory
-            Next
-            _interactions(newDirectory) = actions
-        End If
+        SyncLock _interactionsGuard
+            If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
+            If _interactions.ContainsKey(oldDirectory) Then
+                Dim actions = _interactions(oldDirectory)
+                _interactions.Remove(oldDirectory)
+                For Each action In actions
+                    action.InitiatorName = newDirectory
+                Next
+                _interactions(newDirectory) = actions
+            End If
+        End SyncLock
     End Sub
 
     ''' <summary>
@@ -98,7 +101,9 @@ Public Class PonyCollection
     ''' <param name="directory">The directory identifier of the pony.</param>
     ''' <returns>A list of all interactions where this pony is listed as the initiator.</returns>
     Public Function Interactions(directory As String) As List(Of InteractionBase)
-        Return _interactions.GetOrAdd(directory, newListFactory)
+        SyncLock _interactionsGuard
+            Return _interactions.GetOrAdd(directory, newListFactory)
+        End SyncLock
     End Function
 End Class
 
