@@ -865,19 +865,29 @@ Public Class MainForm
         End If
 
         animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
+        AddHandler animator.AnimationFinished, Sub()
+                                                   Dim localAnimator = animator
+                                                   SmartInvoke(Sub()
+                                                                   PonyShutdown()
+                                                                   If localAnimator.ExitRequested = ExitRequest.ReturnToMenu Then
+                                                                       Show()
+                                                                   ElseIf localAnimator.ExitRequested = ExitRequest.ExitApplication Then
+                                                                       Close()
+                                                                   End If
+                                                               End Sub)
+                                               End Sub
         EvilGlobals.CurrentViewer = ponyViewer
         EvilGlobals.CurrentAnimator = animator
     End Sub
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         If Not Disposing AndAlso Not IsDisposed Then
-            PonyShutdown()
-            EvilGlobals.Main.SmartInvoke(Sub()
-                                             MessageBox.Show("You will be returned to the menu because your screen resolution has changed.",
-                                                             "Resolution Changed - Desktop Ponies",
-                                                             MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                             EvilGlobals.Main.Show()
-                                         End Sub)
+            SmartInvoke(Sub()
+                            PonyShutdown()
+                            MessageBox.Show(Me, "You will be returned to the menu because your screen resolution has changed.",
+                                            "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            Show()
+                        End Sub)
         End If
     End Sub
 
@@ -919,12 +929,14 @@ Public Class MainForm
         End If
     End Sub
 
-    Friend Sub PonyShutdown()
-        If Not IsNothing(animator) Then animator.Finish()
-        EvilGlobals.PoniesHaveLaunched = False
-        If Not IsNothing(animator) Then animator.Clear()
+    Private Sub PonyShutdown()
+        RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
 
-        If Not IsNothing(EvilGlobals.CurrentGame) Then
+        If animator IsNot Nothing Then animator.Finish()
+        EvilGlobals.PoniesHaveLaunched = False
+        If animator IsNot Nothing Then animator.Clear()
+
+        If EvilGlobals.CurrentGame IsNot Nothing Then
             EvilGlobals.CurrentGame.CleanUp()
             EvilGlobals.CurrentGame = Nothing
         End If
@@ -941,11 +953,9 @@ Public Class MainForm
         End If
         animator = Nothing
 
-        If Not IsNothing(ponyViewer) Then
+        If ponyViewer IsNot Nothing Then
             ponyViewer.Close()
         End If
-
-        RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
     End Sub
 
     ''' <summary>

@@ -1,5 +1,11 @@
 ﻿Imports DesktopSprites.SpriteManagement
 
+Public Enum ExitRequest
+    None
+    ReturnToMenu
+    ExitApplication
+End Enum
+
 Public Class PonyAnimator
     Inherits AnimationLoopBase
 
@@ -10,7 +16,15 @@ Public Class PonyAnimator
     Private draggedEffect As Effect
     Private draggingPonyOrEffect As Boolean
     Private draggedPonyWasSleeping As Boolean
-    Private cursorPosition As Point
+    Private cursorPosition As Point?
+    Private interactionsNeedReinitializing As Boolean
+
+    Private _exitRequested As ExitRequest
+    Public ReadOnly Property ExitRequested As ExitRequest
+        Get
+            Return _exitRequested
+        End Get
+    End Property
 
     ''' <summary>
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
@@ -46,11 +60,11 @@ Public Class PonyAnimator
     End Sub
 
     Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
-        If TypeOf e.Item Is Pony Then InitializeInteractions()
+        If TypeOf e.Item Is Pony Then interactionsNeedReinitializing = True
     End Sub
 
     Private Sub SpritesChanged(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
-        If e.Items.Any(Function(s) TypeOf s Is Pony) Then InitializeInteractions()
+        If e.Items.Any(Function(s) TypeOf s Is Pony) Then interactionsNeedReinitializing = True
     End Sub
 
     Private Sub InitializeInteractions()
@@ -71,56 +85,62 @@ Public Class PonyAnimator
     Protected Overrides Sub Update()
         EvilGlobals.CursorLocation = Viewer.CursorPosition
         If EvilGlobals.InScreensaverMode Then
-            'keep track of the cursor and, if it moves, quit (we are supposed to act like a screensaver)
-            If cursorPosition.IsEmpty Then
-                cursorPosition = Cursor.Position
-            End If
-
-            If cursorPosition <> Cursor.Position Then
-                Finish()
-                EvilGlobals.Main.SmartInvoke(AddressOf EvilGlobals.Main.Close)
-                Exit Sub
+            ' Keep track of the cursor, and when it moves, end the screensaver.
+            If cursorPosition Is Nothing Then
+                cursorPosition = Viewer.CursorPosition
+            ElseIf cursorPosition.Value <> Viewer.CursorPosition Then
+                Finish(ExitRequest.ExitApplication)
+                Return
             End If
         End If
 
-        Dim poniesRemoved = False
         For Each sprite In Sprites
-            Dim pony = TryCast(sprite, Pony)
-            If pony Is Nothing Then Continue For
-            If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
-                RemovePony(pony)
-                poniesRemoved = True
-            End If
+            Dim updated = UpdateIfPony(sprite) OrElse UpdateIfEffect(sprite) OrElse UpdateIfHouse(sprite)
         Next
-        If poniesRemoved Then InitializeInteractions()
 
-        If Not IsNothing(EvilGlobals.CurrentGame) Then
+        If EvilGlobals.CurrentGame IsNot Nothing Then
             EvilGlobals.CurrentGame.Update()
         End If
-
-        For Each sprite In Sprites
-            Dim effect = TryCast(sprite, Effect)
-            If effect Is Nothing Then Continue For
-            If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
-                effect.OwningPony.ActiveEffects.Remove(effect)
-                QueueRemove(effect)
-            End If
-        Next
 
         If EvilGlobals.DirectXSoundAvailable Then
             CleanupSounds()
         End If
 
-        For Each sprite In Sprites
-            Dim house = TryCast(sprite, House)
-            If house Is Nothing Then Continue For
-            house.Cycle(ElapsedTime, PonyCollection.Bases)
-        Next
-
+        ProcessQueuedActions()
+        If interactionsNeedReinitializing Then
+            InitializeInteractions()
+            interactionsNeedReinitializing = False
+        End If
         MyBase.Update()
-        If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then ReturnToMenu()
+        If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then Finish(ExitRequest.ReturnToMenu)
         Sort(zOrder)
     End Sub
+
+    Private Function UpdateIfPony(sprite As ISprite) As Boolean
+        Dim pony = TryCast(sprite, Pony)
+        If pony Is Nothing Then Return False
+        If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
+            RemovePony(pony)
+        End If
+        Return True
+    End Function
+
+    Private Function UpdateIfEffect(sprite As ISprite) As Boolean
+        Dim effect = TryCast(sprite, Effect)
+        If effect Is Nothing Then Return False
+        If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
+            effect.OwningPony.ActiveEffects.Remove(effect)
+            QueueRemove(effect)
+        End If
+        Return True
+    End Function
+
+    Private Function UpdateIfHouse(sprite As ISprite) As Boolean
+        Dim house = TryCast(sprite, House)
+        If house Is Nothing Then Return False
+        house.Cycle(ElapsedTime, PonyCollection.Bases)
+        Return True
+    End Function
 
     Protected Friend Sub AddSprites(_sprites As IEnumerable(Of ISprite))
         QueueAddRangeAndStart(_sprites)
@@ -130,23 +150,18 @@ Public Class PonyAnimator
         QueueAddAndStart(pony)
     End Sub
 
-    Protected Sub RemovePony(pony As Pony)
+    Protected Friend Sub RemovePony(pony As Pony)
         QueueRemove(pony)
         For Each effect In pony.ActiveEffects
             QueueRemove(effect)
         Next
     End Sub
 
-    Public Sub RemovePonyAndReinitializeInteractions(pony As Pony)
-        RemovePony(pony)
-        InitializeInteractions()
-    End Sub
-
     Protected Friend Sub AddEffect(effect As Effect)
         QueueAddAndStart(effect)
     End Sub
 
-    Protected Sub RemoveEffect(effect As Effect)
+    Protected Friend Sub RemoveEffect(effect As Effect)
         QueueRemove(effect)
     End Sub
 
@@ -181,7 +196,13 @@ Public Class PonyAnimator
         End If
     End Sub
 
+    Public Overloads Sub Finish(exitMethod As ExitRequest)
+        _exitRequested = exitMethod
+        Finish()
+    End Sub
+
     Public Overrides Sub Finish()
+        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
         RemoveHandler SpriteAdded, AddressOf SpriteChanged
         RemoveHandler SpritesAdded, AddressOf SpritesChanged
         RemoveHandler SpriteRemoved, AddressOf SpriteChanged
@@ -189,22 +210,8 @@ Public Class PonyAnimator
         MyBase.Finish()
     End Sub
 
-    Protected Sub ReturnToMenu()
-        FinishViewer()
-        EvilGlobals.Main.SmartInvoke(Sub()
-                                      EvilGlobals.Main.PonyShutdown()
-                                      EvilGlobals.Main.Opacity = 100 'for when autostarted
-                                      EvilGlobals.Main.Show()
-                                  End Sub)
-    End Sub
-
-    Protected Sub FinishViewer()
-        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
-        Finish()
-    End Sub
-
-    Protected Sub HandleReturnToMenu(sender As Object, e As EventArgs)
-        ReturnToMenu()
+    Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)
+        Finish(ExitRequest.ReturnToMenu)
     End Sub
 
     ''' <summary>
@@ -214,7 +221,6 @@ Public Class PonyAnimator
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
     Private Sub Viewer_MouseUp(sender As Object, e As SimpleMouseEventArgs)
-
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
             If draggingPonyOrEffect Then
                 If Not IsNothing(draggedPony) Then
@@ -232,7 +238,6 @@ Public Class PonyAnimator
                 draggedEffect = Nothing
             End If
         End If
-
     End Sub
 
     ''' <summary>
@@ -242,8 +247,13 @@ Public Class PonyAnimator
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The event data.</param>
     Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
+        If EvilGlobals.InScreensaverMode Then
+            Finish(ExitRequest.ExitApplication)
+            Return
+        End If
+
         If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
-            If Not Options.PonyDraggingEnabled Then Exit Sub
+            If Not Options.PonyDraggingEnabled Then Return
 
             Dim selectedForDragPony = GetClosestUnderPoint(Of Pony)(e.Location)
             If selectedForDragPony IsNot Nothing Then

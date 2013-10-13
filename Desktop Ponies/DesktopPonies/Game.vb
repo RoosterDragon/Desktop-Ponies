@@ -315,7 +315,7 @@ Public Class Game
             Case GameStatus.InProgress
                 For Each team In Teams
                     For Each position In team.Positions
-                        position.DecideOnAction(EvilGlobals.CurrentGame)
+                        position.DecideOnAction(Me)
                         position.PushBackOverlappingPonies(allPlayers)
                         'Position.Player.Update(EvilGlobals.CurrentAnimator.ElapsedTime)
                     Next
@@ -328,7 +328,7 @@ Public Class Game
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        EvilGlobals.CurrentAnimator.RemovePonyAndReinitializeInteractions(ball.Handler)
+                        EvilGlobals.CurrentAnimator.RemovePony(ball.Handler)
                     Next
 
                     For Each team In Teams
@@ -336,8 +336,7 @@ Public Class Game
                             Status = GameStatus.Completed
                             EvilGlobals.CurrentAnimator.Pause(False)
                             MessageBox.Show(team.Name & " won!", "Winner", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                            EvilGlobals.Main.PonyShutdown()
-                            EvilGlobals.Main.SmartInvoke(Sub() EvilGlobals.Main.Visible = True)
+                            EvilGlobals.CurrentAnimator.Finish(ExitRequest.ReturnToMenu)
                             Exit Sub
                         End If
                     Next

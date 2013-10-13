@@ -220,12 +220,7 @@ Public Class DesktopControlForm
     End Function
 
     Private Sub ReturnButton_Click(sender As Object, e As EventArgs) Handles ReturnButton.Click
-        EvilGlobals.CurrentAnimator.Finish()
-        EvilGlobals.Main.SmartInvoke(Sub()
-                                         EvilGlobals.Main.PonyShutdown()
-                                         EvilGlobals.Main.Opacity = 100 'for when autostarted
-                                         EvilGlobals.Main.Show()
-                                     End Sub)
+        EvilGlobals.CurrentAnimator.Finish(ExitRequest.ReturnToMenu)
     End Sub
 
     Public Sub ForceClose()

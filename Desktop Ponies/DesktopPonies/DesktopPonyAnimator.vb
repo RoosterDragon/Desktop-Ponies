@@ -97,8 +97,6 @@ Public Class DesktopPonyAnimator
                 Exit Sub
             End If
 
-            If EvilGlobals.InScreensaverMode Then EvilGlobals.Main.Close()
-
             Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
             Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.ShouldBeSleeping)
             Dim manualControlP1 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerOne)
@@ -244,11 +242,8 @@ Public Class DesktopPonyAnimator
                                                                                                         Dim form = New OptionsForm()
                                                                                                         form.Show()
                                                                                                     End Sub)))
-        menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", AddressOf HandleReturnToMenu))
-        menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub()
-                                                                FinishViewer()
-                                                                EvilGlobals.Main.SmartInvoke(AddressOf EvilGlobals.Main.Close)
-                                                            End Sub))
+        menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", Sub() Finish(ExitRequest.ReturnToMenu)))
+        menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub() Finish(ExitRequest.ExitApplication)))
         If controlForm Is Nothing Then
             ponyMenu = Viewer.CreateContextMenu(menuItems)
         Else

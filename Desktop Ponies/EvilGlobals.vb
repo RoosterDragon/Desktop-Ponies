@@ -26,7 +26,7 @@ Friend NotInheritable Class EvilGlobals
     Friend Shared Property LastLengthAnyAudio As Integer
     Friend Shared Property AudioErrorShown As Boolean
 
-    Private Shared screensaverSettingsPath As String = Path.Combine(Path.GetTempPath, "DesktopPonies_ScreenSaver_Settings.ini")
+    Private Shared screensaverSettingsPath As String = Path.Combine(Path.GetTempPath(), "DesktopPonies_ScreenSaver_Settings.ini")
 
     ''' <summary>
     ''' Are ponies currently walking around the desktop?

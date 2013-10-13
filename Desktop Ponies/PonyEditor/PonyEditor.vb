@@ -467,27 +467,27 @@ Public Class PonyEditor
     Public Sub RunBehavior(behavior As Behavior)
         Argument.EnsureNotNull(behavior, "behavior")
         Dim poniesToRemove = editorAnimator.Ponies().Where(Function(p) Not Object.ReferenceEquals(p, PreviewPony)).ToArray()
-            For Each pony In poniesToRemove
-                editorAnimator.RemovePonyAndReinitializeInteractions(pony)
-            Next
+        For Each pony In poniesToRemove
+            editorAnimator.RemovePony(pony)
+        Next
 
-            PreviewPony.ActiveEffects.Clear()
+        PreviewPony.ActiveEffects.Clear()
 
-            Dim followTarget As Pony = Nothing
-            If behavior.OriginalFollowTargetName <> "" Then
-                followTarget = AddPony(behavior.OriginalFollowTargetName)
+        Dim followTarget As Pony = Nothing
+        If behavior.OriginalFollowTargetName <> "" Then
+            followTarget = AddPony(behavior.OriginalFollowTargetName)
 
-                If followTarget Is Nothing Then
-                    MessageBox.Show("The specified pony to follow (" & behavior.OriginalFollowTargetName &
-                                    ") for this behavior (" & behavior.Name &
-                                    ") does not exist, or has no behaviors. Please review this setting.",
-                                    "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                    Return
-                End If
+            If followTarget Is Nothing Then
+                MessageBox.Show("The specified pony to follow (" & behavior.OriginalFollowTargetName &
+                                ") for this behavior (" & behavior.Name &
+                                ") does not exist, or has no behaviors. Please review this setting.",
+                                "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                Return
             End If
+        End If
 
-            PreviewPony.SelectBehavior(behavior)
-            PreviewPony.followTarget = followTarget
+        PreviewPony.SelectBehavior(behavior)
+        PreviewPony.followTarget = followTarget
     End Sub
 
     Private Function GetGridItem(Of TPonyIniSerializable As IPonyIniSerializable)(sender As Object, e As DataGridViewCellEventArgs,
