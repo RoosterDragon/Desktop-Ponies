@@ -60,7 +60,7 @@
         /// </summary>
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
-        void Draw(ReadOnlyCollection<ISprite> sprites);
+        void Draw(ICollection<ISprite> sprites);
         /// <summary>
         /// Closes the interface.
         /// </summary>

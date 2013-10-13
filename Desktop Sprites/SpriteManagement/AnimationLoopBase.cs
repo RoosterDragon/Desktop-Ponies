@@ -14,6 +14,156 @@
     /// </summary>
     public abstract class AnimationLoopBase : Disposable, ISpriteCollectionController
     {
+        #region ConcurrentReadOnlySpriteCollection struct
+        /// <summary>
+        /// Provides read-only access to the sprite collection. Multiple threads may enumerate the collection concurrently without external
+        /// synchronization. When mutating of the collection is required, the animation thread block until all enumerators complete.
+        /// </summary>
+        public struct ConcurrentReadOnlySpriteCollection : ICollection<ISprite>
+        {
+            #region ConcurrentEnumerator struct
+            /// <summary>
+            /// Enumerates the sprite collection. Enumerator is blocked until all mutations of the sprite collection complete, but the
+            /// collection may safely be enumerated from several threads at once whilst no mutations are occurring.
+            /// </summary>
+            public struct ConcurrentEnumerator : IEnumerator<ISprite>
+            {
+                private readonly AnimationLoopBase animationLoopBase;
+                private LinkedList<ISprite>.Enumerator enumerator;
+                internal ConcurrentEnumerator(AnimationLoopBase animationLoopBase)
+                {
+                    this.animationLoopBase = animationLoopBase;
+                    animationLoopBase.StartSpritesEnumerator();
+                    enumerator = animationLoopBase.sprites.GetEnumerator();
+                }
+                /// <summary>
+                /// Advances the enumerator to the next element of the collection.
+                /// </summary>
+                /// <returns>Returns true if the enumerator was successfully advanced to the next element; false if the enumerator has
+                /// passed the end of the collection.</returns>
+                public bool MoveNext()
+                {
+                    return enumerator.MoveNext();
+                }
+                /// <summary>
+                /// Gets the element in the collection at the current position of the enumerator.
+                /// </summary>
+                public ISprite Current
+                {
+                    get { return enumerator.Current; }
+                }
+                object System.Collections.IEnumerator.Current
+                {
+                    get { return Current; }
+                }
+                /// <summary>
+                /// Sets the enumerator to its initial position, which is before the first element in the collection.
+                /// </summary>
+                public void Reset()
+                {
+                    ((System.Collections.IEnumerator)enumerator).Reset();
+                }
+                /// <summary>
+                /// Releases all resources used by the enumerator. Be sure to call this method or the animation thread will be blocked.
+                /// </summary>
+                public void Dispose()
+                {
+                    enumerator.Dispose();
+                    animationLoopBase.EndSpritesEnumerator();
+                }
+            }
+            #endregion
+            private AnimationLoopBase animationLoopBase;
+            internal ConcurrentReadOnlySpriteCollection(AnimationLoopBase animationLoopBase)
+            {
+                this.animationLoopBase = animationLoopBase;
+            }
+            /// <summary>
+            /// Gets the number of sprites in the collection.
+            /// </summary>
+            public int Count
+            {
+                get { return animationLoopBase.sprites.Count; }
+            }
+            /// <summary>
+            /// Gets a thread-safe enumerator for the collection.
+            /// </summary>
+            /// <returns>A thread-safe enumerator for the collection.</returns>
+            public ConcurrentEnumerator GetEnumerator()
+            {
+                return new ConcurrentEnumerator(animationLoopBase);
+            }
+            IEnumerator<ISprite> IEnumerable<ISprite>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            /// <summary>
+            /// Determines whether a sprite is in the collection.
+            /// </summary>
+            /// <param name="sprite">The sprite to locate in the collection.</param>
+            /// <returns>Returns true if value is found in the collection; otherwise, false.</returns>
+            public bool Contains(ISprite sprite)
+            {
+                try
+                {
+                    animationLoopBase.StartSpritesEnumerator();
+                    return animationLoopBase.sprites.Contains(sprite);
+                }
+                finally
+                {
+                    animationLoopBase.EndSpritesEnumerator();
+                }
+            }
+            /// <summary>
+            /// Copies the entire collection to a compatible one-dimensional <see cref="T:System.Array"/>, starting at the specified index
+            /// of the target array.
+            /// </summary>
+            /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from
+            /// the collection. The <see cref="T:System.Array"/> must have zero-based indexing.</param>
+            /// <param name="index">The zero-based index in array at which copying begins.</param>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception>
+            /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than zero.</exception>
+            /// <exception cref="T:System.ArgumentException">The number of elements in the source collection is greater than the available
+            /// space from <paramref name="index"/> to the end of the destination array.</exception>
+            public void CopyTo(ISprite[] array, int index)
+            {
+                try
+                {
+                    animationLoopBase.StartSpritesEnumerator();
+                    animationLoopBase.sprites.CopyTo(array, index);
+                }
+                finally
+                {
+                    animationLoopBase.EndSpritesEnumerator();
+                }
+            }
+            void ICollection<ISprite>.Add(ISprite item)
+            {
+                throw ReadOnlyException();
+            }
+            void ICollection<ISprite>.Clear()
+            {
+                throw ReadOnlyException();
+            }
+            bool ICollection<ISprite>.IsReadOnly
+            {
+                get { return true; }
+            }
+            bool ICollection<ISprite>.Remove(ISprite item)
+            {
+                throw ReadOnlyException();
+            }
+            private InvalidOperationException ReadOnlyException()
+            {
+                return new InvalidOperationException("Collection is read-only.");
+            }
+        }
+        #endregion
+
         #region FrameRecordCollector class
         /// <summary>
         /// Holds information about render times, frame rate and garbage collections. Provides methods to output and display this data.
@@ -335,14 +485,11 @@
             }
 
             /// <summary>
-            /// Writes performance summary to the specified <see cref="T:System.Text.StringBuilder"/>.
+            /// Gets a short summary of current performance.
             /// </summary>
-            /// <param name="sb">The <see cref="T:System.Text.StringBuilder"/> to be cleared and then where the performance summary will be
-            /// output.</param>
-            public void OutputSummaryTo(StringBuilder sb)
+            public string GetSummary()
             {
-                sb.Clear();
-                sb.AppendFormat(CultureInfo.CurrentCulture,
+                return string.Format(CultureInfo.CurrentCulture,
                     "fps: {0:0.0}/{1:0.0} time: {2:0.0}ms/{3:0.0}ms/{4:0.0}ms interval: {5:0.0}ms/{6:0.0}ms/{7:0.0}ms",
                     FramesPerSecond, AchievableFramesPerSecond,
                     MinTime, MeanTime, MaxTime,
@@ -597,6 +744,12 @@
         /// Used to pause the thread running the main loop. Signals false whilst paused, otherwise signals true.
         /// </summary>
         private readonly ManualResetEvent running = new ManualResetEvent(true);
+#if DEBUG
+        /// <summary>
+        /// Tracks lost time from long delays when debugging the application.
+        /// </summary>
+        private TimeSpan lostTime = TimeSpan.Zero;
+#endif
         /// <summary>
         /// The total elapsed time that animation has been running.
         /// </summary>
@@ -608,8 +761,13 @@
         {
             get 
             {
+#if DEBUG
+                lock (tickSync)
+                    return elapsedTime - lostTime;
+#else
                 lock (tickSync)
                     return elapsedTime;
+#endif
             }
         }
         /// <summary>
@@ -617,6 +775,27 @@
         /// </summary>
         private readonly object tickSync = new object();
 
+        /// <summary>
+        /// Provides reset/set atomicity and disposal safety for the two enumeration/mutation flags guarding access to the sprite
+        /// collection.
+        /// </summary>
+        private readonly object spritesEnumerationGuard = new object();
+        /// <summary>
+        /// Flags when the sprite collection can be enumerated to other threads.
+        /// </summary>
+        private readonly ManualResetEvent spritesCanBeEnumerated = new ManualResetEvent(true);
+        /// <summary>
+        /// Flags when the sprite collection can be mutated to other threads.
+        /// </summary>
+        private readonly ManualResetEvent spritesCanBeMutated = new ManualResetEvent(false);
+        /// <summary>
+        /// Synchronizes access to spritesEnumerationCount.
+        /// </summary>
+        private readonly object spritesEnumerationCountGuard = new object();
+        /// <summary>
+        /// A count of the number of active enumerators of the sprites collection.
+        /// </summary>
+        private int spritesEnumerationCount;
         /// <summary>
         /// The collection of active sprites.
         /// </summary>
@@ -628,7 +807,7 @@
         /// <summary>
         /// Gets the collection of active sprites.
         /// </summary>
-        protected ReadOnlyCollection<ISprite> Sprites { get; private set; }
+        protected ConcurrentReadOnlySpriteCollection Sprites { get; private set; }
         /// <summary>
         /// Gets the viewer for the sprite collection.
         /// </summary>
@@ -718,7 +897,7 @@
                 sprites = new LinkedList<ISprite>();
             else
                 sprites = new LinkedList<ISprite>(spriteCollection);
-            Sprites = sprites.AsReadOnly();
+            Sprites = new ConcurrentReadOnlySpriteCollection(this);
 
             // Stop the animator when the viewer is closed.
             Viewer.InterfaceClosed += (sender, e) => Finish();
@@ -747,11 +926,11 @@
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Started = true;
 
+            runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
             foreach (ISprite sprite in sprites)
                 sprite.Start(ElapsedTime);
-
-            runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
             Viewer.Open();
+            Draw();
             AnimationStarted.Raise(this);
 
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
@@ -952,10 +1131,6 @@
         {
             // Keeps a count of frames since performance information was last displayed.
             int performanceDelayCount = 0;
-#if DEBUG
-            // Tracks lost time from long delays when debugging the application.
-            TimeSpan lostTime = TimeSpan.Zero;
-#endif
 
             // Start timers to track total elapsed time and interval time.
             elapsedWatch.Start();
@@ -969,7 +1144,7 @@
 
 #if DEBUG
                 // When debugging, assume long delays are due to hitting breakpoints.
-                TimeSpan tickElapsed = elapsedWatch.Elapsed - ElapsedTime;
+                TimeSpan tickElapsed = elapsedWatch.Elapsed - elapsedTime;
                 float frameTime;
                 if (tickElapsed.TotalMilliseconds < 2000)
                 {
@@ -998,8 +1173,7 @@
                 if (++performanceDelayCount >= MaximumFramesPerSecond * 10)
                 {
                     performanceDelayCount = 0;
-                    performanceRecorder.OutputSummaryTo(performanceSummary);
-                    Console.WriteLine(performanceSummary.ToString());
+                    Console.WriteLine(performanceRecorder.GetSummary());
                 }
             }
         }
@@ -1015,15 +1189,60 @@
         }
 
         /// <summary>
-        /// Updates the sprites.
+        /// Process any pending queued actions on the sprites collection now. This method is called during every update, buy may be called
+        /// in derived classes if they need to force queued changes to be applied immediately. 
+        /// </summary>
+        protected void ProcessQueuedActions()
+        {
+            lock (spritesEnumerationGuard)
+            {
+                EnsureNotDisposed();
+                spritesCanBeEnumerated.Reset();
+                spritesCanBeMutated.WaitOne();
+            }
+            while (queuedSpriteActions.Count > 0)
+                queuedSpriteActions.Dequeue().Invoke();
+            spritesCanBeEnumerated.Set();
+        }
+
+        /// <summary>
+        /// Begins enumerating sprites once any pending mutations complete. Must be succeeded by a matching call to EndSpritesEnumerator on
+        /// completion of enumeration.
+        /// </summary>
+        private void StartSpritesEnumerator()
+        {
+            lock (spritesEnumerationCountGuard)
+                spritesEnumerationCount++;
+            lock (spritesEnumerationGuard)
+            {
+                EnsureNotDisposed();
+                spritesCanBeMutated.Reset();
+                spritesCanBeEnumerated.WaitOne();
+            }
+        }
+
+        /// <summary>
+        /// Ends enumeration of sprites, and allows mutation again if all enumerators have completed. Must be preceded by a matching call
+        /// to StartSpritesEnumerator.
+        /// </summary>
+        private void EndSpritesEnumerator()
+        {
+            lock (spritesEnumerationCountGuard)
+                if (--spritesEnumerationCount == 0)
+                    if (!Disposed)
+                        spritesCanBeMutated.Set();
+        }
+
+        /// <summary>
+        /// Process queued actions and then updates the sprites.
         /// </summary>
         protected virtual void Update()
         {
+            EnsureNotDisposed();
             lock (tickSync)
             {
                 elapsedTime = elapsedWatch.Elapsed;
-                while (queuedSpriteActions.Count > 0)
-                    queuedSpriteActions.Dequeue().Invoke();
+                ProcessQueuedActions();
                 foreach (ISprite sprite in sprites)
                     sprite.Update(ElapsedTime);
             }
@@ -1034,6 +1253,7 @@
         /// </summary>
         protected virtual void Draw()
         {
+            EnsureNotDisposed();
             lock (tickSync)
                 Viewer.Draw(Sprites);
         }
@@ -1066,6 +1286,11 @@
                 }
                 Viewer.Close();
                 running.Dispose();
+                lock (spritesEnumerationGuard)
+                {
+                    spritesCanBeEnumerated.Dispose();
+                    spritesCanBeMutated.Dispose();
+                }
             }
         }
     }

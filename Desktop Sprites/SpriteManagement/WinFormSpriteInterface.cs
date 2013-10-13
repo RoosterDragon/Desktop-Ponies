@@ -504,7 +504,7 @@
         /// <summary>
         /// Collection of sprites to be rendered.
         /// </summary>
-        private ReadOnlyCollection<ISprite> sprites;
+        private ICollection<ISprite> sprites;
         /// <summary>
         /// Synchronizes access to the sprites field.
         /// </summary>
@@ -1161,7 +1161,7 @@
         /// </summary>
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
-        public void Draw(ReadOnlyCollection<ISprite> sprites)
+        public void Draw(ICollection<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
 
@@ -1172,7 +1172,7 @@
                 this.sprites = sprites;
             ApplicationInvoke(render);
             lock (spritesGuard)
-                this.sprites = new ReadOnlyCollection<ISprite>();
+                this.sprites = null;
         }
 
         /// <summary>
