@@ -48,6 +48,8 @@ Public Class EditorPonyAnimator
                                 End Sub))
         End If
         MyBase.Update()
+        QueueRemove(AddressOf SpriteIsOldInteractionTarget)
+        ProcessQueuedActions()
         If Not editor.IsClosing Then
             editor.BeginInvoke(New MethodInvoker(
                                  Sub()
@@ -70,6 +72,15 @@ Public Class EditorPonyAnimator
                                  End Sub))
         End If
     End Sub
+
+    Private Function SpriteIsOldInteractionTarget(sprite As ISprite) As Boolean
+        Dim pony = TryCast(sprite, Pony)
+        Dim result = pony IsNot Nothing AndAlso
+            Not Object.ReferenceEquals(pony, editor.PreviewPony) AndAlso
+            Not Object.ReferenceEquals(pony, editor.PreviewPony.followTarget)
+        If result Then Stop
+        Return result
+    End Function
 
     Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
         If e.Buttons.HasFlag(SimpleMouseButtons.Right) Then
