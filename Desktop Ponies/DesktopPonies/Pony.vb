@@ -1252,7 +1252,7 @@ Public Class Pony
     ''' <summary>
     ''' Teleport the pony to a random location within bounds.
     ''' </summary>
-    Friend Sub Teleport()
+    Private Sub Teleport()
         ' If we are in preview mode, just teleport into the center for consistency.
         If EvilGlobals.InPreviewMode Then
             TopLeftLocation = Vector2.Truncate(New Vector2F(EvilGlobals.PreviewWindowRectangle.Center()) - (CurrentImageSize / 2.0F))

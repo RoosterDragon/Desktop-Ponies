@@ -91,7 +91,6 @@ Public Class PonyPreview
                 editorAnimator.ChangeEditorMenu(previewPony.Base)
                 If startBehavior IsNot Nothing Then
                     previewPony.SelectBehavior(startBehavior)
-                    previewPony.Teleport()
                 End If
             End If
         End SyncLock

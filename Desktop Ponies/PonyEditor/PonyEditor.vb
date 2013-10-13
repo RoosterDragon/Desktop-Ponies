@@ -450,7 +450,6 @@ Public Class PonyEditor
             For Each ponyBase In Ponies.Bases
                 If ponyBase.Directory = name Then
                     Dim newPony = New Pony(ponyBase)
-                    newPony.Teleport()
                     editorAnimator.AddPony(newPony)
                     Return newPony
                 End If
