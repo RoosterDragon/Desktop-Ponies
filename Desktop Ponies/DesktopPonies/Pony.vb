@@ -1673,6 +1673,11 @@ Public Class Pony
             HaltedForCursor = True
             previousBehavior = CurrentBehavior
 
+            ' Remove effects for the previous behavior. We don't want them lingering when the behavior restarts after the mouse moves away.
+            For Each effect In ActiveEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name)
+                effect.DesiredDuration = 0
+            Next
+
             ' Select a stationary behavior, or if possible a dedicated mouseover behavior.
             CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)
             For Each behavior In Behaviors
@@ -2321,7 +2326,8 @@ Public Class Pony
 
     'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
     Friend Shared Function GetEffectLocation(EffectImageSize As Size, dir As Direction,
-                                      ParentLocation As Point, ParentSize As Vector2, centering As Direction, scale As Single) As Point
+                                             ParentLocation As Point, ParentSize As Vector2,
+                                             centering As Direction, scale As Single) As Point
 
         Dim point As Point
 
@@ -3138,7 +3144,14 @@ Public Class Effect
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
-        If BeingDragged Then
+        If Base.Follow Then
+            Location = Pony.GetEffectLocation(CurrentImageSize,
+                                              PlacementDirection,
+                                              OwningPony.TopLeftLocation,
+                                              OwningPony.CurrentImageSize,
+                                              Centering,
+                                              CSng(OwningPony.Scale))
+        ElseIf BeingDragged Then
             Location = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
     End Sub
