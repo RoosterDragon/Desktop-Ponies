@@ -288,7 +288,7 @@ Public Class DesktopPonyAnimator
         MyBase.Update()
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
-            EvilGlobals.Main.SmartInvoke(Sub() If spriteDebugForm IsNot Nothing Then spriteDebugForm.UpdateSprites(Sprites))
+            spriteDebugForm.SmartInvoke(Sub() spriteDebugForm.UpdateSprites(Sprites))
             countSinceLastDebug = 0
         End If
     End Sub
@@ -301,7 +301,7 @@ Public Class DesktopPonyAnimator
                 End If
             End SyncLock
             If spriteDebugForm IsNot Nothing Then
-                EvilGlobals.Main.SmartInvoke(AddressOf spriteDebugForm.Close)
+                spriteDebugForm.SmartInvoke(AddressOf spriteDebugForm.Close)
                 spriteDebugForm = Nothing
             End If
             RemoveHandler SpriteAdded, AddressOf ControlFormItemAdded
