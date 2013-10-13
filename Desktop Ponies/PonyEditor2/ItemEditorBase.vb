@@ -370,4 +370,19 @@ Public Class ItemEditorBase
                     End Sub)
             End Sub)
     End Sub
+
+    Protected Sub SyncTypedImagePath(selector As FileSelector, behaviorImagePath As String, setPath As Action(Of String),
+                                   ByRef typedPath As String, ByRef typedPathMissing As Boolean)
+        If typedPathMissing Then
+            selector.FilePathComboBox.Items.Remove(typedPath)
+        End If
+        typedPath = Path.GetFileName(behaviorImagePath)
+        If typedPath = Base.Directory OrElse typedPath = "" Then typedPath = Nothing
+        selector.FilePath = typedPath
+        typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathEquality.Comparison)
+        If typedPathMissing Then
+            selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Add(typedPath)
+        End If
+        setPath(selector.FilePath)
+    End Sub
 End Class

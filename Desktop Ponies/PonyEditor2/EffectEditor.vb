@@ -111,9 +111,11 @@ Friend Class EffectEditor
         SelectItemElseNoneOption(RightCenterComboBox, Edited.CenteringRight)
         SelectOrOvertypeItem(BehaviorComboBox, Edited.BehaviorName)
 
-        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path, Sub(path) Edited.LeftImage.Path = path,
+        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path,
+                           Sub(filePath) Edited.LeftImage.Path = Path.Combine(PonyBasePath, filePath),
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
-        SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path, Sub(path) Edited.RightImage.Path = path,
+        SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path,
+                           Sub(filePath) Edited.RightImage.Path = Path.Combine(PonyBasePath, filePath),
                            lastTypedRightFileName, lastTypedRightFileNameMissing)
         LeftImageViewer.Placement = Edited.PlacementDirectionLeft
         LeftImageViewer.Centering = Edited.CenteringLeft
@@ -137,22 +139,6 @@ Friend Class EffectEditor
             rightEffectImagePath = RightImageFileSelector.FilePath
             UpdateImageDisplay(RightImageFileSelector, RightImageViewer, rightBehaviorImagePath)
         End If
-    End Sub
-
-    Private Sub SyncTypedImagePath(selector As FileSelector, behaviorImagePath As String, setPath As Action(Of String),
-                                   ByRef typedPath As String, ByRef typedPathMissing As Boolean)
-        If typedPathMissing Then
-            selector.FilePathComboBox.Items.Remove(typedPath)
-        End If
-        typedPath = Path.GetFileName(behaviorImagePath)
-        If typedPath = Base.Directory OrElse typedPath = "" Then typedPath = Nothing
-        selector.FilePath = typedPath
-        typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathEquality.Comparison)
-        If typedPathMissing Then
-            selector.FilePathComboBox.Items.Add(typedPath)
-            selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Count - 1
-        End If
-        setPath(selector.FilePath)
     End Sub
 
     Private Sub UpdateImageDisplay(selector As FileSelector, viewer As EffectImageViewer, behaviorImagePath As String)

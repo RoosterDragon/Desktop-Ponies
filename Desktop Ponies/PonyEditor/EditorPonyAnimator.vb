@@ -75,11 +75,9 @@ Public Class EditorPonyAnimator
 
     Private Function SpriteIsOldInteractionTarget(sprite As ISprite) As Boolean
         Dim pony = TryCast(sprite, Pony)
-        Dim result = pony IsNot Nothing AndAlso
+        Return pony IsNot Nothing AndAlso
             Not Object.ReferenceEquals(pony, editor.PreviewPony) AndAlso
             Not Object.ReferenceEquals(pony, editor.PreviewPony.followTarget)
-        If result Then Stop
-        Return result
     End Function
 
     Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
