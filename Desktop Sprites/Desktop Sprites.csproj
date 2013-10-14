@@ -108,6 +108,7 @@
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\Linq.cs" />
+    <Compile Include="Core\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Core\Runtime.cs" />
     <Compile Include="Core\IOExtensions.cs" />
     <Compile Include="Forms\AnimatedImageIndexer.cs">

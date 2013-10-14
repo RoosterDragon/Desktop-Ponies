@@ -28,12 +28,12 @@
             /// </summary>
             public struct ConcurrentEnumerator : IEnumerator<ISprite>
             {
-                private readonly AnimationLoopBase animationLoopBase;
+                private readonly ReaderWriterLockSlim guard;
                 private LinkedList<ISprite>.Enumerator enumerator;
                 internal ConcurrentEnumerator(AnimationLoopBase animationLoopBase)
                 {
-                    this.animationLoopBase = animationLoopBase;
-                    animationLoopBase.StartSpritesEnumerator();
+                    this.guard = animationLoopBase.spritesGuard;
+                    guard.EnterReadLock();
                     enumerator = animationLoopBase.sprites.GetEnumerator();
                 }
                 /// <summary>
@@ -69,7 +69,7 @@
                 public void Dispose()
                 {
                     enumerator.Dispose();
-                    animationLoopBase.EndSpritesEnumerator();
+                    guard.ExitReadLock();
                 }
             }
             #endregion
@@ -108,15 +108,8 @@
             /// <returns>Returns true if value is found in the collection; otherwise, false.</returns>
             public bool Contains(ISprite sprite)
             {
-                try
-                {
-                    animationLoopBase.StartSpritesEnumerator();
+                using (animationLoopBase.spritesGuard.InReadMode())
                     return animationLoopBase.sprites.Contains(sprite);
-                }
-                finally
-                {
-                    animationLoopBase.EndSpritesEnumerator();
-                }
             }
             /// <summary>
             /// Copies the entire collection to a compatible one-dimensional <see cref="T:System.Array"/>, starting at the specified index
@@ -131,15 +124,8 @@
             /// space from <paramref name="index"/> to the end of the destination array.</exception>
             public void CopyTo(ISprite[] array, int index)
             {
-                try
-                {
-                    animationLoopBase.StartSpritesEnumerator();
+                using (animationLoopBase.spritesGuard.InReadMode())
                     animationLoopBase.sprites.CopyTo(array, index);
-                }
-                finally
-                {
-                    animationLoopBase.EndSpritesEnumerator();
-                }
             }
             void ICollection<ISprite>.Add(ISprite item)
             {
@@ -776,30 +762,9 @@
         private readonly object tickSync = new object();
 
         /// <summary>
-        /// Provides reset/set atomicity and disposal safety for the two enumeration/mutation flags guarding access to the sprite
-        /// collection.
+        /// Guards enumeration and mutation of the sprites collection.
         /// </summary>
-        private readonly object spritesEnumerationGuard = new object();
-        /// <summary>
-        /// Flags when the sprite collection can be enumerated to other threads.
-        /// </summary>
-        private readonly ManualResetEvent spritesCanBeEnumerated = new ManualResetEvent(true);
-        /// <summary>
-        /// Flags when the sprite collection can be mutated to other threads.
-        /// </summary>
-        private readonly ManualResetEvent spritesCanBeMutated = new ManualResetEvent(false);
-        /// <summary>
-        /// Indicates when the flags indicating enumeration/mutation safety have been disposed.
-        /// </summary>
-        private bool spriteFlagsDisposed;
-        /// <summary>
-        /// Synchronizes access to spritesEnumerationCount.
-        /// </summary>
-        private readonly object spritesEnumerationCountGuard = new object();
-        /// <summary>
-        /// A count of the number of active enumerators of the sprites collection.
-        /// </summary>
-        private int spritesEnumerationCount;
+        private readonly ReaderWriterLockSlim spritesGuard = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         /// <summary>
         /// The collection of active sprites.
         /// </summary>
@@ -928,7 +893,7 @@
             EnsureNotDisposed();
 
             Console.WriteLine(GetType() + " is starting an animation loop...");
-            runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
+            Interlocked.Exchange(ref runner, new Thread(Run) { Name = "AnimationLoopBase.Run" });
             Viewer.Open();
             runner.Start();
         }
@@ -1205,43 +1170,9 @@
         /// </summary>
         protected void ProcessQueuedActions()
         {
-            lock (spritesEnumerationGuard)
-            {
-                EnsureFlagsNotDisposed();
-                spritesCanBeEnumerated.Reset();
-                spritesCanBeMutated.WaitOne();
-            }
-            while (queuedSpriteActions.Count > 0)
-                queuedSpriteActions.Dequeue().Invoke();
-            spritesCanBeEnumerated.Set();
-        }
-
-        /// <summary>
-        /// Begins enumerating sprites once any pending mutations complete. Must be succeeded by a matching call to EndSpritesEnumerator on
-        /// completion of enumeration.
-        /// </summary>
-        private void StartSpritesEnumerator()
-        {
-            lock (spritesEnumerationCountGuard)
-                spritesEnumerationCount++;
-            lock (spritesEnumerationGuard)
-            {
-                EnsureFlagsNotDisposed();
-                spritesCanBeMutated.Reset();
-                spritesCanBeEnumerated.WaitOne();
-            }
-        }
-
-        /// <summary>
-        /// Ends enumeration of sprites, and allows mutation again if all enumerators have completed. Must be preceded by a matching call
-        /// to StartSpritesEnumerator.
-        /// </summary>
-        private void EndSpritesEnumerator()
-        {
-            lock (spritesEnumerationCountGuard)
-                if (--spritesEnumerationCount == 0)
-                    if (!Disposed)
-                        spritesCanBeMutated.Set();
+            using (spritesGuard.InWriteMode())
+                while (queuedSpriteActions.Count > 0)
+                    queuedSpriteActions.Dequeue().Invoke();
         }
 
         /// <summary>
@@ -1249,7 +1180,8 @@
         /// </summary>
         protected virtual void Update()
         {
-            EnsureNotDisposed();
+            if (runner == null)
+                EnsureNotDisposed();
             lock (tickSync)
             {
                 elapsedTime = elapsedWatch.Elapsed;
@@ -1264,7 +1196,8 @@
         /// </summary>
         protected virtual void Draw()
         {
-            EnsureNotDisposed();
+            if (runner == null)
+                EnsureNotDisposed();
             lock (tickSync)
                 Viewer.Draw(Sprites);
         }
@@ -1275,15 +1208,6 @@
         public virtual void Finish()
         {
             Dispose();
-        }
-
-        /// <summary>
-        /// Ensures the sprite flags have not been disposed.
-        /// </summary>
-        private void EnsureFlagsNotDisposed()
-        {
-            if (spriteFlagsDisposed)
-                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <summary>
@@ -1301,17 +1225,12 @@
                     running.Set();
                     if (Thread.CurrentThread != runner)
                         runner.Join();
-                    runner = null;
+                    Interlocked.Exchange(ref runner, null);
                     AnimationFinished.Raise(this);
                 }
                 Viewer.Close();
                 running.Dispose();
-                lock (spritesEnumerationGuard)
-                {
-                    spriteFlagsDisposed = true;
-                    spritesCanBeEnumerated.Dispose();
-                    spritesCanBeMutated.Dispose();
-                }
+                spritesGuard.Dispose();
             }
         }
     }
