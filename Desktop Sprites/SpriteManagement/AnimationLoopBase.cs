@@ -930,11 +930,6 @@
             Console.WriteLine(GetType() + " is starting an animation loop...");
             runner = new Thread(Run) { Name = "AnimationLoopBase.Run" };
             Viewer.Open();
-
-            // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
-            // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
-            General.FullCollect();
-
             runner.Start();
         }
 
@@ -1199,6 +1194,9 @@
             // Start all the sprites.
             foreach (ISprite sprite in sprites)
                 sprite.Start(ElapsedTime);
+            // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
+            // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
+            General.FullCollect();
         }
 
         /// <summary>
