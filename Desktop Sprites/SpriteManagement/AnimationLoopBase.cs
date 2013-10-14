@@ -83,7 +83,11 @@
             /// </summary>
             public int Count
             {
-                get { return animationLoopBase.sprites.Count; }
+                get
+                {
+                    using (animationLoopBase.spritesGuard.InReadMode())
+                        return animationLoopBase.sprites.Count;
+                }
             }
             /// <summary>
             /// Gets a thread-safe enumerator for the collection.
@@ -1055,7 +1059,8 @@
         /// ISprite.</exception>
         protected void Sort()
         {
-            sprites.Sort();
+            using (spritesGuard.InWriteMode())
+                sprites.Sort();
         }
 
         /// <summary>
@@ -1065,7 +1070,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
         protected void Sort(Comparison<ISprite> comparison)
         {
-            sprites.Sort(comparison);
+            using (spritesGuard.InWriteMode())
+                sprites.Sort(comparison);
         }
 
         /// <summary>
@@ -1079,7 +1085,8 @@
         /// ISprite.</exception>
         protected void Sort(IComparer<ISprite> comparer)
         {
-            sprites.Sort(comparer);
+            using (spritesGuard.InWriteMode())
+                sprites.Sort(comparer);
         }
 
         /// <summary>
@@ -1157,7 +1164,7 @@
             Started = true;
             AnimationStarted.Raise(this);
             // Start all the sprites.
-            foreach (ISprite sprite in sprites)
+            foreach (ISprite sprite in Sprites)
                 sprite.Start(ElapsedTime);
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
@@ -1186,7 +1193,7 @@
             {
                 elapsedTime = elapsedWatch.Elapsed;
                 ProcessQueuedActions();
-                foreach (ISprite sprite in sprites)
+                foreach (ISprite sprite in Sprites)
                     sprite.Update(ElapsedTime);
             }
         }
