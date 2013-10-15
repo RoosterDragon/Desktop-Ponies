@@ -518,7 +518,7 @@
         /// <summary>
         /// The full <see cref="T:System.Drawing.Font"/> definition to be used when drawing text to the screen.
         /// </summary>
-        private readonly Font font = new Font(FontFamily.GenericSansSerif, 12, GraphicsUnit.Pixel);
+        private readonly Font font;
         /// <summary>
         /// A <see cref="T:System.Drawing.Brush"/> whose color is roughly white.
         /// </summary>
@@ -800,6 +800,8 @@
                     (b, p, tI, s, w, h, d, hC) => BitmapFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
                     BitmapFrame.AllowableBitDepths));
             render = new MethodInvoker(Render);
+            using (var family = FontFamily.GenericSansSerif)
+                font = new Font(family, 12, GraphicsUnit.Pixel);
 
             Thread appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
             appThread.SetApartmentState(ApartmentState.STA);
