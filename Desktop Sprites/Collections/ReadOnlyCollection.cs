@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using DesktopSprites.Core;
 
     /// <summary>
@@ -28,6 +29,8 @@
     /// Wraps a mutable collection in order to provide a read-only interface.
     /// </summary>
     /// <typeparam name="T">The type of the elements.</typeparam>
+    [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(ReadOnlyCollection<>.DebugView))]
     public struct ReadOnlyCollection<T> : ICollection<T>
     {
         /// <summary>
@@ -163,5 +166,35 @@
         {
             return GetEnumerator();
         }
+        #region DebugView class
+        /// <summary>
+        /// Provides a debugger view for a <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/>.
+        /// </summary>
+        private sealed class DebugView
+        {
+            /// <summary>
+            /// The collection for which an alternate view is being provided.
+            /// </summary>
+            private ReadOnlyCollection<T> readOnlyCollection;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1.DebugView"/> class.
+            /// </summary>
+            /// <param name="readOnlyCollection">The collection to proxy.</param>
+            public DebugView(ReadOnlyCollection<T> readOnlyCollection)
+            {
+                this.readOnlyCollection = Argument.EnsureNotNull(readOnlyCollection, "readOnlyCollection");
+            }
+
+            /// <summary>
+            /// Gets a view of the items in the collection.
+            /// </summary>
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            public T[] Items
+            {
+                get { return readOnlyCollection.collection as T[] ?? readOnlyCollection.collection.ToArray(); }
+            }
+        }
+        #endregion
     }
 }

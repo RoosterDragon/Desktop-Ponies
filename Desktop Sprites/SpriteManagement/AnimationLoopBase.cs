@@ -19,6 +19,8 @@
         /// Provides read-only access to the sprite collection. Multiple threads may enumerate the collection concurrently without external
         /// synchronization. When mutating of the collection is required, the animation thread block until all enumerators complete.
         /// </summary>
+        [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
+        [System.Diagnostics.DebuggerTypeProxy(typeof(ConcurrentReadOnlySpriteCollection.DebugView))]
         public struct ConcurrentReadOnlySpriteCollection : ICollection<ISprite>
         {
             #region ConcurrentEnumerator struct
@@ -151,6 +153,44 @@
             {
                 return new InvalidOperationException("Collection is read-only.");
             }
+            #region DebugView class
+            /// <summary>
+            /// Provides a debugger view for a <see cref="T:DesktopSprites.Collections.ConcurrentReadOnlySpriteCollection"/>.
+            /// </summary>
+            private sealed class DebugView
+            {
+                /// <summary>
+                /// The collection for which an alternate view is being provided.
+                /// </summary>
+                private ConcurrentReadOnlySpriteCollection concurrentReadOnlySpriteCollection;
+
+                /// <summary>
+                /// Initializes a new instance of the
+                /// <see cref="T:DesktopSprites.Collections.ConcurrentReadOnlySpriteCollection.DebugView"/> class.
+                /// </summary>
+                /// <param name="concurrentReadOnlySpriteCollection">The collection to proxy.</param>
+                public DebugView(ConcurrentReadOnlySpriteCollection concurrentReadOnlySpriteCollection)
+                {
+                    this.concurrentReadOnlySpriteCollection = 
+                        Argument.EnsureNotNull(concurrentReadOnlySpriteCollection, "concurrentReadOnlySpriteCollection");
+                }
+
+                /// <summary>
+                /// Gets a view of the items in the collection.
+                /// </summary>
+                [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+                public ISprite[] Items
+                {
+                    get
+                    {
+                        var sprites = concurrentReadOnlySpriteCollection.animationLoopBase.sprites;
+                        ISprite[] items = new ISprite[sprites.Count];
+                        sprites.CopyTo(items, 0);
+                        return items;
+                    }
+                }
+            }
+            #endregion
         }
         #endregion
 

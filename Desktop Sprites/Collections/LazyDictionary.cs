@@ -636,14 +636,12 @@
             private LazyDictionary<TKey, TValue> lazyDictionary;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.LazyDictionary`2.DebugView"/>
-            /// class.
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.LazyDictionary`2.DebugView"/> class.
             /// </summary>
             /// <param name="lazyDictionary">The dictionary to proxy.</param>
             public DebugView(LazyDictionary<TKey, TValue> lazyDictionary)
             {
-                Argument.EnsureNotNull(lazyDictionary, "lazyDictionary");
-                this.lazyDictionary = lazyDictionary;
+                this.lazyDictionary = Argument.EnsureNotNull(lazyDictionary, "lazyDictionary");
             }
 
             /// <summary>

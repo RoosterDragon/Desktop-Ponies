@@ -28,6 +28,8 @@
     /// Represents an immutable collection of elements that can be accessed by index.
     /// </summary>
     /// <typeparam name="T">The type of the elements in the immutable array.</typeparam>
+    [System.Diagnostics.DebuggerDisplay("Length = {Length}")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(ImmutableArray<>.DebugView))]
     public sealed class ImmutableArray<T> : IList<T>
     {
         /// <summary>
@@ -223,5 +225,35 @@
         {
             return GetEnumerator();
         }
+        #region DebugView class
+        /// <summary>
+        /// Provides a debugger view for an <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>.
+        /// </summary>
+        private sealed class DebugView
+        {
+            /// <summary>
+            /// The array for which an alternate view is being provided.
+            /// </summary>
+            private ImmutableArray<T> immutableArray;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ImmutableArray`1.DebugView"/> class.
+            /// </summary>
+            /// <param name="immutableArray">The array to proxy.</param>
+            public DebugView(ImmutableArray<T> immutableArray)
+            {
+                this.immutableArray = Argument.EnsureNotNull(immutableArray, "immutableArray");
+            }
+
+            /// <summary>
+            /// Gets a view of the items in the array.
+            /// </summary>
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            public T[] Items
+            {
+                get { return immutableArray.array; }
+            }
+        }
+        #endregion
     }
 }
