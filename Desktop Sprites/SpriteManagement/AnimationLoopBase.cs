@@ -1097,8 +1097,10 @@
         /// <see cref="P:System.Collections.Generic.Comparer`1.Default"/> cannot find an implementation of the
         /// <see cref="T:System.IComparable`1"/> generic interface or the <see cref="T:System.IComparable"/> interface for type
         /// ISprite.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort()
         {
+            EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort();
         }
@@ -1108,8 +1110,10 @@
         /// </summary>
         /// <param name="comparison">The <see cref="T:System.Comparison`1"/> to use when comparing elements.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort(Comparison<ISprite> comparison)
         {
+            EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort(comparison);
         }
@@ -1123,8 +1127,10 @@
         /// <see cref="P:System.Collections.Generic.Comparer`1.Default"/> cannot find implementation of the
         /// <see cref="T:System.IComparable`1"/> generic interface or the <see cref="T:System.IComparable"/> interface for type
         /// ISprite.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort(IComparer<ISprite> comparer)
         {
+            EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort(comparer);
         }
@@ -1215,8 +1221,11 @@
         /// Process any pending queued actions on the sprites collection now. This method is called during every update, buy may be called
         /// in derived classes if they need to force queued changes to be applied immediately. 
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void ProcessQueuedActions()
         {
+            if (runner == null)
+                EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 while (queuedSpriteActions.Count > 0)
                     queuedSpriteActions.Dequeue().Invoke();
@@ -1225,6 +1234,7 @@
         /// <summary>
         /// Process queued actions and then updates the sprites.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected virtual void Update()
         {
             if (runner == null)
@@ -1241,6 +1251,7 @@
         /// <summary>
         /// Draws the sprites.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected virtual void Draw()
         {
             if (runner == null)

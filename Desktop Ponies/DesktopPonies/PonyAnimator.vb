@@ -112,7 +112,10 @@ Public Class PonyAnimator
             interactionsNeedReinitializing = False
         End If
         MyBase.Update()
-        If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then Finish(ExitRequest.ReturnToMenu)
+        If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then
+            Finish(ExitRequest.ReturnToMenu)
+            Return
+        End If
         Sort(zOrder)
     End Sub
 
