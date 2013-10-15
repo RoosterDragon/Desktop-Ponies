@@ -122,18 +122,85 @@ Public Class PonyBase
             Return _speeches
         End Get
     End Property
-    Public ReadOnly Property SpeechesRandom() As IEnumerable(Of Speech)
+    Public ReadOnly Property SpeechesRandom() As SpeechesEnumerable
         Get
-            Return Speeches.Where(Function(s) Not s.Skip)
+            Return New SpeechesEnumerable(Me, False)
         End Get
     End Property
-    Public ReadOnly Property SpeechesSpecific() As IEnumerable(Of Speech)
+    Public ReadOnly Property SpeechesSpecific() As SpeechesEnumerable
         Get
-            Return Speeches.Where(Function(s) s.Skip)
+            Return New SpeechesEnumerable(Me, True)
         End Get
     End Property
     Private ReadOnly commentLines As New List(Of String)()
     Private ReadOnly invalidLines As New List(Of String)()
+
+#Region "Speeches Enumeration"
+    Public Structure SpeechesEnumerable
+        Implements IEnumerable(Of Speech)
+
+        Private ReadOnly base As PonyBase
+        Private ReadOnly skip As Boolean
+
+        Public Sub New(base As PonyBase, skip As Boolean)
+            Me.base = base
+            Me.skip = skip
+        End Sub
+
+        Public Function GetEnumerator() As SpeechesEnumerator
+            Return New SpeechesEnumerator(base, skip)
+        End Function
+
+        Private Function GetEnumerator1() As IEnumerator(Of Speech) Implements IEnumerable(Of Speech).GetEnumerator
+            Return GetEnumerator()
+        End Function
+
+        Private Function GetEnumerator2() As Collections.IEnumerator Implements Collections.IEnumerable.GetEnumerator
+            Return GetEnumerator()
+        End Function
+    End Structure
+
+    Public Structure SpeechesEnumerator
+        Implements IEnumerator(Of Speech)
+
+        Private ReadOnly skip As Boolean
+        Private ReadOnly speeches As List(Of Speech)
+        Private index As Integer
+
+        Public Sub New(base As PonyBase, skip As Boolean)
+            Argument.EnsureNotNull(base, "base")
+            Me.speeches = base.Speeches
+            Me.skip = skip
+            Me.index = -1
+        End Sub
+
+        Public ReadOnly Property Current As Speech Implements IEnumerator(Of Speech).Current
+            Get
+                Return speeches(index)
+            End Get
+        End Property
+
+        Private ReadOnly Property Current1 As Object Implements Collections.IEnumerator.Current
+            Get
+                Return Current
+            End Get
+        End Property
+
+        Public Function MoveNext() As Boolean Implements Collections.IEnumerator.MoveNext
+            Do
+                index += 1
+            Loop While index < speeches.Count AndAlso Current.Skip <> skip
+            Return index < speeches.Count
+        End Function
+
+        Public Sub Reset() Implements Collections.IEnumerator.Reset
+            index = -1
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+        End Sub
+    End Structure
+#End Region
 
     Private Sub New(collection As PonyCollection)
         _collection = Argument.EnsureNotNull(collection, "collection")
@@ -585,9 +652,10 @@ Public Class Behavior
             _linkedBehaviorName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
+    Private ReadOnly linkedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = LinkedBehaviorName)
     Public ReadOnly Property LinkedBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = LinkedBehaviorName)
+            Return pony.Behaviors.OnlyOrDefault(linkedBehaviorNamePredicate)
         End Get
     End Property
     Private _startLineName As CaseInsensitiveString = ""
@@ -599,9 +667,10 @@ Public Class Behavior
             _startLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
+    Private ReadOnly startLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = StartLineName)
     Public ReadOnly Property StartLine As Speech
         Get
-            Return pony.Speeches.OnlyOrDefault(Function(sl) sl.Name = StartLineName)
+            Return pony.Speeches.OnlyOrDefault(startLineNamePredicate)
         End Get
     End Property
     Private _endLineName As CaseInsensitiveString = ""
@@ -613,9 +682,10 @@ Public Class Behavior
             _endLineName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
+    Private ReadOnly endLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = EndLineName)
     Public ReadOnly Property EndLine As Speech
         Get
-            Return pony.Speeches.OnlyOrDefault(Function(sl) sl.Name = EndLineName)
+            Return pony.Speeches.OnlyOrDefault(endLineNamePredicate)
         End Get
     End Property
 
@@ -669,7 +739,7 @@ Public Class Behavior
         End Function
 
         Private Function GetEnumerator1() As IEnumerator(Of EffectBase) Implements IEnumerable(Of EffectBase).GetEnumerator
-            Return New EffectsEnumerator(behavior)
+            Return GetEnumerator()
         End Function
 
         Private Function GetEnumerator2() As Collections.IEnumerator Implements Collections.IEnumerable.GetEnumerator
@@ -1508,8 +1578,8 @@ Public Class Pony
         ' later.
         If CurrentBehavior.StartLine IsNot Nothing Then
             PonySpeak(CurrentBehavior.StartLine)
-        ElseIf CurrentBehavior.EndLine Is Nothing AndAlso followTargetName = "" AndAlso
-            Not IsInteracting AndAlso Rng.NextDouble() <= Options.PonySpeechChance Then
+        ElseIf followTargetName = "" AndAlso Not IsInteracting AndAlso
+            CurrentBehavior.EndLine Is Nothing AndAlso Rng.NextDouble() <= Options.PonySpeechChance Then
             PonySpeak()
         End If
 
@@ -1579,6 +1649,8 @@ Public Class Pony
         End Select
     End Sub
 
+    Private ReadOnly isSpeechInUsableGroupPredicate As New Func(Of Speech, Boolean)(
+        Function(s) s.Group = 0 OrElse s.Group = CurrentBehavior.Group)
     ''' <summary>
     ''' Prompts the pony to speak a line if it has not done so recently. A random line is chosen unless one is specified.
     ''' </summary>
@@ -1586,19 +1658,15 @@ Public Class Pony
     Public Sub PonySpeak(Optional line As Speech = Nothing)
         'When the cursor is over us, don't talk too often.
         If CursorOverPony AndAlso (internalTime - lastSpeakTime).TotalSeconds < 15 Then
-            Exit Sub
+            Return
         End If
 
         ' Select a line at random from the lines that may be played at random that are in the current group.
         If line Is Nothing Then
-            If Base.SpeechesRandom.Count = 0 Then
-                Exit Sub
-            Else
-                Dim randomGroupLines = Base.SpeechesRandom.Where(
-                    Function(l) l.Group = 0 OrElse l.Group = CurrentBehavior.Group).ToArray()
-                If randomGroupLines.Length = 0 Then Exit Sub
-                line = randomGroupLines(Rng.Next(randomGroupLines.Count))
-            End If
+            If Base.Speeches.Count = 0 Then Return
+            Dim randomGroupLines = Base.SpeechesRandom.Where(isSpeechInUsableGroupPredicate).ToArray()
+            If randomGroupLines.Length = 0 Then Return
+            line = randomGroupLines(Rng.Next(randomGroupLines.Length))
         End If
 
         ' Set the line text to be displayed.
@@ -1674,9 +1742,11 @@ Public Class Pony
             previousBehavior = CurrentBehavior
 
             ' Remove effects for the previous behavior. We don't want them lingering when the behavior restarts after the mouse moves away.
-            For Each effect In ActiveEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name)
-                effect.DesiredDuration = 0
-            Next
+            If ActiveEffects.Count > 0 Then
+                For Each effect In ActiveEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name)
+                    effect.DesiredDuration = 0
+                Next
+            End If
 
             ' Select a stationary behavior, or if possible a dedicated mouseover behavior.
             CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)

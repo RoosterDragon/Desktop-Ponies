@@ -142,6 +142,7 @@
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
     <Compile Include="EvilGlobals.vb" />
     <Compile Include="IdleWorker.vb" />
+    <Compile Include="LinqSpecialized.vb" />
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

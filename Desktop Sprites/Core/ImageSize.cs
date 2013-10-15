@@ -25,7 +25,8 @@
 
         /// <summary>
         /// Contains a collection of known image formats based on the magic bytes in the header of those formats. Each sequence of magic
-        /// bytes maps to a decoding function which reads the image and returns its size.
+        /// bytes maps to a decoding function which reads the image and returns its size. The collection is ordered in the length of the
+        /// magic bytes headers.
         /// </summary>
         private static readonly ImmutableArray<KeyValuePair<byte[], Func<BinaryReader, Size>>> ImageDecoders =
             new Dictionary<byte[], Func<BinaryReader, Size>>
@@ -35,7 +36,7 @@
                 { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, DecodeGif },
                 { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, DecodeGif },
                 { new byte[] { 0x42, 0x4D }, DecodeBitmap },
-            }.ToImmutableArray();
+            }.OrderBy(kvp => kvp.Key.Length).ToImmutableArray();
 
         /// <summary>
         /// The length of the longest sequence of magic bytes in the collection of image decoders.
@@ -80,16 +81,29 @@
         public static Size GetSize(BinaryReader reader)
         {
             Argument.EnsureNotNull(reader, "reader");
-            
-            byte[] magicBytes = new byte[MaxMagicBytesLength];
-            for (int i = 0; i < magicBytes.Length; i++)
-            {
-                magicBytes[i] = reader.ReadByte();
-                foreach (var imageFormatDecoder in ImageDecoders.Where(decoder => decoder.Key.Length == i + 1))
-                    if (magicBytes.StartsWith(imageFormatDecoder.Key))
-                        return imageFormatDecoder.Value(reader);
-            }
 
+            int magicBytesLength = 0;
+            byte[] magicBytes = new byte[MaxMagicBytesLength];
+            int decoderIndex = 0;
+            var decoder = ImageDecoders[decoderIndex];
+            while (magicBytesLength < MaxMagicBytesLength)
+            {
+                do
+                {
+                    magicBytes[magicBytesLength++] = reader.ReadByte();
+                }
+                while (magicBytesLength < decoder.Key.Length);
+                do
+                {
+                    if (magicBytes.StartsWith(decoder.Key))
+                        return decoder.Value(reader);
+                    if (++decoderIndex < ImageDecoders.Length)
+                        decoder = ImageDecoders[decoderIndex];
+                    else
+                        throw new ArgumentException(ErrorMessage, "reader");
+                }
+                while (decoder.Key.Length == magicBytesLength);
+            }
             throw new ArgumentException(ErrorMessage, "reader");
         }
 
