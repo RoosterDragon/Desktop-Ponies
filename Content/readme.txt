@@ -69,6 +69,9 @@ Change Log
 
 Latest changes:
 
+vNext:
+- Added Ms. Peachbottom by Loaded--Dice.
+
 v1.42.2.9:
 - Added Flash Sentry by Bot-chan.
 - Added an interface for specifying translucent colors for GIF images to the editor. 
