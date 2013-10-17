@@ -1100,7 +1100,8 @@
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort()
         {
-            EnsureNotDisposed();
+            if (runner == null)
+                EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort();
         }
@@ -1113,7 +1114,8 @@
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort(Comparison<ISprite> comparison)
         {
-            EnsureNotDisposed();
+            if (runner == null)
+                EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort(comparison);
         }
@@ -1130,7 +1132,8 @@
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void Sort(IComparer<ISprite> comparer)
         {
-            EnsureNotDisposed();
+            if (runner == null)
+                EnsureNotDisposed();
             using (spritesGuard.InWriteMode())
                 sprites.Sort(comparer);
         }
