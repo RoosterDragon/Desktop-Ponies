@@ -69,7 +69,8 @@
         /// </summary>
         /// <param name="left">The vector to the left of the subtraction operator.</param>
         /// <param name="right">The vector to the right of the subtraction operator.</param>
-        /// <returns>A new vector where both components are calculated by subtracting the values in the second vector from the first.</returns>
+        /// <returns>A new vector where both components are calculated by subtracting the values in the second vector from the first.
+        /// </returns>
         public static Vector2 operator -(Vector2 left, Vector2 right)
         {
             return new Vector2(left.X - right.X, left.Y - right.Y);
@@ -95,6 +96,16 @@
             return new Vector2(v.X * scalar, v.Y * scalar);
         }
         /// <summary>
+        /// Multiplies a vector by a scalar.
+        /// </summary>
+        /// <param name="v">The vector to multiply.</param>
+        /// <param name="scalar">The scale factor to apply.</param>
+        /// <returns>A new vector where both components are calculated by multiplying their value by the scale factor.</returns>
+        public static Vector2 operator *(int scalar, Vector2 v)
+        {
+            return v * scalar;
+        }
+        /// <summary>
         /// Divides a vector by a scalar, using integer division.
         /// </summary>
         /// <param name="v">The vector to divide.</param>
@@ -114,6 +125,16 @@
         public static Vector2F operator *(Vector2 v, float scalar)
         {
             return new Vector2F(v.X * scalar, v.Y * scalar);
+        }
+        /// <summary>
+        /// Multiplies a vector by a scalar.
+        /// </summary>
+        /// <param name="v">The vector to multiply.</param>
+        /// <param name="scalar">The scale factor to apply.</param>
+        /// <returns>A new vector where both components are calculated by multiplying their value by the scale factor.</returns>
+        public static Vector2F operator *(float scalar, Vector2 v)
+        {
+            return v * scalar;
         }
         /// <summary>
         /// Divides a vector by a scalar.
@@ -272,21 +293,47 @@
         }
 
         /// <summary>
-        /// Converts the specified <see cref="T:DesktopSprites.Vector2F"/> structure to a <see cref="T:DesktopSprites.Vector2"/>
-        /// structure by truncating the values of the <see cref="T:DesktopSprites.Vector2F"/> to the next lower integer values.
+        /// Converts the specified <see cref="T:DesktopSprites.Core.Vector2F"/> structure to a <see cref="T:DesktopSprites.Core.Vector2"/>
+        /// structure by truncating the values of the <see cref="T:DesktopSprites.Core.Vector2F"/> to the next lower integer values.
         /// </summary>
-        /// <param name="v">The <see cref="T:DesktopSprites.Vector2F"/> structure to convert.</param>
-        /// <returns>The <see cref="T:DesktopSprites.Vector2"/> structure this method converts to.</returns>
+        /// <param name="v">The <see cref="T:DesktopSprites.Core.Vector2F"/> structure to convert.</param>
+        /// <returns>The <see cref="T:DesktopSprites.Core.Vector2"/> structure this method converts to.</returns>
         public static Vector2 Truncate(Vector2F v)
         {
             return new Vector2((int)v.X, (int)v.Y);
         }
         /// <summary>
-        /// Converts the specified <see cref="T:DesktopSprites.Vector2F"/> structure to a <see cref="T:DesktopSprites.Vector2"/>
-        /// structure by rounding the values of the <see cref="T:DesktopSprites.Vector2F"/> structure to the next higher integer values.
+        /// Converts the specified <see cref="T:DesktopSprites.Core.Vector2F"/> structure to a <see cref="T:DesktopSprites.Core.Vector2"/>
+        /// structure by rounding the values of the <see cref="T:DesktopSprites.Core.Vector2F"/> to the nearest integral value. When the
+        /// values are halfway between two numbers, rounding is done to the nearest even number.
         /// </summary>
-        /// <param name="v">The <see cref="T:DesktopSprites.Vector2F"/> structure to convert.</param>
-        /// <returns>The <see cref="T:DesktopSprites.Vector2"/> structure this method converts to.</returns>
+        /// <param name="v">The <see cref="T:DesktopSprites.Core.Vector2F"/> structure to convert.</param>
+        /// <returns>The <see cref="T:DesktopSprites.Core.Vector2"/> structure this method converts to.</returns>
+        public static Vector2 Round(Vector2F v)
+        {
+            return new Vector2((int)Math.Round(v.X), (int)Math.Round(v.Y));
+        }
+        /// <summary>
+        /// Converts the specified <see cref="T:DesktopSprites.Core.Vector2F"/> structure to a <see cref="T:DesktopSprites.Core.Vector2"/>
+        /// structure by rounding the values of the <see cref="T:DesktopSprites.Core.Vector2F"/> to the nearest integral value. When the
+        /// values are halfway between two numbers, the mode determines which number is used.
+        /// </summary>
+        /// <param name="v">The <see cref="T:DesktopSprites.Core.Vector2F"/> structure to convert.</param>
+        /// <param name="mode">Specification for how to round value if it is midway between two other numbers.</param>
+        /// <returns>The <see cref="T:DesktopSprites.Core.Vector2"/> structure this method converts to.</returns>
+        /// <exception cref="T:System.ArgumentException"><paramref name="mode"/> is not a valid value of
+        /// <see cref="T:System.MidpointRounding"/>.</exception>
+        public static Vector2 Round(Vector2F v, MidpointRounding mode)
+        {
+            return new Vector2((int)Math.Round(v.X, mode), (int)Math.Round(v.Y, mode));
+        }
+        /// <summary>
+        /// Converts the specified <see cref="T:DesktopSprites.Core.Vector2F"/> structure to a <see cref="T:DesktopSprites.Core.Vector2"/>
+        /// structure by rounding the values of the <see cref="T:DesktopSprites.Core.Vector2F"/> structure to the next higher integer
+        /// values.
+        /// </summary>
+        /// <param name="v">The <see cref="T:DesktopSprites.Core.Vector2F"/> structure to convert.</param>
+        /// <returns>The <see cref="T:DesktopSprites.Core.Vector2"/> structure this method converts to.</returns>
         public static Vector2 Ceiling(Vector2F v)
         {
             return new Vector2((int)Math.Ceiling(v.X), (int)Math.Ceiling(v.Y));

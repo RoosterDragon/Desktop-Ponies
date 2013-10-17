@@ -96,6 +96,16 @@
             return new Vector2F(v.X * scalar, v.Y * scalar);
         }
         /// <summary>
+        /// Multiplies a vector by a scalar.
+        /// </summary>
+        /// <param name="v">The vector to multiply.</param>
+        /// <param name="scalar">The scale factor to apply.</param>
+        /// <returns>A new vector where both components are calculated by multiplying their value by the scale factor.</returns>
+        public static Vector2F operator *(float scalar, Vector2F v)
+        {
+            return v * scalar;
+        }
+        /// <summary>
         /// Divides a vector by a scalar.
         /// </summary>
         /// <param name="v">The vector to divide.</param>
