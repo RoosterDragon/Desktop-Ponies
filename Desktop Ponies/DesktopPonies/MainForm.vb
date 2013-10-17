@@ -408,9 +408,10 @@ Public Class MainForm
 
             If form.ChangesMade Then
                 ResetPonySelection()
+                FilterAllRadio.Checked = True
                 LoadingProgressBar.Visible = True
                 '(We need to reload everything to account for anything changed while in the editor)
-                Main_Load(Me, EventArgs.Empty)
+                LoadInternal()
             End If
         End Using
 
