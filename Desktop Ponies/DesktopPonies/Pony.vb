@@ -1650,7 +1650,7 @@ Public Class Pony
     End Sub
 
     Private ReadOnly isSpeechInUsableGroupPredicate As New Func(Of Speech, Boolean)(
-        Function(s) s.Group = 0 OrElse s.Group = CurrentBehavior.Group)
+        Function(s) s.Group = Behavior.AnyGroup OrElse s.Group = CurrentBehavior.Group)
     ''' <summary>
     ''' Prompts the pony to speak a line if it has not done so recently. A random line is chosen unless one is specified.
     ''' </summary>
@@ -2814,7 +2814,9 @@ Public Class Pony
             Dim interaction = New Interaction(interactionBase)
 
             ' Get all actual instances of target ponies.
-            interaction.Targets.UnionWith(otherPonies.Where(Function(p) interactionBase.TargetNames.Contains(p.Directory)))
+            interaction.Targets.UnionWith(
+                otherPonies.Where(
+                    Function(p) Not ReferenceEquals(Me, p) AndAlso interactionBase.TargetNames.Contains(p.Directory)))
             ' If no instances of the target ponies are present, we can forget this interaction.
             ' Alternatively, if it is specified all targets must be present but some are missing, the interaction cannot be used.
             If interaction.Targets.Count = 0 OrElse
@@ -2825,7 +2827,7 @@ Public Class Pony
 
             ' Determine the common set of behaviors by name actually implemented by this pony and all discovered targets.
             Dim commonBehaviors As New HashSet(Of CaseInsensitiveString)(interactionBase.BehaviorNames)
-            For Each pony In {Me}.Concat(otherPonies)
+            For Each pony In {Me}.Concat(interaction.Targets)
                 commonBehaviors.IntersectWith(pony.Base.Behaviors.Select(Function(b) b.Name))
                 If commonBehaviors.Count = 0 Then Exit For
             Next
@@ -2850,7 +2852,9 @@ Public Class Pony
         'do we interact with ALL targets, including copies, or just the pony that we ran into?
         If interaction.Base.Activation <> TargetActivation.One Then
             For Each targetPony In interaction.Targets
-                targetPony.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
+                If Not targetPony.IsInteracting Then
+                    targetPony.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
+                End If
             Next
         Else
             interaction.Trigger.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
@@ -2872,8 +2876,16 @@ Public Class Pony
 
         For Each interaction In interactions
             For Each target As Pony In interaction.Targets
-                ' Don't attempt to interact with a busy target, or with self.
-                If target.IsInteracting OrElse ReferenceEquals(Me, target) Then Continue For
+                ' Don't attempt to interact with a busy target.
+                If target.IsInteracting Then
+                    If interaction.Base.Activation = TargetActivation.All Then
+                        ' Need all targets but one is busy? Can't use this interaction then.
+                        Exit For
+                    Else
+                        ' Try a different target.
+                        Continue For
+                    End If
+                End If
 
                 ' Get distance between the pony and the possible target.
                 Dim distance = Vector2.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
