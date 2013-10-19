@@ -870,10 +870,10 @@ Public Class MainForm
                                                    Dim localAnimator = animator
                                                    SmartInvoke(Sub()
                                                                    PonyShutdown()
-                                                                   If localAnimator.ExitRequested = ExitRequest.ReturnToMenu Then
-                                                                       Show()
-                                                                   ElseIf localAnimator.ExitRequested = ExitRequest.ExitApplication Then
+                                                                   If localAnimator.ExitRequested = ExitRequest.ExitApplication Then
                                                                        Close()
+                                                                   Else
+                                                                       Show()
                                                                    End If
                                                                End Sub)
                                                End Sub
