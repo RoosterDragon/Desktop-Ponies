@@ -36,7 +36,7 @@
         /// <param name="theSelector">The selector of the method that handles the message.</param>
         /// <param name="arg">A Boolean argument to the method.</param>
         [DllImport(objc)]
-        public static extern void objc_msgSend(HandleRef theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
+        public static extern void objc_msgSend(IntPtr theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
 
         /// <summary>
         /// Gets the native NSWindow given the pointer to a <see cref="T:Gdk.Window"/> instance.
@@ -44,6 +44,6 @@
         /// <param name="window">The pointer to a <see cref="T:Gdk.Window"/>.</param>
         /// <returns>A pointer to the native NSWindow for the GDK window instance.</returns>
         [DllImport(gtkQuartz)]
-        public static extern IntPtr gdk_quartz_window_get_nswindow(HandleRef window);
+        public static extern IntPtr gdk_quartz_window_get_nswindow(IntPtr window);
     }
 }

@@ -64,15 +64,17 @@
             {
                 // Get the native window handle.
                 IntPtr nativeWindow = 
-                    DesktopSprites.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(new HandleRef(window, window.Handle));
+                    DesktopSprites.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
 
                 // Register the method with the runtime, if it has not yet been.
                 if (setHasShadowSelector == IntPtr.Zero)
                     setHasShadowSelector = DesktopSprites.Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
 
                 // Send a message to the window, indicating the set shadow method and specified argument.
-                DesktopSprites.Interop.MacOSX.NativeMethods.objc_msgSend(
-                    new HandleRef(window, nativeWindow), setHasShadowSelector, hasShadow);
+                DesktopSprites.Interop.MacOSX.NativeMethods.objc_msgSend(nativeWindow, setHasShadowSelector, hasShadow);
+
+                // Keep the managed window from being garbage collected until native code is finished running.
+                System.GC.KeepAlive(window);
             }
         }
         #endregion
