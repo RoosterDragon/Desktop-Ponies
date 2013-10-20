@@ -1216,6 +1216,7 @@ Public Class Pony
     ''' Number of ticks for which the pony is immune to cursor interaction.
     ''' </summary>
     Private CursorImmunity As Integer = 0
+    Private currentMouseoverBehavior As Behavior
 
     Public Property Destination As Vector2
     Public Property AtDestination As Boolean
@@ -1748,16 +1749,9 @@ Public Class Pony
                 Next
             End If
 
-            ' Select a stationary behavior, or if possible a dedicated mouseover behavior.
-            CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)
-            For Each behavior In Behaviors
-                If behavior.Group <> CurrentBehaviorGroup Then Continue For
-                If behavior.AllowedMovement = AllowedMoves.MouseOver Then
-                    CurrentBehavior = behavior
-                    effectsAlreadyPlayedForBehavior.Clear()
-                    Exit For
-                End If
-            Next
+            ' Change to mouseover behavior.
+            CurrentBehavior = currentMouseoverBehavior
+            effectsAlreadyPlayedForBehavior.Clear()
             Paint()
             AddUpdateRecord("Changed into mouseover state.")
         ElseIf Not CursorOverPony And HaltedForCursor Then
@@ -1921,6 +1915,7 @@ Public Class Pony
 
         Dim newTopLeftLocation = Point.Round(CType(TopLeftLocation, Vector2) + movement)
 
+        UpdateCurrentMouseoverBehavior()
         Dim isNearCursorNow = IsPonyNearMouseCursor(TopLeftLocation)
         Dim isNearCursorFuture = IsPonyNearMouseCursor(newTopLeftLocation)
 
@@ -2079,6 +2074,15 @@ Public Class Pony
                 AddUpdateRecord("Painted; but currently blocked from following target.")
             End If
         End If
+    End Sub
+
+    Private Sub UpdateCurrentMouseoverBehavior()
+        Dim updateNeeded = currentMouseoverBehavior Is Nothing OrElse currentMouseoverBehavior.Group <> CurrentBehaviorGroup
+        If Not updateNeeded Then Return
+        Dim fallback = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)
+        Dim preferred = Behaviors.FirstOrDefault(
+            Function(b) b.AllowedMovement = AllowedMoves.MouseOver AndAlso b.Group = CurrentBehaviorGroup)
+        currentMouseoverBehavior = If(preferred, fallback)
     End Sub
 
     Private Function DetermineDestination() As Point
@@ -2733,15 +2737,13 @@ Public Class Pony
         If IsInteracting Then Return False
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
-        For Each behavior In Behaviors
-            If behavior.AllowedMovement = AllowedMoves.MouseOver Then
-                Dim loc = New Vector2F(location)
-                Dim s = CSng(Scale)
-                Dim cursorLoc = New Vector2F(EvilGlobals.CursorLocation)
-                If Vector2F.Distance(loc + (behavior.LeftImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
-                If Vector2F.Distance(loc + (behavior.RightImage.Center * s), cursorLoc) <= Options.CursorAvoidanceSize Then Return True
-            End If
-        Next
+        Dim loc = New Vector2F(location)
+        Dim s = CSng(Scale)
+        Dim cursorLoc = New Vector2F(EvilGlobals.CursorLocation)
+        If Vector2F.Distance(loc + (currentMouseoverBehavior.LeftImage.Center * s), cursorLoc) <=
+            Options.CursorAvoidanceSize Then Return True
+        If Vector2F.Distance(loc + (currentMouseoverBehavior.RightImage.Center * s), cursorLoc) <=
+            Options.CursorAvoidanceSize Then Return True
 
         Return False
     End Function

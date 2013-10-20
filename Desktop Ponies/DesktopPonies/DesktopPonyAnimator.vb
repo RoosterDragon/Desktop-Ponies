@@ -239,9 +239,9 @@ Public Class DesktopPonyAnimator
         End If
 
         menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() EvilGlobals.Main.SmartInvoke(Sub()
-                                                                                                        Dim form = New OptionsForm()
-                                                                                                        form.Show()
-                                                                                                    End Sub)))
+                                                                                                           Dim form = New OptionsForm()
+                                                                                                           form.Show()
+                                                                                                       End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", Sub() Finish(ExitRequest.ReturnToMenu)))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub() Finish(ExitRequest.ExitApplication)))
         If controlForm Is Nothing Then
