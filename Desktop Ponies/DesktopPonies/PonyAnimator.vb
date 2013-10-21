@@ -45,7 +45,7 @@ Public Class PonyAnimator
         MyBase.New(spriteViewer, spriteCollection)
         Me.PonyCollection = Argument.EnsureNotNull(ponyCollection, "ponyCollection")
 
-        MaximumFramesPerSecond = 30
+        MaximumFramesPerSecond = 25
         Viewer.WindowTitle = "Desktop Ponies"
         Viewer.WindowIconFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, "Twilight.ico")
 
