@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.Globalization;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using DesktopSprites.Collections;
@@ -1011,18 +1012,18 @@
         /// </summary>
         /// <param name="sprites">The collection of sprites to add. Start will be called on these sprite when they are added.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
-        /// <exception cref="T:System.ArgumentException"><paramref name="sprites"/> contained a sprite that was null.</exception>
         protected void QueueAddRangeAndStart(IEnumerable<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
+            if (!sprites.Any())
+                return;
             var items = sprites.ToImmutableArray();
-            foreach (ISprite sprite in items)
-                if (sprite == null)
-                    throw new ArgumentException("sprites contained a sprite that was null.", "sprites");
             queuedSpriteActions.Enqueue(() =>
             {
                 foreach (ISprite sprite in items)
                 {
+                    if (sprite == null)
+                        continue;
                     this.sprites.AddLast(sprite);
                     sprite.Start(ElapsedTime);
                 }
@@ -1221,7 +1222,7 @@
         }
 
         /// <summary>
-        /// Process any pending queued actions on the sprites collection now. This method is called during every update, buy may be called
+        /// Process any pending queued actions on the sprites collection now. This method is called during every update, but may be called
         /// in derived classes if they need to force queued changes to be applied immediately. 
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
