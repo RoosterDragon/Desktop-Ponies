@@ -1227,10 +1227,27 @@ Public Class Pony
     ''' </summary>
     Private paintStop As Boolean
 
+    Private _topLeftLocation As Point
     ''' <summary>
     ''' The location on the screen.
     ''' </summary>
-    Public Property TopLeftLocation As Point
+    Public ReadOnly Property TopLeftLocation As Point
+        Get
+            Return _topLeftLocation
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets or sets the location of the center of the pony.
+    ''' </summary>
+    Public Property Location As Point
+        Get
+            Return CenterLocation()
+        End Get
+        Set(value As Point)
+            _topLeftLocation = Point.Round(value - GetImageCenterOffset())
+        End Set
+    End Property
 
     ''' <summary>
     ''' Used for predicting future movement (just more of what we last did)
@@ -1322,7 +1339,7 @@ Public Class Pony
     Private Sub Teleport()
         ' If we are in preview mode, just teleport into the center for consistency.
         If EvilGlobals.InPreviewMode Then
-            TopLeftLocation = Vector2.Truncate(New Vector2F(EvilGlobals.PreviewWindowRectangle.Center()) - (CurrentImageSize / 2.0F))
+            Location = Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
             Exit Sub
         End If
 
@@ -1334,9 +1351,9 @@ Public Class Pony
             teleportLocation = New Point(
                 CInt(area.X + Rng.NextDouble() * area.Width),
                 CInt(area.Y + Rng.NextDouble() * area.Height))
-            If Not InAvoidanceArea(teleportLocation) Then Exit For
+            If Not IsPonyIntersectingWithAvoidanceArea(teleportLocation) Then Exit For
         Next
-        TopLeftLocation = teleportLocation
+        Location = teleportLocation
     End Sub
 
     ''' <summary>
@@ -1380,7 +1397,7 @@ Public Class Pony
             WakeUp()
         End If
 
-        If BeingDragged Then TopLeftLocation = EvilGlobals.CursorLocation - GetImageCenterOffset()
+        If BeingDragged Then Location = EvilGlobals.CursorLocation
 
         ' If we have no specified behavior, make sure the returning to screen flag is not set.
         If CurrentBehavior Is Nothing Then ReturningToScreenArea = False
@@ -1915,14 +1932,14 @@ Public Class Pony
             End If
         End If
 
-        Dim newTopLeftLocation = Point.Round(CType(TopLeftLocation, Vector2) + movement)
+        Dim newLocation = Vector2.Round(New Vector2F(Location) + movement)
 
         UpdateCurrentMouseoverBehavior()
-        Dim isNearCursorNow = IsPonyNearMouseCursor(TopLeftLocation)
-        Dim isNearCursorFuture = IsPonyNearMouseCursor(newTopLeftLocation)
+        Dim isNearCursorNow = IsPonyNearMouseCursor(Location)
+        Dim isNearCursorFuture = IsPonyNearMouseCursor(newLocation)
 
-        Dim isOnscreenNow = IsPonyOnScreen(TopLeftLocation)
-        Dim isOnscreenFuture = IsPonyOnScreen(newTopLeftLocation)
+        Dim isOnscreenNow = IsPonyContainedInCanvas(Location)
+        Dim isOnscreenFuture = IsPonyContainedInCanvas(newLocation)
 
         ' TODO: Refactor and extract.
         'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
@@ -1932,11 +1949,11 @@ Public Class Pony
 
         Dim isEnteringWindowNow = False
         If Options.WindowAvoidanceEnabled AndAlso Not ReturningToScreenArea Then
-            isEnteringWindowNow = IsPonyEnteringWindow(TopLeftLocation, newTopLeftLocation, movement)
+            isEnteringWindowNow = IsPonyEnteringWindow(TopLeftLocation, Vector2.Round(New Vector2F(TopLeftLocation) + movement), movement)
         End If
 
-        Dim isInAvoidanceZoneNow = InAvoidanceArea(TopLeftLocation)
-        Dim isInAvoidanceZoneFuture = InAvoidanceArea(newTopLeftLocation)
+        Dim isInAvoidanceZoneNow = IsPonyIntersectingWithAvoidanceArea(Location)
+        Dim isInAvoidanceZoneFuture = IsPonyIntersectingWithAvoidanceArea(newLocation)
 
         'if we ARE currently in the cursor's zone, then say that we should be halted (cursor_halt), save our current behavior so we 
         'can continue later, and set the current behavior to nothing so it will be changed.
@@ -1967,7 +1984,7 @@ Public Class Pony
             ' If we have a destination, then the cursor is blocking the way and the behavior should be aborted.
             ' TODO: Review abortion.
             If Not hasDestination Then
-                Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
+                Bounce(Me, TopLeftLocation, newLocation, movement)
             Else
                 CurrentBehavior = GetAppropriateBehaviorOrFallback(CurrentBehavior.AllowedMovement, False)
             End If
@@ -1982,7 +1999,7 @@ Public Class Pony
             ' Check if we need to rebound off a window.
             If isEnteringWindowNow Then
                 If Not hasDestination Then
-                    Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
+                    Bounce(Me, TopLeftLocation, newLocation, movement)
                     AddUpdateRecord("Avoiding window.")
                 Else
                     AddUpdateRecord("Wanted to avoid window, but instead pressing to destination.")
@@ -1991,7 +2008,7 @@ Public Class Pony
             End If
 
             ' Everything's cool. Move and repaint.
-            TopLeftLocation = newTopLeftLocation
+            Location = newLocation
             lastMovement = movement
 
             Dim useVisualOverride = (followTarget IsNot Nothing AndAlso
@@ -2016,7 +2033,7 @@ Public Class Pony
                 'except if the user made changes to the avoidance area to include our current safe spot (we were already trying to avoid the area),
                 'then get a new safe spot.
                 If ReturningToScreenArea AndAlso
-                    (InAvoidanceArea(Destination) OrElse Not IsPonyOnScreen(Destination)) Then
+                    (IsPonyIntersectingWithAvoidanceArea(Destination) OrElse Not IsPonyContainedInCanvas(Destination)) Then
                     destinationCoords = FindSafeDestination()
                 End If
             End If
@@ -2062,7 +2079,7 @@ Public Class Pony
         ' If we are moving to a destination, our path is blocked: we'll wait for a bit.
         ' If we are just moving normally, just "bounce" off of the barrier.
         If Not hasDestination Then
-            Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
+            Bounce(Me, TopLeftLocation, newLocation, movement)
             'we need to paint to reset the image centers
             Paint()
             AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
@@ -2107,8 +2124,8 @@ Public Class Pony
             If IsInteracting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
                 followTargetName = CurrentInteraction.Initiator.Directory Then
                 followTarget = CurrentInteraction.Initiator
-                Return New Point(CurrentInteraction.Initiator.TopLeftLocation.X + destinationCoords.X,
-                                 CurrentInteraction.Initiator.TopLeftLocation.Y + destinationCoords.Y)
+                Return New Point(CurrentInteraction.Initiator.CenterLocation.X + destinationCoords.X,
+                                 CurrentInteraction.Initiator.CenterLocation.Y + destinationCoords.Y)
             End If
 
             ' If not interacting, or following a different pony, we need to figure out which ones and follow one at random.
@@ -2121,8 +2138,8 @@ Public Class Pony
             If poniesToFollow.Count <> 0 Then
                 Dim ponyToFollow = poniesToFollow(Rng.Next(poniesToFollow.Count))
                 followTarget = ponyToFollow
-                Return New Point(ponyToFollow.TopLeftLocation.X + destinationCoords.X,
-                                 ponyToFollow.TopLeftLocation.Y + destinationCoords.Y)
+                Return New Point(ponyToFollow.CenterLocation.X + destinationCoords.X,
+                                 ponyToFollow.CenterLocation.Y + destinationCoords.Y)
             End If
 
             ' We can't find the object to follow, so specify no destination.
@@ -2209,7 +2226,7 @@ Public Class Pony
     End Sub
 
     'reverse directions as if we were bouncing off a boundary.
-    Friend Sub Bounce(pony As Pony, currentLocation As Point, newLocation As Point, movement As SizeF)
+    Private Sub Bounce(pony As Pony, topLeftLocation As Point, newTopLeftLocation As Point, movement As SizeF)
         If movement = SizeF.Empty Then Exit Sub
 
         'if we are moving in a simple direction (up/down, left/right) just reverse direction
@@ -2229,18 +2246,21 @@ Public Class Pony
         Dim x_bad = False
         Dim y_bad = False
 
-        Dim new_location_x As New Point(newLocation.X, currentLocation.Y)
-        Dim new_location_y As New Point(currentLocation.X, newLocation.Y)
+        Dim newTopLeftLocationXOnly As New Point(newTopLeftLocation.X, topLeftLocation.Y)
+        Dim newTopLeftLocationYOnly As New Point(topLeftLocation.X, newTopLeftLocation.Y)
+        Dim centerOffset = GetImageCenterOffset()
+        Dim newLocationXOnly = newTopLeftLocationXOnly + centerOffset
+        Dim newLocationYOnly = newTopLeftLocationYOnly + centerOffset
 
         If movement.Width <> 0 AndAlso movement.Height <> 0 Then
-            If Not pony.IsPonyOnScreen(new_location_x) OrElse
-                pony.InAvoidanceArea(new_location_x) OrElse
-                pony.IsPonyEnteringWindow(currentLocation, new_location_x, New SizeF(movement.Width, 0)) Then
+            If Not pony.IsPonyContainedInCanvas(newLocationXOnly) OrElse
+                pony.IsPonyIntersectingWithAvoidanceArea(newLocationXOnly) OrElse
+                pony.IsPonyEnteringWindow(topLeftLocation, newTopLeftLocationXOnly, New SizeF(movement.Width, 0)) Then
                 x_bad = True
             End If
-            If Not pony.IsPonyOnScreen(new_location_y) OrElse
-                pony.InAvoidanceArea(new_location_y) OrElse
-                pony.IsPonyEnteringWindow(currentLocation, new_location_y, New SizeF(0, movement.Height)) Then
+            If Not pony.IsPonyContainedInCanvas(newLocationYOnly) OrElse
+                pony.IsPonyIntersectingWithAvoidanceArea(newLocationYOnly) OrElse
+                pony.IsPonyEnteringWindow(topLeftLocation, newTopLeftLocationYOnly, New SizeF(0, movement.Height)) Then
                 y_bad = True
             End If
         End If
@@ -2373,8 +2393,8 @@ Public Class Pony
 
         'reposition the form based on the new image center, if different:
         If isCustomImageCenterDefined AndAlso currentCustomImageCenter <> newCenter Then
-            TopLeftLocation = New Point(TopLeftLocation.X - newCenter.Width + currentCustomImageCenter.Width,
-                                 TopLeftLocation.Y - newCenter.Height + currentCustomImageCenter.Height)
+            Location = New Point(Location.X - newCenter.Width + currentCustomImageCenter.Width,
+                                 Location.Y - newCenter.Height + currentCustomImageCenter.Height)
             currentCustomImageCenter = newCenter
         End If
 
@@ -2395,61 +2415,49 @@ Public Class Pony
     End Sub
 
     'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
-    Friend Shared Function GetEffectLocation(EffectImageSize As Size, dir As Direction,
-                                             ParentLocation As Point, ParentSize As Vector2,
-                                             centering As Direction, scale As Single) As Point
+    Friend Shared Function GetEffectLocation(effectImageSize As Size, dir As Direction,
+                                             parentTopLeftLocation As Vector2F, parentSize As Vector2,
+                                             centering As Direction, scale As Single) As Vector2
 
-        Dim point As Point
+        Dim scaledParentSize = parentSize * CSng(scale)
+        scaledParentSize.X *= DirectionWeightHorizontal(dir)
+        scaledParentSize.Y *= DirectionWeightVertical(dir)
 
-        With ParentSize * CSng(scale)
-            Select Case dir
-                Case Direction.BottomCenter
-                    point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y))
-                Case Direction.BottomLeft
-                    point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y))
-                Case Direction.BottomRight
-                    point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y))
-                Case Direction.MiddleCenter, Direction.Random, Direction.RandomNotCenter
-                    point = New Point(CInt(ParentLocation.X + .X / 2), CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.MiddleLeft
-                    point = New Point(ParentLocation.X, CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.MiddleRight
-                    point = New Point(CInt(ParentLocation.X + .X), CInt(ParentLocation.Y + .Y / 2))
-                Case Direction.TopCenter
-                    point = New Point(CInt(ParentLocation.X + .X / 2), ParentLocation.Y)
-                Case Direction.TopLeft
-                    point = New Point(ParentLocation.X, ParentLocation.Y)
-                Case Direction.TopRight
-                    point = New Point(CInt(ParentLocation.X + .X), ParentLocation.Y)
-            End Select
+        Dim locationOnParent = parentTopLeftLocation + scaledParentSize
 
-        End With
+        Dim scaledEffectSize = New Vector2F(effectImageSize) * Options.ScaleFactor
+        scaledEffectSize.X *= DirectionWeightHorizontal(centering)
+        scaledEffectSize.Y *= DirectionWeightVertical(centering)
 
-        Dim effectscaling = Options.ScaleFactor
+        Return Vector2.Round(locationOnParent - scaledEffectSize)
+    End Function
 
-        Select Case centering
-            Case Direction.BottomCenter
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.BottomLeft
-                point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.BottomRight
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height)))
-            Case Direction.MiddleCenter, Direction.Random, Direction.RandomNotCenter
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.MiddleLeft
-                point = New Point(point.X, CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.MiddleRight
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), CInt(point.Y - (effectscaling * EffectImageSize.Height) / 2))
-            Case Direction.TopCenter
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width) / 2), point.Y)
-            Case Direction.TopLeft
-                'no change
-            Case Direction.TopRight
-                point = New Point(CInt(point.X - (effectscaling * EffectImageSize.Width)), point.Y)
+    Private Shared Function DirectionWeightHorizontal(dir As Direction) As Single
+        Select Case dir
+            Case Direction.TopLeft, Direction.MiddleLeft, Direction.BottomLeft
+                Return 0
+            Case Direction.TopCenter, Direction.MiddleCenter, Direction.BottomCenter
+                Return 0.5
+            Case Direction.TopRight, Direction.MiddleRight, Direction.BottomRight
+                Return 1
+            Case Direction.Random, Direction.RandomNotCenter
+                Return CSng(Rng.NextDouble())
         End Select
+        Return Single.NaN
+    End Function
 
-        Return point
-
+    Private Shared Function DirectionWeightVertical(dir As Direction) As Single
+        Select Case dir
+            Case Direction.TopLeft, Direction.TopCenter, Direction.TopRight
+                Return 0
+            Case Direction.MiddleLeft, Direction.MiddleCenter, Direction.MiddleRight
+                Return 0.5
+            Case Direction.BottomLeft, Direction.BottomCenter, Direction.BottomRight
+                Return 1
+            Case Direction.Random, Direction.RandomNotCenter
+                Return CSng(Rng.NextDouble())
+        End Select
+        Return Single.NaN
     End Function
 
     Private Function GetAppropriateBehavior(movement As AllowedMoves, speed As Boolean,
@@ -2533,16 +2541,9 @@ Public Class Pony
         Return behavior
     End Function
 
-    Private Shared Function GetScreenContainingPoint(point As Point) As Screen
-        For Each screen In Options.Screens
-            If screen.WorkingArea.Contains(point) Then Return screen
-        Next
-        Return Nothing
-    End Function
-
     'Test to see if we overlap with another application's window.
     <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
-    Private Function IsPonyEnteringWindow(current_location As Point, new_location As Point, movement As SizeF) As Boolean
+    Private Function IsPonyEnteringWindow(topLeftLocation As Point, newTopLeftLocation As Point, movement As SizeF) As Boolean
         If Not OperatingSystemInfo.IsWindows Then Return False
 
         Try
@@ -2551,10 +2552,10 @@ Public Class Pony
 
             If movement = SizeF.Empty Then Return False
 
-            Dim current_window_1 = Win32.WindowFromPoint(New Win32.POINT(current_location.X, current_location.Y))
-            Dim current_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(current_location.X + (Scale * CurrentImageSize.X)), CInt(current_location.Y + (Scale * CurrentImageSize.Y))))
-            Dim current_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(current_location.X + (Scale * CurrentImageSize.X)), current_location.Y))
-            Dim current_window_4 = Win32.WindowFromPoint(New Win32.POINT(current_location.X, CInt(current_location.Y + (Scale * CurrentImageSize.Y))))
+            Dim current_window_1 = Win32.WindowFromPoint(New Win32.POINT(topLeftLocation.X, topLeftLocation.Y))
+            Dim current_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(topLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(topLeftLocation.Y + (Scale * CurrentImageSize.Y))))
+            Dim current_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(topLeftLocation.X + (Scale * CurrentImageSize.X)), topLeftLocation.Y))
+            Dim current_window_4 = Win32.WindowFromPoint(New Win32.POINT(topLeftLocation.X, CInt(topLeftLocation.Y + (Scale * CurrentImageSize.Y))))
 
             'the current position is already half-way between windows.  don't worry about it
             If current_window_1 <> current_window_2 OrElse current_window_1 <> current_window_3 OrElse current_window_1 <> current_window_4 Then
@@ -2569,20 +2570,20 @@ Public Class Pony
 
             Select Case movement.Width
                 Case Is > 0
-                    new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (Scale * CurrentImageSize.X)), CInt(new_location.Y + (Scale * CurrentImageSize.Y))))
-                    new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (Scale * CurrentImageSize.X)), new_location.Y))
+                    new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
+                    new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), newTopLeftLocation.Y))
                 Case Is < 0
-                    new_window_1 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, new_location.Y))
-                    new_window_4 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, CInt(new_location.Y + (Scale * CurrentImageSize.Y))))
+                    new_window_1 = Win32.WindowFromPoint(New Win32.POINT(newTopLeftLocation.X, newTopLeftLocation.Y))
+                    new_window_4 = Win32.WindowFromPoint(New Win32.POINT(newTopLeftLocation.X, CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
             End Select
 
             Select Case movement.Height
                 Case Is > 0
-                    If (new_window_2) = IntPtr.Zero Then new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (Scale * CurrentImageSize.X)), CInt(new_location.Y + (Scale * CurrentImageSize.Y))))
-                    If (new_window_4) = IntPtr.Zero Then new_window_4 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, CInt(new_location.Y + (Scale * CurrentImageSize.Y))))
+                    If (new_window_2) = IntPtr.Zero Then new_window_2 = Win32.WindowFromPoint(New Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
+                    If (new_window_4) = IntPtr.Zero Then new_window_4 = Win32.WindowFromPoint(New Win32.POINT(newTopLeftLocation.X, CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
                 Case Is < 0
-                    If (new_window_1) = IntPtr.Zero Then new_window_1 = Win32.WindowFromPoint(New Win32.POINT(new_location.X, new_location.Y))
-                    If (new_window_3) = IntPtr.Zero Then new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(new_location.X + (Scale * CurrentImageSize.X)), new_location.Y))
+                    If (new_window_1) = IntPtr.Zero Then new_window_1 = Win32.WindowFromPoint(New Win32.POINT(newTopLeftLocation.X, newTopLeftLocation.Y))
+                    If (new_window_3) = IntPtr.Zero Then new_window_3 = Win32.WindowFromPoint(New Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), newTopLeftLocation.Y))
             End Select
 
 
@@ -2629,7 +2630,7 @@ Public Class Pony
 
                         Dim collisionArea As New Win32.RECT
                         Win32.GetWindowRect(collisionWindow, collisionArea)
-                        If IsPonyInBox(current_location, Rectangle.FromLTRB(
+                        If IsPonyIntersectingWithRect(topLeftLocation + GetImageCenterOffset(), Rectangle.FromLTRB(
                                        collisionArea.Left, collisionArea.Top, collisionArea.Right, collisionArea.Bottom)) Then
                             ignored_collision_count += 1
                         End If
@@ -2653,95 +2654,52 @@ Public Class Pony
 
     End Function
 
-    'Is the pony at least partially on any of the main screens?
-    Friend Function IsPonyOnScreen(location As Point) As Boolean
-        Return IsLocationInRect(location, Options.GetCombinedScreenArea())
+    Friend Function IsPonyContainedInCanvas(centerLocation As Point) As Boolean
+        Return IsPonyContainedInRect(centerLocation, Options.GetCombinedScreenArea())
     End Function
 
-    'Is the pony at least partially on the supplied screens?
-    Friend Function IsPonyOnScreen(location As Point, screen As Screen) As Boolean
-        Return IsLocationInRect(location, screen.WorkingArea)
+    Friend Function IsPonyContainedInScreen(centerLocation As Point, screen As Screen) As Boolean
+        Return IsPonyContainedInRect(centerLocation, screen.WorkingArea)
     End Function
 
-    Private Function IsLocationInRect(location As Point, rect As Rectangle) As Boolean
+    Friend Function IsPonyContainedInRect(centerLocation As Point, rect As Rectangle) As Boolean
         If EvilGlobals.InPreviewMode Then Return True
-        Return rect.Contains(New Rectangle(location, New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))))
+        Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
+        Return rect.Contains(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
     End Function
 
-    Public Shared Function IsPonyInBox(location As Point, box As Rectangle) As Boolean
-        Return box.IsEmpty OrElse box.Contains(location)
+    Friend Function IsPonyIntersectingWithRect(centerLocation As Point, rect As Rectangle) As Boolean
+        If EvilGlobals.InPreviewMode Then Return True
+        Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
+        Return rect.IntersectsWith(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
     End Function
 
-    ''are we inside the user specified "Everfree Forest"?
-    Private Function InAvoidanceArea(new_location As Point) As Boolean
+    Private Function IsPonyIntersectingWithAvoidanceArea(centerLocation As Point) As Boolean
+        If CurrentBehavior Is Nothing Then Return False
 
         If EvilGlobals.InPreviewMode Then
             Dim previewArea = EvilGlobals.PreviewWindowRectangle
-
-            If CurrentImageSize.Y > previewArea.Height OrElse _
-                CurrentImageSize.X > previewArea.Width Then
+            If CurrentImageSize.X > previewArea.Width OrElse CurrentImageSize.Y > previewArea.Height Then
                 Return False
             End If
-
-            If IsPonyInBox(new_location, previewArea) AndAlso _
-               IsPonyInBox(New Point(new_location.X, new_location.Y + CurrentImageSize.Y), previewArea) AndAlso _
-               IsPonyInBox(New Point(new_location.X + CurrentImageSize.X, new_location.Y), previewArea) AndAlso _
-               IsPonyInBox(New Point(new_location.X + CurrentImageSize.X, new_location.Y + CurrentImageSize.Y), previewArea) Then
-
-                Return False
-            Else
-                Return True
-            End If
-
+            Return Not IsPonyContainedInRect(centerLocation, previewArea)
         End If
-
-
-        If IsNothing(CurrentBehavior) Then Return False
 
         If Options.ExclusionZone.IsEmpty Then
             Return False
         End If
 
-        Dim points As New List(Of Point)
-
-        'add center (or upper right if no center is defined)
-        Dim center As Point = New Point(
-                              CInt(new_location.X + (Scale * currentCustomImageCenter.Width)),
-                              CInt(new_location.Y + (Scale * currentCustomImageCenter.Height)))
-
-        points.Add(New Point(center.X - 45, center.Y - 45)) 'top left
-        points.Add(New Point(center.X + 45, center.Y - 45)) ' top right
-        points.Add(New Point(center.X - 45, center.Y + 45)) 'bottom left
-        points.Add(New Point(center.X + 45, center.Y + 45)) 'bottom right
-
-        'return true if any of the points hit the bad area
-        For Each point In points
-            Dim screen = GetScreenContainingPoint(point)
-            If screen IsNot Nothing Then
-                Dim area = Options.ExclusionZoneForBounds(screen.WorkingArea)
-                If area.Contains(point) Then Return True
-            End If
-        Next
-
-        Return False
+        Return IsPonyIntersectingWithRect(centerLocation, Options.ExclusionZoneForBounds(Options.GetCombinedScreenArea()))
     End Function
 
-    Private Function IsPonyNearMouseCursor(location As Point) As Boolean
+    Private Function IsPonyNearMouseCursor(centerLocation As Point) As Boolean
         If Not Options.CursorAvoidanceEnabled Then Return False
         If EvilGlobals.InScreensaverMode Then Return False
         If CursorImmunity > 0 Then Return False
         If IsInteracting Then Return False
         If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
 
-        Dim loc = New Vector2F(location)
-        Dim s = CSng(Scale)
-        Dim cursorLoc = New Vector2F(EvilGlobals.CursorLocation)
-        If Vector2F.Distance(loc + (currentMouseoverBehavior.LeftImage.Center * s), cursorLoc) <=
-            Options.CursorAvoidanceSize Then Return True
-        If Vector2F.Distance(loc + (currentMouseoverBehavior.RightImage.Center * s), cursorLoc) <=
-            Options.CursorAvoidanceSize Then Return True
-
-        Return False
+        Return Vector2.Distance(centerLocation, EvilGlobals.CursorLocation) <= Options.CursorAvoidanceSize
     End Function
 
     ''' <summary>
@@ -2749,7 +2707,7 @@ Public Class Pony
     ''' </summary>
     ''' <returns>The center of the preview area in preview mode, otherwise a random location within the allowable region, if one can be
     ''' found; otherwise Point.Empty.</returns>
-    Friend Function FindSafeDestination() As Point
+    Private Function FindSafeDestination() As Point
         If EvilGlobals.InPreviewMode Then Return Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
 
         For i = 0 To 300
@@ -2757,15 +2715,15 @@ Public Class Pony
             Dim teleportLocation = New Point(
                 CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
                 CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
-            If Not InAvoidanceArea(teleportLocation) Then Return teleportLocation
+            If Not IsPonyIntersectingWithAvoidanceArea(teleportLocation) Then Return teleportLocation
         Next
 
         Return Point.Empty
     End Function
 
-    Friend Function GetDestinationDirectionHorizontal(destination As Vector2) As Direction
-        Dim rightImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.RightImage.Center.X))
-        Dim leftImageCenterX = CInt(TopLeftLocation.X + (Scale * CurrentBehavior.LeftImage.Center.X))
+    Friend Function GetDestinationDirectionHorizontal(destination As Vector2F) As Direction
+        Dim rightImageCenterX = TopLeftLocation.X + (Scale * CurrentBehavior.RightImage.Center.X)
+        Dim leftImageCenterX = TopLeftLocation.X + (Scale * CurrentBehavior.LeftImage.Center.X)
         If (rightImageCenterX > destination.X AndAlso leftImageCenterX < destination.X) OrElse
             destination.X - CenterLocation.X <= 0 Then
             Return Direction.MiddleLeft
@@ -2774,9 +2732,9 @@ Public Class Pony
         End If
     End Function
 
-    Friend Function GetDestinationDirectionVertical(destination As Vector2) As Direction
-        Dim rightImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.RightImage.Center.Y))
-        Dim leftImageCenterY = CInt(TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImage.Center.Y))
+    Friend Function GetDestinationDirectionVertical(destination As Vector2F) As Direction
+        Dim rightImageCenterY = TopLeftLocation.Y + (Scale * CurrentBehavior.RightImage.Center.Y)
+        Dim leftImageCenterY = TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImage.Center.Y)
         If (rightImageCenterY > destination.Y AndAlso leftImageCenterY < destination.Y) OrElse
            (rightImageCenterY < destination.Y AndAlso leftImageCenterY > destination.Y) OrElse
            destination.Y - CenterLocation.Y <= 0 Then
@@ -2786,10 +2744,16 @@ Public Class Pony
         End If
     End Function
 
-    Friend ReadOnly Property CurrentImageSize As Vector2
+    Private ReadOnly Property currentImage As CenterableSpriteImage
         Get
             Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
-            Return If(facingRight, behavior.RightImage.Size, behavior.LeftImage.Size)
+            Return If(facingRight, behavior.RightImage, behavior.LeftImage)
+        End Get
+    End Property
+
+    Friend ReadOnly Property CurrentImageSize As Vector2
+        Get
+            Return currentImage.Size
         End Get
     End Property
 
@@ -3161,8 +3125,7 @@ Public Class Effect
     Public Property CloseOnNewBehavior As Boolean
     Private _expired As Boolean
 
-    Public Property Location As Point
-    Public Property TranslatedLocation As Point
+    Public Property TopLeftLocation As Point
     Public Property FacingLeft As Boolean
     Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
     Public Property PlacementDirection As Direction
@@ -3194,7 +3157,7 @@ Public Class Effect
 
     Public Sub Teleport()
         Dim screen = Options.Screens(Rng.Next(Options.Screens.Count))
-        Location = New Point(
+        TopLeftLocation = New Point(
             CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
             CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
     End Sub
@@ -3207,8 +3170,8 @@ Public Class Effect
             scale = 1
         End If
 
-        Return New Point(CInt(Me.Location.X + ((scale * CurrentImageSize.Width) / 2)),
-                         CInt(Me.Location.Y + ((scale * CurrentImageSize.Height) / 2)))
+        Return New Point(CInt(Me.TopLeftLocation.X + ((scale * CurrentImageSize.Width) / 2)),
+                         CInt(Me.TopLeftLocation.Y + ((scale * CurrentImageSize.Height) / 2)))
     End Function
 
     Public ReadOnly Property CurrentImagePath() As String
@@ -3232,14 +3195,14 @@ Public Class Effect
         internalTime = updateTime
         If _expired Then Return
         If Base.Follow Then
-            Location = Pony.GetEffectLocation(CurrentImageSize,
+            TopLeftLocation = Pony.GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
-                                              OwningPony.TopLeftLocation,
+                                              New Vector2F(OwningPony.TopLeftLocation),
                                               OwningPony.CurrentImageSize,
                                               Centering,
                                               CSng(OwningPony.Scale))
         ElseIf BeingDragged Then
-            Location = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
+            TopLeftLocation = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
         If DesiredDuration IsNot Nothing AndAlso ImageTimeIndex > DesiredDuration.Value Then
             Expire()
@@ -3268,7 +3231,7 @@ Public Class Effect
         Get
             Dim width = CInt(CurrentImageSize.Width * Options.ScaleFactor)
             Dim height = CInt(CurrentImageSize.Height * Options.ScaleFactor)
-            Return New Rectangle(Location, New Size(width, height))
+            Return New Rectangle(TopLeftLocation, New Size(width, height))
         End Get
     End Property
 
@@ -3539,7 +3502,7 @@ Public Class House
 
                 Dim deployed_pony = New Pony(ponyBase)
 
-                deployed_pony.TopLeftLocation = instance.Location + New Size(HouseBase.DoorPosition) - deployed_pony.GetImageCenterOffset()
+                deployed_pony.Location = instance.TopLeftLocation + New Size(HouseBase.DoorPosition)
 
                 EvilGlobals.CurrentAnimator.AddPony(deployed_pony)
                 deployedPonies.Add(deployed_pony)
@@ -3592,7 +3555,7 @@ Public Class House
 
                 If pony.Sleeping Then pony.WakeUp()
 
-                pony.Destination = instance.Location + New Size(HouseBase.DoorPosition)
+                pony.Destination = instance.TopLeftLocation + New Size(HouseBase.DoorPosition)
                 pony.GoingHome = True
                 pony.CurrentBehavior = pony.GetAppropriateBehaviorOrFallback(AllowedMoves.All, False)
                 pony.BehaviorDesiredDuration = TimeSpan.FromMinutes(5)

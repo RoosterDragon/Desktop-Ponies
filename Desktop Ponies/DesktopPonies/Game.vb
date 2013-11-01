@@ -301,7 +301,7 @@ Public Class Game
                     activeBalls.Add(ball)
                     EvilGlobals.CurrentAnimator.AddPony(ball.Handler)
                     ball.Handler.CurrentBehavior = ball.Handler.Behaviors(1)
-                    ball.Handler.TopLeftLocation = ball.StartPosition
+                    ball.Handler.Location = ball.StartPosition
                     ball.Update()
                     If ball.Type = BallType.PingPong Then
                         ball.Kick(5, Rng.NextDouble() * (2 * Math.PI), Nothing)
@@ -348,14 +348,14 @@ Public Class Game
     Private Function CheckForScore() As Boolean
         For Each ball In Balls
             If scoringStyles.Contains(ScoreStyle.BallAtSides) Then
-                If ball.Handler.TopLeftLocation.X <
-                    GameScreen.WorkingArea.X + (GameScreen.WorkingArea.Width * 0.02) Then
+                If ball.Handler.Region.Left <
+                    GameScreen.WorkingArea.Left + (GameScreen.WorkingArea.Width * 0.02) Then
                     Teams(1).Score += 1
                     scoreboard.SetScores(Teams(0), Teams(1))
                     Return True
                 Else
-                    If ball.Handler.TopLeftLocation.X + ball.Handler.CurrentImageSize.X >
-                        (GameScreen.WorkingArea.X + GameScreen.WorkingArea.Width) - (GameScreen.WorkingArea.Width * 0.02) Then
+                    If ball.Handler.Region.Right >
+                        (GameScreen.WorkingArea.Right) - (GameScreen.WorkingArea.Width * 0.02) Then
                         Teams(0).Score += 1
                         scoreboard.SetScores(Teams(0), Teams(1))
                         Return True
@@ -364,8 +364,8 @@ Public Class Game
             End If
             If scoringStyles.Contains(ScoreStyle.BallAtGoal) Then
                 For Each goal In goals
-                    Dim goalArea As New Rectangle(goal.HostEffect.Location, goal.HostEffect.CurrentImageSize)
-                    If Pony.IsPonyInBox(ball.Handler.CenterLocation, goalArea) Then
+                    Dim goalArea As New Rectangle(goal.HostEffect.TopLeftLocation, goal.HostEffect.CurrentImageSize)
+                    If ball.Handler.IsPonyContainedInRect(ball.Handler.Location, goalArea) Then
                         For Each team In Teams
                             If ReferenceEquals(team.Goal, goal) AndAlso
                                 ball.LastHandledBy IsNot Nothing AndAlso
@@ -464,12 +464,11 @@ Public Class Game
                 CInt(initialPosition.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(initialPosition.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
 
-            Handler.TopLeftLocation = StartPosition
+            Handler.Location = StartPosition
         End Sub
 
-        Public Function Center() As Point
-            Return New Point(CInt(Me.Handler.TopLeftLocation.X + Me.Handler.CurrentImageSize.X / 2),
-                             CInt(Me.Handler.TopLeftLocation.Y + Me.Handler.CurrentImageSize.Y / 2))
+        Public Function Center() As PointF
+            Return Me.Handler.Location
         End Function
 
         Public Sub Update()
@@ -556,14 +555,13 @@ Public Class Game
         Public Sub Initialize(gameScreen As Screen)
             Argument.EnsureNotNull(gameScreen, "gameScreen")
 
-            HostEffect.Location = New Point(
+            HostEffect.TopLeftLocation = New Point(
                 CInt(startPoint.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(startPoint.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
         End Sub
 
-        Public Function Center() As Point
-            Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize.Width / 2)),
-                             CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize.Height) / 2))
+        Public Function Center() As PointF
+            Return HostEffect.Region.Center()
         End Function
     End Class
 
@@ -601,14 +599,13 @@ Public Class Game
         Public Sub Initialize(gameScreen As Screen)
             Argument.EnsureNotNull(gameScreen, "gameScreen")
 
-            HostEffect.Location = New Point(
+            HostEffect.TopLeftLocation = New Point(
                 CInt(startPoint.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(startPoint.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
         End Sub
 
-        Public Function Center() As Point
-            Return New Point(CInt(HostEffect.Location.X + (HostEffect.CurrentImageSize.Width / 2)),
-                             CInt(HostEffect.Location.Y + (HostEffect.CurrentImageSize.Height) / 2))
+        Public Function Center() As PointF
+            Return HostEffect.Region.Center()
         End Function
 
         Public Sub SetScores(teamOne As Team, teamTwo As Team)
@@ -657,7 +654,7 @@ Public Class Game
 
             Public ReadOnly Property Region As Rectangle Implements ISprite.Region
                 Get
-                    Return New Rectangle(parent.HostEffect.Location + LocalPosition, Size.Empty)
+                    Return New Rectangle(parent.HostEffect.TopLeftLocation + LocalPosition, Size.Empty)
                 End Get
             End Property
 
@@ -781,7 +778,7 @@ Public Class Game
                 Exit Sub
             End If
 
-            If nearestBallDistance <= (Player.CurrentImageSize.X / 2) + 50 Then ' / 2 Then
+            If nearestBallDistance <= (Player.Region.Width / 2) + 50 Then ' / 2 Then
                 PerformAction(haveBallActions, nearest_ball)
                 Exit Sub
             End If
@@ -920,7 +917,7 @@ Public Class Game
             Dim nearest_ball_distance As Double = Double.MaxValue
 
             For Each ball In balls
-                Dim distance = Vector2.Distance(Player.CenterLocation, ball.Center)
+                Dim distance = Vector2F.Distance(New Vector2F(Player.Location), ball.Center)
                 If distance < nearest_ball_distance Then
                     nearest_ball_distance = distance
                     nearest_ball = ball
@@ -999,9 +996,9 @@ Public Class Game
             Dim angle As Double = Nothing
 
             If IsNothing(targetGoal) Then
-                angle = GetAngleToObject(targetPony.CenterLocation)
+                angle = GetAngleToObject(targetPony.Location)
             Else
-                angle = GetAngleToObject(targetGoal.Center)
+                angle = GetAngleToObject(targetGoal.Center())
             End If
 
 
@@ -1018,7 +1015,7 @@ Public Class Game
 
         Private Sub BounceBall(ball As Ball, speed As Double, kicker As Position, line As String)
             If EvilGlobals.CurrentGame.Name = "Ping Pong Pony" Then
-                'avoid boucing the ball back into our own goal.
+                'avoid bouncing the ball back into our own goal.
                 If Not IsNothing(ball.LastHandledBy) AndAlso ReferenceEquals(ball.LastHandledBy, Me) Then
                     Exit Sub
                 End If
@@ -1037,14 +1034,14 @@ Public Class Game
                 angle = 0
             End If
 
-            Dim ball_center As Point = ball.Handler.CenterLocation
-            Dim kicker_center As Point = kicker.Player.CenterLocation
+            Dim ball_center As Point = Point.Round(ball.Handler.Location)
+            Dim kicker_center As Point = Point.Round(kicker.Player.Location)
 
             Dim y_difference = kicker_center.Y - ball_center.Y
 
-            Dim kicker_height = kicker.Player.CurrentImageSize.Y / 1.5
+            Dim kicker_height = kicker.Player.Region.Height / 1.5
 
-            If kicker.Player.CenterLocation.X < (gamescreen.WorkingArea.Width * 0.5) Then
+            If kicker_center.X < (gamescreen.WorkingArea.Width * 0.5) Then
 
                 If y_difference > 0 Then
                     angle += (Math.PI / 4) * (Math.Abs(y_difference) / kicker_height)
@@ -1086,13 +1083,13 @@ Public Class Game
         End Sub
 
         'returns radians
-        Private Function GetAngleToObject(target As Point) As Double
+        Private Function GetAngleToObject(target As PointF) As Double
 
             'opposite = y_distance
-            Dim opposite = Player.CenterLocation.Y - target.Y
+            Dim opposite = Player.Location.Y - target.Y
 
             'adjacent = x_distance
-            Dim adjacent = Player.CenterLocation.X - target.X
+            Dim adjacent = Player.Location.X - target.X
 
             Dim hypotenuse As Double = Math.Sqrt(opposite ^ 2 + adjacent ^ 2)
 
@@ -1102,15 +1099,15 @@ Public Class Game
             Dim angle = Math.Asin(Math.Abs(opposite) / hypotenuse)
 
             ' if the target is below, flip the angle to the 4th quadrant
-            If target.Y > Player.CenterLocation.Y Then
+            If target.Y > Player.Location.Y Then
                 angle = (2 * Math.PI) - angle
                 'if the target is to the left, flip the angle to 3rd quadrant
-                If target.X < Player.CenterLocation.X Then
+                If target.X < Player.Location.X Then
                     angle = Math.PI - angle
                 End If
             Else
-                ' If the tartget is above and to the left, flip the angle to the 2nd quadrant.
-                If target.X < Player.CenterLocation.X Then
+                ' If the target is above and to the left, flip the angle to the 2nd quadrant.
+                If target.X < Player.Location.X Then
                     angle = Math.PI - angle
                 End If
             End If
@@ -1145,14 +1142,14 @@ Public Class Game
 
         Private Shared Function DoesPonyOverlap(pony As Pony, otherPony As Pony) As Boolean
 
-            Dim otherpony_area As New Rectangle(otherPony.TopLeftLocation.X, _
-                                             otherPony.TopLeftLocation.Y, _
-                                             CInt(otherPony.CurrentImageSize.X * otherPony.Scale),
-                                             CInt(otherPony.CurrentImageSize.Y * otherPony.Scale))
+            Dim otherpony_area As New Rectangle(otherPony.Region.X, _
+                                             otherPony.Region.Y, _
+                                             CInt(otherPony.Region.Width * otherPony.Scale),
+                                             CInt(otherPony.Region.Height * otherPony.Scale))
 
 
-            If otherpony_area.IntersectsWith(New Rectangle(pony.TopLeftLocation, New Size(CInt(pony.Scale * pony.CurrentImageSize.X), _
-                                                                                    CInt(pony.Scale * pony.CurrentImageSize.Y)))) Then
+            If otherpony_area.IntersectsWith(New Rectangle(pony.Region.Location, New Size(CInt(pony.Scale * pony.Region.Width), _
+                                                                                    CInt(pony.Scale * pony.Region.Height)))) Then
                 Return True
             Else
                 Return False
@@ -1164,19 +1161,19 @@ Public Class Game
 
             Dim xchange = 1
             Dim ychange = 2
-            If pony1.GetDestinationDirectionHorizontal(pony2.CenterLocation) = Direction.MiddleLeft Then
+            If pony1.GetDestinationDirectionHorizontal(New Vector2F(pony2.Location)) = Direction.MiddleLeft Then
                 xchange = -1
             End If
-            If pony1.GetDestinationDirectionVertical(pony2.CenterLocation) = Direction.TopCenter Then
+            If pony1.GetDestinationDirectionVertical(New Vector2F(pony2.Location)) = Direction.TopCenter Then
                 ychange = -2
             End If
 
             Dim change = New Size(xchange, ychange)
-            Dim new_location = pony1.TopLeftLocation + change
+            Dim newLocation = Point.Round(pony1.Location + change)
 
-            If pony1.IsPonyOnScreen(new_location, EvilGlobals.CurrentGame.GameScreen) AndAlso
-                (Not allowedArea.HasValue OrElse Pony.IsPonyInBox(new_location, allowedArea.Value)) Then
-                pony1.TopLeftLocation = new_location
+            If pony1.IsPonyContainedInScreen(newLocation, EvilGlobals.CurrentGame.GameScreen) AndAlso
+                (Not allowedArea.HasValue OrElse pony1.IsPonyContainedInRect(newLocation, allowedArea.Value)) Then
+                pony1.Location = newLocation
             End If
 
         End Sub
@@ -1186,7 +1183,7 @@ Public Class Game
             Dim ponies As New List(Of Pony)
 
             For Each Position In team.Positions
-                Dim distance = Vector2.Distance(Position.Player.CenterLocation, ball.Center)
+                Dim distance = Vector2F.Distance(New Vector2F(Position.Player.Location), ball.Center())
                 If distance <= minDistance Then
                     ponies.Add(Position.Player)
                 End If
@@ -1212,14 +1209,14 @@ Public Class Game
                         Continue For
                     End If
 
-                    Dim distance = Vector2.Distance(Position.Player.CenterLocation, other_position.Player.CenterLocation)
+                    Dim distance = Vector2.Distance(Position.Player.Location, other_position.Player.Location)
                     If distance <= 200 Then
                         open = False
                     End If
                 Next
 
-                Dim me_distance_to_goal = Vector2.Distance(Player.CenterLocation, goal.Center)
-                Dim teammate_distance_to_goal = Vector2.Distance(Position.Player.CenterLocation, goal.Center)
+                Dim me_distance_to_goal = Vector2F.Distance(New Vector2F(Player.Location), goal.Center())
+                Dim teammate_distance_to_goal = Vector2F.Distance(New Vector2F(Position.Player.Location), goal.Center())
 
                 If open = True AndAlso teammate_distance_to_goal <= me_distance_to_goal Then
                     open_teammates.Add(Position.Player)

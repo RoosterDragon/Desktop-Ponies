@@ -63,7 +63,7 @@ Public Class EffectImageViewer
         Dim loopTime = TimeSpan.FromMilliseconds(Math.Max(Image.ImageDuration, EffectImage.ImageDuration))
         If Time > loopTime Then Time = TimeSpan.Zero
 
-        Dim imageLocation = Point.Empty
+        Dim imageLocation = Vector2.Zero
         Dim effectLocation = Pony.GetEffectLocation(EffectImage.Size, Placement, imageLocation, Image.Size, Centering, 1)
         If effectLocation.X < 0 Then
             imageLocation.X -= effectLocation.X
@@ -73,12 +73,12 @@ Public Class EffectImageViewer
             imageLocation.Y -= effectLocation.Y
             effectLocation.Y = 0
         End If
-        Dim imageMax = imageLocation + Image.Size
-        Dim effectMax = effectLocation + EffectImage.Size
+        Dim imageMax = imageLocation + New Vector2(Image.Size)
+        Dim effectMax = effectLocation + New Vector2(EffectImage.Size)
         Dim bounds = New Rectangle(0, 0, Math.Max(imageMax.X, effectMax.X), Math.Max(imageMax.Y, effectMax.Y))
-        Dim boundsCenter = Point.Truncate(bounds.Center())
-        Dim controlCenter = New Size(CInt(Width / 2), CInt(Height / 2))
-        Dim location = New Size(controlCenter.Width - boundsCenter.X, controlCenter.Height - boundsCenter.Y)
+        Dim boundsCenter = bounds.Center()
+        Dim controlCenter = New Vector2F(Width, Height) / 2
+        Dim location = Vector2.Round(controlCenter - boundsCenter)
         imageLocation += location
         effectLocation += location
 
