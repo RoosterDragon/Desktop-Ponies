@@ -544,7 +544,7 @@ Public Class Game
 
             TeamNumber = _teamNumber
             Dim base As New EffectBase("Team " & TeamNumber & "'s Goal", imageFilename, imageFilename)
-            HostEffect = New Effect(base, True)
+            HostEffect = New Effect(base, True, Nothing, Nothing, Nothing)
 
             Dim locationParts = Split(location, ",")
             startPoint = New Point(
@@ -589,7 +589,7 @@ Public Class Game
             End If
 
             Dim base As New EffectBase("Scoreboard", imageFilename, imageFilename)
-            HostEffect = New Effect(base, True)
+            HostEffect = New Effect(base, True, Nothing, Nothing, Nothing)
 
             startPoint = New Point(
                 Integer.Parse(x, CultureInfo.InvariantCulture),

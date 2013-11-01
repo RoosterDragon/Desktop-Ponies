@@ -3,6 +3,8 @@
 Public Class DesktopPonyAnimator
     Inherits PonyAnimator
 
+    Private context As PonyContext
+    Private pony2Menu As ISimpleContextMenu
     Private ponyMenu As ISimpleContextMenu
     Private houseMenu As ISimpleContextMenu
     Protected selectedHouse As House
@@ -14,8 +16,12 @@ Public Class DesktopPonyAnimator
     Private spriteDebugForm As SpriteDebugForm
     Private countSinceLastDebug As Integer
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite), ponyCollection As PonyCollection)
+    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                   ponyCollection As PonyCollection, ponyContext As PonyContext)
         MyBase.New(spriteViewer, spriteCollection, ponyCollection)
+
+        context = Argument.EnsureNotNull(ponyContext, "ponyContext")
+        context.Sprites = Sprites
 
         If OperatingSystemInfo.IsMacOSX Then
             EvilGlobals.Main.SmartInvoke(Sub() controlForm = New DesktopControlForm(Me))
@@ -90,6 +96,12 @@ Public Class DesktopPonyAnimator
 
     Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
         If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then
+            Dim selectedPony2 = GetClosestUnderPoint(Of Pony2)(e.Location)
+            If selectedPony2 IsNot Nothing Then
+                pony2Menu.Show(e.X, e.Y)
+                Return
+            End If
+
             selectedPony = GetClosestUnderPoint(Of Pony)(e.Location)
             If IsNothing(selectedPony) Then
                 selectedHouse = GetClosestUnderPoint(Of House)(e.Location)
@@ -232,6 +244,14 @@ Public Class DesktopPonyAnimator
         Else
             ponyMenu = controlForm.CreateContextMenu(menuItems)
         End If
+
+        Dim pony2MenuItems = {New SimpleContextMenuItem("Return To Menu", Sub() Finish(ExitRequest.ReturnToMenu)),
+                              New SimpleContextMenuItem("Exit", Sub() Finish(ExitRequest.ExitApplication))}
+        If controlForm Is Nothing Then
+            pony2Menu = Viewer.CreateContextMenu(pony2MenuItems)
+        Else
+            pony2Menu = controlForm.CreateContextMenu(pony2MenuItems)
+        End If
     End Sub
 
     Private Sub CreateHouseMenu()
@@ -268,6 +288,11 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Protected Overrides Sub Update()
+        If context.PendingSprites.Count > 0 Then
+            QueueAddRangeAndStart(context.PendingSprites)
+            context.PendingSprites.Clear()
+        End If
+        context.CursorLocation = Viewer.CursorPosition
         MyBase.Update()
         countSinceLastDebug += 1
         If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
