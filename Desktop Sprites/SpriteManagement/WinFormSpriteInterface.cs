@@ -660,7 +660,8 @@
                     ApplicationInvoke(() =>
                     {
                         form.DesktopBounds = value;
-                        AllocateBuffers();
+                        if (opened)
+                            AllocateBuffers();
                     });
             }
         }
