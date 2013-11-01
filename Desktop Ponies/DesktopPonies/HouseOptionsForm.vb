@@ -209,7 +209,7 @@ Public Class HouseOptionsForm
         Me.Close()
     End Sub
 
-    Private Sub HouseOptionsForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+    Private Sub HouseOptionsForm_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
         house.HouseBase.OptionsForm = Nothing
     End Sub
 End Class

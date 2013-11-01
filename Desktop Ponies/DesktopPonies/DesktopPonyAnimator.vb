@@ -37,7 +37,7 @@ Public Class DesktopPonyAnimator
                                              spriteDebugForm = New SpriteDebugForm()
                                              spriteDebugForm.Show()
                                          End Sub)
-            AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
+            AddHandler spriteDebugForm.Disposed, Sub() spriteDebugForm = Nothing
         End If
 
         AddHandler Viewer.MouseClick, AddressOf Viewer_MouseClick

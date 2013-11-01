@@ -88,7 +88,7 @@
             this.Name = "GifFramesForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GIF Viewer";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GifForm_FormClosed);
+            this.Disposed += new System.EventHandler(this.GifForm_Disposed);
             this.Load += new System.EventHandler(this.GifForm_Load);
             this.ControlsContainer.ResumeLayout(false);
             this.ControlsContainer.PerformLayout();

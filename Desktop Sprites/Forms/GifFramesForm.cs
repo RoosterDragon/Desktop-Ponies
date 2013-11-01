@@ -110,12 +110,12 @@
         }
 
         /// <summary>
-        /// Raised when the form is closed.
+        /// Raised when the form is disposed.
         /// Performs cleanup.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
-        private void GifForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void GifForm_Disposed(object sender, EventArgs e)
         {
             foreach (GifControl gc in FramesDisplayPanel.Controls)
                 gc.Dispose();
