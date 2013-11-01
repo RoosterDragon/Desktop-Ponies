@@ -3539,26 +3539,7 @@ Public Class House
 
                 Dim deployed_pony = New Pony(ponyBase)
 
-                deployed_pony.SelectBehavior()
-
                 deployed_pony.TopLeftLocation = instance.Location + New Size(HouseBase.DoorPosition) - deployed_pony.GetImageCenterOffset()
-
-                Dim groups As New List(Of Integer)
-                Dim Alternate_Group_Behaviors As New List(Of Behavior)
-
-                For Each Behavior In deployed_pony.Behaviors
-                    If Not groups.Contains(Behavior.Group) Then groups.Add(Behavior.Group)
-
-                    If Behavior.Group <> 0 AndAlso Behavior.Skip = False Then
-                        Alternate_Group_Behaviors.Add(Behavior)
-                    End If
-                Next
-
-                Dim selected_group = Rng.Next(groups.Count)
-
-                If selected_group <> 0 AndAlso Alternate_Group_Behaviors.Count > 0 Then
-                    deployed_pony.SelectBehavior(Alternate_Group_Behaviors(Rng.Next(Alternate_Group_Behaviors.Count)))
-                End If
 
                 EvilGlobals.CurrentAnimator.AddPony(deployed_pony)
                 deployedPonies.Add(deployed_pony)
