@@ -1036,7 +1036,7 @@ End Class
 
 #Region "Pony class"
 Public Class Pony
-    Implements ISpeakingSprite, IDraggableSprite
+    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite
 
     ''' <summary>
     ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to UpdateOnce().
@@ -1099,6 +1099,7 @@ Public Class Pony
     End Property
 #End Region
 
+    Private _expired As Boolean
     Private ReadOnly interactions As New List(Of Interaction)()
 
     Public Property ShouldBeSleeping As Boolean
@@ -1350,7 +1351,7 @@ Public Class Pony
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as UpdateOnce must be evaluated many times to catch up).
         Dim difference = updateTime - lastUpdateTime
-        While difference.TotalMilliseconds > 0
+        While difference.TotalMilliseconds > 0 AndAlso Not _expired
             UpdateOnce()
             difference -= TimeSpan.FromMilliseconds(StepRate / Options.TimeFactor)
         End While
@@ -1420,6 +1421,10 @@ Public Class Pony
         Move()
         ' Activate any effects associated with the new behavior.
         ActivateEffects(internalTime)
+
+        If AtDestination AndAlso GoingHome AndAlso OpeningDoor AndAlso Delay <= 0 Then
+            Expire()
+        End If
     End Sub
 
     ''' <summary>
@@ -1742,7 +1747,7 @@ Public Class Pony
             ' Remove effects for the previous behavior. We don't want them lingering when the behavior restarts after the mouse moves away.
             If ActiveEffects.Count > 0 Then
                 For Each effect In ActiveEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name)
-                    effect.DesiredDuration = 0
+                    effect.Expire()
                 Next
             End If
 
@@ -2179,22 +2184,16 @@ Public Class Pony
                     Dim newEffect = New Effect(effect, Not facingRight)
 
                     If newEffect.Base.Duration <> 0 Then
-                        newEffect.DesiredDuration = newEffect.Base.Duration
+                        newEffect.DesiredDuration = TimeSpan.FromSeconds(newEffect.Base.Duration)
                         newEffect.CloseOnNewBehavior = False
                     Else
                         If Me.HaltedForCursor Then
-                            newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration).TotalSeconds
+                            newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration)
                         Else
-                            newEffect.DesiredDuration = (BehaviorDesiredDuration - Me.ImageTimeIndex).TotalSeconds
+                            newEffect.DesiredDuration = BehaviorDesiredDuration - Me.ImageTimeIndex
                         End If
                         newEffect.CloseOnNewBehavior = True
                     End If
-
-                    newEffect.Location = GetEffectLocation(newEffect.CurrentImageSize,
-                                                            newEffect.PlacementDirection,
-                                                            TopLeftLocation,
-                                                            CurrentImageSize,
-                                                            newEffect.Centering, CSng(Scale))
 
                     newEffect.OwningPony = Me
 
@@ -2950,6 +2949,17 @@ Public Class Pony
         End Get
     End Property
 
+    Public Sub Expire() Implements IExpireableSprite.Expire
+        If _expired Then Return
+        _expired = True
+        For Each effect In ActiveEffects
+            effect.Expire()
+        Next
+        RaiseEvent Expired(Me, EventArgs.Empty)
+    End Sub
+
+    Public Event Expired As EventHandler Implements IExpireableSprite.Expired
+
     Private Function ManualControl(ponyAction As Boolean,
                               ponyUp As Boolean, ponyDown As Boolean, ponyLeft As Boolean, ponyRight As Boolean,
                               ponySpeed As Boolean) As Double
@@ -3133,7 +3143,7 @@ End Class
 
 #Region "Effect class"
 Public Class Effect
-    Implements IDraggableSprite
+    Implements IDraggableSprite, IExpireableSprite
     Private Shared ReadOnly DirectionCount As Integer = [Enum].GetValues(GetType(Direction)).Length
 
     Private _base As EffectBase
@@ -3147,8 +3157,9 @@ Public Class Effect
     Private internalTime As TimeSpan
 
     Public Property OwningPony As Pony
-    Public Property DesiredDuration As Double
+    Public Property DesiredDuration As TimeSpan?
     Public Property CloseOnNewBehavior As Boolean
+    Private _expired As Boolean
 
     Public Property Location As Point
     Public Property TranslatedLocation As Point
@@ -3219,6 +3230,7 @@ Public Class Effect
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         internalTime = updateTime
+        If _expired Then Return
         If Base.Follow Then
             Location = Pony.GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
@@ -3228,6 +3240,9 @@ Public Class Effect
                                               CSng(OwningPony.Scale))
         ElseIf BeingDragged Then
             Location = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
+        End If
+        If DesiredDuration IsNot Nothing AndAlso ImageTimeIndex > DesiredDuration.Value Then
+            Expire()
         End If
     End Sub
 
@@ -3256,6 +3271,14 @@ Public Class Effect
             Return New Rectangle(Location, New Size(width, height))
         End Get
     End Property
+
+    Public Sub Expire() Implements IExpireableSprite.Expire
+        If _expired Then Return
+        _expired = True
+        RaiseEvent Expired(Me, EventArgs.Empty)
+    End Sub
+
+    Public Event Expired As EventHandler Implements IExpireableSprite.Expired
 
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Base.Name: " & Base.Name
@@ -3425,7 +3448,6 @@ Public Class House
     Public Sub New(houseBase As HouseBase)
         MyBase.New(houseBase, True)
         _houseBase = houseBase
-        DesiredDuration = TimeSpan.FromDays(100).TotalSeconds
     End Sub
 
     Public Sub InitializeVisitorList()

@@ -157,15 +157,7 @@ Public Class DesktopPonyAnimator
                                                 "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                 Return
                             End If
-                            QueueRemove(Function(sprite)
-                                            If Object.ReferenceEquals(sprite, selectedPony) Then Return True
-                                            Dim effect = TryCast(sprite, Effect)
-                                            If effect IsNot Nothing AndAlso
-                                                Object.ReferenceEquals(effect.OwningPony, selectedPony) Then
-                                                Return True
-                                            End If
-                                            Return False
-                                        End Function)
+                            QueueRemove(Function(sprite) Object.ReferenceEquals(sprite, selectedPony))
                         End Sub)
                 End Sub))
         menuItems.AddLast(
@@ -181,16 +173,7 @@ Public Class DesktopPonyAnimator
                             End If
                             QueueRemove(Function(sprite)
                                             Dim pony = TryCast(sprite, Pony)
-                                            If pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory Then
-                                                Return True
-                                            End If
-                                            Dim effect = TryCast(sprite, Effect)
-                                            If effect IsNot Nothing AndAlso
-                                                effect.OwningPony IsNot Nothing AndAlso
-                                                effect.OwningPony.Directory = selectedPony.Directory Then
-                                                Return True
-                                            End If
-                                            Return False
+                                            return pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory
                                         End Function)
                         End Sub)
                 End Sub))
@@ -271,7 +254,7 @@ Public Class DesktopPonyAnimator
                             End If
                         End Sub)
                 End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() RemoveEffect(selectedHouse)))
+        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() selectedHouse.Expire()))
         If controlForm Is Nothing Then
             houseMenu = Viewer.CreateContextMenu(menuItems)
         Else

@@ -52,6 +52,8 @@ Public Class PonyAnimator
         AddHandler SpritesAdded, AddressOf SpritesChanged
         AddHandler SpriteRemoved, AddressOf SpriteChanged
         AddHandler SpritesRemoved, AddressOf SpritesChanged
+        AddHandler SpriteAdded, AddressOf AddExpiredHandlers
+        AddHandler SpritesAdded, AddressOf AddExpiredHandlers
     End Sub
 
     Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
@@ -60,6 +62,25 @@ Public Class PonyAnimator
 
     Private Sub SpritesChanged(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         If e.Items.Any(Function(s) TypeOf s Is Pony) Then interactionsNeedReinitializing = True
+    End Sub
+
+    Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
+        Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
+        If expireableSprite IsNot Nothing Then
+            AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        End If
+    End Sub
+
+    Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
+        For Each expireableSprite In e.Items.OfType(Of IExpireableSprite)()
+            AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        Next
+    End Sub
+
+    Private Sub RemoveExpiredSprite(sender As Object, e As EventArgs)
+        Dim expireableSprite = DirectCast(sender, IExpireableSprite)
+        RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        QueueRemove(expireableSprite)
     End Sub
 
     Private Sub InitializeInteractions()
@@ -106,23 +127,29 @@ Public Class PonyAnimator
             End If
         End If
 
+        ' Cycle houses.
         For Each sprite In Sprites
-            Dim updated = UpdateIfPony(sprite) OrElse UpdateIfEffect(sprite) OrElse UpdateIfHouse(sprite)
+            UpdateIfHouse(sprite)
         Next
 
+        ' Run game update loop.
+        ' TODO: Refactor game loop into a new derived class.
         If EvilGlobals.CurrentGame IsNot Nothing Then
             EvilGlobals.CurrentGame.Update()
         End If
 
+        ' Release any sounds that finished playing.
         If EvilGlobals.DirectXSoundAvailable Then
             CleanupSounds()
         End If
 
+        ' Process queued actions now, so the sprite collection is up to date. Then we can tell if interactions need to be reinitialized.
         ProcessQueuedActions()
         If interactionsNeedReinitializing Then
             InitializeInteractions()
             interactionsNeedReinitializing = False
         End If
+
         MyBase.Update()
         If ExitWhenNoSprites AndAlso Sprites.Count = 0 Then
             Finish(ExitRequest.ReturnToMenu)
@@ -130,25 +157,6 @@ Public Class PonyAnimator
         End If
         Sort(zOrder)
     End Sub
-
-    Private Function UpdateIfPony(sprite As ISprite) As Boolean
-        Dim pony = TryCast(sprite, Pony)
-        If pony Is Nothing Then Return False
-        If pony.AtDestination AndAlso pony.GoingHome AndAlso pony.OpeningDoor AndAlso pony.Delay <= 0 Then
-            RemovePony(pony)
-        End If
-        Return True
-    End Function
-
-    Private Function UpdateIfEffect(sprite As ISprite) As Boolean
-        Dim effect = TryCast(sprite, Effect)
-        If effect Is Nothing Then Return False
-        If effect.ImageTimeIndex > TimeSpan.FromSeconds(effect.DesiredDuration) Then
-            effect.OwningPony.ActiveEffects.Remove(effect)
-            QueueRemove(effect)
-        End If
-        Return True
-    End Function
 
     Private Function UpdateIfHouse(sprite As ISprite) As Boolean
         Dim house = TryCast(sprite, House)
@@ -165,22 +173,11 @@ Public Class PonyAnimator
         QueueAddAndStart(pony)
     End Sub
 
-    Protected Friend Sub RemovePony(pony As Pony)
-        QueueRemove(pony)
-        For Each effect In pony.ActiveEffects
-            QueueRemove(effect)
-        Next
-    End Sub
-
     Protected Friend Sub AddEffect(effect As Effect)
         QueueAddAndStart(effect)
     End Sub
 
-    Protected Friend Sub RemoveEffect(effect As Effect)
-        QueueRemove(effect)
-    End Sub
-
-    Public Sub Clear()
+    Protected Friend Sub Clear()
         QueueClear()
     End Sub
 

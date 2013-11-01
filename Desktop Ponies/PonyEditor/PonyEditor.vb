@@ -436,7 +436,7 @@ Public Class PonyEditor
         Argument.EnsureNotNull(behavior, "behavior")
         Dim poniesToRemove = editorAnimator.Ponies().Where(Function(p) Not Object.ReferenceEquals(p, PreviewPony)).ToArray()
         For Each pony In poniesToRemove
-            editorAnimator.RemovePony(pony)
+            pony.Expire()
         Next
 
         PreviewPony.ActiveEffects.Clear()

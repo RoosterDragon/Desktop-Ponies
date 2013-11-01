@@ -237,13 +237,11 @@ Public Class Game
 
         For Each goal In goals
             goal.Initialize(GameScreen)
-            goal.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
             EvilGlobals.CurrentAnimator.AddEffect(goal.HostEffect)
         Next
 
         scoreboard.Initialize(GameScreen)
         scoreboard.SetScores(Teams(0), Teams(1))
-        scoreboard.HostEffect.DesiredDuration = 60 * 60 * 24 * 365
         EvilGlobals.CurrentAnimator.AddEffect(scoreboard.HostEffect)
         EvilGlobals.CurrentAnimator.AddSprites(scoreboard.ScoreDisplays)
 
@@ -328,7 +326,7 @@ Public Class Game
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        EvilGlobals.CurrentAnimator.RemovePony(ball.Handler)
+                        ball.Handler.Expire()
                     Next
 
                     For Each team In Teams
