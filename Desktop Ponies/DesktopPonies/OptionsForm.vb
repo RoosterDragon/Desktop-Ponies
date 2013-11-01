@@ -481,5 +481,6 @@ Public Class OptionsForm
 
     Private Sub OptionsForm_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
         If avoidanceZonePreviewGraphics IsNot Nothing Then avoidanceZonePreviewGraphics.Dispose()
+        If AvoidanceZonePreview.Image IsNot Nothing Then AvoidanceZonePreview.Image.Dispose()
     End Sub
 End Class

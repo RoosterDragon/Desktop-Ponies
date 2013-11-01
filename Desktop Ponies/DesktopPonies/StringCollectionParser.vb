@@ -38,7 +38,7 @@ Public Class StringCollectionParser
         End Get
     End Property
     Public Sub New(itemsToParse As String(), itemNames As String())
-        Argument.EnsureNotNull(itemsToParse, "elements")
+        Argument.EnsureNotNull(itemsToParse, "itemsToParse")
         Argument.EnsureNotNull(itemNames, "itemNames")
         items = itemsToParse
         Me.itemNames = itemNames
