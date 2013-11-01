@@ -89,26 +89,22 @@
         /// </summary>
         bool IsAlphaBlended { get; }
         /// <summary>
-        /// Gets the location of the cursor.
+        /// Gets the current location of the cursor.
         /// </summary>
         Point CursorPosition { get; }
+        /// <summary>
+        /// Gets the mouse buttons which are currently held down.
+        /// </summary>
+        SimpleMouseButtons MouseButtonsDown { get; }
 
         /// <summary>
         /// Occurs when a key is pressed while the interface has focus.
         /// </summary>
         event EventHandler<SimpleKeyEventArgs> KeyPress;
         /// <summary>
-        /// Occurs when the mouse pointer is over the interface and a mouse button is pressed.
-        /// </summary>
-        event EventHandler<SimpleMouseEventArgs> MouseDown;
-        /// <summary>
         /// Occurs when the interface is clicked by the mouse.
         /// </summary>
         event EventHandler<SimpleMouseEventArgs> MouseClick;
-        /// <summary>
-        /// Occurs when the mouse pointer is over the interface and a mouse button is released.
-        /// </summary>
-        event EventHandler<SimpleMouseEventArgs> MouseUp;
         /// <summary>
         /// Occurs when the interface is closed, either via the
         /// <see cref="M:DesktopSprites.SpriteManagement.ISpriteCollectionView.Close"/> method or by other means such as user request.
@@ -146,7 +142,7 @@
     }
 
     /// <summary>
-    /// Provides data for the MouseDown, MouseClick and MouseUp events.
+    /// Provides data for the MouseClick event.
     /// </summary>
     public class SimpleMouseEventArgs : EventArgs
     {

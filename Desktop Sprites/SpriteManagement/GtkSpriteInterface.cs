@@ -11,7 +11,6 @@
     using Gdk;
     using Gtk;
     using SD = System.Drawing;
-    using SWF = System.Windows.Forms;
 
     // TODO: See what can be done to improve the memory leak. The way Gtk+ seems to handle unmanaged resources does not seem to perform
     // well in a managed environment, and Dispose() does not follow the usual C# idiom.
@@ -1090,11 +1089,36 @@
             set { }
         }
         /// <summary>
-        /// Gets the location of the cursor.
+        /// Gets the current location of the cursor.
         /// </summary>
         public SD.Point CursorPosition
         {
-            get { return SWF.Cursor.Position; }
+            get
+            {
+                int x, y;
+                (drawOrderedWindows.Count > 0 ? drawOrderedWindows[0].Display : Display.Default).GetPointer(out x, out y);
+                return new SD.Point(x, y);
+            }
+        }
+        /// <summary>
+        /// Gets the mouse buttons which are currently held down.
+        /// </summary>
+        public SimpleMouseButtons MouseButtonsDown
+        {
+            get
+            {
+                int x, y;
+                ModifierType mask;
+                (drawOrderedWindows.Count > 0 ? drawOrderedWindows[0].Display : Display.Default).GetPointer(out x, out y, out mask);
+                SimpleMouseButtons buttons = SimpleMouseButtons.None;
+                if ((mask & ModifierType.Button1Mask) == ModifierType.Button1Mask)
+                    buttons |= SimpleMouseButtons.Left;
+                if ((mask & ModifierType.Button2Mask) == ModifierType.Button2Mask)
+                    buttons |= SimpleMouseButtons.Middle;
+                if ((mask & ModifierType.Button3Mask) == ModifierType.Button3Mask)
+                    buttons |= SimpleMouseButtons.Right;
+                return buttons;
+            }
         }
 
         /// <summary>
@@ -1136,9 +1160,11 @@
         /// <param name="args">Data about the event.</param>
         private void GraphicsWindow_ButtonPressEvent(object o, ButtonPressEventArgs args)
         {
+            var button = GetButtonsFromNative(args.Event.Button);
+            if (button == SimpleMouseButtons.None)
+                return;
             mouseDownTime = DateTime.UtcNow;
-            MouseDown.Raise(this, () => new SimpleMouseEventArgs(
-                GetButtonsFromNative(args.Event.Button), (int)args.Event.XRoot, (int)args.Event.YRoot));
+            MouseDown.Raise(this, () => new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot));
         }
         /// <summary>
         /// Raised when a mouse button has been released.
@@ -1148,9 +1174,15 @@
         /// <param name="args">Data about the event.</param>
         private void GraphicsWindow_ButtonReleaseEvent(object o, ButtonReleaseEventArgs args)
         {
-            SimpleMouseEventArgs e = new SimpleMouseEventArgs(
-                GetButtonsFromNative(args.Event.Button), (int)args.Event.XRoot, (int)args.Event.YRoot);
-            if (DateTime.UtcNow - mouseDownTime <= TimeSpan.FromMilliseconds(SWF.SystemInformation.DoubleClickTime))
+            var button = GetButtonsFromNative(args.Event.Button);
+            if (button == SimpleMouseButtons.None)
+                return;
+            SimpleMouseEventArgs e = new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot);
+            int doubleClickMillisesonds = 
+                (drawOrderedWindows.Count > 0 ?
+                Settings.GetForScreen(drawOrderedWindows[0].Screen) :
+                Settings.Default).DoubleClickTime;
+            if (DateTime.UtcNow - mouseDownTime <= TimeSpan.FromMilliseconds(doubleClickMillisesonds))
                 MouseClick.Raise(this, e);
             MouseUp.Raise(this, e);
         }

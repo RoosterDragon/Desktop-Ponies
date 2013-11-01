@@ -1036,7 +1036,7 @@ End Class
 
 #Region "Pony class"
 Public Class Pony
-    Implements ISpeakingSprite
+    Implements ISpeakingSprite, IDraggableSprite
 
     ''' <summary>
     ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to UpdateOnce().
@@ -1117,7 +1117,7 @@ Public Class Pony
         End Set
     End Property
 
-    Public Property BeingDragged As Boolean
+    Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
 
     Public Property CurrentBehaviorGroup As Integer
 
@@ -1372,17 +1372,16 @@ Public Class Pony
         If Behaviors.Count = 0 Then Exit Sub
 
         ' Handle switching pony between active and asleep.
-        If ShouldBeSleeping Then
-            If Sleeping Then
-                If BeingDragged Then TopLeftLocation = EvilGlobals.CursorLocation - GetImageCenterOffset()
-            Else
-                Sleep()
-            End If
+        Dim wantToSleep = ShouldBeSleeping OrElse BeingDragged
+        If wantToSleep AndAlso Not Sleeping Then
+            Sleep()
             AddUpdateRecord("Pony should be sleeping.")
             Exit Sub
-        Else
-            If Sleeping Then WakeUp()
+        ElseIf Not wantToSleep AndAlso Sleeping Then
+            WakeUp()
         End If
+
+        If BeingDragged Then TopLeftLocation = EvilGlobals.CursorLocation - GetImageCenterOffset()
 
         ' If we have no specified behavior, make sure the returning to screen flag is not set.
         If CurrentBehavior Is Nothing Then ReturningToScreenArea = False
@@ -3142,7 +3141,7 @@ End Class
 
 #Region "Effect class"
 Public Class Effect
-    Implements ISprite
+    Implements IDraggableSprite
     Private Shared ReadOnly DirectionCount As Integer = [Enum].GetValues(GetType(Direction)).Length
 
     Private _base As EffectBase
@@ -3162,7 +3161,7 @@ Public Class Effect
     Public Property Location As Point
     Public Property TranslatedLocation As Point
     Public Property FacingLeft As Boolean
-    Public Property BeingDragged As Boolean
+    Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
     Public Property PlacementDirection As Direction
     Public Property Centering As Direction
 

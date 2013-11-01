@@ -394,7 +394,7 @@
             /// </exception>
             private ToolStripMenuItem CreateItemWithSubitems(ISimpleContextMenuItem menuItem)
             {
-                Argument.EnsureNotNull(menuItem, "menuItems");
+                Argument.EnsureNotNull(menuItem, "menuItem");
                 if (menuItem.SubItems == null || menuItem.SubItems.Count == 0)
                     throw new ArgumentException("menuItem.SubItems must not be null or empty.");
 
@@ -665,11 +665,18 @@
             }
         }
         /// <summary>
-        /// Gets the current position of the cursor.
+        /// Gets the current location of the cursor.
         /// </summary>
         public Point CursorPosition
         {
-            get { return Cursor.Position; }
+            get { return Control.MousePosition; }
+        }
+        /// <summary>
+        /// Gets the mouse buttons which are currently held down.
+        /// </summary>
+        public SimpleMouseButtons MouseButtonsDown
+        {
+            get { return GetButtonsFromNative(Control.MouseButtons); }
         }
         #endregion
 
@@ -685,23 +692,13 @@
         private static SimpleMouseButtons GetButtonsFromNative(MouseButtons buttons)
         {
             SimpleMouseButtons simpleButtons = SimpleMouseButtons.None;
-            if (buttons.HasFlag(MouseButtons.Left))
+            if ((buttons & MouseButtons.Left) == MouseButtons.Left)
                 simpleButtons |= SimpleMouseButtons.Left;
-            if (buttons.HasFlag(MouseButtons.Right))
+            if ((buttons & MouseButtons.Right) == MouseButtons.Right)
                 simpleButtons |= SimpleMouseButtons.Right;
-            if (buttons.HasFlag(MouseButtons.Middle))
+            if ((buttons & MouseButtons.Middle) == MouseButtons.Middle)
                 simpleButtons |= SimpleMouseButtons.Middle;
             return simpleButtons;
-        }
-        /// <summary>
-        /// Raised when a mouse button has been pressed down.
-        /// Raises the MouseDown event.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void GraphicsForm_MouseDown(object sender, MouseEventArgs e)
-        {
-            MouseDown.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a mouse button has been clicked.
@@ -711,17 +708,10 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_MouseClick(object sender, MouseEventArgs e)
         {
-            MouseClick.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
-        }
-        /// <summary>
-        /// Raised when a mouse button has been released.
-        /// Raises the MouseUp event.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The event data.</param>
-        private void GraphicsForm_MouseUp(object sender, MouseEventArgs e)
-        {
-            MouseUp.Raise(this, () => new SimpleMouseEventArgs(GetButtonsFromNative(e.Button), e.X + form.Left, e.Y + form.Top));
+            var button = GetButtonsFromNative(e.Button);
+            if (button == SimpleMouseButtons.None)
+                return;
+            MouseClick.Raise(this, () => new SimpleMouseEventArgs(button, e.X + form.Left, e.Y + form.Top));
         }
         /// <summary>
         /// Raised when a key has been pressed.
@@ -739,17 +729,9 @@
         /// </summary>
         public event EventHandler<SimpleKeyEventArgs> KeyPress;
         /// <summary>
-        /// Occurs when the mouse pointer is over the window and a mouse button is pressed.
-        /// </summary>
-        public event EventHandler<SimpleMouseEventArgs> MouseDown;
-        /// <summary>
         /// Occurs when the window is clicked by the mouse.
         /// </summary>
         public event EventHandler<SimpleMouseEventArgs> MouseClick;
-        /// <summary>
-        /// Occurs when the mouse pointer is over the window and a mouse button is released.
-        /// </summary>
-        public event EventHandler<SimpleMouseEventArgs> MouseUp;
         /// <summary>
         /// Occurs when the interface is closed.
         /// </summary>
@@ -830,9 +812,7 @@
             RemapKeyConflicts();
 
             // Hook up to form events.
-            form.MouseDown += GraphicsForm_MouseDown;
             form.MouseClick += GraphicsForm_MouseClick;
-            form.MouseUp += GraphicsForm_MouseUp;
             form.KeyPress += GraphicsForm_KeyPress;
 
             // Create manual painting handlers.

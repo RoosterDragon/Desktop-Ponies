@@ -50,4 +50,15 @@
         /// </summary>
         string SpeechText { get; }
     }
+
+    /// <summary>
+    /// Defines a sprite which may be dragged.
+    /// </summary>
+    public interface IDraggableSprite : ISprite
+    {
+        /// <summary>
+        /// Gets or sets whether the sprite should be in a state where it acts as if dragged by the cursor.
+        /// </summary>
+        bool Drag { get; set; }
+    }
 }

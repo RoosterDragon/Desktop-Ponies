@@ -12,7 +12,7 @@ Public Class EditorPonyAnimator
         ExitWhenNoSprites = False
         Me.editor = editor
         AddHandler Viewer.InterfaceClosed, Sub() Finish()
-        AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
+        AddHandler Viewer.MouseClick, AddressOf Viewer_MouseClick
         CreateEditorMenu(Nothing)
     End Sub
 
@@ -80,8 +80,8 @@ Public Class EditorPonyAnimator
             Not Object.ReferenceEquals(pony, editor.PreviewPony.followTarget)
     End Function
 
-    Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
-        If e.Buttons.HasFlag(SimpleMouseButtons.Right) Then
+    Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
+        If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then
             If editorMenu IsNot Nothing Then editorMenu.Show(e.X, e.Y)
         End If
     End Sub

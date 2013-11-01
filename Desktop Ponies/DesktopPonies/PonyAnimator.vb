@@ -12,11 +12,8 @@ Public Class PonyAnimator
     Protected Property ExitWhenNoSprites As Boolean = True
     Protected ReadOnly PonyCollection As PonyCollection
     Protected Friend ReadOnly ActiveSounds As New List(Of Object)()
-    Private draggedPony As Pony
-    Private draggedEffect As Effect
-    Private draggingPonyOrEffect As Boolean
-    Private draggedPonyWasSleeping As Boolean
-    Private cursorPosition As Point?
+    Private draggedSprite As IDraggableSprite
+    Private initialCursorPosition As Point?
     Private interactionsNeedReinitializing As Boolean
 
     Private _exitRequested As ExitRequest
@@ -49,8 +46,6 @@ Public Class PonyAnimator
         Viewer.WindowTitle = "Desktop Ponies"
         Viewer.WindowIconFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, "Twilight.ico")
 
-        AddHandler Viewer.MouseUp, AddressOf Viewer_MouseUp
-        AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
         AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 
         AddHandler SpriteAdded, AddressOf SpriteChanged
@@ -84,13 +79,30 @@ Public Class PonyAnimator
     ''' </summary>
     Protected Overrides Sub Update()
         EvilGlobals.CursorLocation = Viewer.CursorPosition
+
+        ' When the cursor moves, or a mouse button is pressed, end the screensaver.
         If EvilGlobals.InScreensaverMode Then
-            ' Keep track of the cursor, and when it moves, end the screensaver.
-            If cursorPosition Is Nothing Then
-                cursorPosition = Viewer.CursorPosition
-            ElseIf cursorPosition.Value <> Viewer.CursorPosition Then
+            If initialCursorPosition Is Nothing Then
+                initialCursorPosition = Viewer.CursorPosition
+            ElseIf initialCursorPosition.Value <> Viewer.CursorPosition OrElse Viewer.MouseButtonsDown <> SimpleMouseButtons.None Then
                 Finish(ExitRequest.ExitApplication)
                 Return
+            End If
+        End If
+
+        ' Handle dragging and dropping on sprites.
+        If (Viewer.MouseButtonsDown And SimpleMouseButtons.Left) = SimpleMouseButtons.Left Then
+            If Options.PonyDraggingEnabled AndAlso draggedSprite Is Nothing Then
+                Dim dragCandidate = GetClosestUnderPoint(Of IDraggableSprite)(Viewer.CursorPosition)
+                If dragCandidate IsNot Nothing Then
+                    draggedSprite = dragCandidate
+                    draggedSprite.Drag = True
+                End If
+            End If
+        Else
+            If draggedSprite IsNot Nothing Then
+                draggedSprite.Drag = False
+                draggedSprite = Nothing
             End If
         End If
 
@@ -215,73 +227,6 @@ Public Class PonyAnimator
 
     Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)
         Finish(ExitRequest.ReturnToMenu)
-    End Sub
-
-    ''' <summary>
-    ''' Occurs when a mouse button is raised.
-    ''' Any dragged pony will be dropped.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">The event data.</param>
-    Private Sub Viewer_MouseUp(sender As Object, e As SimpleMouseEventArgs)
-        If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
-            If draggingPonyOrEffect Then
-                If Not IsNothing(draggedPony) Then
-                    draggedPony.BeingDragged = False
-                    If draggedPonyWasSleeping = False Then
-                        draggedPony.ShouldBeSleeping = False
-                    End If
-                End If
-                If Not IsNothing(draggedEffect) Then
-                    draggedEffect.BeingDragged = False
-                End If
-                draggingPonyOrEffect = False
-
-                draggedPony = Nothing
-                draggedEffect = Nothing
-            End If
-        End If
-    End Sub
-
-    ''' <summary>
-    ''' Occurs when a mouse button is pressed down initially.
-    ''' Selects the nearest pony to be dragged by the mouse.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">The event data.</param>
-    Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
-        If EvilGlobals.InScreensaverMode Then
-            Finish(ExitRequest.ExitApplication)
-            Return
-        End If
-
-        If e.Buttons.HasFlag(SimpleMouseButtons.Left) Then
-            If Not Options.PonyDraggingEnabled Then Return
-
-            Dim selectedForDragPony = GetClosestUnderPoint(Of Pony)(e.Location)
-            If selectedForDragPony IsNot Nothing Then
-                selectedForDragPony.BeingDragged = True
-                draggedPony = selectedForDragPony
-                draggingPonyOrEffect = True
-                If Not Paused Then
-                    selectedForDragPony.BeingDragged = True
-                    If selectedForDragPony.Sleeping = False Then
-                        selectedForDragPony.ShouldBeSleeping = True
-                        draggedPonyWasSleeping = False
-                    Else
-                        draggedPonyWasSleeping = True
-                    End If
-                End If
-            Else
-                Dim selectedforDragEffect = GetClosestUnderPoint(Of Effect)(e.Location)
-                If selectedforDragEffect IsNot Nothing Then
-                    selectedforDragEffect.BeingDragged = True
-                    draggedEffect = selectedforDragEffect
-                    draggingPonyOrEffect = True
-                    Exit Sub
-                End If
-            End If
-        End If
     End Sub
 
     Protected Function GetClosestUnderPoint(Of T)(location As Point) As T

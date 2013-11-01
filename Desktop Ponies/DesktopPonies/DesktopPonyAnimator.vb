@@ -34,7 +34,7 @@ Public Class DesktopPonyAnimator
             AddHandler spriteDebugForm.FormClosed, Sub() spriteDebugForm = Nothing
         End If
 
-        AddHandler Viewer.MouseDown, AddressOf Viewer_MouseDown
+        AddHandler Viewer.MouseClick, AddressOf Viewer_MouseClick
 
         CreatePonyMenu()
         CreateHouseMenu()
@@ -84,12 +84,12 @@ Public Class DesktopPonyAnimator
         End SyncLock
     End Sub
 
-    Public Sub EmulateMouseDown(e As SimpleMouseEventArgs)
-        Viewer_MouseDown(Viewer, e)
+    Public Sub EmulateMouseClick(e As SimpleMouseEventArgs)
+        Viewer_MouseClick(Viewer, e)
     End Sub
 
-    Private Sub Viewer_MouseDown(sender As Object, e As SimpleMouseEventArgs)
-        If e.Buttons.HasFlag(SimpleMouseButtons.Right) Then
+    Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
+        If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then
             selectedPony = GetClosestUnderPoint(Of Pony)(e.Location)
             If IsNothing(selectedPony) Then
                 selectedHouse = GetClosestUnderPoint(Of House)(e.Location)
