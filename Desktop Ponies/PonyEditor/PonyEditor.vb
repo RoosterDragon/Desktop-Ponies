@@ -312,7 +312,7 @@ Public Class PonyEditor
                     effect.DoNotRepeatImageAnimations)
             Next
 
-            For Each interaction In PreviewPony.InteractionBases
+            For Each interaction In PreviewPony.Base.Interactions
                 InteractionsGrid.Rows.Add(
                     interaction.Name,
                     interaction.Name,
@@ -350,7 +350,7 @@ Public Class PonyEditor
             Next
 
             Dim interactionNames As New HashSet(Of CaseInsensitiveString)()
-            For Each interaction In PreviewPony.InteractionBases
+            For Each interaction In PreviewPony.Base.Interactions
                 If Not interactionNames.Add(interaction.Name) Then
                     conflicts.Add("Interaction: " & interaction.Name)
                 End If
@@ -911,7 +911,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each Interaction In PreviewPony.InteractionBases
+                        For Each interaction In PreviewPony.Base.Interactions
                             If interaction.Name = newValue Then
                                 MsgBox("Interaction with name '" & interaction.Name &
                                        "' already exists for this pony. Please select another name.")
@@ -1227,7 +1227,7 @@ Public Class PonyEditor
                 End If
             ElseIf Object.ReferenceEquals(grid, InteractionsGrid) Then
                 Dim todelete As InteractionBase = Nothing
-                For Each interaction In PreviewPony.InteractionBases
+                For Each interaction In PreviewPony.Base.Interactions
                     If DirectCast(e.Row.Cells(colInteractionName.Index).Value, CaseInsensitiveString) = interaction.Name Then
                         todelete = interaction
                         Exit For

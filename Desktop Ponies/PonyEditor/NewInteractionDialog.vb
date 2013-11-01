@@ -21,7 +21,7 @@ Public Class NewInteractionDialog
             Exit Sub
         End If
 
-        For Each Interaction In _editor.PreviewPony.InteractionBases
+        For Each Interaction In _editor.PreviewPony.Base.Interactions
             If Not change_existing_interaction AndAlso Interaction.Name = Trim(Name_Textbox.Text) Then
                 MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
                 Exit Sub

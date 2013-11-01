@@ -1097,11 +1097,6 @@ Public Class Pony
             Return Base.Behaviors
         End Get
     End Property
-    Friend ReadOnly Property InteractionBases() As List(Of InteractionBase)
-        Get
-            Return Base.Interactions
-        End Get
-    End Property
 #End Region
 
     Private ReadOnly interactions As New List(Of Interaction)()
@@ -2814,7 +2809,7 @@ Public Class Pony
         If Directory Is Nothing Then Return
 
         interactions.Clear()
-        For Each interactionBase In InteractionBases
+        For Each interactionBase In Base.Interactions
             Dim interaction = New Interaction(interactionBase)
 
             ' Get all actual instances of target ponies.
