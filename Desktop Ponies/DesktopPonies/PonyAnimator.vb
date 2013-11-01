@@ -143,7 +143,7 @@ Public Class PonyAnimator
     Private Function UpdateIfEffect(sprite As ISprite) As Boolean
         Dim effect = TryCast(sprite, Effect)
         If effect Is Nothing Then Return False
-        If effect.CurrentTime > TimeSpan.FromSeconds(effect.DesiredDuration) Then
+        If effect.ImageTimeIndex > TimeSpan.FromSeconds(effect.DesiredDuration) Then
             effect.OwningPony.ActiveEffects.Remove(effect)
             QueueRemove(effect)
         End If

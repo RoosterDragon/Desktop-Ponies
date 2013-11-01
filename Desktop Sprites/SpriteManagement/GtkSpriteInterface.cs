@@ -1603,7 +1603,7 @@
                     GraphicsWindow window = loopWindow;
 
                     ISprite sprite = window.Sprite;
-                    GtkFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
+                    GtkFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
 
                     // Gtk# operations need to be invoked on the main thread. Although they will usually succeed, eventually an invalid
                     // unmanaged memory access is likely to result.
@@ -1624,7 +1624,7 @@
 
                         // Display any speech.
                         ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                        if (speakingSprite != null && speakingSprite.IsSpeaking)
+                        if (speakingSprite != null && speakingSprite.SpeechText != null)
                             window.ShowSpeech(speakingSprite.SpeechText, sprite.Region.X + sprite.Region.Width / 2, sprite.Region.Y - 2);
                         else
                             window.HideSpeech();

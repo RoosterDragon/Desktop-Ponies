@@ -119,7 +119,7 @@ Public Class PonyPreview
                     If previewPony Is Nothing OrElse Not previewPonyReady Then Return
                     BehaviorNameValueLabel.Text = previewPony.CurrentBehavior.Name
                     TimeLeftValueLabel.Text =
-                        (previewPony.BehaviorDesiredDuration - previewPony.CurrentTime).
+                        (previewPony.BehaviorDesiredDuration - previewPony.ImageTimeIndex).
                         TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
                 End SyncLock
             End Sub))

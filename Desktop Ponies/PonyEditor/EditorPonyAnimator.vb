@@ -66,7 +66,7 @@ Public Class EditorPonyAnimator
                                              editor.PreviewPony.CurrentBehaviorGroup & " - " &
                                              editor.PreviewPony.GetBehaviorGroupName(editor.PreviewPony.CurrentBehaviorGroup)
                                          editor.TimeLeftValueLabel.Text =
-                                             (editor.PreviewPony.BehaviorDesiredDuration - editor.PreviewPony.CurrentTime).
+                                             (editor.PreviewPony.BehaviorDesiredDuration - editor.PreviewPony.ImageTimeIndex).
                                              TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
                                      End If
                                  End Sub))

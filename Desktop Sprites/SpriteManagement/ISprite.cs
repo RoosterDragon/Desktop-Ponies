@@ -21,9 +21,9 @@
         /// </summary>
         Rectangle Region { get; }
         /// <summary>
-        /// Gets the instant in time that represents the current state of the sprite, usually a time index in animations.
+        /// Gets the time index into the current image (for animated images).
         /// </summary>
-        TimeSpan CurrentTime { get; }
+        TimeSpan ImageTimeIndex { get; }
         /// <summary>
         /// Starts the sprite using the given time as a zero point.
         /// </summary>
@@ -42,11 +42,7 @@
     public interface ISpeakingSprite : ISprite
     {
         /// <summary>
-        /// Gets a value indicating whether the sprite is currently speaking (and thus if SpeechText is meaningful).
-        /// </summary>
-        bool IsSpeaking { get; }
-        /// <summary>
-        /// Gets the current speech text that is being spoken by the sprite.
+        /// Gets the current speech text that is being spoken by the sprite, or null to indicate nothing is being spoken.
         /// </summary>
         string SpeechText { get; }
     }

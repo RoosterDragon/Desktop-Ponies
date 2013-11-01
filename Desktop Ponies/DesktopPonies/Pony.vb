@@ -1368,6 +1368,9 @@ Public Class Pony
     Private Sub UpdateOnce()
         internalTime += TimeSpan.FromMilliseconds(StepRate)
 
+        ' Expire any speech.
+        If internalTime - lastSpeakTime > TimeSpan.FromSeconds(2) Then lastSpeakLine = Nothing
+
         ' If there are no behaviors that can be undertaken, there's nothing that needs updating anyway.
         If Behaviors.Count = 0 Then Exit Sub
 
@@ -2187,7 +2190,7 @@ Public Class Pony
                         If Me.HaltedForCursor Then
                             newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration).TotalSeconds
                         Else
-                            newEffect.DesiredDuration = (BehaviorDesiredDuration - Me.CurrentTime).TotalSeconds
+                            newEffect.DesiredDuration = (BehaviorDesiredDuration - Me.ImageTimeIndex).TotalSeconds
                         End If
                         newEffect.CloseOnNewBehavior = True
                     End If
@@ -2916,19 +2919,13 @@ Public Class Pony
         End If
     End Function
 
-    Public ReadOnly Property IsSpeaking As Boolean Implements ISpeakingSprite.IsSpeaking
-        Get
-            Return internalTime - lastSpeakTime < TimeSpan.FromSeconds(2)
-        End Get
-    End Property
-
     Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
         Get
             Return lastSpeakLine
         End Get
     End Property
 
-    Public ReadOnly Property CurrentTime As TimeSpan Implements ISprite.CurrentTime
+    Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
             Return internalTime - BehaviorStartTime
         End Get
@@ -3239,7 +3236,7 @@ Public Class Effect
         End If
     End Sub
 
-    Public ReadOnly Property CurrentTime As TimeSpan Implements ISprite.CurrentTime
+    Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
             Return internalTime - startTime
         End Get

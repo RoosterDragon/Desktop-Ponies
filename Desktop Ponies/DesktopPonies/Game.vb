@@ -633,19 +633,13 @@ Public Class Game
                 parent = parentBoard
             End Sub
 
-            Public ReadOnly Property IsSpeaking As Boolean Implements ISpeakingSprite.IsSpeaking
-                Get
-                    Return True
-                End Get
-            End Property
-
             Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
                 Get
                     Return Text
                 End Get
             End Property
 
-            Public ReadOnly Property CurrentTime As TimeSpan Implements ISprite.CurrentTime
+            Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
                 Get
                     Return TimeSpan.Zero
                 End Get

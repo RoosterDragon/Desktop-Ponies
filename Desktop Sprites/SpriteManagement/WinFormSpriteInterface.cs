@@ -1219,7 +1219,7 @@
                     {
                         postUpdateInvalidRegion.Union(OffsetRectangle(sprite.Region, translate));
                         ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                        if (speakingSprite != null && speakingSprite.IsSpeaking)
+                        if (speakingSprite != null && speakingSprite.SpeechText != null)
                             postUpdateInvalidRegion.Union(OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate));
                     }
                     postUpdateInvalidRegion.Intersect(OffsetRectangle(DisplayBounds, translate));
@@ -1265,13 +1265,13 @@
                 foreach (ISprite sprite in sprites)
                 {
                     // Draw the sprite image.
-                    BitmapFrame frame = images[sprite.ImagePath][sprite.CurrentTime];
+                    BitmapFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
                     frame.Flip(sprite.FlipImage);
                     surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
 
                     // Draw a speech bubble for a speaking sprite.
                     ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                    if (speakingSprite != null && speakingSprite.IsSpeaking)
+                    if (speakingSprite != null && speakingSprite.SpeechText != null)
                     {
                         Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate);
                         surface.FillRectangle(whiteBrush, bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
@@ -1323,7 +1323,7 @@
         /// <see cref="P:System.Drawing.Rectangle.Empty"/> if the sprite is not speaking.</returns>
         private Rectangle GetSpeechBubbleRegion(ISpeakingSprite speakingSprite, Graphics surface)
         {
-            if (!speakingSprite.IsSpeaking)
+            if (speakingSprite.SpeechText == null)
                 return Rectangle.Empty;
 
             Size speechSize = Size.Ceiling(surface.MeasureString(speakingSprite.SpeechText, font));
