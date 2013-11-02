@@ -102,6 +102,8 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Core" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="DesktopSprites.Collections" />
@@ -139,6 +141,12 @@
     </Compile>
     <Compile Include="DesktopPonies\IExpireableSprite.vb" />
     <Compile Include="DesktopPonies\ISoundfulSprite.vb" />
+    <Compile Include="DesktopPonies\CommunityDialog.Designer.vb">
+      <DependentUpon>CommunityDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DesktopPonies\CommunityDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
@@ -383,6 +391,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\DesktopControlForm.resx">
       <DependentUpon>DesktopControlForm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DesktopPonies\CommunityDialog.resx">
+      <DependentUpon>CommunityDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\AnimatedImageViewer.resx">
       <DependentUpon>AnimatedImageViewer.vb</DependentUpon>

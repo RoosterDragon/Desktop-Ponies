@@ -111,6 +111,7 @@
     <Compile Include="Core\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Core\Runtime.cs" />
     <Compile Include="Core\IOExtensions.cs" />
+    <Compile Include="Core\VersionExtensions.cs" />
     <Compile Include="Forms\AnimatedImageIndexer.cs">
       <SubType>UserControl</SubType>
     </Compile>

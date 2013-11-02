@@ -39,7 +39,7 @@ Public Class MainForm
         selectionControlsFilteredVisible =
             PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
         Icon = My.Resources.Twilight
-        Text = "Desktop Ponies v" & My.MyApplication.GetProgramVersion()
+        Text = "Desktop Ponies v" & My.MyApplication.GetAssemblyVersion().ToDisplayString()
         initialized = True
         EvilGlobals.Main = Me
     End Sub
@@ -107,12 +107,10 @@ Public Class MainForm
             End Try
         End If
 
-        ' Force any pending messages to be processed for Mono, which may get caught up with the background loading before the form gets
-        ' fully drawn.
-        'Application.DoEvents()
         Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
+        Threading.ThreadPool.QueueUserWorkItem(Sub() CheckForNewVersion())
     End Sub
 
     Private Function ProcessCommandLine() As Boolean
@@ -339,6 +337,22 @@ Public Class MainForm
     Private Sub CountSelectedPonies()
         Dim totalPonies = PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Sum(Function(psc) psc.Count)
         PonyCountValueLabel.Text = totalPonies.ToString(CultureInfo.CurrentCulture)
+    End Sub
+
+    Private Sub CheckForNewVersion()
+        Dim info = CommunityDialog.CommunityInfo.Retrieve()
+        If info IsNot Nothing Then
+            worker.QueueTask(Sub()
+                                 CommunityLink.Visible = True
+                                 AddHandler CommunityLink.LinkClicked,
+                                     Sub()
+                                         Using dialog = New CommunityDialog(info)
+                                             dialog.ShowDialog(Me)
+                                         End Using
+                                     End Sub
+                                 If info.NewerVersionAvailable Then CommunityLink.Text &= " [New Version Available!]"
+                             End Sub)
+        End If
     End Sub
 #End Region
 

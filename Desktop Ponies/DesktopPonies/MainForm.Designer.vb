@@ -15,6 +15,7 @@ Partial Class MainForm
         Me.PonySelectionPanel = New System.Windows.Forms.FlowLayoutPanel()
         Me.LoadingProgressBar = New System.Windows.Forms.ProgressBar()
         Me.SelectionControlsPanel = New System.Windows.Forms.Panel()
+        Me.CommunityLink = New System.Windows.Forms.LinkLabel()
         Me.PonyCountValueLabel = New System.Windows.Forms.Label()
         Me.DeleteProfileButton = New System.Windows.Forms.Button()
         Me.CopyProfileButton = New System.Windows.Forms.Button()
@@ -49,6 +50,7 @@ Partial Class MainForm
         Me.SelectionControlsPanel.SuspendLayout()
         Me.FilterGroupBox.SuspendLayout()
         Me.PonyPaginationPanel.SuspendLayout()
+        CType(Me.PoniesPerPage, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.LayoutTable.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -64,7 +66,7 @@ Partial Class MainForm
         Me.PonySelectionPanel.Location = New System.Drawing.Point(3, 32)
         Me.PonySelectionPanel.Name = "PonySelectionPanel"
         Me.PonySelectionPanel.Size = New System.Drawing.Size(728, 446)
-        Me.PonySelectionPanel.TabIndex = 2
+        Me.PonySelectionPanel.TabIndex = 3
         '
         'LoadingProgressBar
         '
@@ -74,11 +76,12 @@ Partial Class MainForm
         Me.LoadingProgressBar.Name = "LoadingProgressBar"
         Me.LoadingProgressBar.Size = New System.Drawing.Size(728, 23)
         Me.LoadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.LoadingProgressBar.TabIndex = 3
+        Me.LoadingProgressBar.TabIndex = 4
         '
         'SelectionControlsPanel
         '
         Me.LayoutTable.SetColumnSpan(Me.SelectionControlsPanel, 2)
+        Me.SelectionControlsPanel.Controls.Add(Me.CommunityLink)
         Me.SelectionControlsPanel.Controls.Add(Me.PonyCountValueLabel)
         Me.SelectionControlsPanel.Controls.Add(Me.DeleteProfileButton)
         Me.SelectionControlsPanel.Controls.Add(Me.CopyProfileButton)
@@ -98,7 +101,19 @@ Partial Class MainForm
         Me.SelectionControlsPanel.Location = New System.Drawing.Point(3, 513)
         Me.SelectionControlsPanel.Name = "SelectionControlsPanel"
         Me.SelectionControlsPanel.Size = New System.Drawing.Size(728, 121)
-        Me.SelectionControlsPanel.TabIndex = 4
+        Me.SelectionControlsPanel.TabIndex = 5
+        '
+        'CommunityLink
+        '
+        Me.CommunityLink.Anchor = System.Windows.Forms.AnchorStyles.Right
+        Me.CommunityLink.AutoSize = True
+        Me.CommunityLink.Location = New System.Drawing.Point(9, 38)
+        Me.CommunityLink.Name = "CommunityLink"
+        Me.CommunityLink.Size = New System.Drawing.Size(86, 13)
+        Me.CommunityLink.TabIndex = 3
+        Me.CommunityLink.TabStop = True
+        Me.CommunityLink.Text = "Community Links"
+        Me.CommunityLink.Visible = False
         '
         'PonyCountValueLabel
         '
@@ -106,7 +121,7 @@ Partial Class MainForm
         Me.PonyCountValueLabel.Location = New System.Drawing.Point(675, 66)
         Me.PonyCountValueLabel.Name = "PonyCountValueLabel"
         Me.PonyCountValueLabel.Size = New System.Drawing.Size(43, 13)
-        Me.PonyCountValueLabel.TabIndex = 13
+        Me.PonyCountValueLabel.TabIndex = 14
         Me.PonyCountValueLabel.Text = "0"
         Me.PonyCountValueLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -116,7 +131,7 @@ Partial Class MainForm
         Me.DeleteProfileButton.Location = New System.Drawing.Point(233, 95)
         Me.DeleteProfileButton.Name = "DeleteProfileButton"
         Me.DeleteProfileButton.Size = New System.Drawing.Size(68, 23)
-        Me.DeleteProfileButton.TabIndex = 8
+        Me.DeleteProfileButton.TabIndex = 9
         Me.DeleteProfileButton.Text = "Delete"
         Me.DeleteProfileButton.UseVisualStyleBackColor = True
         '
@@ -126,7 +141,7 @@ Partial Class MainForm
         Me.CopyProfileButton.Location = New System.Drawing.Point(159, 95)
         Me.CopyProfileButton.Name = "CopyProfileButton"
         Me.CopyProfileButton.Size = New System.Drawing.Size(68, 23)
-        Me.CopyProfileButton.TabIndex = 7
+        Me.CopyProfileButton.TabIndex = 8
         Me.CopyProfileButton.Text = "Copy"
         Me.CopyProfileButton.UseVisualStyleBackColor = True
         '
@@ -137,7 +152,7 @@ Partial Class MainForm
         Me.ProfileLabel.Location = New System.Drawing.Point(9, 68)
         Me.ProfileLabel.Name = "ProfileLabel"
         Me.ProfileLabel.Size = New System.Drawing.Size(84, 13)
-        Me.ProfileLabel.TabIndex = 3
+        Me.ProfileLabel.TabIndex = 4
         Me.ProfileLabel.Text = "Selected Profile:"
         '
         'ProfileComboBox
@@ -146,7 +161,7 @@ Partial Class MainForm
         Me.ProfileComboBox.Location = New System.Drawing.Point(99, 63)
         Me.ProfileComboBox.Name = "ProfileComboBox"
         Me.ProfileComboBox.Size = New System.Drawing.Size(202, 21)
-        Me.ProfileComboBox.TabIndex = 4
+        Me.ProfileComboBox.TabIndex = 5
         '
         'ZeroPoniesButton
         '
@@ -154,7 +169,7 @@ Partial Class MainForm
         Me.ZeroPoniesButton.Location = New System.Drawing.Point(619, 3)
         Me.ZeroPoniesButton.Name = "ZeroPoniesButton"
         Me.ZeroPoniesButton.Size = New System.Drawing.Size(100, 23)
-        Me.ZeroPoniesButton.TabIndex = 10
+        Me.ZeroPoniesButton.TabIndex = 11
         Me.ZeroPoniesButton.Text = "0 of All Ponies"
         Me.ZeroPoniesButton.UseVisualStyleBackColor = True
         '
@@ -165,7 +180,7 @@ Partial Class MainForm
         Me.PonyCountLabel.Location = New System.Drawing.Point(601, 66)
         Me.PonyCountLabel.Name = "PonyCountLabel"
         Me.PonyCountLabel.Size = New System.Drawing.Size(69, 13)
-        Me.PonyCountLabel.TabIndex = 12
+        Me.PonyCountLabel.TabIndex = 13
         Me.PonyCountLabel.Text = "Total Ponies:"
         '
         'FilterGroupBox
@@ -178,7 +193,7 @@ Partial Class MainForm
         Me.FilterGroupBox.Location = New System.Drawing.Point(307, 3)
         Me.FilterGroupBox.Name = "FilterGroupBox"
         Me.FilterGroupBox.Size = New System.Drawing.Size(288, 115)
-        Me.FilterGroupBox.TabIndex = 9
+        Me.FilterGroupBox.TabIndex = 10
         Me.FilterGroupBox.TabStop = False
         Me.FilterGroupBox.Text = "Pony Filter"
         '
@@ -242,7 +257,7 @@ Partial Class MainForm
         Me.LoadProfileButton.Location = New System.Drawing.Point(11, 95)
         Me.LoadProfileButton.Name = "LoadProfileButton"
         Me.LoadProfileButton.Size = New System.Drawing.Size(68, 23)
-        Me.LoadProfileButton.TabIndex = 5
+        Me.LoadProfileButton.TabIndex = 6
         Me.LoadProfileButton.Text = "Reload"
         Me.LoadProfileButton.UseVisualStyleBackColor = True
         '
@@ -252,7 +267,7 @@ Partial Class MainForm
         Me.SaveProfileButton.Location = New System.Drawing.Point(85, 95)
         Me.SaveProfileButton.Name = "SaveProfileButton"
         Me.SaveProfileButton.Size = New System.Drawing.Size(68, 23)
-        Me.SaveProfileButton.TabIndex = 6
+        Me.SaveProfileButton.TabIndex = 7
         Me.SaveProfileButton.Text = "Save"
         Me.SaveProfileButton.UseVisualStyleBackColor = True
         '
@@ -262,7 +277,7 @@ Partial Class MainForm
         Me.OnePoniesButton.Location = New System.Drawing.Point(619, 32)
         Me.OnePoniesButton.Name = "OnePoniesButton"
         Me.OnePoniesButton.Size = New System.Drawing.Size(100, 23)
-        Me.OnePoniesButton.TabIndex = 11
+        Me.OnePoniesButton.TabIndex = 12
         Me.OnePoniesButton.Text = "1 of All Ponies"
         Me.OnePoniesButton.UseVisualStyleBackColor = True
         '
@@ -292,7 +307,7 @@ Partial Class MainForm
         Me.GoButton.Location = New System.Drawing.Point(601, 95)
         Me.GoButton.Name = "GoButton"
         Me.GoButton.Size = New System.Drawing.Size(118, 23)
-        Me.GoButton.TabIndex = 14
+        Me.GoButton.TabIndex = 15
         Me.GoButton.Text = "GIVE ME PONIES!"
         Me.GoButton.UseVisualStyleBackColor = True
         '
@@ -412,15 +427,16 @@ Partial Class MainForm
         Me.LayoutTable.ColumnCount = 2
         Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
         Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.LayoutTable.Controls.Add(Me.SelectionControlsPanel, 0, 3)
+        Me.LayoutTable.Controls.Add(Me.SelectionControlsPanel, 0, 4)
         Me.LayoutTable.Controls.Add(Me.PaginationEnabled, 0, 0)
-        Me.LayoutTable.Controls.Add(Me.LoadingProgressBar, 0, 2)
+        Me.LayoutTable.Controls.Add(Me.LoadingProgressBar, 0, 3)
         Me.LayoutTable.Controls.Add(Me.PonyPaginationPanel, 1, 0)
-        Me.LayoutTable.Controls.Add(Me.PonySelectionPanel, 0, 1)
+        Me.LayoutTable.Controls.Add(Me.PonySelectionPanel, 0, 2)
         Me.LayoutTable.Dock = System.Windows.Forms.DockStyle.Fill
         Me.LayoutTable.Location = New System.Drawing.Point(0, 0)
         Me.LayoutTable.Name = "LayoutTable"
-        Me.LayoutTable.RowCount = 4
+        Me.LayoutTable.RowCount = 5
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
@@ -428,8 +444,9 @@ Partial Class MainForm
         Me.LayoutTable.Size = New System.Drawing.Size(734, 637)
         Me.LayoutTable.TabIndex = 0
         '
-        'Main
+        'MainForm
         '
+        Me.AcceptButton = Me.GoButton
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange
@@ -438,7 +455,7 @@ Partial Class MainForm
         Me.Controls.Add(Me.LayoutTable)
         Me.KeyPreview = True
         Me.MinimumSize = New System.Drawing.Size(750, 350)
-        Me.Name = "Main"
+        Me.Name = "MainForm"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Desktop Ponies"
         Me.SelectionControlsPanel.ResumeLayout(False)
@@ -447,6 +464,7 @@ Partial Class MainForm
         Me.FilterGroupBox.PerformLayout()
         Me.PonyPaginationPanel.ResumeLayout(False)
         Me.PonyPaginationPanel.PerformLayout()
+        CType(Me.PoniesPerPage, System.ComponentModel.ISupportInitialize).EndInit()
         Me.LayoutTable.ResumeLayout(False)
         Me.LayoutTable.PerformLayout()
         Me.ResumeLayout(False)
@@ -487,5 +505,6 @@ Partial Class MainForm
     Friend WithEvents PonyPaginationLabel As System.Windows.Forms.Label
     Friend WithEvents PaginationEnabled As System.Windows.Forms.CheckBox
     Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents CommunityLink As System.Windows.Forms.LinkLabel
 
 End Class

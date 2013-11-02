@@ -9,24 +9,14 @@
     ' NetworkAvailabilityChanged: Raised when the network connection is connected or disconnected.
     Partial Friend Class MyApplication
         ''' <summary>
-        ''' Returns the file version of the calling assembly, excluding the minor, build or revision components if they are zero.
+        ''' Returns the file version of the calling assembly.
         ''' </summary>
-        ''' <returns>Returns the file version of the calling assembly, excluding the minor, build or revision components if they are
-        ''' zero.</returns>
+        ''' <returns>Returns the file version of the calling assembly.</returns>
         <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
-        Public Shared Function GetProgramVersion() As String
+        Public Shared Function GetAssemblyVersion() As Version
             Dim fileVersionInfo = Diagnostics.FileVersionInfo.GetVersionInfo(Reflection.Assembly.GetCallingAssembly().Location)
-            Dim fileVersion = New Version(fileVersionInfo.FileVersion)
-            Dim versionFields As Integer = 1
-            If fileVersion.Revision <> 0 Then
-                versionFields = 4
-            ElseIf fileVersion.Build <> 0 Then
-                versionFields = 3
-            ElseIf fileVersion.Minor <> 0 Then
-                versionFields = 2
-            End If
-
-            Return fileVersion.ToString(versionFields)
+            Return New Version(fileVersionInfo.FileMajorPart, fileVersionInfo.FileMinorPart,
+                                          fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart)
         End Function
 
         Private exceptionHandlersAttached As Boolean
@@ -71,7 +61,7 @@
 
         Public Sub NotifyUserOfNonFatalException(ex As Exception, message As String)
             LogErrorToConsole(ex, "WARNING: " & message)
-            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & GetProgramVersion(), False)
+            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & GetAssemblyVersion().ToDisplayString(), False)
         End Sub
 
         Public Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
@@ -85,7 +75,7 @@
                     Console.WriteLine("An unexpected error occurred and Desktop Ponies must close. (An error file could not be generated)")
                 End Try
 
-                Dim version = GetProgramVersion()
+                Dim version = GetAssemblyVersion().ToDisplayString()
                 If TypeOf ex Is InvalidOperationException AndAlso
                     ex.InnerException IsNot Nothing AndAlso
                     TypeOf ex.InnerException Is ArgumentException AndAlso
@@ -115,7 +105,8 @@
         Private Sub LogErrorToConsole(ex As Exception, message As String)
             Console.WriteLine("-----")
             Console.WriteLine(message)
-            Console.WriteLine("Error in Desktop Ponies v" & GetProgramVersion() & " occurred " & DateTime.UtcNow.ToString("u"))
+            Console.WriteLine(
+                "Error in Desktop Ponies v" & GetAssemblyVersion().ToDisplayString() & " occurred " & DateTime.UtcNow.ToString("u"))
             Console.WriteLine()
             Console.WriteLine(ex.ToString())
             Console.WriteLine("-----")
@@ -125,7 +116,8 @@
             Dim path = IO.Path.Combine(EvilGlobals.InstallLocation, "error.txt")
             Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
                 errorFile.WriteLine(
-                    "Unhandled error in Desktop Ponies v" & GetProgramVersion() & " occurred " & DateTime.UtcNow.ToString("u"))
+                    "Unhandled error in Desktop Ponies v" & GetAssemblyVersion().ToDisplayString() &
+                    " occurred " & DateTime.UtcNow.ToString("u"))
                 errorFile.WriteLine()
                 errorFile.WriteLine(ex.ToString())
                 Console.WriteLine("An error file can be found at " & path)
