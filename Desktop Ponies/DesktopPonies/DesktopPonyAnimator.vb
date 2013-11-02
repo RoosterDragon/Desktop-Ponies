@@ -110,7 +110,7 @@ Public Class DesktopPonyAnimator
             End If
 
             Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
-            Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.ShouldBeSleeping)
+            Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.Sleep)
             Dim manualControlP1 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerOne)
             Dim manualControlP2 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerTwo)
 
@@ -185,7 +185,7 @@ Public Class DesktopPonyAnimator
                             End If
                             QueueRemove(Function(sprite)
                                             Dim pony = TryCast(sprite, Pony)
-                                            return pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory
+                                            Return pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory
                                         End Function)
                         End Sub)
                 End Sub))
@@ -193,7 +193,7 @@ Public Class DesktopPonyAnimator
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                  If EvilGlobals.CurrentGame IsNot Nothing OrElse
                                                                      selectedPony Is Nothing Then Return
-                                                                 selectedPony.ShouldBeSleeping = Not selectedPony.ShouldBeSleeping
+                                                                 selectedPony.Sleep = Not selectedPony.Sleep
                                                              End Sub))
         Dim allSleeping = False
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() EvilGlobals.Main.SmartInvoke(
@@ -201,7 +201,7 @@ Public Class DesktopPonyAnimator
                                                                      If EvilGlobals.CurrentGame IsNot Nothing Then Return
                                                                      allSleeping = Not allSleeping
                                                                      For Each pony In Me.Ponies()
-                                                                         pony.ShouldBeSleeping = allSleeping
+                                                                         pony.Sleep = allSleeping
                                                                      Next
                                                                  End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem())

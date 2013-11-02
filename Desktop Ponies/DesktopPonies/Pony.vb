@@ -1120,15 +1120,12 @@ Public Class Pony
     Private _expired As Boolean
     Private ReadOnly interactions As New List(Of Interaction)()
 
-    Public Property ShouldBeSleeping As Boolean
+    Public Property Sleep As Boolean
     Private _sleeping As Boolean
-    Public Property Sleeping() As Boolean
+    Public ReadOnly Property Sleeping As Boolean
         Get
             Return _sleeping
         End Get
-        Private Set(value As Boolean)
-            _sleeping = value
-        End Set
     End Property
 
     Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
@@ -1406,12 +1403,12 @@ Public Class Pony
         If Behaviors.Count = 0 Then Exit Sub
 
         ' Handle switching pony between active and asleep.
-        Dim wantToSleep = ShouldBeSleeping OrElse BeingDragged
-        If wantToSleep AndAlso Not Sleeping Then
-            Sleep()
+        Dim wantToSleep = Sleep OrElse BeingDragged
+        If wantToSleep AndAlso Not _sleeping Then
+            PutToSleep()
             AddUpdateRecord("Pony should be sleeping.")
             Exit Sub
-        ElseIf Not wantToSleep AndAlso Sleeping Then
+        ElseIf Not wantToSleep AndAlso _sleeping Then
             WakeUp()
         End If
 
@@ -1465,7 +1462,7 @@ Public Class Pony
     ''' <summary>
     ''' Chooses a behavior to use for sleeping and activates it with no timeout.
     ''' </summary>
-    Public Sub Sleep()
+    Public Sub PutToSleep()
         ' Choose, in descending order of preference:
         ' - The dragging behavior, when actively being dragged
         ' - The dedicated sleeping behavior
@@ -1483,14 +1480,14 @@ Public Class Pony
         SelectBehavior(sleepBehavior)
         BehaviorDesiredDuration = TimeSpan.FromHours(8)
         Paint()
-        Sleeping = True
+        _sleeping = True
     End Sub
 
     ''' <summary>
     ''' Wakes a pony from their sleeping behavior.
     ''' </summary>
     Public Sub WakeUp()
-        Sleeping = False
+        _sleeping = False
         CursorOverPony = False
 
         'Ponies added during sleep will not be initialized yet, so don't paint them.
@@ -2202,7 +2199,7 @@ Public Class Pony
     Friend Sub ActivateEffects(currentTime As TimeSpan)
 
         If Options.PonyEffectsEnabled AndAlso
-            Not Sleeping AndAlso
+            Not _sleeping AndAlso
             Not BeingDragged AndAlso
             Not ReturningToScreenArea Then
             For Each effect In CurrentBehavior.Effects
@@ -4225,7 +4222,6 @@ End Class
 '    End Sub
 
 '    ' TODO: Implement these.
-'    Public Property ShouldBeSleeping As Boolean
 '    Public Property ManualControlPlayerOne As Boolean
 '    Public Property ManualControlPlayerTwo As Boolean
 'End Class
