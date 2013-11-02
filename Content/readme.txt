@@ -69,8 +69,14 @@ Change Log
 
 Latest changes:
 
-vNext:
+v1.43:
 - Added Ms. Peachbottom by Loaded--Dice.
+- Added Pound Cake, Pumpkin Cake & The Shopkeeper by Bot-chan.
+- Added a Community Links screen. This lists some useful community URLs and will also notify you when new releases become available.
+- Prevent mini-games crashing when using ponies with no 'Any' group behaviors.
+- Fixed effects that were not following their parent ponies when they were configured to do so.
+- Fixed interactions not being considered for use if more ponies than just the interaction targets were present.
+- Fixed crash when trying to start ponies on Windows and the profile speicifed alpha blending to be off.
 
 v1.42.2.9:
 - Added Flash Sentry by Bot-chan.
