@@ -11,7 +11,10 @@ Public Class PonyAnimator
 
     Protected Property ExitWhenNoSprites As Boolean = True
     Protected ReadOnly PonyCollection As PonyCollection
-    Protected Friend ReadOnly ActiveSounds As New List(Of Object)()
+    Private ReadOnly activeSounds As New List(Of Object)()
+    Private globalSoundEnd As Date
+    Private ReadOnly soundEndBySprite As New Dictionary(Of ISoundfulSprite, Date)()
+
     Private draggedSprite As IDraggableSprite
     Private initialCursorPosition As Point?
     Private interactionsNeedReinitializing As Boolean
@@ -54,6 +57,8 @@ Public Class PonyAnimator
         AddHandler SpritesRemoved, AddressOf SpritesChanged
         AddHandler SpriteAdded, AddressOf AddExpiredHandlers
         AddHandler SpritesAdded, AddressOf AddExpiredHandlers
+        AddHandler SpriteRemoved, AddressOf ExpireSprite
+        AddHandler SpritesRemoved, AddressOf ExpireSprites
     End Sub
 
     Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
@@ -66,9 +71,7 @@ Public Class PonyAnimator
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
-        If expireableSprite IsNot Nothing Then
-            AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
-        End If
+        If expireableSprite IsNot Nothing Then AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
     End Sub
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
@@ -78,9 +81,22 @@ Public Class PonyAnimator
     End Sub
 
     Private Sub RemoveExpiredSprite(sender As Object, e As EventArgs)
-        Dim expireableSprite = DirectCast(sender, IExpireableSprite)
-        RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
-        QueueRemove(expireableSprite)
+        QueueRemove(DirectCast(sender, IExpireableSprite))
+    End Sub
+
+    Private Sub ExpireSprite(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
+        Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
+        If expireableSprite IsNot Nothing Then
+            RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+            expireableSprite.Expire()
+        End If
+    End Sub
+
+    Private Sub ExpireSprites(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
+        For Each expireableSprite In e.Items.OfType(Of IExpireableSprite)()
+            RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+            expireableSprite.Expire()
+        Next
     End Sub
 
     Private Sub InitializeInteractions()
@@ -142,11 +158,6 @@ Public Class PonyAnimator
             EvilGlobals.CurrentGame.Update()
         End If
 
-        ' Release any sounds that finished playing.
-        If EvilGlobals.DirectXSoundAvailable Then
-            CleanupSounds()
-        End If
-
         ' Process queued actions now, so the sprite collection is up to date. Then we can tell if interactions need to be reinitialized.
         ProcessQueuedActions()
         If interactionsNeedReinitializing Then
@@ -160,6 +171,10 @@ Public Class PonyAnimator
             Return
         End If
         Sort(zOrder)
+        If EvilGlobals.DirectXSoundAvailable Then
+            PlaySounds()
+            CleanupSounds()
+        End If
     End Sub
 
     Private Function UpdateIfHouse(sprite As ISprite) As Boolean
@@ -168,6 +183,70 @@ Public Class PonyAnimator
         house.Cycle(ElapsedTime, PonyCollection.Bases)
         Return True
     End Function
+
+    Private Sub PlaySounds()
+        ' Sound must be enabled for the mode we are in.
+        If Not Options.SoundEnabled Then Exit Sub
+        If EvilGlobals.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
+
+        ' If only one sound at a time is allowed, wait for it to finish.
+        If Options.SoundSingleChannelOnly AndAlso globalSoundEnd > Date.UtcNow Then Return
+
+        For Each sprite In Sprites
+            Dim soundfulSprite = TryCast(sprite, ISoundfulSprite)
+            If soundfulSprite Is Nothing OrElse soundfulSprite.SoundPath Is Nothing Then Continue For
+
+            ' If one sound per sprite is allowed, wait for it to finish.
+            If Not Options.SoundSingleChannelOnly Then
+                Dim soundEndDate As Date
+                If soundEndBySprite.TryGetValue(soundfulSprite, soundEndDate) Then
+                    If soundEndDate > Date.UtcNow Then
+                        Continue For
+                    Else
+                        soundEndBySprite.Remove(soundfulSprite)
+                    End If
+                End If
+            End If
+
+            Try
+                ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
+                ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
+                ' We use DirectX now so that we can use MP3 instead of WAV files
+                Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(soundfulSprite.SoundPath)
+                ' Volume is between -10000 and 0, with 0 being the loudest.
+                audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
+                audio.Play()
+
+                activeSounds.Add(audio)
+                If Options.SoundSingleChannelOnly Then
+                    globalSoundEnd = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                Else
+                    soundEndBySprite(soundfulSprite) = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                End If
+            Catch ex As Exception
+                ' Swallow any exception here. The sound file may be missing, inaccessible, not a playable format, etc.
+            End Try
+        Next
+    End Sub
+
+    Private Sub CleanupSounds()
+        Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
+
+        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In activeSounds
+            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
+                sound.CurrentPosition >= sound.Duration Then
+                sound.Dispose()
+                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
+                soundsToRemove.AddLast(sound)
+            End If
+        Next
+
+        If soundsToRemove IsNot Nothing Then
+            For Each sound In soundsToRemove
+                activeSounds.Remove(sound)
+            Next
+        End If
+    End Sub
 
     Protected Friend Sub AddSprites(_sprites As IEnumerable(Of ISprite))
         QueueAddRangeAndStart(_sprites)
@@ -192,25 +271,6 @@ Public Class PonyAnimator
     Public Function Effects() As IEnumerable(Of Effect)
         Return Sprites.OfType(Of Effect)()
     End Function
-
-    Private Sub CleanupSounds()
-        Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
-
-        For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In ActiveSounds
-            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
-                sound.CurrentPosition >= sound.Duration Then
-                sound.Dispose()
-                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
-                soundsToRemove.AddLast(sound)
-            End If
-        Next
-
-        If soundsToRemove IsNot Nothing Then
-            For Each sound In soundsToRemove
-                ActiveSounds.Remove(sound)
-            Next
-        End If
-    End Sub
 
     Public Overloads Sub Finish(exitMethod As ExitRequest)
         _exitRequested = exitMethod

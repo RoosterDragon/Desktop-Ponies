@@ -439,8 +439,6 @@ Public Class PonyEditor
             pony.Expire()
         Next
 
-        PreviewPony.ActiveEffects.Clear()
-
         Dim followTarget As Pony = Nothing
         If behavior.OriginalFollowTargetName <> "" Then
             Dim targetBase = Ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.OriginalFollowTargetName)

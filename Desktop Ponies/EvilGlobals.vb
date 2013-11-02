@@ -20,12 +20,6 @@ Friend NotInheritable Class EvilGlobals
     Public Shared Property CurrentGame As Game
     Public Shared Property PreviewWindowRectangle As Rectangle
 
-    ' User has the option of limiting songs to one-total at a time, or one-per-pony at a time.
-    ' These two options are used for the one-at-a-time option.
-    Friend Shared Property AnyAudioLastPlayed As Date = DateTime.UtcNow
-    Friend Shared Property LastLengthAnyAudio As Integer
-    Friend Shared Property AudioErrorShown As Boolean
-
     Private Shared screensaverSettingsPath As String = Path.Combine(Path.GetTempPath(), "DesktopPonies_ScreenSaver_Settings.ini")
 
     ''' <summary>

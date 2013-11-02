@@ -138,6 +138,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DesktopPonies\IExpireableSprite.vb" />
+    <Compile Include="DesktopPonies\ISoundfulSprite.vb" />
     <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />

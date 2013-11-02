@@ -1054,7 +1054,7 @@ End Class
 
 #Region "Pony class"
 Public Class Pony
-    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite
+    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite, ISoundfulSprite
 
     ''' <summary>
     ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to UpdateOnce().
@@ -1269,16 +1269,7 @@ Public Class Pony
     ''' </summary>
     Private lastMovement As Vector2F
 
-    Private ReadOnly _activeEffects As New List(Of Effect)()
-    Public ReadOnly Property ActiveEffects As List(Of Effect)
-        Get
-            Return _activeEffects
-        End Get
-    End Property
-
-    ' These two options are used for the one-per-pony option.
-    Private AudioLastPlayed As Date = DateTime.UtcNow
-    Private LastLengthAudio As Integer
+    Private ReadOnly _activeEffects As New HashSet(Of Effect)()
 
     Public Property BehaviorStartTime As TimeSpan
     Public Property BehaviorDesiredDuration As TimeSpan
@@ -1291,8 +1282,6 @@ Public Class Pony
             Return _manualControlAction
         End Get
     End Property
-
-    Private effectsToRemove As New List(Of Effect)
 
     Private ReadOnly effectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)()
     Private ReadOnly effectsAlreadyPlayedForBehavior As New HashSet(Of EffectBase)()
@@ -1317,6 +1306,7 @@ Public Class Pony
 
     Private lastSpeakTime As TimeSpan = TimeSpan.FromDays(-1)
     Private lastSpeakLine As String
+    Private lastSpeakSound As String
     Friend internalTime As TimeSpan
     Private lastUpdateTime As TimeSpan
 
@@ -1382,6 +1372,7 @@ Public Class Pony
         ' low frame rate of animations and lack of spatial anti-aliasing since the images are pixel art. That said, the time scaling should
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as UpdateOnce must be evaluated many times to catch up).
+        lastSpeakSound = Nothing
         Dim difference = updateTime - lastUpdateTime
         While difference.TotalMilliseconds > 0 AndAlso Not _expired
             UpdateOnce()
@@ -1712,60 +1703,9 @@ Public Class Pony
         End If
 
         ' Start the sound file playing.
-        If line.SoundFile <> "" AndAlso EvilGlobals.DirectXSoundAvailable Then
-            PlaySound(line.SoundFile)
+        If line.SoundFile <> "" Then
+            lastSpeakSound = line.SoundFile
         End If
-    End Sub
-
-    ''' <summary>
-    ''' Plays the sound file located at the specified path.
-    ''' </summary>
-    ''' <param name="filePath">The path to the sound file to be played.</param>
-    Private Sub PlaySound(filePath As String)
-        ' Sound must be enabled for the mode we are in.
-        If Not Options.SoundEnabled Then Exit Sub
-        If EvilGlobals.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
-
-        ' Don't play sounds over other ones - wait until they finish.
-        If Not Options.SoundSingleChannelOnly Then
-            If DateTime.UtcNow.Subtract(AudioLastPlayed).TotalMilliseconds <= LastLengthAudio Then Exit Sub
-        Else
-            If DateTime.UtcNow.Subtract(EvilGlobals.AnyAudioLastPlayed).TotalMilliseconds <= EvilGlobals.LastLengthAnyAudio Then Exit Sub
-        End If
-
-        ' Quick sanity check that the file exists on disk.
-        If Not File.Exists(filePath) Then Exit Sub
-
-        Try
-            ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
-            ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
-            ' We use DirectX now so that we can use MP3 instead of WAV files
-            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(filePath)
-            EvilGlobals.CurrentAnimator.ActiveSounds.Add(audio)
-
-            ' Volume is between -10000 and 0, with 0 being the loudest.
-            audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
-            audio.Play()
-
-            If Not Options.SoundSingleChannelOnly Then
-                Me.LastLengthAudio = CInt(audio.Duration * 1000)
-                Me.AudioLastPlayed = DateTime.UtcNow
-            Else
-                EvilGlobals.LastLengthAnyAudio = CInt(audio.Duration * 1000) 'to milliseconds
-                EvilGlobals.AnyAudioLastPlayed = DateTime.UtcNow
-            End If
-        Catch ex As Exception
-            If Not EvilGlobals.AudioErrorShown AndAlso Not EvilGlobals.InScreensaverMode Then
-                EvilGlobals.AudioErrorShown = True
-                My.Application.NotifyUserOfNonFatalException(
-                    ex, String.Format(CultureInfo.CurrentCulture,
-                                      "There was an error trying to play a sound. Maybe the file is corrupt?{0}" &
-                                      "You will not receive further notifications about sound errors.{0}{0}" &
-                                      "File: {1}{0}" &
-                                      "Pony: {2}{0}",
-                                      Environment.NewLine, filePath, Directory))
-            End If
-        End Try
     End Sub
 
     ''' <summary>
@@ -1778,8 +1718,8 @@ Public Class Pony
             previousBehavior = CurrentBehavior
 
             ' Remove effects for the previous behavior. We don't want them lingering when the behavior restarts after the mouse moves away.
-            If ActiveEffects.Count > 0 Then
-                For Each effect In ActiveEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name)
+            If _activeEffects.Count > 0 Then
+                For Each effect In _activeEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name).ToImmutableArray()
                     effect.Expire()
                 Next
             End If
@@ -2232,7 +2172,8 @@ Public Class Pony
                     End If
 
                     EvilGlobals.CurrentAnimator.AddEffect(newEffect)
-                    ActiveEffects.Add(newEffect)
+                    AddHandler newEffect.Expired, Sub() _activeEffects.Remove(newEffect)
+                    _activeEffects.Add(newEffect)
 
                     effectsLastUsed(effect) = currentTime
 
@@ -2414,20 +2355,6 @@ Public Class Pony
                                  Location.Y - newCenter.Height + currentCustomImageCenter.Height)
             currentCustomImageCenter = newCenter
         End If
-
-        effectsToRemove.Clear()
-
-        For Each effect In ActiveEffects
-            If effect.CloseOnNewBehavior Then
-                If CurrentBehavior.Name <> effect.Base.BehaviorName Then
-                    effectsToRemove.Add(effect)
-                End If
-            End If
-        Next
-
-        For Each effect In effectsToRemove
-            ActiveEffects.Remove(effect)
-        Next
 
     End Sub
 
@@ -2901,6 +2828,12 @@ Public Class Pony
         End Get
     End Property
 
+    Public ReadOnly Property SoundPath As String Implements ISoundfulSprite.SoundPath
+        Get
+            Return lastSpeakSound
+        End Get
+    End Property
+
     Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
             Return internalTime - BehaviorStartTime
@@ -2934,7 +2867,7 @@ Public Class Pony
     Public Sub Expire() Implements IExpireableSprite.Expire
         If _expired Then Return
         _expired = True
-        For Each effect In ActiveEffects
+        For Each effect In _activeEffects.ToImmutableArray()
             effect.Expire()
         Next
         RaiseEvent Expired(Me, EventArgs.Empty)
@@ -3061,7 +2994,7 @@ End Class
 ''' Defines a sprite instance modeled on a <see cref="PonyBase"/>.
 ''' </summary>
 Public Class Pony2
-    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite
+    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite, ISoundfulSprite
     Private ReadOnly _context As PonyContext
     ''' <summary>
     ''' Gets the context that affects how this pony behaviors.
@@ -3129,6 +3062,10 @@ Public Class Pony2
     ''' </summary>
     Private _facingRight As Boolean
     ''' <summary>
+    ''' The location of the center point of the pony.
+    ''' </summary>
+    Private _location As Vector2F = New Vector2F(Single.NaN, Single.NaN)
+    ''' <summary>
     ''' A vector defining the movement to be applied to the location with each step.
     ''' </summary>
     Private _movement As Vector2F
@@ -3159,9 +3096,13 @@ Public Class Pony2
     ''' </summary>
     Private _speechStartTime As TimeSpan = -(_randomSpeechDelayDuration + _speechDuration)
     ''' <summary>
-    ''' The current speech text that should be displayed, if specified.
+    ''' The current speech text to be displayed, if specified.
     ''' </summary>
     Private _currentSpeechText As String
+    ''' <summary>
+    ''' The current speech sound file to be started, if specified.
+    ''' </summary>
+    Private _currentSpeechSound As String
 
     ''' <summary>
     ''' A collection of effect bases that should be repeated until the current behavior ends.
@@ -3313,13 +3254,6 @@ Public Class Pony2
 #End Region
 #End Region
 
-#Region "Public State"
-    ''' <summary>
-    ''' The location of the center point of the pony.
-    ''' </summary>
-    Public Property Location As Vector2F = New Vector2F(Single.NaN, Single.NaN)
-#End Region
-
     ''' <summary>
     ''' Initializes a new instance of the <see cref="Pony2"/> class.
     ''' </summary>
@@ -3370,7 +3304,7 @@ Public Class Pony2
     ''' <summary>
     ''' Gets a value indicating whether the image should be flipped horizontally from its original orientation.
     ''' </summary>
-    Public ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
+    Private ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
         Get
             Return False
         End Get
@@ -3413,6 +3347,16 @@ Public Class Pony2
     End Property
 
     ''' <summary>
+    ''' Gets the path to the sound file that should be played starting as of this update, or null to indicate nothing new should be
+    ''' started.
+    ''' </summary>
+    Public ReadOnly Property SoundPath As String Implements ISoundfulSprite.SoundPath
+        Get
+            Return _currentSpeechSound
+        End Get
+    End Property
+
+    ''' <summary>
     ''' Gets or sets whether the sprite should be in a state where it acts as if dragged by the cursor.
     ''' </summary>
     Public Property Drag As Boolean Implements IDraggableSprite.Drag
@@ -3436,7 +3380,7 @@ Public Class Pony2
         _lastUpdateTime = startTime
         SetBehavior()
         Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
-        Location = currentImage.Center * Context.ScaleFactor +
+        _location = currentImage.Center * Context.ScaleFactor +
             New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
     End Sub
 
@@ -3451,6 +3395,7 @@ Public Class Pony2
         ' low frame rate of animations and lack of spatial anti-aliasing since the images are pixel art. That said, the time scaling should
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as StepOnce must be evaluated many times to catch up).
+        _currentSpeechSound = Nothing
         Dim difference = updateTime - _lastUpdateTime
         While Not _expired AndAlso difference.TotalMilliseconds > 0
             StepOnce()
@@ -3577,6 +3522,7 @@ Public Class Pony2
         ' Set the line text to be displayed.
         _speechStartTime = _currentTime
         _currentSpeechText = Base.DisplayName & ": " & ControlChars.Quote & suggested.Text & ControlChars.Quote
+        _currentSpeechSound = suggested.SoundFile
     End Sub
 
     ''' <summary>
@@ -3750,7 +3696,7 @@ Public Class Pony2
             ' Here the offset represents a custom offset from the center of the target.
             If _followTarget IsNot Nothing Then
                 'If Not _followTarget._facingRight Then offsetVector.X = -offsetVector.X
-                _destination = _followTarget.Location + offsetVector
+                _destination = _followTarget._location + offsetVector
                 Return
             End If
         ElseIf offsetVector <> Vector2.Zero Then
@@ -3776,7 +3722,7 @@ Public Class Pony2
             _movement = Vector2F.Zero
         ElseIf _destination IsNot Nothing Then
             ' Set movement with destination.
-            _movement = _destination.Value - Location
+            _movement = _destination.Value - _location
             Dim magnitude = _movement.Length()
             If magnitude > Epsilon Then
                 Dim speed = CSng(_currentBehavior.SpeedInPixelsPerSecond / StepRate)
@@ -3876,9 +3822,9 @@ Public Class Pony2
     ''' </summary>
     Private Sub UpdateLocation()
         If _inDragState Then
-            Location = Context.CursorLocation
+            _location = Context.CursorLocation
         Else
-            Location += _movement
+            _location += _movement
             TeleportToBoundaryIfOutside()
             If _destination Is Nothing Then ReboundOffBoundary()
         End If
@@ -4002,7 +3948,7 @@ Public Class Pony2
             Dim freeTargets = interaction.Targets.Where(Function(p) Not p.isBusy).ToImmutableArray()
             If freeTargets.Length = 0 Then Continue For
             Dim freeTargetsInRange = freeTargets.Where(
-                Function(p) Vector2F.Distance(Location, p.Location) <= interaction.Base.Proximity).ToImmutableArray()
+                Function(p) Vector2F.Distance(_location, p._location) <= interaction.Base.Proximity).ToImmutableArray()
             If freeTargetsInRange.Length = 0 Then Continue For
 
             If interaction.Base.Activation <> TargetActivation.All OrElse
@@ -4092,7 +4038,7 @@ Public Class Pony2
     ''' <returns>A region where the current location of the pony and image center coincide, whose size is that of the image scaled by the
     ''' context scale factor.</returns>
     Private Function GetRegionFForImage(image As SpriteImage) As RectangleF
-        Return New RectangleF(Location - image.Center * Context.ScaleFactor, image.Size * Context.ScaleFactor)
+        Return New RectangleF(_location - image.Center * Context.ScaleFactor, image.Size * Context.ScaleFactor)
     End Function
 
     ''' <summary>
