@@ -139,6 +139,7 @@
     <Compile Include="DesktopPonies\GameTeamControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="DesktopPonies\IDraggableSprite.vb" />
     <Compile Include="DesktopPonies\IExpireableSprite.vb" />
     <Compile Include="DesktopPonies\ISoundfulSprite.vb" />
     <Compile Include="DesktopPonies\CommunityDialog.Designer.vb">
