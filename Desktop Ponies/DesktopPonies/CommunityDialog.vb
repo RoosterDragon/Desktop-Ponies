@@ -30,7 +30,7 @@
                 If Not String.IsNullOrEmpty(patchFromValue) Then patchFromVersion = Version.Parse(patchFromValue)
                 Dim patchUrlValue = doc.Root.<LatestVersionPatchUrl>.Single().Value
                 If Not String.IsNullOrEmpty(patchUrlValue) Then latestVersionPatchUrl = New Uri(patchUrlValue)
-                For Each element In doc.Root.<Links>.Single().Elements()
+                For Each element In doc.Root.<Links>.Single().Elements("Link")
                     Dim name = element.<Name>.Single().Value
                     Dim url = New Uri(element.<Url>.Single().Value)
                     Dim description = element.<Description>.Single().Value
