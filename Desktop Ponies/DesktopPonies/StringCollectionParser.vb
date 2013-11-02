@@ -1,5 +1,6 @@
 ﻿Imports System.Globalization
 Imports System.IO
+Imports System.Runtime.CompilerServices
 
 Public Class StringCollectionParser
     Private Const NotParsed = "This value was not parsed due to an earlier parsing failure."
@@ -32,9 +33,10 @@ Public Class StringCollectionParser
             Return _lastParseFailed
         End Get
     End Property
-    Public ReadOnly Property AllParsingSuccessful As Boolean
+    Private _result As ParseResult
+    Public ReadOnly Property Result As ParseResult
         Get
-            Return Not LastParseFailed
+            Return _result
         End Get
     End Property
     Public Sub New(itemsToParse As String(), itemNames As String())
@@ -50,16 +52,18 @@ Public Class StringCollectionParser
         Return item
     End Function
     Protected Function HandleParsed(Of T)(parsed As Parsed(Of T)) As T
-        If parsed.Result <> ParseResult.Success Then
-            _lastParseFailed = parsed.Result = ParseResult.Failed
-            If Not (parsed.Source Is Nothing AndAlso parsed.Result = ParseResult.Fallback) Then
-                Dim i = index - 1
-                _issues.Add(New ParseIssue(i,
-                                           If(i < itemNames.Length, itemNames(i), Nothing),
-                                           parsed.Source,
-                                           If(LastParseFailed, Nothing, parsed.Value.ToString()),
-                                           parsed.Reason))
-            End If
+        _lastParseFailed = parsed.Result = ParseResult.Failed
+        Dim lastResult = parsed.Result
+        Dim elementDefaultUsed = parsed.Result = ParseResult.Fallback AndAlso parsed.Source Is Nothing
+        If elementDefaultUsed Then lastResult = ParseResult.Success
+        _result = _result.Combine(lastResult)
+        If parsed.Result <> ParseResult.Success AndAlso Not elementDefaultUsed Then
+            Dim i = index - 1
+            _issues.Add(New ParseIssue(i,
+                                       If(i < itemNames.Length, itemNames(i), Nothing),
+                                       parsed.Source,
+                                       If(LastParseFailed, Nothing, parsed.Value.ToString()),
+                                       parsed.Reason))
         End If
         Return parsed.Value
     End Function
@@ -282,11 +286,6 @@ Public Class StringCollectionParser
         Return result
     End Function
 
-    Protected Enum ParseResult
-        Success
-        Fallback
-        Failed
-    End Enum
     Protected NotInheritable Class Parsed
         Private Sub New()
         End Sub
@@ -392,3 +391,24 @@ Public Structure ParseIssue
         Me._reason = _reason
     End Sub
 End Structure
+
+Public Enum ParseResult
+    Success
+    Fallback
+    Failed
+End Enum
+
+Public Module ParseResultExtensions
+    <Extension()>
+    Public Function Combine(this As ParseResult, other As ParseResult) As ParseResult
+        If this = ParseResult.Failed OrElse other = ParseResult.Failed Then
+            Return ParseResult.Failed
+        ElseIf this = ParseResult.Fallback OrElse other = ParseResult.Fallback Then
+            Return ParseResult.Fallback
+        ElseIf this = ParseResult.Success OrElse other = ParseResult.Success Then
+            Return ParseResult.Success
+        Else
+            Return this
+        End If
+    End Function
+End Module

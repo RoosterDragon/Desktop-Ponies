@@ -199,7 +199,7 @@ Public Class PonyEditorForm2
                                    Return behavior.TryLoad(
                                        behavior.SourceIni,
                                        Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                       base, b, Nothing) AndAlso b.GetReferentialIssues(ponies).Length = 0
+                                       base, b, Nothing).Combine(If(b.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                End Function
         Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
         Dim validateEffect = Function(effect As EffectBase)
@@ -207,7 +207,7 @@ Public Class PonyEditorForm2
                                  Return EffectBase.TryLoad(
                                      effect.SourceIni,
                                      Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                     base, e, Nothing) AndAlso e.GetReferentialIssues(ponies).Length = 0
+                                     base, e, Nothing).Combine(If(e.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                              End Function
         Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
         Dim validateSpeech = Function(speech As Speech)
@@ -221,7 +221,7 @@ Public Class PonyEditorForm2
                                       Dim i As InteractionBase = Nothing
                                       Return InteractionBase.TryLoad(
                                           interaction.SourceIni,
-                                          i, Nothing) AndAlso i.GetReferentialIssues(ponies).Length = 0
+                                          i, Nothing).Combine(If(i.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                   End Function
         Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
                                               PageContent.Interactions, PageContent.Interaction)
@@ -229,25 +229,25 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              Dim ref = New PageRef(base)
                              Dim node = FindNode(ref.ToString())
-                             Dim index = If(behaviorsValid AndAlso effectsValid AndAlso speechesValid AndAlso interactionsValid,
-                                                  1, 2)
+                             Dim result = behaviorsValid.Combine(effectsValid).Combine(speechesValid).Combine(interactionsValid)
+                             Dim index = If(result = ParseResult.Success, 1, If(result = ParseResult.Fallback, 0, 2))
                              node.ImageIndex = index
                              node.SelectedImageIndex = index
                          End Sub)
     End Sub
 
     Private Function ValidateItems(Of T As IPonyIniSourceable)(base As PonyBase, items As IEnumerable(Of T),
-                                                               validateItem As Func(Of T, Boolean),
-                                                               content As PageContent, childContent As PageContent) As Boolean
-        Dim itemsValid = True
+                                                               validateItem As Func(Of T, ParseResult),
+                                                               content As PageContent, childContent As PageContent) As ParseResult
+        Dim itemsValid = ParseResult.Success
         For Each item In items
             Dim ref = New PageRef(base, childContent, item)
             Dim parsedItem As T = Nothing
             Dim itemValid = validateItem(item)
-            If Not itemValid Then itemsValid = False
+            itemsValid = itemsValid.Combine(itemValid)
             worker.QueueTask(Sub()
                                  Dim node = FindNode(ref.ToString())
-                                 Dim index = If(itemValid, 1, 2)
+                                 Dim index = If(itemValid = ParseResult.Success, 1, If(itemValid = ParseResult.Fallback, 0, 2))
                                  node.ImageIndex = index
                                  node.SelectedImageIndex = index
                              End Sub)
@@ -255,7 +255,7 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              Dim ref = New PageRef(base, content)
                              Dim node = FindNode(ref.ToString())
-                             Dim index = If(itemsValid, 1, 2)
+                             Dim index = If(itemsValid = ParseResult.Success, 1, If(itemsValid = ParseResult.Fallback, 0, 2))
                              node.ImageIndex = index
                              node.SelectedImageIndex = index
                          End Sub)

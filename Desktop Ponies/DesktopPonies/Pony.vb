@@ -310,14 +310,14 @@ Public Class PonyBase
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
         Dim result As T
-        If parseFunc(line, directory, result, Nothing) Then
+        If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed Then
             onSuccess(result)
         End If
     End Sub
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
         Dim result As T
-        If parseFunc(line, directory, pony, result, Nothing) Then
+        If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed Then
             onSuccess(result)
         End If
     End Sub
@@ -494,7 +494,7 @@ Public Class InteractionBase
     End Property
     Public Property ReactivationDelay As TimeSpan
 
-    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
+    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
         issues = Nothing
 
@@ -516,7 +516,7 @@ Public Class InteractionBase
 
         issues = p.Issues.ToImmutableArray()
         result = i
-        Return p.AllParsingSuccessful
+        Return p.Result
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
@@ -811,7 +811,7 @@ Public Class Behavior
         Me.pony = Argument.EnsureNotNull(pony, "pony")
     End Sub
 
-    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
         issues = Nothing
 
@@ -862,7 +862,7 @@ Public Class Behavior
 
         issues = p.Issues.ToImmutableArray()
         result = b
-        Return p.AllParsingSuccessful
+        Return p.Result
     End Function
 
     Public Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
@@ -979,7 +979,8 @@ Public Class Speech
     Public Property Skip As Boolean = False 'don't use randomly if true
     Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
 
-    Public Shared Function TryLoad(iniLine As String, soundDirectory As String, ByRef result As Speech, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
+    Public Shared Function TryLoad(iniLine As String, soundDirectory As String,
+                                   ByRef result As Speech, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
         issues = Nothing
 
@@ -1012,7 +1013,7 @@ Public Class Speech
 
         issues = p.Issues.ToImmutableArray()
         result = s
-        Return p.AllParsingSuccessful
+        Return p.Result
     End Function
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
@@ -4203,7 +4204,8 @@ Public Class EffectBase
     Public Property Follow As Boolean
     Public Property DoNotRepeatImageAnimations As Boolean
 
-    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As EffectBase, ByRef issues As ImmutableArray(Of ParseIssue)) As Boolean
+    Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase,
+                                   ByRef result As EffectBase, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
         issues = Nothing
 
@@ -4239,7 +4241,7 @@ Public Class EffectBase
 
         issues = p.Issues.ToImmutableArray()
         result = e
-        Return p.AllParsingSuccessful
+        Return p.Result
     End Function
 
     Protected Sub New()
