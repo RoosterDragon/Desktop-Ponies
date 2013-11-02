@@ -22,7 +22,7 @@
         previewGraphics = Graphics.FromImage(PointPreviewArea.Image)
 
         FollowComboBox.BeginUpdate()
-        For Each base In behaviorToChange.Base.Collection.AllBases
+        For Each base In behaviorToChange.Base.Collection.Bases
             FollowComboBox.Items.Add(base.Directory)
         Next
         FollowComboBox.EndUpdate()
@@ -153,7 +153,7 @@
     End Sub
 
     Private Sub UpdateThumbnail()
-        For Each ponyBase In behaviorToChange.Base.Collection.AllBases
+        For Each ponyBase In behaviorToChange.Base.Collection.Bases
             If ponyBase.Directory = DirectCast(FollowComboBox.SelectedItem, String) Then
                 Try
                     If ponyBase.Behaviors.Count > 0 Then

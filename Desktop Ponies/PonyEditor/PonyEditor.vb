@@ -7,7 +7,7 @@ Public Class PonyEditor
     Private editorInterface As ISpriteCollectionView
 
     Private ReadOnly worker As New IdleWorker(Me)
-    Friend Ponies As PonyCollection
+    Private ponies As PonyCollection
     Private ponyImageList As ImageList
     Private infoGrids As ImmutableArray(Of PonyInfoGrid)
 
@@ -56,10 +56,9 @@ Public Class PonyEditor
         End Sub
     End Class
 
-    Public Sub New(collection As PonyCollection)
+    Public Sub New()
         InitializeComponent()
         Icon = My.Resources.Twilight
-        Ponies = Argument.EnsureNotNull(collection, "collection")
     End Sub
 
     Private Sub PonyEditor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -70,6 +69,8 @@ Public Class PonyEditor
         EnableWaitCursor(True)
 
         Try
+            ponies = New PonyCollection(False)
+
             For Each value In DirectCast([Enum].GetValues(GetType(TargetActivation)), TargetActivation())
                 colInteractionInteractWith.Items.Add(value.ToString())
             Next
@@ -78,13 +79,13 @@ Public Class PonyEditor
                          New PonyInfoGrid(EffectsGrid), New PonyInfoGrid(InteractionsGrid)}.ToImmutableArray()
 
             'add all possible ponies to the selection window.
-            ponyImageList = GenerateImageList(Ponies.AllBases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
+            ponyImageList = GenerateImageList(ponies.Bases, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
             PonyList.LargeImageList = ponyImageList
             PonyList.SmallImageList = ponyImageList
 
             PonyList.SuspendLayout()
-            For i = 0 To Ponies.AllBases.Length - 1
-                PonyList.Items.Add(New ListViewItem(Ponies.AllBases(i).Directory, i) With {.Tag = Ponies.AllBases(i)})
+            For i = 0 To ponies.Bases.Length - 1
+                PonyList.Items.Add(New ListViewItem(ponies.Bases(i).Directory, i) With {.Tag = ponies.Bases(i)})
             Next
             PonyList.ResumeLayout()
         Catch ex As Exception
@@ -94,7 +95,7 @@ Public Class PonyEditor
 
         editorInterface = Options.GetInterface()
         editorInterface.Topmost = True
-        editorAnimator = New EditorPonyAnimator(editorInterface, Ponies, Me)
+        editorAnimator = New EditorPonyAnimator(editorInterface, ponies, Me)
         AddHandler editorAnimator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
         Enabled = True
         UseWaitCursor = False
@@ -439,25 +440,29 @@ Public Class PonyEditor
             pony.Expire()
         Next
 
-        Dim followTarget As Pony = Nothing
-        If behavior.OriginalFollowTargetName <> "" Then
-            Dim targetBase = Ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.OriginalFollowTargetName)
-            If targetBase IsNot Nothing Then
-                followTarget = New Pony(targetBase)
-                editorAnimator.AddPony(followTarget)
-            End If
-
-            If followTarget Is Nothing Then
-                MessageBox.Show(Me, "The specified pony to follow (" & behavior.OriginalFollowTargetName &
-                                ") for this behavior (" & behavior.Name &
-                                ") does not exist, or has no behaviors. Please review this setting.",
-                                "Cannot Run Behavior", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                Return
-            End If
-        End If
-
         PreviewPony.SelectBehavior(behavior)
-        PreviewPony.followTarget = followTarget
+        If Object.ReferenceEquals(PreviewPony.CurrentBehavior, behavior) Then
+            Dim followTarget As Pony = Nothing
+            If behavior.OriginalFollowTargetName <> "" Then
+                Dim targetBase = ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.OriginalFollowTargetName)
+                If targetBase IsNot Nothing Then
+                    followTarget = New Pony(targetBase)
+                    editorAnimator.AddPony(followTarget)
+                End If
+
+                If followTarget Is Nothing Then
+                    MessageBox.Show(Me, "The specified pony to follow (" & behavior.OriginalFollowTargetName &
+                                    ") for this behavior (" & behavior.Name &
+                                    ") does not exist, or has no behaviors. Please review this setting.",
+                                    "Follow Target Invalid", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    Return
+                End If
+            End If
+            PreviewPony.followTarget = followTarget
+        Else
+            MessageBox.Show(Me, "This behavior could not be run. Please check it is valid, and that the images exist.",
+                            "Run Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End If
     End Sub
 
     Private Function GetGridItem(Of TPonyIniSerializable As IPonyIniSerializable)(sender As Object, e As DataGridViewCellEventArgs,
@@ -951,7 +956,7 @@ Public Class PonyEditor
     End Sub
 
     Friend Function GetAllEffects() As EffectBase()
-        Return Ponies.AllBases.SelectMany(Function(pb) pb.Effects).ToArray()
+        Return ponies.Bases.SelectMany(Function(pb) pb.Effects).ToArray()
     End Function
 
     Private Sub SaveSortOrder()
@@ -1361,7 +1366,7 @@ Public Class PonyEditor
                 previousPony = PreviewPony
             End If
 
-            Dim base = PonyBase.CreateInMemory(Ponies)
+            Dim base = PonyBase.CreateInMemory(ponies)
             base.DisplayName = "New Pony"
             _previewPony = New Pony(base)
 

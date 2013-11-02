@@ -110,10 +110,10 @@ Friend Class BehaviorEditor
         SelectOrOvertypeItem(LinkedBehaviorComboBox, Edited.LinkedBehaviorName)
 
         SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path,
-                           Sub(filePath) Edited.LeftImage.Path = Path.Combine(PonyBasePath, filePath),
+                           Sub(filePath) Edited.LeftImage.Path = If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath)),
                            lastTypedLeftFileName, lastTypedLeftFileNameMissing)
         SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path,
-                           Sub(filePath) Edited.RightImage.Path = Path.Combine(PonyBasePath, filePath),
+                           Sub(filePath) Edited.RightImage.Path = If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath)),
                            lastTypedRightFileName, lastTypedRightFileNameMissing)
     End Sub
 

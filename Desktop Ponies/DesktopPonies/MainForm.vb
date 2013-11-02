@@ -198,6 +198,7 @@ Public Class MainForm
 
         ' Load ponies.
         ponies = New PonyCollection(
+            True,
             Sub(count)
                 worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length)
             End Sub,
@@ -410,7 +411,7 @@ Public Class MainForm
 
         EvilGlobals.InPreviewMode = True
         Me.Visible = False
-        Using form = New PonyEditor(ponies)
+        Using form = New PonyEditor()
             form.ShowDialog(Me)
 
             PonyShutdown()

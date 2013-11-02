@@ -79,6 +79,12 @@ Public Class PonyBase
         End Get
     End Property
 
+    Private _validatedOnLoad As Boolean
+    Public ReadOnly Property ValidatedOnLoad As Boolean
+        Get
+            Return _validatedOnLoad
+        End Get
+    End Property
     Private _directory As String
     Public ReadOnly Property Directory As String
         Get
@@ -248,19 +254,23 @@ Public Class PonyBase
         End Try
     End Function
 
-    Public Shared Function Load(collection As PonyCollection, directory As String) As PonyBase
+    Public Shared Function Load(collection As PonyCollection, directory As String, removeInvalidItems As Boolean) As PonyBase
         Dim pony As PonyBase = Nothing
         Try
             Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
             Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
                 pony = New PonyBase(collection)
+                pony._validatedOnLoad = removeInvalidItems
                 pony._directory = directory
                 pony.DisplayName = directory
                 If File.Exists(iniFileName) Then
                     Using reader = New StreamReader(iniFileName)
-                        ParsePonyConfig(fullPath, reader, pony)
+                        ParsePonyConfig(fullPath, reader, pony, removeInvalidItems)
                     End Using
+                End If
+                If removeInvalidItems AndAlso pony.Behaviors.Count = 0 Then
+                    Return Nothing
                 End If
             End If
         Catch ex As Exception
@@ -269,7 +279,7 @@ Public Class PonyBase
         Return pony
     End Function
 
-    Private Shared Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As PonyBase)
+    Private Shared Sub ParsePonyConfig(folder As String, reader As StreamReader, pony As PonyBase, removeInvalidItems As Boolean)
         Do Until reader.EndOfStream
             Dim line = reader.ReadLine()
 
@@ -282,20 +292,28 @@ Public Class PonyBase
             End If
 
             Dim firstComma = line.IndexOf(","c)
-            If firstComma <> -1 Then
+            If firstComma = -1 Then
+                pony.invalidLines.Add(line)
+            Else
                 Select Case line.Substring(0, firstComma).ToLowerInvariant()
                     Case "name"
-                        TryParse(Of String)(line, folder, AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
+                        TryParse(Of String)(line, folder, removeInvalidItems,
+                                            AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
                     Case "scale"
-                        TryParse(Of Double)(line, folder, AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
+                        TryParse(Of Double)(line, folder, removeInvalidItems,
+                                            AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
                     Case "behaviorgroup"
-                        TryParse(Of BehaviorGroup)(line, folder, AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
+                        TryParse(Of BehaviorGroup)(line, folder, removeInvalidItems,
+                                                   AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
                     Case "behavior"
-                        TryParse(Of Behavior)(line, folder, pony, AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
+                        TryParse(Of Behavior)(line, folder, removeInvalidItems, pony,
+                                              AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
                     Case "effect"
-                        TryParse(Of EffectBase)(line, folder, pony, AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
+                        TryParse(Of EffectBase)(line, folder, removeInvalidItems, pony,
+                                                AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
                     Case "speak"
-                        TryParse(Of Speech)(line, folder, AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
+                        TryParse(Of Speech)(line, folder, removeInvalidItems,
+                                            AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Count - 1
@@ -308,17 +326,19 @@ Public Class PonyBase
         Loop
     End Sub
 
-    Private Shared Sub TryParse(Of T)(line As String, directory As String, parseFunc As TryParse(Of T), onSuccess As Action(Of T))
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean,
+                                      parseFunc As TryParse(Of T), onParse As Action(Of T))
         Dim result As T
-        If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed Then
-            onSuccess(result)
+        If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
+            onParse(result)
         End If
     End Sub
 
-    Private Shared Sub TryParse(Of T)(line As String, directory As String, pony As PonyBase, parseFunc As TryParse(Of T, PonyBase), onSuccess As Action(Of T))
+    Private Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean, pony As PonyBase,
+                                      parseFunc As TryParse(Of T, PonyBase), onParse As Action(Of T))
         Dim result As T
-        If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed Then
-            onSuccess(result)
+        If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
+            onParse(result)
         End If
     End Sub
 
@@ -550,7 +570,7 @@ Public Class InteractionBase
 
     Private Sub CheckInteractionReference(ponies As PonyCollection, directory As String,
                                                propertyName As String, issues As List(Of ParseIssue))
-        Dim base = ponies.AllBases.FirstOrDefault(Function(pb) pb.Directory = directory)
+        Dim base = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = directory)
         If base Is Nothing Then
             issues.Add(New ParseIssue(propertyName, directory, "", String.Format("No pony named '{0}' exists.", directory)))
         Else
@@ -835,12 +855,12 @@ Public Class Behavior
         b.RightImage.Path = p.NoParse()
         If p.Assert(b.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             b.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, b.RightImage.Path, "Image will not be loaded.")
-            p.SpecifiedFileExists(b.RightImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.RightImage.Path)
         End If
         b.LeftImage.Path = p.NoParse()
         If p.Assert(b.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             b.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, b.LeftImage.Path, "Image will not be loaded.")
-            p.SpecifiedFileExists(b.LeftImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(b.LeftImage.Path)
         End If
         b.AllowedMovement = p.Map(AllowedMovesFromIni, AllowedMoves.All)
         b.LinkedBehaviorName = p.NotNull("").Trim()
@@ -1005,8 +1025,8 @@ Public Class Speech
         s.Text = p.NotNull()
         s.SoundFile = p.NoParse()
         If s.SoundFile IsNot Nothing Then
-            s.SoundFile = p.SpecifiedCombinePath(soundDirectory, s.SoundFile, "Sound file will not be loaded.")
-            p.SpecifiedFileExists(s.SoundFile, "Sound file will not be loaded.")
+            s.SoundFile = p.SpecifiedCombinePath(soundDirectory, s.SoundFile, "Sound file will not be played.")
+            p.SpecifiedFileExists(s.SoundFile, "Sound file will not be played.")
         End If
         s.Skip = p.ParseBoolean(False)
         s.Group = p.ParseInt32(Behavior.AnyGroup, 0, 100)
@@ -1162,7 +1182,6 @@ Public Class Pony
     ''' Stops interactions from repeating too soon after one another.
     ''' Only affects the triggering pony and not targets.
     ''' </summary>
-    ''' <remarks></remarks>
     Private interactionDelayUntil As TimeSpan
 
     Private _currentBehavior As Behavior
@@ -1172,12 +1191,17 @@ Public Class Pony
         End Get
         Friend Set(value As Behavior)
             Diagnostics.Debug.Assert(value IsNot Nothing)
+            If Not ValidateBehavior(value) Then Return
             _currentBehavior = value
             If Not (ManualControlPlayerOne OrElse ManualControlPlayerTwo) Then
                 SetAllowableDirections()
             End If
         End Set
     End Property
+
+    Private Function ValidateBehavior(behavior As Behavior) As Boolean
+        Return Base.ValidatedOnLoad OrElse (File.Exists(behavior.LeftImage.Path) AndAlso File.Exists(behavior.RightImage.Path))
+    End Function
 
     Private currentCustomImageCenter As Size
     Private ReadOnly Property isCustomImageCenterDefined As Boolean
@@ -1194,7 +1218,7 @@ Public Class Pony
     ''' <summary>
     ''' When set, specifics the alternate set of images that should replace those of the current behavior.
     ''' </summary>
-    Public Property visualOverrideBehavior As Behavior
+    Friend visualOverrideBehavior As Behavior
 
     Private _returningToScreenArea As Boolean
     Public Property ReturningToScreenArea As Boolean
@@ -1332,7 +1356,7 @@ Public Class Pony
     ''' </summary>
     ''' <param name="startTime">The current time of the animator, which will be the temporal zero point for this sprite.</param>
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentBehavior = Behaviors(0)
+        CurrentBehavior = Behaviors.First(AddressOf ValidateBehavior)
         internalTime = startTime
         lastUpdateTime = startTime
         Teleport()
@@ -1565,7 +1589,7 @@ Public Class Pony
             ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
             ' suitable to repeat.
             If Not foundAtRandom AndAlso (IsInteracting OrElse CurrentBehavior Is Nothing) Then
-                CurrentBehavior = Behaviors(0)
+                CurrentBehavior = Behaviors.First(AddressOf ValidateBehavior)
                 AddUpdateRecord(
                     If(IsInteracting,
                        "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
@@ -2338,7 +2362,7 @@ Public Class Pony
                 If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
                     appropriateBehavior = GetAppropriateBehaviorOrFallback(allowedMovement, True)
                 End If
-                visualOverrideBehavior = appropriateBehavior
+                If ValidateBehavior(appropriateBehavior) Then visualOverrideBehavior = appropriateBehavior
             End If
         Else
             paintStop = False
@@ -4223,12 +4247,12 @@ Public Class EffectBase
         e.RightImage.Path = p.NoParse()
         If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             e.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, e.RightImage.Path, "Image will not be loaded.")
-            p.SpecifiedFileExists(e.RightImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.RightImage.Path)
         End If
         e.LeftImage.Path = p.NoParse()
         If p.Assert(e.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             e.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, e.LeftImage.Path, "Image will not be loaded.")
-            p.SpecifiedFileExists(e.LeftImage.Path, "Image will not be loaded.")
+            p.SpecifiedFileExists(e.LeftImage.Path)
         End If
         e.Duration = p.ParseDouble(5, 0, 300)
         e.RepeatDelay = p.ParseDouble(0, 0, 300)

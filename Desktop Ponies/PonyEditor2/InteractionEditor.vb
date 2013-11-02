@@ -55,7 +55,7 @@
 
     Public Overrides Sub LoadItem()
         TargetsList.Items.Clear()
-        TargetsList.Items.AddRange(Base.Collection.AllBases.Select(Function(pb) pb.Directory).ToArray())
+        TargetsList.Items.AddRange(Base.Collection.Bases.Select(Function(pb) pb.Directory).ToArray())
         BehaviorsList.Items.Clear()
         BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).ToArray())
     End Sub

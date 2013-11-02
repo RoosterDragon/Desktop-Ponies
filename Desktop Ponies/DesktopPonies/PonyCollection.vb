@@ -2,14 +2,9 @@
 
 Public Class PonyCollection
     Private _bases As ImmutableArray(Of PonyBase)
-    Public ReadOnly Property AllBases As ImmutableArray(Of PonyBase)
+    Public ReadOnly Property Bases As ImmutableArray(Of PonyBase)
         Get
             Return _bases
-        End Get
-    End Property
-    Public ReadOnly Property Bases As IEnumerable(Of PonyBase)
-        Get
-            Return AllBases.Where(Function(base) base.Behaviors.Count > 0)
         End Get
     End Property
     Private _randomBase As PonyBase
@@ -23,27 +18,27 @@ Public Class PonyCollection
     Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(
         Function(s) New List(Of InteractionBase)())
 
-    Public Sub New()
-        Me.New(Nothing, Nothing)
+    Public Sub New(removeInvalidItems As Boolean)
+        Me.New(removeInvalidItems, Nothing, Nothing)
     End Sub
 
-    Public Sub New(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
-        Threading.Tasks.Parallel.Invoke(Sub() LoadPonyBases(countCallback, loadCallback), AddressOf LoadInteractions)
+    Public Sub New(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
+        Threading.Tasks.Parallel.Invoke(Sub() LoadPonyBases(removeInvalidItems, countCallback, loadCallback), AddressOf LoadInteractions)
     End Sub
 
-    Private Sub LoadPonyBases(countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
+    Private Sub LoadPonyBases(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
         Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory))
         If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
             Sub(folder)
-                        Dim pony = PonyBase.Load(Me, folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1))
-                        If pony IsNot Nothing Then
-                            ponies.Add(pony)
-                            If loadCallback IsNot Nothing Then loadCallback(pony)
-                        End If
-                    End Sub)
+                Dim pony = PonyBase.Load(Me, folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1), removeInvalidItems)
+                If pony IsNot Nothing Then
+                    ponies.Add(pony)
+                    If loadCallback IsNot Nothing Then loadCallback(pony)
+                End If
+            End Sub)
         Dim allBases = ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToList()
         Dim randomIndex = allBases.FindIndex(Function(pb) pb.Directory = PonyBase.RandomDirectory)
         If randomIndex <> -1 Then

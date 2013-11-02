@@ -105,6 +105,7 @@ Public Class PonyEditorForm2
                          End Sub)
 
         ponies = New PonyCollection(
+            False,
             Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
             Sub(base) worker.QueueTask(
                 Sub()
@@ -188,7 +189,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub ValidateBases()
-        For Each base In ponies.AllBases.OrderBy(Function(pb) pb.Directory)
+        For Each base In ponies.Bases.OrderBy(Function(pb) pb.Directory)
             ValidateBase(base)
         Next
     End Sub
