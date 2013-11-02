@@ -156,6 +156,7 @@ Public Class PonyAnimator
         ' TODO: Refactor game loop into a new derived class.
         If EvilGlobals.CurrentGame IsNot Nothing Then
             EvilGlobals.CurrentGame.Update()
+            If Me.Disposed Then Return
         End If
 
         ' Process queued actions now, so the sprite collection is up to date. Then we can tell if interactions need to be reinitialized.
