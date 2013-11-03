@@ -1914,6 +1914,7 @@ Public Class Pony
         End If
 
         Dim newLocation = Vector2.Round(New Vector2F(Location) + movement)
+        Dim newTopLeftLocation = newLocation - New Vector2(GetImageCenterOffset())
 
         UpdateCurrentMouseoverBehavior()
         Dim isNearCursorNow = IsPonyNearMouseCursor(Location)
@@ -1965,7 +1966,7 @@ Public Class Pony
             ' If we have a destination, then the cursor is blocking the way and the behavior should be aborted.
             ' TODO: Review abortion.
             If Not hasDestination Then
-                Bounce(Me, TopLeftLocation, newLocation, movement)
+                Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             Else
                 CurrentBehavior = GetAppropriateBehaviorOrFallback(CurrentBehavior.AllowedMovement, False)
             End If
@@ -1980,7 +1981,7 @@ Public Class Pony
             ' Check if we need to rebound off a window.
             If isEnteringWindowNow Then
                 If Not hasDestination Then
-                    Bounce(Me, TopLeftLocation, newLocation, movement)
+                    Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
                     AddUpdateRecord("Avoiding window.")
                 Else
                     AddUpdateRecord("Wanted to avoid window, but instead pressing to destination.")
@@ -2060,7 +2061,7 @@ Public Class Pony
         ' If we are moving to a destination, our path is blocked: we'll wait for a bit.
         ' If we are just moving normally, just "bounce" off of the barrier.
         If Not hasDestination Then
-            Bounce(Me, TopLeftLocation, newLocation, movement)
+            Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
             'we need to paint to reset the image centers
             Paint()
             AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
