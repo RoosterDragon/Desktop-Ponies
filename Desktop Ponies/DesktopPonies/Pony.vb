@@ -2632,13 +2632,11 @@ Public Class Pony
     End Function
 
     Friend Function IsPonyContainedInRect(centerLocation As Point, rect As Rectangle) As Boolean
-        If EvilGlobals.InPreviewMode Then Return True
         Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
         Return rect.Contains(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
     End Function
 
     Friend Function IsPonyIntersectingWithRect(centerLocation As Point, rect As Rectangle) As Boolean
-        If EvilGlobals.InPreviewMode Then Return True
         Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
         Return rect.IntersectsWith(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
     End Function
