@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 
 Friend Class PonyLogForm
     Private _pony As Pony
