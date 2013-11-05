@@ -83,7 +83,7 @@ Change Log
 
 Latest changes:
 
-v1.43:
+v1.42.3:
 - Added Ms. Peachbottom by Loaded--Dice.
 - Added Pound Cake, Pumpkin Cake, Shopkeeper & Shoeshine by Bot-chan.
 - Added a Community Links screen. This lists some useful community URLs and will also notify you when new releases become available.
