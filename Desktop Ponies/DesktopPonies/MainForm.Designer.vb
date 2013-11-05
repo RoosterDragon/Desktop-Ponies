@@ -50,7 +50,6 @@ Partial Class MainForm
         Me.SelectionControlsPanel.SuspendLayout()
         Me.FilterGroupBox.SuspendLayout()
         Me.PonyPaginationPanel.SuspendLayout()
-        CType(Me.PoniesPerPage, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.LayoutTable.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -464,7 +463,6 @@ Partial Class MainForm
         Me.FilterGroupBox.PerformLayout()
         Me.PonyPaginationPanel.ResumeLayout(False)
         Me.PonyPaginationPanel.PerformLayout()
-        CType(Me.PoniesPerPage, System.ComponentModel.ISupportInitialize).EndInit()
         Me.LayoutTable.ResumeLayout(False)
         Me.LayoutTable.PerformLayout()
         Me.ResumeLayout(False)

@@ -32,6 +32,7 @@ Partial Class CommunityDialog
         Me.LinkToolTip = New System.Windows.Forms.ToolTip(Me.components)
         Me.PatchLink = New System.Windows.Forms.LinkLabel()
         Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.CertificateTextBox = New System.Windows.Forms.TextBox()
         Me.LinksTable = New System.Windows.Forms.TableLayoutPanel()
         Me.InfoLabel = New System.Windows.Forms.Label()
         Me.PatchTextBox = New System.Windows.Forms.TextBox()
@@ -51,7 +52,6 @@ Partial Class CommunityDialog
         Me.DownloadLink.TabStop = True
         Me.DownloadLink.Text = "Download"
         Me.LinkToolTip.SetToolTip(Me.DownloadLink, "Download the latest version of Desktop Ponies.")
-        Me.DownloadLink.Visible = False
         '
         'CloseButton
         '
@@ -100,25 +100,37 @@ Partial Class CommunityDialog
         Me.PatchLink.TabStop = True
         Me.PatchLink.Text = "Download patch"
         Me.LinkToolTip.SetToolTip(Me.PatchLink, "Download a patch to update you to the latest version of desktop ponies.")
-        Me.PatchLink.Visible = False
         '
         'LayoutTable
         '
         Me.LayoutTable.ColumnCount = 1
         Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.Controls.Add(Me.CertificateTextBox, 0, 4)
         Me.LayoutTable.Controls.Add(Me.DownloadLink, 0, 0)
         Me.LayoutTable.Controls.Add(Me.LinksTable, 0, 3)
         Me.LayoutTable.Controls.Add(Me.PatchLink, 0, 1)
         Me.LayoutTable.Controls.Add(Me.PatchTextBox, 0, 2)
         Me.LayoutTable.Location = New System.Drawing.Point(12, 12)
         Me.LayoutTable.Name = "LayoutTable"
-        Me.LayoutTable.RowCount = 4
+        Me.LayoutTable.RowCount = 5
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutTable.Size = New System.Drawing.Size(507, 209)
         Me.LayoutTable.TabIndex = 0
+        '
+        'CertificateTextBox
+        '
+        Me.CertificateTextBox.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.CertificateTextBox.Location = New System.Drawing.Point(3, 148)
+        Me.CertificateTextBox.Multiline = True
+        Me.CertificateTextBox.Name = "CertificateTextBox"
+        Me.CertificateTextBox.ReadOnly = True
+        Me.CertificateTextBox.Size = New System.Drawing.Size(501, 58)
+        Me.CertificateTextBox.TabIndex = 4
+        Me.CertificateTextBox.Text = resources.GetString("CertificateTextBox.Text")
         '
         'LinksTable
         '
@@ -133,7 +145,7 @@ Partial Class CommunityDialog
         Me.LinksTable.Name = "LinksTable"
         Me.LinksTable.RowCount = 1
         Me.LinksTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.LinksTable.Size = New System.Drawing.Size(501, 88)
+        Me.LinksTable.Size = New System.Drawing.Size(501, 24)
         Me.LinksTable.TabIndex = 3
         '
         'InfoLabel
@@ -156,7 +168,6 @@ Partial Class CommunityDialog
         Me.PatchTextBox.Size = New System.Drawing.Size(501, 71)
         Me.PatchTextBox.TabIndex = 2
         Me.PatchTextBox.Text = resources.GetString("PatchTextBox.Text")
-        Me.PatchTextBox.Visible = False
         '
         'CommunityDialog
         '
@@ -192,4 +203,5 @@ Partial Class CommunityDialog
     Friend WithEvents LinksTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents InfoLabel As System.Windows.Forms.Label
     Friend WithEvents PatchTextBox As System.Windows.Forms.TextBox
+    Friend WithEvents CertificateTextBox As System.Windows.Forms.TextBox
 End Class

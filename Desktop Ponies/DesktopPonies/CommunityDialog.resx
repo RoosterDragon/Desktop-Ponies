@@ -123,6 +123,12 @@
   <metadata name="LinkContextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="CertificateTextBox.Text" xml:space="preserve">
+    <value>When getting community information from the web, we weren't sure if the server could be trusted.
+New mono installations don't trust any web servers by default. Try running
+mozroots --import --ask-remove
+from the command line to import a set of default Mozilla certificates.</value>
+  </data>
   <data name="PatchTextBox.Text" xml:space="preserve">
     <value>To patch the program:
  - Download the patch (this will be much smaller than the full download).
