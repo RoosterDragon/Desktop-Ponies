@@ -105,7 +105,7 @@ Partial Class MainForm
         '
         'CommunityLink
         '
-        Me.CommunityLink.Anchor = System.Windows.Forms.AnchorStyles.Right
+        Me.CommunityLink.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.CommunityLink.AutoSize = True
         Me.CommunityLink.Location = New System.Drawing.Point(9, 38)
         Me.CommunityLink.Name = "CommunityLink"

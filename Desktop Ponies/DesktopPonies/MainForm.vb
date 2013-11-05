@@ -316,8 +316,6 @@ Public Class MainForm
     End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
-        If Not ponyBase.Behaviors.Any() Then Return
-
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = ponyBase.RandomDirectory Then

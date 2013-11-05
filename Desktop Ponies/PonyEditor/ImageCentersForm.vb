@@ -146,7 +146,7 @@ Public Class ImageCentersForm
 
     Private Sub PreviousButton_Click(sender As Object, e As EventArgs) Handles PreviousButton.Click
         behaviorIndex -= 1
-        If behaviorIndex = 0 Then behaviorIndex = _editor.PreviewPony.Behaviors.Count - 1
+        If behaviorIndex = -1 Then behaviorIndex = _editor.PreviewPony.Behaviors.Count - 1
         LoadBehavior()
     End Sub
 
