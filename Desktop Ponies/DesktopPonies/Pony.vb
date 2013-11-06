@@ -1536,8 +1536,7 @@ Public Class Pony
 
         AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
 
-        'interactionDelayUntil = internalTime + CurrentInteraction.Base.ReactivationDelay
-        interactionDelayUntil = internalTime + TimeSpan.FromSeconds(5)
+        interactionDelayUntil = internalTime + CurrentInteraction.Base.ReactivationDelay
         CurrentInteraction = Nothing
         isInteractionInitiator = False
     End Sub
