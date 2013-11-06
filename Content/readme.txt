@@ -83,6 +83,10 @@ Change Log
 
 Latest changes:
 
+v1.42.3.1:
+- Fixed interactions not respecting reactivation delay.
+- Prevented crash when interacting with targets lacking the required behaviors.
+
 v1.42.3:
 - Added Ms. Peachbottom by Loaded--Dice.
 - Added Pound Cake, Pumpkin Cake, Shopkeeper & Shoeshine by Bot-chan.
