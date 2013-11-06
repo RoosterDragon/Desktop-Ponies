@@ -2744,14 +2744,18 @@ Public Class Pony
 
             ' Get all actual instances of target ponies.
             interaction.Targets.Clear()
-            interaction.Targets.AddRange(
-                otherPonies.Where(
-                    Function(p) Not ReferenceEquals(Me, p) AndAlso interactionBase.TargetNames.Contains(p.Directory)))
+            Dim missingTargetNames = New HashSet(Of String)(interactionBase.TargetNames)
+            For Each candidatePony In otherPonies
+                If Not ReferenceEquals(Me, candidatePony) AndAlso interactionBase.TargetNames.Contains(candidatePony.Base.Directory) Then
+                    missingTargetNames.Remove(candidatePony.Base.Directory)
+                    interaction.Targets.Add(candidatePony)
+                End If
+            Next
             ' If no instances of the target ponies are present, we can forget this interaction.
             ' Alternatively, if it is specified all targets must be present but some are missing, the interaction cannot be used.
             If interaction.Targets.Count = 0 OrElse
                 (interaction.Base.Activation = TargetActivation.All AndAlso
-                interaction.Targets.Count <> interaction.Base.TargetNames.Count) Then
+                missingTargetNames.Count > 0) Then
                 Continue For
             End If
 
@@ -2792,10 +2796,15 @@ Public Class Pony
     End Sub
 
     Private Sub StartInteractionAsTarget(behaviorName As CaseInsensitiveString, interaction As Interaction)
+        Dim behavior = Behaviors.FirstOrDefault(Function(b) b.Name = behaviorName)
+        If behavior Is Nothing Then
+            Diagnostics.Debug.Assert(behavior IsNot Nothing, "Could not find interaction behavior.")
+            Return
+        End If
         isInteractionInitiator = False
         IsInteracting = True
         CurrentInteraction = interaction
-        SelectBehavior(Behaviors.First(Function(b) b.Name = behaviorName))
+        SelectBehavior(behavior)
     End Sub
 
     Private Function GetReadiedInteraction() As Interaction
