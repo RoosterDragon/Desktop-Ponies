@@ -361,36 +361,36 @@ Public Class DesktopPonyAnimator
 
     Private Sub AddPonySelection(ponyName As String)
         EvilGlobals.Main.SmartInvoke(Sub()
-                                      If EvilGlobals.CurrentGame IsNot Nothing Then
-                                          MessageBox.Show("Cannot add ponies during a game.",
-                                                          "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                          Return
-                                      End If
-                                      If ponyName = PonyBase.RandomDirectory Then
-                                          Dim selection = Rng.Next(PonyCollection.Bases.Count())
-                                          ponyName = PonyCollection.Bases(selection).Directory
-                                      End If
-                                      For Each ponyBase In PonyCollection.Bases
-                                          If ponyBase.Directory = ponyName Then
-                                              Dim newPony = New Pony(ponyBase)
-                                              AddPony(newPony)
-                                          End If
-                                      Next
-                                  End Sub)
+                                         If EvilGlobals.CurrentGame IsNot Nothing Then
+                                             MessageBox.Show("Cannot add ponies during a game.",
+                                                             "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                             Return
+                                         End If
+                                         If ponyName = PonyBase.RandomDirectory Then
+                                             Dim selection = Rng.Next(PonyCollection.Bases.Count())
+                                             ponyName = PonyCollection.Bases(selection).Directory
+                                         End If
+                                         For Each ponyBase In PonyCollection.Bases
+                                             If ponyBase.Directory = ponyName Then
+                                                 Dim newPony = New Pony(ponyBase)
+                                                 AddPony(newPony)
+                                             End If
+                                         Next
+                                     End Sub)
     End Sub
 
     Private Sub AddHouseSelection(houseBase As HouseBase)
         EvilGlobals.Main.SmartInvoke(Sub()
-                                      If EvilGlobals.CurrentGame IsNot Nothing Then
-                                          MessageBox.Show("Cannot add houses during a game.",
-                                                          "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                                          Return
-                                      End If
-                                      Dim newHouse = New House(houseBase)
-                                      newHouse.InitializeVisitorList()
-                                      newHouse.Teleport()
-                                      QueueAddAndStart(newHouse)
-                                  End Sub)
+                                         If EvilGlobals.CurrentGame IsNot Nothing Then
+                                             MessageBox.Show("Cannot add houses during a game.",
+                                                             "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                             Return
+                                         End If
+                                         Dim newHouse = New House(houseBase)
+                                         newHouse.InitializeVisitorList()
+                                         newHouse.Teleport()
+                                         QueueAddAndStart(newHouse)
+                                     End Sub)
     End Sub
 
     Protected Overrides Sub Dispose(disposing As Boolean)

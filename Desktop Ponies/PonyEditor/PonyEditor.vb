@@ -389,7 +389,6 @@ Public Class PonyEditor
             If behavior.LinkedBehaviorName = "" Then Continue For
             ' We will only start chains from the head elements in any chain.
             If behaviorNamesLinkedTo.Contains(behavior.Name) Then Continue For
-            Dim behaviorChain As New List(Of ChainLink)()
             Dim nextBehaviorName = behavior.Name
             Dim depth = 1
             Do

@@ -202,7 +202,7 @@ Public Class StringCollectionParser
             result = projection(s)
         Catch ex As Exception
             message = ex.Message
-            Dim index = message.IndexOf(Environment.NewLine)
+            Dim index = message.IndexOf(Environment.NewLine, StringComparison.CurrentCulture)
             If index <> -1 Then
                 message = message.Substring(0, index)
             End If

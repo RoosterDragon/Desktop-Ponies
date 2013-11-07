@@ -77,7 +77,7 @@
         UpdateList(BehaviorsList, Edited.BehaviorNames)
     End Sub
 
-    Private Sub UpdateList(Of T)(list As CheckedListBox, values As HashSet(Of T))
+    Private Shared Sub UpdateList(Of T)(list As CheckedListBox, values As HashSet(Of T))
         list.SuspendLayout()
         For i = 0 To list.Items.Count - 1
             list.SetItemChecked(i, values.Contains(DirectCast(list.Items(i), T)))

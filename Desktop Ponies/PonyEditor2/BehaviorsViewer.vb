@@ -14,7 +14,7 @@
         BehaviorsGrid.ResumeLayout()
     End Sub
 
-    Private Function GetGroupName(ponyBase As PonyBase, groupNumber As Integer) As String
+    Private Shared Function GetGroupName(ponyBase As PonyBase, groupNumber As Integer) As String
         If groupNumber = Behavior.AnyGroup Then Return "Any"
         Dim group = ponyBase.BehaviorGroups.FirstOrDefault(Function(bg) bg.Number = groupNumber)
         Return If(group Is Nothing, groupNumber.ToString(Globalization.CultureInfo.CurrentCulture), group.Name.ToString())

@@ -572,13 +572,15 @@ Public Class InteractionBase
                                                propertyName As String, issues As List(Of ParseIssue))
         Dim base = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = directory)
         If base Is Nothing Then
-            issues.Add(New ParseIssue(propertyName, directory, "", String.Format("No pony named '{0}' exists.", directory)))
+            issues.Add(New ParseIssue(propertyName, directory, "",
+                                      String.Format(CultureInfo.CurrentCulture, "No pony named '{0}' exists.", directory)))
         Else
             For Each behaviorName In BehaviorNames
                 Dim behavior = base.Behaviors.OnlyOrDefault(Function(b) b.Name = behaviorName)
                 If behavior Is Nothing Then
                     issues.Add(New ParseIssue("Behaviors", behaviorName, "",
-                                              String.Format("'{0}' is missing behavior '{1}'.", directory, behaviorName)))
+                                              String.Format(CultureInfo.CurrentCulture,
+                                                            "'{0}' is missing behavior '{1}'.", directory, behaviorName)))
                 End If
             Next
         End If
@@ -1153,7 +1155,6 @@ Public Class Pony
 
     Public Property CurrentBehaviorGroup As Integer
 
-    Public Property InteractionActive As Boolean
     Private _currentInteraction As Interaction = Nothing
     Public Property CurrentInteraction As Interaction
         Get
@@ -2186,14 +2187,12 @@ Public Class Pony
 
                     If newEffect.Base.Duration <> 0 Then
                         newEffect.DesiredDuration = TimeSpan.FromSeconds(newEffect.Base.Duration)
-                        newEffect.CloseOnNewBehavior = False
                     Else
                         If Me.HaltedForCursor Then
                             newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration)
                         Else
                             newEffect.DesiredDuration = BehaviorDesiredDuration - Me.ImageTimeIndex
                         End If
-                        newEffect.CloseOnNewBehavior = True
                     End If
 
                     EvilGlobals.CurrentAnimator.AddEffect(newEffect)
@@ -3006,7 +3005,7 @@ Public Class PonyContext
         End Get
         Set(value As Rectangle)
             If _region.Width < 0 OrElse _region.Height < 0 Then
-                Throw New ArgumentException("region must have non-negative width and height.", "region")
+                Throw New ArgumentException("region must have non-negative width and height.", "value")
             End If
             _region = value
         End Set
@@ -3247,7 +3246,8 @@ Public Class Pony2
         ''' <param name="y">The second pony.</param>
         ''' <returns>Return true if the base directories are equal; otherwise, false.</returns>
         Public Overloads Function Equals(x As Pony2, y As Pony2) As Boolean Implements IEqualityComparer(Of Pony2).Equals
-            Return x.Base.Directory = y.Base.Directory
+            Return (x IsNot Nothing AndAlso y IsNot Nothing AndAlso x.Base.Directory = y.Base.Directory) OrElse
+                (x Is Nothing AndAlso y Is Nothing)
         End Function
         ''' <summary>
         ''' Gets the hash code of the base directory of the specified pony.
@@ -3255,7 +3255,7 @@ Public Class Pony2
         ''' <param name="obj">The pony.</param>
         ''' <returns>The hash code of the base directory of the specified pony.</returns>
         Public Overloads Function GetHashCode(obj As Pony2) As Integer Implements IEqualityComparer(Of Pony2).GetHashCode
-            Return obj.Base.Directory.GetHashCode()
+            Return If(obj Is Nothing, 0, obj.Base.Directory.GetHashCode())
         End Function
     End Class
 
@@ -3634,7 +3634,7 @@ Public Class Pony2
     ''' <param name="behavior">The behavior to check for a follow target object or destination.</param>
     ''' <returns>Returns true if a follow target is specified (regardless of if a matching target object is present) or a screen
     ''' destination is specified.</returns>
-    Private Function BehaviorHasTarget(behavior As Behavior) As Boolean
+    Private Shared Function BehaviorHasTarget(behavior As Behavior) As Boolean
         Return behavior.OriginalFollowTargetName <> "" OrElse
             behavior.OriginalDestinationXCoord <> 0 OrElse
             behavior.OriginalDestinationYCoord <> 0
@@ -4343,7 +4343,6 @@ Public Class Effect
     Private internalTime As TimeSpan
 
     Public Property DesiredDuration As TimeSpan?
-    Public Property CloseOnNewBehavior As Boolean
     Private _expired As Boolean
 
     Public Property TopLeftLocation As Point

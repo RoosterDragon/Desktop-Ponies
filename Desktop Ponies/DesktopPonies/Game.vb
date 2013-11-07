@@ -394,20 +394,6 @@ Public Class Game
 
     End Function
 
-    Private Function GetTeamByPlayer(Player As Pony) As Team
-
-        For Each team In Teams
-            For Each Position In team.Positions
-                If ReferenceEquals(Position.Player, Player) Then
-                    Return team
-                End If
-            Next
-        Next
-
-        Return Nothing
-
-    End Function
-
     Public Class Ball
         Public Property Type As BallType
         Public Property StartPosition As Point
@@ -603,10 +589,6 @@ Public Class Game
                 CInt(startPoint.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(startPoint.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
         End Sub
-
-        Public Function Center() As PointF
-            Return HostEffect.Region.Center()
-        End Function
 
         Public Sub SetScores(teamOne As Team, teamTwo As Team)
             Argument.EnsureNotNull(teamOne, "teamOne")
@@ -1177,20 +1159,6 @@ Public Class Game
             End If
 
         End Sub
-
-        Private Shared Function FriendlyPoniesAroundBall(ball As Ball, team As Team, minDistance As Integer) As List(Of Pony)
-
-            Dim ponies As New List(Of Pony)
-
-            For Each Position In team.Positions
-                Dim distance = Vector2F.Distance(New Vector2F(Position.Player.Location), ball.Center())
-                If distance <= minDistance Then
-                    ponies.Add(Position.Player)
-                End If
-            Next
-
-            Return ponies
-        End Function
 
         'get a teammate that is not near any enemy players and is closer to the goal than we are.
         Private Function GetOpenTeammate(team As Team, goal As GoalArea) As Pony

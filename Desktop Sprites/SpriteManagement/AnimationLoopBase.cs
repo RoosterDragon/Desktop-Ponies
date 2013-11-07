@@ -150,7 +150,7 @@
             {
                 throw ReadOnlyException();
             }
-            private InvalidOperationException ReadOnlyException()
+            private static InvalidOperationException ReadOnlyException()
             {
                 return new InvalidOperationException("Collection is read-only.");
             }
@@ -434,59 +434,6 @@
             public float AchievableFramesPerSecond
             {
                 get { return Count != 0 ? 1000f / MeanTime : 0; }
-            }
-
-            /// <summary>
-            /// Gets a printable string of the min, mean and max frame times.
-            /// </summary>
-            public string FrameTimings
-            {
-                get
-                {
-                    return "time: " +
-                        MinTime.ToString("0.0", CultureInfo.CurrentCulture) + "ms/" +
-                        MeanTime.ToString("0.0", CultureInfo.CurrentCulture) + "ms/" +
-                        MaxTime.ToString("0.0", CultureInfo.CurrentCulture) + "ms";
-                }
-            }
-            /// <summary>
-            /// Gets a printable string of the min, mean and max frame intervals.
-            /// </summary>
-            public string FrameIntervals
-            {
-                get
-                {
-                    return "interval: " +
-                        MinInterval.ToString("0.0", CultureInfo.CurrentCulture) + "ms/" +
-                        MeanInterval.ToString("0.0", CultureInfo.CurrentCulture) + "ms/" +
-                        MaxInterval.ToString("0.0", CultureInfo.CurrentCulture) + "ms";
-                }
-            }
-            /// <summary>
-            /// Gets a printable string of the current and achievable frames per second.
-            /// </summary>
-            public string FrameRates
-            {
-                get
-                {
-                    return "fps: " +
-                        FramesPerSecond.ToString("0.0", CultureInfo.CurrentCulture) + "/" +
-                        AchievableFramesPerSecond.ToString("0.0", CultureInfo.CurrentCulture);
-                }
-            }
-            /// <summary>
-            /// Gets a printable string of the garbage collections for generations 0, 1 and 2.
-            /// </summary>
-            public string CollectionCounts
-            {
-                get
-                {
-                    int index = marker - 1 >= 0 ? marker - 1 : Count - 1;
-                    return "Collections: " +
-                        frameRecords[index].Gen0Collections + "/" +
-                        frameRecords[index].Gen1Collections + "/" +
-                        frameRecords[index].Gen2Collections;
-                }
             }
 
             /// <summary>
@@ -831,10 +778,6 @@
         /// Holds information about the performance of the animator.
         /// </summary>
         private readonly FrameRecordCollector performanceRecorder = new FrameRecordCollector(300);
-        /// <summary>
-        /// Output of performance summary information.
-        /// </summary>
-        private readonly StringBuilder performanceSummary = new StringBuilder(100);
         /// <summary>
         /// The minimum value for the interval of the timer.
         /// </summary>

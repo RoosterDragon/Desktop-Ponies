@@ -29,23 +29,24 @@ Friend NotInheritable Class EvilGlobals
     Public Shared Property InScreensaverMode As Boolean
     Public Shared Property InPreviewMode As Boolean
 
-    Private Shared _directXSoundAvailable As Boolean
+    Private Shared _directXSoundAvailable As Boolean = IsDirectXSoundAvailable()
     Public Shared ReadOnly Property DirectXSoundAvailable As Boolean
         Get
             Return _directXSoundAvailable
         End Get
     End Property
 
-    Shared Sub New()
+    Private Shared Function IsDirectXSoundAvailable() As Boolean
         ' Check to see if the right version of DirectX is installed for sounds.
         Try
             System.Reflection.Assembly.Load(
                 "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
-            _directXSoundAvailable = True
+            Return True
         Catch ex As Exception
             ' If we can't load the assembly, just don't enable sound.
         End Try
-    End Sub
+        Return False
+    End Function
 
     Public Shared Function TryGetScreensaverPath() As String
         Try

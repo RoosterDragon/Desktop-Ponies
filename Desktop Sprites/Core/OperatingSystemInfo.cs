@@ -14,9 +14,10 @@
         private static readonly OperatingSystem OsInfo = Environment.OSVersion;
 
         /// <summary>
-        /// Initializes static members of the <see cref="T:DesktopSprites.Core.OperatingSystemInfo"/> class.
+        /// Returns a value indicating whether the current operating system is Macintosh.
         /// </summary>
-        static OperatingSystemInfo()
+        /// <returns>A value indicating whether the current operating system is Macintosh.</returns>
+        private static bool OnMacOSX()
         {
             // Check for MacOSX, as PlatformID will simply return Unix under Mono.
             IntPtr buffer = IntPtr.Zero;
@@ -27,7 +28,7 @@
                 {
                     // The buffer contains 5 or 6 null-terminated char arrays, we will marshal the first one, containing the system name.
                     string osName = Marshal.PtrToStringAnsi(buffer);
-                    IsMacOSX = osName == "Darwin";
+                    return osName == "Darwin";
                 }
             }
             catch (Exception)
@@ -39,6 +40,7 @@
                 if (buffer != IntPtr.Zero)
                     Marshal.FreeHGlobal(buffer);
             }
+            return false;
         }
 
         /// <summary>
@@ -64,9 +66,16 @@
             }
         }
         /// <summary>
+        /// Indicates whether the current operating system is Macintosh.
+        /// </summary>
+        private static bool isMacOSX = OnMacOSX();
+        /// <summary>
         /// Gets a value indicating whether the current operating system is Macintosh.
         /// </summary>
-        public static bool IsMacOSX { get; private set; }
+        public static bool IsMacOSX
+        {
+            get { return isMacOSX; }
+        }
         /// <summary>
         /// Gets a value indicating whether the current operating system is Unix.
         /// </summary>

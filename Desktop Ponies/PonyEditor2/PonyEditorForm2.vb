@@ -1,4 +1,5 @@
-﻿Imports System.IO
+﻿Imports System.Globalization
+Imports System.IO
 
 Public Class PonyEditorForm2
     Private Shared ReadOnly ErrorBitmap As Bitmap = SystemIcons.Error.ToBitmap()
@@ -243,7 +244,6 @@ Public Class PonyEditorForm2
         Dim itemsValid = ParseResult.Success
         For Each item In items
             Dim ref = New PageRef(base, childContent, item)
-            Dim parsedItem As T = Nothing
             Dim itemValid = validateItem(item)
             itemsValid = itemsValid.Combine(itemValid)
             worker.QueueTask(Sub()
@@ -343,6 +343,7 @@ Public Class PonyEditorForm2
         For Each tab As TabPage In Documents.TabPages
             If Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase) Then
                 If MessageBox.Show(Me, String.Format(
+                                   CultureInfo.CurrentCulture,
                                    "All open documents about {0} must be closed before editing details, would you like to do this?",
                                    contextBase.Directory),
                                "Close Documents?", MessageBoxButtons.OKCancel,

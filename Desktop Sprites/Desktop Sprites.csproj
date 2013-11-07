@@ -142,9 +142,6 @@
     <Compile Include="Forms\GifControl.Designer.cs">
       <DependentUpon>GifControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="SpriteManagement\BufferedListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="SpriteManagement\GifImage.cs" />
     <Compile Include="Forms\GifFramesForm.cs">
       <SubType>Form</SubType>
