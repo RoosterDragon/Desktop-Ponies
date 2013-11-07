@@ -12,7 +12,7 @@
     using DesktopSprites.SpriteManagement;
 
     /// <summary>
-    /// Allows an ARGB color table to be defined for gif files.
+    /// Allows an ARGB color table to be defined for GIF files.
     /// </summary>
     public partial class GifAlphaForm : Form
     {
@@ -21,11 +21,11 @@
         /// </summary>
         private readonly string filesPath;
         /// <summary>
-        /// The path to the gif image being modified.
+        /// The path to the GIF image being modified.
         /// </summary>
         private string filePath;
         /// <summary>
-        /// The gif image to display and modify.
+        /// The GIF image to display and modify.
         /// </summary>
         private GifImage<Bitmap> gifImage;
         /// <summary>
@@ -110,7 +110,7 @@
 
         /// <summary>
         /// Raised when a new index is selected from ImageSelector.
-        /// Loads the gif of that filename.
+        /// Loads the GIF file of that filename.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
@@ -513,7 +513,7 @@
         /// <summary>
         /// Prompts the user to save any outstanding changes, if required, and returns a value indicating whether the caller can continue.
         /// </summary>
-        /// <returns>A value indicating whether the caller should continue. Returns true to indicate it is ok to proceed, returns false to
+        /// <returns>A value indicating whether the caller should continue. Returns true to indicate it is OK to proceed, returns false to
         /// indicate the user wishes to review the current changes.</returns>
         private bool SavePrompt()
         {

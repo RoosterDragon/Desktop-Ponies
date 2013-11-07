@@ -10,7 +10,7 @@
     using DesktopSprites.SpriteManagement;
 
     /// <summary>
-    /// Displays the individual frames and other information about gif files.
+    /// Displays the individual frames and other information about GIF files.
     /// </summary>
     public partial class GifFramesForm : Form
     {
@@ -57,9 +57,9 @@
         }
 
         /// <summary>
-        /// Loads a gif file from the given path, and displays the resulting frames.
+        /// Loads a GIF file from the given path, and displays the resulting frames.
         /// </summary>
-        /// <param name="path">The path to load the gif file from.</param>
+        /// <param name="path">The path to load the GIF file from.</param>
         private void LoadGif(string path)
         {
             FramesDisplayPanel.SuspendLayout();
@@ -77,7 +77,7 @@
             }
             catch (Exception)
             {
-                // Couldn't load gif, don't display.
+                // Couldn't load GIF, don't display.
                 ImageInfo.Text = "Unable to load gif.";
                 FramesDisplayPanel.ResumeLayout();
                 return;
@@ -100,7 +100,7 @@
 
         /// <summary>
         /// Raised when a new index is selected from ImageSelector.
-        /// Loads the gif of that filename.
+        /// Loads the GIF file of that filename.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>

@@ -114,7 +114,7 @@
             return result;
         }
         /// <summary>
-        /// Creates an exception that represents the error were more data was requested to be read into a buffer than was available.
+        /// Creates an exception that represents the error where more data was requested to be read into a buffer than was available.
         /// </summary>
         /// <returns>A new <see cref="T:System.IO.IOException"/>.</returns>
         private static IOException InsufficientDataAvailableException()

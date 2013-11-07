@@ -47,7 +47,7 @@
     /// for(int row = 0; row < height; row++)
     /// {
     ///     // Copy from the source buffer to the destination buffer.
-    ///     // Notice how the starting index for each array is dependant of the stride width of their respective sources.
+    ///     // Notice how the starting index for each array is dependent of the stride width of their respective sources.
     ///     Array.Copy(buffer, row * stride, frameBuffer, row * frame.Stride, stride);
     /// }
     /// 
@@ -1621,7 +1621,7 @@
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
 
             // The values read in are variable length codewords, which can be of any length.
-            // The gif specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
+            // The GIF specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
             // Thus we need to maintain a dictionary of up to 4096 codewords (which each can be of any length).
             // These codewords have a property that make them easy to store however.
             // If some word w plus some character c is in the dictionary, then the word w will be in the dictionary.

@@ -86,7 +86,7 @@
         {
             #region SpeechWindow class
             /// <summary>
-            /// Represents a small popup window used to display speech bubbles.
+            /// Represents a small pop-up window used to display speech bubbles.
             /// </summary>
             private class SpeechWindow : Gtk.Window
             {

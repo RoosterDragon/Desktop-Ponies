@@ -1,7 +1,7 @@
 ﻿Imports System.Threading
 
 ''' <summary>
-''' Processes UI dependant tasks on the UI thread when it becomes idle.
+''' Processes UI dependent tasks on the UI thread when it becomes idle.
 ''' </summary>
 ''' <remarks>When the control is disposed, any tasks queued for execution are abandoned.</remarks>
 Public Class IdleWorker
@@ -48,7 +48,7 @@ Public Class IdleWorker
     ''' <summary>
     ''' Initializes a new instance of the <see cref="IdleWorker"/> class for the specified control.
     ''' </summary>
-    ''' <param name="control">The control on which tasks are dependant.</param>
+    ''' <param name="control">The control on which tasks are dependent.</param>
     ''' <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.</exception>
     ''' <exception cref="T:System.ArgumentException"><paramref name="control"/> has been disposed.</exception>
     Public Sub New(control As Control)

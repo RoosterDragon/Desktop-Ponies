@@ -96,8 +96,8 @@
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.AnimatedImage`1"/> class from a given file.
         /// </summary>
         /// <param name="path">The path to the file which contains the image to be loaded.</param>
-        /// <param name="staticImageFactory">The method that creates a TFrame object for a non-gif file.</param>
-        /// <param name="frameFactory">The method used to construct a TFrame object for each frame in a gif animation.</param>
+        /// <param name="staticImageFactory">The method that creates a TFrame object for a non-GIF file.</param>
+        /// <param name="frameFactory">The method used to construct a TFrame object for each frame in a GIF animation.</param>
         /// <param name="allowableDepths">The allowable set of depths for the raw buffer. Use as many as your output format permits. The
         /// Indexed8Bpp format is required.</param>
         public AnimatedImage(string path, Func<string, T> staticImageFactory,
@@ -112,9 +112,9 @@
         }
 
         /// <summary>
-        /// Creates an <see cref="T:DesktopSprites.SpriteManagement.AnimatedImage`1"/> from a gif file.
+        /// Creates an <see cref="T:DesktopSprites.SpriteManagement.AnimatedImage`1"/> from a GIF file.
         /// </summary>
-        /// <param name="frameFactory">The method used to construct a TFrame object for each frame in a gif animation.</param>
+        /// <param name="frameFactory">The method used to construct a TFrame object for each frame in a GIF animation.</param>
         /// <param name="allowableDepths">The allowable set of depths for the raw buffer. Use as many as your output format permits. The
         /// Indexed8Bpp format is required.</param>
         private void AnimatedImageFromGif(BufferToImage<T> frameFactory, BitDepths allowableDepths)
@@ -136,7 +136,7 @@
             {
                 int frameDuration = gifImage.Frames[sourceFrame].Duration;
 
-                // Decoding the gif may have produced frames of zero duration, we can safely drop these.
+                // Decoding the GIF may have produced frames of zero duration, we can safely drop these.
                 // If the file has all-zero durations, we're into the land of undefined behavior for animations.
                 // If we get to the last frame and we have nothing so far, we'll use that just so there is something to display.
                 // Alternatively, in an image with only one frame, then only this frame ever need be displayed.
@@ -214,7 +214,7 @@
         /// <summary>
         /// Creates an <see cref="T:DesktopSprites.SpriteManagement.AnimatedImage`1"/> from a static image file.
         /// </summary>
-        /// <param name="staticImageFactory">The method the creates a <typeparamref name="T"/> object for a non-gif file.</param>
+        /// <param name="staticImageFactory">The method the creates a <typeparamref name="T"/> object for a non-GIF file.</param>
         private void AnimatedImageFromStaticFormat(Func<string, T> staticImageFactory)
         {
             Size = ImageSize.GetSize(FilePath);

@@ -382,7 +382,7 @@ Public Class PonyBase
         'or, the offset from the center of the object to go to (upper left, below, etc)
         newBehavior.AutoSelectImagesOnFollow = autoSelectImagesOnFollow
 
-        'When the pony if off-screen we overwrite the follow parameters to get them onscreen again.
+        'When the pony if off-screen we overwrite the follow parameters to get them on-screen again.
         'we save the original parameters here.
         newBehavior.OriginalDestinationXCoord = xCoord
         newBehavior.OriginalDestinationYCoord = yCoord
@@ -1393,7 +1393,7 @@ Public Class Pony
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         ' Find out how far behind the sprite is since its last update, and catch up.
         ' The time factor here means the internal time of the sprite can be advanced at different rates than the external time.
-        ' This fixed timestep method of updating is prone to temporal aliasing, but this is largely unnoticeable compared to the generally
+        ' This fixed time step method of updating is prone to temporal aliasing, but this is largely unnoticeable compared to the generally
         ' low frame rate of animations and lack of spatial anti-aliasing since the images are pixel art. That said, the time scaling should
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as UpdateOnce must be evaluated many times to catch up).
@@ -1534,7 +1534,7 @@ Public Class Pony
             Next
         End If
 
-        AddUpdateRecord("Cancelled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
+        AddUpdateRecord("Canceled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
 
         interactionDelayUntil = internalTime + CurrentInteraction.Base.ReactivationDelay
         CurrentInteraction = Nothing
@@ -1828,7 +1828,7 @@ Public Class Pony
 
             movement.Y = CSng(((CenterLocation.Y - Destination.Y) / (distance)) * -speed)
 
-            ' We do not want to detect if we are at the destination if we are trying to move onscreen - we might stop at the destination
+            ' We do not want to detect if we are at the destination if we are trying to move on-screen - we might stop at the destination
             ' and not get out of the area we want to avoid.
             ' However, we DO want to detect if we are exactly at our destination - our speed will go to 0 and we will be forever stuck
             ' there.
@@ -2050,7 +2050,7 @@ Public Class Pony
                 destinationCoords = safespot
 
                 Paint(False)
-                AddUpdateRecord("Walking back onscreen.")
+                AddUpdateRecord("Walking back on-screen.")
                 Exit Sub
             End If
         End If
@@ -2320,7 +2320,7 @@ Public Class Pony
             Dim allowedMovement = AllowedMoves.All
 
             'if the distance to the destination is mostly horizontal, or mostly vertical, set the movement to either of those
-            'This allows pegasi to fly up to reach their target instead of walking straight up.
+            'This allows Pegasi to fly up to reach their target instead of walking straight up.
             'This is weighted more on the vertical side for better effect
             If horizontalDistance * 0.75 > verticalDistance Then
                 allowedMovement = allowedMovement And AllowedMoves.HorizontalOnly
@@ -3423,7 +3423,7 @@ Public Class Pony2
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         ' Find out how far behind the sprite is since its last update, and catch up.
         ' The time factor here means the internal time of the sprite can be advanced at different rates than the external time.
-        ' This fixed timestep method of updating is prone to temporal aliasing, but this is largely unnoticeable compared to the generally
+        ' This fixed time step method of updating is prone to temporal aliasing, but this is largely unnoticeable compared to the generally
         ' low frame rate of animations and lack of spatial anti-aliasing since the images are pixel art. That said, the time scaling should
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as StepOnce must be evaluated many times to catch up).
@@ -3437,7 +3437,7 @@ Public Class Pony2
     End Sub
 
     ''' <summary>
-    ''' Advances the temporal state of the pony by a single fixed timestep.
+    ''' Advances the temporal state of the pony by a single fixed time step.
     ''' </summary>
     Private Sub StepOnce()
         _currentTime += TimeSpan.FromMilliseconds(StepSize)

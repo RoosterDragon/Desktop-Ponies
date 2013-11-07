@@ -42,7 +42,7 @@
         {
 #if DEBUG
             // As we are outputting to console, we shall lock around the whole collection so as to minimize the interference from
-            // multithreaded calls, however other threads are still free to call for collections outside of this method, so this cannot be
+            // multi-threaded calls, however other threads are still free to call for collections outside of this method, so this cannot be
             // guaranteed.
             lock (BufferGuard)
             {
