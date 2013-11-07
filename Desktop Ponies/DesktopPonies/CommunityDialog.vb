@@ -43,8 +43,8 @@
                 ex.InnerException.InnerException IsNot Nothing AndAlso
                 ex.InnerException.InnerException.GetType().ToString() = "Mono.Security.Protocol.Tls.TlsException"
                 ' Default mono installations do not have any certificates installed and thus do not trust any https connections.
-                ' This is a fairly user unfriendly out of the box default that we'll have to let them the user about and hope they care
-                ' enough to fix.
+                ' This is a fairly user unfriendly out of the box default that we'll have to let the user know about and hope they care
+                ' enough to fix it.
                 Return New CommunityInfo()
             Catch ex As Exception
                 ' There may be a whole variety of reasons we cannot get up-to-date community information. We won't bother the user if any
