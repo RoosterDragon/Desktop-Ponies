@@ -57,8 +57,8 @@ Public Class PonyEditorForm2
         End Sub
         Public Sub New(ponyBase As PonyBase, pageContent As PageContent)
             _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
-            If Not pageContent.IsItemCollection() Then
-                Throw New ArgumentException("pageContent must refer to an item collection.", "pageContent")
+            If Not pageContent.IsItem() AndAlso Not pageContent.IsItemCollection() Then
+                Throw New ArgumentException("pageContent must refer to an item or item collection.", "pageContent")
             End If
             _pageContent = pageContent
         End Sub
@@ -329,7 +329,7 @@ Public Class PonyEditorForm2
         If nodeLookup.TryGetValue(name, node) Then
             Return node
         Else
-            Return DocumentsView.Nodes.Find(name, True).Single()
+            Return DocumentsView.Nodes.Find(name, True).SingleOrDefault()
         End If
     End Function
 
@@ -342,7 +342,7 @@ Public Class PonyEditorForm2
             Case PageContent.Behaviors, PageContent.Effects, PageContent.Speeches, PageContent.Interactions
                 Return pageRef.PonyBase.Directory & " - " & pageRef.PageContent.ToString()
             Case PageContent.Behavior, PageContent.Effect, PageContent.Speech, PageContent.Interaction
-                Return pageRef.PonyBase.Directory & ": " & pageRef.Item.Name
+                Return pageRef.PonyBase.Directory & ": " & If(pageRef.Item Is Nothing, "[New]", pageRef.Item.Name.ToString())
             Case Else
                 Throw New System.ComponentModel.InvalidEnumArgumentException("Unknown Content in pageRef")
         End Select
@@ -390,6 +390,11 @@ Public Class PonyEditorForm2
                     PonyNodeContextMenu.Show(DocumentsView, e.Location)
             End Select
         End If
+    End Sub
+
+    Private Sub DocumentsView_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles DocumentsView.AfterSelect
+        contextRef = GetPageRef(e.Node)
+        EnableEditorToolStripButtons(contextRef.PageContent <> PageContent.Ponies, Documents.SelectedTab IsNot Nothing)
     End Sub
 
     Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
@@ -452,6 +457,22 @@ Public Class PonyEditorForm2
         Next
     End Sub
 
+    Private Sub NewBehaviorMenuItem_Click(sender As Object, e As EventArgs) Handles NewBehaviorMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Behavior))
+    End Sub
+
+    Private Sub NewEffectMenuItem_Click(sender As Object, e As EventArgs) Handles NewEffectMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Effect))
+    End Sub
+
+    Private Sub NewInteractionMenuItem_Click(sender As Object, e As EventArgs) Handles NewInteractionMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Interaction))
+    End Sub
+
+    Private Sub NewSpeechMenuItem_Click(sender As Object, e As EventArgs) Handles NewSpeechMenuItem.Click
+        OpenTab(New PageRef(contextRef.PonyBase, PageContent.Speech))
+    End Sub
+
     Private Sub BehaviorsMenuItem_Click(sender As Object, e As EventArgs) Handles BehaviorsContextMenuItem.Click, BehaviorsMenuItem.Click
         OpenTab(New PageRef(contextRef.PonyBase, PageContent.Behaviors))
     End Sub
@@ -468,7 +489,18 @@ Public Class PonyEditorForm2
         OpenTab(New PageRef(contextRef.PonyBase, PageContent.Speeches))
     End Sub
 
-    Private Function OpenTab(pageRef As PageRef) As Boolean
+    Private Sub OpenContextMenuItem_Click(sender As Object, e As EventArgs) Handles OpenContextMenuItem.Click
+        OpenTab(contextRef)
+    End Sub
+
+    Private Sub OpenTab(pageRef As PageRef)
+        Const MaxTabs = 50
+        If Documents.TabPages.Count >= MaxTabs Then
+            MessageBox.Show(Me, "You already have " & MaxTabs & " documents opens. Please close some before opening more.",
+                            "Document Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
         Dim pageRefKey = pageRef.ToString()
         Dim tab = Documents.TabPages.Item(pageRefKey)
 
@@ -530,7 +562,6 @@ Public Class PonyEditorForm2
                 tab.Controls.Add(childControl)
                 isFirstTab = Documents.TabPages.Count = 0
                 Documents.TabPages.Add(tab)
-                EnableEditorToolStripButtons(True)
             End If
         End If
 
@@ -538,12 +569,10 @@ Public Class PonyEditorForm2
             Documents.SelectedTab = tab
             If isFirstTab Then SwitchTab(tab)
             DocumentsView.Select()
-            DocumentsView.SelectedNode = FindNode(pageRefKey)
-            Return True
+            Dim node = FindNode(pageRefKey)
+            If node IsNot Nothing Then DocumentsView.SelectedNode = node
         End If
-
-        Return False
-    End Function
+    End Sub
 
     Private Sub Documents_Selected(sender As Object, e As TabControlEventArgs) Handles Documents.Selected
         SwitchTab(e.TabPage)
@@ -565,7 +594,6 @@ Public Class PonyEditorForm2
         ActiveItemEditor_DirtinessChanged(Me, EventArgs.Empty)
         ActiveItemEditor_IssuesChanged(Me, EventArgs.Empty)
 
-        contextRef = Nothing
         If newTab IsNot Nothing Then
             contextRef = GetPageRef(newTab)
             If contextRef.PageContent = PageContent.Pony Then
@@ -573,9 +601,17 @@ Public Class PonyEditorForm2
                 preview.RestartForPony(contextRef.PonyBase, previewStartBehavior)
                 previewStartBehavior = Nothing
                 preview.ShowPreview()
+                PreviewRestartButton.Visible = True
+                Focus()
             End If
+        Else
+            contextRef = GetPageRef(DocumentsView.SelectedNode)
         End If
-        If contextRef Is Nothing OrElse contextRef.PageContent <> PageContent.Pony Then preview.HidePreview()
+        If newTab Is Nothing OrElse contextRef.PageContent <> PageContent.Pony Then
+            preview.HidePreview()
+            PreviewRestartButton.Visible = False
+        End If
+        EnableEditorToolStripButtons(contextRef.PageContent <> PageContent.Ponies, Documents.TabPages.Count > 0)
     End Sub
 
     Private Sub Viewer_PreviewRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)
@@ -612,17 +648,23 @@ Public Class PonyEditorForm2
         IssuesGrid.ResumeLayout()
     End Sub
 
-    Private Sub EnableEditorToolStripButtons(enable As Boolean)
-        PreviewButton.Enabled = enable
-        ItemsButton.Enabled = enable
-        CloseTabButton.Enabled = enable
-        CloseAllTabsButton.Enabled = enable
+    Private Sub EnableEditorToolStripButtons(ponyEnable As Boolean, itemEnable As Boolean)
+        PreviewButton.Enabled = ponyEnable
+        NewItemButton.Enabled = ponyEnable
+        ItemsButton.Enabled = ponyEnable
+        CloseTabButton.Enabled = itemEnable
+        CloseAllTabsButton.Enabled = itemEnable
     End Sub
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveItemButton.Click
         If Not ActiveItemEditor.SaveItem() Then Return
         Dim ref = GetPageRef(Documents.SelectedTab)
         Dim node = FindNode(ref.ToString())
+
+        If node Is Nothing Then
+            Dim parentNode = FindNode(New PageRef(ref.PonyBase, ref.PageContent.ItemToItemCollection()).ToString())
+            node = AddItemNode(ref.PonyBase, ActiveItemEditor.Item, parentNode)
+        End If
 
         nodeLookup.Remove(node.Name)
         ref.Item = ActiveItemEditor.Item
@@ -642,8 +684,27 @@ Public Class PonyEditorForm2
 
     Private Sub CloseAllTabsButton_Click(sender As Object, e As EventArgs) Handles CloseAllTabsButton.Click
         For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
-            RemoveTab(t)
+            QueueWorkItem(Sub() RemoveTab(t))
         Next
+    End Sub
+
+    Private Sub PreviewRestartButton_Click(sender As Object, e As EventArgs) Handles PreviewRestartButton.Click
+        PreviewRestartButton.Enabled = False
+
+        Dim shouldRestorePreview = False
+        If Documents.SelectedTab IsNot Nothing AndAlso Documents.SelectedTab.Controls.Contains(preview) Then
+            Documents.SelectedTab.Controls.Remove(preview)
+            shouldRestorePreview = True
+        End If
+        If preview IsNot Nothing Then preview.Dispose()
+        preview = New PonyPreview(ponies)
+        preview.Dock = DockStyle.Fill
+        If shouldRestorePreview Then Documents.SelectedTab.Controls.Add(preview)
+        preview.RestartForPony(contextRef.PonyBase)
+        preview.ShowPreview()
+
+        PreviewRestartButton.Enabled = True
+        Focus()
     End Sub
 
     Private Sub RemoveTab(tab As TabPage)
@@ -652,7 +713,6 @@ Public Class PonyEditorForm2
         If index > 0 Then Documents.SelectedIndex = index - 1
         Documents.TabPages.Remove(tab)
         tab.Dispose()
-        EnableEditorToolStripButtons(Documents.TabPages.Count > 0)
     End Sub
 
     Private Sub QueueWorkItem(item As MethodInvoker)
@@ -672,7 +732,7 @@ Public Class PonyEditorForm2
                          End Sub)
     End Sub
 
-    Private Sub PonyEditorForm2_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+    Private Sub PonyEditorForm2_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
         If preview.Parent IsNot Nothing Then preview.Parent.Controls.Remove(preview)
         preview.Dispose()
     End Sub

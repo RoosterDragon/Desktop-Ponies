@@ -29,7 +29,13 @@ Partial Class PonyEditorForm2
         Me.EditorToolStrip = New System.Windows.Forms.ToolStrip()
         Me.NewPonyButton = New System.Windows.Forms.ToolStripButton()
         Me.PreviewButton = New System.Windows.Forms.ToolStripButton()
+        Me.NewItemButton = New System.Windows.Forms.ToolStripDropDownButton()
+        Me.NewBehaviorMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NewEffectMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NewInteractionMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.NewSpeechMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ItemsButton = New System.Windows.Forms.ToolStripDropDownButton()
+        Me.DetailsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BehaviorsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EffectsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.InteractionsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -38,6 +44,8 @@ Partial Class PonyEditorForm2
         Me.SaveItemButton = New System.Windows.Forms.ToolStripButton()
         Me.CloseTabButton = New System.Windows.Forms.ToolStripButton()
         Me.CloseAllTabsButton = New System.Windows.Forms.ToolStripButton()
+        Me.ItemPreviewSeperator = New System.Windows.Forms.ToolStripSeparator()
+        Me.PreviewRestartButton = New System.Windows.Forms.ToolStripButton()
         Me.EditorStatusStrip = New System.Windows.Forms.StatusStrip()
         Me.EditorStatus = New System.Windows.Forms.ToolStripStatusLabel()
         Me.EditorProgressBar = New System.Windows.Forms.ToolStripProgressBar()
@@ -49,14 +57,16 @@ Partial Class PonyEditorForm2
         Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.BehaviorsPage = New System.Windows.Forms.TabPage()
         Me.PonyNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.PreviewContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DetailsContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.BehaviorsContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EffectsContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.InteractionsContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpeechesContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DetailsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DetailsContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ItemCollectionOrItemNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.OpenContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
@@ -65,6 +75,7 @@ Partial Class PonyEditorForm2
         Me.Output.SuspendLayout()
         Me.IssuesPage.SuspendLayout()
         Me.PonyNodeContextMenu.SuspendLayout()
+        Me.ItemCollectionOrItemNodeContextMenu.SuspendLayout()
         Me.SuspendLayout()
         '
         'EditingArea
@@ -86,7 +97,7 @@ Partial Class PonyEditorForm2
         Me.EditingArea.Panel2.Controls.Add(Me.DocumentsView)
         Me.EditingArea.Panel2MinSize = 100
         Me.EditingArea.Size = New System.Drawing.Size(784, 253)
-        Me.EditingArea.SplitterDistance = 550
+        Me.EditingArea.SplitterDistance = 535
         Me.EditingArea.TabIndex = 0
         '
         'Documents
@@ -95,7 +106,7 @@ Partial Class PonyEditorForm2
         Me.Documents.Location = New System.Drawing.Point(0, 0)
         Me.Documents.Name = "Documents"
         Me.Documents.SelectedIndex = 0
-        Me.Documents.Size = New System.Drawing.Size(550, 253)
+        Me.Documents.Size = New System.Drawing.Size(535, 253)
         Me.Documents.TabIndex = 0
         '
         'DocumentsView
@@ -105,13 +116,13 @@ Partial Class PonyEditorForm2
         Me.DocumentsView.HotTracking = True
         Me.DocumentsView.Location = New System.Drawing.Point(0, 0)
         Me.DocumentsView.Name = "DocumentsView"
-        Me.DocumentsView.Size = New System.Drawing.Size(230, 253)
+        Me.DocumentsView.Size = New System.Drawing.Size(245, 253)
         Me.DocumentsView.TabIndex = 0
         '
         'EditorToolStrip
         '
         Me.EditorToolStrip.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PreviewButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton})
+        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.PreviewRestartButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
         Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
@@ -135,6 +146,40 @@ Partial Class PonyEditorForm2
         Me.PreviewButton.Text = "Preview"
         Me.PreviewButton.ToolTipText = "Preview pony."
         '
+        'NewItemButton
+        '
+        Me.NewItemButton.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewBehaviorMenuItem, Me.NewEffectMenuItem, Me.NewInteractionMenuItem, Me.NewSpeechMenuItem})
+        Me.NewItemButton.Enabled = False
+        Me.NewItemButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.NewItemButton.Name = "NewItemButton"
+        Me.NewItemButton.Size = New System.Drawing.Size(53, 22)
+        Me.NewItemButton.Text = "New..."
+        Me.NewItemButton.ToolTipText = "New..."
+        '
+        'NewBehaviorMenuItem
+        '
+        Me.NewBehaviorMenuItem.Name = "NewBehaviorMenuItem"
+        Me.NewBehaviorMenuItem.Size = New System.Drawing.Size(131, 22)
+        Me.NewBehaviorMenuItem.Text = "Behavior"
+        '
+        'NewEffectMenuItem
+        '
+        Me.NewEffectMenuItem.Name = "NewEffectMenuItem"
+        Me.NewEffectMenuItem.Size = New System.Drawing.Size(131, 22)
+        Me.NewEffectMenuItem.Text = "Effect"
+        '
+        'NewInteractionMenuItem
+        '
+        Me.NewInteractionMenuItem.Name = "NewInteractionMenuItem"
+        Me.NewInteractionMenuItem.Size = New System.Drawing.Size(131, 22)
+        Me.NewInteractionMenuItem.Text = "Interaction"
+        '
+        'NewSpeechMenuItem
+        '
+        Me.NewSpeechMenuItem.Name = "NewSpeechMenuItem"
+        Me.NewSpeechMenuItem.Size = New System.Drawing.Size(131, 22)
+        Me.NewSpeechMenuItem.Text = "Speech"
+        '
         'ItemsButton
         '
         Me.ItemsButton.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DetailsMenuItem, Me.BehaviorsMenuItem, Me.EffectsMenuItem, Me.InteractionsMenuItem, Me.SpeechesMenuItem})
@@ -144,28 +189,34 @@ Partial Class PonyEditorForm2
         Me.ItemsButton.Size = New System.Drawing.Size(54, 22)
         Me.ItemsButton.Text = "View..."
         '
+        'DetailsMenuItem
+        '
+        Me.DetailsMenuItem.Name = "DetailsMenuItem"
+        Me.DetailsMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.DetailsMenuItem.Text = "Details"
+        '
         'BehaviorsMenuItem
         '
         Me.BehaviorsMenuItem.Name = "BehaviorsMenuItem"
-        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.BehaviorsMenuItem.Text = "Behaviors"
         '
         'EffectsMenuItem
         '
         Me.EffectsMenuItem.Name = "EffectsMenuItem"
-        Me.EffectsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.EffectsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.EffectsMenuItem.Text = "Effects"
         '
         'InteractionsMenuItem
         '
         Me.InteractionsMenuItem.Name = "InteractionsMenuItem"
-        Me.InteractionsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.InteractionsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.InteractionsMenuItem.Text = "Interactions"
         '
         'SpeechesMenuItem
         '
         Me.SpeechesMenuItem.Name = "SpeechesMenuItem"
-        Me.SpeechesMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.SpeechesMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.SpeechesMenuItem.Text = "Speeches"
         '
         'PonyItemSeparator
@@ -197,6 +248,20 @@ Partial Class PonyEditorForm2
         Me.CloseAllTabsButton.Text = "Close All Tabs"
         Me.CloseAllTabsButton.ToolTipText = "Close all open tabs."
         '
+        'ItemPreviewSeperator
+        '
+        Me.ItemPreviewSeperator.Name = "ItemPreviewSeperator"
+        Me.ItemPreviewSeperator.Size = New System.Drawing.Size(6, 25)
+        '
+        'PreviewRestartButton
+        '
+        Me.PreviewRestartButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.PreviewRestartButton.Name = "PreviewRestartButton"
+        Me.PreviewRestartButton.Size = New System.Drawing.Size(91, 22)
+        Me.PreviewRestartButton.Text = "Restart Preview"
+        Me.PreviewRestartButton.ToolTipText = "Restart the preview to clear any cached images."
+        Me.PreviewRestartButton.Visible = False
+        '
         'EditorStatusStrip
         '
         Me.EditorStatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditorStatus, Me.EditorProgressBar})
@@ -227,6 +292,7 @@ Partial Class PonyEditorForm2
         Me.Output.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Output.Controls.Add(Me.IssuesPage)
+        Me.Output.Controls.Add(Me.BehaviorsPage)
         Me.Output.Location = New System.Drawing.Point(0, 287)
         Me.Output.Multiline = True
         Me.Output.Name = "Output"
@@ -301,17 +367,32 @@ Partial Class PonyEditorForm2
         Me.colSource.ToolTipText = "The source text that has an issue."
         Me.colSource.Width = 250
         '
+        'BehaviorsPage
+        '
+        Me.BehaviorsPage.Location = New System.Drawing.Point(4, 22)
+        Me.BehaviorsPage.Name = "BehaviorsPage"
+        Me.BehaviorsPage.Size = New System.Drawing.Size(776, 174)
+        Me.BehaviorsPage.TabIndex = 2
+        Me.BehaviorsPage.Text = "Behaviors"
+        Me.BehaviorsPage.UseVisualStyleBackColor = True
+        '
         'PonyNodeContextMenu
         '
         Me.PonyNodeContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PreviewContextMenuItem, Me.DetailsContextMenuItem, Me.BehaviorsContextMenuItem, Me.EffectsContextMenuItem, Me.InteractionsContextMenuItem, Me.SpeechesContextMenuItem})
         Me.PonyNodeContextMenu.Name = "PonyNodeContextMenu"
-        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 158)
+        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 136)
         '
         'PreviewContextMenuItem
         '
         Me.PreviewContextMenuItem.Name = "PreviewContextMenuItem"
         Me.PreviewContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.PreviewContextMenuItem.Text = "Preview Pony"
+        '
+        'DetailsContextMenuItem
+        '
+        Me.DetailsContextMenuItem.Name = "DetailsContextMenuItem"
+        Me.DetailsContextMenuItem.Size = New System.Drawing.Size(164, 22)
+        Me.DetailsContextMenuItem.Text = "View Details"
         '
         'BehaviorsContextMenuItem
         '
@@ -337,17 +418,17 @@ Partial Class PonyEditorForm2
         Me.SpeechesContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.SpeechesContextMenuItem.Text = "View Speeches"
         '
-        'DetailsMenuItem
+        'ItemCollectionOrItemNodeContextMenu
         '
-        Me.DetailsMenuItem.Name = "DetailsMenuItem"
-        Me.DetailsMenuItem.Size = New System.Drawing.Size(152, 22)
-        Me.DetailsMenuItem.Text = "Details"
+        Me.ItemCollectionOrItemNodeContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenContextMenuItem})
+        Me.ItemCollectionOrItemNodeContextMenu.Name = "ItemCollectionNodeContextMenu"
+        Me.ItemCollectionOrItemNodeContextMenu.Size = New System.Drawing.Size(104, 26)
         '
-        'DetailsContextMenuItem
+        'OpenContextMenuItem
         '
-        Me.DetailsContextMenuItem.Name = "DetailsContextMenuItem"
-        Me.DetailsContextMenuItem.Size = New System.Drawing.Size(164, 22)
-        Me.DetailsContextMenuItem.Text = "View Details"
+        Me.OpenContextMenuItem.Name = "OpenContextMenuItem"
+        Me.OpenContextMenuItem.Size = New System.Drawing.Size(103, 22)
+        Me.OpenContextMenuItem.Text = "Open"
         '
         'PonyEditorForm2
         '
@@ -372,6 +453,7 @@ Partial Class PonyEditorForm2
         Me.Output.ResumeLayout(False)
         Me.IssuesPage.ResumeLayout(False)
         Me.PonyNodeContextMenu.ResumeLayout(False)
+        Me.ItemCollectionOrItemNodeContextMenu.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -409,5 +491,15 @@ Partial Class PonyEditorForm2
     Friend WithEvents PonyItemSeparator As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents DetailsMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents DetailsContextMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents BehaviorsPage As System.Windows.Forms.TabPage
+    Friend WithEvents NewItemButton As System.Windows.Forms.ToolStripDropDownButton
+    Friend WithEvents NewBehaviorMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NewEffectMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NewInteractionMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NewSpeechMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents NewPonyButton As System.Windows.Forms.ToolStripButton
+    Friend WithEvents ItemPreviewSeperator As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents PreviewRestartButton As System.Windows.Forms.ToolStripButton
+    Friend WithEvents ItemCollectionOrItemNodeContextMenu As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents OpenContextMenuItem As System.Windows.Forms.ToolStripMenuItem
 End Class
