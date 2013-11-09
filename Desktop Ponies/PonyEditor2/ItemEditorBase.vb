@@ -231,7 +231,10 @@ Public Class ItemEditorBase
     Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector)
         Argument.EnsureNotNull(fileSelector, "fileSelector")
         Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
-        AddHandler fileSelector.ListRefreshed, Sub() RaiseEvent AssetFileIOPerformed(Me, EventArgs.Empty)
+        AddHandler fileSelector.ListRefreshed, Sub()
+                                                   If loadingItem Then Return
+                                                   RaiseEvent AssetFileIOPerformed(Me, EventArgs.Empty)
+                                               End Sub
         AddHandler fileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim fullPath = If(fileSelector.FilePath = Nothing,
@@ -265,15 +268,15 @@ Public Class ItemEditorBase
         Argument.EnsureNotNull(getBehaviorName, "getBehaviorName")
         Bind(propertyExpression, fileSelector)
 
+        Dim behaviorImagePath As String = Nothing
+        Dim effectImagePath As String = Nothing
         Dim refreshImageViewer =
             Sub()
                 Dim behavior = Base.Behaviors.OnlyOrDefault(Function(b) b.Name = getBehaviorName())
-
-                Dim behaviorImagePath As String = Nothing
-                Dim effectImagePath As String = Nothing
                 Dim newBehaviorImagePath As String = Nothing
                 If behavior IsNot Nothing Then newBehaviorImagePath = If(useLeftImage, behavior.LeftImage, behavior.RightImage).Path
-                If behaviorImagePath <> newBehaviorImagePath OrElse effectImagePath <> fileSelector.FilePath Then
+                If Not PathEquality.Comparer.Equals(behaviorImagePath, newBehaviorImagePath) OrElse
+                    Not PathEquality.Comparer.Equals(effectImagePath, fileSelector.FilePath) Then
                     behaviorImagePath = newBehaviorImagePath
                     effectImagePath = fileSelector.FilePath
                     LoadNewImageForViewer(fileSelector, effectImageViewer, behaviorComboBox, behaviorImagePath)
