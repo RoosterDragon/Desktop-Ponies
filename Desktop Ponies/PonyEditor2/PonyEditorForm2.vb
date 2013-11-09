@@ -364,6 +364,14 @@ Public Class PonyEditorForm2
         End If
     End Function
 
+    Private Function ShowMessageBox(show As Func(Of DialogResult)) As DialogResult
+        Dim wasVisible = preview.PreviewVisible
+        If wasVisible Then preview.HidePreview()
+        Dim result = show()
+        If wasVisible Then preview.ShowPreview()
+        Return result
+    End Function
+
     Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
         If e.KeyChar = ChrW(Keys.Enter) Then
             e.Handled = True
@@ -399,10 +407,11 @@ Public Class PonyEditorForm2
 
     Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
         If Documents.TabCount > 0 Then
-            If MessageBox.Show(
-                Me, "All documents must be closed before a new pony can be created. Close them now?",
-                "Close Documents?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <>
-            DialogResult.OK Then Return
+            If ShowMessageBox(
+                Function() MessageBox.Show(
+                    Me, "All documents must be closed before a new pony can be created. Close them now?",
+                    "Close Documents?", MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.OK Then Return
             For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
                 RemoveTab(t)
             Next
@@ -496,8 +505,9 @@ Public Class PonyEditorForm2
     Private Sub OpenTab(pageRef As PageRef)
         Const MaxTabs = 50
         If Documents.TabPages.Count >= MaxTabs Then
-            MessageBox.Show(Me, "You already have " & MaxTabs & " documents opens. Please close some before opening more.",
-                            "Document Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            ShowMessageBox(
+                Function() MessageBox.Show(Me, "You already have " & MaxTabs & " documents opens. Please close some before opening more.",
+                                           "Document Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning))
             Return
         End If
 

@@ -28,6 +28,8 @@ Public Class NewPonyDialog2
             Return
         End If
 
+        ' TODO: Unique name check.
+
         If PonyBase.Create(newName) Then
             _newDirectory = newName
         Else
