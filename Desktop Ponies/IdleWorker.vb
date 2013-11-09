@@ -41,6 +41,10 @@ Public Class IdleWorker
         End Get
     End Property
     ''' <summary>
+    ''' Indicates if this instance has been disposed.
+    ''' </summary>
+    Private disposed As Boolean
+    ''' <summary>
     ''' Async result returned from dummy callback, held so the wait handle may be disposed.
     ''' </summary>
     Private dummyAsyncResult As IAsyncResult
@@ -68,7 +72,7 @@ Public Class IdleWorker
         Argument.EnsureNotNull(task, "task")
         SyncLock tasks
             ' If the control is disposed or the handle has been lost, we will drop all new tasks since they can't be processed anyway.
-            If controlDisposed OrElse Not control.IsHandleCreated Then
+            If disposed OrElse controlDisposed OrElse Not control.IsHandleCreated Then
                 Return
             End If
 
@@ -97,7 +101,7 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If controlDisposed Then Return
+            If disposed OrElse controlDisposed Then Return
             runWatch.Restart()
             ' For efficiency, run a batch of tasks whilst idle.
             ' This reduces the message loop overhead in the case of lots of very short tasks.
@@ -116,7 +120,7 @@ Public Class IdleWorker
             ' We are on the UI thread, invoke tasks until all are complete.
             If UseIdlePooling Then
                 SyncLock tasks
-                    If controlDisposed Then Return
+                    If disposed OrElse controlDisposed Then Return
                     While tasks.Count > 0
                         tasks.Dequeue.Invoke()
                     End While
@@ -127,7 +131,7 @@ Public Class IdleWorker
             End If
         Else
             SyncLock tasks
-                If controlDisposed Then Return
+                If disposed OrElse controlDisposed Then Return
             End SyncLock
             ' We are on another thread, wait on the UI thread to finish processing our tasks.
             Try
@@ -165,6 +169,8 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub Control_Disposed(sender As Object, e As EventArgs)
         SyncLock tasks
+            If disposed Then Return
+            disposed = True
             RemoveHandler Application.Idle, AddressOf RunTask
             empty.Set()
             empty.Dispose()
