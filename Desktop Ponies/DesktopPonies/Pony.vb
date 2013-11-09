@@ -1024,6 +1024,7 @@ End Class
 #Region "Speech class"
 Public Class Speech
     Implements IPonyIniSourceable
+    Public Shared ReadOnly Unnamed As CaseInsensitiveString = "Unnamed"
 
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Text As String = ""
@@ -1039,7 +1040,11 @@ Public Class Speech
         Dim s = New Speech()
         s.SourceIni = iniLine
         Dim iniComponents = CommaSplitQuoteBraceQualified(iniLine)
-        If iniComponents.Length = 1 Then iniComponents = {Nothing, iniComponents(0)}
+        Dim named = True
+        If iniComponents.Length = 2 Then
+            named = False
+            iniComponents = {iniComponents(0), Nothing, iniComponents(1)}
+        End If
         If iniComponents.Length > 3 Then
             Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
             iniComponents(3) = Nothing
@@ -1053,7 +1058,7 @@ Public Class Speech
         Dim p As New StringCollectionParser(iniComponents,
                                             {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
         p.NoParse()
-        s.Name = p.NotNullOrWhiteSpace("Unnamed")
+        s.Name = If(named, p.NotNullOrWhiteSpace(Unnamed), p.NoParse())
         s.Text = p.NotNull()
         s.SoundFile = p.NoParse()
         If s.SoundFile IsNot Nothing Then
@@ -1073,7 +1078,7 @@ Public Class Speech
         If SoundFile Is Nothing Then
             Return String.Join(
                               ",", "Speak",
-                              Quoted(Name),
+                              Quoted(If(Name, Unnamed)),
                               Quoted(Text),
                               "",
                               Skip,
@@ -1082,7 +1087,7 @@ Public Class Speech
             Dim soundFilePath = Path.GetFileName(SoundFile)
             Return String.Join(
                               ",", "Speak",
-                              Quoted(Name),
+                              Quoted(If(Name, Unnamed)),
                               Quoted(Text),
                               Braced(String.Join(",",
                                                  Quoted(soundFilePath),

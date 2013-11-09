@@ -239,8 +239,8 @@ Public Class PonyEditor
 
             Dim unnamedCounter = 1
             For Each speech In PreviewPony.Base.Speeches
-                If speech.Name = "Unnamed" Then
-                    speech.Name = "Unnamed #" & unnamedCounter
+                If speech.Name = speech.Unnamed Then
+                    speech.Name = speech.Unnamed & " #" & unnamedCounter
                     unnamedCounter += 1
                 End If
 
