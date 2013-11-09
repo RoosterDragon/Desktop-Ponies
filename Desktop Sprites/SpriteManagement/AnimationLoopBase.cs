@@ -883,7 +883,13 @@
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Interlocked.Exchange(ref runner, new Thread(Run) { Name = "AnimationLoopBase.Run" });
             Viewer.Open();
-            runner.Start();
+            object startSync = new object();
+            lock (startSync)
+            {
+                runner.Start(startSync);
+                // Wait for thread to spin up and start.
+                Monitor.Wait(startSync);
+            }
         }
 
         /// <summary>
@@ -1085,7 +1091,8 @@
         /// <summary>
         /// Runs frame cycles continuously and tracks animation timings.
         /// </summary>
-        private void Run()
+        /// <param name="startSync">Object on which to pulse to signal animation has started.</param>
+        private void Run(object startSync)
         {
             // Keeps a count of frames since performance information was last displayed.
             int performanceDelayCount = 0;
@@ -1094,7 +1101,12 @@
             while (!Disposed && running.WaitOne() && !Stopped)
             {
                 // Run an update and draw cycle for one frame.
-                Tick();
+                if (!Started)
+                    StartInternal(startSync);
+                else
+                    Update();
+                if (!Disposed)
+                    Draw();
 
 #if DEBUG
                 // When debugging, assume long delays are due to hitting breakpoints.
@@ -1133,22 +1145,10 @@
         }
 
         /// <summary>
-        /// Runs an update and draw cycle.
-        /// </summary>
-        private void Tick()
-        {
-            if (!Started)
-                StartInternal();
-            else
-                Update();
-            if (!Disposed)
-                Draw();
-        }
-
-        /// <summary>
         /// Starts timers and calls Start on all sprites in the collection.
         /// </summary>
-        private void StartInternal()
+        /// <param name="startSync">Object on which to pulse to signal animation has started.</param>
+        private void StartInternal(object startSync)
         {
             // Start timers to track total elapsed time and interval time.
             elapsedWatch.Start();
@@ -1162,6 +1162,9 @@
             // Force a collection now, to clear the heap of any memory from loading. Assuming the loop makes little to no allocations, this
             // should ensure cheap and quick generation zero collections, and will delay the first collection as long as possible.
             General.FullCollect();
+            // Release thread waiting for startup to complete.
+            lock (startSync)
+                Monitor.Pulse(startSync);
         }
 
         /// <summary>
