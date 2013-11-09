@@ -1191,7 +1191,6 @@ Public Class Pony
             Return _currentBehavior
         End Get
         Friend Set(value As Behavior)
-            Diagnostics.Debug.Assert(value IsNot Nothing)
             If Not ValidateBehavior(value) Then Return
             _currentBehavior = value
             If Not (ManualControlPlayerOne OrElse ManualControlPlayerTwo) Then
@@ -1201,7 +1200,8 @@ Public Class Pony
     End Property
 
     Private Function ValidateBehavior(behavior As Behavior) As Boolean
-        Return Base.ValidatedOnLoad OrElse (File.Exists(behavior.LeftImage.Path) AndAlso File.Exists(behavior.RightImage.Path))
+        Return behavior Is Nothing OrElse Base.ValidatedOnLoad OrElse
+            (File.Exists(behavior.LeftImage.Path) AndAlso File.Exists(behavior.RightImage.Path))
     End Function
 
     Private currentCustomImageCenter As Size
@@ -1357,11 +1357,10 @@ Public Class Pony
     ''' </summary>
     ''' <param name="startTime">The current time of the animator, which will be the temporal zero point for this sprite.</param>
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentBehavior = Behaviors.First(AddressOf ValidateBehavior)
+        CurrentBehavior = Behaviors.FirstOrDefault(AddressOf ValidateBehavior)
         internalTime = startTime
         lastUpdateTime = startTime
         Teleport()
-        'UpdateOnce()
     End Sub
 
     ''' <summary>
@@ -1411,13 +1410,16 @@ Public Class Pony
     ''' Advances the internal time state of the pony by the step rate with each call.
     ''' </summary>
     Private Sub UpdateOnce()
+        ' If there are no behaviors that can be undertaken, there's nothing that needs updating anyway.
+        If Not Behaviors.Any(AddressOf ValidateBehavior) Then
+            CurrentBehavior = Nothing
+            Return
+        End If
+
         internalTime += TimeSpan.FromMilliseconds(StepRate)
 
         ' Expire any speech.
         If internalTime - lastSpeakTime > TimeSpan.FromSeconds(2) Then lastSpeakLine = Nothing
-
-        ' If there are no behaviors that can be undertaken, there's nothing that needs updating anyway.
-        If Behaviors.Count = 0 Then Exit Sub
 
         ' Handle switching pony between active and asleep.
         Dim wantToSleep = Sleep OrElse BeingDragged
@@ -1658,14 +1660,16 @@ Public Class Pony
     Private Sub SetAllowableDirections()
         ' Determine move modes that can be used.
         possibleMoveModes.Clear()
-        If (CurrentBehavior.AllowedMovement And AllowedMoves.HorizontalOnly) = AllowedMoves.HorizontalOnly Then
-            possibleMoveModes.Add(AllowedMoves.HorizontalOnly)
-        End If
-        If (CurrentBehavior.AllowedMovement And AllowedMoves.VerticalOnly) = AllowedMoves.VerticalOnly Then
-            possibleMoveModes.Add(AllowedMoves.VerticalOnly)
-        End If
-        If (CurrentBehavior.AllowedMovement And AllowedMoves.DiagonalOnly) = AllowedMoves.DiagonalOnly Then
-            possibleMoveModes.Add(AllowedMoves.DiagonalOnly)
+        If CurrentBehavior IsNot Nothing Then
+            If (CurrentBehavior.AllowedMovement And AllowedMoves.HorizontalOnly) = AllowedMoves.HorizontalOnly Then
+                possibleMoveModes.Add(AllowedMoves.HorizontalOnly)
+            End If
+            If (CurrentBehavior.AllowedMovement And AllowedMoves.VerticalOnly) = AllowedMoves.VerticalOnly Then
+                possibleMoveModes.Add(AllowedMoves.VerticalOnly)
+            End If
+            If (CurrentBehavior.AllowedMovement And AllowedMoves.DiagonalOnly) = AllowedMoves.DiagonalOnly Then
+                possibleMoveModes.Add(AllowedMoves.DiagonalOnly)
+            End If
         End If
 
         ' Select a mode at random, or else deny movement.
@@ -2713,13 +2717,14 @@ Public Class Pony
     Private ReadOnly Property currentImage As CenterableSpriteImage
         Get
             Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
+            If behavior Is Nothing Then Return Nothing
             Return If(facingRight, behavior.RightImage, behavior.LeftImage)
         End Get
     End Property
 
-    Friend ReadOnly Property CurrentImageSize As Vector2
+    Private ReadOnly Property CurrentImageSize As Vector2
         Get
-            Return currentImage.Size
+            Return If(currentImage Is Nothing, Vector2.Zero, currentImage.Size)
         End Get
     End Property
 
@@ -2880,18 +2885,16 @@ Public Class Pony
     Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
         Get
             Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
+            If behavior Is Nothing Then Return Nothing
             Dim path = If(facingRight, behavior.RightImage.Path, behavior.LeftImage.Path)
-            Diagnostics.Debug.Assert(Not String.IsNullOrEmpty(path))
             Return path
         End Get
     End Property
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
-            Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
-            Dim width = CInt(CurrentImageSize.X * Options.ScaleFactor)
-            Dim height = CInt(CurrentImageSize.Y * Options.ScaleFactor)
-            Return New Rectangle(TopLeftLocation, New Size(width, height))
+
+            Return New Rectangle(TopLeftLocation, Vector2.Truncate(CurrentImageSize * Options.ScaleFactor))
         End Get
     End Property
 

@@ -20,10 +20,14 @@ Public Class EditorPonyAnimator
         If base Is Nothing OrElse OperatingSystemInfo.IsMacOSX Then
             editorMenu = Nothing
         Else
-            Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
             Dim behaviorItems = base.Behaviors.Select(Function(b) New SimpleContextMenuItem(b.Name, Sub() editor.RunBehavior(b)))
-            menuItems.AddLast(New SimpleContextMenuItem("Run Behavior", behaviorItems))
-            editorMenu = Viewer.CreateContextMenu(menuItems)
+            If behaviorItems.Any() Then
+                Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
+                menuItems.AddLast(New SimpleContextMenuItem("Run Behavior", behaviorItems))
+                editorMenu = Viewer.CreateContextMenu(menuItems)
+            Else
+                editorMenu = Nothing
+            End If
         End If
     End Sub
 

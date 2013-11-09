@@ -237,6 +237,7 @@
             FrameControls.Enabled = true;
             PaletteControls.Enabled = true;
             ColorControls.Enabled = true;
+            SaveCommand.Enabled = true;
 
             UpdateSelectedFrame(0);
             UpdateColorHex();

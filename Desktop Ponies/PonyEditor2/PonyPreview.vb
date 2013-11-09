@@ -98,6 +98,10 @@ Public Class PonyPreview
 
     Public Sub RunBehavior(behavior As Behavior)
         previewPony.SelectBehavior(behavior)
+        If Not Object.ReferenceEquals(previewPony.CurrentBehavior, behavior) Then
+            MessageBox.Show(Me, "Couldn't run this behavior. Maybe images are missing or it is not set up correctly.",
+                            "Run Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End If
     End Sub
 
     Public Sub HidePreview()
@@ -117,7 +121,8 @@ Public Class PonyPreview
             Sub()
                 SyncLock previewPonyGuard
                     If previewPony Is Nothing OrElse Not previewPonyReady Then Return
-                    BehaviorNameValueLabel.Text = previewPony.CurrentBehavior.Name
+                    BehaviorNameValueLabel.Text =
+                        If(previewPony.CurrentBehavior Is Nothing, "", previewPony.CurrentBehavior.Name.ToString())
                     TimeLeftValueLabel.Text =
                         (previewPony.BehaviorDesiredDuration - previewPony.ImageTimeIndex).
                         TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)

@@ -159,6 +159,7 @@
             // SaveCommand
             // 
             this.SaveCommand.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveCommand.Enabled = false;
             this.SaveCommand.Location = new System.Drawing.Point(380, 37);
             this.SaveCommand.Name = "SaveCommand";
             this.SaveCommand.Size = new System.Drawing.Size(98, 23);

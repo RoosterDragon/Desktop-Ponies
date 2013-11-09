@@ -394,6 +394,9 @@
             /// <param name="height">The height to draw the image at, scaling as required.</param>
             public void DrawFrame(int width, int height)
             {
+                if (CurrentImage == null)
+                    return;
+
                 // Prevent redrawing of the same image.
                 if (initialDrawCountHack < 1)
                 {
@@ -1603,7 +1606,9 @@
                     GraphicsWindow window = loopWindow;
 
                     ISprite sprite = window.Sprite;
-                    GtkFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
+                    GtkFrame frame = null;
+                    if (sprite.ImagePath != null)
+                        frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
 
                     // Gtk# operations need to be invoked on the main thread. Although they will usually succeed, eventually an invalid
                     // unmanaged memory access is likely to result.
@@ -1612,8 +1617,15 @@
                     ApplicationInvoke(() =>
                     {
                         // Flip the image, and set it on the window, as later operations rely on it.
-                        frame.Flip(sprite.FlipImage);
-                        window.CurrentImage = frame.Image;
+                        if (frame != null)
+                        {
+                            frame.Flip(sprite.FlipImage);
+                            window.CurrentImage = frame.Image;
+                        }
+                        else
+                        {
+                            window.CurrentImage = null;
+                        }
 
                         // The window takes on the location and size of the sprite to draw.
                         window.GdkWindow.MoveResize(sprite.Region.X, sprite.Region.Y, sprite.Region.Width, sprite.Region.Height);

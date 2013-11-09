@@ -1266,9 +1266,12 @@
                 foreach (ISprite sprite in sprites)
                 {
                     // Draw the sprite image.
-                    BitmapFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
-                    frame.Flip(sprite.FlipImage);
-                    surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
+                    if (sprite.ImagePath != null)
+                    {
+                        BitmapFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
+                        frame.Flip(sprite.FlipImage);
+                        surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
+                    }
 
                     // Draw a speech bubble for a speaking sprite.
                     ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;

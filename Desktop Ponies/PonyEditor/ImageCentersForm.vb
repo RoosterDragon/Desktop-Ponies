@@ -44,6 +44,7 @@ Public Class ImageCentersForm
     End Sub
 
     Private Sub LoadBehavior()
+        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
 
         animationIndex = 0
 
@@ -127,12 +128,14 @@ Public Class ImageCentersForm
     End Sub
 
     Private Sub LeftImageBox_Click(sender As Object, e As MouseEventArgs) Handles LeftImageBox.MouseClick
+        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
         leftCenter = e.Location
         _editor.PreviewPony.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
         RedrawMarker()
     End Sub
 
     Private Sub RightImageBox_Click(sender As Object, e As MouseEventArgs) Handles RightImageBox.MouseClick
+        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
         rightCenter = e.Location
         _editor.PreviewPony.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
         RedrawMarker()
@@ -140,13 +143,13 @@ Public Class ImageCentersForm
 
     Private Sub NextButton_Click(sender As Object, e As EventArgs) Handles NextButton.Click
         behaviorIndex += 1
-        If behaviorIndex = _editor.PreviewPony.Behaviors.Count Then behaviorIndex = 0
+        If behaviorIndex >= _editor.PreviewPony.Behaviors.Count Then behaviorIndex = 0
         LoadBehavior()
     End Sub
 
     Private Sub PreviousButton_Click(sender As Object, e As EventArgs) Handles PreviousButton.Click
         behaviorIndex -= 1
-        If behaviorIndex = -1 Then behaviorIndex = _editor.PreviewPony.Behaviors.Count - 1
+        If behaviorIndex <= -1 Then behaviorIndex = _editor.PreviewPony.Behaviors.Count - 1
         LoadBehavior()
     End Sub
 
@@ -163,12 +166,14 @@ Public Class ImageCentersForm
     End Sub
 
     Private Sub RightImageResetButton_Click(sender As Object, e As EventArgs) Handles RightImageResetButton.Click
+        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
         rightCenter = rightPreviousCenter
         _editor.PreviewPony.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
         RedrawMarker()
     End Sub
 
     Private Sub LeftImageResetButton_Click(sender As Object, e As EventArgs) Handles LeftImageResetButton.Click
+        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
         leftCenter = leftPreviousCenter
         _editor.PreviewPony.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
         RedrawMarker()
