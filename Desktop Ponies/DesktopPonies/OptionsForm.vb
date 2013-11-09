@@ -37,8 +37,6 @@ Public Class OptionsForm
             Sound.Enabled = True
         End If
 
-        EvilGlobals.Main.ResetToDefaultFilterCategories()
-
         ' Set initial volume value, event handler will update values as needed.
         Volume.Value = 650
 
@@ -150,12 +148,7 @@ Public Class OptionsForm
             End If
 
             Options.LoadProfile(profile, True)
-
             RefreshOptions()
-            If EvilGlobals.Main.FilterOptionsBox.Items.Count = 0 Then
-                EvilGlobals.Main.ResetToDefaultFilterCategories()
-            End If
-
             SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
             My.Application.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")

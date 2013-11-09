@@ -233,10 +233,13 @@ Public Class DesktopPonyAnimator
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
 
-        menuItems.AddLast(New SimpleContextMenuItem("Show Options", Sub() EvilGlobals.Main.SmartInvoke(Sub()
-                                                                                                           Dim form = New OptionsForm()
-                                                                                                           form.Show()
-                                                                                                       End Sub)))
+        menuItems.AddLast(New SimpleContextMenuItem("Show Options",
+                                                    Sub() EvilGlobals.Main.SmartInvoke(
+                                                        Sub()
+                                                            Dim form = New OptionsForm()
+                                                            form.Show()
+                                                            AddHandler form.FormClosed, Sub() EvilGlobals.Main.ReloadFilterCategories()
+                                                        End Sub)))
         menuItems.AddLast(New SimpleContextMenuItem("Return To Menu", Sub() Finish(ExitRequest.ReturnToMenu)))
         menuItems.AddLast(New SimpleContextMenuItem("Exit", Sub() Finish(ExitRequest.ExitApplication)))
         If controlForm Is Nothing Then
@@ -322,26 +325,30 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Function PonySelectionList() As List(Of ISimpleContextMenuItem)
+        Dim tagList = New List(Of ISimpleContextMenuItem)()
+        tagList.Add(New SimpleContextMenuItem(PonyBase.RandomDirectory, Sub() AddPonySelection(PonyBase.RandomDirectory)))
 
-        Dim tagList = New List(Of ISimpleContextMenuItem)
-
-        For Each tag As CaseInsensitiveString In EvilGlobals.Main.FilterOptionsBox.Items
+        For Each tag In PonyBase.StandardTags.Concat(Options.CustomTags)
             Dim ponyList = New List(Of ISimpleContextMenuItem)
-            Dim bases As IEnumerable(Of PonyBase) = PonyCollection.Bases
-            If PonyCollection.RandomBase IsNot Nothing Then bases = {PonyCollection.RandomBase}.Concat(PonyCollection.Bases)
-            For Each loopPonyBase In bases
-                Dim ponyBase = loopPonyBase
-                For Each ponyTag In ponyBase.Tags
-                    If tag = ponyTag OrElse
-                        (ponyBase.Tags.Count = 0 AndAlso tag = "Not Tagged") Then
-                        ponyList.Add(New SimpleContextMenuItem(ponyBase.Directory, Sub() AddPonySelection(ponyBase.Directory)))
-                    End If
-                Next
+            For Each base In PonyCollection.Bases
+                If base.Tags.Contains(tag) Then
+                    ponyList.Add(New SimpleContextMenuItem(base.Directory, Sub() AddPonySelection(base.Directory)))
+                End If
             Next
             If ponyList.Count > 0 Then
                 tagList.Add(New SimpleContextMenuItem(tag, ponyList))
             End If
         Next
+
+        Dim untaggedList = New List(Of ISimpleContextMenuItem)
+        For Each base In PonyCollection.Bases
+            If base.Tags.Count = 0 Then
+                untaggedList.Add(New SimpleContextMenuItem(base.Directory, Sub() AddPonySelection(base.Directory)))
+            End If
+        Next
+        If untaggedList.Count > 0 Then
+            tagList.Add(New SimpleContextMenuItem("[Not Tagged]", untaggedList))
+        End If
 
         Return tagList
     End Function

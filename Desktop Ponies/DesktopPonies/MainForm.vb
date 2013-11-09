@@ -26,6 +26,7 @@ Public Class MainForm
 
     Private preventLoadProfile As Boolean
 
+    Private notTaggedFilterIndex As Integer
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl)
@@ -35,7 +36,6 @@ Public Class MainForm
     Public Sub New()
         loadWatch.Start()
         InitializeComponent()
-        ResetToDefaultFilterCategories()
         selectionControlsFilteredVisible =
             PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
         Icon = My.Resources.Twilight
@@ -391,6 +391,7 @@ Public Class MainForm
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
         Options.LoadProfile(ProfileComboBox.Text, True)
+        ReloadFilterCategories()
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
@@ -402,6 +403,7 @@ Public Class MainForm
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
         Using form = New OptionsForm()
             form.ShowDialog(Me)
+            ReloadFilterCategories()
         End Using
     End Sub
 
@@ -512,6 +514,7 @@ Public Class MainForm
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not preventLoadProfile Then
             Options.LoadProfile(ProfileComboBox.Text, True)
+            ReloadFilterCategories()
         End If
     End Sub
 
@@ -536,38 +539,35 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub RefilterSelection(Optional tags As IEnumerable(Of CaseInsensitiveString) = Nothing)
-        If tags Is Nothing Then tags = FilterOptionsBox.CheckedItems.Cast(Of CaseInsensitiveString)()
+    Private Sub RefilterSelection(Optional tags As HashSet(Of CaseInsensitiveString) = Nothing,
+                                  Optional notTaggedChecked As Boolean? = Nothing)
+        If tags Is Nothing Then tags =
+            New HashSet(Of CaseInsensitiveString)(FilterOptionsBox.CheckedItems.OfType(Of CaseInsensitiveString)())
+        Dim notTaggedFlag As Boolean
+        If notTaggedChecked Is Nothing Then
+            notTaggedFlag = FilterOptionsBox.GetItemChecked(notTaggedFilterIndex)
+        Else
+            notTaggedFlag = notTaggedChecked.Value
+        End If
 
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
-            'reshow all ponies in show all mode.
+            ' Show all ponies.
             If FilterAllRadio.Checked Then
                 selectionControlFilter(selectionControl) = True
             End If
 
-            'don't show ponies that don't have at least one of the desired tags in Show Any.. mode
+            ' Show ponies with at least one matching tag.
             If FilterAnyRadio.Checked Then
-                Dim visible = False
-                For Each tag_to_show In tags
-                    If selectionControl.PonyBase.Tags.Contains(tag_to_show) OrElse
-                        (tag_to_show <> "Not Tagged" AndAlso selectionControl.PonyBase.Tags.Count = 0) Then
-                        visible = True
-                        Exit For
-                    End If
-                Next
+                Dim visible = selectionControl.PonyBase.Tags.Any(Function(tag) tags.Contains(tag)) OrElse
+                (selectionControl.PonyBase.Tags.Count = 0 AndAlso notTaggedFlag)
                 selectionControlFilter(selectionControl) = visible
             End If
 
-            'don't show ponies that don't have all of the desired tags in Show Exactly.. mode
+            ' Show ponies which match all tags.
             If FilterExactlyRadio.Checked Then
-                Dim visible = True
-                For Each tag_to_show In tags
-                    If Not (selectionControl.PonyBase.Tags.Contains(tag_to_show) OrElse
-                        (tag_to_show <> "Not Tagged" AndAlso selectionControl.PonyBase.Tags.Count = 0)) Then
-                        visible = False
-                        Exit For
-                    End If
-                Next
+                Dim visible = If(notTaggedFlag,
+                                 selectionControl.PonyBase.Tags.Count = 0 AndAlso tags.Count = 0,
+                                 selectionControl.PonyBase.Tags.IsSupersetOf(tags))
                 selectionControlFilter(selectionControl) = visible
             End If
         Next
@@ -696,16 +696,21 @@ Public Class MainForm
     End Sub
 
     Private Sub FilterOptionsBox_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles FilterOptionsBox.ItemCheck
-        Dim tags = FilterOptionsBox.CheckedItems.Cast(Of CaseInsensitiveString).ToList()
+        Dim tags = New HashSet(Of CaseInsensitiveString)(FilterOptionsBox.CheckedItems.OfType(Of CaseInsensitiveString)())
+        Dim notTaggedChecked As Boolean?
         If e.CurrentValue <> e.NewValue Then
-            Dim changedTag = DirectCast(FilterOptionsBox.Items(e.Index), CaseInsensitiveString)
-            If e.NewValue = CheckState.Checked Then
-                tags.Add(changedTag)
+            If e.Index <> notTaggedFilterIndex Then
+                Dim changedTag = DirectCast(FilterOptionsBox.Items(e.Index), CaseInsensitiveString)
+                If e.NewValue = CheckState.Checked Then
+                    tags.Add(changedTag)
+                Else
+                    tags.Remove(changedTag)
+                End If
             Else
-                tags.Remove(changedTag)
+                notTaggedChecked = e.NewValue = CheckState.Checked
             End If
         End If
-        RefilterSelection(tags)
+        RefilterSelection(tags, notTaggedChecked)
     End Sub
 #End Region
 
@@ -1005,25 +1010,13 @@ Public Class MainForm
         PonySelectionPanel.ResumeLayout()
     End Sub
 
-    Friend Sub ResetToDefaultFilterCategories()
+    Friend Sub ReloadFilterCategories()
         FilterOptionsBox.SuspendLayout()
         FilterOptionsBox.Items.Clear()
-        FilterOptionsBox.Items.AddRange(
-            New CaseInsensitiveString() {"Main Ponies",
-             "Supporting Ponies",
-             "Alternate Art",
-             "Fillies",
-             "Colts",
-             "Pets",
-             "Stallions",
-             "Mares",
-             "Alicorns",
-             "Unicorns",
-             "Pegasi",
-             "Earth Ponies",
-             "Non-Ponies",
-             "Not Tagged"})
+        FilterOptionsBox.Items.AddRange(PonyBase.StandardTags.Concat(Options.CustomTags).ToArray())
+        notTaggedFilterIndex = FilterOptionsBox.Items.Add("[Not Tagged]")
         FilterOptionsBox.ResumeLayout()
+        RefilterSelection()
     End Sub
 
     Private Sub Main_LocationChanged(sender As Object, e As EventArgs) Handles MyBase.LocationChanged

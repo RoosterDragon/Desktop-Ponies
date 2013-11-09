@@ -35,7 +35,6 @@ Partial Class TagsDialog
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PonyFilterList.CheckOnClick = True
         Me.PonyFilterList.FormattingEnabled = True
-        Me.PonyFilterList.Items.AddRange(New Object() {"Main Ponies", "Supporting Ponies", "Alternate Art", "Fillies", "Pets", "Stallions", "Mares", "Alicorns", "Unicorns", "Pegasi", "Earth Ponies", "Non-Ponies", "Not Tagged"})
         Me.PonyFilterList.Location = New System.Drawing.Point(12, 51)
         Me.PonyFilterList.Name = "PonyFilterList"
         Me.PonyFilterList.Size = New System.Drawing.Size(385, 199)

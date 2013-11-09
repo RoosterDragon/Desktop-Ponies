@@ -11,7 +11,8 @@ Public Class PonyDetailsDialog
 
         NameTextBox.Text = base.Directory
         DisplayNameTextBox.Text = base.DisplayName
-        TagsList.Items.AddRange(EvilGlobals.Main.FilterOptionsBox.Items)
+        TagsList.Items.AddRange(PonyBase.StandardTags.ToArray())
+        TagsList.Items.AddRange(Options.CustomTags.ToArray())
         For i = 0 To TagsList.Items.Count - 1
             If base.Tags.Contains(DirectCast(TagsList.Items(i), CaseInsensitiveString)) Then
                 TagsList.SetItemChecked(i, True)
@@ -56,7 +57,7 @@ Public Class PonyDetailsDialog
             Return
         End If
         base.DisplayName = DisplayNameTextBox.Text
-        base.Tags.Clear()
+        base.Tags.RemoveWhere(Function(tag) Options.CustomTags.Contains(tag) OrElse PonyBase.StandardTags.Contains(tag))
         base.Tags.UnionWith(TagsList.CheckedItems.Cast(Of CaseInsensitiveString)())
 
         DialogResult = DialogResult.OK

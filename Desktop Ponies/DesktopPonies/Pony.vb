@@ -71,6 +71,21 @@ Public Class PonyBase
     Public Const RootDirectory = "Ponies"
     Public Const ConfigFilename = "pony.ini"
     Public Const RandomDirectory = "Random Pony"
+    Public Shared ReadOnly StandardTags As ImmutableArray(Of CaseInsensitiveString) =
+        New CaseInsensitiveString() {
+            "Main Ponies",
+            "Supporting Ponies",
+            "Alternate Art",
+            "Fillies",
+            "Colts",
+            "Pets",
+            "Stallions",
+            "Mares",
+            "Alicorns",
+            "Unicorns",
+            "Pegasi",
+            "Earth Ponies",
+            "Non-Ponies"}.ToImmutableArray()
 
     Private ReadOnly _collection As PonyCollection
     Public ReadOnly Property Collection As PonyCollection

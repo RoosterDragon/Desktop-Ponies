@@ -19,7 +19,7 @@
                             "Invalid Tags", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
         Options.CustomTags.Clear()
-        Options.CustomTags.UnionWith(lines.Select(Function(tag) New CaseInsensitiveString(tag)))
+        Options.CustomTags.AddRange(lines.Select(Function(tag) New CaseInsensitiveString(tag)))
         Me.Close()
     End Sub
 End Class

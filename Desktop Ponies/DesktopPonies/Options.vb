@@ -48,7 +48,7 @@ Public NotInheritable Class Options
 
     Public Shared ReadOnly Screens As New List(Of Screen)()
     Public Shared ReadOnly PonyCounts As New Dictionary(Of String, Integer)()
-    Public Shared ReadOnly CustomTags As New HashSet(Of CaseInsensitiveString)()
+    Public Shared ReadOnly CustomTags As New List(Of CaseInsensitiveString)()
 
     Public Shared EnablePonyLogs As Boolean
     Public Shared ShowPerformanceGraph As Boolean
@@ -155,7 +155,6 @@ Public NotInheritable Class Options
         End If
 
         LoadPonyCounts()
-        LoadCustomTags()
 
         If setAsCurrent Then
             Try
@@ -222,13 +221,6 @@ Public NotInheritable Class Options
                 ponyPanel.Count = 0
             End If
         Next
-    End Sub
-
-    Public Shared Sub LoadCustomTags()
-        If EvilGlobals.PoniesHaveLaunched Then Exit Sub
-
-        EvilGlobals.Main.ResetToDefaultFilterCategories()
-        EvilGlobals.Main.FilterOptionsBox.Items.AddRange(CustomTags.ToArray())
     End Sub
 
     Public Shared Sub SaveProfile(profile As String)
