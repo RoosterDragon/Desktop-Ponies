@@ -113,10 +113,12 @@ Public Class PonyPreview
     End Sub
 
     Public Sub AnimatorStart()
+        If Disposing OrElse IsDisposed Then Return
         BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
     End Sub
 
     Public Sub AnimatorUpdate()
+        If Disposing OrElse IsDisposed Then Return
         BeginInvoke(New MethodInvoker(
             Sub()
                 SyncLock previewPonyGuard
