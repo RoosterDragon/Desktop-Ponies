@@ -12,12 +12,14 @@ Public Class PonyPreview
     Private ReadOnly previewPonyGuard As New Object()
     Private ReadOnly parents As New List(Of Control)()
     Private determineLocationOnPaint As Boolean
+    Private disposedFlag As Integer
 
     Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection)
         Me.editorForm = Argument.EnsureNotNull(editorForm, "editorForm")
         Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
         InitializeComponent()
         AddHandler Disposed, Sub()
+                                 Threading.Interlocked.Exchange(disposedFlag, 1)
                                  If editorAnimator IsNot Nothing Then editorAnimator.Finish()
                                  EvilGlobals.CurrentAnimator = Nothing
                              End Sub
@@ -124,12 +126,12 @@ Public Class PonyPreview
     End Sub
 
     Public Sub AnimatorStart()
-        If Disposing OrElse IsDisposed Then Return
+        If disposedFlag = 1 Then Return
         BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
     End Sub
 
     Public Sub AnimatorUpdate()
-        If Disposing OrElse IsDisposed Then Return
+        If disposedFlag = 1 Then Return
         BeginInvoke(New MethodInvoker(
             Sub()
                 SyncLock previewPonyGuard
