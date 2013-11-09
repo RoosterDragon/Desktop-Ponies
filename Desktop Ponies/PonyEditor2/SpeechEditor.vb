@@ -20,44 +20,21 @@ Friend Class SpeechEditor
         End Get
     End Property
 
-    Public Sub New()
-        InitializeComponent()
-        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
-        AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
-        AddHandler LineTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Text = LineTextBox.Text)
-        AddHandler SoundFileSelector.FilePathSelected,
-            Sub() UpdateProperty(Sub()
-                                     Dim filePath = If(SoundFileSelector.FilePath = Nothing,
-                                                       Nothing, Path.Combine(PonyBasePath, SoundFileSelector.FilePath))
-                                     Edited.SoundFile = filePath
-                                 End Sub)
-        AddHandler RandomCheckBox.CheckedChanged, Sub() UpdateProperty(Sub() Edited.Skip = Not RandomCheckBox.Checked)
-        AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Group = CInt(GroupNumber.Value))
+    Protected Overrides Sub CreateBindings()
+        Bind(Function() Edited.Name, NameTextBox)
+        Bind(Function() Edited.Text, LineTextBox)
+        Bind(Function() Edited.SoundFile, SoundFileSelector)
+        Bind(Function() Edited.Skip, RandomCheckBox, True)
+        Bind(Function() Edited.Group, GroupNumber, Function(int) CDec(int), Function(dec) CInt(dec))
     End Sub
 
-    Public Overrides Sub NewItem(name As String)
-        ' TODO.
+    Protected Overrides Sub ChangeItem()
+        SoundFileSelector.InitializeFromDirectory(PonyBasePath, "*.mp3", "*.ogg")
     End Sub
 
-    Public Overrides Sub LoadItem()
-        Dim sounds =
-            Directory.GetFiles(PonyBasePath, "*.mp3").Concat(Directory.GetFiles(PonyBasePath, "*.ogg")).
-            Select(Function(filePath) Path.GetFileName(filePath)).ToArray()
-        ReplaceItemsInComboBox(SoundFileSelector.FilePathComboBox, sounds, True)
-        If Edited.SoundFile IsNot Nothing Then
-            SelectItemElseAddItem(SoundFileSelector.FilePathComboBox, Path.GetFileName(Edited.SoundFile))
-        End If
-    End Sub
-
-    Protected Overrides Sub SourceTextChanged()
+    Protected Overrides Sub ReparseSource(ByRef parseIssues As ImmutableArray(Of ParseIssue))
         Dim s As Speech = Nothing
-        Speech.TryLoad(Source.Text, PonyBasePath, s, ParseIssues)
-        OnIssuesChanged(EventArgs.Empty)
+        Speech.TryLoad(Source.Text, PonyBasePath, s, parseIssues)
         Edited = s
-
-        NameTextBox.Text = Edited.Name
-        LineTextBox.Text = Edited.Text
-        RandomCheckBox.Checked = Not Edited.Skip
-        GroupNumber.Value = Edited.Group
     End Sub
 End Class

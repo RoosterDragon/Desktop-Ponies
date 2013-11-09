@@ -1,6 +1,4 @@
-﻿Imports System.IO
-
-Friend Class BehaviorEditor
+﻿Friend Class BehaviorEditor
     Private Shared allowedMovesValues As Object() =
         [Enum].GetValues(GetType(AllowedMoves)).Cast(Of Object)().ToArray()
 
@@ -25,96 +23,47 @@ Friend Class BehaviorEditor
 
     Private imageListCrossRefreshNeeded As Boolean
 
-    Public Sub New()
-        InitializeComponent()
+    Protected Overrides Sub CreateBindings()
         MovementComboBox.Items.AddRange(allowedMovesValues)
-        AddHandler NameTextBox.KeyPress, AddressOf IgnoreQuoteCharacter
-        AddHandler NameTextBox.TextChanged, Sub() UpdateProperty(Sub() Edited.Name = NameTextBox.Text)
-        AddHandler GroupNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.Group = CInt(GroupNumber.Value))
-        AddHandler ChanceNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.Chance = ChanceNumber.Value / 100)
-        AddHandler SpeedNumber.TextChanged, Sub() UpdateProperty(Sub() Edited.Speed = SpeedNumber.Value)
-        AddHandler MovementComboBox.SelectedIndexChanged,
-            Sub() UpdateProperty(Sub() Edited.AllowedMovement = DirectCast(MovementComboBox.SelectedItem, AllowedMoves))
-        AddHandler MinDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MinDuration = MinDurationNumber.Value)
-        AddHandler MaxDurationNumber.ValueChanged, Sub() UpdateProperty(Sub() Edited.MaxDuration = MaxDurationNumber.Value)
-        AddHandler StartSpeechComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
-        AddHandler StartSpeechComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.StartLineName = StartSpeechComboBox.Text)
-        AddHandler StartSpeechComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.StartLineName = StartSpeechComboBox.Text)
-        AddHandler EndSpeechComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
-        AddHandler EndSpeechComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.EndLineName = EndSpeechComboBox.Text)
-        AddHandler EndSpeechComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.EndLineName = EndSpeechComboBox.Text)
-        AddHandler LinkedBehaviorComboBox.KeyPress, AddressOf IgnoreQuoteCharacter
-        AddHandler LinkedBehaviorComboBox.TextChanged, Sub() UpdateProperty(Sub() Edited.LinkedBehaviorName = LinkedBehaviorComboBox.Text)
-        AddHandler LinkedBehaviorComboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() Edited.LinkedBehaviorName = LinkedBehaviorComboBox.Text)
-        AddHandler LeftImageFileSelector.FilePathSelected,
-            Sub() UpdateProperty(Sub()
-                                     Dim leftPath = If(LeftImageFileSelector.FilePath = Nothing,
-                                                       Nothing, Path.Combine(PonyBasePath, LeftImageFileSelector.FilePath))
-                                     Edited.LeftImage.Path = leftPath
-                                 End Sub)
-        AddHandler LeftImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(LeftImageFileSelector, LeftImageViewer)
-        AddHandler RightImageFileSelector.FilePathSelected,
-            Sub() UpdateProperty(Sub()
-                                     Dim rightPath = If(RightImageFileSelector.FilePath = Nothing,
-                                                        Nothing, Path.Combine(PonyBasePath, RightImageFileSelector.FilePath))
-                                     Edited.RightImage.Path = rightPath
-                                 End Sub)
-        AddHandler RightImageFileSelector.FilePathSelected, Sub() LoadNewImageForViewer(RightImageFileSelector, RightImageViewer)
+        Bind(Function() Edited.Name, NameTextBox)
+        Bind(Function() Edited.Group, GroupNumber, Function(int) CDec(int), Function(dec) CInt(dec))
+        Bind(Function() Edited.Chance, ChanceNumber, Function(dbl) CDec(dbl) * 100, Function(dec) dec / 100)
+        Bind(Function() Edited.Speed, SpeedNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.AllowedMovement, MovementComboBox)
+        Bind(Function() Edited.MinDuration, MinDurationNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.MaxDuration, MaxDurationNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.StartLineName, StartSpeechComboBox)
+        Bind(Function() Edited.EndLineName, EndSpeechComboBox)
+        Bind(Function() Edited.LinkedBehaviorName, LinkedBehaviorComboBox)
+        Bind(Function() Edited.LeftImage.Path, LeftImageFileSelector, LeftImageViewer)
+        Bind(Function() Edited.RightImage.Path, RightImageFileSelector, RightImageViewer)
     End Sub
 
-    Public Overrides Sub NewItem(name As String)
-        ' TODO.
-    End Sub
-
-    Public Overrides Sub LoadItem()
+    Protected Overrides Sub ChangeItem()
+        RemoveHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
+        RemoveHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
         LeftImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
         RightImageFileSelector.InitializeFromDirectory(PonyBasePath, "*.gif", "*.png")
         AddHandler LeftImageFileSelector.ListRefreshed, AddressOf LeftImageFileSelector_ListRefreshed
         AddHandler RightImageFileSelector.ListRefreshed, AddressOf RightImageFileSelector_ListRefreshed
 
         Dim speeches = Base.Speeches.Select(Function(s) s.Name).ToArray()
-        ReplaceItemsInComboBox(StartSpeechComboBox, speeches, True)
-        ReplaceItemsInComboBox(EndSpeechComboBox, speeches, True)
+        ReplaceItemsInComboBox(StartSpeechComboBox, speeches)
+        ReplaceItemsInComboBox(EndSpeechComboBox, speeches)
 
         Dim behaviors = Base.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, Edited)).Select(Function(s) s.Name).ToArray()
-        ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors, True)
+        ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors)
+    End Sub
+
+    Protected Overrides Sub ReparseSource(ByRef parseIssues As ImmutableArray(Of ParseIssue))
+        Dim b As Behavior = Nothing
+        Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, parseIssues)
+        Edited = b
     End Sub
 
     Public Overrides Sub AnimateImages(animate As Boolean)
         LeftImageViewer.Animate = animate
         RightImageViewer.Animate = animate
-    End Sub
-
-    Private lastTypedLeftFileName As String
-    Private lastTypedRightFileName As String
-    Private lastTypedLeftFileNameMissing As Boolean
-    Private lastTypedRightFileNameMissing As Boolean
-
-    Protected Overrides Sub SourceTextChanged()
-        Dim b As Behavior = Nothing
-        Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, ParseIssues)
-        ReferentialIssues = b.GetReferentialIssues(Base.Collection)
-        OnIssuesChanged(EventArgs.Empty)
-        Edited = b
-
-        NameTextBox.Text = Edited.Name
-        GroupNumber.Value = Edited.Group
-        ChanceNumber.Value = CDec(Edited.Chance) * 100
-        SpeedNumber.Value = CDec(Edited.Speed)
-        MovementComboBox.SelectedItem = Edited.AllowedMovement
-        MinDurationNumber.Value = CDec(Edited.MinDuration)
-        MaxDurationNumber.Value = CDec(Edited.MaxDuration)
-
-        SelectOrOvertypeItem(StartSpeechComboBox, Edited.StartLineName)
-        SelectOrOvertypeItem(EndSpeechComboBox, Edited.EndLineName)
-        SelectOrOvertypeItem(LinkedBehaviorComboBox, Edited.LinkedBehaviorName)
-
-        SyncTypedImagePath(LeftImageFileSelector, Edited.LeftImage.Path,
-                           Sub(filePath) Edited.LeftImage.Path = If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath)),
-                           lastTypedLeftFileName, lastTypedLeftFileNameMissing)
-        SyncTypedImagePath(RightImageFileSelector, Edited.RightImage.Path,
-                           Sub(filePath) Edited.RightImage.Path = If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath)),
-                           lastTypedRightFileName, lastTypedRightFileNameMissing)
     End Sub
 
     Private Sub LeftImageFileSelector_ListRefreshed(sender As Object, e As EventArgs)

@@ -506,7 +506,21 @@ Public Class PonyEditorForm2
                     Case PageContent.Speech
                         editor = New SpeechEditor()
                 End Select
-                QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
+                If pageRef.Item Is Nothing Then
+                    Dim newItem As IPonyIniSourceable = Nothing
+                    If pageRef.PageContent = PageContent.Behavior Then
+                        newItem = New Behavior(pageRef.PonyBase)
+                    ElseIf pageRef.PageContent = PageContent.Effect Then
+                        newItem = New EffectBase(pageRef.PonyBase)
+                    ElseIf pageRef.PageContent = PageContent.Interaction Then
+                        newItem = New InteractionBase() With {.InitiatorName = pageRef.PonyBase.Directory}
+                    ElseIf pageRef.PageContent = PageContent.Speech Then
+                        newItem = New Speech()
+                    End If
+                    QueueWorkItem(Sub() editor.NewItem(pageRef.PonyBase, newItem))
+                Else
+                    QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
+                End If
                 childControl = editor
             End If
             If childControl IsNot Nothing Then
@@ -606,7 +620,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveItemButton.Click
-        ActiveItemEditor.SaveItem()
+        If Not ActiveItemEditor.SaveItem() Then Return
         Dim ref = GetPageRef(Documents.SelectedTab)
         Dim node = FindNode(ref.ToString())
 

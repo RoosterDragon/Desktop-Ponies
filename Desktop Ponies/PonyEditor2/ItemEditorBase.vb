@@ -6,11 +6,11 @@ Public Class ItemEditorBase
     Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
     Private lastFocusedControl As Control
 
-    Protected Property Original As IPonyIniSourceable
+    Private original As IPonyIniSourceable
     Protected Property Edited As IPonyIniSourceable
     Public ReadOnly Property Item As IPonyIniSourceable
         Get
-            Return Original
+            Return original
         End Get
     End Property
     Protected Overridable ReadOnly Property Collection As System.Collections.IList
@@ -42,33 +42,35 @@ Public Class ItemEditorBase
             Return _isNewItem
         End Get
     End Property
-    Private _isItemDirty As Boolean
-    Public ReadOnly Property IsItemDirty As Boolean
-        Get
-            Return _isItemDirty
-        End Get
-    End Property
+
+    Private bindingsCreated As Boolean
     Private _loadingItem As Boolean
     ''' <summary>
     ''' Gets or sets a value indicating whether an item is being loaded, in which case property updates are ignored.
     ''' </summary>
-    Protected Property LoadingItem As Boolean
+    Private Property loadingItem As Boolean
         Get
             Return _loadingItem
         End Get
         Set(value As Boolean)
             _loadingItem = value
-            UseWaitCursor = _loadingItem
+            If _loadingItem Then
+                EnableWaitCursor(True)
+            Else
+                UseWaitCursor = False
+            End If
         End Set
     End Property
     Private propertyUpdating As Boolean
+    Private sourceUpdating As Boolean
+    Private Event SourceTextChanged As Action
 
-    Protected Property ParseIssues As ImmutableArray(Of ParseIssue)
-    Protected Property ReferentialIssues As ImmutableArray(Of ParseIssue)
+    Private parseIssues As ImmutableArray(Of ParseIssue)
+    Private referentialIssues As ImmutableArray(Of ParseIssue)
     Public ReadOnly Property Issues As IEnumerable(Of ParseIssue)
         Get
-            Return If(ParseIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
-                If(ReferentialIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()))
+            Return If(parseIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()).Concat(
+                If(referentialIssues, System.Linq.Enumerable.Empty(Of ParseIssue)()))
         End Get
     End Property
     Public Event IssuesChanged As EventHandler
@@ -76,168 +78,255 @@ Public Class ItemEditorBase
         RaiseEvent IssuesChanged(Me, e)
     End Sub
 
+    Private _isItemDirty As Boolean
+    Public ReadOnly Property IsItemDirty As Boolean
+        Get
+            Return _isItemDirty
+        End Get
+    End Property
     Public Event DirtinessChanged As EventHandler
 
-    Private Sub SetupItem(ponyBase As PonyBase)
-        Argument.EnsureNotNull(ponyBase, "ponyBase")
-        _ponyBasePath = Path.Combine(EvilGlobals.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
-        _base = ponyBase
-        Enabled = True
-    End Sub
-
-    Public Sub NewItem(ponyBase As PonyBase, name As String)
-        SetupItem(ponyBase)
-        LoadingItem = True
-        NewItem(name)
-        LoadingItem = False
-    End Sub
-
-    Public Overridable Sub NewItem(name As String)
-        Throw New NotImplementedException()
+    Public Sub NewItem(ponyBase As PonyBase, item As IPonyIniSourceable)
+        UpdateDirtyFlag(True)
+        SetupItem(ponyBase, item)
     End Sub
 
     Public Sub LoadItem(ponyBase As PonyBase, item As IPonyIniSourceable)
-        Argument.EnsureNotNull(item, "item")
         _isNewItem = False
-        SetupItem(ponyBase)
-        LoadingItem = True
-        Original = item
-        Edited = item.Clone()
-        LoadItem()
-        Source.Text = Edited.SourceIni
-        LoadingItem = False
+        SetupItem(ponyBase, item)
     End Sub
 
-    Public Overridable Sub LoadItem()
+    Private Sub SetupItem(ponyBase As PonyBase, item As IPonyIniSourceable)
+        Argument.EnsureNotNull(ponyBase, "ponyBase")
+        Argument.EnsureNotNull(item, "item")
+        loadingItem = True
+        _ponyBasePath = Path.Combine(EvilGlobals.InstallLocation, ponyBase.RootDirectory, ponyBase.Directory)
+        _base = ponyBase
+        original = item
+        Edited = item.Clone()
+        If Not bindingsCreated Then
+            CreateBindings()
+            bindingsCreated = True
+        End If
+        ChangeItem()
+        Source.Text = Edited.SourceIni
+        Enabled = True
+        loadingItem = False
+    End Sub
+
+    Protected Overridable Sub CreateBindings()
         Throw New NotImplementedException()
     End Sub
 
-    Public Sub SaveItem()
-        If Collection.Cast(Of IPonyIniSourceable).Any(Function(item) item.Name = Edited.Name AndAlso Not Object.ReferenceEquals(item, Original)) Then
-            MessageBox.Show(Me, "A " & ItemTypeName & " with the name '" & Edited.Name &
-                            "' already exists for this pony. Please choose another name.",
-                            "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
-            Return
-        End If
+    Protected Overridable Sub ChangeItem()
+        Throw New NotImplementedException()
+    End Sub
 
-        If Original.Name <> Edited.Name Then
-            If MessageBox.Show(Me, "Renaming this " & ItemTypeName & " will break other references. Continue with save?",
-                               "Rename?", MessageBoxButtons.YesNo,
-                               MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No Then
-                Return
-            End If
-        End If
+    Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object())
+        Argument.EnsureNotNull(comboBox, "comboBox")
+        comboBox.BeginUpdate()
+        comboBox.Items.Clear()
+        comboBox.Items.Add(CaseInsensitiveString.Empty)
+        comboBox.Items.AddRange(items)
+        comboBox.EndUpdate()
+    End Sub
 
-        Dim index = Collection.IndexOf(Original)
-        Collection(index) = Edited
-
-        Dim result = DialogResult.None
-        Do
-            Try
-                Edited.SourceIni = Source.Text
-                Base.Save()
-                _isNewItem = False
-                UpdateDirtyFlag(False)
-            Catch ex As IOException
-                result = MessageBox.Show(Me, "There was an error attempting to save the pony." & Environment.NewLine &
-                                         Environment.NewLine & ex.Message & Environment.NewLine & Environment.NewLine &
-                                         "Retry?", "Save Error", MessageBoxButtons.RetryCancel,
-                                         MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
-            End Try
-        Loop While result = DialogResult.Retry
-
-        Original = Edited
-        Edited = Original.Clone()
+    Protected Overridable Sub ReparseSource(ByRef parseIssues As ImmutableArray(Of ParseIssue))
+        Throw New NotImplementedException()
     End Sub
 
     Public Overridable Sub AnimateImages(animate As Boolean)
     End Sub
 
-    Private Sub UpdateDirtyFlag(newState As Boolean)
-        If _isItemDirty = newState Then Return
-        _isItemDirty = newState
-        RaiseEvent DirtinessChanged(Me, EventArgs.Empty)
-        DirectCast(Parent, ItemTabPage).IsDirty = newState
-    End Sub
+#Region "Binding"
+    Private Structure BindingProperty(Of T)
+        Public ReadOnly Getter As Func(Of T)
+        Public ReadOnly Setter As Action(Of T)
+        Public Sub New(getter As Func(Of T), setter As Action(Of T))
+            Me.Getter = getter
+            Me.Setter = setter
+        End Sub
+    End Structure
 
-    Protected Sub UpdateProperty(handler As Action)
-        Argument.EnsureNotNull(handler, "handler")
-        If LoadingItem Then Return
-        propertyUpdating = True
-        handler()
-        OnItemPropertyChanged()
-        propertyUpdating = False
-    End Sub
+    Private Function VerifyAndGetBindingProperty(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)),
+                                                       Optional writable As Boolean = True) As BindingProperty(Of T)
+        Argument.EnsureNotNull(propertyExpression, "propertyExpression")
+        Dim member = TryCast(propertyExpression.Body, Expressions.MemberExpression)
+        If member Is Nothing Then Throw New ArgumentException(
+            "propertyExpression should access a property in its body.", "propertyExpression")
+        Dim propInfo = TryCast(member.Member, Reflection.PropertyInfo)
+        If propInfo Is Nothing Then Throw New ArgumentException(
+            "propertyExpression should access a property in its body.", "propertyExpression")
+        If Not propInfo.CanRead Then Throw New ArgumentException(
+            "propertyExpression specifies a property without read access.", "propertyExpression")
+        If writable AndAlso Not propInfo.CanWrite Then Throw New ArgumentException(
+            "propertyExpression specifies a property without write access.", "propertyExpression")
+        Dim accessingMember = TryCast(member.Expression, Expressions.MemberExpression)
+        If accessingMember Is Nothing Then Throw New ArgumentException(
+            "propertyExpression must specify a property of an object instance.", "propertyExpression")
 
-    Protected Overridable Sub OnItemPropertyChanged()
-        UpdateDirtyFlag(True)
-        Source.Text = Edited.GetPonyIni()
-    End Sub
+        Dim getTarget = Expressions.Expression.Lambda(Of Func(Of Object))(accessingMember).Compile()
 
-    Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
-        If LoadingItem OrElse propertyUpdating Then
-            LoadingItem = True
-            SourceTextChanged()
-            LoadingItem = False
-            Return
-        End If
-        SourceTextTimer.Stop()
-        SourceTextTimer.Start()
-    End Sub
+        Dim setter As Action(Of T) = Nothing
+        If writable Then setter = Sub(value) propInfo.SetValue(getTarget(), value, Nothing)
+        Return New BindingProperty(Of T)(
+            Function() DirectCast(propInfo.GetValue(getTarget(), Nothing), T),
+            setter)
+    End Function
 
-    Private Sub SourceTextTimer_Tick(sender As Object, e As EventArgs) Handles SourceTextTimer.Tick
-        SourceTextTimer.Stop()
-        LoadingItem = True
-        SourceTextChanged()
-        UpdateDirtyFlag(True)
-        LoadingItem = False
-    End Sub
-
-    Protected Overridable Sub SourceTextChanged()
-        Throw New NotImplementedException()
-    End Sub
-
-    Public Sub RefreshReferentialIssues()
-        Dim referential = TryCast(Edited, IReferential)
-        If referential IsNot Nothing Then
-            ReferentialIssues = referential.GetReferentialIssues(Base.Collection)
-            OnIssuesChanged(EventArgs.Empty)
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of Boolean)), checkBox As CheckBox,
+                       Optional inverse As Boolean = False)
+        Argument.EnsureNotNull(checkBox, "checkBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        If inverse Then
+            AddHandler checkBox.CheckedChanged, Sub() UpdateProperty(Sub() bindProp.Setter(Not checkBox.Checked))
+            AddHandler SourceTextChanged, Sub() UpdateSource(Sub() checkBox.Checked = Not bindProp.Getter())
+        Else
+            AddHandler checkBox.CheckedChanged, Sub() UpdateProperty(Sub() bindProp.Setter(checkBox.Checked))
+            AddHandler SourceTextChanged, Sub() UpdateSource(Sub() checkBox.Checked = bindProp.Getter())
         End If
     End Sub
 
-    Protected Shared Sub IgnoreQuoteCharacter(sender As Object, e As KeyPressEventArgs)
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), textBox As TextBox)
+        Argument.EnsureNotNull(textBox, "textBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler textBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler textBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(textBox.Text))
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() textBox.Text = bindProp.Getter())
+    End Sub
+
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), textBox As TextBox)
+        Argument.EnsureNotNull(textBox, "textBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler textBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler textBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(textBox.Text))
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() textBox.Text = bindProp.Getter())
+    End Sub
+
+    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)), numericUpDown As NumericUpDown,
+                             valueToDecimal As Func(Of T, Decimal), decimalToValue As Func(Of Decimal, T))
+        Argument.EnsureNotNull(numericUpDown, "numericUpDown")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler numericUpDown.ValueChanged, Sub() UpdateProperty(Sub() bindProp.Setter(decimalToValue(numericUpDown.Value)))
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() numericUpDown.Value = valueToDecimal(bindProp.Getter()))
+    End Sub
+
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), comboBox As ComboBox)
+        Argument.EnsureNotNull(comboBox, "comboBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler comboBox.KeyPress, AddressOf IgnoreQuoteCharacter
+        AddHandler comboBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(comboBox.Text))
+        AddHandler comboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() bindProp.Setter(comboBox.Text))
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() SelectOrOvertypeItem(comboBox, bindProp.Getter()))
+    End Sub
+
+    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)), comboBox As ComboBox)
+        Argument.EnsureNotNull(comboBox, "comboBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler comboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() bindProp.Setter(DirectCast(comboBox.SelectedItem, T)))
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() SelectItemElseNoneOption(comboBox, bindProp.Getter()))
+    End Sub
+
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector)
+        Argument.EnsureNotNull(fileSelector, "fileSelector")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler fileSelector.FilePathSelected,
+            Sub() UpdateProperty(Sub()
+                                     Dim fullPath = If(fileSelector.FilePath = Nothing,
+                                                       Nothing, Path.Combine(PonyBasePath, fileSelector.FilePath))
+                                     bindProp.Setter(fullPath)
+                                 End Sub)
+        AddHandler SourceTextChanged,
+            Sub() UpdateSource(
+                Sub()
+                    Dim lastTypedFileName As String = Nothing
+                    Dim lastTypedFileNameMissing As Boolean
+                    SyncTypedImagePath(
+                        fileSelector, bindProp.Getter(),
+                        Sub(filePath) bindProp.Setter(If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath))),
+                        lastTypedFileName, lastTypedFileNameMissing)
+                End Sub)
+    End Sub
+
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
+                       animatedImageViewer As AnimatedImageViewer)
+        Argument.EnsureNotNull(animatedImageViewer, "animatedImageViewer")
+        Bind(propertyExpression, fileSelector)
+        AddHandler fileSelector.FilePathSelected, Sub() LoadNewImageForViewer(fileSelector, animatedImageViewer)
+    End Sub
+
+    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
+                   effectImageViewer As EffectImageViewer, behaviorComboBox As ComboBox,
+                   getBehaviorName As Func(Of CaseInsensitiveString), useLeftImage As Boolean)
+        Argument.EnsureNotNull(effectImageViewer, "effectImageViewer")
+        Argument.EnsureNotNull(behaviorComboBox, "behaviorComboBox")
+        Argument.EnsureNotNull(getBehaviorName, "getBehaviorName")
+        Bind(propertyExpression, fileSelector)
+
+        Dim refreshImageViewer =
+            Sub()
+                Dim behavior = Base.Behaviors.OnlyOrDefault(Function(b) b.Name = getBehaviorName())
+
+                Dim behaviorImagePath As String = Nothing
+                Dim effectImagePath As String = Nothing
+                Dim newBehaviorImagePath As String = Nothing
+                If behavior IsNot Nothing Then newBehaviorImagePath = If(useLeftImage, behavior.LeftImage, behavior.RightImage).Path
+                If behaviorImagePath <> newBehaviorImagePath OrElse effectImagePath <> fileSelector.FilePath Then
+                    behaviorImagePath = newBehaviorImagePath
+                    effectImagePath = fileSelector.FilePath
+                    LoadNewImageForViewer(fileSelector, effectImageViewer, behaviorComboBox, behaviorImagePath)
+                End If
+            End Sub
+
+        AddHandler SourceTextChanged, Sub() refreshImageViewer()
+    End Sub
+
+    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of HashSet(Of T))), checkedListBox As CheckedListBox)
+        Argument.EnsureNotNull(checkedListBox, "checkedListBox")
+        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression, False)
+        AddHandler checkedListBox.ItemCheck, Sub(sender, e) UpdateCheckedListBox(sender, e, bindProp.Getter())
+        AddHandler SourceTextChanged, Sub() UpdateSource(Sub() UpdateList(checkedListBox, bindProp.Getter()))
+    End Sub
+
+    Private Shared Sub IgnoreQuoteCharacter(sender As Object, e As KeyPressEventArgs)
         e.Handled = e.KeyChar = """"c
     End Sub
 
-    Protected Shared Sub ReplaceItemsInComboBox(comboBox As ComboBox, items As Object(), includeNoneOption As Boolean)
-        Argument.EnsureNotNull(comboBox, "comboBox")
-        comboBox.BeginUpdate()
-        comboBox.Items.Clear()
-        If includeNoneOption Then comboBox.Items.Add("")
-        comboBox.Items.AddRange(items)
-        comboBox.EndUpdate()
-    End Sub
-
-    Protected Shared Sub SelectOrOvertypeItem(comboBox As ComboBox, item As Object)
+    Private Shared Sub SelectOrOvertypeItem(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
         Dim itemText = If(item IsNot Nothing, item.ToString(), "")
         If comboBox.Text.Trim() <> itemText.Trim() Then comboBox.Text = itemText
     End Sub
 
-    Protected Shared Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
+    Private Shared Sub SelectItemElseNoneOption(comboBox As ComboBox, item As Object)
         Argument.EnsureNotNull(comboBox, "comboBox")
         comboBox.SelectedItem = item
         If comboBox.SelectedIndex = -1 Then comboBox.SelectedIndex = 0
     End Sub
 
-    Protected Shared Sub SelectItemElseAddItem(comboBox As ComboBox, item As Object)
-        Argument.EnsureNotNull(comboBox, "comboBox")
-        Dim index = comboBox.Items.IndexOf(item)
-        If index = -1 Then index = comboBox.Items.Add(item)
-        comboBox.SelectedIndex = index
+    Private Sub UpdateCheckedListBox(Of T)(sender As Object, e As ItemCheckEventArgs, names As HashSet(Of T))
+        UpdateProperty(Sub()
+                           Dim listBox = DirectCast(sender, CheckedListBox)
+                           names.Clear()
+                           names.UnionWith(listBox.CheckedItems.Cast(Of T))
+                           Dim item = DirectCast(listBox.Items(e.Index), T)
+                           If e.NewValue <> CheckState.Unchecked Then
+                               names.Add(item)
+                           Else
+                               names.Remove(item)
+                           End If
+                       End Sub)
     End Sub
 
-    Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As AnimatedImageViewer)
+    Private Shared Sub UpdateList(Of T)(list As CheckedListBox, values As HashSet(Of T))
+        list.SuspendLayout()
+        For i = 0 To list.Items.Count - 1
+            list.SetItemChecked(i, values.Contains(DirectCast(list.Items(i), T)))
+        Next
+        list.ResumeLayout()
+    End Sub
+
+    Private Sub LoadNewImageForViewer(selector As FileSelector, viewer As AnimatedImageViewer)
         Argument.EnsureNotNull(selector, "selector")
         Argument.EnsureNotNull(viewer, "viewer")
         Dim hadFocus = selector.ContainsFocus OrElse idleFocusControl.ContainsFocus
@@ -291,7 +380,7 @@ Public Class ItemEditorBase
             End Sub)
     End Sub
 
-    Protected Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorCombo As ComboBox, behaviorImagePath As String)
+    Private Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorCombo As ComboBox, behaviorImagePath As String)
         Argument.EnsureNotNull(selector, "selector")
         Argument.EnsureNotNull(viewer, "viewer")
         Argument.EnsureNotNull(behaviorCombo, "behaviorCombo")
@@ -371,12 +460,12 @@ Public Class ItemEditorBase
             End Sub)
     End Sub
 
-    Protected Sub SyncTypedImagePath(selector As FileSelector, behaviorImagePath As String, setPath As Action(Of String),
+    Private Sub SyncTypedImagePath(selector As FileSelector, fullPath As String, setPath As Action(Of String),
                                    ByRef typedPath As String, ByRef typedPathMissing As Boolean)
         If typedPathMissing Then
             selector.FilePathComboBox.Items.Remove(typedPath)
         End If
-        typedPath = Path.GetFileName(behaviorImagePath)
+        typedPath = Path.GetFileName(fullPath)
         If typedPath = Base.Directory OrElse typedPath = "" Then typedPath = Nothing
         selector.FilePath = typedPath
         typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathEquality.Comparison)
@@ -384,5 +473,132 @@ Public Class ItemEditorBase
             selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Add(typedPath)
         End If
         setPath(selector.FilePath)
+    End Sub
+#End Region
+
+    Private Sub UpdateSource(updateUIFromProperty As Action)
+        If propertyUpdating Then Return
+        sourceUpdating = True
+        updateUIFromProperty()
+        sourceUpdating = False
+    End Sub
+
+    Private Sub UpdateProperty(updatePropertyFromUI As Action)
+        If loadingItem OrElse sourceUpdating Then Return
+        propertyUpdating = True
+        updatePropertyFromUI()
+        OnItemPropertyChanged()
+        propertyUpdating = False
+    End Sub
+
+    Protected Sub OnItemPropertyChanged()
+        propertyUpdating = True
+        UpdateDirtyFlag(True)
+        Source.Text = Edited.GetPonyIni()
+        propertyUpdating = False
+    End Sub
+
+    Private Sub Source_TextChanged(sender As Object, e As EventArgs) Handles Source.TextChanged
+        If loadingItem OrElse propertyUpdating Then
+            SourceChangesMade()
+            Return
+        End If
+        SourceTextTimer.Stop()
+        SourceTextTimer.Start()
+    End Sub
+
+    Private Sub SourceTextTimer_Tick(sender As Object, e As EventArgs) Handles SourceTextTimer.Tick
+        SourceTextTimer.Stop()
+        SourceChangesMade()
+        UpdateDirtyFlag(True)
+    End Sub
+
+    Private Sub SourceChangesMade()
+        loadingItem = True
+        ReparseSource(parseIssues)
+        UpdateReferentialIssues()
+        OnIssuesChanged(EventArgs.Empty)
+        RaiseEvent SourceTextChanged()
+        loadingItem = False
+    End Sub
+
+    Private Function UpdateReferentialIssues() As Boolean
+        Dim referential = TryCast(Edited, IReferential)
+        If referential IsNot Nothing Then
+            referentialIssues = referential.GetReferentialIssues(Base.Collection)
+        End If
+        Return referential IsNot Nothing
+    End Function
+
+    Public Sub RefreshReferentialIssues()
+        If UpdateReferentialIssues() Then OnIssuesChanged(EventArgs.Empty)
+    End Sub
+
+    Public Function SaveItem() As Boolean
+        If String.IsNullOrWhiteSpace(Edited.Name) Then
+            MessageBox.Show(Me, "Please enter a name for this " & ItemTypeName & ".",
+                            "Name Missing", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Return False
+        End If
+
+        If Collection.Cast(Of IPonyIniSourceable).Any(
+            Function(item) item.Name = Edited.Name AndAlso Not Object.ReferenceEquals(item, original)) Then
+            MessageBox.Show(Me, "A " & ItemTypeName & " with the name '" & Edited.Name &
+                            "' already exists for this pony. Please choose another name.",
+                            "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            Return False
+        End If
+
+        If original.Name <> Edited.Name Then
+            If MessageBox.Show(Me, "Renaming this " & ItemTypeName & " will break other references. Continue with save?",
+                               "Rename?", MessageBoxButtons.YesNo,
+                               MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No Then
+                Return False
+            End If
+        End If
+
+        Dim index = Collection.IndexOf(original)
+        Dim added = index = -1
+        If added Then
+            index = Collection.Add(Edited)
+        Else
+            Collection(index) = Edited
+        End If
+
+        Dim result = DialogResult.None
+        Do
+            Try
+                Edited.SourceIni = Source.Text
+                Base.Save()
+                _isNewItem = False
+                UpdateDirtyFlag(False)
+                result = DialogResult.OK
+            Catch ex As IOException
+                result = MessageBox.Show(Me, "There was an error attempting to save the pony." & Environment.NewLine &
+                                         Environment.NewLine & ex.Message & Environment.NewLine & Environment.NewLine &
+                                         "Retry?", "Save Error", MessageBoxButtons.RetryCancel,
+                                         MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
+            End Try
+        Loop While result = DialogResult.Retry
+
+        If result <> DialogResult.OK Then
+            If added Then
+                Collection.Remove(Edited)
+            Else
+                Collection(index) = original
+            End If
+            Return False
+        Else
+            original = Edited
+            Edited = original.Clone()
+            Return True
+        End If
+    End Function
+
+    Private Sub UpdateDirtyFlag(newState As Boolean)
+        If _isItemDirty = newState Then Return
+        _isItemDirty = newState
+        RaiseEvent DirtinessChanged(Me, EventArgs.Empty)
+        DirectCast(Parent, ItemTabPage).IsDirty = newState
     End Sub
 End Class
