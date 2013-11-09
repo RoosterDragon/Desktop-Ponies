@@ -364,7 +364,7 @@ Public Class PonyEditorForm2
         End If
     End Function
 
-    Private Function ShowMessageBox(show As Func(Of DialogResult)) As DialogResult
+    Private Function ShowDialogOverPreview(show As Func(Of DialogResult)) As DialogResult
         Dim wasVisible = preview.PreviewVisible
         If wasVisible Then preview.HidePreview()
         Dim result = show()
@@ -407,7 +407,7 @@ Public Class PonyEditorForm2
 
     Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
         If Documents.TabCount > 0 Then
-            If ShowMessageBox(
+            If ShowDialogOverPreview(
                 Function() MessageBox.Show(
                     Me, "All documents must be closed before a new pony can be created. Close them now?",
                     "Close Documents?", MessageBoxButtons.OKCancel,
@@ -438,7 +438,7 @@ Public Class PonyEditorForm2
         Using dialog As New PonyDetailsDialog(contextBase, Not contextBaseHasOpenDocuments)
             Dim ref = New PageRef(contextBase)
             Dim refOriginalName = ref.ToString()
-            If dialog.ShowDialog(Me) = DialogResult.OK Then
+            If ShowDialogOverPreview(Function() dialog.ShowDialog(Me)) = DialogResult.OK Then
                 Dim refNewName = ref.ToString()
                 If refOriginalName <> refNewName Then
                     Dim node = FindNode(refOriginalName)
@@ -505,7 +505,7 @@ Public Class PonyEditorForm2
     Private Sub OpenTab(pageRef As PageRef)
         Const MaxTabs = 50
         If Documents.TabPages.Count >= MaxTabs Then
-            ShowMessageBox(
+            ShowDialogOverPreview(
                 Function() MessageBox.Show(Me, "You already have " & MaxTabs & " documents opens. Please close some before opening more.",
                                            "Document Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning))
             Return
