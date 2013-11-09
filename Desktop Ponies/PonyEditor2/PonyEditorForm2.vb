@@ -525,17 +525,16 @@ Public Class PonyEditorForm2
             If pageRef.PageContent = PageContent.Pony Then
                 childControl = preview
             ElseIf pageRef.PageContent.IsItemCollection() Then
-                ' TODO.
                 Dim viewer As ItemsViewerBase = Nothing
                 Select Case pageRef.PageContent
                     Case PageContent.Behaviors
                         viewer = New BehaviorsViewer()
                     Case PageContent.Effects
-                        viewer = New BehaviorsViewer()
+                        viewer = New EffectsViewer()
                     Case PageContent.Interactions
-                        viewer = New BehaviorsViewer()
+                        viewer = New InteractionsViewer()
                     Case PageContent.Speeches
-                        viewer = New BehaviorsViewer()
+                        viewer = New SpeechesViewer()
                 End Select
                 QueueWorkItem(Sub() viewer.LoadFor(pageRef.PonyBase))
                 AddHandler viewer.PreviewRequested, AddressOf Viewer_PreviewRequested
@@ -681,7 +680,15 @@ Public Class PonyEditorForm2
 
     Private Sub Viewer_PreviewRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)
         Dim ref = DirectCast(DirectCast(sender, Control).Tag, PageRef)
-        previewStartBehavior = DirectCast(e.Item, Behavior)
+        Dim behaviorItem = TryCast(e.Item, Behavior)
+        If behaviorItem IsNot Nothing Then
+            previewStartBehavior = behaviorItem
+        Else
+            Dim effectItem = TryCast(e.Item, EffectBase)
+            If effectItem IsNot Nothing Then
+                previewStartBehavior = ref.PonyBase.Behaviors.SingleOrDefault(Function(b) b.Name = effectItem.BehaviorName)
+            End If
+        End If
         OpenTab(New PageRef(ref.PonyBase))
     End Sub
 

@@ -53,11 +53,6 @@ Partial Class PonyEditorForm2
         Me.Output = New System.Windows.Forms.TabControl()
         Me.IssuesPage = New System.Windows.Forms.TabPage()
         Me.IssuesGrid = New System.Windows.Forms.DataGridView()
-        Me.colFatal = New System.Windows.Forms.DataGridViewImageColumn()
-        Me.colIndex = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.BehaviorsPage = New System.Windows.Forms.TabPage()
         Me.PonyNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.PreviewContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -68,6 +63,11 @@ Partial Class PonyEditorForm2
         Me.SpeechesContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ItemCollectionOrItemNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.OpenContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.colFatal = New System.Windows.Forms.DataGridViewImageColumn()
+        Me.colIndex = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
@@ -308,7 +308,7 @@ Partial Class PonyEditorForm2
         Me.Output.Name = "Output"
         Me.Output.SelectedIndex = 0
         Me.Output.Size = New System.Drawing.Size(784, 200)
-        Me.Output.TabIndex = 3
+        Me.Output.TabIndex = 1
         '
         'IssuesPage
         '
@@ -336,46 +336,6 @@ Partial Class PonyEditorForm2
         Me.IssuesGrid.ShowEditingIcon = False
         Me.IssuesGrid.Size = New System.Drawing.Size(770, 168)
         Me.IssuesGrid.TabIndex = 0
-        '
-        'colFatal
-        '
-        Me.colFatal.HeaderText = ""
-        Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
-        Me.colFatal.Name = "colFatal"
-        Me.colFatal.ReadOnly = True
-        Me.colFatal.ToolTipText = "Does this issue prevent the item being used?"
-        Me.colFatal.Width = 35
-        '
-        'colIndex
-        '
-        Me.colIndex.HeaderText = "Property"
-        Me.colIndex.Name = "colIndex"
-        Me.colIndex.ReadOnly = True
-        Me.colIndex.ToolTipText = "What setting is causing the issue?"
-        '
-        'colDescription
-        '
-        Me.colDescription.HeaderText = "Description"
-        Me.colDescription.Name = "colDescription"
-        Me.colDescription.ReadOnly = True
-        Me.colDescription.ToolTipText = "A description of the issue."
-        Me.colDescription.Width = 350
-        '
-        'colFallback
-        '
-        Me.colFallback.HeaderText = "Fallback"
-        Me.colFallback.Name = "colFallback"
-        Me.colFallback.ReadOnly = True
-        Me.colFallback.ToolTipText = "For non-fatal issues: the fallback value used."
-        Me.colFallback.Width = 80
-        '
-        'colSource
-        '
-        Me.colSource.HeaderText = "Source"
-        Me.colSource.Name = "colSource"
-        Me.colSource.ReadOnly = True
-        Me.colSource.ToolTipText = "The source text that has an issue."
-        Me.colSource.Width = 250
         '
         'BehaviorsPage
         '
@@ -441,6 +401,45 @@ Partial Class PonyEditorForm2
         Me.OpenContextMenuItem.Size = New System.Drawing.Size(103, 22)
         Me.OpenContextMenuItem.Text = "Open"
         '
+        'colFatal
+        '
+        Me.colFatal.HeaderText = ""
+        Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
+        Me.colFatal.Name = "colFatal"
+        Me.colFatal.ReadOnly = True
+        Me.colFatal.ToolTipText = "Does this issue prevent the item being used?"
+        Me.colFatal.Width = 35
+        '
+        'colIndex
+        '
+        Me.colIndex.HeaderText = "Property"
+        Me.colIndex.Name = "colIndex"
+        Me.colIndex.ReadOnly = True
+        Me.colIndex.ToolTipText = "What setting is causing the issue?"
+        '
+        'colDescription
+        '
+        Me.colDescription.HeaderText = "Description"
+        Me.colDescription.Name = "colDescription"
+        Me.colDescription.ReadOnly = True
+        Me.colDescription.ToolTipText = "A description of the issue."
+        Me.colDescription.Width = 350
+        '
+        'colFallback
+        '
+        Me.colFallback.HeaderText = "Fallback"
+        Me.colFallback.Name = "colFallback"
+        Me.colFallback.ReadOnly = True
+        Me.colFallback.ToolTipText = "For non-fatal issues: the fallback value used."
+        '
+        'colSource
+        '
+        Me.colSource.HeaderText = "Source"
+        Me.colSource.Name = "colSource"
+        Me.colSource.ReadOnly = True
+        Me.colSource.ToolTipText = "The source text that has an issue."
+        Me.colSource.Width = 250
+        '
         'PonyEditorForm2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -482,11 +481,6 @@ Partial Class PonyEditorForm2
     Friend WithEvents CloseTabButton As System.Windows.Forms.ToolStripButton
     Friend WithEvents CloseAllTabsButton As System.Windows.Forms.ToolStripButton
     Friend WithEvents IssuesGrid As System.Windows.Forms.DataGridView
-    Friend WithEvents colFatal As System.Windows.Forms.DataGridViewImageColumn
-    Friend WithEvents colIndex As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colDescription As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colFallback As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents PonyNodeContextMenu As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents PreviewContextMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents BehaviorsContextMenuItem As System.Windows.Forms.ToolStripMenuItem
@@ -514,4 +508,9 @@ Partial Class PonyEditorForm2
     Friend WithEvents ItemCollectionOrItemNodeContextMenu As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents OpenContextMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ReloadButton As System.Windows.Forms.ToolStripButton
+    Friend WithEvents colFatal As System.Windows.Forms.DataGridViewImageColumn
+    Friend WithEvents colIndex As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colDescription As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colFallback As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
 End Class
