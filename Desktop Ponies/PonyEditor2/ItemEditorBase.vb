@@ -55,7 +55,7 @@ Public Class ItemEditorBase
         Set(value As Boolean)
             _loadingItem = value
             If _loadingItem Then
-                EnableWaitCursor(True)
+                EnableWaitCursor(False)
             Else
                 UseWaitCursor = False
             End If
@@ -361,8 +361,11 @@ Public Class ItemEditorBase
                             viewer.Image = newImage
 
                             If ex IsNot Nothing Then
-                                viewer.ShowError("There was an error attempting to display this image." & Environment.NewLine & Environment.NewLine &
-                                                 ex.GetType().ToString() & Environment.NewLine & ex.Message)
+                                viewer.ShowError("There was an error attempting to display this image." &
+                                                 Environment.NewLine & Environment.NewLine &
+                                                 ex.GetType().ToString() &
+                                                 Environment.NewLine &
+                                                 ex.Message)
                             Else
                                 viewer.ClearError()
                             End If
@@ -380,7 +383,8 @@ Public Class ItemEditorBase
             End Sub)
     End Sub
 
-    Private Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer, behaviorCombo As ComboBox, behaviorImagePath As String)
+    Private Sub LoadNewImageForViewer(selector As FileSelector, viewer As EffectImageViewer,
+                                      behaviorCombo As ComboBox, behaviorImagePath As String)
         Argument.EnsureNotNull(selector, "selector")
         Argument.EnsureNotNull(viewer, "viewer")
         Argument.EnsureNotNull(behaviorCombo, "behaviorCombo")
@@ -434,8 +438,11 @@ Public Class ItemEditorBase
                             viewer.EffectImage = newImage
 
                             If ex IsNot Nothing Then
-                                viewer.ShowError("There was an error attempting to display this image." & Environment.NewLine & Environment.NewLine &
-                                                 ex.GetType().ToString() & Environment.NewLine & ex.Message)
+                                viewer.ShowError("There was an error attempting to display this image." &
+                                                 Environment.NewLine & Environment.NewLine &
+                                                 ex.GetType().ToString() &
+                                                 Environment.NewLine &
+                                                 ex.Message)
                             Else
                                 viewer.ClearError()
                             End If
@@ -514,12 +521,10 @@ Public Class ItemEditorBase
     End Sub
 
     Private Sub SourceChangesMade()
-        loadingItem = True
         ReparseSource(parseIssues)
         UpdateReferentialIssues()
         OnIssuesChanged(EventArgs.Empty)
         RaiseEvent SourceTextChanged()
-        loadingItem = False
     End Sub
 
     Private Function UpdateReferentialIssues() As Boolean
