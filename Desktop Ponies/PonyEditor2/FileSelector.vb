@@ -25,7 +25,7 @@ Public Class FileSelector
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
     Public Property FilePath As String
         Get
-            Return If(FilePathComboBox.SelectedIndex = 0, Nothing, FilePathComboBox.Text)
+            Return If(FilePathComboBox.SelectedIndex <= 0, Nothing, FilePathComboBox.Text)
         End Get
         Set(value As String)
             If value Is Nothing Then
@@ -49,7 +49,6 @@ Public Class FileSelector
     End Sub
 
     Public Sub InitializeFromDirectory(baseDirectory As String, ParamArray searchPatterns As String())
-        previousFilePath = Nothing
         _baseDirectory = Argument.EnsureNotNull(baseDirectory, "baseDirectory")
         _searchPatterns = Argument.EnsureNotNull(searchPatterns, "searchPatterns")
         FilePathComboBox.BeginUpdate()
@@ -61,6 +60,12 @@ Public Class FileSelector
         Next
         fileNames.Sort(StringComparer.OrdinalIgnoreCase)
         FilePathComboBox.Items.AddRange(fileNames.ToArray())
+        FilePath = previousFilePath
+        If FilePath <> previousFilePath Then
+            FilePath = Nothing
+            previousFilePath = FilePath
+            RaiseEvent FilePathSelected(Me, EventArgs.Empty)
+        End If
         FilePathComboBox.EndUpdate()
         RaiseEvent ListRefreshed(Me, EventArgs.Empty)
     End Sub
@@ -80,6 +85,19 @@ Public Class FileSelector
     Private Sub FilePathChooseButton_Click(sender As Object, e As EventArgs) Handles FilePathChooseButton.Click
         Using dialog As New OpenFileDialog()
             dialog.InitialDirectory = _baseDirectory
+            Dim filterBuilder As New System.Text.StringBuilder()
+            Dim first = True
+            For Each pattern In SearchPatterns
+                If first Then
+                    first = False
+                Else
+                    filterBuilder.Append("|"c)
+                End If
+                filterBuilder.Append(pattern)
+                filterBuilder.Append("|"c)
+                filterBuilder.Append(pattern)
+            Next
+            dialog.Filter = filterBuilder.ToString()
             If dialog.ShowDialog(Me.ParentForm) = DialogResult.OK Then
                 Dim destinationFileName = IO.Path.GetFileName(dialog.FileName)
                 If IO.Path.GetDirectoryName(dialog.FileName) = BaseDirectory Then

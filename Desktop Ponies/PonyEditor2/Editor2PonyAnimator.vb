@@ -33,7 +33,8 @@ Public Class Editor2PonyAnimator
 
     Public Sub ChangeEditorMenu(base As PonyBase)
         If OperatingSystemInfo.IsMacOSX Then Return
-        Dim behaviorItems = base.Behaviors.Select(Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.RunBehavior(b)))
+        Dim behaviorItems = base.Behaviors.Select(
+            Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.SmartInvoke(Sub() preview.RunBehavior(b))))
         If behaviorItems.Any() Then
             Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
             menuItems.AddLast(New SimpleContextMenuItem("Run Behavior", behaviorItems))

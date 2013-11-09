@@ -45,6 +45,7 @@ Partial Class PonyEditorForm2
         Me.CloseTabButton = New System.Windows.Forms.ToolStripButton()
         Me.CloseAllTabsButton = New System.Windows.Forms.ToolStripButton()
         Me.ItemPreviewSeperator = New System.Windows.Forms.ToolStripSeparator()
+        Me.ReloadButton = New System.Windows.Forms.ToolStripButton()
         Me.PreviewRestartButton = New System.Windows.Forms.ToolStripButton()
         Me.EditorStatusStrip = New System.Windows.Forms.StatusStrip()
         Me.EditorStatus = New System.Windows.Forms.ToolStripStatusLabel()
@@ -122,7 +123,7 @@ Partial Class PonyEditorForm2
         'EditorToolStrip
         '
         Me.EditorToolStrip.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.PreviewRestartButton})
+        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.ReloadButton, Me.PreviewRestartButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
         Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
@@ -252,6 +253,15 @@ Partial Class PonyEditorForm2
         '
         Me.ItemPreviewSeperator.Name = "ItemPreviewSeperator"
         Me.ItemPreviewSeperator.Size = New System.Drawing.Size(6, 25)
+        '
+        'ReloadButton
+        '
+        Me.ReloadButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.ReloadButton.Name = "ReloadButton"
+        Me.ReloadButton.Size = New System.Drawing.Size(85, 22)
+        Me.ReloadButton.Text = "Reload Ponies"
+        Me.ReloadButton.ToolTipText = "Reload ponies from disk and revalidate them. Useful if you have changed files on " & _
+    "disk."
         '
         'PreviewRestartButton
         '
@@ -502,4 +512,5 @@ Partial Class PonyEditorForm2
     Friend WithEvents PreviewRestartButton As System.Windows.Forms.ToolStripButton
     Friend WithEvents ItemCollectionOrItemNodeContextMenu As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents OpenContextMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ReloadButton As System.Windows.Forms.ToolStripButton
 End Class

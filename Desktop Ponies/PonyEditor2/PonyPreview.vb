@@ -3,6 +3,7 @@ Imports System.Globalization
 
 Public Class PonyPreview
     Private loaded As Boolean
+    Private editorForm As PonyEditorForm2
     Private ponies As PonyCollection
     Private editorAnimator As Editor2PonyAnimator
     Private editorInterface As ISpriteCollectionView
@@ -12,7 +13,8 @@ Public Class PonyPreview
     Private ReadOnly parents As New List(Of Control)()
     Private determineLocationOnPaint As Boolean
 
-    Public Sub New(ponies As PonyCollection)
+    Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection)
+        Me.editorForm = Argument.EnsureNotNull(editorForm, "editorForm")
         Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
         InitializeComponent()
         AddHandler Disposed, Sub()
@@ -96,11 +98,20 @@ Public Class PonyPreview
         End SyncLock
     End Sub
 
+    Public Function ShowDialogOverPreview(show As Func(Of DialogResult)) As DialogResult
+        Dim wasVisible = editorAnimator IsNot Nothing AndAlso Not editorAnimator.Paused
+        If wasVisible Then HidePreview()
+        Dim result = show()
+        If wasVisible Then ShowPreview()
+        Return result
+    End Function
+
     Public Sub RunBehavior(behavior As Behavior)
         previewPony.SelectBehavior(behavior)
         If Not Object.ReferenceEquals(previewPony.CurrentBehavior, behavior) Then
-            MessageBox.Show(Me, "Couldn't run this behavior. Maybe images are missing or it is not set up correctly.",
-                            "Run Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            ShowDialogOverPreview(
+                Function() MessageBox.Show(Me, "Couldn't run this behavior. Maybe images are missing or it is not set up correctly.",
+                                           "Run Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning))
         End If
     End Sub
 
@@ -111,12 +122,6 @@ Public Class PonyPreview
     Public Sub ShowPreview()
         If editorAnimator IsNot Nothing Then editorAnimator.Resume()
     End Sub
-
-    Public ReadOnly Property PreviewVisible As Boolean
-        Get
-            Return editorAnimator IsNot Nothing AndAlso Not editorAnimator.Paused
-        End Get
-    End Property
 
     Public Sub AnimatorStart()
         If Disposing OrElse IsDisposed Then Return

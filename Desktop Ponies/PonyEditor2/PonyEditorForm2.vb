@@ -118,10 +118,19 @@ Public Class PonyEditorForm2
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
     End Sub
 
-    Private Sub ClearBases()
-        If Documents.TabCount > 0 Then Throw New InvalidOperationException("Cannot clear bases with documents open.")
-        nodeLookup.Clear()
-        DocumentsView.Nodes.Clear()
+    Private Sub ReloadBases(Optional initialPonyToFocus As String = Nothing)
+        If Documents.TabCount > 0 Then Throw New InvalidOperationException("Cannot reload bases with documents open.")
+        Threading.Interlocked.Increment(validationIndex)
+        EnableWaitCursor(True)
+        Threading.ThreadPool.QueueUserWorkItem(
+            Sub()
+                SyncLock validationGuard
+                    Console.WriteLine("Entering reload guard")
+                    nodeLookup.Clear()
+                    worker.QueueTask(AddressOf DocumentsView.Nodes.Clear)
+                End SyncLock
+                LoadBases(initialPonyToFocus)
+            End Sub)
     End Sub
 
     Private Sub LoadBases(Optional initialPonyToFocus As String = Nothing)
@@ -152,7 +161,7 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              poniesNode.Expand()
                              If preview IsNot Nothing Then preview.Dispose()
-                             preview = New PonyPreview(ponies)
+                             preview = New PonyPreview(Me, ponies)
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1
                              EditorProgressBar.Maximum = 1
@@ -235,18 +244,24 @@ Public Class PonyEditorForm2
     Private Sub ValidateBases()
         Dim initialValidationIndex = Threading.Interlocked.Increment(validationIndex)
         SyncLock validationGuard
+            Console.WriteLine("Entering validate guard")
             Dim resetNodeIndices As Action(Of TreeNodeCollection) =
                 Sub(nodes As TreeNodeCollection)
-                For Each node As TreeNode In nodes
-                    node.ImageIndex = ValidationPendingIndex
-                    resetNodeIndices(node.Nodes)
-                Next
-            End Sub
+                    For Each node As TreeNode In nodes
+                        node.ImageIndex = ValidationPendingIndex
+                        resetNodeIndices(node.Nodes)
+                    Next
+                End Sub
             worker.QueueTask(Sub() resetNodeIndices(DocumentsView.Nodes))
             For Each base In ponies.Bases
-                If initialValidationIndex <> validationIndex Then Return
+                If initialValidationIndex <> validationIndex Then
+                    Console.WriteLine("Early exit validation")
+                    Exit For
+                End If
                 ValidateBase(base)
             Next
+            worker.WaitOnAllTasks()
+            Console.WriteLine("Exiting validate guard")
         End SyncLock
     End Sub
 
@@ -364,14 +379,6 @@ Public Class PonyEditorForm2
         End If
     End Function
 
-    Private Function ShowDialogOverPreview(show As Func(Of DialogResult)) As DialogResult
-        Dim wasVisible = preview.PreviewVisible
-        If wasVisible Then preview.HidePreview()
-        Dim result = show()
-        If wasVisible Then preview.ShowPreview()
-        Return result
-    End Function
-
     Private Sub DocumentsView_KeyPress(sender As Object, e As KeyPressEventArgs) Handles DocumentsView.KeyPress
         If e.KeyChar = ChrW(Keys.Enter) Then
             e.Handled = True
@@ -407,7 +414,7 @@ Public Class PonyEditorForm2
 
     Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
         If Documents.TabCount > 0 Then
-            If ShowDialogOverPreview(
+            If preview.ShowDialogOverPreview(
                 Function() MessageBox.Show(
                     Me, "All documents must be closed before a new pony can be created. Close them now?",
                     "Close Documents?", MessageBoxButtons.OKCancel,
@@ -418,8 +425,7 @@ Public Class PonyEditorForm2
         End If
         Using dialog = New NewPonyDialog2()
             If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
-                ClearBases()
-                Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases(dialog.NewDirectory))
+                ReloadBases(dialog.NewDirectory)
             End If
         End Using
     End Sub
@@ -438,7 +444,7 @@ Public Class PonyEditorForm2
         Using dialog As New PonyDetailsDialog(contextBase, Not contextBaseHasOpenDocuments)
             Dim ref = New PageRef(contextBase)
             Dim refOriginalName = ref.ToString()
-            If ShowDialogOverPreview(Function() dialog.ShowDialog(Me)) = DialogResult.OK Then
+            If preview.ShowDialogOverPreview(Function() dialog.ShowDialog(Me)) = DialogResult.OK Then
                 Dim refNewName = ref.ToString()
                 If refOriginalName <> refNewName Then
                     Dim node = FindNode(refOriginalName)
@@ -505,7 +511,7 @@ Public Class PonyEditorForm2
     Private Sub OpenTab(pageRef As PageRef)
         Const MaxTabs = 50
         If Documents.TabPages.Count >= MaxTabs Then
-            ShowDialogOverPreview(
+            preview.ShowDialogOverPreview(
                 Function() MessageBox.Show(Me, "You already have " & MaxTabs & " documents opens. Please close some before opening more.",
                                            "Document Limit Reached", MessageBoxButtons.OK, MessageBoxIcon.Warning))
             Return
@@ -563,6 +569,7 @@ Public Class PonyEditorForm2
                 Else
                     QueueWorkItem(Sub() editor.LoadItem(pageRef.PonyBase, pageRef.Item))
                 End If
+                AddHandler editor.AssetFileIOPerformed, Sub() Threading.ThreadPool.QueueUserWorkItem(Sub() ValidateBases())
                 childControl = editor
             End If
             If childControl IsNot Nothing Then
@@ -698,6 +705,20 @@ Public Class PonyEditorForm2
         Next
     End Sub
 
+    Private Sub ReloadButton_Click(sender As Object, e As EventArgs) Handles ReloadButton.Click
+        If Documents.TabCount > 0 Then
+            If preview.ShowDialogOverPreview(
+                Function() MessageBox.Show(
+                    Me, "All documents must be closed before ponies can be reloaded. Close them now?",
+                    "Close Documents?", MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.OK Then Return
+            For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
+                RemoveTab(t)
+            Next
+        End If
+        ReloadBases()
+    End Sub
+
     Private Sub PreviewRestartButton_Click(sender As Object, e As EventArgs) Handles PreviewRestartButton.Click
         PreviewRestartButton.Enabled = False
 
@@ -707,7 +728,7 @@ Public Class PonyEditorForm2
             shouldRestorePreview = True
         End If
         If preview IsNot Nothing Then preview.Dispose()
-        preview = New PonyPreview(ponies)
+        preview = New PonyPreview(Me, ponies)
         preview.Dock = DockStyle.Fill
         If shouldRestorePreview Then Documents.SelectedTab.Controls.Add(preview)
         preview.RestartForPony(contextRef.PonyBase)

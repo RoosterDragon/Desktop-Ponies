@@ -85,6 +85,7 @@ Public Class ItemEditorBase
         End Get
     End Property
     Public Event DirtinessChanged As EventHandler
+    Public Event AssetFileIOPerformed As EventHandler
 
     Public Sub NewItem(ponyBase As PonyBase, item As IPonyIniSourceable)
         UpdateDirtyFlag(True)
@@ -230,17 +231,18 @@ Public Class ItemEditorBase
     Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector)
         Argument.EnsureNotNull(fileSelector, "fileSelector")
         Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        AddHandler fileSelector.ListRefreshed, Sub() RaiseEvent AssetFileIOPerformed(Me, EventArgs.Empty)
         AddHandler fileSelector.FilePathSelected,
             Sub() UpdateProperty(Sub()
                                      Dim fullPath = If(fileSelector.FilePath = Nothing,
                                                        Nothing, Path.Combine(PonyBasePath, fileSelector.FilePath))
                                      bindProp.Setter(fullPath)
                                  End Sub)
+        Dim lastTypedFileName As String = Nothing
+        Dim lastTypedFileNameMissing As Boolean
         AddHandler SourceTextChanged,
             Sub() UpdateSource(
                 Sub()
-                    Dim lastTypedFileName As String = Nothing
-                    Dim lastTypedFileNameMissing As Boolean
                     SyncTypedImagePath(
                         fileSelector, bindProp.Getter(),
                         Sub(filePath) bindProp.Setter(If(filePath Is Nothing, Nothing, Path.Combine(PonyBasePath, filePath))),
