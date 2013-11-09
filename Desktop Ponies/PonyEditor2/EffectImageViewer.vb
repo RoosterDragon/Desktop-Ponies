@@ -61,6 +61,9 @@ Public Class EffectImageViewer
         End If
 
         Dim loopTime = TimeSpan.FromMilliseconds(Math.Max(Image.ImageDuration, EffectImage.ImageDuration))
+        If FixedAnimationDuration IsNot Nothing AndAlso FixedAnimationDuration.Value < loopTime Then
+            loopTime = FixedAnimationDuration.Value
+        End If
         If Time > loopTime Then Time = TimeSpan.Zero
 
         Dim imageLocation = Vector2.Zero

@@ -59,6 +59,10 @@
         Dim b As Behavior = Nothing
         Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, parseIssues)
         Edited = b
+
+        Dim duration As TimeSpan? = TimeSpan.FromSeconds(Edited.MaxDuration)
+        LeftImageViewer.FixedAnimationDuration = duration
+        RightImageViewer.FixedAnimationDuration = duration
     End Sub
 
     Public Overrides Sub AnimateImages(animate As Boolean)

@@ -2,6 +2,18 @@
 Imports DesktopSprites.SpriteManagement
 
 Public Class AnimatedImageViewer
+    Private _fixedAnimationDuration As TimeSpan?
+    <Description("The maximum duration of animation before it should be forced to repeat.")>
+    Public Property FixedAnimationDuration As TimeSpan?
+        Get
+            Return _fixedAnimationDuration
+        End Get
+        Set(value As TimeSpan?)
+            _fixedAnimationDuration = value
+            Time = TimeSpan.Zero
+            Invalidate()
+        End Set
+    End Property
     <Description("The time index into the animated image.")>
     <DefaultValue(0)>
     Protected Property Time As TimeSpan
@@ -70,7 +82,14 @@ Public Class AnimatedImageViewer
         If image Is Nothing Then Return
 
         Dim loopTime = TimeSpan.FromMilliseconds(image.ImageDuration)
-        If Time > loopTime Then Time -= loopTime
+        If FixedAnimationDuration IsNot Nothing AndAlso FixedAnimationDuration.Value < loopTime Then
+            loopTime = FixedAnimationDuration.Value
+        End If
+        If TimeSpan.FromMilliseconds(animationTimer.Interval) > loopTime Then
+            Time = TimeSpan.Zero
+        ElseIf Time > loopTime Then
+            Time -= loopTime
+        End If
 
         Dim bitmap = image(Time).Image
         Dim controlCenter = New Size(CInt(Width / 2), CInt(Height / 2))

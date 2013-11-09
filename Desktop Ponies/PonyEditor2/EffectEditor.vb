@@ -61,10 +61,13 @@
         EffectBase.TryLoad(Source.Text, PonyBasePath, Base, e, parseIssues)
         Edited = e
 
+        Dim duration As TimeSpan? = If(Edited.Duration = 0, Nothing, TimeSpan.FromSeconds(Edited.Duration))
         LeftImageViewer.Placement = Edited.PlacementDirectionLeft
         LeftImageViewer.Centering = Edited.CenteringLeft
+        LeftImageViewer.FixedAnimationDuration = duration
         RightImageViewer.Placement = Edited.PlacementDirectionRight
         RightImageViewer.Centering = Edited.CenteringRight
+        RightImageViewer.FixedAnimationDuration = duration
     End Sub
 
     Public Overrides Sub AnimateImages(animate As Boolean)
