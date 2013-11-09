@@ -27,6 +27,7 @@ Partial Class PonyEditorForm2
         Me.Documents = New System.Windows.Forms.TabControl()
         Me.DocumentsView = New System.Windows.Forms.TreeView()
         Me.EditorToolStrip = New System.Windows.Forms.ToolStrip()
+        Me.NewPonyButton = New System.Windows.Forms.ToolStripButton()
         Me.PreviewButton = New System.Windows.Forms.ToolStripButton()
         Me.ItemsButton = New System.Windows.Forms.ToolStripDropDownButton()
         Me.BehaviorsMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -116,6 +117,14 @@ Partial Class PonyEditorForm2
         Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
         Me.EditorToolStrip.TabIndex = 0
         Me.EditorToolStrip.Text = "Item Operations"
+        '
+        'NewPonyButton
+        '
+        Me.NewPonyButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.NewPonyButton.Name = "NewPonyButton"
+        Me.NewPonyButton.Size = New System.Drawing.Size(65, 22)
+        Me.NewPonyButton.Text = "New Pony"
+        Me.NewPonyButton.ToolTipText = "Create a new pony."
         '
         'PreviewButton
         '
@@ -400,4 +409,5 @@ Partial Class PonyEditorForm2
     Friend WithEvents PonyItemSeparator As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents DetailsMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents DetailsContextMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents NewPonyButton As System.Windows.Forms.ToolStripButton
 End Class

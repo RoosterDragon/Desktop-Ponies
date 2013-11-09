@@ -96,7 +96,20 @@ Public Class PonyEditorForm2
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
     End Sub
 
-    Private Sub LoadBases()
+    Private Sub ClearBases()
+        If Documents.TabCount > 0 Then Throw New InvalidOperationException("Cannot clear bases with documents open.")
+        nodeLookup.Clear()
+        DocumentsView.Nodes.Clear()
+    End Sub
+
+    Private Sub LoadBases(Optional initialPonyToFocus As String = Nothing)
+        worker.QueueTask(Sub()
+                             EditorStatus.Text = "Loading..."
+                             EditorProgressBar.Value = 0
+                             EditorProgressBar.Style = ProgressBarStyle.Continuous
+                             EditorProgressBar.Visible = True
+                         End Sub)
+
         Dim poniesNode As TreeNode = Nothing
         worker.QueueTask(Sub()
                              poniesNode = New TreeNode("Ponies") With
@@ -124,7 +137,18 @@ Public Class PonyEditorForm2
                              EditorProgressBar.Visible = False
                              UseWaitCursor = False
                              Enabled = True
-                             DocumentsView.Focus()
+                             Dim focusPending = True
+                             If initialPonyToFocus IsNot Nothing Then
+                                 Dim pony = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = initialPonyToFocus)
+                                 If pony IsNot Nothing Then
+                                     Dim node = FindNode(New PageRef(pony).ToString())
+                                     If node IsNot Nothing Then
+                                         DocumentsView.SelectedNode = node
+                                         focusPending = False
+                                     End If
+                                 End If
+                             End If
+                             If focusPending Then DocumentsView.Focus()
                          End Sub)
         worker.WaitOnAllTasks()
         ValidateBases()
@@ -329,6 +353,24 @@ Public Class PonyEditorForm2
                     PonyNodeContextMenu.Show(DocumentsView, e.Location)
             End Select
         End If
+    End Sub
+
+    Private Sub NewPonyButton_Click(sender As Object, e As EventArgs) Handles NewPonyButton.Click
+        If Documents.TabCount > 0 Then
+            If MessageBox.Show(
+                Me, "All documents must be closed before a new pony can be created. Close them now?",
+                "Close Documents?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <>
+            DialogResult.OK Then Return
+            For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
+                RemoveTab(t)
+            Next
+        End If
+        Using dialog = New NewPonyDialog2()
+            If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
+                ClearBases()
+                Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases(dialog.NewDirectory))
+            End If
+        End Using
     End Sub
 
     Private Sub Preview_Click(sender As Object, e As EventArgs) Handles PreviewContextMenuItem.Click, PreviewButton.Click
