@@ -303,17 +303,15 @@ Public Class StringCollectionParser
                                                   String.Format(CultureInfo.CurrentCulture, FileNotFoundFailureFormat, filePath)))
         End If
     End Sub
-    Public Function Assert(source As String, condition As Func(Of String, Boolean), reason As String, fallback As String) As Boolean
-        Argument.EnsureNotNull(condition, "condition")
-        Dim result = condition(source)
-        If result Then
+    Public Function Assert(source As String, condition As Boolean, reason As String, fallback As String) As Boolean
+        If condition Then
             HandleParsed(Parsed.Success(source))
         ElseIf fallback IsNot Nothing Then
             HandleParsed(Parsed.Fallback(source, fallback, reason))
         Else
             HandleParsed(Parsed.Failed(Of String)(source, reason))
         End If
-        Return result
+        Return condition
     End Function
 
     Protected NotInheritable Class Parsed

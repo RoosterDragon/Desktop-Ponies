@@ -679,8 +679,14 @@ Public Class Behavior
 
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Chance As Double
-    Public Property MaxDuration As Double 'seconds
-    Public Property MinDuration As Double 'seconds
+    ''' <summary>
+    ''' Max duration in seconds.
+    ''' </summary>
+    Public Property MaxDuration As Double
+    ''' <summary>
+    ''' Min duration in seconds.
+    ''' </summary>
+    Public Property MinDuration As Double
 
     Private _rightImage As New CenterableSpriteImage()
     Private _leftImage As New CenterableSpriteImage()
@@ -876,14 +882,15 @@ Public Class Behavior
         b.Chance = p.ParseDouble(0, 0, 1)
         b.MaxDuration = p.ParseDouble(15, 0, 300)
         b.MinDuration = p.ParseDouble(5, 0, 300)
+        p.Assert("", b.MaxDuration >= b.MinDuration, "The min duration exceeds the max duration.", "Values will be swapped.")
         b.Speed = p.ParseDouble(3, 0, 25)
         b.RightImage.Path = p.NoParse()
-        If p.Assert(b.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
+        If p.Assert(b.RightImage.Path, Not String.IsNullOrEmpty(b.RightImage.Path), "An image path has not been set.", Nothing) Then
             b.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, b.RightImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(b.RightImage.Path)
         End If
         b.LeftImage.Path = p.NoParse()
-        If p.Assert(b.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
+        If p.Assert(b.LeftImage.Path, Not String.IsNullOrEmpty(b.LeftImage.Path), "An image path has not been set.", Nothing) Then
             b.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, b.LeftImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(b.LeftImage.Path)
         End If
@@ -1648,8 +1655,13 @@ Public Class Pony
         effectsAlreadyPlayedForBehavior.Clear()
 
         BehaviorStartTime = internalTime
-        BehaviorDesiredDuration = TimeSpan.FromSeconds(
-            (Rng.NextDouble() * (CurrentBehavior.MaxDuration - CurrentBehavior.MinDuration) + CurrentBehavior.MinDuration))
+        Dim minDuration = CurrentBehavior.MinDuration
+        Dim maxDuration = CurrentBehavior.MaxDuration
+        If minDuration > maxDuration Then
+            minDuration = CurrentBehavior.MaxDuration
+            maxDuration = CurrentBehavior.MinDuration
+        End If
+        BehaviorDesiredDuration = TimeSpan.FromSeconds(minDuration + Rng.NextDouble() * (maxDuration - minDuration))
 
         ' Speak the starting line now, if one is specified; otherwise speak a random line by chance, but only if it won't get in the way
         ' later.
@@ -4278,12 +4290,12 @@ Public Class EffectBase
         e.Name = If(p.NotNullOrWhiteSpace(), "")
         e.BehaviorName = If(p.NotNullOrWhiteSpace(), "")
         e.RightImage.Path = p.NoParse()
-        If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
+        If p.Assert(e.RightImage.Path, Not String.IsNullOrEmpty(e.RightImage.Path), "An image path has not been set.", Nothing) Then
             e.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, e.RightImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(e.RightImage.Path)
         End If
         e.LeftImage.Path = p.NoParse()
-        If p.Assert(e.LeftImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
+        If p.Assert(e.LeftImage.Path, Not String.IsNullOrEmpty(e.LeftImage.Path), "An image path has not been set.", Nothing) Then
             e.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, e.LeftImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(e.LeftImage.Path)
         End If

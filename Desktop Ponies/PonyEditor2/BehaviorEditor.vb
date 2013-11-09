@@ -60,7 +60,7 @@
         Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, parseIssues)
         Edited = b
 
-        Dim duration As TimeSpan? = TimeSpan.FromSeconds(Edited.MaxDuration)
+        Dim duration As TimeSpan? = TimeSpan.FromSeconds(Math.Max(Edited.MinDuration, Edited.MaxDuration))
         LeftImageViewer.FixedAnimationDuration = duration
         RightImageViewer.FixedAnimationDuration = duration
     End Sub
