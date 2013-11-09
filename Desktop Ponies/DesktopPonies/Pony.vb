@@ -31,7 +31,11 @@ Public NotInheritable Class Referential
             If currentName.Equals(name) Then
                 Return New ParseIssue(propertyName, name, "", "A circular loop has been detected.")
             End If
-            currentElement = nextElement(currentElement)
+            Dim resolvedNextElement = nextElement(currentElement)
+            If Object.ReferenceEquals(resolvedNextElement, currentElement) Then
+                Return New ParseIssue(propertyName, name, "", "A circular loop has been detected.")
+            End If
+            currentElement = resolvedNextElement
             If currentElement Is Nothing Then Exit Do
             currentName = elementName(currentElement)
         Loop
@@ -232,6 +236,9 @@ Public Class PonyBase
         If Directory Is Nothing Then Return Create(newDirectory)
         If String.Equals(Directory, newDirectory, PathEquality.Comparison) Then Return True
         Try
+            If newDirectory.Contains("""") Then
+                Throw New ArgumentException("newDirectory may not contain any quote characters.", "newDirectory")
+            End If
             Dim currentPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory)
             Dim newPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
@@ -260,6 +267,7 @@ Public Class PonyBase
 
     Public Shared Function Create(directory As String) As Boolean
         Try
+            If directory.Contains("""") Then Throw New ArgumentException("directory may not contain any quote characters.", "directory")
             Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
             If IO.Directory.Exists(fullPath) Then Return False
             IO.Directory.CreateDirectory(fullPath)
@@ -539,13 +547,13 @@ Public Class InteractionBase
                                             {"Name", "Initiator", "Chance",
                                              "Proximity", "Targets", "Target Activation",
                                              "Behaviors", "Reactivation Delay"})
-        i.Name = p.NotNull()
-        i.InitiatorName = p.NotNull()
+        i.Name = If(p.NotNullOrWhiteSpace(), "")
+        i.InitiatorName = If(p.NotNullOrWhiteSpace(), "")
         i.Chance = p.ParseDouble(0, 0, 1)
         i.Proximity = p.ParseDouble(125, 0, 10000)
-        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0))
+        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)))
         i.Activation = p.Project(AddressOf TargetActivationFromString, TargetActivation.One)
-        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNull("")).Where(Function(s) s.Length <> 0).
+        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)).
                                   Select(Function(s) New CaseInsensitiveString(s)))
         i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
 
@@ -864,7 +872,7 @@ Public Class Behavior
                                              "Right Image Center", "Left Image Center",
                                              "Prevent Animation Loop", "Group"})
         p.NoParse()
-        b.Name = p.NotNull()
+        b.Name = If(p.NotNullOrWhiteSpace(), "")
         b.Chance = p.ParseDouble(0, 0, 1)
         b.MaxDuration = p.ParseDouble(15, 0, 300)
         b.MinDuration = p.ParseDouble(5, 0, 300)
@@ -1038,7 +1046,7 @@ Public Class Speech
         Dim p As New StringCollectionParser(iniComponents,
                                             {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
         p.NoParse()
-        s.Name = p.NotNull("Unnamed")
+        s.Name = p.NotNullOrWhiteSpace("Unnamed")
         s.Text = p.NotNull()
         s.SoundFile = p.NoParse()
         If s.SoundFile IsNot Nothing Then
@@ -4267,8 +4275,8 @@ Public Class EffectBase
                                              "Placement Left", "Centering Left",
                                              "Follow", "Prevent Repeat"})
         p.NoParse()
-        e.Name = p.NotNull()
-        e.BehaviorName = p.NotNull()
+        e.Name = If(p.NotNullOrWhiteSpace(), "")
+        e.BehaviorName = If(p.NotNullOrWhiteSpace(), "")
         e.RightImage.Path = p.NoParse()
         If p.Assert(e.RightImage.Path, Function(s) Not String.IsNullOrEmpty(s), "An image path has not been set.", Nothing) Then
             e.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, e.RightImage.Path, "Image will not be loaded.")

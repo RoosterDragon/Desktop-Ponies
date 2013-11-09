@@ -139,7 +139,7 @@ Public NotInheritable Class PonyIniParser
                                        p.NoParse()
                                        Dim bg As New BehaviorGroup(Nothing, 0)
                                        bg.Number = p.ParseInt32(0, 100)
-                                       bg.Name = p.NotNull("")
+                                       bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToString())
                                        Return bg
                                    End Function)
     End Function

@@ -85,6 +85,36 @@ Public Class StringCollectionParser
             Return Parsed.Failed(Of String)(s, NullFailure)
         End If
     End Function
+    Public Function NotNullOrEmpty() As String
+        Return NotNullOrEmpty(Nothing)
+    End Function
+    Public Function NotNullOrEmpty(fallback As String) As String
+        Return HandleParsed(ParsedNotNullOrEmpty(GetNextItem(), fallback))
+    End Function
+    Private Shared Function ParsedNotNullOrEmpty(s As String, fallback As String) As Parsed(Of String)
+        If Not String.IsNullOrEmpty(s) Then
+            Return Parsed.Success(s)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback, NullFailure)
+        Else
+            Return Parsed.Failed(Of String)(s, NullFailure)
+        End If
+    End Function
+    Public Function NotNullOrWhiteSpace() As String
+        Return NotNullOrWhiteSpace(Nothing)
+    End Function
+    Public Function NotNullOrWhiteSpace(fallback As String) As String
+        Return HandleParsed(ParsedNotNullOrWhiteSpace(GetNextItem(), fallback))
+    End Function
+    Private Shared Function ParsedNotNullOrWhiteSpace(s As String, fallback As String) As Parsed(Of String)
+        If Not String.IsNullOrWhiteSpace(s) Then
+            Return Parsed.Success(s)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback, NullFailure)
+        Else
+            Return Parsed.Failed(Of String)(s, NullFailure)
+        End If
+    End Function
     Public Function ParseBoolean() As Boolean
         Return ParseBoolean(Nothing)
     End Function
