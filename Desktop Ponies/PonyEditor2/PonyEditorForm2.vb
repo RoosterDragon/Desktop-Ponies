@@ -2,6 +2,11 @@
 Imports System.IO
 
 Public Class PonyEditorForm2
+    Private Const ValidationPendingIndex = 0
+    Private Const ValidationErrorIndex = 1
+    Private Const ValidationWarningIndex = 2
+    Private Const ValidationOkIndex = 3
+
     Private Shared ReadOnly ErrorBitmap As Bitmap = SystemIcons.Error.ToBitmap()
     Private Shared ReadOnly WarningBitmap As Bitmap = SystemIcons.Warning.ToBitmap()
 
@@ -15,6 +20,8 @@ Public Class PonyEditorForm2
     Private previousItemEditor As ItemEditorBase
 
     Private workingCount As Integer
+    Private validationIndex As Integer
+    Private ReadOnly validationGuard As New Object()
 
     Private Class PageRef
         Private ReadOnly _ponyBase As PonyBase
@@ -86,11 +93,26 @@ Public Class PonyEditorForm2
         Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
         worker.QueueTask(Sub()
+                             DocumentsView.TreeViewNodeSorter = Comparer.Create(Of TreeNode)(
+                                 Function(x, y)
+                                     ' Get page ref & content - we know both nodes should have same content.
+                                     Dim refX = GetPageRef(x)
+                                     If refX.PageContent = PageContent.Pony Then
+                                         ' Sort ponies by directory name.
+                                         Return String.Compare(
+                                             refX.PonyBase.Directory, GetPageRef(y).PonyBase.Directory, StringComparison.OrdinalIgnoreCase)
+                                     Else
+                                         ' Leave other nodes in their insertion order.
+                                         Return x.Index.CompareTo(y.Index)
+                                     End If
+                                 End Function)
+
                              EnableWaitCursor(True)
                              Dim images = New ImageList()
-                             images.Images.Add(SystemIcons.Warning)
-                             images.Images.Add(SystemIcons.WinLogo)
+                             images.Images.Add(SystemIcons.Question)
                              images.Images.Add(SystemIcons.Error)
+                             images.Images.Add(SystemIcons.Warning)
+                             images.Images.Add(SystemIcons.Application)
                              DocumentsView.ImageList = images
                          End Sub)
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
@@ -126,9 +148,10 @@ Public Class PonyEditorForm2
                     AddPonyBaseToDocumentsView(base)
                     EditorProgressBar.Value += 1
                 End Sub))
-        worker.QueueTask(Sub() DocumentsView.Sort())
+        worker.QueueTask(AddressOf DocumentsView.Sort)
         worker.QueueTask(Sub()
                              poniesNode.Expand()
+                             If preview IsNot Nothing Then preview.Dispose()
                              preview = New PonyPreview(ponies)
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1
@@ -185,38 +208,46 @@ Public Class PonyEditorForm2
         nodeLookup(interactionsNode.Name) = interactionsNode
 
         For Each behavior In base.Behaviors
-            Dim ref = New PageRef(base, PageContent.Behavior, behavior)
-            Dim node = New TreeNode(behavior.Name) With {.Tag = ref, .Name = ref.ToString()}
-            behaviorsNode.Nodes.Add(node)
-            nodeLookup(node.Name) = node
+            AddItemNode(base, behavior, behaviorsNode)
         Next
 
         For Each effect In base.Effects
-            Dim ref = New PageRef(base, PageContent.Effect, effect)
-            Dim node = New TreeNode(effect.Name) With {.Tag = ref, .Name = ref.ToString()}
-            effectsNode.Nodes.Add(node)
-            nodeLookup(node.Name) = node
-        Next
-
-        For Each speech In base.Speeches
-            Dim ref = New PageRef(base, PageContent.Speech, speech)
-            Dim node = New TreeNode(speech.Name) With {.Tag = ref, .Name = ref.ToString()}
-            speechesNode.Nodes.Add(node)
-            nodeLookup(node.Name) = node
+            AddItemNode(base, effect, effectsNode)
         Next
 
         For Each interaction In base.Interactions
-            Dim ref = New PageRef(base, PageContent.Interaction, interaction)
-            Dim node = New TreeNode(interaction.Name) With {.Tag = ref, .Name = ref.ToString()}
-            interactionsNode.Nodes.Add(node)
-            nodeLookup(node.Name) = node
+            AddItemNode(base, interaction, interactionsNode)
+        Next
+
+        For Each speech In base.Speeches
+            AddItemNode(base, speech, speechesNode)
         Next
     End Sub
 
+    Private Function AddItemNode(base As PonyBase, item As IPonyIniSourceable, parentCollectionNode As TreeNode) As TreeNode
+        Dim ref = New PageRef(base, PageContentExtensions.FromSource(item), item)
+        Dim node = New TreeNode(item.Name) With {.Tag = ref, .Name = ref.ToString()}
+        parentCollectionNode.Nodes.Add(node)
+        nodeLookup(node.Name) = node
+        Return node
+    End Function
+
     Private Sub ValidateBases()
-        For Each base In ponies.Bases.OrderBy(Function(pb) pb.Directory)
-            ValidateBase(base)
-        Next
+        Dim initialValidationIndex = Threading.Interlocked.Increment(validationIndex)
+        SyncLock validationGuard
+            Dim resetNodeIndices As Action(Of TreeNodeCollection) =
+                Sub(nodes As TreeNodeCollection)
+                For Each node As TreeNode In nodes
+                    node.ImageIndex = ValidationPendingIndex
+                    resetNodeIndices(node.Nodes)
+                Next
+            End Sub
+            worker.QueueTask(Sub() resetNodeIndices(DocumentsView.Nodes))
+            For Each base In ponies.Bases
+                If initialValidationIndex <> validationIndex Then Return
+                ValidateBase(base)
+            Next
+        End SyncLock
     End Sub
 
     Private Sub ValidateBase(base As PonyBase)
@@ -225,7 +256,8 @@ Public Class PonyEditorForm2
                                    Return behavior.TryLoad(
                                        behavior.SourceIni,
                                        Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                       base, b, Nothing).Combine(If(b.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
+                                       base, b, Nothing).Combine(
+                                       If(b.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                End Function
         Dim behaviorsValid = ValidateItems(base, base.Behaviors, validateBehavior, PageContent.Behaviors, PageContent.Behavior)
         Dim validateEffect = Function(effect As EffectBase)
@@ -233,7 +265,8 @@ Public Class PonyEditorForm2
                                  Return EffectBase.TryLoad(
                                      effect.SourceIni,
                                      Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
-                                     base, e, Nothing).Combine(If(e.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
+                                     base, e, Nothing).Combine(
+                                     If(e.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                              End Function
         Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
         Dim validateSpeech = Function(speech As Speech)
@@ -247,7 +280,8 @@ Public Class PonyEditorForm2
                                       Dim i As InteractionBase = Nothing
                                       Return InteractionBase.TryLoad(
                                           interaction.SourceIni,
-                                          i, Nothing).Combine(If(i.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
+                                          i, Nothing).Combine(
+                                          If(i.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                   End Function
         Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
                                               PageContent.Interactions, PageContent.Interaction)
@@ -256,7 +290,8 @@ Public Class PonyEditorForm2
                              Dim ref = New PageRef(base)
                              Dim node = FindNode(ref.ToString())
                              Dim result = behaviorsValid.Combine(effectsValid).Combine(speechesValid).Combine(interactionsValid)
-                             Dim index = If(result = ParseResult.Success, 1, If(result = ParseResult.Fallback, 0, 2))
+                             Dim index = If(result = ParseResult.Success, ValidationOkIndex,
+                                            If(result = ParseResult.Fallback, ValidationWarningIndex, ValidationErrorIndex))
                              node.ImageIndex = index
                              node.SelectedImageIndex = index
                          End Sub)
@@ -272,7 +307,8 @@ Public Class PonyEditorForm2
             itemsValid = itemsValid.Combine(itemValid)
             worker.QueueTask(Sub()
                                  Dim node = FindNode(ref.ToString())
-                                 Dim index = If(itemValid = ParseResult.Success, 1, If(itemValid = ParseResult.Fallback, 0, 2))
+                                 Dim index = If(itemValid = ParseResult.Success, ValidationOkIndex,
+                                                If(itemValid = ParseResult.Fallback, ValidationWarningIndex, ValidationErrorIndex))
                                  node.ImageIndex = index
                                  node.SelectedImageIndex = index
                              End Sub)
@@ -280,7 +316,8 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              Dim ref = New PageRef(base, content)
                              Dim node = FindNode(ref.ToString())
-                             Dim index = If(itemsValid = ParseResult.Success, 1, If(itemsValid = ParseResult.Fallback, 0, 2))
+                             Dim index = If(itemsValid = ParseResult.Success, ValidationOkIndex,
+                                            If(itemsValid = ParseResult.Fallback, ValidationWarningIndex, ValidationErrorIndex))
                              node.ImageIndex = index
                              node.SelectedImageIndex = index
                          End Sub)

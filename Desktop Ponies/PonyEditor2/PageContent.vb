@@ -41,4 +41,18 @@ Public Module PageContentExtensions
         If Not content.IsItem() Then Throw New ArgumentException("content must be an item.", "content")
         Return DirectCast(content - 1, PageContent)
     End Function
+
+    Public Function FromSource(source As IPonyIniSourceable) As PageContent
+        If TypeOf source Is Behavior Then
+            Return PageContent.Behavior
+        ElseIf TypeOf source Is EffectBase Then
+            Return PageContent.Effect
+        ElseIf TypeOf source Is InteractionBase Then
+            Return PageContent.Interaction
+        ElseIf TypeOf source Is Speech Then
+            Return PageContent.Speech
+        Else
+            Throw New ArgumentException("source is not a known type", "source")
+        End If
+    End Function
 End Module
