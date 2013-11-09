@@ -419,33 +419,15 @@ Public Class PonyEditorForm2
 
     Private Sub DetailsMenuItem_Click(sender As Object, e As EventArgs) Handles DetailsContextMenuItem.Click, DetailsMenuItem.Click
         Dim contextBase = contextRef.PonyBase
-        For Each tab As TabPage In Documents.TabPages
-            If Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase) Then
-                If MessageBox.Show(Me, String.Format(
-                                   CultureInfo.CurrentCulture,
-                                   "All open documents about {0} must be closed before editing details, would you like to do this?",
-                                   contextBase.Directory),
-                               "Close Documents?", MessageBoxButtons.OKCancel,
-                               MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) = DialogResult.OK Then
-                    For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
-                        If Object.ReferenceEquals(GetPageRef(t).PonyBase, contextBase) Then
-                            RemoveTab(t)
-                        End If
-                    Next
-                    Exit For
-                Else
-                    Return
-                End If
-            End If
-        Next
-        Using dialog As New PonyDetailsDialog(contextBase)
+        Dim contextBaseHasOpenDocuments = Documents.TabPages.Cast(Of TabPage).Any(
+            Function(tab) Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase))
+        Using dialog As New PonyDetailsDialog(contextBase, Not contextBaseHasOpenDocuments)
             Dim ref = New PageRef(contextBase)
             Dim refOriginalName = ref.ToString()
             If dialog.ShowDialog(Me) = DialogResult.OK Then
-                Dim node = FindNode(refOriginalName)
                 Dim refNewName = ref.ToString()
                 If refOriginalName <> refNewName Then
-                    nodeLookup.Clear()
+                    Dim node = FindNode(refOriginalName)
                     node.Name = refNewName
                     node.Text = contextBase.Directory
                     RenameNodes(DocumentsView.Nodes)
@@ -464,7 +446,9 @@ Public Class PonyEditorForm2
     Private Sub RenameNodes(nodeCollection As TreeNodeCollection)
         For Each node As TreeNode In nodeCollection
             RenameNodes(node.Nodes)
+            nodeLookup.Remove(node.Name)
             node.Name = DirectCast(node.Tag, PageRef).ToString()
+            nodeLookup.Add(node.Name, node)
         Next
     End Sub
 

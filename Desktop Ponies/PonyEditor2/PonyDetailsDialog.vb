@@ -4,10 +4,13 @@ Public Class PonyDetailsDialog
 
     Private ReadOnly base As PonyBase
 
-    Public Sub New(base As PonyBase)
+    Public Sub New(base As PonyBase, allowDirectoryEdit As Boolean)
         Me.base = Argument.EnsureNotNull(base, "base")
         InitializeComponent()
         Icon = My.Resources.Twilight
+
+        NoNameEditLabel.Visible = Not allowDirectoryEdit
+        NameTextBox.ReadOnly = Not allowDirectoryEdit
 
         NameTextBox.Text = base.Directory
         DisplayNameTextBox.Text = base.DisplayName

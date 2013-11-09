@@ -32,6 +32,7 @@ Partial Class PonyDetailsDialog
         Me.NameTextBox = New System.Windows.Forms.TextBox()
         Me.DisplayNameTextBox = New System.Windows.Forms.TextBox()
         Me.TagsList = New System.Windows.Forms.CheckedListBox()
+        Me.NoNameEditLabel = New System.Windows.Forms.Label()
         Me.DialogTable.SuspendLayout()
         Me.PropertiesTable.SuspendLayout()
         Me.SuspendLayout()
@@ -44,7 +45,7 @@ Partial Class PonyDetailsDialog
         Me.DialogTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.DialogTable.Controls.Add(Me.OK_Button, 0, 0)
         Me.DialogTable.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.DialogTable.Location = New System.Drawing.Point(226, 246)
+        Me.DialogTable.Location = New System.Drawing.Point(226, 290)
         Me.DialogTable.Name = "DialogTable"
         Me.DialogTable.RowCount = 1
         Me.DialogTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -78,31 +79,33 @@ Partial Class PonyDetailsDialog
         Me.PropertiesTable.AutoSize = True
         Me.PropertiesTable.ColumnCount = 2
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.PropertiesTable.Controls.Add(Me.TagsLabel, 0, 2)
-        Me.PropertiesTable.Controls.Add(Me.DisplayNameLabel, 0, 1)
+        Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.PropertiesTable.Controls.Add(Me.TagsLabel, 0, 3)
+        Me.PropertiesTable.Controls.Add(Me.DisplayNameLabel, 0, 2)
         Me.PropertiesTable.Controls.Add(Me.NameLabel, 0, 0)
         Me.PropertiesTable.Controls.Add(Me.NameTextBox, 1, 0)
-        Me.PropertiesTable.Controls.Add(Me.DisplayNameTextBox, 1, 1)
-        Me.PropertiesTable.Controls.Add(Me.TagsList, 1, 2)
+        Me.PropertiesTable.Controls.Add(Me.DisplayNameTextBox, 1, 2)
+        Me.PropertiesTable.Controls.Add(Me.TagsList, 1, 3)
+        Me.PropertiesTable.Controls.Add(Me.NoNameEditLabel, 0, 1)
         Me.PropertiesTable.Location = New System.Drawing.Point(12, 12)
         Me.PropertiesTable.Name = "PropertiesTable"
-        Me.PropertiesTable.RowCount = 3
+        Me.PropertiesTable.RowCount = 4
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.PropertiesTable.Size = New System.Drawing.Size(360, 228)
+        Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.PropertiesTable.Size = New System.Drawing.Size(360, 272)
         Me.PropertiesTable.TabIndex = 0
         '
         'TagsLabel
         '
         Me.TagsLabel.AutoSize = True
         Me.TagsLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.TagsLabel.Location = New System.Drawing.Point(3, 58)
+        Me.TagsLabel.Location = New System.Drawing.Point(3, 77)
         Me.TagsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.TagsLabel.Name = "TagsLabel"
         Me.TagsLabel.Size = New System.Drawing.Size(75, 13)
-        Me.TagsLabel.TabIndex = 4
+        Me.TagsLabel.TabIndex = 5
         Me.TagsLabel.Text = "Tags:"
         Me.TagsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -110,11 +113,11 @@ Partial Class PonyDetailsDialog
         '
         Me.DisplayNameLabel.AutoSize = True
         Me.DisplayNameLabel.Dock = System.Windows.Forms.DockStyle.Top
-        Me.DisplayNameLabel.Location = New System.Drawing.Point(3, 32)
+        Me.DisplayNameLabel.Location = New System.Drawing.Point(3, 51)
         Me.DisplayNameLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.DisplayNameLabel.Name = "DisplayNameLabel"
         Me.DisplayNameLabel.Size = New System.Drawing.Size(75, 13)
-        Me.DisplayNameLabel.TabIndex = 2
+        Me.DisplayNameLabel.TabIndex = 3
         Me.DisplayNameLabel.Text = "Display Name:"
         Me.DisplayNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -144,21 +147,33 @@ Partial Class PonyDetailsDialog
         '
         Me.DisplayNameTextBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.DisplayNameTextBox.Location = New System.Drawing.Point(84, 29)
+        Me.DisplayNameTextBox.Location = New System.Drawing.Point(84, 48)
         Me.DisplayNameTextBox.MaxLength = 50
         Me.DisplayNameTextBox.Name = "DisplayNameTextBox"
         Me.DisplayNameTextBox.Size = New System.Drawing.Size(273, 20)
-        Me.DisplayNameTextBox.TabIndex = 3
+        Me.DisplayNameTextBox.TabIndex = 4
         '
         'TagsList
         '
         Me.TagsList.CheckOnClick = True
         Me.TagsList.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TagsList.FormattingEnabled = True
-        Me.TagsList.Location = New System.Drawing.Point(84, 55)
+        Me.TagsList.Location = New System.Drawing.Point(84, 74)
         Me.TagsList.Name = "TagsList"
-        Me.TagsList.Size = New System.Drawing.Size(273, 170)
-        Me.TagsList.TabIndex = 5
+        Me.TagsList.Size = New System.Drawing.Size(273, 195)
+        Me.TagsList.TabIndex = 6
+        '
+        'NoNameEditLabel
+        '
+        Me.PropertiesTable.SetColumnSpan(Me.NoNameEditLabel, 2)
+        Me.NoNameEditLabel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.NoNameEditLabel.Location = New System.Drawing.Point(3, 26)
+        Me.NoNameEditLabel.Margin = New System.Windows.Forms.Padding(3, 0, 3, 6)
+        Me.NoNameEditLabel.Name = "NoNameEditLabel"
+        Me.NoNameEditLabel.Size = New System.Drawing.Size(354, 13)
+        Me.NoNameEditLabel.TabIndex = 2
+        Me.NoNameEditLabel.Text = "To edit the name of this pony, close any open documents of theirs first."
+        Me.NoNameEditLabel.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'PonyDetailsDialog
         '
@@ -166,12 +181,12 @@ Partial Class PonyDetailsDialog
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(384, 287)
+        Me.ClientSize = New System.Drawing.Size(384, 331)
         Me.Controls.Add(Me.PropertiesTable)
         Me.Controls.Add(Me.DialogTable)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(400, 300)
+        Me.MinimumSize = New System.Drawing.Size(300, 204)
         Me.Name = "PonyDetailsDialog"
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
@@ -193,5 +208,6 @@ Partial Class PonyDetailsDialog
     Friend WithEvents DisplayNameLabel As System.Windows.Forms.Label
     Friend WithEvents DisplayNameTextBox As System.Windows.Forms.TextBox
     Friend WithEvents TagsList As System.Windows.Forms.CheckedListBox
+    Friend WithEvents NoNameEditLabel As System.Windows.Forms.Label
 
 End Class
