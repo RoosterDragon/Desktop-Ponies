@@ -379,6 +379,7 @@ Partial Class PonyEditorForm2
         '
         'BehaviorsPage
         '
+        Me.BehaviorsPage.AutoScroll = True
         Me.BehaviorsPage.Location = New System.Drawing.Point(4, 22)
         Me.BehaviorsPage.Name = "BehaviorsPage"
         Me.BehaviorsPage.Size = New System.Drawing.Size(776, 174)

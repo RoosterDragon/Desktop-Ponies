@@ -20,8 +20,11 @@ Public Class PonyEditorForm2
     Private previousItemEditor As ItemEditorBase
 
     Private workingCount As Integer
+
     Private validationIndex As Integer
     Private ReadOnly validationGuard As New Object()
+    Private regenerateIndex As Integer
+    Private ReadOnly regenerateGuard As New Object()
 
     Private Class PageRef
         Private ReadOnly _ponyBase As PonyBase
@@ -93,6 +96,9 @@ Public Class PonyEditorForm2
         Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
         CenterToScreen()
         worker.QueueTask(Sub()
+                             Output.TabPages.Clear()
+                             EnableWaitCursor(True)
+
                              DocumentsView.TreeViewNodeSorter = Comparer.Create(Of TreeNode)(
                                  Function(x, y)
                                      ' Get page ref & content - we know both nodes should have same content.
@@ -107,7 +113,6 @@ Public Class PonyEditorForm2
                                      End If
                                  End Function)
 
-                             EnableWaitCursor(True)
                              Dim images = New ImageList()
                              images.Images.Add(SystemIcons.Question)
                              images.Images.Add(SystemIcons.Error)
@@ -125,7 +130,6 @@ Public Class PonyEditorForm2
         Threading.ThreadPool.QueueUserWorkItem(
             Sub()
                 SyncLock validationGuard
-                    Console.WriteLine("Entering reload guard")
                     nodeLookup.Clear()
                     worker.QueueTask(AddressOf DocumentsView.Nodes.Clear)
                 End SyncLock
@@ -244,7 +248,6 @@ Public Class PonyEditorForm2
     Private Sub ValidateBases()
         Dim initialValidationIndex = Threading.Interlocked.Increment(validationIndex)
         SyncLock validationGuard
-            Console.WriteLine("Entering validate guard")
             Dim resetNodeIndices As Action(Of TreeNodeCollection) =
                 Sub(nodes As TreeNodeCollection)
                     For Each node As TreeNode In nodes
@@ -254,14 +257,10 @@ Public Class PonyEditorForm2
                 End Sub
             worker.QueueTask(Sub() resetNodeIndices(DocumentsView.Nodes))
             For Each base In ponies.Bases
-                If initialValidationIndex <> validationIndex Then
-                    Console.WriteLine("Early exit validation")
-                    Exit For
-                End If
+                If initialValidationIndex <> validationIndex Then Exit For
                 ValidateBase(base)
             Next
             worker.WaitOnAllTasks()
-            Console.WriteLine("Exiting validate guard")
         End SyncLock
     End Sub
 
@@ -596,6 +595,10 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub SwitchTab(newTab As TabPage)
+        Output.TabPages.Clear()
+        IssuesGrid.Rows.Clear()
+        ClearBehaviorButtons()
+
         If previousItemEditor IsNot Nothing Then
             RemoveHandler previousItemEditor.IssuesChanged, AddressOf ActiveItemEditor_IssuesChanged
             RemoveHandler previousItemEditor.DirtinessChanged, AddressOf ActiveItemEditor_DirtinessChanged
@@ -619,7 +622,11 @@ Public Class PonyEditorForm2
                 previewStartBehavior = Nothing
                 preview.ShowPreview()
                 PreviewRestartButton.Visible = True
+                Output.TabPages.Add(BehaviorsPage)
+                RegenerateBehaviorButtons()
                 Focus()
+            Else
+                Output.TabPages.Add(IssuesPage)
             End If
         Else
             contextRef = GetPageRef(DocumentsView.SelectedNode)
@@ -629,6 +636,47 @@ Public Class PonyEditorForm2
             PreviewRestartButton.Visible = False
         End If
         EnableEditorToolStripButtons(contextRef.PageContent <> PageContent.Ponies, Documents.TabPages.Count > 0)
+    End Sub
+
+    Private Sub ClearBehaviorButtons()
+        Threading.Interlocked.Increment(regenerateIndex)
+        SyncLock regenerateGuard
+            Dim oldControls = BehaviorsPage.Controls.Cast(Of Control)().ToImmutableArray()
+            BehaviorsPage.Controls.Clear()
+            For Each control In oldControls
+                control.Dispose()
+            Next
+        End SyncLock
+    End Sub
+
+    Private Sub RegenerateBehaviorButtons()
+        Dim initialIndex = Threading.Interlocked.Increment(regenerateIndex)
+        SyncLock regenerateGuard
+            Dim leftOffset = BehaviorsPage.Padding.Left
+            Dim topOffset = BehaviorsPage.Padding.Top
+            For Each behavior In contextRef.PonyBase.Behaviors
+                worker.QueueTask(
+                    Sub()
+                        If initialIndex <> regenerateIndex Then Return
+                        Dim button = New Button() With {
+                            .Text = behavior.Name,
+                            .AutoSize = True,
+                            .AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                            .Location = New Point(leftOffset, topOffset)
+                        }
+                        AddHandler button.Click, Sub() preview.RunBehavior(behavior)
+                        button.CreateControl()
+                        BehaviorsPage.Controls.Add(button)
+                        leftOffset += button.Width + button.Margin.Horizontal
+                        If leftOffset > BehaviorsPage.Width - BehaviorsPage.Padding.Right - SystemInformation.VerticalScrollBarWidth Then
+                            leftOffset = BehaviorsPage.Padding.Left
+                            topOffset += button.Height + button.Margin.Vertical
+                            button.Location = New Point(leftOffset, topOffset)
+                            leftOffset += button.Width + button.Margin.Horizontal
+                        End If
+                    End Sub)
+            Next
+        End SyncLock
     End Sub
 
     Private Sub Viewer_PreviewRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)
