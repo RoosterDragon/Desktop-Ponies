@@ -46,9 +46,9 @@ Public NotInheritable Class Options
     Public Shared ScaleFactor As Single
     Public Shared ExclusionZone As RectangleF
 
-    Public Shared ReadOnly Screens As New List(Of Screen)()
-    Public Shared ReadOnly PonyCounts As New Dictionary(Of String, Integer)()
-    Public Shared ReadOnly CustomTags As New List(Of CaseInsensitiveString)()
+    Public Shared Screens As ImmutableArray(Of Screen)
+    Public Shared PonyCounts As Dictionary(Of String, Integer)
+    Public Shared CustomTags As ImmutableArray(Of CaseInsensitiveString)
 
     Public Shared EnablePonyLogs As Boolean
     Public Shared ShowPerformanceGraph As Boolean
@@ -96,9 +96,9 @@ Public NotInheritable Class Options
         Else
             Using reader As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
                 ProfileName = profile
-                Screens.Clear()
-                PonyCounts.Clear()
-                CustomTags.Clear()
+                Dim newScreens As New List(Of Screen)()
+                Dim newCounts As New Dictionary(Of String, Integer)()
+                Dim newTags As New List(Of CaseInsensitiveString)()
                 While Not reader.EndOfStream
                     Dim columns = CommaSplitQuoteQualified(reader.ReadLine())
                     If columns.Length = 0 Then Continue While
@@ -142,15 +142,18 @@ Public NotInheritable Class Options
                         Case "monitor"
                             If columns.Length - 1 <> 1 Then Throw New InvalidDataException("Expected a monitor name on the monitor line.")
                             Dim monitor = Screen.AllScreens.FirstOrDefault(Function(s) s.DeviceName = columns(1))
-                            If monitor IsNot Nothing Then Screens.Add(monitor)
+                            If monitor IsNot Nothing Then newScreens.Add(monitor)
                         Case "count"
                             If columns.Length - 1 <> 2 Then Throw New InvalidDataException("Expected a count on the count line.")
-                            PonyCounts.Add(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture))
+                            newCounts.Add(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture))
                         Case "tag"
                             If columns.Length - 1 <> 1 Then Throw New InvalidDataException("Expected a tag name on the tag line.")
-                            CustomTags.Add(columns(1))
+                            newTags.Add(columns(1))
                     End Select
                 End While
+                Screens = newScreens.ToImmutableArray()
+                PonyCounts = newCounts
+                CustomTags = newTags.ToImmutableArray()
             End Using
         End If
 
@@ -168,10 +171,9 @@ Public NotInheritable Class Options
 
     Public Shared Sub LoadDefaultProfile()
         ProfileName = DefaultProfileName
-        Screens.Clear()
-        Screens.Add(Screen.PrimaryScreen)
-        PonyCounts.Clear()
-        CustomTags.Clear()
+        Screens = {Screen.PrimaryScreen}.ToImmutableArray()
+        PonyCounts = New Dictionary(Of String, Integer)()
+        CustomTags = New CaseInsensitiveString() {}.ToImmutableArray()
 
         SuspendForFullscreenApplication = True
         ShowInTaskbar = OperatingSystemInfo.IsWindows
@@ -294,10 +296,11 @@ Public NotInheritable Class Options
     End Function
 
     Private Shared Sub GetPonyCounts()
-        PonyCounts.Clear()
+        Dim newCounts = New Dictionary(Of String, Integer)()
         For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            PonyCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
+            newCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
         Next
+        PonyCounts = newCounts
     End Sub
 
     Public Shared Function GetCombinedScreenArea() As Rectangle
@@ -314,7 +317,7 @@ Public NotInheritable Class Options
 
     Public Shared Function GetInterface() As DesktopSprites.SpriteManagement.ISpriteCollectionView
         'This should already be set in the options, but in case it isn't, use all monitors.
-        If Screens.Count = 0 Then Screens.AddRange(Screen.AllScreens)
+        If Screens.Count = 0 Then Screens = Screen.AllScreens.ToImmutableArray()
 
         Dim viewer As DesktopSprites.SpriteManagement.ISpriteCollectionView
         If GetInterfaceType() = GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface) Then

@@ -185,7 +185,7 @@ Public Class OptionsForm
     End Sub
 
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
-        Options.PonyCounts.Clear()
+        Options.PonyCounts = New Dictionary(Of String, Integer)()
 
         For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"
@@ -218,14 +218,15 @@ Public Class OptionsForm
             MonitorsMinimumLabel.Visible = False
         End If
 
-        Options.Screens.Clear()
+        Dim newScreens = New List(Of Screen)()
         For i = 0 To MonitorsSelection.SelectedItems.Count - 1
             For Each monitor In Screen.AllScreens
                 If monitor.DeviceName = DirectCast(MonitorsSelection.SelectedItems(i), String) Then
-                    Options.Screens.Add(monitor)
+                    newScreens.Add(monitor)
                 End If
             Next
         Next
+        Options.Screens = newScreens.ToImmutableArray()
 
         If IsNothing(EvilGlobals.CurrentViewer) Then
             'done

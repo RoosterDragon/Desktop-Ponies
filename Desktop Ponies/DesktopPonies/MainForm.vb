@@ -986,13 +986,13 @@ Public Class MainForm
     Private Sub TempSaveCounts()
         If PonySelectionPanel.Controls.Count = 0 Then Exit Sub
 
-        Options.PonyCounts.Clear()
-
+        Dim newCounts = New Dictionary(Of String, Integer)()
         For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
             Dim count As Integer
             Integer.TryParse(ponyPanel.PonyCount.Text, count)
-            Options.PonyCounts(ponyPanel.PonyBase.Directory) = count
+            newCounts.Add(ponyPanel.PonyBase.Directory, count)
         Next
+        Options.PonyCounts = newCounts
     End Sub
 
     ''' <summary>

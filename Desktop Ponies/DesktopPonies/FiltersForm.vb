@@ -9,7 +9,7 @@
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-        Me.Close()
+        Close()
     End Sub
 
     Private Sub Save_Button_Click(sender As Object, e As EventArgs) Handles Save_Button.Click
@@ -18,8 +18,7 @@
             MessageBox.Show(Me, "You cannot use the quote character in custom tags. Any tags with this character have been removed.",
                             "Invalid Tags", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
-        Options.CustomTags.Clear()
-        Options.CustomTags.AddRange(lines.Select(Function(tag) New CaseInsensitiveString(tag)))
-        Me.Close()
+        Options.CustomTags = lines.Select(Function(tag) New CaseInsensitiveString(tag)).ToImmutableArray()
+        Close()
     End Sub
 End Class

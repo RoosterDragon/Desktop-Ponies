@@ -266,8 +266,7 @@ Public Class Game
             ball.Initialize(GameScreen)
         Next
 
-        Options.Screens.Clear()
-        Options.Screens.Add(GameScreen)
+        Options.Screens = {GameScreen}.ToImmutableArray()
 
         If Options.ScaleFactor <> 1 Then
             MessageBox.Show(String.Format(CultureInfo.CurrentCulture,
