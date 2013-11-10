@@ -23,7 +23,6 @@ Partial Class EffectsViewer
         Me.colPreview = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        CType(Me.EffectsGrid, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'EffectsGrid
@@ -73,7 +72,6 @@ Partial Class EffectsViewer
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.Controls.Add(Me.EffectsGrid)
         Me.Name = "EffectsViewer"
-        CType(Me.EffectsGrid, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub

@@ -1,18 +1,16 @@
 ﻿Public Class BehaviorsViewer
-    Public Overrides Sub LoadFor(ponyBase As PonyBase)
-        BehaviorsGrid.SuspendLayout()
-        BehaviorsGrid.Rows.Clear()
+    Protected Overrides ReadOnly Property Grid As DataGridView
+        Get
+            Return BehaviorsGrid
+        End Get
+    End Property
+
+    Protected Overrides Iterator Function GetGridRows(ponyBase As PonyBase) As IEnumerable(Of Tuple(Of IPonyIniSourceable, Object()))
         For Each behavior In ponyBase.Behaviors
-            Dim index = BehaviorsGrid.Rows.Add(
-                Nothing,
-                Nothing,
-                behavior.Name,
-                GetGroupName(ponyBase, behavior.Group),
-                behavior.Chance)
-            BehaviorsGrid.Rows(index).Tag = behavior
+            Yield Tuple.Create(Of IPonyIniSourceable, Object())(
+                behavior, {Nothing, Nothing, behavior.Name, GetGroupName(ponyBase, behavior.Group), behavior.Chance})
         Next
-        BehaviorsGrid.ResumeLayout()
-    End Sub
+    End Function
 
     Private Shared Function GetGroupName(ponyBase As PonyBase, groupNumber As Integer) As String
         If groupNumber = Behavior.AnyGroup Then Return "Any"

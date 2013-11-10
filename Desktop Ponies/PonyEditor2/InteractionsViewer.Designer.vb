@@ -22,7 +22,6 @@ Partial Class InteractionsViewer
         Me.InteractionsGrid = New System.Windows.Forms.DataGridView()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        CType(Me.InteractionsGrid, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'InteractionsGrid
@@ -62,7 +61,6 @@ Partial Class InteractionsViewer
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.Controls.Add(Me.InteractionsGrid)
         Me.Name = "InteractionsViewer"
-        CType(Me.InteractionsGrid, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub

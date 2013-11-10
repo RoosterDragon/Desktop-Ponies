@@ -745,6 +745,13 @@ Public Class PonyEditorForm2
         node.Text = ref.Item.Name
         nodeLookup.Add(node.Name, node)
 
+        If ref.PageContent.IsItem() Then
+            Dim tab = Documents.TabPages.Item(New PageRef(ref.PonyBase, ref.PageContent.ItemToItemCollection()).ToString())
+            If tab IsNot Nothing Then
+                DirectCast(tab.Controls(0), ItemsViewerBase).LoadFor(ref.PonyBase)
+            End If
+        End If
+
         EditorStatus.Text = "Saved"
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() ValidateBases())
