@@ -24,7 +24,10 @@
                 Dim group = base.BehaviorGroups.FirstOrDefault(Function(bg) bg.Number = i)
                 If group IsNot Nothing Then name = group.Name
             End If
-            NamesGrid.Rows.Add(i, name)
+            Dim index = NamesGrid.Rows.Add(i, name)
+            If i = Behavior.AnyGroup Then
+                NamesGrid.Rows(i).ReadOnly = True
+            End If
         Next
         NamesGrid.ResumeLayout()
         Enabled = True
@@ -36,6 +39,7 @@
         For Each row As DataGridViewRow In NamesGrid.Rows
             Dim number = DirectCast(row.Cells(colNumber.Index).Value, Integer)
             Dim name = DirectCast(row.Cells(colName.Index).Value, String)
+            If number = Behavior.AnyGroup Then Continue For
             If Not String.IsNullOrWhiteSpace(name) Then base.BehaviorGroups.Add(New BehaviorGroup(name, number))
         Next
         Try
