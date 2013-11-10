@@ -124,7 +124,7 @@ Public Class PonyEditorForm2
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
     End Sub
 
-    Private Sub ReloadBases(Optional initialPonyToFocus As String = Nothing)
+    Private Sub ReloadBases(Optional openDetailsForPony As String = Nothing)
         If Documents.TabCount > 0 Then Throw New InvalidOperationException("Cannot reload bases with documents open.")
         Threading.Interlocked.Increment(validationIndex)
         EnableWaitCursor(True)
@@ -134,11 +134,11 @@ Public Class PonyEditorForm2
                     nodeLookup.Clear()
                     worker.QueueTask(AddressOf DocumentsView.Nodes.Clear)
                 End SyncLock
-                LoadBases(initialPonyToFocus)
+                LoadBases(openDetailsForPony)
             End Sub)
     End Sub
 
-    Private Sub LoadBases(Optional initialPonyToFocus As String = Nothing)
+    Private Sub LoadBases(Optional openDetailsForPony As String = Nothing)
         worker.QueueTask(Sub()
                              EditorStatus.Text = "Loading..."
                              EditorProgressBar.Value = 0
@@ -175,14 +175,15 @@ Public Class PonyEditorForm2
                              UseWaitCursor = False
                              Enabled = True
                              Dim focusPending = True
-                             If initialPonyToFocus IsNot Nothing Then
-                                 Dim pony = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = initialPonyToFocus)
+                             If openDetailsForPony IsNot Nothing Then
+                                 Dim pony = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = openDetailsForPony)
                                  If pony IsNot Nothing Then
                                      Dim node = FindNode(New PageRef(pony).ToString())
                                      If node IsNot Nothing Then
                                          DocumentsView.SelectedNode = node
                                          focusPending = False
                                      End If
+                                     OpenDetailsDialogForContext()
                                  End If
                              End If
                              If focusPending Then DocumentsView.Focus()
@@ -438,7 +439,12 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub DetailsMenuItem_Click(sender As Object, e As EventArgs) Handles DetailsContextMenuItem.Click, DetailsMenuItem.Click
+        OpenDetailsDialogForContext()
+    End Sub
+
+    Private Sub OpenDetailsDialogForContext()
         Dim contextBase = contextRef.PonyBase
+        If contextBase Is Nothing Then Return
         Dim contextBaseHasOpenDocuments = Documents.TabPages.Cast(Of TabPage).Any(
             Function(tab) Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase))
         Using dialog As New PonyDetailsDialog(contextBase, Not contextBaseHasOpenDocuments)
