@@ -18,6 +18,7 @@ Public Class PonyEditorForm2
     Private previewStartBehavior As Behavior
     Private contextRef As PageRef
     Private previousItemEditor As ItemEditorBase
+    Private previewHiddenForDeactivation As Boolean
 
     Private workingCount As Integer
 
@@ -829,6 +830,15 @@ Public Class PonyEditorForm2
                                  End If
                              End Try
                          End Sub)
+    End Sub
+
+    Private Sub PonyEditorForm2_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
+        If preview IsNot Nothing AndAlso previewHiddenForDeactivation Then preview.ShowPreview()
+    End Sub
+
+    Private Sub PonyEditorForm2_Deactivate(sender As Object, e As EventArgs) Handles MyBase.Deactivate
+        previewHiddenForDeactivation = preview.PreviewVisible
+        If preview IsNot Nothing Then preview.HidePreview()
     End Sub
 
     Private Sub PonyEditorForm2_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed

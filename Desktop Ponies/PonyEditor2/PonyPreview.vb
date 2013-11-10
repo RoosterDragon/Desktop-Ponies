@@ -125,6 +125,12 @@ Public Class PonyPreview
         If editorAnimator IsNot Nothing Then editorAnimator.Resume()
     End Sub
 
+    Public ReadOnly Property PreviewVisible As Boolean
+        Get
+            Return editorAnimator IsNot Nothing AndAlso Not editorAnimator.Paused
+        End Get
+    End Property
+
     Public Sub AnimatorStart()
         If disposedFlag = 1 Then Return
         BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
