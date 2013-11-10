@@ -51,21 +51,26 @@ Public Class PonyAnimator
 
         AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 
-        AddHandler SpriteAdded, AddressOf SpriteChanged
-        AddHandler SpritesAdded, AddressOf SpritesChanged
-        AddHandler SpriteRemoved, AddressOf SpriteChanged
-        AddHandler SpritesRemoved, AddressOf SpritesChanged
+        If spriteCollection IsNot Nothing Then
+            AttachedExpiredHandlers(spriteCollection.OfType(Of IExpireableSprite)())
+        End If
+
+        AddHandler SpriteAdded, AddressOf InvalidateInteractions
+        AddHandler SpritesAdded, AddressOf InvalidateInteractions
+        AddHandler SpriteRemoved, AddressOf InvalidateInteractions
+        AddHandler SpritesRemoved, AddressOf InvalidateInteractions
+
         AddHandler SpriteAdded, AddressOf AddExpiredHandlers
         AddHandler SpritesAdded, AddressOf AddExpiredHandlers
         AddHandler SpriteRemoved, AddressOf ExpireSprite
         AddHandler SpritesRemoved, AddressOf ExpireSprites
     End Sub
 
-    Private Sub SpriteChanged(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
+    Private Sub InvalidateInteractions(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         If TypeOf e.Item Is Pony Then interactionsNeedReinitializing = True
     End Sub
 
-    Private Sub SpritesChanged(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
+    Private Sub InvalidateInteractions(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         If e.Items.Any(Function(s) TypeOf s Is Pony) Then interactionsNeedReinitializing = True
     End Sub
 
@@ -75,7 +80,11 @@ Public Class PonyAnimator
     End Sub
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
-        For Each expireableSprite In e.Items.OfType(Of IExpireableSprite)()
+        AttachedExpiredHandlers(e.Items.OfType(Of IExpireableSprite)())
+    End Sub
+
+    Private Sub AttachedExpiredHandlers(expirableSprites As IEnumerable(Of IExpireableSprite))
+        For Each expireableSprite In expirableSprites
             AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
         Next
     End Sub
@@ -280,10 +289,10 @@ Public Class PonyAnimator
 
     Public Overrides Sub Finish()
         RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
-        RemoveHandler SpriteAdded, AddressOf SpriteChanged
-        RemoveHandler SpritesAdded, AddressOf SpritesChanged
-        RemoveHandler SpriteRemoved, AddressOf SpriteChanged
-        RemoveHandler SpritesRemoved, AddressOf SpritesChanged
+        RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
+        RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
+        RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
+        RemoveHandler SpritesRemoved, AddressOf InvalidateInteractions
         MyBase.Finish()
     End Sub
 
