@@ -91,13 +91,12 @@ Public Class FileSelector
                 If first Then
                     first = False
                 Else
-                    filterBuilder.Append("|"c)
+                    filterBuilder.Append(";"c)
                 End If
                 filterBuilder.Append(pattern)
-                filterBuilder.Append("|"c)
-                filterBuilder.Append(pattern)
             Next
-            dialog.Filter = filterBuilder.ToString()
+            Dim filter = filterBuilder.ToString()
+            dialog.Filter = filter & "|" & filter
             If dialog.ShowDialog(Me.ParentForm) = DialogResult.OK Then
                 Dim destinationFileName = IO.Path.GetFileName(dialog.FileName)
                 If IO.Path.GetDirectoryName(dialog.FileName) = BaseDirectory Then
