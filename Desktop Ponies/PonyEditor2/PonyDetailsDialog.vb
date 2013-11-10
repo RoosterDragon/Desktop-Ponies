@@ -59,9 +59,22 @@ Public Class PonyDetailsDialog
                             "Rename Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End If
+        Dim originalDisplayName = base.DisplayName
+        Dim originalTags = base.Tags
+
         base.DisplayName = DisplayNameTextBox.Text
         base.Tags.RemoveWhere(Function(tag) Options.CustomTags.Contains(tag) OrElse PonyBase.StandardTags.Contains(tag))
         base.Tags.UnionWith(TagsList.CheckedItems.Cast(Of CaseInsensitiveString)())
+
+        Try
+            base.Save()
+        Catch ex As Exception
+            base.DisplayName = originalDisplayName
+            base.Tags.Clear()
+            base.Tags.UnionWith(originalTags)
+            MessageBox.Show(Me, "Failed to save. Please try again.", "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End Try
 
         DialogResult = DialogResult.OK
         Close()

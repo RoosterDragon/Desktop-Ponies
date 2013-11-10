@@ -204,6 +204,12 @@
     <Compile Include="PonyEditor2\FileSelector.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="PonyEditor2\GroupNamesDialog.Designer.vb">
+      <DependentUpon>GroupNamesDialog.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\GroupNamesDialog.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PonyEditor2\InteractionEditor.Designer.vb">
       <DependentUpon>InteractionEditor.vb</DependentUpon>
     </Compile>
@@ -437,6 +443,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\FileSelector.resx">
       <DependentUpon>FileSelector.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\GroupNamesDialog.resx">
+      <DependentUpon>GroupNamesDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\InteractionEditor.resx">
       <DependentUpon>InteractionEditor.vb</DependentUpon>

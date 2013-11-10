@@ -1,4 +1,6 @@
 ﻿Public Class BehaviorsViewer
+    Private base As PonyBase
+
     Protected Overrides ReadOnly Property Grid As DataGridView
         Get
             Return BehaviorsGrid
@@ -6,6 +8,7 @@
     End Property
 
     Protected Overrides Iterator Function GetGridRows(ponyBase As PonyBase) As IEnumerable(Of Tuple(Of IPonyIniSourceable, Object()))
+        base = ponyBase
         For Each behavior In ponyBase.Behaviors
             Yield Tuple.Create(Of IPonyIniSourceable, Object())(
                 behavior, {Nothing, Nothing, behavior.Name, GetGroupName(ponyBase, behavior.Group), behavior.Chance})
@@ -37,5 +40,13 @@
             Case colEdit.Index
                 OnEditRequested(New ViewerItemEventArgs(GetBehaviorForRow(e.RowIndex)))
         End Select
+    End Sub
+
+    Private Sub GroupNamesButton_Click(sender As Object, e As EventArgs) Handles GroupNamesButton.Click
+        Using dialog = New GroupNamesDialog(base)
+            If dialog.ShowDialog(Me) = DialogResult.OK Then
+                Me.LoadFor(base)
+            End If
+        End Using
     End Sub
 End Class
