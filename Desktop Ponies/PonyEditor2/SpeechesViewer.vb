@@ -1,4 +1,9 @@
 ﻿Public Class SpeechesViewer
+    Protected Overrides ReadOnly Property Content As PageContent
+        Get
+            Return PageContent.Speeches
+        End Get
+    End Property
     Protected Overrides ReadOnly Property Grid As DataGridView
         Get
             Return SpeechesGrid
@@ -7,7 +12,9 @@
 
     Protected Overrides Iterator Function GetGridRows(ponyBase As PonyBase) As IEnumerable(Of Tuple(Of IPonyIniSourceable, Object()))
         For Each speech In ponyBase.Speeches
-            Yield Tuple.Create(Of IPonyIniSourceable, Object())(speech, {Nothing, speech.Name})
+            Yield Tuple.Create(Of IPonyIniSourceable, Object())(
+                speech, {Nothing, speech.Name, GetGroupName(ponyBase, speech.Group),
+                         Not speech.Skip, speech.Text, GetFileNameRelaxed(speech.SoundFile)})
         Next
     End Function
 

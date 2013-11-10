@@ -259,15 +259,14 @@ Public Class PonyEditor
             Dim behaviorSequencesByName = DetermineBehaviorSequences()
             For Each behavior In PreviewPony.Behaviors
                 Dim followName As String = ""
-                If behavior.OriginalFollowTargetName <> "" Then
-                    followName = behavior.OriginalFollowTargetName
-                Else
-                    If behavior.OriginalDestinationXCoord <> 0 AndAlso behavior.OriginalDestinationYCoord <> 0 Then
+                Select Case behavior.TargetMode
+                    Case TargetMode.Pony
+                        followName = behavior.OriginalFollowTargetName
+                    Case TargetMode.Point
                         followName = behavior.OriginalDestinationXCoord & " , " & behavior.OriginalDestinationYCoord
-                    Else
+                    Case TargetMode.None
                         followName = "Select..."
-                    End If
-                End If
+                End Select
 
                 Dim chance = "N/A"
                 If Not behavior.Skip Then

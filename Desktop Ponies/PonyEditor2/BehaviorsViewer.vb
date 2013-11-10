@@ -1,6 +1,12 @@
 ﻿Public Class BehaviorsViewer
     Private base As PonyBase
 
+    Protected Overrides ReadOnly Property Content As PageContent
+        Get
+            Return PageContent.Behaviors
+        End Get
+    End Property
+
     Protected Overrides ReadOnly Property Grid As DataGridView
         Get
             Return BehaviorsGrid
@@ -11,21 +17,51 @@
         base = ponyBase
         For Each behavior In ponyBase.Behaviors
             Yield Tuple.Create(Of IPonyIniSourceable, Object())(
-                behavior, {Nothing, Nothing, behavior.Name, GetGroupName(ponyBase, behavior.Group), behavior.Chance})
+                behavior, {Nothing, Nothing, behavior.Name, GetGroupName(ponyBase, behavior.Group),
+                           behavior.Chance, behavior.Speed, behavior.AllowedMovement, behavior.MinDuration, behavior.MaxDuration,
+                           GetFileNameRelaxed(behavior.LeftImage.Path), GetFileNameRelaxed(behavior.RightImage.Path),
+                           behavior.StartLineName, behavior.EndLineName, behavior.LinkedBehaviorName,
+                           GetTargetName(behavior), GetTargetImageBehavior(behavior, True), GetTargetImageBehavior(behavior, False)})
         Next
     End Function
 
-    Private Shared Function GetGroupName(ponyBase As PonyBase, groupNumber As Integer) As String
-        If groupNumber = Behavior.AnyGroup Then Return "Any"
-        Dim group = ponyBase.BehaviorGroups.FirstOrDefault(Function(bg) bg.Number = groupNumber)
-        Return If(group Is Nothing, groupNumber.ToString(Globalization.CultureInfo.CurrentCulture), group.Name.ToString())
+    Private Shared Function GetTargetName(behavior As Behavior) As String
+        Select Case behavior.TargetMode
+            Case TargetMode.Pony
+                Return behavior.OriginalFollowTargetName
+            Case TargetMode.Point
+                Return New Vector2(behavior.OriginalDestinationXCoord, behavior.OriginalDestinationYCoord).ToString()
+            Case Else
+                Return Nothing
+        End Select
+    End Function
+
+    Private Shared Function GetTargetImageBehavior(behavior As Behavior, stopped As Boolean) As String
+        If behavior.TargetMode = TargetMode.None Then
+            Return Nothing
+        ElseIf behavior.AutoSelectImagesOnFollow Then
+            Return "[Auto]"
+        Else
+            Return If(stopped, behavior.FollowStoppedBehaviorName, behavior.FollowMovingBehaviorName)
+        End If
     End Function
 
     Private Sub BehaviorsGrid_SortCompare(sender As Object, e As DataGridViewSortCompareEventArgs) Handles BehaviorsGrid.SortCompare
-        If Object.ReferenceEquals(e.Column, colChance) Then
-            e.Handled = True
-            e.SortResult = GetBehaviorForRow(e.RowIndex1).Chance.CompareTo(GetBehaviorForRow(e.RowIndex2).Chance)
-        End If
+        e.Handled = True
+        Select Case e.Column.Index
+            Case colChance.Index
+                e.SortResult = GetBehaviorForRow(e.RowIndex1).Chance.CompareTo(GetBehaviorForRow(e.RowIndex2).Chance)
+            Case colSpeed.Index
+                e.SortResult = GetBehaviorForRow(e.RowIndex1).Speed.CompareTo(GetBehaviorForRow(e.RowIndex2).Speed)
+            Case colMinDuration.Index
+                e.SortResult = GetBehaviorForRow(e.RowIndex1).MinDuration.CompareTo(GetBehaviorForRow(e.RowIndex2).MinDuration)
+            Case colMaxDuration.Index
+                e.SortResult = GetBehaviorForRow(e.RowIndex1).MaxDuration.CompareTo(GetBehaviorForRow(e.RowIndex2).MaxDuration)
+            Case colLeftImage.Index, colRightImage.Index
+                e.SortResult = PathEquality.Comparer.Compare(e.CellValue1, e.CellValue2)
+            Case Else
+                e.Handled = False
+        End Select
     End Sub
 
     Private Function GetBehaviorForRow(rowIndex As Integer) As Behavior

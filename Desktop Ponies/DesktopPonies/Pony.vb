@@ -666,6 +666,11 @@ End Class
 #End Region
 
 #Region "Behavior class"
+Public Enum TargetMode
+    None
+    Point
+    Pony
+End Enum
 Public Class Behavior
     Implements IPonyIniSourceable, IReferential
     Private ReadOnly pony As PonyBase
@@ -770,6 +775,14 @@ Public Class Behavior
         Set(value As String)
             _originalFollowTargetName = Argument.EnsureNotNull(value, "value")
         End Set
+    End Property
+
+    Public ReadOnly Property TargetMode As TargetMode
+        Get
+            Return If(OriginalFollowTargetName <> "", TargetMode.Pony,
+                      If(OriginalDestinationXCoord <> 0 OrElse OriginalDestinationYCoord <> 0, TargetMode.Point,
+                         TargetMode.None))
+        End Get
     End Property
 
     Public Property FollowStoppedBehaviorName As CaseInsensitiveString
@@ -3344,7 +3357,7 @@ Public Class Pony2
             Throw New ArgumentException("base must contain at least one behavior that can be used at random in the 'Any' group.", "base")
         End If
         Dim fallbackStationaryBehavior = GetBehaviorMatching(
-            Function(b) b.SpeedInPixelsPerSecond = 0 AndAlso Not b.Skip AndAlso Not BehaviorHasTarget(b),
+            Function(b) b.SpeedInPixelsPerSecond = 0 AndAlso Not b.Skip AndAlso b.TargetMode = TargetMode.None,
             Function(b) b.SpeedInPixelsPerSecond = 0)
         _mouseoverBehavior = If(GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
                                 fallbackStationaryBehavior)
@@ -3669,18 +3682,6 @@ Public Class Pony2
             Next
         Next
         Return Nothing
-    End Function
-
-    ''' <summary>
-    ''' Indicates if the specified behavior has a follow target, or screen destination specified.
-    ''' </summary>
-    ''' <param name="behavior">The behavior to check for a follow target object or destination.</param>
-    ''' <returns>Returns true if a follow target is specified (regardless of if a matching target object is present) or a screen
-    ''' destination is specified.</returns>
-    Private Shared Function BehaviorHasTarget(behavior As Behavior) As Boolean
-        Return behavior.OriginalFollowTargetName <> "" OrElse
-            behavior.OriginalDestinationXCoord <> 0 OrElse
-            behavior.OriginalDestinationYCoord <> 0
     End Function
 
     ''' <summary>

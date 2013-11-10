@@ -23,6 +23,17 @@ Partial Class EffectsViewer
         Me.colPreview = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRepeatDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colFollowPony = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colPreventLoop = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colLeftImage = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRightImage = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colLeftPlacement = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colLeftCenter = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRightPlacement = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRightCenter = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SuspendLayout()
         '
         'EffectsGrid
@@ -30,14 +41,16 @@ Partial Class EffectsViewer
         Me.EffectsGrid.AllowUserToAddRows = False
         Me.EffectsGrid.AllowUserToDeleteRows = False
         Me.EffectsGrid.AllowUserToOrderColumns = True
+        Me.EffectsGrid.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.EffectsGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.EffectsGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colPreview, Me.colEdit, Me.colName})
-        Me.EffectsGrid.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.EffectsGrid.Location = New System.Drawing.Point(0, 0)
+        Me.EffectsGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colPreview, Me.colEdit, Me.colName, Me.colDuration, Me.colRepeatDelay, Me.colBehavior, Me.colFollowPony, Me.colPreventLoop, Me.colLeftImage, Me.colRightImage, Me.colLeftPlacement, Me.colLeftCenter, Me.colRightPlacement, Me.colRightCenter})
+        Me.EffectsGrid.Location = New System.Drawing.Point(3, 32)
         Me.EffectsGrid.Name = "EffectsGrid"
         Me.EffectsGrid.ReadOnly = True
-        Me.EffectsGrid.Size = New System.Drawing.Size(500, 300)
-        Me.EffectsGrid.TabIndex = 0
+        Me.EffectsGrid.Size = New System.Drawing.Size(494, 265)
+        Me.EffectsGrid.TabIndex = 1
         '
         'colPreview
         '
@@ -65,13 +78,90 @@ Partial Class EffectsViewer
         Me.colName.HeaderText = "Name"
         Me.colName.Name = "colName"
         Me.colName.ReadOnly = True
-        Me.colName.Width = 175
+        Me.colName.Width = 150
+        '
+        'colDuration
+        '
+        Me.colDuration.HeaderText = "Duration"
+        Me.colDuration.Name = "colDuration"
+        Me.colDuration.ReadOnly = True
+        Me.colDuration.Width = 60
+        '
+        'colRepeatDelay
+        '
+        Me.colRepeatDelay.HeaderText = "Repeat Delay"
+        Me.colRepeatDelay.Name = "colRepeatDelay"
+        Me.colRepeatDelay.ReadOnly = True
+        '
+        'colBehavior
+        '
+        Me.colBehavior.HeaderText = "Behavior"
+        Me.colBehavior.Name = "colBehavior"
+        Me.colBehavior.ReadOnly = True
+        Me.colBehavior.Width = 150
+        '
+        'colFollowPony
+        '
+        Me.colFollowPony.HeaderText = "Follow Pony"
+        Me.colFollowPony.Name = "colFollowPony"
+        Me.colFollowPony.ReadOnly = True
+        Me.colFollowPony.Width = 70
+        '
+        'colPreventLoop
+        '
+        Me.colPreventLoop.HeaderText = "Prevent Loop"
+        Me.colPreventLoop.Name = "colPreventLoop"
+        Me.colPreventLoop.ReadOnly = True
+        Me.colPreventLoop.Width = 80
+        '
+        'colLeftImage
+        '
+        Me.colLeftImage.HeaderText = "Left Image"
+        Me.colLeftImage.Name = "colLeftImage"
+        Me.colLeftImage.ReadOnly = True
+        Me.colLeftImage.Width = 150
+        '
+        'colRightImage
+        '
+        Me.colRightImage.HeaderText = "Right Image"
+        Me.colRightImage.Name = "colRightImage"
+        Me.colRightImage.ReadOnly = True
+        Me.colRightImage.Width = 150
+        '
+        'colLeftPlacement
+        '
+        Me.colLeftPlacement.HeaderText = "Left Placement"
+        Me.colLeftPlacement.Name = "colLeftPlacement"
+        Me.colLeftPlacement.ReadOnly = True
+        Me.colLeftPlacement.Width = 110
+        '
+        'colLeftCenter
+        '
+        Me.colLeftCenter.HeaderText = "Left Centering"
+        Me.colLeftCenter.Name = "colLeftCenter"
+        Me.colLeftCenter.ReadOnly = True
+        Me.colLeftCenter.Width = 110
+        '
+        'colRightPlacement
+        '
+        Me.colRightPlacement.HeaderText = "Right Placement"
+        Me.colRightPlacement.Name = "colRightPlacement"
+        Me.colRightPlacement.ReadOnly = True
+        Me.colRightPlacement.Width = 110
+        '
+        'colRightCenter
+        '
+        Me.colRightCenter.HeaderText = "Right Centering"
+        Me.colRightCenter.Name = "colRightCenter"
+        Me.colRightCenter.ReadOnly = True
+        Me.colRightCenter.Width = 110
         '
         'EffectsViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.Controls.Add(Me.EffectsGrid)
         Me.Name = "EffectsViewer"
+        Me.Controls.SetChildIndex(Me.EffectsGrid, 0)
         Me.ResumeLayout(False)
 
     End Sub
@@ -79,5 +169,16 @@ Partial Class EffectsViewer
     Friend WithEvents colPreview As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colEdit As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colName As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colDuration As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colRepeatDelay As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colBehavior As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents colPreventLoop As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents colLeftImage As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colRightImage As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colLeftPlacement As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colLeftCenter As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colRightPlacement As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colRightCenter As System.Windows.Forms.DataGridViewTextBoxColumn
 
 End Class

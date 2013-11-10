@@ -22,6 +22,12 @@ Partial Class InteractionsViewer
         Me.InteractionsGrid = New System.Windows.Forms.DataGridView()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colChance = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colProximity = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colReactivationDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colInteractsWith = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colTargets = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colBehaviors = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SuspendLayout()
         '
         'InteractionsGrid
@@ -29,14 +35,16 @@ Partial Class InteractionsViewer
         Me.InteractionsGrid.AllowUserToAddRows = False
         Me.InteractionsGrid.AllowUserToDeleteRows = False
         Me.InteractionsGrid.AllowUserToOrderColumns = True
+        Me.InteractionsGrid.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.InteractionsGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.InteractionsGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colEdit, Me.colName})
-        Me.InteractionsGrid.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.InteractionsGrid.Location = New System.Drawing.Point(0, 0)
+        Me.InteractionsGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colEdit, Me.colName, Me.colChance, Me.colProximity, Me.colReactivationDelay, Me.colInteractsWith, Me.colTargets, Me.colBehaviors})
+        Me.InteractionsGrid.Location = New System.Drawing.Point(0, 32)
         Me.InteractionsGrid.Name = "InteractionsGrid"
         Me.InteractionsGrid.ReadOnly = True
-        Me.InteractionsGrid.Size = New System.Drawing.Size(500, 300)
-        Me.InteractionsGrid.TabIndex = 0
+        Me.InteractionsGrid.Size = New System.Drawing.Size(497, 265)
+        Me.InteractionsGrid.TabIndex = 1
         '
         'colEdit
         '
@@ -54,18 +62,66 @@ Partial Class InteractionsViewer
         Me.colName.HeaderText = "Name"
         Me.colName.Name = "colName"
         Me.colName.ReadOnly = True
-        Me.colName.Width = 175
+        Me.colName.Width = 150
+        '
+        'colChance
+        '
+        Me.colChance.HeaderText = "Chance"
+        Me.colChance.Name = "colChance"
+        Me.colChance.ReadOnly = True
+        Me.colChance.Width = 55
+        '
+        'colProximity
+        '
+        Me.colProximity.HeaderText = "Proximity"
+        Me.colProximity.Name = "colProximity"
+        Me.colProximity.ReadOnly = True
+        Me.colProximity.Width = 55
+        '
+        'colReactivationDelay
+        '
+        Me.colReactivationDelay.HeaderText = "Reactiviation Delay"
+        Me.colReactivationDelay.Name = "colReactivationDelay"
+        Me.colReactivationDelay.ReadOnly = True
+        Me.colReactivationDelay.Width = 125
+        '
+        'colInteractsWith
+        '
+        Me.colInteractsWith.HeaderText = "Interacts With"
+        Me.colInteractsWith.Name = "colInteractsWith"
+        Me.colInteractsWith.ReadOnly = True
+        '
+        'colTargets
+        '
+        Me.colTargets.HeaderText = "Targets"
+        Me.colTargets.Name = "colTargets"
+        Me.colTargets.ReadOnly = True
+        Me.colTargets.Width = 300
+        '
+        'colBehaviors
+        '
+        Me.colBehaviors.HeaderText = "Behaviors"
+        Me.colBehaviors.Name = "colBehaviors"
+        Me.colBehaviors.ReadOnly = True
+        Me.colBehaviors.Width = 150
         '
         'InteractionsViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.Controls.Add(Me.InteractionsGrid)
         Me.Name = "InteractionsViewer"
+        Me.Controls.SetChildIndex(Me.InteractionsGrid, 0)
         Me.ResumeLayout(False)
 
     End Sub
     Friend WithEvents InteractionsGrid As System.Windows.Forms.DataGridView
     Friend WithEvents colEdit As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colName As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colChance As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colProximity As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colReactivationDelay As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colInteractsWith As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colTargets As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colBehaviors As System.Windows.Forms.DataGridViewTextBoxColumn
 
 End Class

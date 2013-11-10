@@ -537,6 +537,7 @@ Public Class PonyEditorForm2
                         viewer = New SpeechesViewer()
                 End Select
                 QueueWorkItem(Sub() viewer.LoadFor(pageRef.PonyBase))
+                AddHandler viewer.NewRequested, AddressOf Viewer_NewRequested
                 AddHandler viewer.PreviewRequested, AddressOf Viewer_PreviewRequested
                 AddHandler viewer.EditRequested, AddressOf Viewer_EditRequested
                 childControl = viewer
@@ -676,6 +677,11 @@ Public Class PonyEditorForm2
                     End Sub)
             Next
         End SyncLock
+    End Sub
+
+    Private Sub Viewer_NewRequested(sender As Object, e As ItemsViewerBase.ViewerNewItemEventArgs)
+        Dim ref = DirectCast(DirectCast(sender, Control).Tag, PageRef)
+        OpenTab(New PageRef(ref.PonyBase, ref.PageContent.ItemCollectionToItem()))
     End Sub
 
     Private Sub Viewer_PreviewRequested(sender As Object, e As ItemsViewerBase.ViewerItemEventArgs)

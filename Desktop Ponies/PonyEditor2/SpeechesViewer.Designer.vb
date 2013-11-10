@@ -22,6 +22,10 @@ Partial Class SpeechesViewer
         Me.SpeechesGrid = New System.Windows.Forms.DataGridView()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRandom = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colLine = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSoundFile = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SuspendLayout()
         '
         'SpeechesGrid
@@ -29,14 +33,16 @@ Partial Class SpeechesViewer
         Me.SpeechesGrid.AllowUserToAddRows = False
         Me.SpeechesGrid.AllowUserToDeleteRows = False
         Me.SpeechesGrid.AllowUserToOrderColumns = True
+        Me.SpeechesGrid.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.SpeechesGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.SpeechesGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colEdit, Me.colName})
-        Me.SpeechesGrid.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.SpeechesGrid.Location = New System.Drawing.Point(0, 0)
+        Me.SpeechesGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colEdit, Me.colName, Me.colGroup, Me.colRandom, Me.colLine, Me.colSoundFile})
+        Me.SpeechesGrid.Location = New System.Drawing.Point(3, 32)
         Me.SpeechesGrid.Name = "SpeechesGrid"
         Me.SpeechesGrid.ReadOnly = True
-        Me.SpeechesGrid.Size = New System.Drawing.Size(500, 300)
-        Me.SpeechesGrid.TabIndex = 0
+        Me.SpeechesGrid.Size = New System.Drawing.Size(494, 265)
+        Me.SpeechesGrid.TabIndex = 1
         '
         'colEdit
         '
@@ -54,18 +60,51 @@ Partial Class SpeechesViewer
         Me.colName.HeaderText = "Name"
         Me.colName.Name = "colName"
         Me.colName.ReadOnly = True
-        Me.colName.Width = 175
+        Me.colName.Width = 150
+        '
+        'colGroup
+        '
+        Me.colGroup.HeaderText = "Group"
+        Me.colGroup.Name = "colGroup"
+        Me.colGroup.ReadOnly = True
+        Me.colGroup.Width = 75
+        '
+        'colRandom
+        '
+        Me.colRandom.HeaderText = "Use Randomly"
+        Me.colRandom.Name = "colRandom"
+        Me.colRandom.ReadOnly = True
+        Me.colRandom.Width = 90
+        '
+        'colLine
+        '
+        Me.colLine.HeaderText = "Line"
+        Me.colLine.Name = "colLine"
+        Me.colLine.ReadOnly = True
+        Me.colLine.Width = 325
+        '
+        'colSoundFile
+        '
+        Me.colSoundFile.HeaderText = "Sound File"
+        Me.colSoundFile.Name = "colSoundFile"
+        Me.colSoundFile.ReadOnly = True
+        Me.colSoundFile.Width = 150
         '
         'SpeechesViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.Controls.Add(Me.SpeechesGrid)
         Me.Name = "SpeechesViewer"
+        Me.Controls.SetChildIndex(Me.SpeechesGrid, 0)
         Me.ResumeLayout(False)
 
     End Sub
     Friend WithEvents SpeechesGrid As System.Windows.Forms.DataGridView
     Friend WithEvents colEdit As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colName As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colGroup As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colRandom As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents colLine As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colSoundFile As System.Windows.Forms.DataGridViewTextBoxColumn
 
 End Class

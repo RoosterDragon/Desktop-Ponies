@@ -38,10 +38,7 @@
 
         AutoSelectImageCheckbox.Checked = behaviorToChange.AutoSelectImagesOnFollow
 
-        Dim targetIsPoint = behaviorToChange.OriginalDestinationXCoord <> 0 OrElse behaviorToChange.OriginalDestinationYCoord <> 0
-        Dim targetIsPony = False
         If behaviorToChange.OriginalFollowTargetName <> "" Then
-            targetIsPony = True
             FollowComboBox.SelectedItem = behaviorToChange.OriginalFollowTargetName
         End If
 
@@ -53,21 +50,18 @@
             StoppedComboBox.SelectedItem = behaviorToChange.FollowStoppedBehaviorName
         End If
 
-        If targetIsPoint Then
-            PointX.Value = behaviorToChange.OriginalDestinationXCoord
-            PointY.Value = behaviorToChange.OriginalDestinationYCoord
-        End If
+        PointX.Value = behaviorToChange.OriginalDestinationXCoord
+        PointY.Value = behaviorToChange.OriginalDestinationYCoord
 
-        If targetIsPony AndAlso Not targetIsPoint Then
-            FollowOption.Checked = True
-        ElseIf Not targetIsPony AndAlso targetIsPoint Then
-            GoToPointOption.Checked = True
-        ElseIf targetIsPony AndAlso targetIsPoint Then
-            FollowOption.Checked = True
-        Else
-            NoTargetOption.Checked = True
-            ponyThumbnail = Nothing
-        End If
+        Select Case behaviorToChange.TargetMode
+            Case TargetMode.Pony
+                FollowOption.Checked = True
+            Case TargetMode.Point
+                GoToPointOption.Checked = True
+            Case TargetMode.None
+                NoTargetOption.Checked = True
+                ponyThumbnail = Nothing
+        End Select
 
         RedrawFollowPoint()
 
