@@ -92,8 +92,8 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub PonyEditorForm2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Dim screenArea = Screen.FromHandle(Handle).WorkingArea.Size
-        Size = New Size(CInt(screenArea.Width * 0.8), screenArea.Height)
+        Dim screenArea = Screen.FromControl(Me).WorkingArea.Size
+        Size = New Size(Math.Min(screenArea.Width, CInt(Width * 1.2)), Math.Min(screenArea.Height, CInt(Height * 1.2)))
         CenterToScreen()
         worker.QueueTask(Sub()
                              Output.TabPages.Clear()

@@ -53,6 +53,11 @@ Partial Class PonyEditorForm2
         Me.Output = New System.Windows.Forms.TabControl()
         Me.IssuesPage = New System.Windows.Forms.TabPage()
         Me.IssuesGrid = New System.Windows.Forms.DataGridView()
+        Me.colFatal = New System.Windows.Forms.DataGridViewImageColumn()
+        Me.colIndex = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.BehaviorsPage = New System.Windows.Forms.TabPage()
         Me.PonyNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.PreviewContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -63,11 +68,6 @@ Partial Class PonyEditorForm2
         Me.SpeechesContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ItemCollectionOrItemNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.OpenContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.colFatal = New System.Windows.Forms.DataGridViewImageColumn()
-        Me.colIndex = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colDescription = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colFallback = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colSource = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
@@ -97,8 +97,8 @@ Partial Class PonyEditorForm2
         '
         Me.EditingArea.Panel2.Controls.Add(Me.DocumentsView)
         Me.EditingArea.Panel2MinSize = 100
-        Me.EditingArea.Size = New System.Drawing.Size(784, 253)
-        Me.EditingArea.SplitterDistance = 535
+        Me.EditingArea.Size = New System.Drawing.Size(984, 353)
+        Me.EditingArea.SplitterDistance = 735
         Me.EditingArea.TabIndex = 0
         '
         'Documents
@@ -107,7 +107,7 @@ Partial Class PonyEditorForm2
         Me.Documents.Location = New System.Drawing.Point(0, 0)
         Me.Documents.Name = "Documents"
         Me.Documents.SelectedIndex = 0
-        Me.Documents.Size = New System.Drawing.Size(535, 253)
+        Me.Documents.Size = New System.Drawing.Size(735, 353)
         Me.Documents.TabIndex = 0
         '
         'DocumentsView
@@ -117,7 +117,7 @@ Partial Class PonyEditorForm2
         Me.DocumentsView.HotTracking = True
         Me.DocumentsView.Location = New System.Drawing.Point(0, 0)
         Me.DocumentsView.Name = "DocumentsView"
-        Me.DocumentsView.Size = New System.Drawing.Size(245, 253)
+        Me.DocumentsView.Size = New System.Drawing.Size(245, 353)
         Me.DocumentsView.TabIndex = 0
         '
         'EditorToolStrip
@@ -126,7 +126,7 @@ Partial Class PonyEditorForm2
         Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.ReloadButton, Me.PreviewRestartButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
-        Me.EditorToolStrip.Size = New System.Drawing.Size(784, 25)
+        Me.EditorToolStrip.Size = New System.Drawing.Size(984, 25)
         Me.EditorToolStrip.TabIndex = 0
         Me.EditorToolStrip.Text = "Item Operations"
         '
@@ -275,9 +275,9 @@ Partial Class PonyEditorForm2
         'EditorStatusStrip
         '
         Me.EditorStatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditorStatus, Me.EditorProgressBar})
-        Me.EditorStatusStrip.Location = New System.Drawing.Point(0, 490)
+        Me.EditorStatusStrip.Location = New System.Drawing.Point(0, 590)
         Me.EditorStatusStrip.Name = "EditorStatusStrip"
-        Me.EditorStatusStrip.Size = New System.Drawing.Size(784, 22)
+        Me.EditorStatusStrip.Size = New System.Drawing.Size(984, 22)
         Me.EditorStatusStrip.TabIndex = 2
         Me.EditorStatusStrip.Text = "StatusStrip1"
         '
@@ -303,11 +303,11 @@ Partial Class PonyEditorForm2
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Output.Controls.Add(Me.IssuesPage)
         Me.Output.Controls.Add(Me.BehaviorsPage)
-        Me.Output.Location = New System.Drawing.Point(0, 287)
+        Me.Output.Location = New System.Drawing.Point(0, 387)
         Me.Output.Multiline = True
         Me.Output.Name = "Output"
         Me.Output.SelectedIndex = 0
-        Me.Output.Size = New System.Drawing.Size(784, 200)
+        Me.Output.Size = New System.Drawing.Size(984, 200)
         Me.Output.TabIndex = 1
         '
         'IssuesPage
@@ -316,7 +316,7 @@ Partial Class PonyEditorForm2
         Me.IssuesPage.Location = New System.Drawing.Point(4, 22)
         Me.IssuesPage.Name = "IssuesPage"
         Me.IssuesPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.IssuesPage.Size = New System.Drawing.Size(776, 174)
+        Me.IssuesPage.Size = New System.Drawing.Size(976, 174)
         Me.IssuesPage.TabIndex = 1
         Me.IssuesPage.Text = "Issues"
         Me.IssuesPage.UseVisualStyleBackColor = True
@@ -334,8 +334,47 @@ Partial Class PonyEditorForm2
         Me.IssuesGrid.Name = "IssuesGrid"
         Me.IssuesGrid.ReadOnly = True
         Me.IssuesGrid.ShowEditingIcon = False
-        Me.IssuesGrid.Size = New System.Drawing.Size(770, 168)
+        Me.IssuesGrid.Size = New System.Drawing.Size(970, 168)
         Me.IssuesGrid.TabIndex = 0
+        '
+        'colFatal
+        '
+        Me.colFatal.HeaderText = ""
+        Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
+        Me.colFatal.Name = "colFatal"
+        Me.colFatal.ReadOnly = True
+        Me.colFatal.ToolTipText = "Does this issue prevent the item being used?"
+        Me.colFatal.Width = 35
+        '
+        'colIndex
+        '
+        Me.colIndex.HeaderText = "Property"
+        Me.colIndex.Name = "colIndex"
+        Me.colIndex.ReadOnly = True
+        Me.colIndex.ToolTipText = "What setting is causing the issue?"
+        '
+        'colDescription
+        '
+        Me.colDescription.HeaderText = "Description"
+        Me.colDescription.Name = "colDescription"
+        Me.colDescription.ReadOnly = True
+        Me.colDescription.ToolTipText = "A description of the issue."
+        Me.colDescription.Width = 350
+        '
+        'colFallback
+        '
+        Me.colFallback.HeaderText = "Fallback"
+        Me.colFallback.Name = "colFallback"
+        Me.colFallback.ReadOnly = True
+        Me.colFallback.ToolTipText = "For non-fatal issues: the fallback value used."
+        '
+        'colSource
+        '
+        Me.colSource.HeaderText = "Source"
+        Me.colSource.Name = "colSource"
+        Me.colSource.ReadOnly = True
+        Me.colSource.ToolTipText = "The source text that has an issue."
+        Me.colSource.Width = 250
         '
         'BehaviorsPage
         '
@@ -401,55 +440,17 @@ Partial Class PonyEditorForm2
         Me.OpenContextMenuItem.Size = New System.Drawing.Size(103, 22)
         Me.OpenContextMenuItem.Text = "Open"
         '
-        'colFatal
-        '
-        Me.colFatal.HeaderText = ""
-        Me.colFatal.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Zoom
-        Me.colFatal.Name = "colFatal"
-        Me.colFatal.ReadOnly = True
-        Me.colFatal.ToolTipText = "Does this issue prevent the item being used?"
-        Me.colFatal.Width = 35
-        '
-        'colIndex
-        '
-        Me.colIndex.HeaderText = "Property"
-        Me.colIndex.Name = "colIndex"
-        Me.colIndex.ReadOnly = True
-        Me.colIndex.ToolTipText = "What setting is causing the issue?"
-        '
-        'colDescription
-        '
-        Me.colDescription.HeaderText = "Description"
-        Me.colDescription.Name = "colDescription"
-        Me.colDescription.ReadOnly = True
-        Me.colDescription.ToolTipText = "A description of the issue."
-        Me.colDescription.Width = 350
-        '
-        'colFallback
-        '
-        Me.colFallback.HeaderText = "Fallback"
-        Me.colFallback.Name = "colFallback"
-        Me.colFallback.ReadOnly = True
-        Me.colFallback.ToolTipText = "For non-fatal issues: the fallback value used."
-        '
-        'colSource
-        '
-        Me.colSource.HeaderText = "Source"
-        Me.colSource.Name = "colSource"
-        Me.colSource.ReadOnly = True
-        Me.colSource.ToolTipText = "The source text that has an issue."
-        Me.colSource.Width = 250
-        '
         'PonyEditorForm2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(784, 512)
+        Me.ClientSize = New System.Drawing.Size(984, 612)
         Me.Controls.Add(Me.Output)
         Me.Controls.Add(Me.EditorStatusStrip)
         Me.Controls.Add(Me.EditingArea)
         Me.Controls.Add(Me.EditorToolStrip)
         Me.KeyPreview = True
+        Me.MinimumSize = New System.Drawing.Size(600, 505)
         Me.Name = "PonyEditorForm2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Pony Editor - Desktop Ponies"
