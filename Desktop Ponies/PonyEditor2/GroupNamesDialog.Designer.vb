@@ -104,8 +104,8 @@ Partial Class GroupNamesDialog
         '
         Me.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill
         Me.colName.HeaderText = "Name"
+        Me.colName.MaxInputLength = 100
         Me.colName.Name = "colName"
-        Me.colName.ReadOnly = True
         '
         'GroupNamesDialog
         '

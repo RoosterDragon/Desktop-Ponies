@@ -5,6 +5,7 @@
     Public Sub New(base As PonyBase)
         Me.base = Argument.EnsureNotNull(base, "base")
         InitializeComponent()
+        Icon = My.Resources.Twilight
     End Sub
 
     Private Sub GroupNamesDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
