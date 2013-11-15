@@ -83,6 +83,15 @@ Change Log
 
 Latest changes:
 
+v1.42.3.2:
+- Added "party hard" Twilight animation by ponynoia.
+- Fixed some ponies getting stuck in the doorway when returning to houses.
+- Fixed reloading options sometimes causing a crash if ponies were running.
+- Fix an error where unrecognised tags against a pony were removed rather than ignored if you edited the tags.
+- If a behavior has a min duration higher than the max duration, the values will be silently swapped around to remain sensible.
+- Fixed a bug where old style speech definitions in .ini files were being ignored.
+- Fixed a few things in the pony editor so they could handle ponies without any behaviors.
+
 v1.42.3.1:
 - Fixed interactions not respecting reactivation delay.
 - Prevented crash when interacting with targets lacking the required behaviors.
