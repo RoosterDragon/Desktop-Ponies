@@ -559,7 +559,7 @@ Public Class ItemEditorBase
             Return False
         End If
 
-        If original.Name <> Edited.Name Then
+        If Not IsNewItem AndAlso original.Name <> Edited.Name Then
             If MessageBox.Show(Me, "Renaming this " & ItemTypeName & " will break other references. Continue with save?",
                                "Rename?", MessageBoxButtons.YesNo,
                                MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No Then

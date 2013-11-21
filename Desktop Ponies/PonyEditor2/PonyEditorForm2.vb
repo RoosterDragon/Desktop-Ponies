@@ -108,9 +108,15 @@ Public Class PonyEditorForm2
                                          ' Sort ponies by directory name.
                                          Return String.Compare(
                                              refX.PonyBase.Directory, GetPageRef(y).PonyBase.Directory, StringComparison.OrdinalIgnoreCase)
-                                     Else
+                                     ElseIf x.Parent IsNot Nothing AndAlso y.Parent IsNot Nothing Then
                                          ' Leave other nodes in their insertion order.
                                          Return x.Index.CompareTo(y.Index)
+                                     ElseIf x.Parent IsNot Nothing Then
+                                         Return -1
+                                     ElseIf y.Parent IsNot Nothing Then
+                                         Return 1
+                                     Else
+                                         Return 0
                                      End If
                                  End Function)
 
@@ -753,8 +759,10 @@ Public Class PonyEditorForm2
 
         nodeLookup.Remove(node.Name)
         ref.Item = ActiveItemEditor.Item
+        Dim pageRefKey = ref.ToString()
+        Documents.SelectedTab.Name = pageRefKey
         Documents.SelectedTab.Text = GetTabText(ref)
-        node.Name = ref.ToString()
+        node.Name = pageRefKey
         node.Text = ref.Item.Name
         nodeLookup.Add(node.Name, node)
 
@@ -843,8 +851,10 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub PonyEditorForm2_Deactivate(sender As Object, e As EventArgs) Handles MyBase.Deactivate
-        previewHiddenForDeactivation = preview.PreviewVisible
-        If preview IsNot Nothing Then preview.HidePreview()
+        If preview IsNot Nothing Then
+            previewHiddenForDeactivation = preview.PreviewVisible
+            preview.HidePreview()
+        End If
     End Sub
 
     Private Sub PonyEditorForm2_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
