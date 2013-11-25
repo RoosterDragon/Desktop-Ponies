@@ -679,6 +679,18 @@
         {
             get { return GetButtonsFromNative(Control.MouseButtons); }
         }
+        /// <summary>
+        /// Gets a value indicating whether the interface has input focus.
+        /// </summary>
+        public bool HasFocus
+        {
+            get
+            {
+                bool hasFocus = false;
+                ApplicationInvoke(() => hasFocus = form.ContainsFocus);
+                return hasFocus;
+            }
+        }
         #endregion
 
         #region Events

@@ -96,6 +96,10 @@
         /// Gets the mouse buttons which are currently held down.
         /// </summary>
         SimpleMouseButtons MouseButtonsDown { get; }
+        /// <summary>
+        /// Gets a value indicating whether the interface has input focus.
+        /// </summary>
+        bool HasFocus { get; }
 
         /// <summary>
         /// Occurs when a key is pressed while the interface has focus.

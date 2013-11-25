@@ -1151,6 +1151,27 @@
         public bool IsAlphaBlended { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether the interface has input focus.
+        /// </summary>
+        public bool HasFocus
+        {
+            get
+            {
+                bool hasFocus = false;
+                ApplicationInvoke(() =>
+                    {
+                        foreach (var window in drawOrderedWindows)
+                            if (window.HasFocus)
+                            {
+                                hasFocus = true;
+                                break;
+                            }
+                    });
+                return hasFocus;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the FrameRecordCollector for debugging purposes.
         /// </summary>
         internal AnimationLoopBase.FrameRecordCollector Collector { get; set; }
