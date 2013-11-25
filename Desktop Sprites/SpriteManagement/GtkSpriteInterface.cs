@@ -1099,7 +1099,8 @@
             get
             {
                 int x, y;
-                (drawOrderedWindows.Count > 0 ? drawOrderedWindows[0].Display : Display.Default).GetPointer(out x, out y);
+                ModifierType mod;
+                GetPointer(out x, out y, out mod);
                 return new SD.Point(x, y);
             }
         }
@@ -1111,18 +1112,36 @@
             get
             {
                 int x, y;
-                ModifierType mask;
-                (drawOrderedWindows.Count > 0 ? drawOrderedWindows[0].Display : Display.Default).GetPointer(out x, out y, out mask);
+                ModifierType mod;
+                GetPointer(out x, out y, out mod);
                 SimpleMouseButtons buttons = SimpleMouseButtons.None;
-                if ((mask & ModifierType.Button1Mask) == ModifierType.Button1Mask)
+                if ((mod & ModifierType.Button1Mask) == ModifierType.Button1Mask)
                     buttons |= SimpleMouseButtons.Left;
-                if ((mask & ModifierType.Button2Mask) == ModifierType.Button2Mask)
+                if ((mod & ModifierType.Button2Mask) == ModifierType.Button2Mask)
                     buttons |= SimpleMouseButtons.Middle;
-                if ((mask & ModifierType.Button3Mask) == ModifierType.Button3Mask)
+                if ((mod & ModifierType.Button3Mask) == ModifierType.Button3Mask)
                     buttons |= SimpleMouseButtons.Right;
                 return buttons;
             }
         }
+
+        /// <summary>
+        /// Gets the mouse pointer state.
+        /// </summary>
+        /// <param name="x">When this method returns, contains the x location of the mouse in screen coordinates.</param>
+        /// <param name="y">When this method returns, contains the y location of the mouse in screen coordinates.</param>
+        /// <param name="mod">When this method returns, contains the state of the modifier keys and mouse buttons.</param>
+        private void GetPointer(out int x, out int y, out ModifierType mod)
+        {
+            int x1 = 0, y1 = 0;
+            ModifierType mod1 = ModifierType.None;
+            ApplicationInvoke(() =>
+                (drawOrderedWindows.Count > 0 ? drawOrderedWindows[0].Display : Display.Default).GetPointer(out x1, out y1, out mod1));
+            x = x1;
+            y = y1;
+            mod = mod1;
+        }
+
 
         /// <summary>
         /// Gets a value indicating whether alpha blending is in use. If true, pixels which are partially transparent will be blended with
@@ -1167,7 +1186,6 @@
             if (button == SimpleMouseButtons.None)
                 return;
             mouseDownTime = DateTime.UtcNow;
-            MouseDown.Raise(this, () => new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot));
         }
         /// <summary>
         /// Raised when a mouse button has been released.
@@ -1187,7 +1205,6 @@
                 Settings.Default).DoubleClickTime;
             if (DateTime.UtcNow - mouseDownTime <= TimeSpan.FromMilliseconds(doubleClickMillisesonds))
                 MouseClick.Raise(this, e);
-            MouseUp.Raise(this, e);
         }
         /// <summary>
         /// Raised when a key has been pressed.
@@ -1205,17 +1222,9 @@
         /// </summary>
         public event EventHandler<SimpleKeyEventArgs> KeyPress;
         /// <summary>
-        /// Occurs when the mouse pointer is over a window and a mouse button is pressed.
-        /// </summary>
-        public event EventHandler<SimpleMouseEventArgs> MouseDown;
-        /// <summary>
         /// Occurs when a window is clicked by the mouse.
         /// </summary>
         public event EventHandler<SimpleMouseEventArgs> MouseClick;
-        /// <summary>
-        /// Occurs when the mouse pointer is over a window and a mouse button is released.
-        /// </summary>
-        public event EventHandler<SimpleMouseEventArgs> MouseUp;
         /// <summary>
         /// Occurs when the interface is closed.
         /// </summary>

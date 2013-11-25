@@ -1202,7 +1202,7 @@
         /// Draws the sprites.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
-        protected virtual void Draw()
+        private void Draw()
         {
             if (runner == null)
                 EnsureNotDisposed();

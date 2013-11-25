@@ -38,7 +38,6 @@ Public Class EditorPonyAnimator
     End Sub
 
     Public Overrides Sub Pause(hide As Boolean)
-        If hide Then Draw()
         MyBase.Pause(hide)
     End Sub
 
