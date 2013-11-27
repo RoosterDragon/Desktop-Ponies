@@ -18,7 +18,6 @@ Public Class PonyEditorForm2
     Private previewStartBehavior As Behavior
     Private contextRef As PageRef
     Private previousItemEditor As ItemEditorBase
-    Private previewHiddenForDeactivation As Boolean
 
     Private workingCount As Integer
 
@@ -26,6 +25,10 @@ Public Class PonyEditorForm2
     Private ReadOnly validationGuard As New Object()
     Private regenerateIndex As Integer
     Private ReadOnly regenerateGuard As New Object()
+
+    Private previewHiddenForUnfocus As Boolean
+    Private reshowingPreviewAfterUnfocus As Boolean
+    Private formLostFocusAndPendingActivationChange As Boolean
 
     Private Class PageRef
         Private ReadOnly _ponyBase As PonyBase
@@ -171,8 +174,7 @@ Public Class PonyEditorForm2
         worker.QueueTask(AddressOf DocumentsView.Sort)
         worker.QueueTask(Sub()
                              poniesNode.Expand()
-                             If preview IsNot Nothing Then preview.Dispose()
-                             preview = New PonyPreview(Me, ponies)
+                             CreatePreview()
                              EditorStatus.Text = "Ready"
                              EditorProgressBar.Value = 1
                              EditorProgressBar.Maximum = 1
@@ -243,6 +245,13 @@ Public Class PonyEditorForm2
         For Each speech In base.Speeches
             AddItemNode(base, speech, speechesNode)
         Next
+    End Sub
+
+    Private Sub CreatePreview()
+        If preview IsNot Nothing Then preview.Dispose()
+        preview = New PonyPreview(Me, ponies)
+        AddHandler preview.PreviewFocused, AddressOf Preview_PreviewFocused
+        AddHandler preview.PreviewUnfocused, AddressOf Preview_PreviewUnfocused
     End Sub
 
     Private Function AddItemNode(base As PonyBase, item As IPonyIniSourceable, parentCollectionNode As TreeNode) As TreeNode
@@ -633,7 +642,11 @@ Public Class PonyEditorForm2
                 newTab.Controls.Add(preview)
                 preview.RestartForPony(contextRef.PonyBase, previewStartBehavior)
                 previewStartBehavior = Nothing
-                preview.ShowPreview()
+                If Object.ReferenceEquals(Me, Form.ActiveForm) Then
+                    preview.ShowPreview()
+                Else
+                    previewHiddenForUnfocus = True
+                End If
                 PreviewRestartButton.Visible = True
                 Output.TabPages.Add(BehaviorsPage)
                 RegenerateBehaviorButtons()
@@ -805,20 +818,14 @@ Public Class PonyEditorForm2
     Private Sub PreviewRestartButton_Click(sender As Object, e As EventArgs) Handles PreviewRestartButton.Click
         PreviewRestartButton.Enabled = False
 
-        Dim shouldRestorePreview = False
-        If Documents.SelectedTab IsNot Nothing AndAlso Documents.SelectedTab.Controls.Contains(preview) Then
-            Documents.SelectedTab.Controls.Remove(preview)
-            shouldRestorePreview = True
-        End If
-        If preview IsNot Nothing Then preview.Dispose()
-        preview = New PonyPreview(Me, ponies)
+        Documents.SelectedTab.Controls.Remove(preview)
+        CreatePreview()
         preview.Dock = DockStyle.Fill
-        If shouldRestorePreview Then Documents.SelectedTab.Controls.Add(preview)
+        Documents.SelectedTab.Controls.Add(preview)
         preview.RestartForPony(contextRef.PonyBase)
         preview.ShowPreview()
 
         PreviewRestartButton.Enabled = True
-        Focus()
     End Sub
 
     Private Sub RemoveTab(tab As TabPage)
@@ -847,13 +854,55 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub PonyEditorForm2_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
-        If preview IsNot Nothing AndAlso previewHiddenForDeactivation Then preview.ShowPreview()
+        formLostFocusAndPendingActivationChange = False
+        ActivatedHandler()
+    End Sub
+
+    Private Sub Preview_PreviewFocused(sender As Object, e As EventArgs)
+        ActivatedHandler()
+    End Sub
+
+    Private Sub ActivatedHandler()
+        If preview Is Nothing OrElse Not previewHiddenForUnfocus Then Return
+        previewHiddenForUnfocus = False
+        reshowingPreviewAfterUnfocus = True
+        If Not preview.Disposing AndAlso Not preview.IsDisposed Then preview.ShowPreview()
+        reshowingPreviewAfterUnfocus = False
     End Sub
 
     Private Sub PonyEditorForm2_Deactivate(sender As Object, e As EventArgs) Handles MyBase.Deactivate
-        If preview IsNot Nothing Then
-            previewHiddenForDeactivation = preview.PreviewVisible
-            preview.HidePreview()
+        formLostFocusAndPendingActivationChange = False
+        DeactivateHandler()
+    End Sub
+
+    Private Sub Preview_PreviewUnfocused(sender As Object, e As EventArgs)
+        DeactivateHandler()
+    End Sub
+
+    Private Sub DeactivateHandler()
+        If preview Is Nothing OrElse previewHiddenForUnfocus Then Return
+        previewHiddenForUnfocus = Not reshowingPreviewAfterUnfocus AndAlso preview.PreviewVisible AndAlso
+            Not Object.ReferenceEquals(Me, Form.ActiveForm) AndAlso Not preview.PreviewHasFocus
+        If previewHiddenForUnfocus AndAlso Not preview.Disposing AndAlso Not preview.IsDisposed Then preview.HidePreview()
+        If formLostFocusAndPendingActivationChange AndAlso Not preview.PreviewHasFocus Then
+            ' If the form has lost focus, we will start polling in case it has actually also become deactivated but the deactivated event
+            ' has bugged out and not been processed immediately. This means the reactivation signal we are relying on won't fire since the
+            ' form mistakenly believes itself to still be active.
+            formLostFocusAndPendingActivationChange = False
+            ActiveFormPollingTimer.Enabled = True
+        End If
+    End Sub
+
+    Private Sub PonyEditorForm2_LostFocus(sender As Object, e As EventArgs) Handles MyBase.LostFocus
+        formLostFocusAndPendingActivationChange = True
+    End Sub
+
+    Private Sub ActiveFormPollingTimer_Tick(sender As Object, e As EventArgs) Handles ActiveFormPollingTimer.Tick
+        ' Whilst we believe the form to possibly have been deactivated but that the deactivated event has been delayed in firing, we will
+        ' poll to see if the form becomes active. This is because until the deactivated event fires, we cannot receive an activated event.
+        If Object.ReferenceEquals(Me, Form.ActiveForm) Then
+            ActivatedHandler()
+            ActiveFormPollingTimer.Enabled = False
         End If
     End Sub
 

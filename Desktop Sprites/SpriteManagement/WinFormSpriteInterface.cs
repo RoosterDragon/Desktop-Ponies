@@ -684,12 +684,7 @@
         /// </summary>
         public bool HasFocus
         {
-            get
-            {
-                bool hasFocus = false;
-                ApplicationInvoke(() => hasFocus = form.ContainsFocus);
-                return hasFocus;
-            }
+            get { return Form.ActiveForm == form; }
         }
         #endregion
 
@@ -745,6 +740,14 @@
         /// Occurs when the window is clicked by the mouse.
         /// </summary>
         public event EventHandler<SimpleMouseEventArgs> MouseClick;
+        /// <summary>
+        /// Occurs when the interface gains input focus.
+        /// </summary>
+        public event EventHandler Focused;
+        /// <summary>
+        /// Occurs when the interface loses input focus.
+        /// </summary>
+        public event EventHandler Unfocused;
         /// <summary>
         /// Occurs when the interface is closed.
         /// </summary>
@@ -820,6 +823,9 @@
             form = new GraphicsForm(!IsAlphaBlended);
             form.FormClosing += GraphicsForm_FormClosing;
             form.Disposed += GraphicsForm_Disposed;
+
+            form.Activated += (sender, e) => Focused.Raise(this);
+            form.Deactivate += (sender, e) => Unfocused.Raise(this);
 
             DisplayBounds = parameters.Item2;
             RemapKeyConflicts();
@@ -1063,10 +1069,7 @@
             ApplicationInvoke(() =>
             {
                 AllocateBuffers();
-                form.Show();
-                // Reapply this setting, as otherwise it may not be applied when the form first opens.
-                if (form.TopMost)
-                    form.TopMost = true;
+                Show();
                 opened = true;
             });
         }
@@ -1113,7 +1116,14 @@
         /// </summary>
         public void Show()
         {
-            ApplicationInvoke(form.Show);
+            ApplicationInvoke(() =>
+            {
+                // TopMost interferes with initial window focus. To workaround this, we will only set it once the form has become visible.
+                bool topMost = form.TopMost;
+                form.TopMost = false;
+                form.Show();
+                form.TopMost = topMost;
+            });
         }
 
         /// <summary>
@@ -1146,9 +1156,9 @@
                     });
                 }
 
-                Show();
                 paused = false;
             }
+            Show();
         }
 
         /// <summary>

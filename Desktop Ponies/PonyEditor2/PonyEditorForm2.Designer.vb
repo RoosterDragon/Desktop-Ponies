@@ -68,6 +68,7 @@ Partial Class PonyEditorForm2
         Me.SpeechesContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ItemCollectionOrItemNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.OpenContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ActiveFormPollingTimer = New System.Windows.Forms.Timer(Me.components)
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
@@ -381,7 +382,7 @@ Partial Class PonyEditorForm2
         Me.BehaviorsPage.AutoScroll = True
         Me.BehaviorsPage.Location = New System.Drawing.Point(4, 22)
         Me.BehaviorsPage.Name = "BehaviorsPage"
-        Me.BehaviorsPage.Size = New System.Drawing.Size(776, 174)
+        Me.BehaviorsPage.Size = New System.Drawing.Size(976, 174)
         Me.BehaviorsPage.TabIndex = 2
         Me.BehaviorsPage.Text = "Behaviors"
         Me.BehaviorsPage.UseVisualStyleBackColor = True
@@ -439,6 +440,9 @@ Partial Class PonyEditorForm2
         Me.OpenContextMenuItem.Name = "OpenContextMenuItem"
         Me.OpenContextMenuItem.Size = New System.Drawing.Size(103, 22)
         Me.OpenContextMenuItem.Text = "Open"
+        '
+        'ActiveFormPollingTimer
+        '
         '
         'PonyEditorForm2
         '
@@ -514,4 +518,5 @@ Partial Class PonyEditorForm2
     Friend WithEvents colDescription As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colFallback As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents ActiveFormPollingTimer As System.Windows.Forms.Timer
 End Class

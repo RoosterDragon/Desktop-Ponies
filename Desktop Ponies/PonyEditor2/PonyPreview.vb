@@ -14,6 +14,9 @@ Public Class PonyPreview
     Private determineLocationOnPaint As Boolean
     Private disposedFlag As Integer
 
+    Public Event PreviewFocused As EventHandler
+    Public Event PreviewUnfocused As EventHandler
+
     Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection)
         Me.editorForm = Argument.EnsureNotNull(editorForm, "editorForm")
         Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
@@ -66,6 +69,8 @@ Public Class PonyPreview
         If loaded Then Return
         editorInterface = Options.GetInterface()
         editorInterface.Topmost = True
+        AddHandler editorInterface.Focused, Sub() RaiseEvent PreviewFocused(Me, EventArgs.Empty)
+        AddHandler editorInterface.Unfocused, Sub() RaiseEvent PreviewUnfocused(Me, EventArgs.Empty)
         DetermineParentsAndScreenLocation(Me, EventArgs.Empty)
         editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, Me)
         EvilGlobals.CurrentAnimator = editorAnimator
@@ -85,7 +90,6 @@ Public Class PonyPreview
         PonyNameValueLabel.Text = base.Directory
         BehaviorNameValueLabel.Text = ""
         TimeLeftValueLabel.Text = ""
-        editorAnimator.Resume()
     End Sub
 
     Private Sub HandleAddedNotification(addedPony As Pony, startBehavior As Behavior)
@@ -131,23 +135,37 @@ Public Class PonyPreview
         End Get
     End Property
 
+    Public ReadOnly Property PreviewHasFocus As Boolean
+        Get
+            Return editorInterface IsNot Nothing AndAlso editorInterface.HasFocus
+        End Get
+    End Property
+
     Public Sub AnimatorStart()
         If disposedFlag = 1 Then Return
-        BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
+        Try
+            BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
+        Catch ex As InvalidOperationException
+            If disposedFlag <> 1 Then Throw
+        End Try
     End Sub
 
     Public Sub AnimatorUpdate()
         If disposedFlag = 1 Then Return
-        BeginInvoke(New MethodInvoker(
-            Sub()
-                SyncLock previewPonyGuard
-                    If previewPony Is Nothing OrElse Not previewPonyReady Then Return
-                    BehaviorNameValueLabel.Text =
-                        If(previewPony.CurrentBehavior Is Nothing, "", previewPony.CurrentBehavior.Name.ToString())
-                    TimeLeftValueLabel.Text =
-                        (previewPony.BehaviorDesiredDuration - previewPony.ImageTimeIndex).
-                        TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
-                End SyncLock
-            End Sub))
+        Try
+            BeginInvoke(New MethodInvoker(
+                Sub()
+                    SyncLock previewPonyGuard
+                        If previewPony Is Nothing OrElse Not previewPonyReady Then Return
+                        BehaviorNameValueLabel.Text =
+                            If(previewPony.CurrentBehavior Is Nothing, "", previewPony.CurrentBehavior.Name.ToString())
+                        TimeLeftValueLabel.Text =
+                            (previewPony.BehaviorDesiredDuration - previewPony.ImageTimeIndex).
+                            TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
+                    End SyncLock
+                End Sub))
+        Catch ex As InvalidOperationException
+            If disposedFlag <> 1 Then Throw
+        End Try
     End Sub
 End Class

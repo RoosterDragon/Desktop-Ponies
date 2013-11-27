@@ -110,6 +110,14 @@
         /// </summary>
         event EventHandler<SimpleMouseEventArgs> MouseClick;
         /// <summary>
+        /// Occurs when the interface gains input focus.
+        /// </summary>
+        event EventHandler Focused;
+        /// <summary>
+        /// Occurs when the interface loses input focus.
+        /// </summary>
+        event EventHandler Unfocused;
+        /// <summary>
         /// Occurs when the interface is closed, either via the
         /// <see cref="M:DesktopSprites.SpriteManagement.ISpriteCollectionView.Close"/> method or by other means such as user request.
         /// </summary>

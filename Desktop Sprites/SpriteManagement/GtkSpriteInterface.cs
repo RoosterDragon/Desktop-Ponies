@@ -192,7 +192,8 @@
 
                 speechBubble = new SpeechWindow();
 
-                Events |= EventMask.ButtonPressMask | EventMask.ButtonReleaseMask | EventMask.KeyPressMask | EventMask.EnterNotifyMask;
+                Events |= EventMask.ButtonPressMask | EventMask.ButtonReleaseMask | 
+                    EventMask.KeyPressMask | EventMask.EnterNotifyMask | EventMask.FocusChangeMask;
             }
 
             /// <summary>
@@ -1247,6 +1248,14 @@
         /// </summary>
         public event EventHandler<SimpleMouseEventArgs> MouseClick;
         /// <summary>
+        /// Occurs when the interface gains input focus.
+        /// </summary>
+        public event EventHandler Focused;
+        /// <summary>
+        /// Occurs when the interface loses input focus.
+        /// </summary>
+        public event EventHandler Unfocused;
+        /// <summary>
         /// Occurs when the interface is closed.
         /// </summary>
         public event EventHandler InterfaceClosed;
@@ -1535,6 +1544,7 @@
         /// </summary>
         public void Resume()
         {
+            Show();
             paused = false;
         }
 
@@ -1558,6 +1568,8 @@
                     win.ButtonPressEvent += GraphicsWindow_ButtonPressEvent;
                     win.ButtonReleaseEvent += GraphicsWindow_ButtonReleaseEvent;
                     win.KeyPressEvent += GraphicsWindow_KeyPressEvent;
+                    win.FocusInEvent += (sender, e) => Focused.Raise(this);
+                    win.FocusOutEvent += (sender, e) => Unfocused.Raise(this);
                     win.Realize();
                 });
             });

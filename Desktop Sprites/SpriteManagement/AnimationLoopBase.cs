@@ -906,15 +906,13 @@
 
             if (!Paused)
             {
-                running.Reset();
-
                 Viewer.Pause();
-                if (hide)
-                    Viewer.Hide();
 
                 intervalWatch.Stop();
                 elapsedWatch.Stop();
             }
+            if (hide)
+                Viewer.Hide();
         }
 
         /// <summary>
@@ -933,11 +931,9 @@
                 elapsedWatch.Start();
                 intervalWatch.Start();
 
-                Viewer.Show();
-                Viewer.Resume();
-
                 running.Set();
             }
+            Viewer.Resume();
         }
 
         /// <summary>
