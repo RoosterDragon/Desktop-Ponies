@@ -6,7 +6,6 @@
             Return PageContent.Behaviors
         End Get
     End Property
-
     Protected Overrides ReadOnly Property Grid As DataGridView
         Get
             Return BehaviorsGrid

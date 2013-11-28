@@ -26,6 +26,7 @@ Partial Class SpeechesViewer
         Me.colRandom = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.colLine = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colSoundFile = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.GroupNamesButton = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'SpeechesGrid
@@ -42,7 +43,7 @@ Partial Class SpeechesViewer
         Me.SpeechesGrid.Name = "SpeechesGrid"
         Me.SpeechesGrid.ReadOnly = True
         Me.SpeechesGrid.Size = New System.Drawing.Size(494, 265)
-        Me.SpeechesGrid.TabIndex = 1
+        Me.SpeechesGrid.TabIndex = 2
         '
         'colEdit
         '
@@ -90,12 +91,23 @@ Partial Class SpeechesViewer
         Me.colSoundFile.ReadOnly = True
         Me.colSoundFile.Width = 150
         '
+        'GroupNamesButton
+        '
+        Me.GroupNamesButton.Location = New System.Drawing.Point(84, 3)
+        Me.GroupNamesButton.Name = "GroupNamesButton"
+        Me.GroupNamesButton.Size = New System.Drawing.Size(125, 23)
+        Me.GroupNamesButton.TabIndex = 1
+        Me.GroupNamesButton.Text = "Edit Group Names"
+        Me.GroupNamesButton.UseVisualStyleBackColor = True
+        '
         'SpeechesViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.Controls.Add(Me.GroupNamesButton)
         Me.Controls.Add(Me.SpeechesGrid)
         Me.Name = "SpeechesViewer"
         Me.Controls.SetChildIndex(Me.SpeechesGrid, 0)
+        Me.Controls.SetChildIndex(Me.GroupNamesButton, 0)
         Me.ResumeLayout(False)
 
     End Sub
@@ -106,5 +118,6 @@ Partial Class SpeechesViewer
     Friend WithEvents colRandom As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colLine As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colSoundFile As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents GroupNamesButton As System.Windows.Forms.Button
 
 End Class
