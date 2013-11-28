@@ -22,43 +22,43 @@ Partial Class NewInteractionDialog
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
+        Me.CommandsTable = New System.Windows.Forms.TableLayoutPanel()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.OK_Button = New System.Windows.Forms.Button()
-        Me.Name_Textbox = New System.Windows.Forms.TextBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Chance_Box = New System.Windows.Forms.TextBox()
-        Me.Proximity_Box = New System.Windows.Forms.TextBox()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.Targets_Box = New System.Windows.Forms.CheckedListBox()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Behaviors_Box = New System.Windows.Forms.CheckedListBox()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.Reactivation_Delay_Textbox = New System.Windows.Forms.TextBox()
+        Me.NameTextbox = New System.Windows.Forms.TextBox()
+        Me.NameLabel = New System.Windows.Forms.Label()
+        Me.ChanceTextbox = New System.Windows.Forms.TextBox()
+        Me.ProximityTextbox = New System.Windows.Forms.TextBox()
+        Me.ChanceLabel = New System.Windows.Forms.Label()
+        Me.ProximityLabel = New System.Windows.Forms.Label()
+        Me.TargetsList = New System.Windows.Forms.CheckedListBox()
+        Me.TargetsLabel = New System.Windows.Forms.Label()
+        Me.BehaviorsLabel = New System.Windows.Forms.Label()
+        Me.BehaviorsList = New System.Windows.Forms.CheckedListBox()
+        Me.ReactivationDelayLabel = New System.Windows.Forms.Label()
+        Me.ReactivationDelayTextbox = New System.Windows.Forms.TextBox()
         Me.InteractsWithGroupBox = New System.Windows.Forms.GroupBox()
         Me.AllRadioButton = New System.Windows.Forms.RadioButton()
         Me.AnyRadioButton = New System.Windows.Forms.RadioButton()
         Me.OneRadioButton = New System.Windows.Forms.RadioButton()
-        Me.TableLayoutPanel1.SuspendLayout()
+        Me.CommandsTable.SuspendLayout()
         Me.InteractsWithGroupBox.SuspendLayout()
         Me.SuspendLayout()
         '
-        'TableLayoutPanel1
+        'CommandsTable
         '
-        Me.TableLayoutPanel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(323, 471)
-        Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
-        Me.TableLayoutPanel1.RowCount = 1
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(320, 29)
-        Me.TableLayoutPanel1.TabIndex = 13
+        Me.CommandsTable.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.CommandsTable.ColumnCount = 2
+        Me.CommandsTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandsTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandsTable.Controls.Add(Me.Cancel_Button, 1, 0)
+        Me.CommandsTable.Controls.Add(Me.OK_Button, 0, 0)
+        Me.CommandsTable.Location = New System.Drawing.Point(323, 471)
+        Me.CommandsTable.Name = "CommandsTable"
+        Me.CommandsTable.RowCount = 1
+        Me.CommandsTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandsTable.Size = New System.Drawing.Size(320, 29)
+        Me.CommandsTable.TabIndex = 13
         '
         'Cancel_Button
         '
@@ -83,104 +83,105 @@ Partial Class NewInteractionDialog
         Me.OK_Button.Text = "OK"
         Me.OK_Button.UseVisualStyleBackColor = False
         '
-        'Name_Textbox
+        'NameTextbox
         '
-        Me.Name_Textbox.Location = New System.Drawing.Point(92, 73)
-        Me.Name_Textbox.Name = "Name_Textbox"
-        Me.Name_Textbox.Size = New System.Drawing.Size(100, 20)
-        Me.Name_Textbox.TabIndex = 1
+        Me.NameTextbox.Location = New System.Drawing.Point(92, 73)
+        Me.NameTextbox.Name = "NameTextbox"
+        Me.NameTextbox.Size = New System.Drawing.Size(100, 20)
+        Me.NameTextbox.TabIndex = 1
         '
-        'Label1
+        'NameLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(60, 57)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(91, 13)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Interaction Name:"
+        Me.NameLabel.AutoSize = True
+        Me.NameLabel.Location = New System.Drawing.Point(60, 57)
+        Me.NameLabel.Name = "NameLabel"
+        Me.NameLabel.Size = New System.Drawing.Size(91, 13)
+        Me.NameLabel.TabIndex = 0
+        Me.NameLabel.Text = "Interaction Name:"
         '
-        'Chance_Box
+        'ChanceTextbox
         '
-        Me.Chance_Box.Location = New System.Drawing.Point(418, 48)
-        Me.Chance_Box.Name = "Chance_Box"
-        Me.Chance_Box.Size = New System.Drawing.Size(100, 20)
-        Me.Chance_Box.TabIndex = 3
+        Me.ChanceTextbox.Location = New System.Drawing.Point(418, 48)
+        Me.ChanceTextbox.Name = "ChanceTextbox"
+        Me.ChanceTextbox.Size = New System.Drawing.Size(100, 20)
+        Me.ChanceTextbox.TabIndex = 3
         '
-        'Proximity_Box
+        'ProximityTextbox
         '
-        Me.Proximity_Box.Location = New System.Drawing.Point(418, 108)
-        Me.Proximity_Box.Name = "Proximity_Box"
-        Me.Proximity_Box.Size = New System.Drawing.Size(100, 20)
-        Me.Proximity_Box.TabIndex = 5
+        Me.ProximityTextbox.Location = New System.Drawing.Point(418, 108)
+        Me.ProximityTextbox.Name = "ProximityTextbox"
+        Me.ProximityTextbox.Size = New System.Drawing.Size(100, 20)
+        Me.ProximityTextbox.TabIndex = 5
+        Me.ProximityTextbox.Text = "300"
         '
-        'Label5
+        'ChanceLabel
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(388, 32)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(106, 13)
-        Me.Label5.TabIndex = 2
-        Me.Label5.Text = "Chance to occur (%):"
+        Me.ChanceLabel.AutoSize = True
+        Me.ChanceLabel.Location = New System.Drawing.Point(388, 32)
+        Me.ChanceLabel.Name = "ChanceLabel"
+        Me.ChanceLabel.Size = New System.Drawing.Size(106, 13)
+        Me.ChanceLabel.TabIndex = 2
+        Me.ChanceLabel.Text = "Chance to occur (%):"
         '
-        'Label6
+        'ProximityLabel
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(378, 92)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(189, 13)
-        Me.Label6.TabIndex = 4
-        Me.Label6.Text = "Activation Proximity (in pixels to target):"
+        Me.ProximityLabel.AutoSize = True
+        Me.ProximityLabel.Location = New System.Drawing.Point(378, 92)
+        Me.ProximityLabel.Name = "ProximityLabel"
+        Me.ProximityLabel.Size = New System.Drawing.Size(189, 13)
+        Me.ProximityLabel.TabIndex = 4
+        Me.ProximityLabel.Text = "Activation Proximity (in pixels to target):"
         '
-        'Targets_Box
+        'TargetsList
         '
-        Me.Targets_Box.FormattingEnabled = True
-        Me.Targets_Box.Location = New System.Drawing.Point(54, 194)
-        Me.Targets_Box.Name = "Targets_Box"
-        Me.Targets_Box.Size = New System.Drawing.Size(207, 94)
-        Me.Targets_Box.TabIndex = 9
+        Me.TargetsList.FormattingEnabled = True
+        Me.TargetsList.Location = New System.Drawing.Point(54, 194)
+        Me.TargetsList.Name = "TargetsList"
+        Me.TargetsList.Size = New System.Drawing.Size(207, 94)
+        Me.TargetsList.TabIndex = 9
         '
-        'Label2
+        'TargetsLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(37, 178)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(114, 13)
-        Me.Label2.TabIndex = 8
-        Me.Label2.Text = "Ponies to interact with:"
+        Me.TargetsLabel.AutoSize = True
+        Me.TargetsLabel.Location = New System.Drawing.Point(37, 178)
+        Me.TargetsLabel.Name = "TargetsLabel"
+        Me.TargetsLabel.Size = New System.Drawing.Size(114, 13)
+        Me.TargetsLabel.TabIndex = 8
+        Me.TargetsLabel.Text = "Ponies to interact with:"
         '
-        'Label4
+        'BehaviorsLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(147, 315)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(221, 13)
-        Me.Label4.TabIndex = 11
-        Me.Label4.Text = "Behaviors to trigger (one selected at random):"
+        Me.BehaviorsLabel.AutoSize = True
+        Me.BehaviorsLabel.Location = New System.Drawing.Point(147, 315)
+        Me.BehaviorsLabel.Name = "BehaviorsLabel"
+        Me.BehaviorsLabel.Size = New System.Drawing.Size(221, 13)
+        Me.BehaviorsLabel.TabIndex = 11
+        Me.BehaviorsLabel.Text = "Behaviors to trigger (one selected at random):"
         '
-        'Behaviors_Box
+        'BehaviorsList
         '
-        Me.Behaviors_Box.FormattingEnabled = True
-        Me.Behaviors_Box.Location = New System.Drawing.Point(208, 331)
-        Me.Behaviors_Box.Name = "Behaviors_Box"
-        Me.Behaviors_Box.Size = New System.Drawing.Size(228, 109)
-        Me.Behaviors_Box.TabIndex = 12
+        Me.BehaviorsList.FormattingEnabled = True
+        Me.BehaviorsList.Location = New System.Drawing.Point(208, 331)
+        Me.BehaviorsList.Name = "BehaviorsList"
+        Me.BehaviorsList.Size = New System.Drawing.Size(228, 109)
+        Me.BehaviorsList.TabIndex = 12
         '
-        'Label7
+        'ReactivationDelayLabel
         '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(378, 155)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(149, 13)
-        Me.Label7.TabIndex = 6
-        Me.Label7.Text = "Reactivation Delay (seconds):"
+        Me.ReactivationDelayLabel.AutoSize = True
+        Me.ReactivationDelayLabel.Location = New System.Drawing.Point(378, 155)
+        Me.ReactivationDelayLabel.Name = "ReactivationDelayLabel"
+        Me.ReactivationDelayLabel.Size = New System.Drawing.Size(149, 13)
+        Me.ReactivationDelayLabel.TabIndex = 6
+        Me.ReactivationDelayLabel.Text = "Reactivation Delay (seconds):"
         '
-        'Reactivation_Delay_Textbox
+        'ReactivationDelayTextbox
         '
-        Me.Reactivation_Delay_Textbox.Location = New System.Drawing.Point(418, 171)
-        Me.Reactivation_Delay_Textbox.Name = "Reactivation_Delay_Textbox"
-        Me.Reactivation_Delay_Textbox.Size = New System.Drawing.Size(100, 20)
-        Me.Reactivation_Delay_Textbox.TabIndex = 7
-        Me.Reactivation_Delay_Textbox.Text = "60"
+        Me.ReactivationDelayTextbox.Location = New System.Drawing.Point(418, 171)
+        Me.ReactivationDelayTextbox.Name = "ReactivationDelayTextbox"
+        Me.ReactivationDelayTextbox.Size = New System.Drawing.Size(100, 20)
+        Me.ReactivationDelayTextbox.TabIndex = 7
+        Me.ReactivationDelayTextbox.Text = "60"
         '
         'InteractsWithGroupBox
         '
@@ -235,19 +236,19 @@ Partial Class NewInteractionDialog
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(655, 512)
         Me.Controls.Add(Me.InteractsWithGroupBox)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.Reactivation_Delay_Textbox)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.Behaviors_Box)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.Targets_Box)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.Proximity_Box)
-        Me.Controls.Add(Me.Chance_Box)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Name_Textbox)
-        Me.Controls.Add(Me.TableLayoutPanel1)
+        Me.Controls.Add(Me.ReactivationDelayLabel)
+        Me.Controls.Add(Me.ReactivationDelayTextbox)
+        Me.Controls.Add(Me.BehaviorsLabel)
+        Me.Controls.Add(Me.BehaviorsList)
+        Me.Controls.Add(Me.TargetsLabel)
+        Me.Controls.Add(Me.TargetsList)
+        Me.Controls.Add(Me.ProximityLabel)
+        Me.Controls.Add(Me.ChanceLabel)
+        Me.Controls.Add(Me.ProximityTextbox)
+        Me.Controls.Add(Me.ChanceTextbox)
+        Me.Controls.Add(Me.NameLabel)
+        Me.Controls.Add(Me.NameTextbox)
+        Me.Controls.Add(Me.CommandsTable)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -255,28 +256,28 @@ Partial Class NewInteractionDialog
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Create New Interaction..."
-        Me.TableLayoutPanel1.ResumeLayout(False)
+        Me.CommandsTable.ResumeLayout(False)
         Me.InteractsWithGroupBox.ResumeLayout(False)
         Me.InteractsWithGroupBox.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents CommandsTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
-    Friend WithEvents Name_Textbox As System.Windows.Forms.TextBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents Chance_Box As System.Windows.Forms.TextBox
-    Friend WithEvents Proximity_Box As System.Windows.Forms.TextBox
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents Targets_Box As System.Windows.Forms.CheckedListBox
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents Behaviors_Box As System.Windows.Forms.CheckedListBox
-    Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents Reactivation_Delay_Textbox As System.Windows.Forms.TextBox
+    Friend WithEvents NameTextbox As System.Windows.Forms.TextBox
+    Friend WithEvents NameLabel As System.Windows.Forms.Label
+    Friend WithEvents ChanceTextbox As System.Windows.Forms.TextBox
+    Friend WithEvents ProximityTextbox As System.Windows.Forms.TextBox
+    Friend WithEvents ChanceLabel As System.Windows.Forms.Label
+    Friend WithEvents ProximityLabel As System.Windows.Forms.Label
+    Friend WithEvents TargetsList As System.Windows.Forms.CheckedListBox
+    Friend WithEvents TargetsLabel As System.Windows.Forms.Label
+    Friend WithEvents BehaviorsLabel As System.Windows.Forms.Label
+    Friend WithEvents BehaviorsList As System.Windows.Forms.CheckedListBox
+    Friend WithEvents ReactivationDelayLabel As System.Windows.Forms.Label
+    Friend WithEvents ReactivationDelayTextbox As System.Windows.Forms.TextBox
     Friend WithEvents InteractsWithGroupBox As System.Windows.Forms.GroupBox
     Friend WithEvents AllRadioButton As System.Windows.Forms.RadioButton
     Friend WithEvents AnyRadioButton As System.Windows.Forms.RadioButton

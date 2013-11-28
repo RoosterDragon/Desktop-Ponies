@@ -596,13 +596,11 @@ Public Class PonyEditor
             Select Case e.ColumnIndex
                 Case colInteractionTargets.Index, colInteractionBehaviors.Index
                     HidePony()
-                    Using form = New NewInteractionDialog(Me)
-                        form.ChangeInteraction(interaction)
+                    Using form = New NewInteractionDialog(interaction, PreviewPony.Base)
                         form.ShowDialog(Me)
-                        changeMade = form.DialogResult = Windows.Forms.DialogResult.OK
+                        changeMade = form.DialogResult = DialogResult.OK
                     End Using
                     ShowPony()
-
             End Select
 
             If changeMade Then
@@ -902,27 +900,33 @@ Public Class PonyEditor
 
                 Select Case e.ColumnIndex
                     Case colInteractionName.Index
-                        If newValue = "" Then
-                            MsgBox("You must give an interaction a name. It can't be blank.")
+                        If newValue = interaction.Name Then Exit Sub
+
+                        If String.IsNullOrWhiteSpace(newValue) Then
                             InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = interaction.Name
+                            MessageBox.Show(Me, "You must enter a name for the new interaction.",
+                                            "No Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
                             Exit Sub
                         End If
 
-                        If newValue = interaction.Name Then
-                            Exit Sub
-                        End If
-
-                        For Each interaction In PreviewPony.Base.Interactions
-                            If interaction.Name = newValue Then
-                                MsgBox("Interaction with name '" & interaction.Name &
-                                       "' already exists for this pony. Please select another name.")
+                        For Each i In PreviewPony.Base.Interactions
+                            If i.Name = newValue Then
                                 InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = interaction.Name
+                                MessageBox.Show(Me, "Interaction '" & newValue & "' already exists for this pony. Please select another name.",
+                                                "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                 Exit Sub
                             End If
                         Next
 
+                        If newValue.IndexOfAny({","c, "{"c, "}"c}) <> -1 Then
+                            InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = interaction.Name
+                            MessageBox.Show(Me, "The interaction name cannot contain a comma (,) or curly braces ({}). Please select another name.",
+                                            "Invalid Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            Exit Sub
+                        End If
+
                         interaction.Name = newValue
-                        InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = newValue
+                        InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionOriginalName.Index).Value = interaction.Name
 
                     Case colInteractionChance.Index
                         interaction.Chance = Double.Parse(
@@ -1111,8 +1115,7 @@ Public Class PonyEditor
             End If
 
             HidePony()
-            Using dialog = New NewInteractionDialog(Me)
-                dialog.ChangeInteraction(Nothing)
+            Using dialog = New NewInteractionDialog(Nothing, PreviewPony.Base)
                 dialog.ShowDialog(Me)
             End Using
             ShowPony()

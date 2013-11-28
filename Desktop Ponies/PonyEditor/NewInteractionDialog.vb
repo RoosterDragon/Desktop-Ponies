@@ -2,148 +2,30 @@
 
 Public Class NewInteractionDialog
 
-    Dim change_existing_interaction As Boolean = False
+    Private base As PonyBase
+    Private interactionToEdit As InteractionBase
 
-    Private _editor As PonyEditor
-    Public Sub New(editor As PonyEditor)
+    Public Sub New(interaction As InteractionBase, ponyBase As PonyBase)
         InitializeComponent()
-        _editor = editor
-    End Sub
 
-    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If Trim(Name_Textbox.Text) = "" Then
-            MsgBox("You must enter a name for the new behavior.")
-            Exit Sub
-        End If
+        base = Argument.EnsureNotNull(ponyBase, "ponyBase")
+        interactionToEdit = interaction
 
-        If InStr(Name_Textbox.Text, ",") <> 0 Then
-            MsgBox("The interaction name can't have a comma in it.")
-            Exit Sub
-        End If
-
-        For Each Interaction In _editor.PreviewPony.Base.Interactions
-            If Not change_existing_interaction AndAlso Interaction.Name = Trim(Name_Textbox.Text) Then
-                MsgBox("Interaction with name '" & Interaction.Name & "' already exists.  Please select a different name.")
-                Exit Sub
-            End If
+        For Each behavior In ponyBase.Behaviors
+            BehaviorsList.Items.Add(behavior.Name)
         Next
 
-        Dim chance As Double
+        For Each target In ponyBase.Collection.Bases
+            TargetsList.Items.Add(target.Directory)
+        Next
 
-        If Not Double.TryParse(Trim(Replace(Chance_Box.Text, "%", "")), NumberStyles.Float, CultureInfo.CurrentCulture, chance) Then
-            MsgBox("You need to enter a % chance that the behavior has to occur (or you may have entered an invalid one).")
-            Exit Sub
-        End If
+        If interaction Is Nothing Then Return
 
-        If chance < 0 Then
-            MsgBox("You entered a negative value for % chance.  Please correct this.")
-            Exit Sub
-        End If
-
-        Dim proximity As Double
-
-        If Not Double.TryParse(Proximity_Box.Text, NumberStyles.Float, CultureInfo.CurrentCulture, proximity) Then
-            MsgBox("You need to enter a number for proximity.")
-            Exit Sub
-        End If
-
-        If proximity < 0 Then
-            MsgBox("You entered a negative value for activation distance.  Please correct this.")
-            Exit Sub
-        End If
-
-        Dim reactivationDelay As Double
-
-        If Not Double.TryParse(Reactivation_Delay_Textbox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, reactivationDelay) Then
-            MsgBox("You need to enter a number for the reactivation delay.")
-            Exit Sub
-        End If
-
-        If reactivationDelay < 0 Then
-            MsgBox("You entered a negative value for reactivation delay.  Please correct this.")
-            Exit Sub
-        End If
-
-        If Targets_Box.CheckedItems.Count = 0 Then
-            MsgBox("You need to select at least one pony to interact with.")
-            Exit Sub
-        End If
-
-        If Behaviors_Box.CheckedItems.Count = 0 Then
-            MsgBox("You need to select at least one behavior to trigger.")
-            Exit Sub
-        End If
-
-        If change_existing_interaction Then
-            Dim toRemove = _editor.PreviewPony.Base.Interactions.Where(
-                Function(interaction) interaction.Name = Name_Textbox.Text).ToArray()
-            For Each interaction In toRemove
-                _editor.PreviewPony.Base.Interactions.Remove(interaction)
-            Next
-        End If
-
-        Dim targetsActivated As TargetActivation
-        If OneRadioButton.Checked Then targetsActivated = TargetActivation.One
-        If AnyRadioButton.Checked Then targetsActivated = TargetActivation.Any
-        If AllRadioButton.Checked Then targetsActivated = TargetActivation.All
-
-        Dim newInteraction = New InteractionBase() With
-                             {.Name = Name_Textbox.Text,
-                              .InitiatorName = _editor.PreviewPony.Directory,
-                              .Chance = chance / 100,
-                              .Proximity = proximity,
-                              .Activation = targetsActivated,
-                              .ReactivationDelay = TimeSpan.FromSeconds(reactivationDelay)}
-        newInteraction.TargetNames.UnionWith(Targets_Box.CheckedItems.Cast(Of String))
-        newInteraction.BehaviorNames.UnionWith(Behaviors_Box.CheckedItems.Cast(Of String).Select(Function(s) New CaseInsensitiveString(s)))
-        _editor.PreviewPony.Base.Interactions.Add(newInteraction)
-
-        MessageBox.Show(Me, "Important note:" & Environment.NewLine &
-                        "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
-                        "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-        DialogResult = Windows.Forms.DialogResult.OK
-        Me.Close()
-    End Sub
-
-    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-        DialogResult = Windows.Forms.DialogResult.Cancel
-        Me.Close()
-    End Sub
-
-    Friend Sub ChangeInteraction(interaction As InteractionBase)
-        Targets_Box.Items.Clear()
-        Behaviors_Box.Items.Clear()
-
-        With _editor
-
-            Dim linked_behavior_list = .colBehaviorLinked
-            For Each item In linked_behavior_list.Items
-                Behaviors_Box.Items.Add(item)
-            Next
-
-            For Each ponyBase In _editor.PreviewPony.Base.Collection.Bases
-                Targets_Box.Items.Add(ponyBase.Directory)
-            Next
-
-        End With
-
-        Behaviors_Box.Items.Remove("None")
-
-        Me.Text = "Create new interaction..."
-
-        Chance_Box.Text = ""
-        Proximity_Box.Text = "300"
-        Name_Textbox.Text = ""
-
-        If IsNothing(interaction) Then
-            change_existing_interaction = False
-            Name_Textbox.Enabled = True
-            Exit Sub
-        End If
-
-        Name_Textbox.Enabled = False
-        change_existing_interaction = True
+        Text = "Edit Interaction..."
+        NameTextbox.Text = interaction.Name
+        ChanceTextbox.Text = (interaction.Chance * 100).ToString(CultureInfo.CurrentCulture)
+        ProximityTextbox.Text = interaction.Proximity.ToString(CultureInfo.CurrentCulture)
+        ReactivationDelayTextbox.Text = interaction.ReactivationDelay.TotalSeconds.ToString(CultureInfo.CurrentCulture)
         Select Case interaction.Activation
             Case TargetActivation.One
                 OneRadioButton.Checked = True
@@ -153,38 +35,125 @@ Public Class NewInteractionDialog
                 AllRadioButton.Checked = True
         End Select
 
-        Chance_Box.Text = (interaction.Chance * 100).ToString(CultureInfo.CurrentCulture)
-        Name_Textbox.Text = interaction.Name
-        Proximity_Box.Text = interaction.Proximity.ToString(CultureInfo.CurrentCulture)
-        Reactivation_Delay_Textbox.Text = interaction.ReactivationDelay.TotalSeconds.ToString(CultureInfo.CurrentCulture)
-        Me.Text = "Edit interaction..."
-
-        Dim target_index_list As New List(Of Integer)
-
-        For Each target In interaction.TargetNames
-            For Each item As String In Targets_Box.Items
-                If Trim(target) = Trim(item) Then
-                    target_index_list.Add(Targets_Box.Items.IndexOf(item))
-                End If
-            Next
+        For i = 0 To BehaviorsList.Items.Count - 1
+            If interaction.BehaviorNames.Contains(DirectCast(BehaviorsList.Items(i), CaseInsensitiveString)) Then
+                BehaviorsList.SetItemChecked(i, True)
+            End If
         Next
 
-        Dim behaviors_index_list As New List(Of Integer)
+        For i = 0 To TargetsList.Items.Count - 1
+            If interaction.TargetNames.Contains(DirectCast(TargetsList.Items(i), String)) Then
+                TargetsList.SetItemChecked(i, True)
+            End If
+        Next
+    End Sub
 
-        For Each behaviorName In interaction.BehaviorNames
-            For Each item As String In Behaviors_Box.Items
-                If behaviorName = item Then
-                    behaviors_index_list.Add(Behaviors_Box.Items.IndexOf(item))
-                End If
-            Next
+    Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
+        If String.IsNullOrWhiteSpace(NameTextbox.Text) Then
+            MessageBox.Show(Me, "You must enter a name for the new interaction.",
+                            "No Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        For Each interaction In base.Interactions
+            If interaction.Name = NameTextbox.Text AndAlso Not Object.ReferenceEquals(interactionToEdit, interaction) Then
+                MessageBox.Show(Me, "Interaction '" & interaction.Name & "' already exists for this pony. Please select another name.",
+                                "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Exit Sub
+            End If
         Next
 
-        For Each index In target_index_list
-            Targets_Box.SetItemChecked(index, True)
-        Next
+        If NameTextbox.Text.IndexOfAny({","c, "{"c, "}"c}) <> -1 Then
+            MessageBox.Show(Me, "The interaction name cannot contain a comma (,) or curly braces ({}). Please select another name.",
+                            "Invalid Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
 
-        For Each index In behaviors_index_list
-            Behaviors_Box.SetItemChecked(index, True)
-        Next
+        Dim chance As Double
+
+        If Not Double.TryParse(Trim(Replace(ChanceTextbox.Text, "%", "")), NumberStyles.Float, CultureInfo.InvariantCulture, chance) Then
+            MessageBox.Show(Me, "You have not entered the chance the interaction has to occur (or the value you entered was invalid).",
+                            "No Chance Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If chance < 0 Then
+            MessageBox.Show(Me, "You entered a negative value for chance. This is not allowed.",
+                            "Invalid Value Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        Dim proximity As Double
+
+        If Not Double.TryParse(ProximityTextbox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, proximity) Then
+            MessageBox.Show(Me, "You have not entered the proximity (or the value you entered was invalid).",
+                            "No Speed Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If proximity < 0 Then
+            MessageBox.Show(Me, "You entered a negative value for proximity. This is not allowed.",
+                            "Invalid Value Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        Dim reactivationDelay As Double
+
+        If Not Double.TryParse(ReactivationDelayTextbox.Text, NumberStyles.Float, CultureInfo.CurrentCulture, reactivationDelay) Then
+            MessageBox.Show(Me, "You have not entered the reactivation delay (or the value you entered was invalid).",
+                            "No Speed Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If reactivationDelay < 0 Then
+            MessageBox.Show(Me, "You entered a negative value for reactivation delay. This is not allowed.",
+                            "Invalid Value Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If TargetsList.CheckedItems.Count = 0 Then
+            MessageBox.Show(Me, "You need to select at least one target to interact with.",
+                            "No Targets Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If BehaviorsList.CheckedItems.Count = 0 Then
+            MessageBox.Show(Me, "You need to select at least one behavior to activate.",
+                            "No Behaviors Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        Dim targetsActivated As TargetActivation
+        If OneRadioButton.Checked Then targetsActivated = TargetActivation.One
+        If AnyRadioButton.Checked Then targetsActivated = TargetActivation.Any
+        If AllRadioButton.Checked Then targetsActivated = TargetActivation.All
+
+        If interactionToEdit Is Nothing Then
+            interactionToEdit = New InteractionBase()
+            base.Interactions.Add(interactionToEdit)
+        End If
+
+        interactionToEdit.Name = NameTextbox.Text
+        interactionToEdit.InitiatorName = base.Directory
+        interactionToEdit.Chance = chance / 100
+        interactionToEdit.Proximity = proximity
+        interactionToEdit.Activation = targetsActivated
+        interactionToEdit.ReactivationDelay = TimeSpan.FromSeconds(reactivationDelay)
+        interactionToEdit.TargetNames.Clear()
+        interactionToEdit.TargetNames.UnionWith(TargetsList.CheckedItems.Cast(Of String))
+        interactionToEdit.BehaviorNames.Clear()
+        interactionToEdit.BehaviorNames.UnionWith(BehaviorsList.CheckedItems.Cast(Of CaseInsensitiveString))
+
+        MessageBox.Show(Me, "Important note:" & Environment.NewLine &
+                        "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
+                        "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        DialogResult = DialogResult.OK
+        Close()
+    End Sub
+
+    Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
+        DialogResult = DialogResult.Cancel
+        Close()
     End Sub
 End Class
