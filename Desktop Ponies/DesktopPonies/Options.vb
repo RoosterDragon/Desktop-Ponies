@@ -15,7 +15,7 @@ Public NotInheritable Class Options
     Public Shared SuspendForFullscreenApplication As Boolean
     Public Shared ShowInTaskbar As Boolean
     Public Shared AlwaysOnTop As Boolean
-    Public Shared AlphaBlendingEnabled As Boolean
+    Private Shared alphaBlendingEnabled As Boolean
     Public Shared WindowAvoidanceEnabled As Boolean
     Public Shared CursorAvoidanceEnabled As Boolean
     Public Shared CursorAvoidanceSize As Single
@@ -121,7 +121,7 @@ Public NotInheritable Class Options
                             ExclusionZone.Height = Single.Parse(columns(11), CultureInfo.InvariantCulture)
                             ScaleFactor = Single.Parse(columns(12), CultureInfo.InvariantCulture)
                             MaxPonyCount = Integer.Parse(columns(13), CultureInfo.InvariantCulture)
-                            AlphaBlendingEnabled = Boolean.Parse(columns(14))
+                            alphaBlendingEnabled = Boolean.Parse(columns(14))
                             PonyEffectsEnabled = Boolean.Parse(columns(15))
                             WindowAvoidanceEnabled = Boolean.Parse(columns(16))
                             PonyAvoidsPonies = Boolean.Parse(columns(17))
@@ -178,7 +178,7 @@ Public NotInheritable Class Options
         SuspendForFullscreenApplication = True
         ShowInTaskbar = OperatingSystemInfo.IsWindows
         AlwaysOnTop = True
-        AlphaBlendingEnabled = True
+        alphaBlendingEnabled = True
         WindowAvoidanceEnabled = False
         CursorAvoidanceEnabled = True
         CursorAvoidanceSize = 100
@@ -243,7 +243,7 @@ Public NotInheritable Class Options
                                      ExclusionZone.Height.ToString(CultureInfo.InvariantCulture),
                                      ScaleFactor.ToString(CultureInfo.InvariantCulture),
                                      MaxPonyCount.ToString(CultureInfo.InvariantCulture),
-                                     AlphaBlendingEnabled,
+                                     alphaBlendingEnabled,
                                      PonyEffectsEnabled,
                                      WindowAvoidanceEnabled,
                                      PonyAvoidsPonies,
@@ -321,9 +321,9 @@ Public NotInheritable Class Options
 
         Dim viewer As DesktopSprites.SpriteManagement.ISpriteCollectionView
         If GetInterfaceType() = GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface) Then
-            viewer = New DesktopSprites.SpriteManagement.WinFormSpriteInterface(GetCombinedScreenArea(), AlphaBlendingEnabled)
+            viewer = New DesktopSprites.SpriteManagement.WinFormSpriteInterface(GetCombinedScreenArea())
         Else
-            viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface(AlphaBlendingEnabled)
+            viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface()
         End If
         viewer.ShowInTaskbar = ShowInTaskbar
         Return viewer

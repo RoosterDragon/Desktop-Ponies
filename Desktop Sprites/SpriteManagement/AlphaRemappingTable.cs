@@ -93,6 +93,15 @@
         }
 
         /// <summary>
+        /// Gets a copy of the current RGB to ARGB mapping.
+        /// </summary>
+        /// <returns>A copy of the current RGB to ARGB mapping.</returns>
+        public Dictionary<RgbColor, ArgbColor> GetMap()
+        {
+            return new Dictionary<RgbColor, ArgbColor>(map);
+        }
+
+        /// <summary>
         /// Adds a mapping from the given RGB color to the given ARGB color.
         /// </summary>
         /// <param name="source">The source RGB color.</param>

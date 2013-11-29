@@ -446,7 +446,7 @@
                     if (palette.Entries[i].A == 255)
                         palette.Entries[i] = colorMappingTable[palette.Entries[i]];
                 desiredFrames[frame].Palette = palette;
-                desiredFrames[frame].PreMultiplyAlpha();
+                desiredFrames[frame].PremultiplyAlpha();
             }
         }
 

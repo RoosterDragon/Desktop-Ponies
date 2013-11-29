@@ -1143,14 +1143,6 @@
             mod = mod1;
         }
 
-
-        /// <summary>
-        /// Gets a value indicating whether alpha blending is in use. If true, pixels which are partially transparent will be blended with
-        /// those behind them to achieve proper transparency; otherwise these pixels will be rendered opaque, and only fully transparent
-        /// pixels will render as transparent, resulting in simple 1-bit transparency.
-        /// </summary>
-        public bool IsAlphaBlended { get; private set; }
-
         /// <summary>
         /// Gets a value indicating whether the interface has input focus.
         /// </summary>
@@ -1295,10 +1287,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> class.
         /// </summary>
-        /// <param name="useAlphaBlending">Indicates if alpha blending should be supported. If true, the transparency value in images is
-        /// respected, and the color is blended with the color behind it. If false, semi-transparent values will appear opaque. Only fully
-        /// transparent pixels will continue to render as transparent.</param>
-        public GtkSpriteInterface(bool useAlphaBlending)
+        public GtkSpriteInterface()
         {
             lock (drawSync)
             {
@@ -1318,7 +1307,6 @@
             }
 
             GtkFrame.Interface = this;
-            IsAlphaBlended = useAlphaBlending;
             images = new LazyDictionary<string, AnimatedImage<GtkFrame>>(
                 fileName => new AnimatedImage<GtkFrame>(
                     fileName, GtkFrameFromFile,
@@ -1407,9 +1395,6 @@
         /// <param name="pixbuf">The <see cref="T:Gdk.Pixbuf"/> to be altered.</param>
         private void AlterPixbufForTransparency(string fileName, Pixbuf pixbuf)
         {
-            if (!IsAlphaBlended)
-                return;
-
             string mapFilePath = System.IO.Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
             if (File.Exists(mapFilePath))
             {

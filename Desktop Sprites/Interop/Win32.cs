@@ -127,6 +127,174 @@
     }
 
     /// <summary>
+    /// The <see cref="T:DesktopSprites.Win32.BITMAPINFOHEADER"/> structure contains information about the dimensions and color format of a
+    /// DIB.
+    /// </summary>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
+        Justification = "Following Windows API conventions.")]
+    [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1307:AccessibleFieldsMustBeginWithUpperCaseLetter",
+        Justification = "Following Windows API conventions.")]
+    internal struct BITMAPINFOHEADER
+    {
+        /// <summary>
+        /// Specifies the number of bytes required by the structure.
+        /// </summary>
+        public static readonly uint StructureSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER));
+        /// <summary>
+        /// The number of bytes required by the structure.
+        /// </summary>
+        public uint biSize;
+        /// <summary>
+        /// The width of the bitmap, in pixels.
+        /// </summary>
+        public int biWidth;
+        /// <summary>
+        /// The height of the bitmap, in pixels. If biHeight is positive, the bitmap is a bottom-up DIB and its origin is the lower-left
+        /// corner. If biHeight is negative, the bitmap is a top-down DIB and its origin is the upper-left corner.
+        /// </summary>
+        public int biHeight;
+        /// <summary>
+        /// The number of planes for the target device. This value must be set to 1.
+        /// </summary>
+        public ushort biPlanes;
+        /// <summary>
+        /// The number of bits-per-pixel.
+        /// </summary>
+        public ushort biBitCount;
+        /// <summary>
+        /// The type of compression for a compressed bottom-up bitmap (top-down DIBs cannot be compressed).
+        /// </summary>
+        public BiFlags biCompression;
+        /// <summary>
+        /// The size, in bytes, of the image.
+        /// </summary>
+        public uint biSizeImage;
+        /// <summary>
+        /// The horizontal resolution, in pixels-per-meter, of the target device for the bitmap.
+        /// </summary>
+        public int biXPelsPerMeter;
+        /// <summary>
+        /// The vertical resolution, in pixels-per-meter, of the target device for the bitmap.
+        /// </summary>
+        public int biYPelsPerMeter;
+        /// <summary>
+        /// The number of color indexes in the color table that are actually used by the bitmap.
+        /// </summary>
+        public uint biClrUsed;
+        /// <summary>
+        /// The number of color indexes that are required for displaying the bitmap. If this value is zero, all colors are required.
+        /// </summary>
+        public uint biClrImportant;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Interop.Win32.BITMAPINFOHEADER"/> structure.
+        /// </summary>
+        /// <param name="width">The width of the bitmap, in pixels.
+        /// If biCompression is BI_JPEG or BI_PNG, the biWidth member specifies the
+        /// width of the decompressed JPEG or PNG image file, respectively.</param>
+        /// <param name="height">The height of the bitmap, in pixels. If biHeight is positive, the bitmap is a bottom-up DIB and its origin
+        /// is the lower-left corner. If biHeight is negative, the bitmap is a top-down DIB and its origin is the upper-left corner.
+        /// If biHeight is negative, indicating a top-down DIB, biCompression must be either BI_RGB or BI_BITFIELDS. Top-down DIBs cannot
+        /// be compressed.
+        /// If biCompression is BI_JPEG or BI_PNG, the biHeight member specifies the height of the decompressed JPEG or PNG image file,
+        /// respectively.</param>
+        /// <param name="bitCount">The number of bits-per-pixel. The biBitCount member of the BITMAPINFOHEADER structure determines the
+        /// number of bits that define each pixel and the maximum number of colors in the bitmap. This member must be one of the following
+        /// values: 0, 1, 4, 8, 16, 24, 32.</param>
+        /// <param name="compression">The type of compression for a compressed bottom-up bitmap (top-down DIBs cannot be compressed).
+        /// </param>
+        /// <param name="sizeImage">The size, in bytes, of the image. This may be set to zero for BI_RGB bitmaps.
+        /// If biCompression is BI_JPEG or BI_PNG, biSizeImage indicates the size of the JPEG or PNG image buffer, respectively.</param>
+        /// <param name="xPelsPerMeter">The horizontal resolution, in pixels-per-meter, of the target device for the bitmap. An application
+        /// can use this value to select a bitmap from a resource group that best matches the characteristics of the current device.
+        /// </param>
+        /// <param name="yPelsPerMeter">The vertical resolution, in pixels-per-meter, of the target device for the bitmap.</param>
+        /// <param name="clrUsed">The number of color indexes in the color table that are actually used by the bitmap. If this value is
+        /// zero, the bitmap uses the maximum number of colors corresponding to the value of the biBitCount member for the compression mode
+        /// specified by biCompression.
+        /// If biClrUsed is nonzero and the biBitCount member is less than 16, the biClrUsed member specifies the actual number of colors
+        /// the graphics engine or device driver accesses. If biBitCount is 16 or greater, the biClrUsed member specifies the size of the
+        /// color table used to optimize performance of the system color palettes. If biBitCount equals 16 or 32, the optimal color palette
+        /// starts immediately following the three DWORD masks.
+        /// When the bitmap array immediately follows the BITMAPINFO structure, it is a packed bitmap. Packed bitmaps are referenced by a
+        /// single pointer. Packed bitmaps require that the biClrUsed member must be either zero or the actual size of the color table.
+        /// </param>
+        /// <param name="clrImportant">The number of color indexes that are required for displaying the bitmap. If this value is zero, all
+        /// colors are required.</param>
+        public BITMAPINFOHEADER(int width, int height, ushort bitCount, BiFlags compression, uint sizeImage,
+            int xPelsPerMeter, int yPelsPerMeter, uint clrUsed, uint clrImportant)
+        {
+            biSize = StructureSize;
+            biWidth = width;
+            biHeight = height;
+            biPlanes = 1;
+            biBitCount = bitCount;
+            biCompression = compression;
+            biSizeImage = sizeImage;
+            biXPelsPerMeter = xPelsPerMeter;
+            biYPelsPerMeter = yPelsPerMeter;
+            biClrUsed = clrUsed;
+            biClrImportant = clrImportant;
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="T:DesktopSprites.Win32.BITMAPINFO"/> structure defines the dimensions and color information for a DIB.
+    /// </summary>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1307:AccessibleFieldsMustBeginWithUpperCaseLetter",
+        Justification = "Following Windows API conventions.")]
+    internal struct BITMAPINFO
+    {
+        /// <summary>
+        /// A BITMAPINFOHEADER structure that contains information about the dimensions of color format.
+        /// </summary>
+        public BITMAPINFOHEADER bmiHeader;
+        /// <summary>
+        /// The bmiColors member contains one of the following:
+        /// An array of RGBQUAD. The elements of the array that make up the color table.
+        /// An array of 16-bit unsigned integers that specifies indexes into the currently realized logical palette. 
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1, ArraySubType = UnmanagedType.Struct)]
+        public RGBQUAD[] bmiColors;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.Interop.Win32.BITMAPINFO"/> structure.
+        /// </summary>
+        /// <param name="header">A BITMAPINFOHEADER structure that contains information about the dimensions of color format.</param>
+        public BITMAPINFO(BITMAPINFOHEADER header)
+        {
+            bmiHeader = header;
+            bmiColors = new RGBQUAD[1];
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="T:DesktopSprites.Interop.Win32.RGBQUAD"/> structure describes a color consisting of relative intensities of red,
+    /// green, and blue.
+    /// </summary>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1307:AccessibleFieldsMustBeginWithUpperCaseLetter",
+        Justification = "Following Windows API conventions.")]
+    internal struct RGBQUAD
+    {
+        /// <summary>
+        /// The intensity of blue in the color.
+        /// </summary>
+        public byte rgbBlue;
+        /// <summary>
+        /// The intensity of green in the color.
+        /// </summary>
+        public byte rgbGreen;
+        /// <summary>
+        /// The intensity of red in the color.
+        /// </summary>
+        public byte rgbRed;
+        /// <summary>
+        /// This member is reserved and must be zero.
+        /// </summary>
+        public byte rgbReserved;
+    }
+
+    /// <summary>
     /// Specifies the blend operation.
     /// </summary>
     internal enum BlendOp : byte
@@ -149,6 +317,56 @@
         /// by 0xff prior to the call.
         /// </summary>
         AC_SRC_ALPHA = 0x01
+    }
+
+    /// <summary>
+    /// The type of data contained in the bmiColors array member of the BITMAPINFO structure pointed to by pbmi
+    /// (either logical palette indexes or literal RGB values).
+    /// </summary>
+    internal enum DibFlags : ushort
+    {
+        /// <summary>
+        /// The BITMAPINFO structure contains an array of literal RGB values.
+        /// </summary>
+        DIB_RGB_COLORS = 0,
+        /// <summary>
+        /// The bmiColors member is an array of 16-bit indexes into the logical palette of the device context specified by hdc.
+        /// </summary>
+        DIB_PAL_COLORS = 1
+    }
+
+    /// <summary>
+    /// The type of compression for a compressed bottom-up bitmap (top-down DIBs cannot be compressed).
+    /// </summary>
+    internal enum BiFlags : uint
+    {
+        /// <summary>
+        /// An uncompressed format.
+        /// </summary>
+        BI_RGB = 0,
+        /// <summary>
+        /// A run-length encoded (RLE) format for bitmaps with 8 bpp. The compression format is a 2-byte format consisting of a count byte
+        /// followed by a byte containing a color index.
+        /// </summary>
+        BI_RLE8 = 1,
+        /// <summary>
+        /// An RLE format for bitmaps with 4 bpp. The compression format is a 2-byte format consisting of a count byte followed by two
+        /// word-length color indexes.
+        /// </summary>
+        BI_RLE4 = 2,
+        /// <summary>
+        /// Specifies that the bitmap is not compressed and that the color table consists of three DWORD color masks that specify the red,
+        /// green, and blue components, respectively, of each pixel. This is valid when used with 16- and 32-bpp bitmaps.
+        /// </summary>
+        BI_BITFIELDS = 3,
+        /// <summary>
+        /// Indicates that the image is a JPEG image.
+        /// </summary>
+        BI_JPEG = 4,
+        /// <summary>
+        /// Indicates that the image is a PNG image.
+        /// </summary>
+        BI_PNG = 5
     }
 
     /// <summary>
@@ -340,7 +558,7 @@
     /// Exposes Windows API functions.
     /// </summary>
     [SuppressMessage("Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
-        Justification = "Following Windows API conventions, which use Hungarian notation.")]
+        Justification = "Following Windows API conventions.")]
     internal static class NativeMethods
     {
         /// <summary>
@@ -351,6 +569,39 @@
         /// Location of the library implementing the Graphics Device Interface.
         /// </summary>
         private const string gdi = "gdi32.dll";
+
+        /// <summary>
+        /// The CreateDIBSection function creates a DIB that applications can write to directly. The function gives you a pointer to the
+        /// location of the bitmap bit values. You can supply a handle to a file-mapping object that the function will use to create the
+        /// bitmap, or you can let the system allocate the memory for the bitmap.
+        /// </summary>
+        /// <param name="hdc">A handle to a device context. If the value of iUsage is DIB_PAL_COLORS, the function uses this device
+        /// context's logical palette to initialize the DIB colors.</param>
+        /// <param name="pbmi">A pointer to a BITMAPINFO structure that specifies various attributes of the DIB, including the bitmap
+        /// dimensions and colors.</param>
+        /// <param name="iUsage">The type of data contained in the bmiColors array member of the BITMAPINFO structure pointed to by pbmi
+        /// (either logical palette indexes or literal RGB values).</param>
+        /// <param name="ppvBits">A pointer to a variable that receives a pointer to the location of the DIB bit values.</param>
+        /// <param name="hSection">A handle to a file-mapping object that the function will use to create the DIB. This parameter can be
+        /// NULL.
+        /// If hSection is not NULL, it must be a handle to a file-mapping object created by calling the CreateFileMapping function with
+        /// the PAGE_READWRITE or PAGE_WRITECOPY flag. Read-only DIB sections are not supported. Handles created by other means will cause
+        /// CreateDIBSection to fail.
+        /// If hSection is not NULL, the CreateDIBSection function locates the bitmap bit values at offset dwOffset in the file-mapping
+        /// object referred to by hSection. An application can later retrieve the hSection handle by calling the GetObject function with
+        /// the HBITMAP returned by CreateDIBSection.
+        /// If hSection is NULL, the system allocates memory for the DIB. In this case, the CreateDIBSection function ignores the dwOffset
+        /// parameter. An application cannot later obtain a handle to this memory. The dshSection member of the DIBSECTION structure filled
+        /// in by calling the GetObject function will be NULL.</param>
+        /// <param name="dwOffset">The offset from the beginning of the file-mapping object referenced by hSection where storage for the
+        /// bitmap bit values is to begin. This value is ignored if hSection is NULL. The bitmap bit values are aligned on doubleword
+        /// boundaries, so dwOffset must be a multiple of the size of a DWORD.</param>
+        /// <returns>If the function succeeds, the return value is a handle to the newly created DIB, and *ppvBits points to the bitmap bit
+        /// values.
+        /// If the function fails, the return value is NULL, and *ppvBits is NULL.</returns>
+        [DllImport(gdi, SetLastError = true)]
+        public static extern IntPtr CreateDIBSection(IntPtr hdc, [In] ref BITMAPINFO pbmi,
+            DibFlags iUsage, out IntPtr ppvBits, IntPtr hSection, uint dwOffset);
 
         /// <summary>
         /// Updates the position, size, shape, content, and translucency of a layered window.

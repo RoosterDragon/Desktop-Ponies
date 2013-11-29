@@ -83,12 +83,6 @@
         /// </summary>
         bool ShowInTaskbar { get; set; }
         /// <summary>
-        /// Gets a value indicating whether alpha blending is in use. If true, pixels which are partially transparent will be blended with
-        /// those behind them to achieve proper transparency; otherwise these pixels will be rendered opaque, and only fully transparent
-        /// pixels will render as transparent, resulting in simple 1-bit transparency.
-        /// </summary>
-        bool IsAlphaBlended { get; }
-        /// <summary>
         /// Gets the current location of the cursor.
         /// </summary>
         Point CursorPosition { get; }

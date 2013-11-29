@@ -86,7 +86,6 @@ Public Class OptionsForm
 
         SizeScale.Value = CInt(Options.ScaleFactor * 100)
         MaxPonies.Value = Options.MaxPonyCount
-        AlphaBlending.Checked = Options.AlphaBlendingEnabled
         Effects.Checked = Options.PonyEffectsEnabled
         WindowAvoidance.Checked = Options.WindowAvoidanceEnabled
         PoniesAvoidPonies.Checked = Options.PonyAvoidsPonies
@@ -395,11 +394,6 @@ Public Class OptionsForm
     Private Sub MaxPonies_ValueChanged(sender As Object, e As EventArgs) Handles MaxPonies.ValueChanged
         If initializing Then Return
         Options.MaxPonyCount = CInt(MaxPonies.Value)
-    End Sub
-
-    Private Sub AlphaBlending_CheckedChanged(sender As Object, e As EventArgs) Handles AlphaBlending.CheckedChanged
-        If initializing Then Return
-        Options.AlphaBlendingEnabled = AlphaBlending.Checked
     End Sub
 
     Private Sub Effects_CheckedChanged(sender As Object, e As EventArgs) Handles Effects.CheckedChanged

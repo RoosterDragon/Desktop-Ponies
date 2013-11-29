@@ -88,7 +88,6 @@ Partial Class OptionsForm
         Me.TimeScaleValueLabel = New System.Windows.Forms.Label()
         Me.TimeScaleLabel = New System.Windows.Forms.Label()
         Me.TimeScale = New System.Windows.Forms.TrackBar()
-        Me.AlphaBlending = New System.Windows.Forms.CheckBox()
         Me.SpeechGroup = New System.Windows.Forms.GroupBox()
         Me.SpeechDisabledLabel = New System.Windows.Forms.Label()
         Me.CursorGroup = New System.Windows.Forms.GroupBox()
@@ -836,18 +835,6 @@ Partial Class OptionsForm
         Me.TimeScale.TickStyle = System.Windows.Forms.TickStyle.TopLeft
         Me.TimeScale.Value = 10
         '
-        'AlphaBlending
-        '
-        Me.AlphaBlending.AutoSize = True
-        Me.AlphaBlending.Checked = True
-        Me.AlphaBlending.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.AlphaBlending.Location = New System.Drawing.Point(6, 140)
-        Me.AlphaBlending.Name = "AlphaBlending"
-        Me.AlphaBlending.Size = New System.Drawing.Size(133, 17)
-        Me.AlphaBlending.TabIndex = 6
-        Me.AlphaBlending.Text = "Enable Alpha Blending"
-        Me.AlphaBlending.UseVisualStyleBackColor = True
-        '
         'SpeechGroup
         '
         Me.SpeechGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
@@ -956,7 +943,6 @@ Partial Class OptionsForm
         Me.ScreenGroup.Controls.Add(Me.TeleportLabel)
         Me.ScreenGroup.Controls.Add(Me.MonitorsLabel)
         Me.ScreenGroup.Controls.Add(Me.MonitorsSelection)
-        Me.ScreenGroup.Controls.Add(Me.AlphaBlending)
         Me.ScreenGroup.Controls.Add(Me.MonitorsMinimumLabel)
         Me.ScreenGroup.Location = New System.Drawing.Point(522, 12)
         Me.ScreenGroup.Name = "ScreenGroup"
@@ -1152,7 +1138,6 @@ Partial Class OptionsForm
     Friend WithEvents TimeScaleValueLabel As System.Windows.Forms.Label
     Friend WithEvents TimeScaleLabel As System.Windows.Forms.Label
     Friend WithEvents TimeScale As System.Windows.Forms.TrackBar
-    Friend WithEvents AlphaBlending As System.Windows.Forms.CheckBox
     Friend WithEvents SpeechGroup As System.Windows.Forms.GroupBox
     Friend WithEvents CursorGroup As System.Windows.Forms.GroupBox
     Friend WithEvents InteractionsGroup As System.Windows.Forms.GroupBox

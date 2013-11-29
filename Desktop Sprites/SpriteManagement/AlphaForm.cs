@@ -48,16 +48,29 @@
                 // Lazily initialize the graphics buffer.
                 if (backgroundGraphics == null)
                 {
-                    using (var bitmap = new Bitmap(Width, Height))
-                        hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));
+                    IntPtr backgroundBits;
+                    var bitmapInfo = new BITMAPINFO(new BITMAPINFOHEADER(
+                        Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
+                    hBitmap = NativeMethods.CreateDIBSection(
+                        hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
                     hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
                     if (hPrevBitmap == IntPtr.Zero)
                         throw new Win32Exception();
                     backgroundGraphics = Graphics.FromHdc(hdcBackground);
+                    unsafe
+                    {
+                        BackgroundData = (int*)backgroundBits.ToPointer();
+                    }
                 }
                 return backgroundGraphics;
             }
         }
+        /// <summary>
+        /// Gets a pointer to the array of raw pixels of the background graphics buffer which may be operated on directly for speed. The
+        /// array is of length Width * Height. Each element is a packed 32-bit ARGB value. This buffer is recreated whenever the form is
+        /// resized.
+        /// </summary>
+        public unsafe int* BackgroundData { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.AlphaForm"/> class.
@@ -111,6 +124,10 @@
             }
             if (hBitmap != IntPtr.Zero && hPrevBitmap != IntPtr.Zero)
             {
+                unsafe
+                {
+                    BackgroundData = null;
+                }
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
                 if (!NativeMethods.DeleteObject(new HandleRef(this, hBitmap)))
                     throw new Win32Exception();

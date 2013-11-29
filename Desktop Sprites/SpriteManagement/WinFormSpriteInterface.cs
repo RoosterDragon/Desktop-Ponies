@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Drawing2D;
-    using System.Drawing.Imaging;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -16,17 +15,11 @@
     /// Creates a single Windows Form that is used as a canvas to display sprites.
     /// </summary>
     /// <remarks>
-    /// Creates a single window that can support either 1-bit or 8-bit transparency. Using one window as a canvas gives reasonably scalable
+    /// Creates a single window used as a canvas on which sprites are drawn. Using one window as a canvas gives reasonably scalable
     /// performance (for CPU side graphics, at least). There is no overhead in modifying the collection of sprites to be drawn each call.
     /// There is an overhead for maintaining a window that covers the whole drawing area. This will be negligible on most systems, but is
     /// quite costly when running in a virtual machine as the whole surface must be transmitted over the wire. However, in return the
     /// overhead for each additional sprite is very low.
-    /// When alpha blending is disabled, this interface requires one color to be reserved for transparency. On Windows XP, this is
-    /// RGB 0, 0, 0; i.e. black. This is due to a bug on that platform. On Vista and later the default key is RGB 0, 1, 0; but you may
-    /// specify your own. When images are loaded, any colors conflicting with the key will be remapped to a similar color that does not
-    /// conflict so they display correctly.
-    /// When alpha blending is enabled, the transparency key is not used. The use of alpha blending forces the whole area to be refreshed
-    /// with each draw, which will cause higher CPU usage compared to a non-blended form that can reduce the overall clipping rectangle.
     /// </remarks>
     public sealed class WinFormSpriteInterface : Disposable, ISpriteCollectionView
     {
@@ -40,8 +33,7 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.GraphicsForm"/>
             /// class.
             /// </summary>
-            /// <param name="useTransparencyKey">Pass true to set a transparency key; otherwise pass false.</param>
-            public GraphicsForm(bool useTransparencyKey)
+            public GraphicsForm()
             {
                 // Create the form.
                 Name = GetType().Name;
@@ -57,30 +49,19 @@
                 // This event will now only occur when we raise it.
                 SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
-                if (useTransparencyKey)
-                    if (OperatingSystemInfo.IsWindowsXP)
-                    {
-                        // Certain versions of XP won't support transparency with the settings given so far. Using the
-                        // SupportsTransparentBackColor draws the form onto an all zeroed buffer. The flag is only meant to support
-                        // transparent controls on or above other controls and not to provide actual transparency on the desktop but we can
-                        // abuse the all zero buffer. With the buffer being transparent black as a result of being zeroed, we can then set
-                        // transparent black as the TransparencyKey to get achieve transparency.
-                        SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-                        BackColor = Color.FromArgb(255, 0, 0, 0);
-                        TransparencyKey = Color.FromArgb(0, 0, 0, 0);
-                    }
-                    else
-                    {
-                        // Forms don't truly support a transparent background, however a transparency key can be used to tell it to treat a
-                        // certain color as transparent. So we'll try and use an uncommon color. This also has the bonus effect of making
-                        // interaction fall through the transparent areas. This means interaction with the desktop is possible.
-                        BackColor = Color.FromArgb(0, 1, 0);
-                        TransparencyKey = BackColor;
-                    }
-
                 // Force creation of the window handle, so properties may be altered before the form is shown.
                 if (!this.IsHandleCreated)
                     CreateHandle();
+            }
+
+            /// <summary>
+            /// Sets the interpolation mode of the background graphics buffer to nearest neighbor whenever it is recreated.
+            /// </summary>
+            /// <param name="e">Data about the event.</param>
+            protected override void OnResize(EventArgs e)
+            {
+                base.OnResize(e);
+                BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             }
         }
         #endregion
@@ -427,6 +408,191 @@
         }
         #endregion
 
+        #region ImageData and ImageFrame classes
+        /// <summary>
+        /// Contains either an image stored as a GDI+ bitmap, or as a 8bbp indexed array and color palette.
+        /// </summary>
+        private sealed class ImageData : Disposable
+        {
+            /// <summary>
+            /// A GDI+ bitmap of the image. This will be null if the image is instead made up of an indexed array and color palette.
+            /// </summary>
+            public readonly Bitmap Bitmap;
+            /// <summary>
+            /// An indexed array of image data. Each value refers to an index in the color palette. This will be null if the image is
+            /// instead made up of a bitmap.
+            /// </summary>
+            public readonly byte[] Data;
+            /// <summary>
+            /// An array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
+            /// instead made up of a bitmap.
+            /// </summary>
+            public readonly int[] ArgbPalette;
+            /// <summary>
+            /// The width of the image, in pixels.
+            /// </summary>
+            public readonly int Width;
+            /// <summary>
+            /// The height of the image, in pixels.
+            /// </summary>
+            public readonly int Height;
+            /// <summary>
+            /// A hash code for the image.
+            /// </summary>
+            private readonly int hashCode;
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
+            /// loading a GDI+ bitmap from file.
+            /// </summary>
+            /// <param name="path">The path to an image to be loaded.</param>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="path"/> is null.</exception>
+            public ImageData(string path)
+            {
+                Argument.EnsureNotNull(path, "path");
+                Bitmap = new Bitmap(path);
+                Width = Bitmap.Width;
+                Height = Bitmap.Height;
+                this.hashCode = path.GetHashCode();
+            }
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
+            /// creating a new image from a raw buffer and color palette.
+            /// </summary>
+            /// <param name="data">The 8bbp array of color palette indexes to use.</param>
+            /// <param name="palette">The source color palette to use.</param>
+            /// <param name="transparentIndex">The index in the source palette that should be replaced with a transparent color, or -1 if
+            /// there is no transparent color in the image.</param>
+            /// <param name="stride">The stride width of the data buffer, in bytes.</param>
+            /// <param name="width">The width of the image, in pixels.</param>
+            /// <param name="height">The height of the image, in pixels.</param>
+            /// <param name="hashCode">A pre-generated hash code for the image.</param>
+            public ImageData(byte[] data, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int hashCode)
+            {
+                Data = data;
+                Height = height;
+                Width = width;
+                this.hashCode = hashCode;
+                ArgbPalette = new int[palette.Length];
+                for (int i = 0; i < ArgbPalette.Length; i++)
+                    ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
+                if (transparentIndex != -1)
+                    ArgbPalette[transparentIndex] = new ArgbColor().ToArgb();
+            }
+            /// <summary>
+            /// Returns a hash code for this <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class.
+            /// </summary>
+            /// <returns>An integer value that specifies the hash code for this
+            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> instance.</returns>
+            public override int GetHashCode()
+            {
+                return hashCode;
+            }
+            /// <summary>
+            /// Cleans up any resources being used.
+            /// </summary>
+            /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise,
+            /// only unmanaged resources should be disposed.</param>
+            protected override void Dispose(bool disposing)
+            {
+                if (Bitmap != null)
+                    Bitmap.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Defines a <see cref="T:DesktopSprites.SpriteManagement.SpriteFrame`1"/> whose underlying image is an
+        /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> instance.
+        /// </summary>
+        private sealed class ImageFrame : SpriteFrame<ImageData>, IDisposable
+        {
+            /// <summary>
+            /// Gets the method that converts a buffer into an
+            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
+            /// </summary>
+            public static BufferToImage<ImageFrame> FromBuffer
+            {
+                get { return FromBufferInternal; }
+            }
+            /// <summary>
+            /// The method that converts a buffer into an
+            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
+            /// </summary>
+            private static readonly BufferToImage<ImageFrame> FromBufferInternal =
+                (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
+                {
+                    return new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, hashCode));
+                };
+
+            /// <summary>
+            /// Represents the allowable set of depths that can be used when generating a
+            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
+            /// </summary>
+            public const BitDepths AllowableBitDepths = BitDepths.Indexed8Bpp;
+
+            /// <summary>
+            /// Gets the dimensions of the frame.
+            /// </summary>
+            public override Size Size
+            {
+                get { return new Size(Image.Width, Image.Height); }
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> class.
+            /// </summary>
+            /// <param name="imageData">The image data to use.</param>
+            private ImageFrame(ImageData imageData)
+                : base(imageData)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> class.
+            /// </summary>
+            /// <param name="path">A path to the image to load. A GDI+ bitmap will be loaded from this file.</param>
+            public ImageFrame(string path)
+                : base(new ImageData(path))
+            {
+            }
+
+            /// <summary>
+            /// Ensures the image is facing the desired direction by possibly flipping it horizontally.
+            /// </summary>
+            /// <param name="flipFromOriginal">Pass true to ensure the frame is facing the opposing direction as when it was loaded. Pass
+            /// false  to ensure the frame is facing the same direction as when it was loaded.</param>
+            public override void Flip(bool flipFromOriginal)
+            {
+                if (Flipped != flipFromOriginal)
+                {
+                    Flipped = !Flipped;
+                    // TODO: Support flipping the raw bytes somehow?
+                    if (Image.Bitmap != null)
+                        Image.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    else
+                        throw new NotImplementedException();
+                }
+            }
+
+            /// <summary>
+            /// Gets the hash code of the frame image.
+            /// </summary>
+            /// <returns>A hash code for this frame image.</returns>
+            public override int GetFrameHashCode()
+            {
+                return Image.GetHashCode();
+            }
+
+            /// <summary>
+            /// Releases all resources used by the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>
+            /// object.
+            /// </summary>
+            public void Dispose()
+            {
+                Image.Dispose();
+            }
+        }
+        #endregion
+
         #region Fields and Properties
         /// <summary>
         /// Gets or sets the FrameRecordCollector for debugging purposes.
@@ -446,49 +612,15 @@
         /// </summary>
         private bool closing;
         /// <summary>
-        /// Stores the images for each sprite as a series of <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/>, indexed by
-        /// filename.
+        /// Stores the images for each sprite as a series of
+        /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>, indexed by filename.
         /// </summary>
-        private LazyDictionary<string, AnimatedImage<BitmapFrame>> images;
+        private LazyDictionary<string, AnimatedImage<ImageFrame>> images;
 
         /// <summary>
         /// The underlying form on which graphics are displayed.
         /// </summary>
         private GraphicsForm form;
-        /// <summary>
-        /// The context that allocates graphics buffers.
-        /// </summary>
-        private BufferedGraphicsContext bufferedGraphicsContext;
-        /// <summary>
-        /// The graphics buffer of the form to which drawing is done and from which rendering to the screen is performed.
-        /// </summary>
-        private BufferedGraphics bufferedGraphics;
-        /// <summary>
-        /// The graphics surface of the form (unbuffered), used to provide the pixel format required when allocating graphics buffers.
-        /// </summary>
-        private Graphics graphics;
-        /// <summary>
-        /// Indicates if any manual painting is taking place.
-        /// </summary>
-        private bool manualPainting;
-        /// <summary>
-        /// The <see cref="T:System.Windows.Forms.PaintEventHandler"/> that ensures the form is repainted when paused.
-        /// </summary>
-        private PaintEventHandler manualRender;
-        /// <summary>
-        /// The <see cref="T:System.Windows.Forms.PaintEventHandler"/> that ensures the form can be manually cleared.
-        /// </summary>
-        private PaintEventHandler manualClear;
-        /// <summary>
-        /// Gets a value indicating whether alpha blending is in use. If true, pixels which are partially transparent will be blended with
-        /// those behind them to achieve proper transparency; otherwise these pixels will be rendered opaque, and only fully transparent
-        /// pixels will render as transparent, resulting in simple 1-bit transparency.
-        /// </summary>
-        public bool IsAlphaBlended { get; private set; }
-        /// <summary>
-        /// Specifies the palette mapping that maps the transparency key to another color to avoid conflict.
-        /// </summary>
-        private readonly Dictionary<Color, Color> paletteMapping = new Dictionary<Color, Color>(1);
         /// <summary>
         /// Represents the area that becomes invalidated before updating. This area needs to be cleared.
         /// </summary>
@@ -519,18 +651,6 @@
         /// The full <see cref="T:System.Drawing.Font"/> definition to be used when drawing text to the screen.
         /// </summary>
         private readonly Font font;
-        /// <summary>
-        /// A <see cref="T:System.Drawing.Brush"/> whose color is roughly white.
-        /// </summary>
-        private Brush whiteBrush;
-        /// <summary>
-        /// A <see cref="T:System.Drawing.Brush"/> whose color is roughly black.
-        /// </summary>
-        private Brush blackBrush;
-        /// <summary>
-        /// A <see cref="T:System.Drawing.Pen"/> whose color is roughly black.
-        /// </summary>
-        private Pen blackPen;
         /// <summary>
         /// The identity matrix.
         /// </summary>
@@ -585,36 +705,6 @@
             }
         }
         /// <summary>
-        /// Gets or sets the color that will appear as transparent when displaying sprites. This only applies if alpha-blending is
-        /// disabled.
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">The operating system is Windows XP (black is the only supported key on this
-        /// platform).-or-Images have been loaded. The key must be set before any images are loaded by the interface.</exception>
-        /// <exception cref="System.ArgumentException">The operation was set and the given color was not opaque.</exception>
-        public Color TransparencyKey
-        {
-            get
-            {
-                return form.TransparencyKey;
-            }
-            set
-            {
-                if (OperatingSystemInfo.IsWindowsXP)
-                    throw new InvalidOperationException("The transparency key may not be altered on Windows XP.");
-                if (images.Count > 0)
-                    throw new InvalidOperationException("The transparency key may not be altered if images have been loaded.");
-                if (value.A != 255)
-                    throw new ArgumentException("value must be an opaque color, i.e. its alpha component must be 255.");
-
-                ApplicationInvoke(() =>
-                {
-                    form.BackColor = value;
-                    form.TransparencyKey = value;
-                    RemapKeyConflicts();
-                });
-            }
-        }
-        /// <summary>
         /// Gets or sets a value indicating whether the form should be displayed as a topmost form. This will cause a momentary graphical
         /// stutter if the form has already been opened and alpha blending is disabled. If the form is not paused, this will not take
         /// effect until Draw is called.
@@ -628,13 +718,7 @@
             set
             {
                 if (form.TopMost != value)
-                    ApplicationInvoke(() =>
-                    {
-                        if (!opened)
-                            form.TopMost = value;
-                        else
-                            ToggleTopmost(paused);
-                    });
+                    ApplicationInvoke(() => form.TopMost = value);
             }
         }
         /// <summary>
@@ -657,12 +741,7 @@
             set
             {
                 if (form.DesktopBounds != value)
-                    ApplicationInvoke(() =>
-                    {
-                        form.DesktopBounds = value;
-                        if (opened)
-                            AllocateBuffers();
-                    });
+                    ApplicationInvoke(() => form.DesktopBounds = value);
             }
         }
         /// <summary>
@@ -786,17 +865,13 @@
         /// </summary>
         /// <param name="displayBounds">The initial display boundary the interface should cover. Sprites outside this area will not be
         /// drawn.</param>
-        /// <param name="useAlphaBlending">Indicates if alpha blending should be supported. If true, the transparency value in images is
-        /// respected, and the color is blended with the color behind it. If false, semi-transparent values will appear opaque. Only fully
-        /// transparent pixels will continue to render as transparent.</param>
-        public WinFormSpriteInterface(Rectangle displayBounds, bool useAlphaBlending)
+        public WinFormSpriteInterface(Rectangle displayBounds)
         {
-            IsAlphaBlended = useAlphaBlending;
-            images = new LazyDictionary<string, AnimatedImage<BitmapFrame>>(
-                fileName => new AnimatedImage<BitmapFrame>(
-                    fileName, BitmapFrameFromFile,
-                    (b, p, tI, s, w, h, d, hC) => BitmapFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
-                    BitmapFrame.AllowableBitDepths));
+            images = new LazyDictionary<string, AnimatedImage<ImageFrame>>(
+                fileName => new AnimatedImage<ImageFrame>(
+                    fileName, ImageFrameFromFile,
+                    (b, p, tI, s, w, h, d, hC) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
+                    ImageFrame.AllowableBitDepths));
             render = new MethodInvoker(Render);
             using (var family = FontFamily.GenericSansSerif)
                 font = new Font(family, 12, GraphicsUnit.Pixel);
@@ -820,7 +895,7 @@
             var parameters = (Tuple<object, Rectangle>)parameter;
 
             // Create the form.
-            form = new GraphicsForm(!IsAlphaBlended);
+            form = new GraphicsForm();
             form.FormClosing += GraphicsForm_FormClosing;
             form.Disposed += GraphicsForm_Disposed;
 
@@ -828,21 +903,10 @@
             form.Deactivate += (sender, e) => Unfocused.Raise(this);
 
             DisplayBounds = parameters.Item2;
-            RemapKeyConflicts();
 
             // Hook up to form events.
             form.MouseClick += GraphicsForm_MouseClick;
             form.KeyPress += GraphicsForm_KeyPress;
-
-            // Create manual painting handlers.
-            manualRender = (sender, e) =>
-            {
-                if (IsAlphaBlended)
-                    form.UpdateBackgroundGraphics();
-                else
-                    bufferedGraphics.Render(e.Graphics);
-            };
-            manualClear = (sender, e) => e.Graphics.Clear(form.TransparencyKey);
 
             postUpdateInvalidRegion.MakeEmpty();
 
@@ -875,67 +939,33 @@
         }
 
         /// <summary>
-        /// Maps drawing brushes and pens around the transparency key, and sets the paletteMapping for images to avoid conflict.
-        /// </summary>
-        private void RemapKeyConflicts()
-        {
-            Color key = form.BackColor;
-            Color remappedKey;
-
-            if (key.G == 255)
-                remappedKey = Color.FromArgb(key.R, 254, key.B);
-            else
-                remappedKey = Color.FromArgb(key.R, key.G + 1, key.B);
-
-            paletteMapping.Clear();
-            paletteMapping.Add(key, remappedKey);
-
-            if (whiteBrush != null)
-                whiteBrush.Dispose();
-            if (blackBrush != null)
-                blackBrush.Dispose();
-            if (blackPen != null)
-                blackPen.Dispose();
-
-            if (key.R == 255 && key.G == 255 && key.B == 255)
-                whiteBrush = new SolidBrush(Color.FromArgb(255, 254, 255));
-            else
-                whiteBrush = new SolidBrush(Color.FromArgb(255, 255, 255));
-
-            if (key.R == 0 && key.G == 0 && key.B == 0)
-            {
-                blackBrush = new SolidBrush(Color.FromArgb(0, 1, 0));
-                blackPen = new Pen(Color.FromArgb(0, 1, 0));
-            }
-            else
-            {
-                blackBrush = new SolidBrush(Color.FromArgb(0, 0, 0));
-                blackPen = new Pen(Color.FromArgb(0, 0, 0));
-            }
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/> from the given file, loading extra transparency
-        /// information and adjusting the colors as required by the transparency.
+        /// Creates a new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> from the given file, loading
+        /// extra transparency information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="fileName">The path to a static image file from which to create a new
-        /// <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/>.
-        /// </param>
-        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/> created from the given file.</returns>
-        private BitmapFrame BitmapFrameFromFile(string fileName)
+        /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.</param>
+        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> created from the given file.
+        /// </returns>
+        private ImageFrame ImageFrameFromFile(string fileName)
         {
-            return Disposable.SetupSafely(new BitmapFrame(fileName), frame =>
+            return Disposable.SetupSafely(new ImageFrame(fileName), frame =>
             {
-                if (IsAlphaBlended)
-                    frame.Image.PreMultiplyAlpha();
-                else
-                    frame.Image.RemapColors(paletteMapping);
+                // Check for an alpha remapping table, and apply it if one exists.
+                string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+                if (File.Exists(mapFilePath))
+                {
+                    AlphaRemappingTable map = new AlphaRemappingTable();
+                    map.LoadMap(mapFilePath);
+                    frame.Image.Bitmap.RemapColors(map.GetMap().ToDictionary(
+                        kvp => Color.FromArgb(kvp.Key.ToArgb()), kvp => Color.FromArgb(kvp.Value.ToArgb())));
+                }
+                frame.Image.Bitmap.PremultiplyAlpha();
             });
         }
 
         /// <summary>
-        /// Creates a new <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/> from the raw buffer, loading extra transparency
-        /// information and adjusting the colors as required by the transparency.
+        /// Creates a new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> from the raw buffer, loading
+        /// extra transparency information and adjusting the colors as required by the transparency.
         /// </summary>
         /// <param name="buffer">The raw buffer.</param>
         /// <param name="palette">The color palette.</param>
@@ -946,75 +976,33 @@
         /// <param name="depth">The bit depth of the buffer.</param>
         /// <param name="hashCode">The hash code of the frame.</param>
         /// <param name="fileName">The path to the GIF file being loaded.</param>
-        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/> for the frame held in the raw buffer.</returns>
-        private BitmapFrame BitmapFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
+        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> for the frame held in the raw
+        /// buffer.</returns>
+        private ImageFrame ImageFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
             int stride, int width, int height, int depth, int hashCode, string fileName)
         {
             return Disposable.SetupSafely(
-                BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode),
+                ImageFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode),
                 frame =>
                 {
-                    if (IsAlphaBlended)
+                    // Check for an alpha remapping table, and apply it if one exists.
+                    string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+                    if (File.Exists(mapFilePath))
                     {
-                        // Check for an alpha remapping table, and apply it if one exists.
-                        string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
-                        if (File.Exists(mapFilePath))
+                        AlphaRemappingTable map = new AlphaRemappingTable();
+                        map.LoadMap(mapFilePath);
+                        var colorPalette = frame.Image.ArgbPalette;
+                        for (int i = 0; i < colorPalette.Length; i++)
                         {
-                            AlphaRemappingTable map = new AlphaRemappingTable();
-                            map.LoadMap(mapFilePath);
-                            ColorPalette colorPalette = frame.Image.Palette;
-                            for (int i = 0; i < colorPalette.Entries.Length; i++)
-                            {
-                                Color color = colorPalette.Entries[i];
-                                ArgbColor argbColor;
-                                if (map.TryGetMapping(new RgbColor(color.R, color.G, color.B), out argbColor))
-                                    colorPalette.Entries[i] = Color.FromArgb(argbColor.ToArgb());
-                            }
-                            frame.Image.Palette = colorPalette;
-                            // We only need to pre-multiply when we add an alpha channel ourselves, as GIFs only support 1 bit transparency.
-                            frame.Image.PreMultiplyAlpha();
+                            ArgbColor paletteColor = new ArgbColor(colorPalette[i]);
+                            if (paletteColor.A != 255)
+                                continue;
+                            ArgbColor argbColor;
+                            if (map.TryGetMapping(new RgbColor(paletteColor.R, paletteColor.G, paletteColor.B), out argbColor))
+                                colorPalette[i] = argbColor.PremultipliedAlpha().ToArgb();
                         }
                     }
-                    else
-                    {
-                        frame.Image.RemapColors(paletteMapping);
-                    }
                 });
-        }
-
-        /// <summary>
-        /// Toggles the topmost display of the form and recreates the graphics surfaces since they become invalidated.
-        /// </summary>
-        /// <param name="beginManualPainting">If true, indicates the paint method of the form should be hooked on to in order to ensure the
-        /// graphics get redrawn.</param>
-        private void ToggleTopmost(bool beginManualPainting)
-        {
-            // Toggle the topmost setting.
-            form.TopMost = !form.TopMost;
-
-            if (!IsAlphaBlended)
-            {
-                // Recreate the buffers as they will have become invalid.
-                graphics.Dispose();
-                graphics = form.CreateGraphics();
-                graphics.SetClip(DisplayBounds);
-                bufferedGraphics.Dispose();
-                bufferedGraphics = bufferedGraphicsContext.Allocate(graphics, DisplayBounds);
-                bufferedGraphics.Graphics.SetClip(DisplayBounds);
-                bufferedGraphics.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            }
-
-            if (beginManualPainting && !manualPainting)
-            {
-                if (!IsAlphaBlended)
-                {
-                    // We must offset the form as rendering the buffer does not account for its transparent edges.
-                    form.Location = Point.Truncate(postUpdateInvalidRegion.GetBounds(bufferedGraphics.Graphics).Location);
-                }
-                // Hook up to form painting so our buffer still gets drawn.
-                form.Paint += manualRender;
-                manualPainting = true;
-            }
         }
 
         /// <summary>
@@ -1066,41 +1054,8 @@
         /// </summary>
         public void Open()
         {
-            ApplicationInvoke(() =>
-            {
-                AllocateBuffers();
-                Show();
-                opened = true;
-            });
-        }
-
-        /// <summary>
-        /// Allocates the graphics buffers to cover the display area of the form.
-        /// </summary>
-        private void AllocateBuffers()
-        {
-            if (IsAlphaBlended)
-            {
-                form.BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            }
-            else
-            {
-                // Windows Forms provides easy ways to double buffer forms. Double buffering prevents flicker by drawing to a back buffer,
-                // then displaying it all at once. It can be quickly set with DoubleBuffered = true or
-                // SetStyle(ControlStyles.OptimizedDoubleBuffer, true). However this method creates a lot of garbage, so it's better to
-                // handle it manually. We create our own buffer surface, draw to that and render when done. Allocating a full size buffer
-                // will prevent the context from having to create a larger surface when resizing and creating garbage later. Instead it can
-                // reuse portions of the existing surface.
-                if (graphics == null)
-                    graphics = form.CreateGraphics();
-                graphics.SetClip(DisplayBounds);
-                if (bufferedGraphicsContext == null)
-                    bufferedGraphicsContext = new BufferedGraphicsContext();
-                bufferedGraphicsContext.MaximumBuffer = DisplayBounds.Size;
-                if (bufferedGraphics != null)
-                    bufferedGraphics.Dispose();
-                bufferedGraphics = bufferedGraphicsContext.Allocate(graphics, DisplayBounds);
-            }
+            Show();
+            opened = true;
         }
 
         /// <summary>
@@ -1139,25 +1094,7 @@
         /// </summary>
         public void Resume()
         {
-            if (opened && paused)
-            {
-                // Reset any manual painting that is taking place.
-                if (manualPainting)
-                {
-                    ApplicationInvoke(() =>
-                    {
-                        form.Paint -= manualRender;
-                        form.Paint += manualClear;
-                        form.Invalidate();
-                        form.Update();
-                        form.Paint -= manualClear;
-                        form.Location = Point.Empty;
-                        manualPainting = false;
-                    });
-                }
-
-                paused = false;
-            }
+            paused = false;
             Show();
         }
 
@@ -1190,13 +1127,6 @@
                 if (sprites == null)
                     return;
 
-                // Get the target graphics surface.
-                Graphics surface;
-                if (IsAlphaBlended)
-                    surface = form.BackgroundGraphics;
-                else
-                    surface = bufferedGraphics.Graphics;
-
                 // Translation offset so the top-left of the form and drawing surface coincide.
                 Size translate = new Size(-form.Left, -form.Top);
 
@@ -1216,7 +1146,7 @@
                     timingsInfo = "fps: " +
                         Collector.FramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + "/" +
                         Collector.AchievableFramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
-                    Size timingsSize = Size.Ceiling(surface.MeasureString(timingsInfo, font));
+                    Size timingsSize = Size.Ceiling(form.BackgroundGraphics.MeasureString(timingsInfo, font));
 
                     // Set location and get area of graph draw.
                     Point offset = new Point(10, 10) + translate;
@@ -1240,10 +1170,13 @@
                 {
                     foreach (ISprite sprite in sprites)
                     {
-                        postUpdateInvalidRegion.Union(OffsetRectangle(sprite.Region, translate));
+                        var invalidRect = OffsetRectangle(sprite.Region, translate);
+                        invalidRect.Size += new Size(1, 1);
+                        postUpdateInvalidRegion.Union(invalidRect);
                         ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
                         if (speakingSprite != null && speakingSprite.SpeechText != null)
-                            postUpdateInvalidRegion.Union(OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate));
+                            postUpdateInvalidRegion.Union(
+                                OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, form.BackgroundGraphics), translate));
                     }
                     postUpdateInvalidRegion.Intersect(OffsetRectangle(DisplayBounds, translate));
                 }
@@ -1253,19 +1186,11 @@
                 }
 
                 // Determine the current clipping area required, and clear it of old graphics.
-                if (IsAlphaBlended)
-                {
-                    surface.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
-                    surface.Clear(Color.FromArgb(0));
-                }
-                else
-                {
-                    surface = ResizeGraphicsBuffer();
-                    surface.Clear(form.TransparencyKey);
-                }
+                form.BackgroundGraphics.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
+                form.BackgroundGraphics.Clear(Color.FromArgb(0));
 
                 // Set the clipping area to the region we'll be drawing in for this frame.
-                surface.SetClip(postUpdateInvalidRegion, CombineMode.Replace);
+                form.BackgroundGraphics.SetClip(postUpdateInvalidRegion, CombineMode.Replace);
 
                 #region Show Clipping Region
                 if (ShowClippingRegion)
@@ -1279,7 +1204,7 @@
                         Rectangle invalidRectangle = new Rectangle(
                             (int)invalidRectangleF.X, (int)invalidRectangleF.Y,
                             (int)invalidRectangleF.Width - 1, (int)invalidRectangleF.Height - 1);
-                        surface.DrawRectangle(Pens.Blue, invalidRectangle);
+                        form.BackgroundGraphics.DrawRectangle(Pens.Blue, invalidRectangle);
                     }
                 }
                 #endregion
@@ -1290,20 +1215,25 @@
                     // Draw the sprite image.
                     if (sprite.ImagePath != null)
                     {
-                        BitmapFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
+                        var area = OffsetRectangle(sprite.Region, translate);
+                        ImageFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
                         frame.Flip(sprite.FlipImage);
-                        surface.DrawImage(frame.Image, OffsetRectangle(sprite.Region, translate));
+                        if (frame.Image.Bitmap != null)
+                            form.BackgroundGraphics.DrawImage(frame.Image.Bitmap, area);
+                        else
+                            AlphaBlend(frame.Image, area);
                     }
 
                     // Draw a speech bubble for a speaking sprite.
                     ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
                     if (speakingSprite != null && speakingSprite.SpeechText != null)
                     {
-                        Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, surface), translate);
-                        surface.FillRectangle(whiteBrush, bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
-                        surface.DrawRectangle(blackPen,
-                            new Rectangle(bubble.X, bubble.Y, bubble.Width - 1, bubble.Height - 1));
-                        surface.DrawString(speakingSprite.SpeechText, font, blackBrush, bubble.Location);
+                        Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, form.BackgroundGraphics), translate);
+                        form.BackgroundGraphics.FillRectangle(Brushes.White,
+                            bubble.X + 1, bubble.Y + 1, bubble.Width - 2, bubble.Height - 2);
+                        form.BackgroundGraphics.DrawRectangle(Pens.Black,
+                            bubble.X, bubble.Y, bubble.Width - 1, bubble.Height - 1);
+                        form.BackgroundGraphics.DrawString(speakingSprite.SpeechText, font, Brushes.Black, bubble.Location);
                     }
                 }
 
@@ -1311,20 +1241,126 @@
                 if (Collector != null && ShowPerformanceGraph && Collector.Count != 0)
                 {
                     // Display a graph of frame times and garbage collections.
-                    Collector.DrawGraph(surface);
+                    Collector.DrawGraph(form.BackgroundGraphics);
 
                     // Display how long this frame took.
-                    surface.FillRectangle(blackBrush, timingsArea);
-                    surface.DrawString(timingsInfo, font, whiteBrush, timingsArea.Left, timingsArea.Top);
+                    form.BackgroundGraphics.FillRectangle(Brushes.Black, timingsArea);
+                    form.BackgroundGraphics.DrawString(timingsInfo, font, Brushes.White, timingsArea.Left, timingsArea.Top);
                 }
                 #endregion
             }
 
             // Render the result.
-            if (IsAlphaBlended)
-                form.UpdateBackgroundGraphics();
-            else
-                bufferedGraphics.Render();
+            form.UpdateBackgroundGraphics();
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified image within the specified rectangle onto the form. Scaling is done using nearest
+        /// neighbor interpolation.
+        /// </summary>
+        /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlend(ImageData image, Rectangle area)
+        {
+            if (image.Width == area.Width && image.Height == area.Height)
+            {
+                AlphaBlend(image, area.Location);
+                return;
+            }
+
+            int xMin = Math.Max(0, -area.Left);
+            int yMin = Math.Max(0, -area.Top);
+            int xMax = Math.Min(area.Width, form.Width - area.Left);
+            int yMax = Math.Min(area.Height, form.Height - area.Top);
+
+            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
+            int backgroundIndexRowChange = form.Width - xMax + xMin;
+
+            float xScale = (float)image.Width / area.Width;
+            float yScale = (float)image.Height / area.Height;
+            float xMinScaled = xMin * xScale;
+
+            byte[] data = image.Data;
+            int[] palette = image.ArgbPalette;
+            int* backgroundData = form.BackgroundData;
+            int imageWidth = image.Width;
+            for (int y = yMin; y < yMax; y++)
+            {
+                float dataIndex = (int)(y * yScale) * imageWidth + xMinScaled;
+                for (int x = xMin; x < xMax; x++)
+                {
+                    byte paletteIndex = data[(int)dataIndex];
+                    dataIndex += xScale;
+                    int srcColor = palette[paletteIndex];
+                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    if (srcAlpha == byte.MaxValue)
+                        backgroundData[backgroundIndex] = srcColor;
+                    else if (srcAlpha > 0)
+                        AlphaBlendInternal(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                    backgroundIndex++;
+                }
+                backgroundIndex += backgroundIndexRowChange;
+            }
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified image at the specified location onto the form at its native size.
+        /// </summary>
+        /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="location">The location on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlend(ImageData image, Point location)
+        {
+            int xMin = Math.Max(0, -location.X);
+            int yMin = Math.Max(0, -location.Y);
+            int xMax = Math.Min(image.Width, form.Width - location.X);
+            int yMax = Math.Min(image.Height, form.Height - location.Y);
+
+            int backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
+            int backgroundIndexRowChange = form.Width - xMax + xMin;
+
+            int dataIndex = yMin * image.Width + xMin;
+            int dataIndexRowChange = image.Width - xMax + xMin;
+
+            byte[] data = image.Data;
+            int[] palette = image.ArgbPalette;
+            int* backgroundData = form.BackgroundData;
+            for (int y = yMin; y < yMax; y++)
+            {
+                for (int x = xMin; x < xMax; x++)
+                {
+                    byte paletteIndex = data[dataIndex++];
+                    int srcColor = palette[paletteIndex];
+                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    if (srcAlpha == byte.MaxValue)
+                        backgroundData[backgroundIndex] = srcColor;
+                    else if (srcAlpha > 0)
+                        AlphaBlendInternal(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                    backgroundIndex++;
+                }
+                backgroundIndex += backgroundIndexRowChange;
+                dataIndex += dataIndexRowChange;
+            }
+        }
+
+        /// <summary>
+        /// Blends a translucent source color with the form background.
+        /// </summary>
+        /// <param name="backgroundData">A pointer to the BackgroundData of the form.</param>
+        /// <param name="backgroundIndex">The index into the <paramref name="backgroundData"/> array that represents the destination pixel.
+        /// </param>
+        /// <param name="srcColor">The source pixel to blend with the form.</param>
+        /// <param name="srcAlpha">The alpha value of the source pixel.</param>
+        private unsafe void AlphaBlendInternal(int* backgroundData, int backgroundIndex, int srcColor, int srcAlpha)
+        {
+            int dstColor = backgroundData[backgroundIndex];
+            int dstAlpha = (dstColor >> 24) & 0xFF;
+            int inverseSrcAlpha = byte.MaxValue - srcAlpha;
+            int dstAG = ((dstColor >> 8) & 0x00FF00FF) * inverseSrcAlpha;
+            int dstRB = (dstColor & 0x00FF00FF) * inverseSrcAlpha;
+            backgroundData[backgroundIndex] =
+                srcColor +
+                ((dstRB >> 8) & 0x00FF00FF) +
+                (dstAG & unchecked((int)0xFF00FF00));
         }
 
         /// <summary>
@@ -1359,45 +1395,6 @@
             speechSize.Width += 1;
             speechSize.Height += 1;
             return new Rectangle(location, speechSize);
-        }
-
-        /// <summary>
-        /// Resizes the graphics surface of the bufferedGraphics object to cover the area given by the current invalidation regions.
-        /// </summary>
-        /// <returns>The newly created surface in use by the bufferedGraphics object.</returns>
-        private Graphics ResizeGraphicsBuffer()
-        {
-            // Determine the bounds of the current draw.
-            // This needs to cover areas to be cleared and areas to be drawn.
-            RectangleF boundsF =
-                RectangleF.Union(preUpdateInvalidRegion.GetBounds(graphics), postUpdateInvalidRegion.GetBounds(graphics));
-            // See if the bounds differ from the current buffer.
-            if (bufferedGraphics.Graphics.ClipBounds != boundsF)
-            {
-                // Reallocate the buffer at the new size. We'll need to clip the whole area, so it can be filled with the right color. 
-                // Doing this doesn't have any real effect on our program, but it does help the desktop composition program out.
-                // dwm.exe (Vista and later) maintains bitmaps of all running programs so it can do the fancy stuff for the Aero theme.
-                // By redrawing a full size buffer every tick, it needs to update a large area and uses significant CPU time. By
-                // redrawing a minimally sized buffer, we can reduce the pixel count significantly and thus it will use less CPU.
-                // Whilst helpful, this is obviously limited by the size we can set the buffer to. For example, if there are graphics
-                // in two opposite corners then we still need a full size buffer and thus no real savings results. On the plus side
-                // even small reductions in width and height result in big savings on area (e.g. 90% width and 90% height is only 81%
-                // of the area), and the saved CPU indirectly benefits our frame time.
-                bufferedGraphics.Dispose();
-                bufferedGraphics = bufferedGraphicsContext.Allocate(graphics, boundsF.BoundingRectangle());
-                bufferedGraphics.Graphics.SetClip(OffsetRectangle(DisplayBounds, new Size(-form.Left, -form.Top)));
-
-                // Set the quality of drawing.
-                // As a result of having to use a transparency key, we can't use anti-aliasing functions.
-                // If we did, semi-transparent pixels would be blended with the form background color.
-                bufferedGraphics.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            }
-            else
-            {
-                // We can reuse the existing buffer, and so reduce the area needing to be cleared.
-                bufferedGraphics.Graphics.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
-            }
-            return bufferedGraphics.Graphics;
         }
 
         /// <summary>
@@ -1455,15 +1452,9 @@
                 if (form != null)
                     form.Dispose();
 
-                foreach (AnimatedImage<BitmapFrame> image in images.InitializedValues)
+                foreach (var image in images.InitializedValues)
                     image.Dispose();
 
-                if (graphics != null)
-                    graphics.Dispose();
-                if (bufferedGraphics != null)
-                    bufferedGraphics.Dispose();
-                if (bufferedGraphicsContext != null)
-                    bufferedGraphicsContext.Dispose();
                 if (windowIcon != null)
                     windowIcon.Dispose();
 
@@ -1475,9 +1466,6 @@
 
                 identityMatrix.Dispose();
                 font.Dispose();
-                whiteBrush.Dispose();
-                blackBrush.Dispose();
-                blackPen.Dispose();
             }
         }
     }

@@ -26,6 +26,18 @@
         public byte B { get; private set; }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure from the specified 32-bit
+        /// ARGB value.
+        /// </summary>
+        /// <param name="argbColor">The 32-bit ARGB value stored in the format 0xAARRGGBB.</param>
+        public ArgbColor(int argbColor)
+            : this(
+            (byte)((argbColor >> 24) & 0xFF), (byte)((argbColor >> 16) & 0xFF),
+            (byte)((argbColor >> 8) & 0xFF), (byte)(argbColor & 0xFF))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure from the specified
         /// alpha, and with the same red, green and blue values as the given <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/>.
         /// </summary>
@@ -127,6 +139,17 @@
         public int ToArgb()
         {
             return (A << 24) | (R << 16) | (G << 8) | B;
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure where the alpha component has been
+        /// premultiplied with each of the RGB color components. This is, the value of each color component is multiplied by the value of
+        /// the alpha component, and then divided by 255.
+        /// </summary>
+        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure with premultiplied components.</returns>
+        public ArgbColor PremultipliedAlpha()
+        {
+            return new ArgbColor(A, (byte)((R * A) / 255), (byte)((G * A) / 255), (byte)((B * A) / 255));
         }
 
         /// <summary>
