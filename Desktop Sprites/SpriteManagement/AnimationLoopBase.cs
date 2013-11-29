@@ -24,16 +24,28 @@
         [System.Diagnostics.DebuggerTypeProxy(typeof(ConcurrentReadOnlySpriteCollection.DebugView))]
         public struct ConcurrentReadOnlySpriteCollection : ICollection<ISprite>
         {
-            #region ConcurrentEnumerator struct
+            #region Enumerator struct
             /// <summary>
             /// Enumerates the sprite collection. Enumerator is blocked until all mutations of the sprite collection complete, but the
             /// collection may safely be enumerated from several threads at once whilst no mutations are occurring.
             /// </summary>
-            public struct ConcurrentEnumerator : IEnumerator<ISprite>
+            public struct Enumerator : IEnumerator<ISprite>
             {
+                /// <summary>
+                /// Lock used to guard the collection during enumeration.
+                /// </summary>
                 private readonly ReaderWriterLockSlim guard;
+                /// <summary>
+                /// The enumerator for the sprite collection.
+                /// </summary>
                 private LinkedList<ISprite>.Enumerator enumerator;
-                internal ConcurrentEnumerator(AnimationLoopBase animationLoopBase)
+                /// <summary>
+                /// Initializes a new instance of the
+                /// <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection.Enumerator"/>
+                /// structure.
+                /// </summary>
+                /// <param name="animationLoopBase">The animator whose sprite collection should be enumerated.</param>
+                internal Enumerator(AnimationLoopBase animationLoopBase)
                 {
                     this.guard = animationLoopBase.spritesGuard;
                     guard.EnterReadLock();
@@ -55,6 +67,9 @@
                 {
                     get { return enumerator.Current; }
                 }
+                /// <summary>
+                /// Gets the element in the collection at the current position of the enumerator.
+                /// </summary>
                 object System.Collections.IEnumerator.Current
                 {
                     get { return Current; }
@@ -76,7 +91,15 @@
                 }
             }
             #endregion
-            private AnimationLoopBase animationLoopBase;
+            /// <summary>
+            /// The animator that owns the sprite collection.
+            /// </summary>
+            private readonly AnimationLoopBase animationLoopBase;
+            /// <summary>
+            /// Initializes a new instance of the
+            /// <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection"/> structure.
+            /// </summary>
+            /// <param name="animationLoopBase">The animator that should own the sprite collection.</param>
             internal ConcurrentReadOnlySpriteCollection(AnimationLoopBase animationLoopBase)
             {
                 this.animationLoopBase = animationLoopBase;
@@ -96,14 +119,22 @@
             /// Gets a thread-safe enumerator for the collection.
             /// </summary>
             /// <returns>A thread-safe enumerator for the collection.</returns>
-            public ConcurrentEnumerator GetEnumerator()
+            public Enumerator GetEnumerator()
             {
-                return new ConcurrentEnumerator(animationLoopBase);
+                return new Enumerator(animationLoopBase);
             }
+            /// <summary>
+            /// Gets a thread-safe enumerator for the collection.
+            /// </summary>
+            /// <returns>A thread-safe enumerator for the collection.</returns>
             IEnumerator<ISprite> IEnumerable<ISprite>.GetEnumerator()
             {
                 return GetEnumerator();
             }
+            /// <summary>
+            /// Gets a thread-safe enumerator for the collection.
+            /// </summary>
+            /// <returns>A thread-safe enumerator for the collection.</returns>
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
                 return GetEnumerator();
@@ -134,25 +165,49 @@
                 using (animationLoopBase.spritesGuard.InReadMode())
                     animationLoopBase.sprites.CopyTo(array, index);
             }
+            /// <summary>
+            /// Returns a new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.
+            /// </summary>
+            /// <returns>A new <see cref="T:System.NotSupportedException"/> with a message about the collection being read-only.</returns>
+            private static InvalidOperationException ReadOnlyException()
+            {
+                return new InvalidOperationException("Collection is read-only.");
+            }
+            /// <summary>
+            /// Not supported by <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection"/>.
+            /// </summary>
+            /// <param name="item">The parameter is not used.</param>
+            /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
             void ICollection<ISprite>.Add(ISprite item)
             {
                 throw ReadOnlyException();
             }
+            /// <summary>
+            /// Not supported by <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection"/>.
+            /// </summary>
+            /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
             void ICollection<ISprite>.Clear()
             {
                 throw ReadOnlyException();
             }
+            /// <summary>
+            /// Gets a value indicating whether the
+            /// <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection"/> is read-only. Returns
+            /// true.
+            /// </summary>
             bool ICollection<ISprite>.IsReadOnly
             {
                 get { return true; }
             }
+            /// <summary>
+            /// Not supported by <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection"/>.
+            /// </summary>
+            /// <param name="item">The parameter is not used.</param>
+            /// <returns>The method does not return.</returns>
+            /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
             bool ICollection<ISprite>.Remove(ISprite item)
             {
                 throw ReadOnlyException();
-            }
-            private static InvalidOperationException ReadOnlyException()
-            {
-                return new InvalidOperationException("Collection is read-only.");
             }
             #region DebugView class
             /// <summary>

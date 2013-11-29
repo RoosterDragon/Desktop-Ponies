@@ -166,35 +166,77 @@
         {
             return new NotSupportedException("Collection is read-only.");
         }
+        /// <summary>
+        /// Not supported by <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.
+        /// </summary>
+        /// <param name="index">The parameter is not used.</param>
+        /// <param name="item">The parameter is not used.</param>
+        /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
         void IList<T>.Insert(int index, T item)
         {
             throw ReadOnlyException();
         }
+        /// <summary>
+        /// Not supported by <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.
+        /// </summary>
+        /// <param name="index">The parameter is not used.</param>
+        /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
         void IList<T>.RemoveAt(int index)
         {
             throw ReadOnlyException();
         }
+        /// <summary>
+        /// Gets the element at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index of the element to get.</param>
+        /// <returns>The element at the specified index. A set operation throws a <see cref="T:System.NotSupportedException"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the
+        /// <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.</exception>
+        /// <exception cref="T:System.NotSupportedException">The operation is set.</exception>
         T IList<T>.this[int index]
         {
             get { return this[index]; }
             set { throw ReadOnlyException(); }
         }
+        /// <summary>
+        /// Not supported by <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.
+        /// </summary>
+        /// <param name="item">The parameter is not used.</param>
+        /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
         void ICollection<T>.Add(T item)
         {
             throw ReadOnlyException();
         }
+        /// <summary>
+        /// Not supported by <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.
+        /// </summary>
+        /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
         void ICollection<T>.Clear()
         {
             throw ReadOnlyException();
         }
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/> is read-only. Returns true.
+        /// </summary>
         bool ICollection<T>.IsReadOnly
         {
             get { return true; }
         }
+        /// <summary>
+        /// Not supported by <see cref="T:DesktopSprites.Collections.ReadOnlyList`1"/>.
+        /// </summary>
+        /// <param name="item">The parameter is not used.</param>
+        /// <returns>The method does not return.</returns>
+        /// <exception cref="T:System.NotSupportedException">Thrown when the method is invoked.</exception>
         bool ICollection<T>.Remove(T item)
         {
             throw ReadOnlyException();
         }
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

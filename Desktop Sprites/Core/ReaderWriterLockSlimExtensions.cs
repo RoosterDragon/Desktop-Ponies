@@ -13,6 +13,9 @@
         /// </summary>
         public struct ReadMode : IDisposable
         {
+            /// <summary>
+            /// The lock.
+            /// </summary>
             private readonly ReaderWriterLockSlim rwls;
             /// <summary>
             /// Tries to enter the lock in read mode.
@@ -42,6 +45,9 @@
         /// </summary>
         public struct UpgradeableMode : IDisposable
         {
+            /// <summary>
+            /// The lock.
+            /// </summary>
             private readonly ReaderWriterLockSlim rwls;
             /// <summary>
             /// Tries to enter the lock in upgradeable mode.
@@ -72,6 +78,9 @@
         /// </summary>
         public struct WriteMode : IDisposable
         {
+            /// <summary>
+            /// The lock.
+            /// </summary>
             private readonly ReaderWriterLockSlim rwls;
             /// <summary>
             /// Tries to enter the lock in write mode.
