@@ -786,15 +786,17 @@ Public Class Behavior
     End Property
 
     Public Property FollowStoppedBehaviorName As CaseInsensitiveString
+    Private ReadOnly followStoppedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowStoppedBehaviorName)
     Public ReadOnly Property FollowStoppedBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = FollowStoppedBehaviorName)
+            Return pony.Behaviors.OnlyOrDefault(followStoppedBehaviorNamePredicate)
         End Get
     End Property
     Public Property FollowMovingBehaviorName As CaseInsensitiveString
+    Private ReadOnly followMovingBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowMovingBehaviorName)
     Public ReadOnly Property FollowMovingBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(Function(b) b.Name = FollowMovingBehaviorName)
+            Return pony.Behaviors.OnlyOrDefault(followMovingBehaviorNamePredicate)
         End Get
     End Property
     Public Property AutoSelectImagesOnFollow As Boolean = True
@@ -1247,6 +1249,7 @@ Public Class Pony
         End Set
     End Property
 
+    Private ReadOnly validateBehaviorPredicate As New Func(Of Behavior, Boolean)(AddressOf ValidateBehavior)
     Private Function ValidateBehavior(behavior As Behavior) As Boolean
         Return behavior Is Nothing OrElse Base.ValidatedOnLoad OrElse
             (File.Exists(behavior.LeftImage.Path) AndAlso File.Exists(behavior.RightImage.Path))
@@ -1405,7 +1408,7 @@ Public Class Pony
     ''' </summary>
     ''' <param name="startTime">The current time of the animator, which will be the temporal zero point for this sprite.</param>
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentBehavior = Behaviors.FirstOrDefault(AddressOf ValidateBehavior)
+        CurrentBehavior = Behaviors.FirstOrDefault(validateBehaviorPredicate)
         internalTime = startTime
         lastUpdateTime = startTime
         Teleport()
@@ -1459,7 +1462,7 @@ Public Class Pony
     ''' </summary>
     Private Sub UpdateOnce()
         ' If there are no behaviors that can be undertaken, there's nothing that needs updating anyway.
-        If Not Behaviors.Any(AddressOf ValidateBehavior) Then
+        If Not Behaviors.Any(validateBehaviorPredicate) Then
             CurrentBehavior = Nothing
             Return
         End If
@@ -1639,7 +1642,7 @@ Public Class Pony
             ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
             ' suitable to repeat.
             If Not foundAtRandom AndAlso (IsInteracting OrElse CurrentBehavior Is Nothing) Then
-                CurrentBehavior = Behaviors.First(AddressOf ValidateBehavior)
+                CurrentBehavior = Behaviors.First(validateBehaviorPredicate)
                 AddUpdateRecord(
                     If(IsInteracting,
                        "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
@@ -2946,7 +2949,6 @@ Public Class Pony
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
-
             Return New Rectangle(TopLeftLocation, Vector2.Truncate(CurrentImageSize * Options.ScaleFactor))
         End Get
     End Property
