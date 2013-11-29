@@ -73,80 +73,20 @@
         /// <summary>
         /// Returns an enumerator that iterates through the immutable array.
         /// </summary>
-        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> that can be used to iterate through the
-        /// collection.</returns>
-        public Enumerator GetEnumerator()
+        /// <returns>A <see cref="T:DesktopSprites.Collections.ArrayEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
+        public ArrayEnumerator<T> GetEnumerator()
         {
-            return new Enumerator(this);
+            return new ArrayEnumerator<T>(array);
         }
         /// <summary>
         /// Returns an enumerator that iterates through the immutable array.
         /// </summary>
-        /// <returns>A <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> that can be used to iterate through the
-        /// collection.</returns>
+        /// <returns>A <see cref="T:DesktopSprites.Collections.ArrayEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return GetEnumerator();
-        }
-        /// <summary>
-        /// Supports iteration over an immutable array.
-        /// </summary>
-        public struct Enumerator : IEnumerator<T>
-        {
-            /// <summary>
-            /// The array being enumerated.
-            /// </summary>
-            private readonly ImmutableArray<T> immutableArray;
-            /// <summary>
-            /// The current index into the array.
-            /// </summary>
-            private int index;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.ImmutableArray`1.Enumerator"/> structure.
-            /// </summary>
-            /// <param name="immutableArray">The immutable array to enumerate.</param>
-            internal Enumerator(ImmutableArray<T> immutableArray)
-            {
-                this.immutableArray = Argument.EnsureNotNull(immutableArray, "immutableArray");
-                this.index = -1;
-            }
-            /// <summary>
-            /// Advances the enumerator to the next element of the immutable array.
-            /// </summary>
-            /// <returns>Return true if the enumerator was successfully advanced to the next element; false if the enumerator has passed
-            /// the end of the collection.</returns>
-            public bool MoveNext()
-            {
-                return ++index < immutableArray.Length;
-            }
-            /// <summary>
-            /// Gets the current element in the collection.
-            /// </summary>
-            public T Current
-            {
-                get { return immutableArray[index]; }
-            }
-            /// <summary>
-            /// Releases all resources allocated by the object.
-            /// </summary>
-            public void Dispose()
-            {
-            }
-            /// <summary>
-            /// Gets the current element in the collection.
-            /// </summary>
-            object System.Collections.IEnumerator.Current
-            {
-                get { return Current; }
-            }
-            /// <summary>
-            /// Sets the enumerator to its initial position, which is before the first element in the collection.
-            /// </summary>
-            void System.Collections.IEnumerator.Reset()
-            {
-                index = -1;
-            }
         }
         /// <summary>
         /// Determines the index of a specific item in the <see cref="T:DesktopSprites.Collections.ImmutableArray`1"/>.

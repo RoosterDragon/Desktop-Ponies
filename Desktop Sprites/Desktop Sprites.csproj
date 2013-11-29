@@ -90,6 +90,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\ArrayEnumerator.cs" />
     <Compile Include="Collections\ArrayExtensions.cs" />
     <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
