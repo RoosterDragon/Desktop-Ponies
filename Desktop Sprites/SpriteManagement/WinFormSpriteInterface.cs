@@ -437,9 +437,20 @@
             /// </summary>
             public readonly int Height;
             /// <summary>
+            /// The stride width of the image, in bytes.
+            /// </summary>
+            public readonly int Stride;
+            /// <summary>
             /// A hash code for the image.
             /// </summary>
             private readonly int hashCode;
+            /// <summary>
+            /// Gets the bit depth of the image, either 8bbp or 4bbp. Does not apply for bitmaps.
+            /// </summary>
+            public int Depth
+            {
+                get { return Width == Stride ? 8 : 4; }
+            }
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
             /// loading a GDI+ bitmap from file.
@@ -458,7 +469,7 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
             /// creating a new image from a raw buffer and color palette.
             /// </summary>
-            /// <param name="data">The 8bbp array of color palette indexes to use.</param>
+            /// <param name="data">The 4bbp or 8bbp array of color palette indexes to use.</param>
             /// <param name="palette">The source color palette to use.</param>
             /// <param name="transparentIndex">The index in the source palette that should be replaced with a transparent color, or -1 if
             /// there is no transparent color in the image.</param>
@@ -471,6 +482,7 @@
                 Data = data;
                 Height = height;
                 Width = width;
+                Stride = stride;
                 this.hashCode = hashCode;
                 ArgbPalette = new int[palette.Length];
                 for (int i = 0; i < ArgbPalette.Length; i++)
@@ -527,7 +539,7 @@
             /// Represents the allowable set of depths that can be used when generating a
             /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
             /// </summary>
-            public const BitDepths AllowableBitDepths = BitDepths.Indexed8Bpp;
+            public const BitDepths AllowableBitDepths = BitDepths.Indexed4Bpp | BitDepths.Indexed8Bpp;
 
             /// <summary>
             /// Gets the dimensions of the frame.
@@ -1262,53 +1274,31 @@
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend(ImageData image, Rectangle area)
         {
+            // Check if we can use the non-scaling methods for a performance boost.
+            // Note the code duplication in these methods is required: they are on the hot path and we need to avoid function call
+            // overhead. The methods are too long for the jitter to consider inlining them, so this is done manually.
             if (image.Width == area.Width && image.Height == area.Height)
             {
-                AlphaBlend(image, area.Location);
-                return;
+                if (image.Depth == 8)
+                    AlphaBlend8bbpUnscaled(image, area.Location);
+                else
+                    AlphaBlend4bbpUnscaled(image, area.Location);
             }
-
-            int xMin = Math.Max(0, -area.Left);
-            int yMin = Math.Max(0, -area.Top);
-            int xMax = Math.Min(area.Width, form.Width - area.Left);
-            int yMax = Math.Min(area.Height, form.Height - area.Top);
-
-            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
-            int backgroundIndexRowChange = form.Width - xMax + xMin;
-
-            float xScale = (float)image.Width / area.Width;
-            float yScale = (float)image.Height / area.Height;
-            float xMinScaled = xMin * xScale;
-
-            byte[] data = image.Data;
-            int[] palette = image.ArgbPalette;
-            int* backgroundData = form.BackgroundData;
-            int imageWidth = image.Width;
-            for (int y = yMin; y < yMax; y++)
+            else
             {
-                float dataIndex = (int)(y * yScale) * imageWidth + xMinScaled;
-                for (int x = xMin; x < xMax; x++)
-                {
-                    byte paletteIndex = data[(int)dataIndex];
-                    dataIndex += xScale;
-                    int srcColor = palette[paletteIndex];
-                    int srcAlpha = (srcColor >> 24) & 0xFF;
-                    if (srcAlpha == byte.MaxValue)
-                        backgroundData[backgroundIndex] = srcColor;
-                    else if (srcAlpha > 0)
-                        AlphaBlendInternal(backgroundData, backgroundIndex, srcColor, srcAlpha);
-                    backgroundIndex++;
-                }
-                backgroundIndex += backgroundIndexRowChange;
+                if (image.Depth == 8)
+                    AlphaBlend8bbp(image, area);
+                else
+                    AlphaBlend4bbp(image, area);
             }
         }
 
         /// <summary>
-        /// Draws, with alpha blending, the specified image at the specified location onto the form at its native size.
+        /// Draws, with alpha blending, the specified 8bbp image at the specified location onto the form at its native size.
         /// </summary>
-        /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend(ImageData image, Point location)
+        private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location)
         {
             int xMin = Math.Max(0, -location.X);
             int yMin = Math.Max(0, -location.Y);
@@ -1318,8 +1308,8 @@
             int backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
             int backgroundIndexRowChange = form.Width - xMax + xMin;
 
-            int dataIndex = yMin * image.Width + xMin;
-            int dataIndexRowChange = image.Width - xMax + xMin;
+            int dataIndex = yMin * image.Stride;
+            int dataIndexRowChange = image.Stride;
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
@@ -1328,17 +1318,148 @@
             {
                 for (int x = xMin; x < xMax; x++)
                 {
-                    byte paletteIndex = data[dataIndex++];
+                    byte paletteIndex = data[dataIndex + x];
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
-                        AlphaBlendInternal(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
                 dataIndex += dataIndexRowChange;
+            }
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified 4bbp image at the specified location onto the form at its native size.
+        /// </summary>
+        /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="location">The location on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location)
+        {
+            int xMin = Math.Max(0, -location.X);
+            int yMin = Math.Max(0, -location.Y);
+            int xMax = Math.Min(image.Width, form.Width - location.X);
+            int yMax = Math.Min(image.Height, form.Height - location.Y);
+
+            int backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
+            int backgroundIndexRowChange = form.Width - xMax + xMin;
+
+            int dataIndex = yMin * image.Stride;
+            int dataIndexRowChange = image.Stride;
+
+            byte[] data = image.Data;
+            int[] palette = image.ArgbPalette;
+            int* backgroundData = form.BackgroundData;
+            for (int y = yMin; y < yMax; y++)
+            {
+                for (int x = xMin; x < xMax; x++)
+                {
+                    byte paletteIndexes = data[dataIndex + x / 2];
+                    int paletteIndex;
+                    if (x % 2 == 0)
+                        paletteIndex = paletteIndexes >> 4;
+                    paletteIndex = paletteIndexes & 0xF;
+                    int srcColor = palette[paletteIndex];
+                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    if (srcAlpha == byte.MaxValue)
+                        backgroundData[backgroundIndex] = srcColor;
+                    else if (srcAlpha > 0)
+                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                    backgroundIndex++;
+                }
+                backgroundIndex += backgroundIndexRowChange;
+                dataIndex += dataIndexRowChange;
+            }
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified 8bbp image within the specified rectangle onto the form. Scaling is done using
+        /// nearest neighbor interpolation.
+        /// </summary>
+        /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area)
+        {
+            int xMin = Math.Max(0, -area.Left);
+            int yMin = Math.Max(0, -area.Top);
+            int xMax = Math.Min(area.Width, form.Width - area.Left);
+            int yMax = Math.Min(area.Height, form.Height - area.Top);
+
+            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
+            int backgroundIndexRowChange = form.Width - xMax + xMin;
+
+            float xScale = (float)image.Stride / area.Width;
+            float yScale = (float)image.Height / area.Height;
+
+            byte[] data = image.Data;
+            int[] palette = image.ArgbPalette;
+            int* backgroundData = form.BackgroundData;
+            int imageStride = image.Stride;
+            for (int y = yMin; y < yMax; y++)
+            {
+                int dataRowIndex = (int)(y * yScale) * imageStride;
+                for (int x = xMin; x < xMax; x++)
+                {
+                    int dataIndex = dataRowIndex + (int)(x * xScale);
+                    byte paletteIndex = data[dataIndex];
+                    int srcColor = palette[paletteIndex];
+                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    if (srcAlpha == byte.MaxValue)
+                        backgroundData[backgroundIndex] = srcColor;
+                    else if (srcAlpha > 0)
+                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                    backgroundIndex++;
+                }
+                backgroundIndex += backgroundIndexRowChange;
+            }
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified 4bbp image within the specified rectangle onto the form. Scaling is done using
+        /// nearest neighbor interpolation.
+        /// </summary>
+        /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area)
+        {
+            int xMin = Math.Max(0, -area.Left);
+            int yMin = Math.Max(0, -area.Top);
+            int xMax = Math.Min(area.Width, form.Width - area.Left);
+            int yMax = Math.Min(area.Height, form.Height - area.Top);
+
+            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
+            int backgroundIndexRowChange = form.Width - xMax + xMin;
+
+            float xScale = (float)image.Stride / area.Width;
+            float yScale = (float)image.Height / area.Height;
+
+            byte[] data = image.Data;
+            int[] palette = image.ArgbPalette;
+            int* backgroundData = form.BackgroundData;
+            int imageStride = image.Stride;
+            for (int y = yMin; y < yMax; y++)
+            {
+                int dataRowIndex = (int)(y * yScale) * imageStride;
+                for (int x = xMin; x < xMax; x++)
+                {
+                    int dataIndex = dataRowIndex + (int)(x * xScale);
+                    byte paletteIndexes = data[dataIndex];
+                    int paletteIndex;
+                    if (dataIndex % 2 == 0)
+                        paletteIndex = paletteIndexes >> 4;
+                    paletteIndex = paletteIndexes & 0xF;
+                    int srcColor = palette[paletteIndex];
+                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    if (srcAlpha == byte.MaxValue)
+                        backgroundData[backgroundIndex] = srcColor;
+                    else if (srcAlpha > 0)
+                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                    backgroundIndex++;
+                }
+                backgroundIndex += backgroundIndexRowChange;
             }
         }
 
@@ -1350,7 +1471,7 @@
         /// </param>
         /// <param name="srcColor">The source pixel to blend with the form.</param>
         /// <param name="srcAlpha">The alpha value of the source pixel.</param>
-        private unsafe void AlphaBlendInternal(int* backgroundData, int backgroundIndex, int srcColor, int srcAlpha)
+        private unsafe void AlphaBlendPixel(int* backgroundData, int backgroundIndex, int srcColor, int srcAlpha)
         {
             int dstColor = backgroundData[backgroundIndex];
             int dstAlpha = (dstColor >> 24) & 0xFF;
