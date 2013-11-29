@@ -81,7 +81,7 @@
         public override string ToString()
         {
             return "{CX=" + CX + " CY=" + CY + "}";
-        } 
+        }
     }
 
     /// <summary>

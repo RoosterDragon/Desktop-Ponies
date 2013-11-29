@@ -167,7 +167,7 @@
 
                 /// <summary>
                 /// Initializes a new instance of the
-                /// <see cref="T:DesktopSprites.Collections.ConcurrentReadOnlySpriteCollection.DebugView"/> class.
+                /// <see cref="T:DesktopSprites.SpriteManagement.AnimationLoopBase.ConcurrentReadOnlySpriteCollection.DebugView"/> class.
                 /// </summary>
                 /// <param name="concurrentReadOnlySpriteCollection">The collection to proxy.</param>
                 public DebugView(ConcurrentReadOnlySpriteCollection concurrentReadOnlySpriteCollection)
@@ -465,6 +465,7 @@
             /// <summary>
             /// Gets a short summary of current performance.
             /// </summary>
+            /// <returns>A short summary of current performance.</returns>
             public string GetSummary()
             {
                 return string.Format(CultureInfo.CurrentCulture,

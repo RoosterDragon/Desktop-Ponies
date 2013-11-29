@@ -98,8 +98,8 @@
         /// <summary>
         /// Multiplies a vector by a scalar.
         /// </summary>
-        /// <param name="v">The vector to multiply.</param>
         /// <param name="scalar">The scale factor to apply.</param>
+        /// <param name="v">The vector to multiply.</param>
         /// <returns>A new vector where both components are calculated by multiplying their value by the scale factor.</returns>
         public static Vector2 operator *(int scalar, Vector2 v)
         {
@@ -129,8 +129,8 @@
         /// <summary>
         /// Multiplies a vector by a scalar.
         /// </summary>
-        /// <param name="v">The vector to multiply.</param>
         /// <param name="scalar">The scale factor to apply.</param>
+        /// <param name="v">The vector to multiply.</param>
         /// <returns>A new vector where both components are calculated by multiplying their value by the scale factor.</returns>
         public static Vector2F operator *(float scalar, Vector2 v)
         {
