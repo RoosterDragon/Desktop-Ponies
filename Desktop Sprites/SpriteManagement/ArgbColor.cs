@@ -30,8 +30,8 @@
         /// alpha, and with the same red, green and blue values as the given <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/>.
         /// </summary>
         /// <param name="a">The alpha component value for the new <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/>.</param>
-        /// <param name="color">An <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> which specifies the red, green and blue components for the new
-        /// <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/>.</param>
+        /// <param name="color">An <see cref="T:DesktopSprites.SpriteManagement.RgbColor"/> which specifies the red, green and blue
+        /// components for the new <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/>.</param>
         public ArgbColor(byte a, RgbColor color)
             : this(a, color.R, color.G, color.B)
         {
@@ -121,7 +121,7 @@
         }
 
         /// <summary>
-        /// Gets the 32-bit ARGB value of this <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure..
+        /// Gets the 32-bit ARGB value of this <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure.
         /// </summary>
         /// <returns>The 32-bit ARGB value of this <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/>.</returns>
         public int ToArgb()

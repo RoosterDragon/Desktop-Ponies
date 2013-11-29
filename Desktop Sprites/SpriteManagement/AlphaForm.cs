@@ -112,7 +112,8 @@
             if (hBitmap != IntPtr.Zero && hPrevBitmap != IntPtr.Zero)
             {
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
-                NativeMethods.DeleteObject(new HandleRef(this, hBitmap));
+                if (!NativeMethods.DeleteObject(new HandleRef(this, hBitmap)))
+                    throw new Win32Exception();
             }
         }
 
