@@ -181,7 +181,7 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GraphicsWindow"/> class.
             /// </summary>
             public GraphicsWindow()
-                : base(Gtk.WindowType.Popup)
+                : base(Gtk.WindowType.Toplevel)
             {
                 DetermineAlphaSupport();
 
@@ -1152,14 +1152,14 @@
             {
                 bool hasFocus = false;
                 ApplicationInvoke(() =>
-                    {
-                        foreach (var window in drawOrderedWindows)
-                            if (window.HasFocus)
-                            {
-                                hasFocus = true;
-                                break;
-                            }
-                    });
+                {
+                    foreach (var window in drawOrderedWindows)
+                        if (window.HasToplevelFocus)
+                        {
+                            hasFocus = true;
+                            break;
+                        }
+                });
                 return hasFocus;
             }
         }

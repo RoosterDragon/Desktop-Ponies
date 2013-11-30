@@ -83,6 +83,12 @@ Change Log
 
 Latest changes:
 
+v1.42.4:
+- Change most of Fluttershy's speeches to be in group 0, so she will talk more often.
+- Rendering speed on Windows has been significantly improved, allowing more ponies for less CPU.
+- Fix a bug in the editor preventing creating or editing some parts of interactions.
+- Fix a bug on Windows where transparent regions of a pony where sometimes clickable.
+
 v1.42.3.2:
 - Added "party hard" Twilight animation by ponynoia.
 - Fixed some ponies getting stuck in the doorway when returning to houses.
