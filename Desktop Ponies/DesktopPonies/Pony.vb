@@ -112,25 +112,25 @@ Public Class PonyBase
     End Property
     Public Property DisplayName As String
     Public Property Scale As Double
-    Private _tags As New HashSet(Of CaseInsensitiveString)()
+    Private ReadOnly _tags As New HashSet(Of CaseInsensitiveString)()
     Public ReadOnly Property Tags As HashSet(Of CaseInsensitiveString)
         Get
             Return _tags
         End Get
     End Property
-    Private _behaviorGroups As New List(Of BehaviorGroup)()
+    Private ReadOnly _behaviorGroups As New List(Of BehaviorGroup)()
     Public ReadOnly Property BehaviorGroups() As List(Of BehaviorGroup)
         Get
             Return _behaviorGroups
         End Get
     End Property
-    Private _behaviors As New List(Of Behavior)()
+    Private ReadOnly _behaviors As New List(Of Behavior)()
     Public ReadOnly Property Behaviors() As List(Of Behavior)
         Get
             Return _behaviors
         End Get
     End Property
-    Private _effects As New List(Of EffectBase)()
+    Private ReadOnly _effects As New List(Of EffectBase)()
     Public ReadOnly Property Effects() As List(Of EffectBase)
         Get
             Return _effects
@@ -141,7 +141,7 @@ Public Class PonyBase
             Return Collection.Interactions(Directory)
         End Get
     End Property
-    Private _speeches As New List(Of Speech)()
+    Private ReadOnly _speeches As New List(Of Speech)()
     Public ReadOnly Property Speeches() As List(Of Speech)
         Get
             Return _speeches
