@@ -212,8 +212,11 @@
             protected override void OnRealized()
             {
                 base.OnRealized();
-                if (NSWindow.IsSupported)
-                    NSWindow.SetHasShadow(GdkWindow, false);
+                // This code attempts to remove the drop shadow on the window on Mac systems. However, it doesn't seem to be working at the
+                // moment, with the objective-C runtime throwing a doesNotRecognizeSelector exception (unrecognized selector sent to
+                // instance). Hopefully this issue can be resolved at some point.
+                //if (NSWindow.IsSupported)
+                //    NSWindow.SetHasShadow(GdkWindow, false);
             }
 
             /// <summary>

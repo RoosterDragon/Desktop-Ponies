@@ -32,11 +32,11 @@
         /// <summary>
         /// Sends a message with a simple return value to an instance of a class.
         /// </summary>
-        /// <param name="theReceiver">A pointer that points to the instance of the class that is to receive the message.</param>
-        /// <param name="theSelector">The selector of the method that handles the message.</param>
+        /// <param name="self">A pointer that points to the instance of the class that is to receive the message.</param>
+        /// <param name="op">The selector of the method that handles the message.</param>
         /// <param name="arg">A Boolean argument to the method.</param>
         [DllImport(objc)]
-        public static extern void objc_msgSend(IntPtr theReceiver, IntPtr theSelector, [MarshalAs(UnmanagedType.I1)] bool arg);
+        public static extern void objc_msgSend(IntPtr self, IntPtr op, [MarshalAs(UnmanagedType.I1)] bool arg);
 
         /// <summary>
         /// Gets the native NSWindow given the pointer to a <see cref="T:Gdk.Window"/> instance.
