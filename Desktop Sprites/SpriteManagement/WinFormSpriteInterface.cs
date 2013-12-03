@@ -1294,19 +1294,69 @@
         }
 
         /// <summary>
+        /// Initializes some common alpha blending parameters.
+        /// </summary>
+        /// <param name="location">The desired location of the image to draw.</param>
+        /// <param name="size">The desired size of the image to draw.</param>
+        /// <param name="xMin">When this methods returns, contains the minimum x-coordinate in image space.</param>
+        /// <param name="xMax">When this methods returns, contains the maximum x-coordinate in image space.</param>
+        /// <param name="yMin">When this methods returns, contains the minimum y-coordinate in image space.</param>
+        /// <param name="yMax">When this methods returns, contains the maximum y-coordinate in image space.</param>
+        /// <param name="backgroundIndex">When this methods returns, contains the initial index into the form background data buffer.
+        /// </param>
+        /// <param name="backgroundIndexRowChange">When this methods returns, contains the value to add to the backgroundIndex after each
+        /// image scanline is iterated.</param>
+        private void AlphaBlendInitialize(Point location, Size size,
+            out int xMin, out int xMax, out int yMin, out int yMax, out int backgroundIndex, out int backgroundIndexRowChange)
+        {
+            xMin = Math.Max(0, -location.X);
+            yMin = Math.Max(0, -location.Y);
+            xMax = Math.Min(size.Width, form.Width - location.X);
+            yMax = Math.Min(size.Height, form.Height - location.Y);
+
+            backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
+            backgroundIndexRowChange = form.Width - xMax + xMin;
+        }
+
+        /// <summary>
+        /// Initializes some common alpha blending parameters when performing nearest neighbor interpolation when rescaling.
+        /// </summary>
+        /// <param name="image">The image to draw.</param>
+        /// <param name="area">The area to draw the image within.</param>
+        /// <param name="xMax">The maximum x value in image space.</param>
+        /// <param name="yMin">The minimum y value in image space.</param>
+        /// <param name="yMax">The maximum y value in image space.</param>
+        /// <param name="xShift">The shift to apply to the x fixed point value to bring it back in range.</param>
+        /// <param name="yShift">The shift to apply to the y fixed point value to bring it back in range</param>
+        /// <param name="xScaleFixedPoint">The scaled x value computed in fixed point arithmetic for speed.</param>
+        /// <param name="yScaleFixedPoint">The scaled y value computed in fixed point arithmetic for speed.</param>
+        /// <param name="dataRowIndexFixedPoint">The initial row index into the image data buffer, computed in fixed point arithmetic.
+        /// </param>
+        private void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMax, int yMin, int yMax,
+            out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint, out int dataRowIndexFixedPoint)
+        {
+            float xScale = (float)image.Stride / area.Width;
+            float yScale = (float)image.Height / area.Height;
+
+            xShift = (int)Math.Log(int.MaxValue / (xScale * xMax), 2);
+            xScaleFixedPoint = (int)(xScale * (1 << xShift));
+
+            yShift = (int)Math.Log(int.MaxValue / (yScale * yMax), 2);
+            yScaleFixedPoint = (int)(yScale * (1 << yShift));
+
+            dataRowIndexFixedPoint = yMin * yScaleFixedPoint;
+        }
+
+        /// <summary>
         /// Draws, with alpha blending, the specified 8bbp image at the specified location onto the form at its native size.
         /// </summary>
         /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location)
         {
-            int xMin = Math.Max(0, -location.X);
-            int yMin = Math.Max(0, -location.Y);
-            int xMax = Math.Min(image.Width, form.Width - location.X);
-            int yMax = Math.Min(image.Height, form.Height - location.Y);
-
-            int backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
-            int backgroundIndexRowChange = form.Width - xMax + xMin;
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height),
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -1339,13 +1389,9 @@
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location)
         {
-            int xMin = Math.Max(0, -location.X);
-            int yMin = Math.Max(0, -location.Y);
-            int xMax = Math.Min(image.Width, form.Width - location.X);
-            int yMax = Math.Min(image.Height, form.Height - location.Y);
-
-            int backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
-            int backgroundIndexRowChange = form.Width - xMax + xMin;
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height),
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -1357,10 +1403,10 @@
             {
                 for (int x = xMin; x < xMax; x++)
                 {
-                    byte paletteIndexes = data[dataIndex + x / 2];
+                    int paletteIndexes = data[dataIndex + x / 2];
                     int paletteIndex;
                     if (x % 2 == 0)
-                        paletteIndex = paletteIndexes >> 4;
+                        paletteIndexes = paletteIndexes >> 4;
                     paletteIndex = paletteIndexes & 0xF;
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
@@ -1383,27 +1429,27 @@
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area)
         {
-            int xMin = Math.Max(0, -area.Left);
-            int yMin = Math.Max(0, -area.Top);
-            int xMax = Math.Min(area.Width, form.Width - area.Left);
-            int yMax = Math.Min(area.Height, form.Height - area.Top);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
+            AlphaBlendInitialize(area.Location, area.Size,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
-            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
-            int backgroundIndexRowChange = form.Width - xMax + xMin;
-
-            float xScale = (float)image.Stride / area.Width;
-            float yScale = (float)image.Height / area.Height;
+            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint;
+            AlphaBlendScalingInitialize(image, area, xMax, yMin, yMax,
+                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint, out dataRowIndexFixedPoint);
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
             int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
+            int dataColumnIndexFixedPointInitial = xMin * xScaleFixedPoint;
             for (int y = yMin; y < yMax; y++)
             {
-                int dataRowIndex = (int)(y * yScale) * imageStride;
+                int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
+                int dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
                 for (int x = xMin; x < xMax; x++)
                 {
-                    int dataIndex = dataRowIndex + (int)(x * xScale);
+                    int dataIndex = dataRowIndex + (dataColumnIndexFixedPoint >> xShift);
+                    dataColumnIndexFixedPoint += xScaleFixedPoint;
                     byte paletteIndex = data[dataIndex];
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
@@ -1414,6 +1460,7 @@
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
+                dataRowIndexFixedPoint += yScaleFixedPoint;
             }
         }
 
@@ -1425,31 +1472,31 @@
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area)
         {
-            int xMin = Math.Max(0, -area.Left);
-            int yMin = Math.Max(0, -area.Top);
-            int xMax = Math.Min(area.Width, form.Width - area.Left);
-            int yMax = Math.Min(area.Height, form.Height - area.Top);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
+            AlphaBlendInitialize(area.Location, area.Size,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
-            int backgroundIndex = (area.Top + yMin) * form.Width + area.Left + xMin;
-            int backgroundIndexRowChange = form.Width - xMax + xMin;
-
-            float xScale = (float)image.Stride / area.Width;
-            float yScale = (float)image.Height / area.Height;
+            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint;
+            AlphaBlendScalingInitialize(image, area, xMax, yMin, yMax,
+                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint, out dataRowIndexFixedPoint);
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
             int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
+            int dataColumnIndexFixedPointInitial = xMin * xScaleFixedPoint;
             for (int y = yMin; y < yMax; y++)
             {
-                int dataRowIndex = (int)(y * yScale) * imageStride;
+                int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
+                int dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
                 for (int x = xMin; x < xMax; x++)
                 {
-                    int dataIndex = dataRowIndex + (int)(x * xScale);
-                    byte paletteIndexes = data[dataIndex];
+                    int dataIndex = dataRowIndex + (dataColumnIndexFixedPoint >> xShift);
+                    dataColumnIndexFixedPoint += xScaleFixedPoint;
+                    int paletteIndexes = data[dataIndex];
                     int paletteIndex;
                     if (dataIndex % 2 == 0)
-                        paletteIndex = paletteIndexes >> 4;
+                        paletteIndexes = paletteIndexes >> 4;
                     paletteIndex = paletteIndexes & 0xF;
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
@@ -1460,6 +1507,7 @@
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
+                dataRowIndexFixedPoint += yScaleFixedPoint;
             }
         }
 
