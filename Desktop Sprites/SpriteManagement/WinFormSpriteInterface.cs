@@ -655,6 +655,31 @@
         private readonly object spritesGuard = new object();
 
         /// <summary>
+        /// Number of additional threads used for parallel blending operations.
+        /// </summary>
+        private static readonly int parallelBlendThreads = Environment.ProcessorCount - 1;
+        /// <summary>
+        /// Number of threads total used for parallel blending operations (additional threads plus the main thread).
+        /// </summary>
+        private static readonly int parallelBlendTotalSections = parallelBlendThreads + 1;
+        /// <summary>
+        /// The current image to be blended in parallel.
+        /// </summary>
+        private ImageData parallelBlendImage;
+        /// <summary>
+        /// The current area to be blended in parallel.
+        /// </summary>
+        private Rectangle parallelBlendArea;
+        /// <summary>
+        /// The current number of blending sections.
+        /// </summary>
+        private int parallelBlendSections;
+        /// <summary>
+        /// Synchronization object for parallel rendering threads.
+        /// </summary>
+        private readonly Barrier parallelBlend;
+
+        /// <summary>
         /// List of <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
         /// the interface.
         /// </summary>
@@ -879,21 +904,30 @@
         /// drawn.</param>
         public WinFormSpriteInterface(Rectangle displayBounds)
         {
-            images = new LazyDictionary<string, AnimatedImage<ImageFrame>>(
-                fileName => new AnimatedImage<ImageFrame>(
-                    fileName, ImageFrameFromFile,
-                    (b, p, tI, s, w, h, d, hC) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
-                    ImageFrame.AllowableBitDepths));
-            render = new MethodInvoker(Render);
-            using (var family = FontFamily.GenericSansSerif)
-                font = new Font(family, 12, GraphicsUnit.Pixel);
-
             Thread appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
             appThread.SetApartmentState(ApartmentState.STA);
             object appInitiated = new object();
             lock (appInitiated)
             {
                 appThread.Start(Tuple.Create(appInitiated, displayBounds));
+
+                // Do other initialization in parallel whilst the UI thread is spinning up.
+                images = new LazyDictionary<string, AnimatedImage<ImageFrame>>(
+                    fileName => new AnimatedImage<ImageFrame>(
+                        fileName, ImageFrameFromFile,
+                        (b, p, tI, s, w, h, d, hC) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
+                        ImageFrame.AllowableBitDepths));
+                render = new MethodInvoker(Render);
+                using (var family = FontFamily.GenericSansSerif)
+                    font = new Font(family, 12, GraphicsUnit.Pixel);
+                postUpdateInvalidRegion.MakeEmpty();
+                if (parallelBlendThreads > 0)
+                {
+                    parallelBlend = new Barrier(parallelBlendTotalSections);
+                    for (int i = 0; i < parallelBlendThreads; i++)
+                        new Thread(o => AlphaBlendWorker(o)).Start(i);
+                }
+
                 Monitor.Wait(appInitiated);
             }
         }
@@ -906,21 +940,15 @@
         {
             var parameters = (Tuple<object, Rectangle>)parameter;
 
-            // Create the form.
             form = new GraphicsForm();
+            form.MouseClick += GraphicsForm_MouseClick;
+            form.KeyPress += GraphicsForm_KeyPress;
+            form.Activated += (sender, e) => Focused.Raise(this);
+            form.Deactivate += (sender, e) => Unfocused.Raise(this);
             form.FormClosing += GraphicsForm_FormClosing;
             form.Disposed += GraphicsForm_Disposed;
 
-            form.Activated += (sender, e) => Focused.Raise(this);
-            form.Deactivate += (sender, e) => Unfocused.Raise(this);
-
             DisplayBounds = parameters.Item2;
-
-            // Hook up to form events.
-            form.MouseClick += GraphicsForm_MouseClick;
-            form.KeyPress += GraphicsForm_KeyPress;
-
-            postUpdateInvalidRegion.MakeEmpty();
 
             lock (parameters.Item1)
                 Monitor.Pulse(parameters.Item1);
@@ -1177,8 +1205,8 @@
                 // Determine and apply the clipping area, this is only beneficial when there are few sprites on screen. As more are added
                 // the cost of hit testing that combined area becomes larger, and so it's just cheaper to redraw everything than to perform
                 // hit testing on a complex area, and then end up redrawing most everything anyway.
-                const int Threshold = 15;
-                if (sprites.Count < Threshold)
+                const int ClippingThreshold = 15;
+                if (sprites.Count <= ClippingThreshold)
                 {
                     foreach (ISprite sprite in sprites)
                     {
@@ -1221,6 +1249,9 @@
                 }
                 #endregion
 
+                // When rendering a large number of sprites, we will use multiple threads to improve the frame rate. When the number of
+                // sprites is small we will render using only a single thread to reduce CPU by eliminating parallelization overhead.
+                const int ParallelBlendingThreshold = 100;
                 // Draw all the sprites.
                 foreach (ISprite sprite in sprites)
                 {
@@ -1232,8 +1263,10 @@
                         frame.Flip(sprite.FlipImage);
                         if (frame.Image.Bitmap != null)
                             form.BackgroundGraphics.DrawImage(frame.Image.Bitmap, area);
-                        else
+                        else if (sprites.Count <= ParallelBlendingThreshold)
                             AlphaBlend(frame.Image, area);
+                        else
+                            AlphaBlendParallel(frame.Image, area);
                     }
 
                     // Draw a speech bubble for a speaking sprite.
@@ -1268,11 +1301,69 @@
 
         /// <summary>
         /// Draws, with alpha blending, the specified image within the specified rectangle onto the form. Scaling is done using nearest
+        /// neighbor interpolation. Drawing is done in parallel across multiple threads.
+        /// </summary>
+        /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        private unsafe void AlphaBlendParallel(ImageData image, Rectangle area)
+        {
+            // Publish current image details.
+            parallelBlendImage = image;
+            parallelBlendArea = area;
+            parallelBlendSections = Math.Min(parallelBlendTotalSections, area.Height);
+            Thread.MemoryBarrier();
+            // Start work.
+            parallelBlend.SignalAndWait();
+            // The main thread is responsible for blending the last section.
+            AlphaBlend(parallelBlendImage, parallelBlendArea, parallelBlendSections - 1, parallelBlendSections);
+            // Wait for work to finish.
+            parallelBlend.SignalAndWait();
+        }
+
+        /// <summary>
+        /// Method to be executed on parallel blending threads to execute blending of certain image sections.
+        /// </summary>
+        /// <param name="sectionObject">The section number this thread is responsible for blending.</param>
+        private void AlphaBlendWorker(object sectionObject)
+        {
+            // Update cache to ensure we get the initialized synchronization object.
+            Thread.MemoryBarrier();
+            int section = (int)sectionObject;
+            while (true)
+            {
+                // Wait for work or signal to exit.
+                parallelBlend.SignalAndWait();
+                if (Disposed)
+                    return;
+                // Update cache of current work and do it.
+                Thread.MemoryBarrier();
+                if (section < parallelBlendSections - 1)
+                    AlphaBlend(parallelBlendImage, parallelBlendArea, section, parallelBlendSections);
+                // Signal work is complete.
+                parallelBlend.SignalAndWait();
+            }
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified image within the specified rectangle onto the form. Scaling is done using nearest
         /// neighbor interpolation.
         /// </summary>
         /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
         private unsafe void AlphaBlend(ImageData image, Rectangle area)
+        {
+            AlphaBlend(image, area, 0, 1);
+        }
+
+        /// <summary>
+        /// Draws, with alpha blending, the specified image within the specified rectangle onto the form. Scaling is done using nearest
+        /// neighbor interpolation.
+        /// </summary>
+        /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
+        /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        private unsafe void AlphaBlend(ImageData image, Rectangle area, int section, int sectionCount)
         {
             // Check if we can use the non-scaling methods for a performance boost.
             // Note the code duplication in these methods is required: they are on the hot path and we need to avoid function call
@@ -1280,16 +1371,16 @@
             if (image.Width == area.Width && image.Height == area.Height)
             {
                 if (image.Depth == 8)
-                    AlphaBlend8bbpUnscaled(image, area.Location);
+                    AlphaBlend8bbpUnscaled(image, area.Location, section, sectionCount);
                 else
-                    AlphaBlend4bbpUnscaled(image, area.Location);
+                    AlphaBlend4bbpUnscaled(image, area.Location, section, sectionCount);
             }
             else
             {
                 if (image.Depth == 8)
-                    AlphaBlend8bbp(image, area);
+                    AlphaBlend8bbp(image, area, section, sectionCount);
                 else
-                    AlphaBlend4bbp(image, area);
+                    AlphaBlend4bbp(image, area, section, sectionCount);
             }
         }
 
@@ -1298,21 +1389,28 @@
         /// </summary>
         /// <param name="location">The desired location of the image to draw.</param>
         /// <param name="size">The desired size of the image to draw.</param>
-        /// <param name="xMin">When this methods returns, contains the minimum x-coordinate in image space.</param>
-        /// <param name="xMax">When this methods returns, contains the maximum x-coordinate in image space.</param>
-        /// <param name="yMin">When this methods returns, contains the minimum y-coordinate in image space.</param>
-        /// <param name="yMax">When this methods returns, contains the maximum y-coordinate in image space.</param>
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        /// <param name="xMin">When this methods returns, contains the minimum x-coordinate in scaled image space.</param>
+        /// <param name="xMax">When this methods returns, contains the maximum x-coordinate in scaled image space.</param>
+        /// <param name="yMin">When this methods returns, contains the minimum y-coordinate in scaled image space.</param>
+        /// <param name="yMax">When this methods returns, contains the maximum y-coordinate in scaled image space.</param>
         /// <param name="backgroundIndex">When this methods returns, contains the initial index into the form background data buffer.
         /// </param>
         /// <param name="backgroundIndexRowChange">When this methods returns, contains the value to add to the backgroundIndex after each
         /// image scanline is iterated.</param>
-        private void AlphaBlendInitialize(Point location, Size size,
+        private void AlphaBlendInitialize(Point location, Size size, int section, int sectionCount,
             out int xMin, out int xMax, out int yMin, out int yMax, out int backgroundIndex, out int backgroundIndexRowChange)
         {
             xMin = Math.Max(0, -location.X);
             yMin = Math.Max(0, -location.Y);
             xMax = Math.Min(size.Width, form.Width - location.X);
             yMax = Math.Min(size.Height, form.Height - location.Y);
+
+            int sectionSize = (yMax - yMin) / sectionCount;
+            yMin = yMin + section * sectionSize;
+            if (section + 1 != sectionCount)
+                yMax = yMin + sectionSize;
 
             backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
             backgroundIndexRowChange = form.Width - xMax + xMin;
@@ -1323,17 +1421,21 @@
         /// </summary>
         /// <param name="image">The image to draw.</param>
         /// <param name="area">The area to draw the image within.</param>
-        /// <param name="xMax">The maximum x value in image space.</param>
-        /// <param name="yMin">The minimum y value in image space.</param>
-        /// <param name="yMax">The maximum y value in image space.</param>
+        /// <param name="xMin">The minimum x value in scaled image space.</param>
+        /// <param name="xMax">The maximum x value in scaled image space.</param>
+        /// <param name="yMin">The minimum y value in scaled image space.</param>
+        /// <param name="yMax">The maximum y value in scaled image space.</param>
         /// <param name="xShift">The shift to apply to the x fixed point value to bring it back in range.</param>
         /// <param name="yShift">The shift to apply to the y fixed point value to bring it back in range</param>
         /// <param name="xScaleFixedPoint">The scaled x value computed in fixed point arithmetic for speed.</param>
         /// <param name="yScaleFixedPoint">The scaled y value computed in fixed point arithmetic for speed.</param>
         /// <param name="dataRowIndexFixedPoint">The initial row index into the image data buffer, computed in fixed point arithmetic.
         /// </param>
-        private void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMax, int yMin, int yMax,
-            out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint, out int dataRowIndexFixedPoint)
+        /// <param name="dataColumnIndexFixedPointInitial">The initial column index into the image data buffer, computed in fixed point
+        /// arithmetic.</param>
+        private void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMin, int xMax, int yMin, int yMax,
+            out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
+            out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial)
         {
             float xScale = (float)image.Stride / area.Width;
             float yScale = (float)image.Height / area.Height;
@@ -1345,6 +1447,7 @@
             yScaleFixedPoint = (int)(yScale * (1 << yShift));
 
             dataRowIndexFixedPoint = yMin * yScaleFixedPoint;
+            dataColumnIndexFixedPointInitial = xMin * xScaleFixedPoint;
         }
 
         /// <summary>
@@ -1352,10 +1455,12 @@
         /// </summary>
         /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location)
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location, int section, int sectionCount)
         {
             int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(location, new Size(image.Width, image.Height),
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height), section, sectionCount,
                 out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
@@ -1387,10 +1492,12 @@
         /// </summary>
         /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location)
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location, int section, int sectionCount)
         {
             int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(location, new Size(image.Width, image.Height),
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height), section, sectionCount,
                 out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
@@ -1427,21 +1534,23 @@
         /// </summary>
         /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area)
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area, int section, int sectionCount)
         {
             int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(area.Location, area.Size,
+            AlphaBlendInitialize(area.Location, area.Size, section, sectionCount,
                 out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
-            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint;
-            AlphaBlendScalingInitialize(image, area, xMax, yMin, yMax,
-                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint, out dataRowIndexFixedPoint);
+            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
+            AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
+                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint,
+                out dataRowIndexFixedPoint, out dataColumnIndexFixedPointInitial);
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
             int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
-            int dataColumnIndexFixedPointInitial = xMin * xScaleFixedPoint;
             for (int y = yMin; y < yMax; y++)
             {
                 int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
@@ -1470,21 +1579,23 @@
         /// </summary>
         /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area)
+        /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
+        /// <param name="sectionCount">The number of scanline sections.</param>
+        private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area, int section, int sectionCount)
         {
             int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(area.Location, area.Size,
+            AlphaBlendInitialize(area.Location, area.Size, section, sectionCount,
                 out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
 
-            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint;
-            AlphaBlendScalingInitialize(image, area, xMax, yMin, yMax,
-                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint, out dataRowIndexFixedPoint);
-
+            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
+            AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
+                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint,
+                out dataRowIndexFixedPoint, out dataColumnIndexFixedPointInitial);
+            
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
             int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
-            int dataColumnIndexFixedPointInitial = xMin * xScaleFixedPoint;
             for (int y = yMin; y < yMax; y++)
             {
                 int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
@@ -1629,6 +1740,12 @@
 
                 foreach (WinFormContextMenu contextMenu in contextMenus)
                     contextMenu.Dispose();
+
+                if (parallelBlend != null)
+                {
+                    parallelBlend.SignalAndWait();
+                    parallelBlend.Dispose();
+                }
 
                 preUpdateInvalidRegion.Dispose();
                 postUpdateInvalidRegion.Dispose();
