@@ -1389,9 +1389,10 @@ Public Class Pony
 
     Private ReadOnly possibleMoveModes As New List(Of AllowedMoves)(3)
 
+    Private optionsScaleFactor As Single
     Public ReadOnly Property Scale() As Double
         Get
-            Return If(Base.Scale <> 0, Base.Scale, Options.ScaleFactor)
+            Return If(Base.Scale <> 0, Base.Scale, optionsScaleFactor)
         End Get
     End Property
 #End Region
@@ -1411,6 +1412,7 @@ Public Class Pony
         CurrentBehavior = Behaviors.FirstOrDefault(validateBehaviorPredicate)
         internalTime = startTime
         lastUpdateTime = startTime
+        optionsScaleFactor = Options.ScaleFactor
         Teleport()
     End Sub
 
@@ -1467,6 +1469,7 @@ Public Class Pony
             Return
         End If
 
+        optionsScaleFactor = Options.ScaleFactor
         internalTime += TimeSpan.FromMilliseconds(StepRate)
 
         ' Expire any speech.
@@ -2445,7 +2448,7 @@ Public Class Pony
     'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
     Friend Shared Function GetEffectLocation(effectImageSize As Size, dir As Direction,
                                              parentTopLeftLocation As Vector2F, parentSize As Vector2,
-                                             centering As Direction, scale As Single) As Vector2
+                                             centering As Direction, scale As Single, globalScale As Single) As Vector2
 
         Dim scaledParentSize = parentSize * CSng(scale)
         scaledParentSize.X *= DirectionWeightHorizontal(dir)
@@ -2453,7 +2456,7 @@ Public Class Pony
 
         Dim locationOnParent = parentTopLeftLocation + scaledParentSize
 
-        Dim scaledEffectSize = New Vector2F(effectImageSize) * Options.ScaleFactor
+        Dim scaledEffectSize = New Vector2F(effectImageSize) * globalScale
         scaledEffectSize.X *= DirectionWeightHorizontal(centering)
         scaledEffectSize.Y *= DirectionWeightVertical(centering)
 
@@ -2949,7 +2952,7 @@ Public Class Pony
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
-            Return New Rectangle(TopLeftLocation, Vector2.Truncate(CurrentImageSize * Options.ScaleFactor))
+            Return New Rectangle(TopLeftLocation, Vector2.Truncate(CurrentImageSize * optionsScaleFactor))
         End Get
     End Property
 
@@ -4464,7 +4467,8 @@ Public Class Effect
                                               locationProvider(),
                                               sizeProvider(),
                                               Centering,
-                                              scaleProvider())
+                                              scaleProvider(),
+                                              Options.ScaleFactor)
         End If
     End Sub
 
@@ -4477,7 +4481,8 @@ Public Class Effect
                                               locationProvider(),
                                               sizeProvider(),
                                               Centering,
-                                              scaleProvider())
+                                              scaleProvider(),
+                                              Options.ScaleFactor)
         ElseIf BeingDragged Then
             TopLeftLocation = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
         End If
