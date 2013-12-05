@@ -422,7 +422,7 @@
             /// An indexed array of image data. Each value refers to an index in the color palette. This will be null if the image is
             /// instead made up of a bitmap.
             /// </summary>
-            public readonly byte[] Data;
+            public byte[] Data;
             /// <summary>
             /// An array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
             /// instead made up of a bitmap.
@@ -431,15 +431,15 @@
             /// <summary>
             /// The width of the image, in pixels.
             /// </summary>
-            public readonly int Width;
+            public int Width;
             /// <summary>
             /// The height of the image, in pixels.
             /// </summary>
-            public readonly int Height;
+            public int Height;
             /// <summary>
             /// The stride width of the image, in bytes.
             /// </summary>
-            public readonly int Stride;
+            public int Stride;
             /// <summary>
             /// A hash code for the image.
             /// </summary>
@@ -489,6 +489,92 @@
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
                 if (transparentIndex != -1)
                     ArgbPalette[transparentIndex] = new ArgbColor().ToArgb();
+                TryDownscale();
+            }
+            /// <summary>
+            /// Attempts to downscale the image by a factor of 2, if this is a lossless transformation. This is to save on memory.
+            /// TODO: This is an overly specific to Desktop Ponies images hack - and should be moved into the assembly somehow.
+            /// </summary>
+            private void TryDownscale()
+            {
+                // Need image dimensions to be multiples of 2.
+                if (Width % 2 != 0 || Height % 2 != 0)
+                    return;
+                if (Depth == 8)
+                    TryDownscale8bbp();
+                else
+                    TryDownscale4bbp();
+            }
+            /// <summary>
+            /// Attempts to downscale an 8bbp encoded image by a factor of 2, if this is a lossless transformation.
+            /// </summary>
+            private void TryDownscale8bbp()
+            {
+                // Ensure each 2x2 block contains the same value.
+                for (int y = 0; y < Height - 1; y += 2)
+                    for (int x = 0; x < Stride - 1; x += 2)
+                    {
+                        byte topLeft = Data[y * Stride + x];
+                        if (topLeft != Data[y * Stride + x + 1] ||
+                            topLeft != Data[(y + 1) * Stride + x] ||
+                            topLeft != Data[(y + 1) * Stride + x + 1])
+                            return;
+                    }
+
+                // We can downscale this image!
+                int newHeight = Height / 2;
+                int newWidth = Width / 2;
+                byte[] newData = new byte[newWidth * newHeight];
+                for (int y = 0; y < newHeight; y++)
+                    for (int x = 0; x < newWidth; x++)
+                        newData[y * newWidth + x] = Data[y * 2 * Stride + x * 2];
+
+                // Override with new data.
+                Data = newData;
+                Stride = Stride / 2;
+                Height = newHeight;
+                Width = newWidth;
+            }
+            /// <summary>
+            /// Attempts to downscale a 4bbp encoded image by a factor of 2, if this is a lossless transformation.
+            /// </summary>
+            private void TryDownscale4bbp()
+            {
+                // Ensure each 2x2 block contains the same value.
+                for (int y = 0; y < Height - 1; y += 2)
+                    for (int x = 0; x < Stride; x++)
+                    {
+                        byte top = Data[y * Stride + x];
+                        byte bottom = Data[(y + 1) * Stride + x];
+                        int topLeft = top >> 4;
+                        if (topLeft != (top & 0xF) ||
+                            topLeft != bottom >> 4 ||
+                            topLeft != (bottom & 0xF))
+                            return;
+                    }
+
+                // We can downscale this image!
+                int newStride = (int)Math.Ceiling(Stride / 2f);
+                int newHeight = Height / 2;
+                int newWidth = Width / 2;
+                bool aligned = newWidth % 2 == 0;
+                byte[] newData = new byte[newStride * newHeight];
+                for (int y = 0; y < newHeight; y++)
+                    for (int x = 0; x < newStride; x++)
+                    {
+                        int oldIndex = y * 2 * Stride + x * 2;
+                        int a = Data[oldIndex] >> 4;
+                        int b = 0;
+                        if (aligned || x * 2 + 1 < newWidth)
+                            b = Data[oldIndex + 1] >> 4;
+                        newData[y * newStride + x] = (byte)(a << 4 | b);
+                    }
+
+                // Override with new data.
+                Data = newData;
+                Stride = newStride;
+                Height = newHeight;
+                Width = newWidth;
             }
             /// <summary>
             /// Returns a hash code for this <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class.
