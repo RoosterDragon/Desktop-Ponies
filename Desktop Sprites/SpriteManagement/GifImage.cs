@@ -1917,7 +1917,7 @@
         {
             // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
             // the underlying buffer and color table conspire sufficiently.
-            int hash = Fnv1AHash32(frameBuffer.Buffer);
+            int hash = Hash.Fnv1A32(frameBuffer.Buffer);
             byte[] colorValues = new byte[colors.Length * 3];
             int i = 0;
             foreach (var color in colors)
@@ -1926,14 +1926,14 @@
                 colorValues[i++] = color.G;
                 colorValues[i++] = color.B;
             }
-            Fnv1AHash32Continue(colorValues, hash);
-            Fnv1AHash32Continue(BitConverter.GetBytes(transparentIndex), hash);
-            Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Width), hash);
-            Fnv1AHash32Continue(BitConverter.GetBytes(frameBuffer.Size.Height), hash);
+            hash = Hash.Fnv1A32Continue(colorValues, hash);
+            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(transparentIndex), hash);
+            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(frameBuffer.Size.Width), hash);
+            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(frameBuffer.Size.Height), hash);
 
             //// Generate a hash code based on the resulting visual. Images which look the same will have the same code, even if their
             //// underlying buffers and lookup indexes are different.
-            //int hash = Fnv1AHash32(
+            //int hash = Hash.Fnv1A32(
             //    frameBuffer.FrameValues().SelectMany(colorIndex =>
             //    {
             //        // Default value is the ARGB code for transparent black.
@@ -1945,32 +1945,6 @@
             //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Width))
             //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)).ToArray());
 
-            return hash;
-        }
-        /// <summary>
-        /// Gets the 32-bit FNV-1a hash code for a sequence of bytes.
-        /// </summary>
-        /// <param name="input">The sequence of bytes which should be hashed.</param>
-        /// <returns>A 32-bit integer that is the hash code for the input bytes.</returns>
-        private static int Fnv1AHash32(byte[] input)
-        {
-            const int OffsetBasis32 = unchecked((int)2166136261);
-            return Fnv1AHash32Continue(input, OffsetBasis32);
-        }
-        /// <summary>
-        /// Gets the 32-bit FNV-1a hash code for a sequence of bytes, starting from a hash value generated from a previous sequence.
-        /// </summary>
-        /// <param name="input">The sequence of bytes which should be hashed.</param>
-        /// <param name="hash">A 32-bit FNV-1a hash which should be hashed further.</param>
-        /// <returns>A 32-bit integer that is the hash code for the input bytes, plus those of the previous sequences.</returns>
-        private static int Fnv1AHash32Continue(byte[] input, int hash)
-        {
-            const int FnvPrime32 = 16777619;
-            foreach (byte octet in input)
-            {
-                hash ^= octet;
-                hash *= FnvPrime32;
-            }
             return hash;
         }
     }

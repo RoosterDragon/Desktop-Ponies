@@ -110,6 +110,7 @@
     <Compile Include="Core\ExceptionDialog.Designer.cs">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\Hash.cs" />
     <Compile Include="Core\Linq.cs" />
     <Compile Include="Core\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Core\Runtime.cs" />
