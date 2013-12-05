@@ -534,7 +534,7 @@
             public void FillBuffer(byte value, Rectangle bounds)
             {
                 byte byteValue = AllValuesInByte(value);
-                FillBuffer(bounds, (x, y) => value, i => byteValue);
+                FillBuffer(bounds, true, (x, y) => value, i => byteValue);
             }
             /// <summary>
             /// Efficiently sets all values in the buffer within the given bounds to the values contained in the source buffer.
@@ -544,16 +544,18 @@
             /// <exception cref="T:System.ArgumentException"><paramref name="bounds"/> extends outside the area of the buffer.</exception>
             public void FillBuffer(DataBuffer source, Rectangle bounds)
             {
-                FillBuffer(bounds, (x, y) => source.GetValue(x, y), i => source.Buffer[i]);
+                FillBuffer(bounds, false, (x, y) => source.GetValue(x, y), i => source.Buffer[i]);
             }
             /// <summary>
             /// Efficiently sets all values in the buffer within the given bounds to the values created by the given functions.
             /// </summary>
             /// <param name="bounds">The area in which to apply the value. Areas outside these bounds will not be changed.</param>
+            /// <param name="fixedValues">Indicates if both the factory delegates return fixed values regardless of input.</param>
             /// <param name="valueFactory">Function that returns the value to set, given an x and y location in the buffer.</param>
             /// <param name="bufferValueFactory">Function that returns a byte to set, given an index in the buffer.</param>
             /// <exception cref="T:System.ArgumentException"><paramref name="bounds"/> extends outside the area of the buffer.</exception>
-            private void FillBuffer(Rectangle bounds, Func<int, int, byte> valueFactory, Func<int, byte> bufferValueFactory)
+            private void FillBuffer(Rectangle bounds, bool fixedValues,
+                Func<int, int, byte> valueFactory, Func<int, byte> bufferValueFactory)
             {
                 if (!new Rectangle(Point.Empty, Size).Contains(bounds))
                     throw new ArgumentException("Given bounds must not extend outside the area of the buffer.", "bounds");
@@ -583,10 +585,22 @@
                     {
                         int rowAlignmentStart = Seek(x, y) / ValuesPerByte;
                         int rowAlignmentEnd = Seek(bounds.Right, y) / ValuesPerByte - 1;
-                        for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
+                        if (fixedValues)
                         {
-                            Buffer[i] = bufferValueFactory(i);
-                            x += ValuesPerByte;
+                            byte value = bufferValueFactory(0);
+                            for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
+                            {
+                                Buffer[i] = value;
+                                x += ValuesPerByte;
+                            }
+                        }
+                        else
+                        {
+                            for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
+                            {
+                                Buffer[i] = bufferValueFactory(i);
+                                x += ValuesPerByte;
+                            }
                         }
                     }
                     // Set values in the unaligned area until the row is done.
