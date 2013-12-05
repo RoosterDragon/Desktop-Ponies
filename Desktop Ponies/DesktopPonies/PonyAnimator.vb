@@ -143,7 +143,8 @@ Public Class PonyAnimator
         ' Handle dragging and dropping on sprites.
         If Viewer.HasFocus AndAlso (Viewer.MouseButtonsDown And SimpleMouseButtons.Left) = SimpleMouseButtons.Left Then
             If Options.PonyDraggingEnabled AndAlso draggedSprite Is Nothing Then
-                Dim dragCandidate = GetClosestUnderPoint(Of IDraggableSprite)(Viewer.CursorPosition)
+                Dim dragCandidate = If(GetClosestUnderPoint(Of Pony)(Viewer.CursorPosition),
+                                       GetClosestUnderPoint(Of IDraggableSprite)(Viewer.CursorPosition))
                 If dragCandidate IsNot Nothing Then
                     draggedSprite = dragCandidate
                     draggedSprite.Drag = True
