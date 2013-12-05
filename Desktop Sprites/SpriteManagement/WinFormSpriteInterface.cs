@@ -1431,13 +1431,13 @@
         /// <param name="yScaleFixedPoint">The scaled y value computed in fixed point arithmetic for speed.</param>
         /// <param name="dataRowIndexFixedPoint">The initial row index into the image data buffer, computed in fixed point arithmetic.
         /// </param>
-        /// <param name="dataColumnIndexFixedPointInitial">The initial column index into the image data buffer, computed in fixed point
-        /// arithmetic.</param>
+        /// <param name="dataColumnIndexFixedPointInitial">The initial logical column index into the image data buffer, computed in fixed
+        /// point arithmetic.</param>
         private void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMin, int xMax, int yMin, int yMax,
             out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
             out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial)
         {
-            float xScale = (float)image.Stride / area.Width;
+            float xScale = (float)image.Width / area.Width;
             float yScale = (float)image.Height / area.Height;
 
             xShift = (int)Math.Log(int.MaxValue / (xScale * xMax), 2);
@@ -1510,11 +1510,12 @@
             {
                 for (int x = xMin; x < xMax; x++)
                 {
-                    int paletteIndexes = data[dataIndex + x / 2];
+                    byte paletteIndexes = data[dataIndex + x / 2];
                     int paletteIndex;
                     if (x % 2 == 0)
-                        paletteIndexes = paletteIndexes >> 4;
-                    paletteIndex = paletteIndexes & 0xF;
+                        paletteIndex = paletteIndexes >> 4;
+                    else
+                        paletteIndex = paletteIndexes & 0xF;
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
@@ -1602,13 +1603,15 @@
                 int dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
                 for (int x = xMin; x < xMax; x++)
                 {
-                    int dataIndex = dataRowIndex + (dataColumnIndexFixedPoint >> xShift);
+                    int dataColumnIndex = dataColumnIndexFixedPoint >> xShift;
                     dataColumnIndexFixedPoint += xScaleFixedPoint;
-                    int paletteIndexes = data[dataIndex];
+                    int dataIndex = dataRowIndex + dataColumnIndex / 2;
+                    byte paletteIndexes = data[dataIndex];
                     int paletteIndex;
-                    if (dataIndex % 2 == 0)
-                        paletteIndexes = paletteIndexes >> 4;
-                    paletteIndex = paletteIndexes & 0xF;
+                    if (dataColumnIndex % 2 == 0)
+                        paletteIndex = paletteIndexes >> 4;
+                    else
+                        paletteIndex = paletteIndexes & 0xF;
                     int srcColor = palette[paletteIndex];
                     int srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
