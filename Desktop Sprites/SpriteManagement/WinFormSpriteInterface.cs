@@ -511,23 +511,34 @@
             private void TryDownscale8bbp()
             {
                 // Ensure each 2x2 block contains the same value.
-                for (int y = 0; y < Height - 1; y += 2)
-                    for (int x = 0; x < Stride - 1; x += 2)
+                int yMax = Height - 1;
+                for (int y = 0; y < yMax; y += 2)
+                {
+                    int currentRow = y * Stride;
+                    int nextRow = (y + 1) * Stride;
+                    int xMax = Stride - 1;
+                    for (int x = 0; x < xMax; x += 2)
                     {
-                        byte topLeft = Data[y * Stride + x];
-                        if (topLeft != Data[y * Stride + x + 1] ||
-                            topLeft != Data[(y + 1) * Stride + x] ||
-                            topLeft != Data[(y + 1) * Stride + x + 1])
+                        int xPlusOne = x + 1;
+                        byte topLeft = Data[currentRow + x];
+                        if (topLeft != Data[currentRow + xPlusOne] ||
+                            topLeft != Data[nextRow + x] ||
+                            topLeft != Data[nextRow + xPlusOne])
                             return;
                     }
+                }
 
                 // We can downscale this image!
                 int newHeight = Height / 2;
                 int newWidth = Width / 2;
                 byte[] newData = new byte[newWidth * newHeight];
                 for (int y = 0; y < newHeight; y++)
+                {
+                    int newDataRow = y * newWidth;
+                    int dataRow = y * 2 * Stride;
                     for (int x = 0; x < newWidth; x++)
-                        newData[y * newWidth + x] = Data[y * 2 * Stride + x * 2];
+                        newData[newDataRow + x] = Data[dataRow + x * 2];
+                }
 
                 // Override with new data.
                 Data = newData;
@@ -541,17 +552,22 @@
             private void TryDownscale4bbp()
             {
                 // Ensure each 2x2 block contains the same value.
-                for (int y = 0; y < Height - 1; y += 2)
+                int yMax = Height - 1;
+                for (int y = 0; y < yMax; y += 2)
+                {
+                    int currentRow = y * Stride;
+                    int nextRow = (y + 1) * Stride;
                     for (int x = 0; x < Stride; x++)
                     {
-                        byte top = Data[y * Stride + x];
-                        byte bottom = Data[(y + 1) * Stride + x];
+                        byte top = Data[currentRow + x];
+                        byte bottom = Data[nextRow + x];
                         int topLeft = top >> 4;
                         if (topLeft != (top & 0xF) ||
                             topLeft != bottom >> 4 ||
                             topLeft != (bottom & 0xF))
                             return;
                     }
+                }
 
                 // We can downscale this image!
                 int newStride = (int)Math.Ceiling(Stride / 2f);
@@ -560,15 +576,19 @@
                 bool aligned = newWidth % 2 == 0;
                 byte[] newData = new byte[newStride * newHeight];
                 for (int y = 0; y < newHeight; y++)
+                {
+                    int newDataRow = y * newStride;
+                    int dataRow = y * 2 * Stride;
                     for (int x = 0; x < newStride; x++)
                     {
-                        int oldIndex = y * 2 * Stride + x * 2;
+                        int oldIndex = dataRow + x * 2;
                         int a = Data[oldIndex] >> 4;
                         int b = 0;
                         if (aligned || x * 2 + 1 < newWidth)
                             b = Data[oldIndex + 1] >> 4;
-                        newData[y * newStride + x] = (byte)(a << 4 | b);
+                        newData[newDataRow + x] = (byte)(a << 4 | b);
                     }
+                }
 
                 // Override with new data.
                 Data = newData;
