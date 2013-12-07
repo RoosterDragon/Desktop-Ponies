@@ -432,7 +432,7 @@ Public Class PonyEditorForm2
         If Documents.TabCount > 0 Then
             If preview.ShowDialogOverPreview(
                 Function() MessageBox.Show(
-                    Me, "All documents must be closed before a new pony can be created. Close them now?",
+                    Me, "All documents must be closed before a new pony can be created. Close them now? (You will lose unsaved changes.)",
                     "Close Documents?", MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.OK Then Return
             For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
@@ -792,10 +792,22 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub CloseTabButton_Click(sender As Object, e As EventArgs) Handles CloseTabButton.Click
+        If ActiveItemEditor IsNot Nothing AndAlso ActiveItemEditor.IsItemDirty Then
+            If preview.ShowDialogOverPreview(
+                Function() MessageBox.Show(
+                    Me, "This document has unsaved changes, close it anyway?", "Unsaved Changes", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.Yes Then Return
+        End If
         RemoveTab(Documents.SelectedTab)
     End Sub
 
     Private Sub CloseAllTabsButton_Click(sender As Object, e As EventArgs) Handles CloseAllTabsButton.Click
+        If AnyUnsavedDocuments() Then
+            If preview.ShowDialogOverPreview(
+                Function() MessageBox.Show(
+                    Me, "Some documents have unsaved changes, close them anyway?", "Unsaved Changes", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.Yes Then Return
+        End If
         For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
             QueueWorkItem(Sub() RemoveTab(t))
         Next
@@ -805,7 +817,7 @@ Public Class PonyEditorForm2
         If Documents.TabCount > 0 Then
             If preview.ShowDialogOverPreview(
                 Function() MessageBox.Show(
-                    Me, "All documents must be closed before ponies can be reloaded. Close them now?",
+                    Me, "All documents must be closed before ponies can be reloaded. Close them now? (You will lose unsaved changes.)",
                     "Close Documents?", MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.OK Then Return
             For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
@@ -835,6 +847,14 @@ Public Class PonyEditorForm2
         Documents.TabPages.Remove(tab)
         tab.Dispose()
     End Sub
+
+    Private Function AnyUnsavedDocuments() As Boolean
+        Return Documents.TabPages.Cast(Of TabPage)().Any(
+            Function(tab)
+                Dim editor = GetItemEditor(tab)
+                Return editor IsNot Nothing AndAlso editor.IsItemDirty
+            End Function)
+    End Function
 
     Private Sub QueueWorkItem(item As MethodInvoker)
         workingCount += 1
@@ -906,8 +926,24 @@ Public Class PonyEditorForm2
         End If
     End Sub
 
-    Private Sub PonyEditorForm2_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
+    Private Sub DisposePreviewForClose()
+        If preview Is Nothing Then Return
         If preview.Parent IsNot Nothing Then preview.Parent.Controls.Remove(preview)
         preview.Dispose()
+        preview = Nothing
+    End Sub
+
+    Private Sub PonyEditorForm2_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        If AnyUnsavedDocuments() Then
+            e.Cancel = preview.ShowDialogOverPreview(
+                Function() MessageBox.Show(
+                    Me, "Some documents have unsaved changes, exit anyway?", "Unsaved Changes", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)) <> DialogResult.Yes
+        End If
+        If Not e.Cancel Then DisposePreviewForClose()
+    End Sub
+
+    Private Sub PonyEditorForm2_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
+        DisposePreviewForClose()
     End Sub
 End Class
