@@ -1,6 +1,7 @@
 ﻿Imports DesktopSprites.SpriteManagement
 
 Public Class PonySelectionControl
+    Private Const ImageMargin = 3
     Public PonyBase As PonyBase
     Private _count As Integer
     Public Property Count As Integer
@@ -30,6 +31,14 @@ Public Class PonySelectionControl
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
+    Private ReadOnly Property ponyImageArea As Rectangle
+        Get
+            Return New Rectangle(ImageMargin,
+                                 CInt(ClientSize.Height / 2 - imageSize.Height / 2),
+                                 imageSize.Width,
+                                 imageSize.Height)
+        End Get
+    End Property
 
     Public Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
         Argument.EnsureNotNull(ponyTemplate, "ponyTemplate")
@@ -86,21 +95,14 @@ Public Class PonySelectionControl
     End Sub
 
     Public Sub ResizeToFit()
-        Dim borderWidth As Integer = 0
-        Select Case BorderStyle
-            Case BorderStyle.FixedSingle
-                borderWidth = SystemInformation.FixedFrameBorderSize.Width
-            Case BorderStyle.Fixed3D
-                borderWidth = SystemInformation.Border3DSize.Width
-        End Select
-
         If PonyImage IsNot Nothing Then imageSize =
             New Size(CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor))
-
         Dim nameWidth = TextRenderer.MeasureText(PonyName.Text, PonyName.Font).Width + PonyName.Margin.Horizontal
+        Dim borderSize = Forms.GetBorderSize(BorderStyle)
+
         DetailPanel.Width = Math.Max(nameWidth, DetailPanel.MinimumSize.Width)
-        Width = imageSize.Width + DetailPanel.Width + borderWidth
-        Height = Math.Max(imageSize.Height, DetailPanel.MinimumSize.Height) + borderWidth
+        Width = imageSize.Width + DetailPanel.Width + 2 * borderSize.Width + 2 * ImageMargin
+        Height = Math.Max(imageSize.Height, DetailPanel.MinimumSize.Height) + 2 * borderSize.Height + 2 * ImageMargin
         DetailPanel.Location = New Point(Width - DetailPanel.Width, 0)
     End Sub
 
@@ -109,7 +111,7 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub InvalidatePonyImageArea()
-        Invalidate(New Rectangle(0, 0, CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor)))
+        Invalidate(ponyImageArea)
     End Sub
 
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
@@ -119,7 +121,7 @@ Public Class PonySelectionControl
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
             image(timeIndex).Flip(flip)
             Dim bitmap = image(timeIndex).Image
-            e.Graphics.DrawImage(bitmap, 0, 0, bitmap.Width * Options.ScaleFactor, bitmap.Height * Options.ScaleFactor)
+            e.Graphics.DrawImage(bitmap, ponyImageArea)
         End If
     End Sub
 

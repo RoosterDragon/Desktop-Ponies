@@ -41,11 +41,12 @@ Public Class EffectImageViewer
         If ErrorLabel.Visible Then
             Return ErrorLabel.GetPreferredSize(proposedSize)
         ElseIf Image IsNot Nothing AndAlso EffectImage IsNot Nothing Then
-            Return New Size(Image.Width + EffectImage.Width + 12, Image.Height + EffectImage.Height + 12)
+            Return New Vector2(Image.Size) + New Vector2(EffectImage.Size) +
+                2 * New Vector2(Forms.GetBorderSize(BorderStyle)) + New Vector2(10, 10)
         ElseIf EffectImage IsNot Nothing Then
-            Return EffectImage.Size
+            Return New Vector2(EffectImage.Size) + 2 * New Vector2(Forms.GetBorderSize(BorderStyle))
         ElseIf Image IsNot Nothing Then
-            Return Image.Size
+            Return New Vector2(Image.Size) + 2 * New Vector2(Forms.GetBorderSize(BorderStyle))
         Else
             Return Size.Empty
         End If
@@ -66,8 +67,9 @@ Public Class EffectImageViewer
         End If
         If Time > loopTime Then Time = TimeSpan.Zero
 
-        Dim imageLocation = Vector2.Zero
-        Dim effectLocation = Pony.GetEffectLocation(EffectImage.Size, Placement, imageLocation, Image.Size, Centering, 1, Options.ScaleFactor)
+        Dim imageLocation As Vector2
+        Dim effectLocation = Pony.GetEffectLocation(
+            EffectImage.Size, Placement, imageLocation, Image.Size, Centering, 1, Options.ScaleFactor)
         If effectLocation.X < 0 Then
             imageLocation.X -= effectLocation.X
             effectLocation.X = 0
@@ -80,7 +82,7 @@ Public Class EffectImageViewer
         Dim effectMax = effectLocation + New Vector2(EffectImage.Size)
         Dim bounds = New Rectangle(0, 0, Math.Max(imageMax.X, effectMax.X), Math.Max(imageMax.Y, effectMax.Y))
         Dim boundsCenter = bounds.Center()
-        Dim controlCenter = New Vector2F(Width, Height) / 2
+        Dim controlCenter = New Vector2F(ClientSize.Width, ClientSize.Height) / 2
         Dim location = Vector2.Round(controlCenter - boundsCenter)
         imageLocation += location
         effectLocation += location

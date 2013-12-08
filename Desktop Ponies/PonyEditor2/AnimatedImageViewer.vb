@@ -67,7 +67,7 @@ Public Class AnimatedImageViewer
         If ErrorLabel.Visible Then
             Return ErrorLabel.GetPreferredSize(proposedSize)
         ElseIf Image IsNot Nothing Then
-            Return Image.Size
+            Return New Vector2(Image.Size) + 2 * New Vector2(Forms.GetBorderSize(BorderStyle))
         Else
             Return Size.Empty
         End If
@@ -92,9 +92,9 @@ Public Class AnimatedImageViewer
         End If
 
         Dim bitmap = image(Time).Image
-        Dim controlCenter = New Size(CInt(Width / 2), CInt(Height / 2))
+        Dim controlCenter = New Size(CInt(ClientSize.Width / 2), CInt(ClientSize.Height / 2))
         Dim imageCenter = New Size(CInt(bitmap.Width / 2), CInt(bitmap.Height / 2))
-        Dim location = New Point(controlCenter.Width - imageCenter.Width, controlCenter.Height - imageCenter.Height)
+        Dim location = New Point(controlCenter - imageCenter)
         e.Graphics.DrawImageUnscaled(bitmap, location)
         e.Graphics.DrawRectangle(Pens.LightGray, location.X - 1, location.Y - 1, bitmap.Width + 1, bitmap.Height + 1)
     End Sub
