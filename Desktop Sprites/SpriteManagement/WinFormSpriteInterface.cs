@@ -1546,10 +1546,10 @@
             float xScale = (float)image.Width / area.Width;
             float yScale = (float)image.Height / area.Height;
 
-            xShift = (int)Math.Log(int.MaxValue / (xScale * xMax), 2);
+            xShift = Math.Min((int)Math.Log(int.MaxValue / (xScale * xMax), 2), 30);
             xScaleFixedPoint = (int)(xScale * (1 << xShift));
 
-            yShift = (int)Math.Log(int.MaxValue / (yScale * yMax), 2);
+            yShift = Math.Min((int)Math.Log(int.MaxValue / (yScale * yMax), 2), 30);
             yScaleFixedPoint = (int)(yScale * (1 << yShift));
 
             dataRowIndexFixedPoint = yMin * yScaleFixedPoint;
