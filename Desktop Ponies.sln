@@ -10,6 +10,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Desktop Ponies", "Desktop P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Desktop Sprites", "Desktop Sprites\Desktop Sprites.csproj", "{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Release Tool", "Release Tool\Release Tool.csproj", "{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,16 @@ Global
 		{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}.Release|x86.ActiveCfg = Release|x86
 		{52D75211-12BF-4F07-A5C6-32E5D8F8D0B7}.Release|x86.Build.0 = Release|x86
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9CDEF844-0F7E-480A-9CB1-AE1AE0A954DC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

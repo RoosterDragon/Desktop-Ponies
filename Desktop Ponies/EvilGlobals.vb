@@ -8,7 +8,7 @@ Imports DesktopSprites.SpriteManagement
 ''' TODO: Remove or relocate these globals as it becomes possible.
 ''' Also evil: Most everything in Options.
 ''' </remarks>
-Friend NotInheritable Class EvilGlobals
+Public NotInheritable Class EvilGlobals
     Private Sub New()
     End Sub
     Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
@@ -29,10 +29,16 @@ Friend NotInheritable Class EvilGlobals
     Public Shared Property InScreensaverMode As Boolean
     Public Shared Property InPreviewMode As Boolean
 
-    Private Shared _directXSoundAvailable As Boolean = IsDirectXSoundAvailable()
+    Private Shared ReadOnly directXSoundAvailableSync As New Object()
+    Private Shared _directXSoundAvailable As Boolean?
     Public Shared ReadOnly Property DirectXSoundAvailable As Boolean
         Get
-            Return _directXSoundAvailable
+            SyncLock directXSoundAvailableSync
+                If Not _directXSoundAvailable.HasValue Then
+                    _directXSoundAvailable = IsDirectXSoundAvailable()
+                End If
+                Return _directXSoundAvailable.Value
+            End SyncLock
         End Get
     End Property
 
