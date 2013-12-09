@@ -447,10 +447,7 @@
             /// <summary>
             /// Gets the bit depth of the image, either 8bbp or 4bbp. Does not apply for bitmaps.
             /// </summary>
-            public int Depth
-            {
-                get { return Width == Stride ? 8 : 4; }
-            }
+            public int Depth { get; private set; }
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
             /// loading a GDI+ bitmap from file.
@@ -476,13 +473,16 @@
             /// <param name="stride">The stride width of the data buffer, in bytes.</param>
             /// <param name="width">The width of the image, in pixels.</param>
             /// <param name="height">The height of the image, in pixels.</param>
+            /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
             /// <param name="hashCode">A pre-generated hash code for the image.</param>
-            public ImageData(byte[] data, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int hashCode)
+            public ImageData(byte[] data, RgbColor[] palette, int transparentIndex,
+                int stride, int width, int height, int depth, int hashCode)
             {
                 Data = data;
                 Height = height;
                 Width = width;
                 Stride = stride;
+                Depth = depth;
                 this.hashCode = hashCode;
                 ArgbPalette = new int[palette.Length];
                 for (int i = 0; i < ArgbPalette.Length; i++)
@@ -638,7 +638,7 @@
             private static readonly BufferToImage<ImageFrame> FromBufferInternal =
                 (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
                 {
-                    return new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, hashCode));
+                    return new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, hashCode));
                 };
 
             /// <summary>
