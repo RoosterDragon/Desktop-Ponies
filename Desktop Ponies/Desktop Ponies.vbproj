@@ -586,6 +586,54 @@
       <Name>Desktop Sprites</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CircleWarning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CircleError.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CircleOK.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CircleQuestion.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconBehavior.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconEffect.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconInteraction.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconSpeech.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconClose.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconCloseAll.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconNew.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconNewPony.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconPreview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconSave.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconView.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconDetails.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(TargetDir)$(TargetName).scr"

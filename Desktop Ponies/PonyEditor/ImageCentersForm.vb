@@ -1,32 +1,38 @@
 ﻿Imports System.Globalization
 
 Public Class ImageCentersForm
+    Private behaviorIndex As Integer
+    Private animationIndex As Integer
+    Private maxFrameIndex As Integer
 
-    Dim behaviorIndex As Integer
-    Dim animationIndex As Integer
-    Dim maxFrameIndex As Integer
+    Private leftPreviousCenter As Point
+    Private rightPreviousCenter As Point
+    Private rightCenter As Point
+    Private leftCenter As Point
 
-    Dim leftPreviousCenter As Point
-    Dim rightPreviousCenter As Point
-    Dim rightCenter As Point
-    Dim leftCenter As Point
+    Private rightImage As Image
+    Private leftImage As Image
+    Private leftGraphics As Graphics
+    Private rightGraphics As Graphics
 
-    Dim rightImage As Image
-    Dim leftImage As Image
-    Dim leftGraphics As Graphics
-    Dim rightGraphics As Graphics
+    Private rightFrameDimension As Imaging.FrameDimension
+    Private rightFrameCount As Integer
+    Private leftFrameDimension As Imaging.FrameDimension
+    Private leftFrameCount As Integer
 
-    Dim rightFrameDimension As Imaging.FrameDimension
-    Dim rightFrameCount As Integer
-    Dim leftFrameDimension As Imaging.FrameDimension
-    Dim leftFrameCount As Integer
+    Private _changesMade As Boolean
+    Public ReadOnly Property ChangesMade As Boolean
+        Get
+            Return _changesMade
+        End Get
+    End Property
 
-    Private _editor As PonyEditor
-    Public Sub New(editor As PonyEditor)
+    Private base As PonyBase
+    Public Sub New(ponyBase As PonyBase)
+        base = Argument.EnsureNotNull(ponyBase, "ponyBase")
         InitializeComponent()
         Icon = My.Resources.Twilight
-        _editor = editor
-        Text = "Image Centering for " & _editor.PreviewPony.Directory
+        Text = "Image Centering for " & base.Directory
     End Sub
 
     Private Sub ImageCentersForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -44,11 +50,11 @@ Public Class ImageCentersForm
     End Sub
 
     Private Sub LoadBehavior()
-        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
+        If base.Behaviors.Count = 0 Then Return
 
         animationIndex = 0
 
-        Dim behavior = _editor.PreviewPony.Behaviors(behaviorIndex)
+        Dim behavior = base.Behaviors(behaviorIndex)
 
         leftImage = Image.FromFile(behavior.LeftImage.Path)
         rightImage = Image.FromFile(behavior.RightImage.Path)
@@ -90,7 +96,6 @@ Public Class ImageCentersForm
         End If
 
         RedrawMarker()
-
     End Sub
 
     Private Sub RedrawMarker()
@@ -123,38 +128,38 @@ Public Class ImageCentersForm
 
             LeftCenterLabel.Text = leftCenter.ToString()
             RightCenterLabel.Text = rightCenter.ToString()
-
         End If
     End Sub
 
     Private Sub LeftImageBox_Click(sender As Object, e As MouseEventArgs) Handles LeftImageBox.MouseClick
-        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
+        If base.Behaviors.Count = 0 Then Return
+        _changesMade = True
         leftCenter = e.Location
-        _editor.PreviewPony.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
+        base.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
         RedrawMarker()
     End Sub
 
     Private Sub RightImageBox_Click(sender As Object, e As MouseEventArgs) Handles RightImageBox.MouseClick
-        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
+        If base.Behaviors.Count = 0 Then Return
+        _changesMade = True
         rightCenter = e.Location
-        _editor.PreviewPony.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
+        base.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
         RedrawMarker()
     End Sub
 
     Private Sub NextButton_Click(sender As Object, e As EventArgs) Handles NextButton.Click
         behaviorIndex += 1
-        If behaviorIndex >= _editor.PreviewPony.Behaviors.Count Then behaviorIndex = 0
+        If behaviorIndex >= base.Behaviors.Count Then behaviorIndex = 0
         LoadBehavior()
     End Sub
 
     Private Sub PreviousButton_Click(sender As Object, e As EventArgs) Handles PreviousButton.Click
         behaviorIndex -= 1
-        If behaviorIndex <= -1 Then behaviorIndex = _editor.PreviewPony.Behaviors.Count - 1
+        If behaviorIndex <= -1 Then behaviorIndex = base.Behaviors.Count - 1
         LoadBehavior()
     End Sub
 
     Private Sub FrameSlider_Scroll(sender As Object, e As EventArgs) Handles FrameSlider.Scroll
-
         animationIndex = FrameSlider.Value
         FrameIndexLabel.Text = animationIndex.ToString(CultureInfo.CurrentCulture)
 
@@ -162,20 +167,21 @@ Public Class ImageCentersForm
         leftImage.SelectActiveFrame(leftFrameDimension, animationIndex)
 
         RedrawMarker()
-
     End Sub
 
     Private Sub RightImageResetButton_Click(sender As Object, e As EventArgs) Handles RightImageResetButton.Click
-        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
+        If base.Behaviors.Count = 0 Then Return
+        _changesMade = True
         rightCenter = rightPreviousCenter
-        _editor.PreviewPony.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
+        base.Behaviors(behaviorIndex).RightImage.CustomCenter = rightCenter
         RedrawMarker()
     End Sub
 
     Private Sub LeftImageResetButton_Click(sender As Object, e As EventArgs) Handles LeftImageResetButton.Click
-        If _editor.PreviewPony.Behaviors.Count = 0 Then Return
+        If base.Behaviors.Count = 0 Then Return
+        _changesMade = True
         leftCenter = leftPreviousCenter
-        _editor.PreviewPony.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
+        base.Behaviors(behaviorIndex).LeftImage.CustomCenter = leftCenter
         RedrawMarker()
     End Sub
 

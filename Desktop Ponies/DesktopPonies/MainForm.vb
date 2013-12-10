@@ -646,13 +646,17 @@ Public Class MainForm
                 End If
             Next
         ElseIf e.KeyChar = "#"c Then
-#If DEBUG Then
             EvilGlobals.InPreviewMode = True
             Using newEditor = New PonyEditorForm2()
                 newEditor.ShowDialog(Me)
+                If newEditor.ChangesMade Then
+                    ResetPonySelection()
+                    FilterAllRadio.Checked = True
+                    LoadingProgressBar.Visible = True
+                    LoadInternal()
+                End If
             End Using
             EvilGlobals.InPreviewMode = False
-#End If
         End If
     End Sub
 

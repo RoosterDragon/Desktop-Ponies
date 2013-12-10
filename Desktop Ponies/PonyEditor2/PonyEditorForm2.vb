@@ -7,9 +7,6 @@ Public Class PonyEditorForm2
     Private Const ValidationWarningIndex = 2
     Private Const ValidationOkIndex = 3
 
-    Private Shared ReadOnly ErrorBitmap As Bitmap = SystemIcons.Error.ToBitmap()
-    Private Shared ReadOnly WarningBitmap As Bitmap = SystemIcons.Warning.ToBitmap()
-
     Private ReadOnly worker As New IdleWorker(Me)
     Private ponies As PonyCollection
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
@@ -29,6 +26,13 @@ Public Class PonyEditorForm2
     Private previewHiddenForUnfocus As Boolean
     Private reshowingPreviewAfterUnfocus As Boolean
     Private formLostFocusAndPendingActivationChange As Boolean
+
+    Private _changesMade As Boolean
+    Public ReadOnly Property ChangesMade As Boolean
+        Get
+            Return _changesMade
+        End Get
+    End Property
 
     Private Class PageRef
         Private ReadOnly _ponyBase As PonyBase
@@ -124,10 +128,10 @@ Public Class PonyEditorForm2
                                  End Function)
 
                              Dim images = New ImageList()
-                             images.Images.Add(SystemIcons.Question)
-                             images.Images.Add(SystemIcons.Error)
-                             images.Images.Add(SystemIcons.Warning)
-                             images.Images.Add(SystemIcons.Application)
+                             images.Images.Add(My.Resources.CircleQuestion)
+                             images.Images.Add(My.Resources.CircleError)
+                             images.Images.Add(My.Resources.CircleWarning)
+                             images.Images.Add(My.Resources.CircleOK)
                              DocumentsView.ImageList = images
                          End Sub)
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadBases())
@@ -158,7 +162,7 @@ Public Class PonyEditorForm2
         Dim poniesNode As TreeNode = Nothing
         worker.QueueTask(Sub()
                              poniesNode = New TreeNode("Ponies") With
-                                          {.Tag = New PageRef()}
+                                          {.Tag = New PageRef(), .Name = New PageRef().ToString()}
                              DocumentsView.Nodes.Add(poniesNode)
                              nodeLookup(poniesNode.Name) = poniesNode
                          End Sub)
@@ -269,6 +273,7 @@ Public Class PonyEditorForm2
                 Sub(nodes As TreeNodeCollection)
                     For Each node As TreeNode In nodes
                         node.ImageIndex = ValidationPendingIndex
+                        node.SelectedImageIndex = ValidationPendingIndex
                         resetNodeIndices(node.Nodes)
                     Next
                 End Sub
@@ -278,6 +283,11 @@ Public Class PonyEditorForm2
                 ValidateBase(base)
             Next
             worker.WaitOnAllTasks()
+            worker.QueueTask(Sub()
+                                 Dim node = FindNode(New PageRef().ToString())
+                                 node.ImageIndex = ValidationOkIndex
+                                 node.SelectedImageIndex = ValidationOkIndex
+                             End Sub)
         End SyncLock
     End Sub
 
@@ -410,7 +420,7 @@ Public Class PonyEditorForm2
 
     Private Sub OpenTabFromNode(node As TreeNode)
         contextRef = GetPageRef(node)
-        If contextRef.PageContent.IsItem() Then OpenTab(contextRef)
+        If contextRef.PageContent <> PageContent.Ponies Then OpenTab(contextRef)
     End Sub
 
     Private Sub DocumentsView_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseClick
@@ -419,6 +429,8 @@ Public Class PonyEditorForm2
             Select Case contextRef.PageContent
                 Case PageContent.Pony
                     PonyNodeContextMenu.Show(DocumentsView, e.Location)
+                Case Else
+                    ItemCollectionOrItemNodeContextMenu.Show(DocumentsView, e.Location)
             End Select
         End If
     End Sub
@@ -742,7 +754,7 @@ Public Class PonyEditorForm2
         IssuesGrid.Rows.Clear()
         If ActiveItemEditor IsNot Nothing Then
             For Each issue In ActiveItemEditor.Issues
-                IssuesGrid.Rows.Add(If(issue.Fatal, ErrorBitmap, WarningBitmap),
+                IssuesGrid.Rows.Add(If(issue.Fatal, My.Resources.CircleError, My.Resources.CircleWarning),
                                     If(issue.PropertyName, "Element " & issue.Index + 1),
                                     issue.Reason,
                                     issue.FallbackValue,
@@ -762,6 +774,7 @@ Public Class PonyEditorForm2
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveItemButton.Click
         If Not ActiveItemEditor.SaveItem() Then Return
+        _changesMade = True
         Dim ref = GetPageRef(Documents.SelectedTab)
         Dim node = FindNode(ref.ToString())
 

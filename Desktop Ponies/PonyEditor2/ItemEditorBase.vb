@@ -88,7 +88,6 @@ Public Class ItemEditorBase
     Public Event AssetFileIOPerformed As EventHandler
 
     Public Sub NewItem(ponyBase As PonyBase, item As IPonyIniSourceable)
-        UpdateDirtyFlag(True)
         SetupItem(ponyBase, item)
     End Sub
 
@@ -605,7 +604,7 @@ Public Class ItemEditorBase
         End If
     End Function
 
-    Private Sub UpdateDirtyFlag(newState As Boolean)
+    Protected Sub UpdateDirtyFlag(newState As Boolean)
         If _isItemDirty = newState Then Return
         _isItemDirty = newState
         RaiseEvent DirtinessChanged(Me, EventArgs.Empty)

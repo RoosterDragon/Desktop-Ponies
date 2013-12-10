@@ -91,4 +91,32 @@
             End If
         End Using
     End Sub
+
+    Private Sub ImageOperationsButton_Click(sender As Object, e As EventArgs) Handles ImageOperationsButton.Click
+        ImagesContextMenu.Show(MousePosition)
+    End Sub
+
+    Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
+        ImagesContextMenu.Hide()
+        If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
+            Using form = New ImageCentersForm(Base)
+                form.ShowDialog(Me)
+                If form.ChangesMade Then UpdateDirtyFlag(True)
+            End Using
+        ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
+            Using form = New DesktopSprites.Forms.GifAlphaForm(
+                         IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Base.Directory))
+                form.Icon = ParentForm.Icon
+                form.Text &= " - Desktop Ponies"
+                form.ShowDialog(Me)
+            End Using
+        ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
+            Using form = New DesktopSprites.Forms.GifFramesForm(
+                         IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Base.Directory))
+                form.Icon = ParentForm.Icon
+                form.Text &= " - Desktop Ponies"
+                form.ShowDialog(Me)
+            End Using
+        End If
+    End Sub
 End Class

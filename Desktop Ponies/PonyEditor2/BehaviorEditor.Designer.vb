@@ -22,7 +22,9 @@ Partial Class BehaviorEditor
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.PropertiesTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.ImageOperationsLabel = New System.Windows.Forms.Label()
         Me.TargetLabel = New System.Windows.Forms.Label()
         Me.LinkedBehaviorComboBox = New System.Windows.Forms.ComboBox()
         Me.LinkedBehaviorLabel = New System.Windows.Forms.Label()
@@ -51,14 +53,19 @@ Partial Class BehaviorEditor
         Me.LeftImageViewer = New DesktopPonies.AnimatedImageViewer()
         Me.RightImageViewer = New DesktopPonies.AnimatedImageViewer()
         Me.TargetButton = New System.Windows.Forms.Button()
+        Me.ImageOperationsButton = New System.Windows.Forms.Button()
+        Me.ImagesContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.ImageCentersMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GifAlphaMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GifViewerMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PropertiesPanel.SuspendLayout()
         Me.PropertiesTable.SuspendLayout()
+        Me.ImagesContextMenu.SuspendLayout()
         Me.SuspendLayout()
         '
         'PropertiesPanel
         '
         Me.PropertiesPanel.Controls.Add(Me.PropertiesTable)
-        Me.PropertiesPanel.TabIndex = 2
         '
         'PropertiesTable
         '
@@ -69,6 +76,7 @@ Partial Class BehaviorEditor
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
         Me.PropertiesTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.PropertiesTable.Controls.Add(Me.ImageOperationsLabel, 2, 5)
         Me.PropertiesTable.Controls.Add(Me.TargetLabel, 0, 5)
         Me.PropertiesTable.Controls.Add(Me.LinkedBehaviorComboBox, 3, 4)
         Me.PropertiesTable.Controls.Add(Me.LinkedBehaviorLabel, 2, 4)
@@ -97,6 +105,7 @@ Partial Class BehaviorEditor
         Me.PropertiesTable.Controls.Add(Me.LeftImageViewer, 0, 7)
         Me.PropertiesTable.Controls.Add(Me.RightImageViewer, 2, 7)
         Me.PropertiesTable.Controls.Add(Me.TargetButton, 1, 5)
+        Me.PropertiesTable.Controls.Add(Me.ImageOperationsButton, 3, 5)
         Me.PropertiesTable.Location = New System.Drawing.Point(0, 0)
         Me.PropertiesTable.Name = "PropertiesTable"
         Me.PropertiesTable.RowCount = 8
@@ -108,8 +117,21 @@ Partial Class BehaviorEditor
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.PropertiesTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
         Me.PropertiesTable.Size = New System.Drawing.Size(701, 197)
         Me.PropertiesTable.TabIndex = 0
+        '
+        'ImageOperationsLabel
+        '
+        Me.ImageOperationsLabel.AutoSize = True
+        Me.ImageOperationsLabel.Dock = System.Windows.Forms.DockStyle.Top
+        Me.ImageOperationsLabel.Location = New System.Drawing.Point(334, 139)
+        Me.ImageOperationsLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
+        Me.ImageOperationsLabel.Name = "ImageOperationsLabel"
+        Me.ImageOperationsLabel.Size = New System.Drawing.Size(99, 13)
+        Me.ImageOperationsLabel.TabIndex = 22
+        Me.ImageOperationsLabel.Text = "Images:"
+        Me.ImageOperationsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'TargetLabel
         '
@@ -230,7 +252,7 @@ Partial Class BehaviorEditor
         Me.RightImageFileSelector.Location = New System.Drawing.Point(439, 165)
         Me.RightImageFileSelector.Name = "RightImageFileSelector"
         Me.RightImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.RightImageFileSelector.TabIndex = 26
+        Me.RightImageFileSelector.TabIndex = 27
         '
         'LeftImageFileSelector
         '
@@ -239,7 +261,7 @@ Partial Class BehaviorEditor
         Me.LeftImageFileSelector.Location = New System.Drawing.Point(69, 165)
         Me.LeftImageFileSelector.Name = "LeftImageFileSelector"
         Me.LeftImageFileSelector.Size = New System.Drawing.Size(259, 23)
-        Me.LeftImageFileSelector.TabIndex = 23
+        Me.LeftImageFileSelector.TabIndex = 25
         '
         'SpeedLabel
         '
@@ -370,7 +392,7 @@ Partial Class BehaviorEditor
         Me.LeftImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.LeftImageLabel.Name = "LeftImageLabel"
         Me.LeftImageLabel.Size = New System.Drawing.Size(60, 13)
-        Me.LeftImageLabel.TabIndex = 22
+        Me.LeftImageLabel.TabIndex = 24
         Me.LeftImageLabel.Text = "Left Image:"
         Me.LeftImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -382,7 +404,7 @@ Partial Class BehaviorEditor
         Me.RightImageLabel.Margin = New System.Windows.Forms.Padding(3, 6, 3, 6)
         Me.RightImageLabel.Name = "RightImageLabel"
         Me.RightImageLabel.Size = New System.Drawing.Size(99, 13)
-        Me.RightImageLabel.TabIndex = 25
+        Me.RightImageLabel.TabIndex = 26
         Me.RightImageLabel.Text = "Right Image:"
         Me.RightImageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
@@ -395,10 +417,11 @@ Partial Class BehaviorEditor
         Me.LeftImageViewer.BackColor = System.Drawing.Color.White
         Me.LeftImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.LeftImageViewer, 2)
+        Me.LeftImageViewer.FixedAnimationDuration = Nothing
         Me.LeftImageViewer.Location = New System.Drawing.Point(165, 194)
         Me.LeftImageViewer.Name = "LeftImageViewer"
         Me.LeftImageViewer.Size = New System.Drawing.Size(0, 0)
-        Me.LeftImageViewer.TabIndex = 24
+        Me.LeftImageViewer.TabIndex = 28
         '
         'RightImageViewer
         '
@@ -409,6 +432,7 @@ Partial Class BehaviorEditor
         Me.RightImageViewer.BackColor = System.Drawing.Color.White
         Me.RightImageViewer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.PropertiesTable.SetColumnSpan(Me.RightImageViewer, 2)
+        Me.RightImageViewer.FixedAnimationDuration = Nothing
         Me.RightImageViewer.Location = New System.Drawing.Point(516, 194)
         Me.RightImageViewer.Name = "RightImageViewer"
         Me.RightImageViewer.Size = New System.Drawing.Size(0, 0)
@@ -425,15 +449,53 @@ Partial Class BehaviorEditor
         Me.TargetButton.Text = "Setup Target..."
         Me.TargetButton.UseVisualStyleBackColor = True
         '
+        'ImageOperationsButton
+        '
+        Me.ImageOperationsButton.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ImageOperationsButton.Location = New System.Drawing.Point(439, 136)
+        Me.ImageOperationsButton.Name = "ImageOperationsButton"
+        Me.ImageOperationsButton.Size = New System.Drawing.Size(259, 23)
+        Me.ImageOperationsButton.TabIndex = 23
+        Me.ImageOperationsButton.Text = "Image Operations..."
+        Me.ImageOperationsButton.UseVisualStyleBackColor = True
+        '
+        'ImagesContextMenu
+        '
+        Me.ImagesContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ImageCentersMenuItem, Me.GifAlphaMenuItem, Me.GifViewerMenuItem})
+        Me.ImagesContextMenu.Name = "ImagesContextMenu"
+        Me.ImagesContextMenu.Size = New System.Drawing.Size(199, 92)
+        '
+        'ImageCentersMenuItem
+        '
+        Me.ImageCentersMenuItem.Name = "ImageCentersMenuItem"
+        Me.ImageCentersMenuItem.Size = New System.Drawing.Size(198, 22)
+        Me.ImageCentersMenuItem.Text = "Set Image Centers"
+        '
+        'GifAlphaMenuItem
+        '
+        Me.GifAlphaMenuItem.Name = "GifAlphaMenuItem"
+        Me.GifAlphaMenuItem.Size = New System.Drawing.Size(198, 22)
+        Me.GifAlphaMenuItem.Text = "Setup GIF Transparency"
+        '
+        'GifViewerMenuItem
+        '
+        Me.GifViewerMenuItem.Name = "GifViewerMenuItem"
+        Me.GifViewerMenuItem.Size = New System.Drawing.Size(198, 22)
+        Me.GifViewerMenuItem.Text = "View GIF Frames"
+        '
         'BehaviorEditor
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.Name = "BehaviorEditor"
+        Me.Controls.SetChildIndex(Me.Source, 0)
+        Me.Controls.SetChildIndex(Me.PropertiesPanel, 0)
         Me.PropertiesPanel.ResumeLayout(False)
         Me.PropertiesPanel.PerformLayout()
         Me.PropertiesTable.ResumeLayout(False)
         Me.PropertiesTable.PerformLayout()
+        Me.ImagesContextMenu.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -467,5 +529,11 @@ Partial Class BehaviorEditor
     Friend WithEvents LinkedBehaviorLabel As System.Windows.Forms.Label
     Friend WithEvents TargetLabel As System.Windows.Forms.Label
     Friend WithEvents TargetButton As System.Windows.Forms.Button
+    Friend WithEvents ImageOperationsLabel As System.Windows.Forms.Label
+    Friend WithEvents ImageOperationsButton As System.Windows.Forms.Button
+    Friend WithEvents ImagesContextMenu As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents ImageCentersMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents GifAlphaMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents GifViewerMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class

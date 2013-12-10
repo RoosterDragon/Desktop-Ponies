@@ -40,10 +40,10 @@ Partial Class InteractionsViewer
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.InteractionsGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.InteractionsGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colEdit, Me.colName, Me.colChance, Me.colProximity, Me.colReactivationDelay, Me.colInteractsWith, Me.colTargets, Me.colBehaviors})
-        Me.InteractionsGrid.Location = New System.Drawing.Point(0, 32)
+        Me.InteractionsGrid.Location = New System.Drawing.Point(3, 32)
         Me.InteractionsGrid.Name = "InteractionsGrid"
         Me.InteractionsGrid.ReadOnly = True
-        Me.InteractionsGrid.Size = New System.Drawing.Size(497, 265)
+        Me.InteractionsGrid.Size = New System.Drawing.Size(494, 265)
         Me.InteractionsGrid.TabIndex = 1
         '
         'colEdit

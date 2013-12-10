@@ -133,18 +133,22 @@ Partial Class PonyEditorForm2
         '
         'NewPonyButton
         '
+        Me.NewPonyButton.Image = Global.DesktopPonies.My.Resources.Resources.IconNewPony
+        Me.NewPonyButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewPonyButton.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.NewPonyButton.Name = "NewPonyButton"
-        Me.NewPonyButton.Size = New System.Drawing.Size(65, 22)
+        Me.NewPonyButton.Size = New System.Drawing.Size(81, 22)
         Me.NewPonyButton.Text = "New Pony"
         Me.NewPonyButton.ToolTipText = "Create a new pony."
         '
         'PreviewButton
         '
         Me.PreviewButton.Enabled = False
+        Me.PreviewButton.Image = Global.DesktopPonies.My.Resources.Resources.IconPreview
+        Me.PreviewButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.PreviewButton.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.PreviewButton.Name = "PreviewButton"
-        Me.PreviewButton.Size = New System.Drawing.Size(52, 22)
+        Me.PreviewButton.Size = New System.Drawing.Size(68, 22)
         Me.PreviewButton.Text = "Preview"
         Me.PreviewButton.ToolTipText = "Preview pony."
         '
@@ -152,32 +156,42 @@ Partial Class PonyEditorForm2
         '
         Me.NewItemButton.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewBehaviorMenuItem, Me.NewEffectMenuItem, Me.NewInteractionMenuItem, Me.NewSpeechMenuItem})
         Me.NewItemButton.Enabled = False
+        Me.NewItemButton.Image = Global.DesktopPonies.My.Resources.Resources.IconNew
+        Me.NewItemButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewItemButton.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.NewItemButton.Name = "NewItemButton"
-        Me.NewItemButton.Size = New System.Drawing.Size(53, 22)
+        Me.NewItemButton.Size = New System.Drawing.Size(69, 22)
         Me.NewItemButton.Text = "New..."
         Me.NewItemButton.ToolTipText = "New..."
         '
         'NewBehaviorMenuItem
         '
+        Me.NewBehaviorMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconBehavior
+        Me.NewBehaviorMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewBehaviorMenuItem.Name = "NewBehaviorMenuItem"
         Me.NewBehaviorMenuItem.Size = New System.Drawing.Size(131, 22)
         Me.NewBehaviorMenuItem.Text = "Behavior"
         '
         'NewEffectMenuItem
         '
+        Me.NewEffectMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconEffect
+        Me.NewEffectMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewEffectMenuItem.Name = "NewEffectMenuItem"
         Me.NewEffectMenuItem.Size = New System.Drawing.Size(131, 22)
         Me.NewEffectMenuItem.Text = "Effect"
         '
         'NewInteractionMenuItem
         '
+        Me.NewInteractionMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconInteraction
+        Me.NewInteractionMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewInteractionMenuItem.Name = "NewInteractionMenuItem"
         Me.NewInteractionMenuItem.Size = New System.Drawing.Size(131, 22)
         Me.NewInteractionMenuItem.Text = "Interaction"
         '
         'NewSpeechMenuItem
         '
+        Me.NewSpeechMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconSpeech
+        Me.NewSpeechMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.NewSpeechMenuItem.Name = "NewSpeechMenuItem"
         Me.NewSpeechMenuItem.Size = New System.Drawing.Size(131, 22)
         Me.NewSpeechMenuItem.Text = "Speech"
@@ -186,39 +200,51 @@ Partial Class PonyEditorForm2
         '
         Me.ItemsButton.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DetailsMenuItem, Me.BehaviorsMenuItem, Me.EffectsMenuItem, Me.InteractionsMenuItem, Me.SpeechesMenuItem})
         Me.ItemsButton.Enabled = False
+        Me.ItemsButton.Image = Global.DesktopPonies.My.Resources.Resources.IconView
+        Me.ItemsButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.ItemsButton.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.ItemsButton.Name = "ItemsButton"
-        Me.ItemsButton.Size = New System.Drawing.Size(54, 22)
+        Me.ItemsButton.Size = New System.Drawing.Size(70, 22)
         Me.ItemsButton.Text = "View..."
         '
         'DetailsMenuItem
         '
+        Me.DetailsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconDetails
+        Me.DetailsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.DetailsMenuItem.Name = "DetailsMenuItem"
-        Me.DetailsMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.DetailsMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.DetailsMenuItem.Text = "Details"
         '
         'BehaviorsMenuItem
         '
+        Me.BehaviorsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconBehavior
+        Me.BehaviorsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.BehaviorsMenuItem.Name = "BehaviorsMenuItem"
-        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.BehaviorsMenuItem.Text = "Behaviors"
         '
         'EffectsMenuItem
         '
+        Me.EffectsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconEffect
+        Me.EffectsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.EffectsMenuItem.Name = "EffectsMenuItem"
-        Me.EffectsMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.EffectsMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.EffectsMenuItem.Text = "Effects"
         '
         'InteractionsMenuItem
         '
+        Me.InteractionsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconInteraction
+        Me.InteractionsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.InteractionsMenuItem.Name = "InteractionsMenuItem"
-        Me.InteractionsMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.InteractionsMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.InteractionsMenuItem.Text = "Interactions"
         '
         'SpeechesMenuItem
         '
+        Me.SpeechesMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconSpeech
+        Me.SpeechesMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.SpeechesMenuItem.Name = "SpeechesMenuItem"
-        Me.SpeechesMenuItem.Size = New System.Drawing.Size(136, 22)
+        Me.SpeechesMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.SpeechesMenuItem.Text = "Speeches"
         '
         'PonyItemSeparator
@@ -229,24 +255,30 @@ Partial Class PonyEditorForm2
         'SaveItemButton
         '
         Me.SaveItemButton.Enabled = False
+        Me.SaveItemButton.Image = Global.DesktopPonies.My.Resources.Resources.IconSave
+        Me.SaveItemButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.SaveItemButton.Name = "SaveItemButton"
-        Me.SaveItemButton.Size = New System.Drawing.Size(62, 22)
+        Me.SaveItemButton.Size = New System.Drawing.Size(78, 22)
         Me.SaveItemButton.Text = "Save Item"
         Me.SaveItemButton.ToolTipText = "Save item."
         '
         'CloseTabButton
         '
         Me.CloseTabButton.Enabled = False
+        Me.CloseTabButton.Image = Global.DesktopPonies.My.Resources.Resources.IconClose
+        Me.CloseTabButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.CloseTabButton.Name = "CloseTabButton"
-        Me.CloseTabButton.Size = New System.Drawing.Size(63, 22)
+        Me.CloseTabButton.Size = New System.Drawing.Size(79, 22)
         Me.CloseTabButton.Text = "Close Tab"
         Me.CloseTabButton.ToolTipText = "Close the currently visible tab."
         '
         'CloseAllTabsButton
         '
         Me.CloseAllTabsButton.Enabled = False
+        Me.CloseAllTabsButton.Image = Global.DesktopPonies.My.Resources.Resources.IconCloseAll
+        Me.CloseAllTabsButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.CloseAllTabsButton.Name = "CloseAllTabsButton"
-        Me.CloseAllTabsButton.Size = New System.Drawing.Size(85, 22)
+        Me.CloseAllTabsButton.Size = New System.Drawing.Size(101, 22)
         Me.CloseAllTabsButton.Text = "Close All Tabs"
         Me.CloseAllTabsButton.ToolTipText = "Close all open tabs."
         '
@@ -391,40 +423,46 @@ Partial Class PonyEditorForm2
         '
         Me.PonyNodeContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PreviewContextMenuItem, Me.DetailsContextMenuItem, Me.BehaviorsContextMenuItem, Me.EffectsContextMenuItem, Me.InteractionsContextMenuItem, Me.SpeechesContextMenuItem})
         Me.PonyNodeContextMenu.Name = "PonyNodeContextMenu"
-        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 136)
+        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 158)
         '
         'PreviewContextMenuItem
         '
+        Me.PreviewContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconPreview
         Me.PreviewContextMenuItem.Name = "PreviewContextMenuItem"
         Me.PreviewContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.PreviewContextMenuItem.Text = "Preview Pony"
         '
         'DetailsContextMenuItem
         '
+        Me.DetailsContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconDetails
         Me.DetailsContextMenuItem.Name = "DetailsContextMenuItem"
         Me.DetailsContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.DetailsContextMenuItem.Text = "View Details"
         '
         'BehaviorsContextMenuItem
         '
+        Me.BehaviorsContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconBehavior
         Me.BehaviorsContextMenuItem.Name = "BehaviorsContextMenuItem"
         Me.BehaviorsContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.BehaviorsContextMenuItem.Text = "View Behaviors"
         '
         'EffectsContextMenuItem
         '
+        Me.EffectsContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconEffect
         Me.EffectsContextMenuItem.Name = "EffectsContextMenuItem"
         Me.EffectsContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.EffectsContextMenuItem.Text = "View Effects"
         '
         'InteractionsContextMenuItem
         '
+        Me.InteractionsContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconInteraction
         Me.InteractionsContextMenuItem.Name = "InteractionsContextMenuItem"
         Me.InteractionsContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.InteractionsContextMenuItem.Text = "View Interactions"
         '
         'SpeechesContextMenuItem
         '
+        Me.SpeechesContextMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconSpeech
         Me.SpeechesContextMenuItem.Name = "SpeechesContextMenuItem"
         Me.SpeechesContextMenuItem.Size = New System.Drawing.Size(164, 22)
         Me.SpeechesContextMenuItem.Text = "View Speeches"

@@ -1478,7 +1478,7 @@ Public Class PonyEditor
         HidePony()
         ImagesContextMenu.Hide()
         If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
-            Using form = New ImageCentersForm(Me)
+            Using form = New ImageCentersForm(PreviewPony.Base)
                 form.ShowDialog(Me)
             End Using
             hasSaved = False
