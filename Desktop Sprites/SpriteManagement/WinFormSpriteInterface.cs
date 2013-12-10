@@ -1357,7 +1357,7 @@
 
                 // When rendering a large number of sprites, we will use multiple threads to improve the frame rate. When the number of
                 // sprites is small we will render using only a single thread to reduce CPU by eliminating parallelization overhead.
-                const int ParallelBlendingThreshold = 100;
+                const int ParallelBlendingThreshold = 75;
                 // Draw all the sprites.
                 foreach (ISprite sprite in sprites)
                 {
