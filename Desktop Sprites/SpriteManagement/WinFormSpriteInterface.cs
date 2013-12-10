@@ -410,7 +410,7 @@
 
         #region ImageData and ImageFrame classes
         /// <summary>
-        /// Contains either an image stored as a GDI+ bitmap, or as a 8bbp indexed array and color palette.
+        /// Contains either an image stored as a GDI+ bitmap, or as an indexed array and color palette.
         /// </summary>
         private sealed class ImageData : Disposable
         {
