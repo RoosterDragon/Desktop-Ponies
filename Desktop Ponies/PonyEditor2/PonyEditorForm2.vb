@@ -282,12 +282,12 @@ Public Class PonyEditorForm2
                 If initialValidationIndex <> validationIndex Then Exit For
                 ValidateBase(base)
             Next
-            worker.WaitOnAllTasks()
             worker.QueueTask(Sub()
                                  Dim node = FindNode(New PageRef().ToString())
                                  node.ImageIndex = ValidationOkIndex
                                  node.SelectedImageIndex = ValidationOkIndex
                              End Sub)
+            worker.WaitOnAllTasks()
         End SyncLock
     End Sub
 
@@ -824,6 +824,15 @@ Public Class PonyEditorForm2
         For Each t In Documents.TabPages.Cast(Of TabPage)().ToArray()
             QueueWorkItem(Sub() RemoveTab(t))
         Next
+    End Sub
+
+    Private Sub UnusedFilesButton_Click(sender As Object, e As EventArgs) Handles UnusedFilesButton.Click
+        preview.ShowDialogOverPreview(
+            Function()
+                Using form As New UnusedFilesForm(ponies)
+                    Return form.ShowDialog(Me)
+                End Using
+            End Function)
     End Sub
 
     Private Sub ReloadButton_Click(sender As Object, e As EventArgs) Handles ReloadButton.Click

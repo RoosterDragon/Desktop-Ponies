@@ -45,6 +45,7 @@ Partial Class PonyEditorForm2
         Me.CloseTabButton = New System.Windows.Forms.ToolStripButton()
         Me.CloseAllTabsButton = New System.Windows.Forms.ToolStripButton()
         Me.ItemPreviewSeperator = New System.Windows.Forms.ToolStripSeparator()
+        Me.UnusedFilesButton = New System.Windows.Forms.ToolStripButton()
         Me.ReloadButton = New System.Windows.Forms.ToolStripButton()
         Me.PreviewRestartButton = New System.Windows.Forms.ToolStripButton()
         Me.EditorStatusStrip = New System.Windows.Forms.StatusStrip()
@@ -124,7 +125,7 @@ Partial Class PonyEditorForm2
         'EditorToolStrip
         '
         Me.EditorToolStrip.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.ReloadButton, Me.PreviewRestartButton})
+        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.UnusedFilesButton, Me.ReloadButton, Me.PreviewRestartButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
         Me.EditorToolStrip.Size = New System.Drawing.Size(984, 25)
@@ -212,7 +213,7 @@ Partial Class PonyEditorForm2
         Me.DetailsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconDetails
         Me.DetailsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.DetailsMenuItem.Name = "DetailsMenuItem"
-        Me.DetailsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.DetailsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.DetailsMenuItem.Text = "Details"
         '
         'BehaviorsMenuItem
@@ -220,7 +221,7 @@ Partial Class PonyEditorForm2
         Me.BehaviorsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconBehavior
         Me.BehaviorsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.BehaviorsMenuItem.Name = "BehaviorsMenuItem"
-        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.BehaviorsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.BehaviorsMenuItem.Text = "Behaviors"
         '
         'EffectsMenuItem
@@ -228,7 +229,7 @@ Partial Class PonyEditorForm2
         Me.EffectsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconEffect
         Me.EffectsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.EffectsMenuItem.Name = "EffectsMenuItem"
-        Me.EffectsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.EffectsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.EffectsMenuItem.Text = "Effects"
         '
         'InteractionsMenuItem
@@ -236,7 +237,7 @@ Partial Class PonyEditorForm2
         Me.InteractionsMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconInteraction
         Me.InteractionsMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.InteractionsMenuItem.Name = "InteractionsMenuItem"
-        Me.InteractionsMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.InteractionsMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.InteractionsMenuItem.Text = "Interactions"
         '
         'SpeechesMenuItem
@@ -244,7 +245,7 @@ Partial Class PonyEditorForm2
         Me.SpeechesMenuItem.Image = Global.DesktopPonies.My.Resources.Resources.IconSpeech
         Me.SpeechesMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.SpeechesMenuItem.Name = "SpeechesMenuItem"
-        Me.SpeechesMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.SpeechesMenuItem.Size = New System.Drawing.Size(136, 22)
         Me.SpeechesMenuItem.Text = "Speeches"
         '
         'PonyItemSeparator
@@ -286,6 +287,14 @@ Partial Class PonyEditorForm2
         '
         Me.ItemPreviewSeperator.Name = "ItemPreviewSeperator"
         Me.ItemPreviewSeperator.Size = New System.Drawing.Size(6, 25)
+        '
+        'UnusedFilesButton
+        '
+        Me.UnusedFilesButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.UnusedFilesButton.Name = "UnusedFilesButton"
+        Me.UnusedFilesButton.Size = New System.Drawing.Size(77, 22)
+        Me.UnusedFilesButton.Text = "Unused Files"
+        Me.UnusedFilesButton.ToolTipText = "Find image and sound files that are not used by any behavior, effect or speech."
         '
         'ReloadButton
         '
@@ -423,7 +432,7 @@ Partial Class PonyEditorForm2
         '
         Me.PonyNodeContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PreviewContextMenuItem, Me.DetailsContextMenuItem, Me.BehaviorsContextMenuItem, Me.EffectsContextMenuItem, Me.InteractionsContextMenuItem, Me.SpeechesContextMenuItem})
         Me.PonyNodeContextMenu.Name = "PonyNodeContextMenu"
-        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 158)
+        Me.PonyNodeContextMenu.Size = New System.Drawing.Size(165, 136)
         '
         'PreviewContextMenuItem
         '
@@ -557,4 +566,5 @@ Partial Class PonyEditorForm2
     Friend WithEvents colFallback As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents ActiveFormPollingTimer As System.Windows.Forms.Timer
+    Friend WithEvents UnusedFilesButton As System.Windows.Forms.ToolStripButton
 End Class

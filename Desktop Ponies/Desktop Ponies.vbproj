@@ -277,6 +277,12 @@
     <Compile Include="PonyEditor2\SpeechesViewer.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="PonyEditor2\UnusedFilesForm.Designer.vb">
+      <DependentUpon>UnusedFilesForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PonyEditor2\UnusedFilesForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PonyEditor\EditorPonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonySelectionControl.Designer.vb">
       <DependentUpon>PonySelectionControl.vb</DependentUpon>
@@ -500,6 +506,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\SpeechesViewer.resx">
       <DependentUpon>SpeechesViewer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PonyEditor2\UnusedFilesForm.resx">
+      <DependentUpon>UnusedFilesForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor\GifRuntimeDialog.resx">
       <DependentUpon>GifRuntimeDialog.vb</DependentUpon>
