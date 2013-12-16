@@ -83,6 +83,13 @@ Change Log
 
 Latest changes:
 
+v1.42.5:
+- Added Princess Twilight Sparkle starburst animation by Bot-chan.
+- Changed a couple of pony configs to utilise some images that weren't actually being used.
+- Fix a regression where the transparent regions of effects sometimes allowed them to be dragged, even if a pony should have been preferred.
+- Memory usage on Windows has been reduced significantly.
+- Rendering speed on Windows has been improved for large numbers of sprites, and when a scale factor is set.
+
 v1.42.4:
 - Change most of Fluttershy's speeches to be in group 0, so she will talk more often.
 - Rendering speed on Windows has been significantly improved, allowing more ponies for less CPU.
