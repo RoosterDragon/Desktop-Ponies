@@ -1471,6 +1471,9 @@
         /// <param name="sectionCount">The number of scanline sections.</param>
         private unsafe void AlphaBlend(ImageData image, Rectangle area, int section, int sectionCount)
         {
+            if (area.Width <= 0 || area.Height <= 0)
+                return;
+
             // Check if we can use the non-scaling methods for a performance boost.
             // Note the code duplication in these methods is required: they are on the hot path and we need to avoid function call
             // overhead. The methods are too long for the jitter to consider inlining them, so this is done manually.
