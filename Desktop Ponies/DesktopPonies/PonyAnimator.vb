@@ -113,10 +113,6 @@ Public Class PonyAnimator
         For Each pony In currentPonies
             pony.InitializeInteractions(currentPonies)
         Next
-        Dim currentPonies2 = Sprites.OfType(Of Pony2)()
-        For Each pony In currentPonies2
-            pony.InitializeInteractions(currentPonies2)
-        Next
     End Sub
 
     Public Overrides Sub Start()

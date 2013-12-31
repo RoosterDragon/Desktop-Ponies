@@ -165,7 +165,7 @@ Friend Class MainWindow
                                               Invoke(Sub() progressBar.Fraction = imagesLoadedCount / images.Count)
                                           End Sub)
 
-                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies, New PonyContext())
+                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies)
                 AddHandler animator.AnimationFinished, Sub()
                                                            If animator.ExitRequested = ExitRequest.ExitApplication Then
                                                                Gtk.Application.Quit()

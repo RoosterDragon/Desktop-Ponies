@@ -832,10 +832,7 @@ Public Class MainForm
             ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
         End If
 
-        Dim context = New PonyContext() With {.Region = Options.GetCombinedScreenArea()}
-        Dim newPonies = startupPonies.Select(Function(p) New Pony2(context, p.Base))
-        'animator = New DesktopPonyAnimator(ponyViewer, newPonies, ponies, context)
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context)
+        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
         AddHandler animator.AnimationFinished, Sub()
                                                    Dim localAnimator = animator
                                                    SmartInvoke(Sub()
