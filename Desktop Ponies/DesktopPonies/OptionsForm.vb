@@ -184,7 +184,7 @@ Public Class OptionsForm
     End Sub
 
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
-        Options.PonyCounts = New Dictionary(Of String, Integer)()
+        Options.PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
 
         For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             ponyPanel.PonyCount.Text = "0"

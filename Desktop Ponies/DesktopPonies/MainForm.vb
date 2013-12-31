@@ -941,7 +941,7 @@ Public Class MainForm
             Integer.TryParse(ponyPanel.PonyCount.Text, count)
             newCounts.Add(ponyPanel.PonyBase.Directory, count)
         Next
-        Options.PonyCounts = newCounts
+        Options.PonyCounts = newCounts.AsReadOnly()
     End Sub
 
     ''' <summary>

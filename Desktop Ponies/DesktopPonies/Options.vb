@@ -47,7 +47,7 @@ Public NotInheritable Class Options
     Public Shared ExclusionZone As RectangleF
 
     Public Shared Screens As ImmutableArray(Of Screen)
-    Public Shared PonyCounts As Dictionary(Of String, Integer)
+    Public Shared PonyCounts As ReadOnlyDictionary(Of String, Integer)
     Public Shared CustomTags As ImmutableArray(Of CaseInsensitiveString)
 
     Public Shared EnablePonyLogs As Boolean
@@ -156,7 +156,7 @@ Public NotInheritable Class Options
                     End Select
                 End While
                 Screens = newScreens.ToImmutableArray()
-                PonyCounts = newCounts
+                PonyCounts = newCounts.AsReadOnly()
                 CustomTags = newTags.ToImmutableArray()
             End Using
         End If
@@ -176,7 +176,7 @@ Public NotInheritable Class Options
     Public Shared Sub LoadDefaultProfile()
         ProfileName = DefaultProfileName
         Screens = {Screen.PrimaryScreen}.ToImmutableArray()
-        PonyCounts = New Dictionary(Of String, Integer)()
+        PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
         CustomTags = New CaseInsensitiveString() {}.ToImmutableArray()
 
         SuspendForFullscreenApplication = True
@@ -304,7 +304,7 @@ Public NotInheritable Class Options
         For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
             newCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
         Next
-        PonyCounts = newCounts
+        PonyCounts = newCounts.AsReadOnly()
     End Sub
 
     Public Shared Function GetCombinedScreenArea() As Rectangle

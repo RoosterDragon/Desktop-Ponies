@@ -102,6 +102,7 @@
     <Compile Include="Collections\ImmutableArray.cs" />
     <Compile Include="Collections\KeyValuePair.cs" />
     <Compile Include="Collections\ReadOnlyCollection.cs" />
+    <Compile Include="Collections\ReadOnlyDictionary.cs" />
     <Compile Include="Collections\ReadOnlyList.cs" />
     <Compile Include="Core\ControlExtensions.cs" />
     <Compile Include="Core\ExceptionDialog.cs">
