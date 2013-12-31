@@ -134,7 +134,7 @@
   <ItemGroup>
     <Compile Include="DesktopPonies\MainWindow.vb" />
     <Compile Include="Program.vb" />
-    <Compile Include="BufferedCheckedListBox.vb">
+    <Compile Include="Core\BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Monitoring\PonyLogForm.Designer.vb">
@@ -162,16 +162,16 @@
     <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
-    <Compile Include="EvilGlobals.vb" />
-    <Compile Include="IdleWorker.vb" />
-    <Compile Include="LinqSpecialized.vb" />
+    <Compile Include="DesktopPonies\EvilGlobals.vb" />
+    <Compile Include="Core\IdleWorker.vb" />
+    <Compile Include="DesktopPonies\LinqSpecialized.vb" />
     <Compile Include="My Project\Settings.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="DesktopPonies\Options.vb" />
-    <Compile Include="PathEquality.vb" />
+    <Compile Include="Core\PathEquality.vb" />
     <Compile Include="PonyEditor2\AnimatedImageViewer.Designer.vb">
       <DependentUpon>AnimatedImageViewer.vb</DependentUpon>
     </Compile>
@@ -307,7 +307,7 @@
     <Compile Include="Monitoring\SpriteDebugForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Win32.vb" />
+    <Compile Include="Interop\Win32.vb" />
     <Compile Include="DesktopPonies\HouseOptionsForm.Designer.vb">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
     </Compile>
@@ -339,8 +339,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="DesktopPonies\Pony.vb" />
-    <Compile Include="IniLineParser.vb" />
-    <Compile Include="KeyboardState.vb" />
+    <Compile Include="DesktopPonies\IniLineParser.vb" />
+    <Compile Include="Core\KeyboardState.vb" />
     <Compile Include="DesktopPonies\MainForm.vb">
       <SubType>Form</SubType>
     </Compile>

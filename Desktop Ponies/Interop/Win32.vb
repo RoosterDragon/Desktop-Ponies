@@ -1,6 +1,6 @@
 ﻿Imports System.Runtime.InteropServices
 
-Namespace Win32
+Namespace Interop.Win32
     Friend Structure POINT
         Public X As Integer
         Public Y As Integer

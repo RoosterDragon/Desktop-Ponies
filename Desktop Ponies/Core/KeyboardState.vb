@@ -7,7 +7,7 @@ Public Module KeyboardState
             Return False
         End If
 
-        Return HighBitSet(Win32.GetKeyState(CInt(key)))
+        Return HighBitSet(Interop.Win32.GetKeyState(CInt(key)))
     End Function
 
     Private Function HighBitSet(keyState As Short) As Boolean
