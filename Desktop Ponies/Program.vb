@@ -8,6 +8,7 @@ Public NotInheritable Class Program
     Public Shared Sub Main()
         AttachExceptionHandlers()
         Application.EnableVisualStyles()
+        Application.SetCompatibleTextRenderingDefault(False)
         If Not OperatingSystemInfo.IsMacOSX Then
             Application.Run(New MainForm())
         Else
