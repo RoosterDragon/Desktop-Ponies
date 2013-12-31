@@ -13,6 +13,12 @@ Public Class PonyCollection
             Return _randomBase
         End Get
     End Property
+    Private _houses As ImmutableArray(Of HouseBase)
+    Public ReadOnly Property Houses As ImmutableArray(Of HouseBase)
+        Get
+            Return _houses
+        End Get
+    End Property
     Private ReadOnly _interactionsGuard As New Object()
     Private ReadOnly _interactions As New Dictionary(Of String, List(Of InteractionBase))()
     Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(
@@ -23,7 +29,10 @@ Public Class PonyCollection
     End Sub
 
     Public Sub New(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
-        Threading.Tasks.Parallel.Invoke(Sub() LoadPonyBases(removeInvalidItems, countCallback, loadCallback), AddressOf LoadInteractions)
+        Threading.Tasks.Parallel.Invoke(
+            Sub() LoadPonyBases(removeInvalidItems, countCallback, loadCallback),
+            AddressOf LoadInteractions,
+            AddressOf LoadHouses)
     End Sub
 
     Private Sub LoadPonyBases(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
@@ -68,6 +77,23 @@ Public Class PonyCollection
                 End If
             Loop
         End Using
+    End Sub
+
+    Private Sub LoadHouses()
+        ' TODO: Hook up to count and load callbacks.
+        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
+        Dim houses As New Collections.Concurrent.ConcurrentBag(Of HouseBase)()
+        Threading.Tasks.Parallel.ForEach(
+            houseDirectories,
+            Sub(folder)
+                Try
+                    Dim base = New HouseBase(folder)
+                    houses.Add(base)
+                Catch ex As Exception
+                    ' Ignore errors from loading badly configured houses.
+                End Try
+            End Sub)
+        _houses = houses.OrderBy(Function(hb) hb.Name).ToImmutableArray()
     End Sub
 
     ''' <summary>

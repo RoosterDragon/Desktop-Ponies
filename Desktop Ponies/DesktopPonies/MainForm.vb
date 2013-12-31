@@ -9,7 +9,7 @@ Public Class MainForm
 #Region "Fields and Properties"
     Private initialized As Boolean
     Private loading As Boolean
-    Private loadWatch As New Diagnostics.Stopwatch()
+    Private ReadOnly loadWatch As New Diagnostics.Stopwatch()
     Private ReadOnly worker As New IdleWorker(Me)
 
     Private oldWindowState As FormWindowState
@@ -21,7 +21,6 @@ Public Class MainForm
     Private ponyViewer As ISpriteCollectionView
     Private ReadOnly startupPonies As New List(Of Pony)()
     Private ponies As PonyCollection
-    Friend ReadOnly HouseBases As New List(Of HouseBase)()
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
     Private preventLoadProfile As Boolean
@@ -194,13 +193,11 @@ Public Class MainForm
     End Function
 
     Private Sub LoadTemplates()
-        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
-
         ' Load ponies.
         ponies = New PonyCollection(
             True,
             Sub(count)
-                worker.QueueTask(Sub() LoadingProgressBar.Maximum = count + houseDirectories.Length)
+                worker.QueueTask(Sub() LoadingProgressBar.Maximum = count)
             End Sub,
             Sub(pony)
                 worker.QueueTask(Sub()
@@ -208,13 +205,6 @@ Public Class MainForm
                                      LoadingProgressBar.Value += 1
                                  End Sub)
             End Sub)
-
-        ' Load houses.
-        Dim skipLoadingErrors = False
-        For Each folder In houseDirectories
-            skipLoadingErrors = LoadHouse(folder, skipLoadingErrors)
-            worker.QueueTask(Sub() LoadingProgressBar.Value += 1)
-        Next
 
         ' Sort controls by name.
         worker.QueueTask(Sub()
@@ -268,7 +258,7 @@ Public Class MainForm
 
                                  PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
                                  PaginationEnabled.Enabled = True
-                                 PaginationEnabled.Checked = OperatingSystemInfo.IsMacOSX
+                                 PaginationEnabled.Checked = Not OperatingSystemInfo.IsWindows
 
                                  PonySelectionPanel.Enabled = True
                                  SelectionControlsPanel.Enabled = True
@@ -284,36 +274,6 @@ Public Class MainForm
                                                loadWatch.Elapsed.TotalSeconds, PonySelectionPanel.Controls.Count)
                          End Sub)
     End Sub
-
-    Private Function LoadHouse(folder As String, skipErrors As Boolean) As Boolean
-        Try
-            Dim base = New HouseBase(folder)
-            HouseBases.Add(base)
-            Return True
-        Catch ex As Exception
-            If Not skipErrors Then
-                Dim result As DialogResult
-                SmartInvoke(Sub() result =
-                                MessageBox.Show(Me,
-                                                "Error: Invalid data in " & HouseBase.ConfigFilename &
-                                                " configuration file in " & folder & ControlChars.NewLine &
-                                                "Won't load this house..." & ControlChars.NewLine &
-                                                "Do you want to skip seeing these errors? " &
-                                                "Press No to see the error for each house. " &
-                                                "Press cancel to quit.", "Invalid Configuration File",
-                                                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation))
-                Select Case result
-                    Case DialogResult.Yes
-                        Return True
-                    Case DialogResult.No
-                        'do nothing
-                    Case DialogResult.Cancel
-                        Me.Close()
-                End Select
-            End If
-            Return skipErrors
-        End Try
-    End Function
 
     Private Sub AddToMenu(ponyBase As PonyBase)
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
@@ -875,9 +835,6 @@ Public Class MainForm
                         images.Add(effect.RightImage.Path)
                     Next
                 Next
-            Next
-            For Each house In HouseBases
-                images.Add(house.LeftImage.Path)
             Next
 
             worker.QueueTask(Sub()

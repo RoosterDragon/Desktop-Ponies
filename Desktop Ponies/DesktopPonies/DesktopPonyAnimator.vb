@@ -356,12 +356,12 @@ Public Class DesktopPonyAnimator
     Private Function HouseSelectionList() As List(Of ISimpleContextMenuItem)
         Dim houseBaseList = New List(Of ISimpleContextMenuItem)
 
-        For Each loopHouseBase As HouseBase In EvilGlobals.Main.HouseBases
+        For Each loopHouseBase In PonyCollection.Houses
             Dim houseBase = loopHouseBase
-            houseBaseList.Add(New SimpleContextMenuItem(houseBase.Name, Sub(sender, e)
-                                                                            AddHouseSelection(houseBase)
-                                                                        End Sub))
+            houseBaseList.Add(New SimpleContextMenuItem(houseBase.Name, Sub() AddHouseSelection(houseBase)))
         Next
+
+        If houseBaseList.Count = 0 Then houseBaseList.Add(New SimpleContextMenuItem())
 
         Return houseBaseList
     End Function
