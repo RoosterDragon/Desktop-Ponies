@@ -157,7 +157,7 @@
                     End If
                 Catch ex As Exception
                     ponyThumbnail = Nothing
-                    My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & ponyBase.Directory)
+                    Program.NotifyUserOfNonFatalException(ex, "Failed to load image for pony " & ponyBase.Directory)
                 End Try
                 Return
             End If

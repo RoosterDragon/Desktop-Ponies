@@ -26,7 +26,7 @@ Public Class GameSelectionForm
             Try
                 games.Add(New Game(ponies, gameDirectory))
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
+                Program.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
             End Try
         Next
 

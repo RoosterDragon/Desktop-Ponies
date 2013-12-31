@@ -17,7 +17,7 @@ Public Class EditorPonyAnimator
     End Sub
 
     Public Sub CreateEditorMenu(base As PonyBase)
-        If base Is Nothing OrElse OperatingSystemInfo.IsMacOSX Then
+        If base Is Nothing Then
             editorMenu = Nothing
         Else
             Dim behaviorItems = base.Behaviors.Select(Function(b) New SimpleContextMenuItem(b.Name, Sub() editor.RunBehavior(b)))

@@ -151,18 +151,6 @@ Public Class PonySelectionControl
         If String.IsNullOrEmpty(PonyCount.Text) Then PonyCount.Text = "0"
     End Sub
 
-    Private Sub PonySelectionControl_VisibleChanged(sender As System.Object, e As System.EventArgs) Handles MyBase.VisibleChanged
-        ' Force child controls to match parent state on Mac.
-        If OperatingSystemInfo.IsMacOSX Then
-            For Each control As Control In Controls
-                control.Visible = Visible
-            Next
-            If PonyName.Text <> PonyBase.RandomDirectory Then
-                NoDuplicates.Visible = False
-            End If
-        End If
-    End Sub
-
     Protected Overrides Sub Dispose(disposing As Boolean)
         Try
             If disposing Then

@@ -38,7 +38,7 @@ Public Class MainForm
         selectionControlsFilteredVisible =
             PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
         Icon = My.Resources.Twilight
-        Text = "Desktop Ponies v" & My.MyApplication.GetAssemblyVersion().ToDisplayString()
+        Text = "Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString()
         initialized = True
         EvilGlobals.Main = Me
     End Sub
@@ -187,7 +187,7 @@ Public Class MainForm
                 End Select
             End If
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
+            Program.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
         End Try
         Return False
     End Function
@@ -283,7 +283,6 @@ Public Class MainForm
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
         End If
-        If OperatingSystemInfo.IsMacOSX Then ponySelection.Visible = False
 
         selectionControlFilter.Add(ponySelection, True)
         PonySelectionPanel.Controls.Add(ponySelection)
@@ -408,7 +407,7 @@ Public Class MainForm
                 End If
             End Using
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error loading games.")
+            Program.NotifyUserOfNonFatalException(ex, "Error loading games.")
 #If DEBUG Then
             Throw
 #End If
@@ -554,18 +553,7 @@ Public Class MainForm
             If makeVisible Then visibleCount += 1
             Dim visibleChanged = selectionControl.Visible <> makeVisible
             selectionControl.Visible = makeVisible
-            ' Force an update on Mac to try and get visibility change applied.
-            If OperatingSystemInfo.IsMacOSX AndAlso visibleChanged Then
-                selectionControl.Invalidate()
-                selectionControl.Update()
-            End If
         Next
-
-        ' Force an update on Mac to try and clear leftover graphics.
-        If OperatingSystemInfo.IsMacOSX Then
-            PonySelectionPanel.Invalidate()
-            PonySelectionPanel.Update()
-        End If
 
         PonySelectionPanel.ResumeLayout()
 
@@ -769,7 +757,7 @@ Public Class MainForm
             PonyStartup()
             LoadPoniesAsyncEnd(False)
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
             LoadPoniesAsyncEnd(True)
 #If DEBUG Then
             Throw

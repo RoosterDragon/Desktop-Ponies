@@ -8,11 +8,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7C08ADD7-DEC4-40C3-8BBD-27ACE4414BF7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>DesktopPonies.My.MyApplication</StartupObject>
+    <StartupObject>Sub Main</StartupObject>
     <RootNamespace>DesktopPonies</RootNamespace>
     <AssemblyName>Desktop Ponies</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <MyType>WindowsForms</MyType>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile>
@@ -94,6 +94,22 @@
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
+    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\GtkSharp\2.12\lib\gtk-sharp-2.0\atk-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\GtkSharp\2.12\lib\gtk-sharp-2.0\gdk-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\GtkSharp\2.12\lib\gtk-sharp-2.0\glib-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\GtkSharp\2.12\lib\gtk-sharp-2.0\gtk-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Windows\assembly\GAC\Microsoft.DirectX.AudioVideoPlayback\1.0.2902.0__31bf3856ad364e35\Microsoft.DirectX.AudioVideoPlayback.dll</HintPath>
@@ -116,7 +132,8 @@
     <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationEvents.vb" />
+    <Compile Include="DesktopPonies\MainWindow.vb" />
+    <Compile Include="Program.vb" />
     <Compile Include="BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
     </Compile>
@@ -127,12 +144,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DesktopPonies\CaseInsensitiveString.vb" />
-    <Compile Include="DesktopPonies\DesktopControlForm.Designer.vb">
-      <DependentUpon>DesktopControlForm.vb</DependentUpon>
-    </Compile>
-    <Compile Include="DesktopPonies\DesktopControlForm.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="DesktopPonies\GameTeamControl.Designer.vb">
       <DependentUpon>GameTeamControl.vb</DependentUpon>
     </Compile>
@@ -303,10 +314,6 @@
     <Compile Include="DesktopPonies\HouseOptionsForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="My Project\Application.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Application.myapp</DependentUpon>
-    </Compile>
     <Compile Include="DesktopPonies\ScreensaverBackgroundForm.Designer.vb">
       <DependentUpon>ScreensaverBackgroundForm.vb</DependentUpon>
     </Compile>
@@ -425,9 +432,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\HouseOptionsForm.resx">
       <DependentUpon>HouseOptionsForm.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DesktopPonies\DesktopControlForm.resx">
-      <DependentUpon>DesktopControlForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DesktopPonies\CommunityDialog.resx">
       <DependentUpon>CommunityDialog.vb</DependentUpon>
@@ -575,12 +579,6 @@
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="My Project\Application.myapp">
-      <Generator>MyApplicationCodeGenerator</Generator>
-      <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,7 @@ Public Class HouseOptionsForm
         Try
             houseImage = Image.FromFile(base.LeftImage.Path)
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Couldn't open the image file for the house.")
+            Program.NotifyUserOfNonFatalException(ex, "Couldn't open the image file for the house.")
             Exit Sub
         End Try
         DoorLocation_Label.Text = doorLocation.ToString()
@@ -198,7 +198,7 @@ Public Class HouseOptionsForm
             End Using
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Unable to save house file")
+            Program.NotifyUserOfNonFatalException(ex, "Unable to save house file")
             Exit Sub
         End Try
 

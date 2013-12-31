@@ -65,6 +65,10 @@ Public NotInheritable Class Options
         BackgroundImage
     End Enum
 
+    Shared Sub New()
+        LoadDefaultProfile()
+    End Sub
+
     Private Sub New()
     End Sub
 

@@ -32,7 +32,6 @@ Public Class Editor2PonyAnimator
     End Sub
 
     Public Sub ChangeEditorMenu(base As PonyBase)
-        If OperatingSystemInfo.IsMacOSX Then Return
         Dim behaviorItems = base.Behaviors.Select(
             Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.SmartInvoke(Sub() preview.RunBehavior(b))))
         If behaviorItems.Any() Then

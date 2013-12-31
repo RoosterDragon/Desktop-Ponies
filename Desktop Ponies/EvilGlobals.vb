@@ -95,7 +95,7 @@ Public NotInheritable Class EvilGlobals
                 writer.WriteLine(newPath)
             End Using
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Unable to save settings! Screensaver mode will not work.")
+            Program.NotifyUserOfNonFatalException(ex, "Unable to save settings! Screensaver mode will not work.")
             Return False
         End Try
         Return True

@@ -108,5 +108,22 @@
             Console.WriteLine(Buffer, bufferIndex, Buffer.Length - bufferIndex);
         }
 #endif
+
+        /// <summary>
+        /// Gets the file version of the calling assembly.
+        /// </summary>
+        /// <returns>The file version of the calling assembly.</returns>
+        /// <exception cref="T:System.NotSupportedException">The current assembly is a dynamic assembly, or was loaded from a byte array.
+        /// </exception>
+        public static Version GetAssemblyVersion()
+        {
+            var location = System.Reflection.Assembly.GetCallingAssembly().Location;
+            if (location == "")
+                throw new NotSupportedException("The calling assembly was loaded from a byte array.");
+            var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(location);
+            return new Version(
+                fileVersionInfo.FileMajorPart, fileVersionInfo.FileMinorPart,
+                fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
+        }
     }
 }

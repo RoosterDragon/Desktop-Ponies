@@ -89,7 +89,7 @@ Public Class PonyEditor
             Next
             PonyList.ResumeLayout()
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
             Me.Close()
         End Try
 
@@ -149,7 +149,7 @@ Public Class PonyEditor
             LoadPony()
             hasSaved = True
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
         End Try
     End Sub
 
@@ -371,7 +371,7 @@ Public Class PonyEditor
 
             editorAnimator.CreateEditorMenu(PreviewPony.Base)
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -523,7 +523,7 @@ Public Class PonyEditor
             End Select
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -558,7 +558,7 @@ Public Class PonyEditor
             End Select
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -582,7 +582,7 @@ Public Class PonyEditor
             End Select
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -616,7 +616,7 @@ Public Class PonyEditor
             End If
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
     End Sub
 
@@ -751,13 +751,13 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              BehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
             End Try
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -824,13 +824,13 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              EffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
             End Try
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -878,13 +878,13 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              SpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
             End Try
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -946,13 +946,13 @@ Public Class PonyEditor
                 End Select
 
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
+                Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              InteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
             End Try
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
+            Program.NotifyUserOfNonFatalException(ex, "Error altering pony parameters.")
         End Try
 
     End Sub
@@ -975,7 +975,7 @@ Public Class PonyEditor
                 infoGrid.Grid.Sort(infoGrid.SortColumn, ConvertSortOrder(infoGrid.SortOrder))
             Next
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error restoring sort order for grid.")
+            Program.NotifyUserOfNonFatalException(ex, "Error restoring sort order for grid.")
         End Try
     End Sub
 
@@ -1006,7 +1006,7 @@ Public Class PonyEditor
                 PausePonyButton.Text = "Pause Pony"
             End If
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to pause or resume animation.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to pause or resume animation.")
         End Try
 
     End Sub
@@ -1050,7 +1050,7 @@ Public Class PonyEditor
             End If
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new behavior. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error creating new behavior. The editor will now close.")
             Me.Close()
         End Try
 
@@ -1075,7 +1075,7 @@ Public Class PonyEditor
             LoadPonyInfo()
             hasSaved = False
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new speech. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error creating new speech. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1100,7 +1100,7 @@ Public Class PonyEditor
             LoadPonyInfo()
             hasSaved = False
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new effect, the editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error creating new effect, the editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1124,7 +1124,7 @@ Public Class PonyEditor
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new interaction. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error creating new interaction. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1162,7 +1162,7 @@ Public Class PonyEditor
                     End If
                     My.Computer.FileSystem.CopyFile(imagePath, desiredPath, True)
                 Catch ex As Exception
-                    My.Application.NotifyUserOfNonFatalException(
+                    Program.NotifyUserOfNonFatalException(
                         ex, "Couldn't copy the image file to the pony directory." &
                         " If you were trying to use the same image for left and right, you can safely ignore this message.")
                 End Try
@@ -1172,7 +1172,7 @@ Public Class PonyEditor
 
         Catch ex As Exception
 
-            My.Application.NotifyUserOfNonFatalException(ex, "Error loading image.")
+            Program.NotifyUserOfNonFatalException(ex, "Error loading image.")
             Return Nothing
 
         End Try
@@ -1258,7 +1258,7 @@ Public Class PonyEditor
             hasSaved = False
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error handling row deletion.")
+            Program.NotifyUserOfNonFatalException(ex, "Error handling row deletion.")
         End Try
 
     End Sub
@@ -1304,7 +1304,7 @@ Public Class PonyEditor
                             "Value will be reset.",
                             "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1339,7 +1339,7 @@ Public Class PonyEditor
 
             hasSaved = False
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error setting follow parameters. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error setting follow parameters. The editor will now close.")
             Me.Close()
         End Try
     End Sub
@@ -1389,7 +1389,7 @@ Public Class PonyEditor
             Me.Close()
 
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error creating new pony. The editor will now close.")
+            Program.NotifyUserOfNonFatalException(ex, "Error creating new pony. The editor will now close.")
             Me.Close()
         End Try
 
@@ -1410,7 +1410,7 @@ Public Class PonyEditor
                             "Invalid Characters", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return False
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "There was an unexpected error trying to save the pony.")
+            Program.NotifyUserOfNonFatalException(ex, "There was an unexpected error trying to save the pony.")
             Return False
         End Try
         hasSaved = True

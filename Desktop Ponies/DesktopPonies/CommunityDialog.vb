@@ -68,10 +68,10 @@
                         links As ImmutableArray(Of LinkInfo))
             Me.LatestVersion = latestVersion
             Me.LatestVersionUrl = latestVersionUrl
-            NewerVersionAvailable = latestVersion > My.MyApplication.GetAssemblyVersion()
+            NewerVersionAvailable = latestVersion > General.GetAssemblyVersion()
             Me.PatchFromVersion = patchFromVersion
             Me.LatestVersionPatchUrl = latestVersionPatchUrl
-            CanPatch = patchFromVersion IsNot Nothing AndAlso My.MyApplication.GetAssemblyVersion() >= patchFromVersion
+            CanPatch = patchFromVersion IsNot Nothing AndAlso General.GetAssemblyVersion() >= patchFromVersion
             Me.Links = links
         End Sub
     End Class

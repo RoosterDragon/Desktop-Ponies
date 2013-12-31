@@ -150,7 +150,7 @@ Public Class OptionsForm
             RefreshOptions()
             SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
-            My.Application.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
+            Program.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
         End Try
     End Sub
 
@@ -179,7 +179,7 @@ Public Class OptionsForm
             Options.SaveProfile(profile)
             MessageBox.Show(Me, "Profile '" & profile & "' saved.", "Profile Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to save this profile.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to save this profile.")
         End Try
     End Sub
 
@@ -328,7 +328,7 @@ Public Class OptionsForm
                     Try
                         Image.FromFile(dialog.FileName)
                     Catch ex As Exception
-                        My.Application.NotifyUserOfNonFatalException(ex, "Failed to load image: " & dialog.FileName)
+                        Program.NotifyUserOfNonFatalException(ex, "Failed to load image: " & dialog.FileName)
                         Exit Sub
                     End Try
 

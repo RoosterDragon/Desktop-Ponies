@@ -122,7 +122,7 @@ Public Class FileSelector
                         IO.File.Copy(dialog.FileName, destinationFilePath, overwrite)
                         copied = True
                     Catch ex As Exception
-                        My.Application.NotifyUserOfNonFatalException(
+                        Program.NotifyUserOfNonFatalException(
                             ex, "Could not copy file from '" & dialog.FileName & "' to '" & destinationFilePath & "'")
                     End Try
                     If copied Then
@@ -144,7 +144,7 @@ Public Class FileSelector
                 IO.File.Delete(fullPath)
                 deleted = True
             Catch ex As Exception
-                My.Application.NotifyUserOfNonFatalException(ex, "Could not delete file '" & fullPath & "'")
+                Program.NotifyUserOfNonFatalException(ex, "Could not delete file '" & fullPath & "'")
             End Try
             If deleted Then
                 ReinitializeFromCurrentDirectory()

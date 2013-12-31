@@ -74,7 +74,7 @@ Friend Class SpeechEditor
             SoundTimer.Start()
         Catch ex As Exception
             SoundPreviewLabel.Text = "Unable to play sound file."
-            My.Application.NotifyUserOfNonFatalException(ex, "Unable to play sound file.")
+            Program.NotifyUserOfNonFatalException(ex, "Unable to play sound file.")
         End Try
     End Sub
 

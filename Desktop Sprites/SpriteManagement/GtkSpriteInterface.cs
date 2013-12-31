@@ -962,6 +962,10 @@
         /// </summary>
         private readonly LinkedList<GtkContextMenu> contextMenus = new LinkedList<GtkContextMenu>();
         /// <summary>
+        /// Indicates if we started a new UI thread, otherwise we are borrowing the callers thread.
+        /// </summary>
+        private readonly bool dedicatedAppThread;
+        /// <summary>
         /// The thread running the application.
         /// </summary>
         private readonly Thread appThread;
@@ -1283,9 +1287,20 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> class.
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> class with a dedicated
+        /// thread.
         /// </summary>
         public GtkSpriteInterface()
+            : this(true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> class.
+        /// </summary>
+        /// <param name="startNewThread">If true, a new UI thread will be started and dedicated to drawing; otherwise it is assumed Gtk#
+        /// has been started on the current thread and that the interface may use that thread for drawing.</param>
+        public GtkSpriteInterface(bool startNewThread)
         {
             lock (drawSync)
             {
@@ -1311,9 +1326,17 @@
                     (b, p, tI, s, w, h, d, hC) => GtkFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
                     GtkFrame.AllowableBitDepths));
 
-            appThread = new Thread(ApplicationRun) { Name = "GtkSpriteInterface.ApplicationRun" };
-            appThread.SetApartmentState(ApartmentState.STA);
-            appThread.Start();
+            dedicatedAppThread = startNewThread;
+            if (dedicatedAppThread)
+            {
+                appThread = new Thread(ApplicationRun) { Name = "GtkSpriteInterface.ApplicationRun" };
+                appThread.SetApartmentState(ApartmentState.STA);
+                appThread.Start();
+            }
+            else
+            {
+                appThread = Thread.CurrentThread;
+            }
         }
 
         /// <summary>
@@ -1708,8 +1731,9 @@
                         foreach (GtkContextMenu menu in contextMenus)
                             menu.Destroy();
                     });
-                    
-                    Application.Quit();
+
+                    if (dedicatedAppThread)
+                        Application.Quit();
                     spriteWindows.Clear();
 
                     if (windowIcon != null)

@@ -2679,7 +2679,7 @@ Public Class Pony
 
         Catch ex As Exception
             Options.WindowAvoidanceEnabled = False
-            My.Application.NotifyUserOfNonFatalException(ex, "Error attempting to avoid windows. Window avoidance has been disabled.")
+            Program.NotifyUserOfNonFatalException(ex, "Error attempting to avoid windows. Window avoidance has been disabled.")
             Return False
         End Try
 
