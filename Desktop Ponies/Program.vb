@@ -7,9 +7,9 @@ Public NotInheritable Class Program
 
     Public Shared Sub Main()
         AttachExceptionHandlers()
-        Application.EnableVisualStyles()
-        Application.SetCompatibleTextRenderingDefault(False)
         If Not OperatingSystemInfo.IsMacOSX Then
+            Application.EnableVisualStyles()
+            Application.SetCompatibleTextRenderingDefault(False)
             Application.Run(New MainForm())
         Else
             Gtk.Application.Init()
@@ -44,7 +44,9 @@ Public NotInheritable Class Program
 
     Public Shared Sub NotifyUserOfNonFatalException(ex As Exception, message As String)
         LogErrorToConsole(ex, "WARNING: " & message)
-        ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString(), False)
+        If Not OperatingSystemInfo.IsMacOSX Then
+            ExceptionDialog.Show(ex, message, "Warning - Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString(), False)
+        End If
     End Sub
 
     Public Shared Sub NotifyUserOfFatalExceptionAndExit(ex As Exception)
@@ -58,23 +60,11 @@ Public NotInheritable Class Program
                 Console.WriteLine("An unexpected error occurred and Desktop Ponies must close. (An error file could not be generated)")
             End Try
 
-            Dim version = General.GetAssemblyVersion().ToDisplayString()
-            If TypeOf ex Is InvalidOperationException AndAlso
-                ex.InnerException IsNot Nothing AndAlso
-                TypeOf ex.InnerException Is ArgumentException AndAlso
-                ex.InnerException.Message = "The requested FontFamily could not be found [GDI+ status: FontFamilyNotFound]" AndAlso
-                OperatingSystemInfo.IsMacOSX Then
-                ' This is a known error with mono on Mac installations. The default fonts it attempts to find do not exist.
-                Dim message = "Your system lacks fonts required by Desktop Ponies." & Environment.NewLine &
-                    "You can get these fonts by downloading XQuartz from xquartz.macosforge.org" & Environment.NewLine &
-                    "The program will now exit."
-                Console.WriteLine(message)
-                MessageBox.Show(message, "Font Not Found - Desktop Ponies v" & version, MessageBoxButtons.OK, MessageBoxIcon.Error)
-            Else
+            If Not OperatingSystemInfo.IsMacOSX Then
                 ' Attempt to notify user of an unknown error.
                 ExceptionDialog.Show(ex, "An unexpected error occurred and Desktop Ponies must close." &
                                      " Please report this error so it can be fixed.",
-                                     "Unexpected Error - Desktop Ponies v" & version, True)
+                                     "Unexpected Error - Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString(), True)
             End If
         Catch
             ' The application is already in an unreliable state, we're just trying to exit as cleanly as possible now.
