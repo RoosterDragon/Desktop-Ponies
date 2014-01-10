@@ -1870,9 +1870,9 @@
             else
             {
                 // There is no backup index. This happens when the table was at size 256 and there were no duplicate colors.
-                throw new NotSupportedException(string.Format(CultureInfo.CurrentCulture,
+                throw new NotSupportedException(
                     "Attempted to decode an image using 256 RGB colors and transparency. " +
-                    "If transparency is required, this decoder only supports 255 RGB colors."));
+                    "If transparency is required, this decoder only supports 255 RGB colors.");
             }
         }
         /// <summary>

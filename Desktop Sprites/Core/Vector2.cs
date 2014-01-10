@@ -173,7 +173,7 @@
         /// <returns>A string representation of this vector.</returns>
         public override string ToString()
         {
-            return string.Format(System.Globalization.CultureInfo.CurrentCulture, "({0}, {1})", X, Y);
+            return string.Format("({0}, {1})", X, Y);
         }
         /// <summary>
         /// Tests whether the specified object is a vector structure and is equal to this vector.

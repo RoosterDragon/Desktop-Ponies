@@ -91,7 +91,7 @@ Friend Class SpeechEditor
     End Sub
 
     Private Sub UpdateSoundLabel(currentPosition As Double, duration As Double)
-        SoundPreviewLabel.Text = String.Format("{0:0.000} / {1:0.000}",
+        SoundPreviewLabel.Text = String.Format(Globalization.CultureInfo.CurrentCulture, "{0:0.000} / {1:0.000}",
                                                TimeSpan.FromSeconds(currentPosition).TotalSeconds,
                                                TimeSpan.FromSeconds(duration).TotalSeconds)
     End Sub
