@@ -95,17 +95,18 @@ Public Class PonyAnimator
 
     Private Sub ExpireSprite(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
-        If expireableSprite IsNot Nothing Then
-            RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
-            expireableSprite.Expire()
-        End If
+        If expireableSprite IsNot Nothing Then RemoveExpiredHandlerAndExpireSprite(expireableSprite)
     End Sub
 
     Private Sub ExpireSprites(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         For Each expireableSprite In e.Items.OfType(Of IExpireableSprite)()
-            RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
-            expireableSprite.Expire()
+            RemoveExpiredHandlerAndExpireSprite(expireableSprite)
         Next
+    End Sub
+
+    Private Sub RemoveExpiredHandlerAndExpireSprite(expireableSprite As IExpireableSprite)
+        RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        expireableSprite.Expire()
     End Sub
 
     Private Sub InitializeInteractions()
@@ -290,6 +291,9 @@ Public Class PonyAnimator
         RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
         RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
         RemoveHandler SpritesRemoved, AddressOf InvalidateInteractions
+        For Each expireableSprite In Sprites.OfType(Of IExpireableSprite)()
+            RemoveExpiredHandlerAndExpireSprite(expireableSprite)
+        Next
         MyBase.Finish()
     End Sub
 

@@ -77,7 +77,7 @@
             /// The <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/> that owns this
             /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.WinFormContextMenuItem"/>.
             /// </summary>
-            private WinFormSpriteInterface owner;
+            private readonly WinFormSpriteInterface owner;
             /// <summary>
             /// The wrapped <see cref="T:System.Windows.Forms.ToolStripMenuItem"/>.
             /// </summary>
@@ -199,6 +199,7 @@
                     {
                         owner.ApplicationInvoke(() =>
                         {
+                            RemoveQueuedClickHandler();
                             item.Dispose();
                             item = new ToolStripMenuItem();
                         });
@@ -253,8 +254,7 @@
                         throw new InvalidOperationException("Cannot set the activation method on this type of item.");
                     owner.ApplicationInvoke(() =>
                     {
-                        if (queuedActivatedMethod != null)
-                            item.Click -= queuedActivatedMethod;
+                        RemoveQueuedClickHandler();
 
                         activatedMethod = value;
                         queuedActivatedMethod = null;
@@ -271,6 +271,14 @@
             /// Gets the sub-items in an item that displays a new sub-menu of items.
             /// </summary>
             public IList<ISimpleContextMenuItem> SubItems { get; private set; }
+            /// <summary>
+            /// Removes the queued activated method handler from the item click event.
+            /// </summary>
+            private void RemoveQueuedClickHandler()
+            {
+                if (queuedActivatedMethod != null)
+                    item.Click -= queuedActivatedMethod;
+            }
 
             /// <summary>
             /// Releases all resources used by the
@@ -278,6 +286,8 @@
             /// </summary>
             public void Dispose()
             {
+                RemoveQueuedClickHandler();
+
                 if (item != null)
                     item.Dispose();
 
@@ -359,6 +369,13 @@
                 {
                     foreach (WinFormContextMenuItem item in Items)
                         item.Dispose();
+
+                    // An internal WinForms class, ToolStripScrollButton, is not disposed correctly when you dispose of the control and it
+                    // must then be finalized. Unfortunately this keeps the parent class alive which in turn keeps the whole interface
+                    // alive since we have a reference to it! This means all the cached images are kept around and absorb managed memory.
+                    // To rectify this, we will explicitly break our references so the finalizer thread isn't keeping stuff alive.
+                    owner = null;
+                    Items = null;
                 };
             }
 
@@ -1797,6 +1814,11 @@
             if (closing)
                 return;
             ApplicationInvoke(form.Close);
+            if (opened)
+            {
+                opened = false;
+                InterfaceClosed.Raise(this);
+            }
         }
 
         /// <summary>
@@ -1807,11 +1829,6 @@
         private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             closing = true;
-            if (opened)
-            {
-                opened = false;
-                ThreadPool.QueueUserWorkItem(o => InterfaceClosed.Raise(this));
-            }
         }
 
         /// <summary>

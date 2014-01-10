@@ -166,14 +166,19 @@ Friend Class MainWindow
                                           End Sub)
 
                 Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies)
-                AddHandler animator.AnimationFinished, Sub()
-                                                           If animator.ExitRequested = ExitRequest.ExitApplication Then
-                                                               Gtk.Application.Quit()
-                                                           Else
-                                                               Show()
-                                                               ponySelectionBox.Show()
-                                                           End If
-                                                       End Sub
+                AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
+                                                           Sub() Invoke(
+                                                               Sub()
+                                                                   EvilGlobals.CurrentViewer = Nothing
+                                                                   EvilGlobals.CurrentAnimator = Nothing
+                                                                   If animator.ExitRequested = ExitRequest.ExitApplication Then
+                                                                       Gtk.Application.Quit()
+                                                                   Else
+                                                                       Show()
+                                                                       ponySelectionBox.Show()
+                                                                       General.FullCollect()
+                                                                   End If
+                                                               End Sub))
 
                 EvilGlobals.CurrentViewer = viewer
                 EvilGlobals.CurrentAnimator = animator

@@ -833,17 +833,18 @@ Public Class MainForm
         End If
 
         animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
-        AddHandler animator.AnimationFinished, Sub()
-                                                   Dim localAnimator = animator
-                                                   SmartInvoke(Sub()
-                                                                   PonyShutdown()
-                                                                   If localAnimator.ExitRequested = ExitRequest.ExitApplication Then
-                                                                       Close()
-                                                                   Else
-                                                                       Show()
-                                                                   End If
-                                                               End Sub)
-                                               End Sub
+        AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
+                                                   Sub() SmartInvoke(
+                                                       Sub()
+                                                           Dim exitRequest = animator.ExitRequested
+                                                           PonyShutdown()
+                                                           If exitRequest = exitRequest.ExitApplication Then
+                                                               Close()
+                                                           Else
+                                                               Show()
+                                                               General.FullCollect()
+                                                           End If
+                                                       End Sub))
         EvilGlobals.CurrentViewer = ponyViewer
         EvilGlobals.CurrentAnimator = animator
     End Sub
@@ -923,6 +924,10 @@ Public Class MainForm
 
         If ponyViewer IsNot Nothing Then
             ponyViewer.Close()
+            If Object.ReferenceEquals(ponyViewer, EvilGlobals.CurrentViewer) Then
+                EvilGlobals.CurrentViewer = Nothing
+            End If
+            ponyViewer = Nothing
         End If
     End Sub
 
