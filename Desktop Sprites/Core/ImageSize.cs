@@ -33,8 +33,7 @@
             {
                 { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, DecodePng },
                 { new byte[] { 0xFF, 0xD8 }, DecodeJfif },
-                { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, DecodeGif },
-                { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, DecodeGif },
+                { new byte[] { 0x47, 0x49, 0x46 }, DecodeGif },
                 { new byte[] { 0x42, 0x4D }, DecodeBitmap },
             }.OrderBy(kvp => kvp.Key.Length).ToImmutableArray();
 
@@ -176,8 +175,13 @@
         /// </summary>
         /// <param name="binaryReader">The stream from which to read, which must already have advanced past the header.</param>
         /// <returns>The image dimensions for this GIF image.</returns>
+        /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         private static Size DecodeGif(BinaryReader binaryReader)
         {
+            if (!char.IsDigit(binaryReader.ReadChar()) ||
+                !char.IsDigit(binaryReader.ReadChar()) ||
+                !char.IsLetter(binaryReader.ReadChar()))
+                throw new ArgumentException("Invalid version in header.");
             return new Size(binaryReader.ReadInt16(), binaryReader.ReadInt16());
         }
 

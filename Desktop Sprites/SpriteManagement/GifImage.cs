@@ -1277,13 +1277,10 @@
                     string.Format(CultureInfo.CurrentCulture, "Invalid signature in header. Expected '{0}'. Read '{1}'.",
                     SignatureExpected, signature));
 
-            const string Version87a = "87a";
-            const string Version89a = "89a";
             string version = new string(reader.ReadCharsExact(3));
-            if (version != Version87a && version != Version89a)
+            if (!char.IsDigit(version, 0) || !char.IsDigit(version, 1) || !char.IsLetter(version, 2))
                 throw new InvalidDataException(
-                    string.Format(CultureInfo.CurrentCulture, "Invalid version in header. Expected '{0}' or '{1}'. Read '{2}'.",
-                    Version87a, Version89a, version));
+                    string.Format(CultureInfo.CurrentCulture, "Invalid version in header. Read '{0}'.", version));
         }
         /// <summary>
         /// Reads the logical screen section. This contains the logical screen descriptor and global color table.
