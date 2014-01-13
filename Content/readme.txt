@@ -1,25 +1,19 @@
 ﻿Desktop Ponies!
-Have little ponies running around your desktop aimlessly!  Might entertain you for a few minutes!
+Have little ponies running around your desktop aimlessly! Might entertain you for a few minutes!
 
-(not affiliated with Hasbro in any way, all of the art has been either created by others, or, in the case of the original Derpy images, from Derpy Delivery: http://www.hamalonesandwich.com/derpydelivery/#l  
-A lot of the animations have been done by Jay Wright)
-
-We have a new forum for things Desktop Pony related:
+We have a forum for things Desktop Pony related:
 http://desktopponies.bugs3.com/index.php
+If you have any trouble, you can ask for assistance in this sub-forum:
+http://desktopponies.bugs3.com/viewforum.php?f=8
 
 There are also threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
 http://www.ponychan.net/chan/collab/
 Latest threads at time of writing:
-Mane - http://www.ponychan.net/chan/collab/res/43172.html
+Mane - http://www.ponychan.net/chan/collab/res/45984.html
   OC - http://www.ponychan.net/chan/collab/res/43607.html
 
 The sprite artists maintain a community for their works on DeviantArt:
 http://desktop-pony-team.deviantart.com/
-
-The source code is available under the Creative Commons BY-NC-SA 3.0 license:
-http://creativecommons.org/licenses/by-nc-sa/3.0/
-The source itself is available from:
-https://github.com/RoosterDragon/Desktop-Ponies
 
 ---------------------------------------
 
@@ -40,10 +34,6 @@ Installation
     You will need mono version 3.2.1 or better.
     Choose the "Mono MRE Installer" from: http://www.go-mono.com/mono-downloads/download.html
     Once installed, you can run the "RunOnMac.command" file to launch the program.
-    (If the program immediately errors when you attempt to run it, you may be missing some required fonts.
-    Try installing XQuartz, and this should resolve your issue: http://xquartz.macosforge.org)
-    It is recommended to run "mozroots --import --ask-remove" from the command line to install default Mozilla web certificates,
-    which will allow the program to check online for updates.
 
 ---------------------------------------
 
@@ -57,7 +47,7 @@ Patches
 
 ---------------------------------------
 
-Screensaver
+Screensaver (Windows Only)
 
     The 'Desktop Ponies.scr' is a Windows screensaver file. You can preview it by double-clicking the icon.
     To install it as a Windows screensaver, right-click and choose "Install" from the context menu.
@@ -71,17 +61,20 @@ Screensaver
 
 ---------------------------------------
 
-1.42 Release Notes
-- v1.42 is the first version that works on Mac & Unix systems. The program should run decently, but it can be less stable than running on Windows.
-  Some features have been disabled on these systems where they are not supported or were causing problems.
-- Interactions files have changed since the previous version, and custom interactions may be broken. If you have errors, please post on the forums for assistance.
-- Some options available in previous versions are no longer supported, and thus you may notice them missing from the options menu.
-
----------------------------------------
-
 Change Log
 
 Latest changes:
+
+v1.43:
+- Added Ahuizotl, Mane-iac, Suri Polomare, Scootaloo fly animation, Spitfire's cutie mark,
+  animated idle image for Candy Mane and Dinky Hooves and an animated TARDIS by Bot-chan.
+- Added Apple Split, Babs Seed, Hayseed Turnip Truck and Jesús Pezuña by Anonycat.
+- Added Coco Pommel by StarStep.
+- Added Lightning Dust by Starly and Bot-chan.
+- Added Daring Do fly animation by Anonymous and StarStep.
+- Tweaks to Bon-Bon's color scheme and idle animation by Bot-chan.
+- Added a custom menu for Mac - to resolve issues where it was not possible to start ponies on this platform.
+- Fixed a divide by zero error on Windows.
 
 v1.42.5:
 - Added Princess Twilight Sparkle starburst animation by Bot-chan.
@@ -253,15 +246,15 @@ v1.42.0.1:
 - Fixed some screensaver issues.
 - Changed the main menu design in hopes of fixing some scrolling issues on the Mac platform.
 
-v1.42
-
+v1.42:
 - Added lots of new ponies from various artists.
 - Support for Mac/Unix systems.
 - Support for alpha blending.
 - Some UI improvements.
 - Slew of bug fixes.
 
-V1.42 TEST 2:
+
+V1.42 TEST 2
 
 (test 1)
 -Options for Minimum and Maximum # of spawn ponies added to houses.  (Note that these are per house TYPE, not per house spawned).
@@ -275,7 +268,8 @@ V1.42 TEST 2:
 You can also use the command line:  "autostart profilename" to load the 'profilename' profile.
 -The save button on the main screen now saves all settings, instead of just the # of ponies.
 
-V1.41 (Release - includes test version changes below):
+
+V1.41 (Release - includes test version changes below)
 
 -Applejack will put on her NMN costume less often.
 -Pinkie pie will put on her silly mask less often (it was set to 70% instead of 7%?)
@@ -285,6 +279,7 @@ V1.41 (Release - includes test version changes below):
 -The cancel button on the house options menu works now.
 -Flickering when a pony reached their destination has hopefully been reduced.
 -A rare crash caused by trying to draw() a negative frame # has been fixed.
+
 
 V1.41 TEST 3
 
@@ -322,6 +317,7 @@ Pony changes/updates:
 -Iron Will by StarStep
 -All of the PNG files have been re-saved with a program that I think will fix any remaining issues with them (randomly being displayed large).
 
+
 V1.41 TEST 2
 
 -It was sometimes not possible to right click or drag a pony with scaling.  Fixed.
@@ -332,6 +328,7 @@ V1.41 TEST 2
 -There is now a checkbox for "Don't Run Randomly" when creating a new behavior.
 -New option for effects and behaviors in the editor:  "Don't repeat animations".  Will force animations to stop on their last frame after one loop, regardless how a gif file is set up.
 -Mouseover speech is back.
+
 
 V1.41 TEST 1
 
@@ -345,12 +342,14 @@ Each "house" can have its own timer (default is 5 minutes) in which one of the f
 
 Each house can have its own list of ponies that are allowed to enter it (or leave from it).  For the moment, Trixie has MANY guests crashing at her place... since that's the only art I have for structures.
 
+
 V1.40 (official - includes test versions listed below)
 
 -Master and MareDoWell have had categories added.  Violet's 2nd "sit" behavior has been renamed so it is not a duplicate.
 -The Dr. Whooves from the show (original) has replaced the Dr.Who fan one
 
-V1.40 TEST 2:
+
+V1.40 TEST 2
 
 -Updated image handling and gif reading code from Rooster Dragon.  Result:  Less memory usage, among other things!
 -Missing "T" in title fixed
@@ -359,28 +358,28 @@ V1.40 TEST 2:
 -New option: Slowdown factor.  Slows the application (including animations) down by the amount specified.
 
 
-V1.40 TEST 1:
+V1.40 TEST 1
 
 -Angel, Rainbow Dash, and Winona had behavior durations that didn't make sense (Maximum larger than Minimum).  Fixed
 -Hoity Toity, 80's Cheerilee and Elsie all had invalid parameters in some of their behaviors for following.  Fixed.
 
 New and updated art:
 
-+Lily
-+Violet
-+Pinkie Pie summersault and Oink, Oink animations
-+Daring do
-+Mr Cake
-+Update to Mysterious Mare Do Well
-+Mjolna
-+Dr Woof's hourglass twirl
-+Rainbow beepbeep
-+Master
-+Spike's Moustache
-+Sleeping Rarity
-+Applejack’s Nightmare Night costume.
-+AJ lasso + pose animations
-+Derpy's "Just don't know what went wrong"
++Lily by Bot-chan
++Violet by Vulcan539
++Pinkie Pie summersault and Oink, Oink animations by DeathPony
++Daring do by Anonymous (Heh, fitting!)
++Mr Cake by Bot-Chan and Anonycat
++Update to Mysterious Mare Do Well by JavaNut
++Mjolna by Anonymous
++Dr Woof's hourglass twirl by Anonycat
++Rainbow beepbeep by Felix-0
++Master by Anonycat
++Spike's Moustache by Anonymous + Anonycat
++Sleeping Rarity by Miriam the Bat
++Applejack's Nightmare Night costume.
++AJ lasso + pose animations by Starstep and Bot-Chan
++Derpy's "Just don't know what went wrong" by The Coop
 
 -Those of you with very large screens (?) will no longer get overflow errors when clicking ponies.
 -The old behavior of hiding the pony when opening up other windows in the editor has been restored.
@@ -393,11 +392,12 @@ New and updated art:
 -Known issues:
 -XP users may see white/gray bars and other artifacts.
 -Some images may cause errors like "Caught an generic error in GDI+" in certain setups (XP Machines).
--PNG files are sometimes displayed much larger than they should be (gala dresses...).  Some of these images have been disabled for now.
+-PNG files are sometimes displayed much larger than they should be (gala dresses...). Some of these images have been disabled for now.
 
 TO DO List:
 
 - Pony "Houses"
+
 
 V1.39
 
@@ -443,8 +443,10 @@ Art updates:
 -Twilight image fixes by Bot-chan
 -Spike and the door, by Anonycat
 
+
 v1.38.1
 -Fixed a crash on startup for those who don't have DirectX installed.
+
 
 V1.38
 
@@ -506,9 +508,7 @@ Pony and art changes:
 
 -Discorded Twilight by StarStep
 
--Pipsqueak by StarStep 
-
-
+-Pipsqueak by StarStep
 
 
 V1.37
@@ -627,6 +627,7 @@ V1.35.1
 - Image centering did not work properly with scaling.  Fixed.
 
 - DeathPony provided a better-centered Pinkie Pie ini file.  Thanks.
+
 
 v1.35
 
@@ -770,6 +771,7 @@ Dinky by AnonyCat
 Spike replaced with new version by Anonymous
 Naked Trixie now has a delay of a few seconds between blinks.
 
+
 v1.31
 
 -All ponies in games will move at the same speed, instead of Rainbow dominating every match.
@@ -869,6 +871,7 @@ only kick once every two seconds!  Make it count!"
 	Ponies get stuck if the ball is on the outer edge of the screen - drag them around to fix
 	Full teams make for one big clump of ponies.
 
+
 v1.28
 
 -New RANDOM pony option!  A wild-card pony, "Random," has been added that will give you random ponies!  Works like any other in the selection menu.
@@ -892,6 +895,7 @@ Updated Art:
 -Photo finish has a better "Da Magics!" animation and also a running one. Thanks to Pony Noia
 -Soigne Folio (Photo finish minion) also has a new running animation, thanks to Pony Noia
 
+
 v1.27
 
 -Saving in the editor will no longer force an immediate reload and quit to the main menu. Instead, you can continue and the reload will occur when you close the editor yourself.
@@ -911,7 +915,6 @@ v1.27
 
 
 v1.26
-
 
 -Added an option to not display warnings regarding interactions.
 -Added an option to completely disable speech, including hover-over text.
@@ -952,6 +955,7 @@ Art additions and changes:
 -New interactions, thanks to Pseudo Hoof
 	Big Celesita/Nightmare Moon
 	Rainbow Dash/Gilda
+
 
 v1.25
 
@@ -1031,6 +1035,7 @@ v1.23
 
 -New feature - autostart command line.  "DesktopPonies.exe autostart" will automatically launch ponies with the settings in the INI file (or defaults if no settings are there).
 
+
 v1.22
 
 -Stella's walking animation had some non-transparent parts.  Fixed
@@ -1054,6 +1059,7 @@ New/updated ponies:
 -Candy Mane
 -Elsie as noted above
 -Stella as noted above
+
 
 v1.21
 
@@ -1081,7 +1087,6 @@ Updated art:
 Added sounds for Pinkie and Fluttershy, if you have them enabled
 
 
-
 V1.20
 
 Many bug fixes to the pony editor.
@@ -1089,7 +1094,7 @@ Many bug fixes to the pony editor.
 Updated art:  Gummy, Derpy!
 
 
-v1.19:
+v1.19
 
 +New feature:  Pony Editor Gui!
 
@@ -1110,7 +1115,6 @@ New features:
 -There is now an option to avoid other program windows.  Note that this is disabled by default; find it in the options menu.
 	*this may take quite a bit more CPU usage than other options*
 	*note that it doesn't work well with too many ponies on the screen - they end up overlapping and obscuring each other’s view of what windows are there*
-
 
 
 v1.17
@@ -1145,6 +1149,7 @@ v1.17
 
 Example:
 Pinkie_Lures_Parasprites, "Pinkie Pie", 0.05, default, {"ParaSprite", "Princess Celestia"}, all, {parasprite_follow_circle}
+
 
 v1.16 (skipped 1.15 to avoid confusion with a non-official version)
 
@@ -1209,6 +1214,7 @@ This should be fixed now as the save file won't use ANSI code pages by default, 
 + Updated Pinkie Pie!
 + Updated Rarity!
 
+
 v1.13
 
 -”Take Control” should now do a better job of selecting animations to play.
@@ -1262,6 +1268,7 @@ Effect, "Sonic Rainboom_left", RainBow_Dash_Left, Rainboom.gif, 5, 0, right,left
 Effect, "Rainbow Trail_left", dash_l, left_rainbow.gif, 2, 1, right, left, false
 Effect, "Rainbow Trail_left_follow", dash_l, left_rainbow_follow.png, 0, 0, right, left, true
 
+
 v1.10 -> v1.11
 
 - Ponies sometimes flicker when changing behaviors. - Fixed.
@@ -1274,53 +1281,19 @@ all at once all in one place.
 
 - Shortened durations for all ponies - it looks like everyone was mostly copying the initial Derpy file.  Do you really think Pinkie Pie can stand still for 15 seconds?  I don't.   This should also help with ponies ending up on screen edges.
 
-History:
 
-v1.01 -> v1.02
+v1.09 -> v1.10
 
-+Added "linked behaviors."  See Derpy's INI file for an example.
--Fixed the graphics for all ponies but twilight so they won't "float-walk" anymore
+v1.09 had a bug where ponies could not escape from a screen they should not have been on, or an ‘everfree forest zone’.  They would just spaz out.  Fixed now.
 
-v1.02 -> v1.03
 
--Fixed linked behaviors - only the first one would link (exit sub <> exit for, oops)
+v1.08 -> v1.09
 
-v1.03 -> v1.04
+-Misc typos in ALL of the pony.ini’s fixed
+-AJ had a backwards animation, fixed
+-AJ was galloping way too often (in my opinion), so toned her down a bit.
+-Ponies falling asleep at the corners of the screen - fixed  (separated and cleaned up code for cursor halting - it was a mess...)
 
-New features:
-
--That folder separator thingy that broke things for people crazy enough to run under linux+mono is fixed (i think, can't try it for myself...)
-+Cursor avoidance. Ponies will avoid running under the cursor, and stop still if you hover over them.
-+Monitor selection - if you have more than one monitor, you can select which ones ponies will go to, or all!
-+"The Everfree forest" - you can designate a no-pony-zone on your screen that ponies will never enter!
-
-...and, all of the ponies are added that i've seen until now!
-
-v1.04 -> v1.05
-
-A brony, ‘Velocity’ generously donated beautifying code for the UI!  ...and then I muddied it with the controls from v1.04...
-
-v.1.05 -> v1.06
-
-The horribleness of the last version should be reduced.
-I think the crashing was caused by SelectBehavior() being recursive, and people having bad luck (or too many ponies).
-
-v.1.06 -> v1.07:
-
-- mouse_over doesn't play gifs??!?!? - FIXED
-- now with 50% less pony talking by default
-- talking interrupts take_control - FIXED
-
-New options menu (you can even leave it open and change settings on the fly)!
-
-Has the following options you can change:
-- optional cursor avoidance - also improved.
-- cursor avoidance zone size
-- pony talk chance
-- max ponies
-- Pony dragging disable option
-
-Known bugs:  Settings options, then closing, and reopening the options menu through right-click resets settings to default.
 
 v1.07 -> v1.08
 
@@ -1338,13 +1311,54 @@ This file is automatically loaded (if present) on startup.
 
 Known issues:  Ponies sometimes get stuck in the corners of the screen under certain conditions.  Reason:  messy code.  Cleaning up now.
 
-v1.08 -> v1.09
 
--Misc typos in ALL of the pony.ini’s fixed
--AJ had a backwards animation, fixed
--AJ was galloping way too often (in my opinion), so toned her down a bit.
--Ponies falling asleep at the corners of the screen - fixed  (separated and cleaned up code for cursor halting - it was a mess...)
+v1.06 -> v1.07
 
-v1.09 -> v1.10
+- mouse_over doesn't play gifs??!?!? - FIXED
+- now with 50% less pony talking by default
+- talking interrupts take_control - FIXED
 
-v1.09 had a bug where ponies could not escape from a screen they should not have been on, or an ‘everfree forest zone’.  They would just spaz out.  Fixed now.
+New options menu (you can even leave it open and change settings on the fly)!
+
+Has the following options you can change:
+- optional cursor avoidance - also improved.
+- cursor avoidance zone size
+- pony talk chance
+- max ponies
+- Pony dragging disable option
+
+Known bugs:  Settings options, then closing, and reopening the options menu through right-click resets settings to default.
+
+
+v1.05 -> v1.06
+
+The horribleness of the last version should be reduced.
+I think the crashing was caused by SelectBehavior() being recursive, and people having bad luck (or too many ponies).
+
+
+v1.04 -> v1.05
+
+A brony, ‘Velocity’ generously donated beautifying code for the UI!  ...and then I muddied it with the controls from v1.04...
+
+
+v1.03 -> v1.04
+
+New features:
+
+-That folder separator thingy that broke things for people crazy enough to run under linux+mono is fixed (i think, can't try it for myself...)
++Cursor avoidance. Ponies will avoid running under the cursor, and stop still if you hover over them.
++Monitor selection - if you have more than one monitor, you can select which ones ponies will go to, or all!
++"The Everfree forest" - you can designate a no-pony-zone on your screen that ponies will never enter!
+
+...and, all of the ponies are added that i've seen until now!
+
+
+v1.02 -> v1.03
+
+-Fixed linked behaviors - only the first one would link (exit sub <> exit for, oops)
+
+
+v1.01 -> v1.02
+
++Added "linked behaviors."  See Derpy's INI file for an example.
+-Fixed the graphics for all ponies but twilight so they won't "float-walk" anymore

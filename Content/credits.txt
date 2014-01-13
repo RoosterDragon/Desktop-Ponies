@@ -1,0 +1,745 @@
+# Desktop Ponies Program Credits
+
+The source code for Desktop Ponies is available under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+
+You can access the source itself from the [GitHub repository](https://github.com/RoosterDragon/Desktop-Ponies).
+
+## Contributors
+* DesktopPonyGuy
+* RoosterDragon (Tom Roostan)
+
+# Desktop Ponies Art Credits
+
+Artwork included with this program is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](http://creativecommons.org/licenses/by-nc-sa/3.0/). This means you are allowed to share and alter the artwork, provided you give credit, do not use it for commercial purposes and release it under this same license.
+
+[My Little Pony: Friendship is Magic](http://wikipedia.org/wiki/My_Little_Pony:_Friendship_Is_Magic) and sound files taken from the show are © [Hasbro](http://www.hasbro.com/).
+
+## Templates
+
+Standing, trotting and flying templates provided by Jay Wright.
+Galloping and filly trotting templates provided by Pony Noia.
+
+[Template Files](http://dl.dropbox.com/u/35213087/Templates.zip)
+
+In this document, any images using these templates as a base implicitly includes the templates authors for those images, as listed above. If you are sharing or altering an image based on any of these templates, be sure to include these template authors.
+
+## Contributors
+
+### List of Contributors
+
+The following is an alphabetical list of contributors and known aliases.
+
+You may also be interested in the [deviantART group for Desktop Ponies](http://desktop-pony-team.deviantart.com/).
+
+* [Anonycat](http://anonycat.deviantart.com/)
+* [asluc96](http://asluc96.deviantart.com/)
+* [Asparagus](http://asparagusunited.deviantart.com/)
+* Azure Fang
+* [Blackfeathr](http://blackfeathr.deviantart.com/)
+* [Bot-chan](http://botchan-mlp.deviantart.com/)
+* [CANDYBAG](http://auraion.deviantart.com/)
+* [DeathPony (DeathPwny)](http://deathpwny.deviantart.com/)
+* DesktopPonyGuy
+* [Distoorted](http://distoorted.deviantart.com/)
+* Doctor Blade
+* DrZoin
+* [emeralddarkness](http://emeralddarkness.deviantart.com/)
+* [fanofetcetera](http://fanofetcetera.deviantart.com/)
+* [Felix-0](http://felix-0.deviantart.com/)
+* Gilgapony
+* [Glamador](http://glamador.deviantart.com/)
+* [Half-n-Half](http://sephurmcgoul.deviantart.com/)
+* [humle (steglad, the wizard)](http://steglad.deviantart.com/)
+* [InfinityDash](http://infinitydash.deviantart.com/)
+* [Jay Wright (monkeyjay)](http://monkeyjay.deviantart.com/)
+* JavaNut
+* [kjhf](http://kjhf.deviantart.com/)
+* [Klopp](http://klopp22.deviantart.com/)
+* [Loaded--Dice](http://loaded--dice.deviantart.com/)
+* Logan
+* [Midnyte (Miles000)](http://www.escapistmagazine.com/profiles/view/Miles000)
+* Miriam the Bat
+* oppl jok
+* Peter Kurucz (Fantos)
+* [Pony Noia](http://ponynoia.deviantart.com/)
+* [Ponyluver (AngelKat58, AngelKat34)](http://angelkat34.deviantart.com/)
+* [PsychoShutin](http://psychoshutin.deviantart.com/)
+* RainbowCrash
+* Rainbowdutch
+* [RJP!](http://rj-p.deviantart.com/)
+* RQK
+* SarkInABox
+* sidekick ponyguy
+* [Starly](http://starlyk.deviantart.com/)
+* [StarStep](http://starsteppony.deviantart.com/)
+* [SupaSpeedStrut](http://supaspeedstrut.deviantart.com/)
+* [supersaiyanmikito](http://supersaiyanmikito.deviantart.com/)
+* [The Coop](http://the-coop.deviantart.com/)
+* [Tyranico](http://tyranico.deviantart.com/)
+* [vulcan539 (james539)](http://james539.deviantart.com/)
+* Whimsy Morning
+* [Yamino](http://yamino.deviantart.com/)
+
+### Characters
+
+Contributors are broken down by character. If there was more than one contributor to a character, the images they created are listed against their name. If no images are listed, then all contributors contributed to each image.
+
+#### Ace
+* Bot-chan
+
+#### Ahuizotl
+* Bot-chan
+
+#### Allie Way
+* Bot-chan
+
+#### Aloe
+* Jay Wright
+
+#### Angel
+* DeathPony
+
+#### Apple Bloom
+* Pony Noia [All Other Images]
+* The Coop [Skip]
+
+#### Apple Bumpkin
+* Pony Noia
+
+#### Apple Fritter
+* vulcan539 [Sit, Sleep]
+* Anonymous [Stand, Trot]
+
+#### Apple Split
+* Anonycat
+
+#### Applejack
+* Jay Wright [Stand, Trotcycle]
+* RJP! [Gallop, Rear]
+* Bot-chan [Idle, Trot, Pose, Lasso]
+* StarStep [Gala, Sleep, Conga, Lasso2, Hurdle]
+* Anonycat [Truck]
+* DesktopPonyGuy [Apple]
+* PsychoShutin [Buck, Tree]
+
+#### Applejack (Filly)
+* SupaSpeedStrut
+
+#### Archer
+* vulcan539
+
+#### Babs Seed
+* Anonycat
+
+#### Beauty Brass
+* asluc96
+
+#### Berry Punch
+* CANDYBAG [StandOPPP, TrotOPPP, StandBerry, TrotBerry]
+* vulcan539 [SitOPPP]
+* Azure Fang [SitBerry, Sleep]
+* Bot-chan [Drink]
+
+#### Big Mac
+* Anonycat [Stand]
+* StarStep [Stand, Trot, Buck, Sleep]
+
+#### Big Macintosh
+* Bot-chan
+
+#### Blinkie Pie
+* Anonycat
+
+#### Blossomforth
+* fanofetcetera
+
+#### Blues
+* Anonycat [Stand, Walk]
+* StarStep [Sit, Sax, SaxPlay]
+
+#### Bon-Bon
+* Jay Wright [Idle, Walk]
+* Starly [Sleep]
+* Bot-chan [Idle]
+
+#### Boxxy Brown
+* Bot-chan
+
+#### Braeburn
+* Anonycat
+
+#### Caesar
+* Anonycat
+
+#### Candy Mane
+* Pony Noia [Idle, Trot]
+* Bot-chan [Idle]
+
+#### Caramel
+* Starly
+
+#### Carrot Top
+* CANDYBAG [Idle, Trot]
+* Pony Noia [All Other Images]
+
+#### Changeling
+* Bot-chan
+* (Refer to credits for each of the mane 6 for borrowed animations)
+
+#### Cheerilee
+* humle
+
+#### Cheerilee (80s)
+* humle
+
+#### Cherry Berry
+* fanofetcetera [Stand, Trot, Sit, Sleep]
+* CANDYBAG [Stand, Trot]
+* vulcan539 [Sit]
+* Azure Fang [Sleep]
+
+#### Cloud Kicker
+* Tyranico
+
+#### Cloudchaser
+* fanofetcetera
+
+#### Clyde Pie
+* Anonycat
+
+#### Coco Pommel
+* StarStep
+
+#### Colgate
+* RJP! [Stand, Walk, Stretch, Brush]
+* vulcan539 [Sit]
+* Anonymous [Sit]
+
+#### Daisy
+* Anonycat
+
+#### Daring Do
+* Anonymous [Stand, Trot, Fly]
+* StarStep [Fly]
+
+#### Davenport
+* Anonycat
+
+#### Derpy Hooves
+* RJP! [Stand, Walk, Sleep, Hover, Fly, Mail, Muffin]
+* vulcan539 [Sit]
+* Blackfeathr [Drag]
+* The Coop [Cloud, Sit]
+
+#### Diamond Mint
+* Starly [Stand, Trot]
+* StarStep [GalaTrot]
+
+#### Diamond Tiara
+* Anonycat [Stand, Trot, Scoff]
+* Bot-chan [Bump]
+
+#### Dinky Hooves
+* Anonycat [Idle, Trot]
+* Bot-chan [Idle]
+
+#### Discord
+* StarStep
+
+#### Doctor Whooves
+* Asparagus [Stand, Idle, Walk]
+* RJP! [Stand, Idle, Walk]
+* Anonycat [Tardis, Hourglass]
+* Bot-chan [Tardis]
+
+#### Doctor Whooves (Fan Character)
+* Doctor Blade [Stand, Idle, Walk, Fez]
+* Images modified from Doctor Whooves.
+
+#### Donny
+* Bot-chan
+
+#### Donut Joe
+* Bot-chan
+
+#### Dude
+* Bot-chan
+
+#### Elsie
+* Pony Noia
+
+#### Fancypants
+* Pony Noia
+
+#### Fiddlesticks
+* Bot-chan
+
+#### Fido
+* Pony Noia
+
+#### Filthy Rich
+* kjhf
+
+#### Flam
+* Bot-chan
+
+#### Flash Sentry
+* Bot-chan
+
+#### Fleur de lis
+* Pony Noia
+
+#### Flim
+* Bot-chan
+
+#### Flitter
+* fanofetcetera
+
+#### Fluttershy
+* Jay Wright [Stand, Trot, Fly]
+* humle [GalaStand, GalaTrot, GalaFly]
+* StarStep [Conga, GalaStand, Critter, Stare]
+* DeathPony [Mouseover, Drag]
+* Ponyluver [Sleep]
+* Asparagus [Sleep]
+* Half-n-Half [Gallop]
+
+#### Fluttershy (Filly)
+* PsychoShutin
+
+#### Fredrick Horeshoepin
+* vulcan539
+
+#### Gilda
+* Bot-chan
+
+#### Ginger Snap
+* Bot-chan
+
+#### Grace Manewitz
+* Pony Noia
+
+#### Granny Smith
+* Bot-chan
+
+#### Gummy
+* CANDYBAG [Stand, Walk, Bounce]
+* DeathPony [Dance]
+
+#### Gustave
+* Bot-chan
+
+#### Hayseed Turnip Truck
+* Anonycat
+
+#### Hoity-Toity
+* Pony Noia
+
+#### Horse Power
+* Bot-chan
+
+#### Horte Cuisine
+* Anonycat
+
+#### Inky Pie
+* Anonycat
+
+#### Iron Will
+* StarStep
+
+#### King Sombra
+* Bot-chan
+
+#### Lemon Hearts
+* fanofetcetera
+
+#### Lightning Bolt
+* Starly
+
+#### Lightning Dust
+* Starly [Idle]
+* Bot-chan [Trot, Fly]
+
+#### Lily
+* Bot-chan
+
+#### Little Strongheart
+* Pony Noia
+
+#### Lotus
+* Jay Wright
+
+#### Lyra
+* Starly [Stand, Walk, Sit, Sleep, Jump]
+* Anonymous [Stand, Walk]
+
+#### Mane-iac
+* Bot-chan
+
+#### Manticore
+* Bot-chan
+
+#### Master
+* Anonycat
+
+#### Mayor Mare
+* Anonycat
+
+#### Mjolna
+* Anonymous
+
+#### Mr Cake
+* Anonycat [Idle]
+* Bot-chan [Trot]
+
+#### Mrs Cake
+* Bot-chan
+
+#### Mrs Sparkle
+* supersaiyanmikito
+
+#### Ms Peachbottom
+* Loaded-Dice
+
+#### Mysterious Mare Do Well
+* JavaNut [Stand, Trot, Gallop, Fly]
+* DrZoin [FlyFast, Magic, Teleport]
+* Bot-chan [Gallop]
+
+#### Nightmare Moon
+* Yamino
+* Images modified from Princess Celestia.
+
+#### Nurse Redheart
+* Logan [Trot]
+* StarStep [Idle]
+
+#### Octavia
+* RJP!
+
+#### Opalescence
+* StarStep
+
+#### Owlowiscious
+* Bot-chan
+
+#### Parasprite
+* DesktopPonyGuy [Fly, Stay]
+* Gilgapony [Red, Yellow, Brown, Green]
+
+#### Jesús Pezuña
+* Anonycat
+
+#### Philomena
+* Pony Noia
+
+#### Photo Finish
+* Pony Noia
+
+#### Pinkamina Diane Pie
+* supersaiyanmikito [Stand, Trot]
+* Jay Wright [Stand, Trot]
+* Anonycat [Madame LaFlour, MrTurnip, Rocky, SirLintsALot]
+
+#### Pinkie Pie
+* Jay Wright [Stand, Trot, Bounce, Parade]
+* DeathPony [All Other Images]
+* sidekick ponyguy [Fly]
+* StarStep [Conga]
+
+#### Pinkie Pie (Filly)
+* PsychoShutin
+
+#### Pinkie Pie (Gala)
+* humle
+
+#### Pipsqueak
+* StarStep
+
+#### Pokey Pierce
+* Anonycat
+
+#### Pound Cake
+* Bot-chan
+
+#### Prince Blueblood
+* Bot-chan
+
+#### Princess Cadence
+* emeralddarkness [Stand]
+* Bot-chan [Walk, Flight]
+
+#### Princess Cadence (Teenager)
+* Klopp
+
+#### Princess Celestia
+* oppl jok [Stand, Walk, Fly]
+* StarStep [Scroll]
+* Bot-chan [Fly]
+
+#### Princess Celestia (Alternate Filly)
+* Asparagus
+
+#### Princess Celestia (Filly)
+* Asparagus
+
+#### Princess Luna
+* Bot-chan
+
+#### Princess Luna (Filly)
+* Asparagus
+
+#### Princess Luna (Season 1)
+* emeralddarkness [Stand, Walk, Fly, Sleep]
+* Distoorted [Jump]
+* RQK [Magic, Abacus]
+
+#### Princess Twilight Sparkle
+* Bot-chan [All Images]
+* Jay Wright [Stand, Trot]
+* Images modified from Twilight Sparkle.
+
+#### Pumpkin Cake
+* Bot-chan
+
+#### Queen Chrysalis
+* Bot-chan
+
+#### Rainbow Dash
+* Jay Wright [Stand, Trot, TrotWing, Hover, Fly, FlyZoom]
+* StarStep [Conga, Gala, Salute, Dash]
+* SarkInABox [Dash]
+* fanofetcetera [Motivate]
+* Bot-chan [Drag]
+* Felix-0 [Beep]
+* DrZoin [Dizzy]
+* supersaiyanmikito [Crysallized]
+* Pony Noia [Dino]
+* Anonymous [CloudSleep]
+
+#### Rainbow Dash (Filly)
+* PsychoShutin [Stand, Trot, Fly, FlyFast, FlySonic, FlyUp, Rainboom1, Rainboom3, RainboomTest]
+* Starly [Stand]
+* asluc96 [Leap]
+
+#### Rainbowshine
+* Bot-chan
+
+#### Raindrops
+* Starly [Stand, Walk, Fly, Hover]
+* Ponyluver [Sleep]
+* StarStep [Gala]
+
+#### Rarity
+* Jay Wright [Stand, Trot, Horn, Fly]
+* Anonymous [Fly]
+* StarStep [Conga, Ponder, Fashion]
+* Bot-chan [DramaCouch]
+* The Coop [Gala, Tantrum, Ponder, DramaCouch, Sleep]
+* Miriam the Bat [Sleep]
+
+#### Rarity (Filly)
+* RJP!
+
+#### Rarity’s Father
+* Bot-chan
+
+#### Rarity’s Mother
+* Bot-chan
+
+#### Raven
+* Bot-chan
+
+#### Roseluck
+* Anonymous
+
+#### Rover
+* Pony Noia
+
+#### Royal Guard
+* StarStep
+
+#### Royal Night Guard
+* Bot-chan
+
+#### Ruby Pinch
+* Azure Fang
+
+#### Rumble
+* fanofetcetera
+
+#### Sapphire Shores
+* Pony Noia
+
+#### Scootaloo
+* Midnyte [Stand, Walk, Scoot, Basket]
+* RainbowCrash [Stand]
+* The Coop [Skip]
+* Bot-chan [Fly]
+
+#### Screw Loose
+* Bot-chan
+
+#### Screwball
+* DeathPony
+
+#### Sea Swirl
+* Whimsy Morning [Stand, Walk, Stretch, Sit, NMN, Horn]
+* RJP! [Stand, Walk, Stretch]
+* vulcan539 [Sit]
+* Anonymous [Sit]
+
+#### Shadowbolt
+* Pony Noia [Stand, Run, Fly]
+* Glamador [Stand, Run, Fly]
+
+#### Sheriff Silverstar
+* Anonycat
+
+#### Shining Armour
+* emeralddarkness [Stand, Trot]
+* StarStep [Trot]
+* Images modified from Fancypants.
+
+#### Shoeshine
+* Bot-chan
+
+#### Shopkeeper
+* Bot-chan
+
+#### Silver Spoon
+* Anonycat
+
+#### Silverspeed
+* fanofetcetera
+
+#### Sindy
+* Pony Noia
+
+#### Sir Colton Vines
+* Anonycat
+
+#### Snails
+* Anonycat
+
+#### Snips
+* Anonycat
+
+#### Soarin’
+* StarStep [Idle, Trot, Fly]
+* Anonycat [Idle, Pie]
+
+#### Soigne Folio
+* Pony Noia
+
+#### Sparkler
+* vulcan539 [Stand, Walk, Jump, Sit, Sleep, Stand]
+* Images modified from Lyra.
+
+#### Spike
+* Peter Kurucz (Fantos) [Idle, Run]
+* Anonycat [MoustacheStand, Stand, Door]
+* StarStep [Float, Love]
+* Anonymous [MoustacheTwirl, MoustacheMagic, MoustacheReady, MoustacheWorking]
+
+#### Spitfire
+* Rainbowdutch [Stand, Trot, Fly, Goggles, SuitlessStand, SuitlessTrot, SuitlessFly]
+* Bot-chan [Smoke, Dash, SuitlessStand, SuitlessTrot, SuitlessFly]
+
+#### Spot
+* Pony Noia
+
+#### Stella
+* Pony Noia
+
+#### Steven Magnet
+* StarStep
+
+#### Sue Pie
+* Anonycat
+
+#### Sunset Shimmer
+* Bot-chan
+
+#### Suri Polomare
+* Bot-chan
+
+#### Surprise
+* DeathPony
+
+#### Sweetie Belle
+* Midnyte [Stand, Walk, Fly, Sit, Look]
+* The Coop [Skip]
+* Cantorlot [HappyJump]
+* StarStep [Scoot]
+
+#### Tank
+* Bot-chan
+
+#### Thunderlane
+* fanofetcetera
+
+#### Trixie
+* Yamino [Sit, Stand, TrixieFireworks, Walk]
+* humle [Fireworks]
+* Starly [NakedStand, NakedTrot]
+
+#### Twilight Sparkle
+* Jay Wright [Stand, Trot]
+* humle [Teleport]
+* Bot-chan [Rage, Owl]
+* StarStep [Conga, Discorded, Drag, Gala]
+* Anonycat [Balloon]
+* InfinityDash [Gallop]
+* supersaiyanmikito [Crystallized, Breakdown]
+* asluc96 [Windblown]
+* Pony Noia [Read, PartyHard]
+* Deathpony [Magic]
+
+#### Twilight Sparkle (Filly)
+* RJP!
+
+#### Twinkleshine
+* fanofetcetera
+
+#### Twist
+* Anonycat
+
+#### Uncle Orange
+* Anonycat
+
+#### Vinyl Scratch
+* Jay Wright
+
+#### Violet
+* vulcan539
+
+#### Walter
+* Bot-chan
+
+#### Wild Fire
+* Bot-chan
+
+#### Winona
+* DeathPony
+
+#### Zecora
+* sidekick ponyguy [Stand, Trot]
+* RJP! [Stand, Trot, Balance, Dig]
+
+### Houses
+
+#### HomeStead
+* StarStep
+
+#### Section 8
+* Half-n-Half
+
+#### SoCal
+* Half-n-Half
+
+#### Sugarcube Corner
+* StarStep
+
+#### Trixie's Stage
+* Anonycat
