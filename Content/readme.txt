@@ -71,6 +71,7 @@ v1.43:
 - Added Apple Split, Babs Seed, Hayseed Turnip Truck and Jesús Pezuña by Anonycat.
 - Added Coco Pommel by StarStep.
 - Added Lightning Dust by Starly and Bot-chan.
+- Added Grace Manewitz by Pony Noia.
 - Added Daring Do fly animation by Anonymous and StarStep.
 - Tweaks to Bon-Bon's color scheme and idle animation by Bot-chan.
 - Added a custom menu for Mac - to resolve issues where it was not possible to start ponies on this platform.
