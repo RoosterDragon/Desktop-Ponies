@@ -14,19 +14,6 @@
     public sealed class AnimatedImage<T> : Disposable where T : Frame
     {
         /// <summary>
-        /// The number of zero-length frames that were dropped.
-        /// </summary>
-        private static int framesDropped = 0;
-        /// <summary>
-        /// The number of duplicate frames that were dropped.
-        /// </summary>
-        private static int duplicatesDropped = 0;
-        /// <summary>
-        /// The number of unique frames saved.
-        /// </summary>
-        private static int framesSaved = 0;
-
-        /// <summary>
         /// Gets the path to the image file.
         /// </summary>
         public string FilePath { get; private set; }
@@ -68,11 +55,6 @@
         {
             get { return frameIndexes.Length; }
         }
-        /// <summary>
-        /// Gets a value indicating whether this animation contained frames that had a duration of zero. These are dropped from the final
-        /// animation and do not count towards the total number of frames.
-        /// </summary>
-        public bool HadZeroDurationFrames { get; private set; }
 
         /// <summary>
         /// If the image has a common frame duration, indicates the duration each frame is shown for, otherwise -1.
@@ -146,10 +128,6 @@
                     IDisposable disposable = gifImage.Frames[sourceFrame].Image as IDisposable;
                     if (disposable != null)
                         disposable.Dispose();
-                    System.Threading.Interlocked.Increment(ref framesDropped);
-                    HadZeroDurationFrames = true;
-                    Console.WriteLine(string.Format(System.Globalization.CultureInfo.CurrentCulture,
-                        "Dropped frame of zero duration: Frame {0} in {1}", sourceFrame, FilePath));
                     continue;
                 }
 
@@ -199,7 +177,6 @@
                 frames.Add(frame.Image);
                 frameHashes.Add(frameHash);
                 frameIndexes.Add(frames.Count - 1);
-                System.Threading.Interlocked.Increment(ref framesSaved);
             }
             else
             {
@@ -207,7 +184,6 @@
                 IDisposable disposable = frame.Image as IDisposable;
                 if (disposable != null)
                     disposable.Dispose();
-                System.Threading.Interlocked.Increment(ref duplicatesDropped);
             }
         }
 
