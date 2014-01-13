@@ -56,7 +56,7 @@ Friend Class MainWindow
                         Threading.Monitor.Pulse(invokeSync)
                     End SyncLock
                 End Sub)
-        Threading.Monitor.Wait(invokeSync)
+            Threading.Monitor.Wait(invokeSync)
         End SyncLock
     End Sub
 

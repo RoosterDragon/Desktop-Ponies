@@ -8,15 +8,9 @@ Public NotInheritable Class Program
     Public Shared Sub Main()
         AttachExceptionHandlers()
         If Not OperatingSystemInfo.IsMacOSX Then
-            Application.EnableVisualStyles()
-            Application.SetCompatibleTextRenderingDefault(False)
-            Application.Run(New MainForm())
+            RunWinForms()
         Else
-            Gtk.Application.Init()
-            Dim window = New MainWindow()
-            AddHandler window.DeleteEvent, Sub() Gtk.Application.Quit()
-            window.ShowAll()
-            Gtk.Application.Run()
+            RunGtk()
         End If
     End Sub
 
@@ -24,6 +18,20 @@ Public NotInheritable Class Program
         AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
         AddHandler Application.ThreadException, AddressOf Application_ThreadException
         AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
+    End Sub
+
+    Private Shared Sub RunWinForms()
+        Application.EnableVisualStyles()
+        Application.SetCompatibleTextRenderingDefault(False)
+        Application.Run(New MainForm())
+    End Sub
+
+    Private Shared Sub RunGtk()
+        Gtk.Application.Init()
+        Dim window = New MainWindow()
+        AddHandler window.DeleteEvent, Sub() Gtk.Application.Quit()
+        window.ShowAll()
+        Gtk.Application.Run()
     End Sub
 
     Private Shared Sub TaskScheduler_UnobservedTaskException(sender As Object, e As Threading.Tasks.UnobservedTaskExceptionEventArgs)
