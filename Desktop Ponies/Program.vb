@@ -1,12 +1,13 @@
 ﻿''' <summary>
 ''' Contains the main entry point for the program.
 ''' </summary>
-Public NotInheritable Class Program
+Friend NotInheritable Class Program
     Private Sub New()
     End Sub
 
     Public Shared Sub Main()
-        AttachExceptionHandlers()
+        AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
+        AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
         If Not OperatingSystemInfo.IsMacOSX Then
             RunWinForms()
         Else
@@ -14,13 +15,8 @@ Public NotInheritable Class Program
         End If
     End Sub
 
-    Private Shared Sub AttachExceptionHandlers()
-        AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
-        AddHandler Application.ThreadException, AddressOf Application_ThreadException
-        AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
-    End Sub
-
     Private Shared Sub RunWinForms()
+        AddHandler Application.ThreadException, AddressOf Application_ThreadException
         Application.EnableVisualStyles()
         Application.SetCompatibleTextRenderingDefault(False)
         Application.Run(New MainForm())
@@ -34,6 +30,10 @@ Public NotInheritable Class Program
         Gtk.Application.Run()
     End Sub
 
+    Private Shared Sub AppDomain_UnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
+        NotifyUserOfFatalExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
+    End Sub
+
     Private Shared Sub TaskScheduler_UnobservedTaskException(sender As Object, e As Threading.Tasks.UnobservedTaskExceptionEventArgs)
         ' If a debugger is attached, this event is not raised (instead the exception is allowed to propagate to the debugger),
         ' therefore we'll just log since ending the process gains no additional safety at this point.
@@ -44,10 +44,6 @@ Public NotInheritable Class Program
 
     Private Shared Sub Application_ThreadException(sender As Object, e As Threading.ThreadExceptionEventArgs)
         NotifyUserOfFatalExceptionAndExit(e.Exception)
-    End Sub
-
-    Private Shared Sub AppDomain_UnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
-        NotifyUserOfFatalExceptionAndExit(DirectCast(e.ExceptionObject, Exception))
     End Sub
 
     Public Shared Sub NotifyUserOfNonFatalException(ex As Exception, message As String)

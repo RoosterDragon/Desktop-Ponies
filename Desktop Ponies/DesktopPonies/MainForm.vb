@@ -33,7 +33,6 @@ Public Class MainForm
 
 #Region "Initialization"
     Public Sub New()
-        loadWatch.Start()
         InitializeComponent()
         selectionControlsFilteredVisible =
             PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Where(Function(control) selectionControlFilter(control))
@@ -51,9 +50,9 @@ Public Class MainForm
     ''' Read all configuration files and pony folders.
     ''' </summary>
     Private Sub LoadInternal()
+        loadWatch.Restart()
         UseWaitCursor = True
         loading = True
-        Console.WriteLine("Main Loading after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         PonyPaginationPanel.Enabled = False
         PonySelectionPanel.Enabled = False
@@ -105,8 +104,6 @@ Public Class MainForm
                 Options.LoadDefaultProfile()
             End Try
         End If
-
-        Console.WriteLine("Main Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
         Threading.ThreadPool.QueueUserWorkItem(Sub() CheckForNewVersion())
@@ -242,7 +239,7 @@ Public Class MainForm
 
         ' Finish loading.
         worker.QueueTask(Sub()
-                             Console.WriteLine("Templates Loaded after {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
+                             Console.WriteLine("Templates Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
                              PonyPaginationLabel.Text = String.Format(
                                      CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
