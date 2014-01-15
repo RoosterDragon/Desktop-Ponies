@@ -181,7 +181,7 @@
             if (!char.IsDigit(binaryReader.ReadChar()) ||
                 !char.IsDigit(binaryReader.ReadChar()) ||
                 !char.IsLetter(binaryReader.ReadChar()))
-                throw new ArgumentException("Invalid version in header.");
+                throw new ArgumentException(ErrorMessage);
             return new Size(binaryReader.ReadInt16(), binaryReader.ReadInt16());
         }
 

@@ -358,7 +358,7 @@ Public Class PonyBase
     End Sub
 
     Private Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean, pony As PonyBase,
-                                      parseFunc As TryParse(Of T, PonyBase), onParse As Action(Of T))
+                                      parseFunc As TryParseBase(Of T), onParse As Action(Of T))
         Dim result As T
         If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
             onParse(result)

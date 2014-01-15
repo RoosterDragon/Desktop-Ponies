@@ -89,7 +89,8 @@
         End Select
     End Function
 
-    Private ReadOnly _directionFromIni As New Dictionary(Of String, Direction)(StringComparer.OrdinalIgnoreCase) From
+    Private ReadOnly _directionFromIni As ReadOnlyDictionary(Of String, Direction) =
+        New Dictionary(Of String, Direction)(StringComparer.OrdinalIgnoreCase) From
         {
             {"top_left", Direction.TopLeft},
             {"top", Direction.TopCenter},
@@ -102,14 +103,15 @@
             {"bottom_right", Direction.BottomRight},
             {"any", Direction.Random},
             {"any-not_center", Direction.RandomNotCenter}
-        }
-    Public ReadOnly Property DirectionFromIni As Dictionary(Of String, Direction)
+        }.AsReadOnly()
+    Public ReadOnly Property DirectionFromIni As ReadOnlyDictionary(Of String, Direction)
         Get
             Return _directionFromIni
         End Get
     End Property
 
-    Private ReadOnly _allowedMovesFromIni As New Dictionary(Of String, AllowedMoves)(StringComparer.OrdinalIgnoreCase) From
+    Private ReadOnly _allowedMovesFromIni As ReadOnlyDictionary(Of String, AllowedMoves) =
+        New Dictionary(Of String, AllowedMoves)(StringComparer.OrdinalIgnoreCase) From
         {
             {"none", AllowedMoves.None},
             {"horizontal_only", AllowedMoves.HorizontalOnly},
@@ -122,8 +124,8 @@
             {"mouseover", AllowedMoves.MouseOver},
             {"sleep", AllowedMoves.Sleep},
             {"dragged", AllowedMoves.Dragged}
-        }
-    Public ReadOnly Property AllowedMovesFromIni As Dictionary(Of String, AllowedMoves)
+        }.AsReadOnly()
+    Public ReadOnly Property AllowedMovesFromIni As ReadOnlyDictionary(Of String, AllowedMoves)
         Get
             Return _allowedMovesFromIni
         End Get

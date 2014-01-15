@@ -19,10 +19,8 @@ Public Class PonyCollection
             Return _houses
         End Get
     End Property
-    Private ReadOnly _interactionsGuard As New Object()
     Private ReadOnly _interactions As New Dictionary(Of String, List(Of InteractionBase))()
-    Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(
-        Function(s) New List(Of InteractionBase)())
+    Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(Function(s) New List(Of InteractionBase)())
 
     Public Sub New(removeInvalidItems As Boolean)
         Me.New(removeInvalidItems, Nothing, Nothing)
@@ -103,7 +101,7 @@ Public Class PonyCollection
     ''' <param name="newDirectory">The new directory name.</param>
     Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
         If oldDirectory = newDirectory Then Return
-        SyncLock _interactionsGuard
+        SyncLock _interactions
             If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
             If _interactions.ContainsKey(oldDirectory) Then
                 Dim actions = _interactions(oldDirectory)
@@ -122,7 +120,7 @@ Public Class PonyCollection
     ''' <param name="directory">The directory identifier of the pony.</param>
     ''' <returns>A list of all interactions where this pony is listed as the initiator.</returns>
     Public Function Interactions(directory As String) As List(Of InteractionBase)
-        SyncLock _interactionsGuard
+        SyncLock _interactions
             Return _interactions.GetOrAdd(directory, newListFactory)
         End SyncLock
     End Function
@@ -174,5 +172,5 @@ End Class
 Public Delegate Function TryParse(Of T)(iniLine As String, directory As String,
                                         ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
 
-Public Delegate Function TryParse(Of T, TPonyBase As PonyBase)(iniLine As String, directory As String, pony As TPonyBase,
-                                                               ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+Public Delegate Function TryParseBase(Of T)(iniLine As String, directory As String, pony As PonyBase,
+                                        ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult

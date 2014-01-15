@@ -22,18 +22,18 @@ Installation
 * Windows
     You will need .NET framework 4 installed. This comes by default with newer versions of Windows,
     but you can also get it here: https://www.microsoft.com/en-gb/download/details.aspx?id=17718
-    Once installed, simply click on 'Desktop Ponies.exe' to run the program.
+    Once installed, simply click on 'Desktop Ponies.exe' to start the program.
 * Unix
     You will need the latest stable version of mono. Some distributions include it as part of their standard packages,
     you can also download it from here: http://www.go-mono.com/mono-downloads/download.html
-    Once installed, you can run the program from the command line with "mono 'Desktop Ponies.exe'".
+    Once installed, you can start the program from the command line with "mono 'Desktop Ponies.exe'".
     If the program fails to start, you may need a package named "libmono-microsoft-visualbasic10.0-cil". Use your package manager to install it.
     It is recommended to run "mozroots --import --ask-remove" from the command line to install default Mozilla web certificates,
     which will allow the program to check online for updates.
 * Mac
     You will need mono version 3.2.1 or better.
     Choose the "Mono MRE Installer" from: http://www.go-mono.com/mono-downloads/download.html
-    Once installed, you can run the "RunOnMac.command" file to launch the program.
+    Once installed, you can run the "RunOnMac.command" file to start the program.
 
 ---------------------------------------
 

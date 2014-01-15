@@ -85,7 +85,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null.</exception>
         public bool TryGetValue(TKey key, out TValue value)
         {
-            throw new NotImplementedException();
+            return dictionary.TryGetValue(key, out value);
         }
         /// <summary>
         /// Gets the element with the specified key.
