@@ -763,43 +763,7 @@ Public Class MainForm
     End Sub
 
     Private Sub PonyStartup()
-        If EvilGlobals.InScreensaverMode Then
-            SmartInvoke(Sub()
-                            If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
-                                screensaverForms = New List(Of ScreensaverBackgroundForm)()
-
-                                Dim backgroundColor As Color = Color.Black
-                                Dim backgroundImage As Image = Nothing
-                                If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor Then
-                                    backgroundColor = Color.FromArgb(255, Options.ScreensaverBackgroundColor)
-                                End If
-                                If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
-                                    Try
-                                        backgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
-                                    Catch
-                                        ' Image failed to load, so we'll fall back to a background color.
-                                    End Try
-                                End If
-
-                                For Each monitor In Screen.AllScreens
-                                    Dim screensaverBackground As New ScreensaverBackgroundForm()
-                                    screensaverForms.Add(screensaverBackground)
-
-                                    If backgroundImage IsNot Nothing Then
-                                        screensaverBackground.BackgroundImage = backgroundImage
-                                    Else
-                                        screensaverBackground.BackColor = backgroundColor
-                                    End If
-
-                                    screensaverBackground.Size = monitor.Bounds.Size
-                                    screensaverBackground.Location = monitor.Bounds.Location
-
-                                    screensaverBackground.Show()
-                                Next
-                            End If
-                            Cursor.Hide()
-                        End Sub)
-        End If
+        If EvilGlobals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
 
         AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
         ponyViewer = Options.GetInterface()
@@ -842,8 +806,45 @@ Public Class MainForm
                                                                General.FullCollect()
                                                            End If
                                                        End Sub))
+
         EvilGlobals.CurrentViewer = ponyViewer
         EvilGlobals.CurrentAnimator = animator
+    End Sub
+
+    Private Sub CreateScreensaverForms()
+        If Options.ScreensaverStyle <> Options.ScreensaverBackgroundStyle.Transparent Then
+            screensaverForms = New List(Of ScreensaverBackgroundForm)()
+
+            Dim backgroundColor As Color = Color.Black
+            Dim backgroundImage As Image = Nothing
+            If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor Then
+                backgroundColor = Color.FromArgb(255, Options.ScreensaverBackgroundColor)
+            End If
+            If Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage Then
+                Try
+                    backgroundImage = Image.FromFile(Options.ScreensaverBackgroundImagePath)
+                Catch
+                    ' Image failed to load, so we'll fall back to a background color.
+                End Try
+            End If
+
+            For Each monitor In Screen.AllScreens
+                Dim screensaverBackground As New ScreensaverBackgroundForm()
+                screensaverForms.Add(screensaverBackground)
+
+                If backgroundImage IsNot Nothing Then
+                    screensaverBackground.BackgroundImage = backgroundImage
+                Else
+                    screensaverBackground.BackColor = backgroundColor
+                End If
+
+                screensaverBackground.Size = monitor.Bounds.Size
+                screensaverBackground.Location = monitor.Bounds.Location
+
+                screensaverBackground.Show()
+            Next
+        End If
+        Cursor.Hide()
     End Sub
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
