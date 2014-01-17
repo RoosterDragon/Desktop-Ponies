@@ -6,6 +6,7 @@
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
@@ -22,6 +23,7 @@
             string currentDirectory = Environment.CurrentDirectory;
             string solutionDirectory = currentDirectory.Remove(currentDirectory.IndexOf("Release Tool"));
             string contentDirectory = Path.Combine(solutionDirectory, "Content");
+            string releaseDirectory = Path.Combine(solutionDirectory, "Desktop Ponies", "bin", "Release");
 
             DesktopPonies.EvilGlobals.InstallLocation = contentDirectory;
 
@@ -32,6 +34,10 @@
                 CompressPngs(contentDirectory);
                 Console.WriteLine("Optimizing finished.");
                 Console.WriteLine();
+            }
+            if (FixRunOnMacLineEndings(contentDirectory) && ConsoleReadYesNoQuit("Package output?"))
+            {
+                PackageReleaseFiles(releaseDirectory, solutionDirectory, new Version(dpVersion).ToDisplayString());
             }
 
             Console.WriteLine("Finished. Press any key to exit...");
@@ -378,6 +384,46 @@
                 }
                 ConsoleReplacePreviousLine("PNGs optimized");
             }
+        }
+
+        private static bool FixRunOnMacLineEndings(string sourceDirectory)
+        {
+            string fileName = Path.Combine(sourceDirectory, "RunOnMac.command");
+            string fileContents = File.ReadAllText(fileName);
+            string fixedFileContents = fileContents.Replace("\r\n", "\n");
+            bool sameText = fileContents == fixedFileContents;
+            if (!sameText)
+            {
+                File.WriteAllText(fileName, fixedFileContents);
+                Console.WriteLine("Had to fix line endings in RunOnMac.command. Ensure this file is copied to output directory.");
+            }
+            return sameText;
+        }
+
+        private static void PackageReleaseFiles(string sourceDirectory, string destinationDirectory, string version)
+        {
+            string destinationFilename = Path.Combine(destinationDirectory, "Desktop Ponies v" + version + ".zip");
+            if (File.Exists(destinationFilename))
+            {
+                if (ConsoleReadYesNoQuit("Replace existing package?"))
+                    File.Delete(destinationFilename);
+                else
+                    return;
+            }
+            ZipFile.CreateFromDirectory(sourceDirectory, destinationFilename, CompressionLevel.Optimal, false);
+            using (var zip = ZipFile.Open(destinationFilename, ZipArchiveMode.Update))
+                foreach (var entryToRemove in new[]{
+                    "Desktop Ponies.vshost.exe", 
+                    "Desktop Ponies.vshost.exe.config",
+                    "Desktop Ponies.vshost.exe.manifest",
+                    "Desktop Ponies.xml",
+                    "Desktop Sprites.xml"})
+                {
+                    var entry = zip.GetEntry(entryToRemove);
+                    if (entry != null)
+                        entry.Delete();
+                }
+            Console.WriteLine("Package output to " + destinationFilename);
         }
 
         private static void RetryActionWithDelay(Action action, int attempts, TimeSpan delay)
