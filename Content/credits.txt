@@ -414,6 +414,12 @@ Contributors are broken down by character. If there was more than one contributo
 * Logan [Trot]
 * StarStep [Idle]
 
+#### Nurse Snowheart
+* Bot-chan
+
+#### Nurse Sweetheart
+* Bot-chan
+
 #### Octavia
 * RJP!
 
