@@ -27,18 +27,20 @@
 
             DesktopPonies.EvilGlobals.InstallLocation = contentDirectory;
 
+            bool contentChanged = false;
             if (ConsoleReadYesNoQuit("Run image optimizers?"))
             {
                 CropImages(contentDirectory);
-                CompressGifs(contentDirectory);
+                contentChanged = CompressGifs(contentDirectory) > 0 || contentChanged;
                 CompressPngs(contentDirectory);
                 Console.WriteLine("Optimizing finished.");
                 Console.WriteLine();
             }
-            if (FixRunOnMacLineEndings(contentDirectory) && ConsoleReadYesNoQuit("Package output?"))
-            {
+            contentChanged = FixRunOnMacLineEndings(contentDirectory) || contentChanged;
+            if (contentChanged)
+                Console.WriteLine("Content has changed and you should ensure it is copied to output. (Rebuilding will work).");
+            else if (ConsoleReadYesNoQuit("Package output?"))
                 PackageReleaseFiles(releaseDirectory, solutionDirectory, new Version(dpVersion).ToDisplayString());
-            }
 
             Console.WriteLine("Finished. Press any key to exit...");
             Console.Read();
@@ -292,7 +294,7 @@
             }
         }
 
-        private static void CompressGifs(string sourceDirectory)
+        private static int CompressGifs(string sourceDirectory)
         {
             string tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
@@ -306,7 +308,7 @@
                 if (!File.Exists(process.StartInfo.FileName))
                 {
                     Console.WriteLine("Missing gifsicle.exe in current directory.");
-                    return;
+                    return 0;
                 }
                 Console.WriteLine();
                 foreach (var sourceFilePath in Directory.EnumerateFiles(sourceDirectory, "*.gif", SearchOption.AllDirectories))
@@ -351,6 +353,7 @@
                 if (File.Exists(tempFilePath))
                     File.Delete(tempFilePath);
                 ConsoleReplacePreviousLine(gifsOptimized + " GIFs optimized.");
+                return gifsOptimized;
             }
         }
 
