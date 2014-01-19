@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Provides extra LINQ style extension methods.
@@ -56,6 +57,30 @@
                     result = element;
                 }
             return result;
+        }
+
+        /// <summary>
+        /// Returns an element uniformly selected at random from all elements of a non-empty sequence.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <param name="source">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> to return a random element from.</param>
+        /// <returns>A random element of the sequence.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="source"/> contains no elements.</exception>
+        public static TSource RandomElement<TSource>(this IEnumerable<TSource> source)
+        {
+            Argument.EnsureNotNull(source, "source");
+            var collection = source as ICollection<TSource>;
+            if (collection != null)
+            {
+                if (collection.Count == 0)
+                    throw new ArgumentException("source must contain at least one element.", "source");
+                return collection.ElementAt(Rng.Next(collection.Count));
+            }
+            var array = source.ToArray();
+            if (array.Length == 0)
+                throw new ArgumentException("source must contain at least one element.", "source");
+            return array[Rng.Next(array.Length)];
         }
     }
 }

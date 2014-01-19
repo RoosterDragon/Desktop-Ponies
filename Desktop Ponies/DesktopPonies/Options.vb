@@ -321,7 +321,7 @@ Public NotInheritable Class Options
 
     Public Shared Function GetInterface() As DesktopSprites.SpriteManagement.ISpriteCollectionView
         'This should already be set in the options, but in case it isn't, use all monitors.
-        If Screens.Count = 0 Then Screens = Screen.AllScreens.ToImmutableArray()
+        If Screens.Length = 0 Then Screens = Screen.AllScreens.ToImmutableArray()
 
         Dim viewer As DesktopSprites.SpriteManagement.ISpriteCollectionView
         If GetInterfaceType() = GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface) Then

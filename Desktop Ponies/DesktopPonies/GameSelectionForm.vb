@@ -171,7 +171,7 @@ Public Class GameSelectionForm
 
         Dim selection As Integer = PonyList.SelectedIndices(0)
         If selection = 0 Then
-            selection = Rng.Next(ponies.Bases.Count())
+            selection = Rng.Next(ponies.Bases.Length)
         Else
             selection -= 1
         End If

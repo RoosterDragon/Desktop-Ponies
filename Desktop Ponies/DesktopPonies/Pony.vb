@@ -339,7 +339,7 @@ Public Class PonyBase
                                             AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
-                        For i = 1 To columns.Count - 1
+                        For i = 1 To columns.Length - 1
                             pony.Tags.Add(columns(i))
                         Next
                     Case Else
@@ -1423,7 +1423,7 @@ Public Class Pony
         ' TODO: Create method that will uniformly choose a random location from allowable points, also taking into account image sizing.
         Dim teleportLocation As Point
         For tries = 0 To 300
-            Dim area = Options.Screens(Rng.Next(Options.Screens.Count)).WorkingArea
+            Dim area = Options.Screens.RandomElement().WorkingArea
             teleportLocation = New Point(
                 CInt(area.X + Rng.NextDouble() * area.Width),
                 CInt(area.Y + Rng.NextDouble() * area.Height))
@@ -1608,7 +1608,7 @@ Public Class Pony
             ' current behavior for now.
             Dim foundAtRandom As Boolean
             For i = 0 To 200
-                Dim potentialBehavior = Behaviors(Rng.Next(Behaviors.Count))
+                Dim potentialBehavior = Behaviors.RandomElement()
 
                 ' The behavior can't be disallowed from running randomly, and it must in in the same group or the "any" group.
                 ' Then, do a random test against the chance the behavior can occur.
@@ -1727,7 +1727,7 @@ Public Class Pony
         ' Select a mode at random, or else deny movement.
         Dim selectedMoveMode As AllowedMoves = AllowedMoves.None
         If possibleMoveModes.Count > 0 Then
-            selectedMoveMode = possibleMoveModes(Rng.Next(possibleMoveModes.Count))
+            selectedMoveMode = possibleMoveModes.RandomElement()
         End If
 
         ' Depending on mode, set allowable movement state for the pony.
@@ -1774,7 +1774,7 @@ Public Class Pony
             If Base.Speeches.Count = 0 Then Return
             Dim randomGroupLines = Base.SpeechesRandom.Where(isSpeechInUsableGroupPredicate).ToArray()
             If randomGroupLines.Length = 0 Then Return
-            line = randomGroupLines(Rng.Next(randomGroupLines.Length))
+            line = randomGroupLines.RandomElement()
         End If
 
         ' Set the line text to be displayed.
@@ -2174,7 +2174,7 @@ Public Class Pony
                 End If
             Next
             If poniesToFollow.Count <> 0 Then
-                Dim ponyToFollow = poniesToFollow(Rng.Next(poniesToFollow.Count))
+                Dim ponyToFollow = poniesToFollow.RandomElement()
                 followTarget = ponyToFollow
                 Return New Point(ponyToFollow.CenterLocation.X + destinationCoords.X,
                                  ponyToFollow.CenterLocation.Y + destinationCoords.Y)
@@ -2561,7 +2561,7 @@ Public Class Pony
         Dim behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior)
         If behavior Is Nothing Then behavior = CurrentBehavior
         If behavior Is Nothing Then behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior, False)
-        If behavior Is Nothing Then behavior = Behaviors(Rng.Next(Behaviors.Count))
+        If behavior Is Nothing Then behavior = Behaviors.RandomElement()
         Return behavior
     End Function
 
@@ -2745,7 +2745,7 @@ Public Class Pony
         If EvilGlobals.InPreviewMode Then Return Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
 
         For i = 0 To 300
-            Dim randomScreen = Options.Screens(Rng.Next(Options.Screens.Count))
+            Dim randomScreen = Options.Screens.RandomElement()
             Dim teleportLocation = New Point(
                 CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
                 CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
@@ -2847,7 +2847,7 @@ Public Class Pony
         isInteractionInitiator = True
         IsInteracting = True
         CurrentInteraction = interaction
-        SelectBehavior(interaction.Behaviors(Rng.Next(interaction.Behaviors.Count)))
+        SelectBehavior(interaction.Behaviors.RandomElement())
 
         interaction.Initiator = Me
 
@@ -3212,7 +3212,7 @@ Public Class Effect
     End Sub
 
     Public Sub Teleport()
-        Dim screen = Options.Screens(Rng.Next(Options.Screens.Count))
+        Dim screen = Options.Screens.RandomElement()
         TopLeftLocation = New Point(
             CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
             CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
@@ -3505,13 +3505,15 @@ Public Class House
             End If
 
             If Rng.NextDouble() < HouseBase.Bias Then
-                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso EvilGlobals.CurrentAnimator.Ponies().Count < Options.MaxPonyCount Then
+                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso
+                    EvilGlobals.CurrentAnimator.Ponies().Count() < Options.MaxPonyCount Then
                     DeployPony(Me, ponyBases)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
                 End If
             Else
-                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso EvilGlobals.CurrentAnimator.Ponies().Count > 1 Then
+                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso
+                    EvilGlobals.CurrentAnimator.Ponies().Count() > 1 Then
                     RecallPony(Me)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
@@ -3551,11 +3553,9 @@ Public Class House
 
         choices.Remove(PonyBase.RandomDirectory)
 
-        If choices.Count = 0 Then
-            Exit Sub
-        End If
+        If choices.Count = 0 Then Exit Sub
 
-        Dim selected_name = choices(Rng.Next(choices.Count))
+        Dim selected_name = choices.RandomElement()
 
         For Each ponyBase In ponyBases
             If ponyBase.Directory = selected_name Then
@@ -3605,7 +3605,7 @@ Public Class House
 
         If choices.Count = 0 Then Exit Sub
 
-        Dim selected_name = choices(Rng.Next(choices.Count))
+        Dim selected_name = choices.RandomElement()
 
         For Each pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
             If pony.Directory = selected_name Then

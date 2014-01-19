@@ -561,12 +561,12 @@ Public Class MainForm
             String.Format(CultureInfo.CurrentCulture,
                           "Viewing {0} to {1} of {2} ponies",
                           ponyOffset + 1,
-                          Math.Min(ponyOffset + PoniesPerPage.Value, selectionControlsFilteredVisible.Count),
-                          selectionControlsFilteredVisible.Count)
+                          Math.Min(ponyOffset + PoniesPerPage.Value, visibleCount),
+                          visibleCount)
         End If
 
         Dim min = ponyOffset = 0
-        Dim max = ponyOffset >= selectionControlsFilteredVisible.Count - PoniesPerPage.Value
+        Dim max = ponyOffset >= visibleCount - PoniesPerPage.Value
         FirstPageButton.Enabled = Not min
         PreviousPageButton.Enabled = Not min
         PreviousPonyButton.Enabled = Not min
@@ -621,17 +621,17 @@ Public Class MainForm
     End Sub
 
     Private Sub NextPonyButton_Click(sender As Object, e As EventArgs) Handles NextPonyButton.Click
-        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value) - ponyOffset, 1)
+        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count() - CInt(PoniesPerPage.Value) - ponyOffset, 1)
         RepaginateSelection()
     End Sub
 
     Private Sub NextPageButton_Click(sender As Object, e As EventArgs) Handles NextPageButton.Click
-        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value) - ponyOffset, CInt(PoniesPerPage.Value))
+        ponyOffset += Math.Min(selectionControlsFilteredVisible.Count() - CInt(PoniesPerPage.Value) - ponyOffset, CInt(PoniesPerPage.Value))
         RepaginateSelection()
     End Sub
 
     Private Sub LastPageButton_Click(sender As Object, e As EventArgs) Handles LastPageButton.Click
-        ponyOffset = selectionControlsFilteredVisible.Count - CInt(PoniesPerPage.Value)
+        ponyOffset = selectionControlsFilteredVisible.Count() - CInt(PoniesPerPage.Value)
         RepaginateSelection()
     End Sub
 
@@ -745,9 +745,7 @@ Public Class MainForm
                     If remainingPonyBases.Count = 0 Then Exit For
                     Dim index = Rng.Next(remainingPonyBases.Count)
                     startupPonies.Add(New Pony(remainingPonyBases(index)))
-                    If Options.NoRandomDuplicates Then
-                        remainingPonyBases.RemoveAt(index)
-                    End If
+                    If Options.NoRandomDuplicates Then remainingPonyBases.RemoveAt(index)
                 Next
             End If
 

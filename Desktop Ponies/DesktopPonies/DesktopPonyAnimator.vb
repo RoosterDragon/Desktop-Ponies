@@ -271,8 +271,7 @@ Public Class DesktopPonyAnimator
             Return
         End If
         If ponyName = PonyBase.RandomDirectory Then
-            Dim selection = Rng.Next(PonyCollection.Bases.Count())
-            ponyName = PonyCollection.Bases(selection).Directory
+            ponyName = PonyCollection.Bases.RandomElement().Directory
         End If
         For Each ponyBase In PonyCollection.Bases
             If ponyBase.Directory = ponyName Then

@@ -804,12 +804,8 @@ Public Class Game
                 End If
             End If
 
-            Dim selection As Integer = Rng.Next(actionList.Count)
-
-            Dim selected_action As PlayerActionType = actionList(selection)
-
+            Dim selected_action = actionList.RandomElement()
             Select Case selected_action
-
                 Case PlayerActionType.NotSet
                     Throw New Exception("Can't do this action (reserved): " & selected_action)
                 Case PlayerActionType.ReturnToStart
@@ -1191,9 +1187,7 @@ Public Class Game
             Next
 
             If open_teammates.Count = 0 Then Return Nothing
-
-            Return open_teammates(Rng.Next(open_teammates.Count))
-
+            Return open_teammates.RandomElement()
         End Function
 
         Private Sub SpeedOverride(enable As Boolean)
