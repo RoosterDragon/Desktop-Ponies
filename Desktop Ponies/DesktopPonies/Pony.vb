@@ -295,6 +295,7 @@ Public Class PonyBase
                 If removeInvalidItems AndAlso pony.Behaviors.Count = 0 Then
                     Return Nothing
                 End If
+                pony.UpdateImageSizes()
             End If
         Catch ex As Exception
             Return Nothing
@@ -363,6 +364,17 @@ Public Class PonyBase
         If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
             onParse(result)
         End If
+    End Sub
+
+    Private Sub UpdateImageSizes()
+        For Each behavior In Behaviors
+            behavior.LeftImage.UpdateSize()
+            behavior.RightImage.UpdateSize()
+        Next
+        For Each effect In Effects
+            effect.LeftImage.UpdateSize()
+            effect.RightImage.UpdateSize()
+        Next
     End Sub
 
     Public Sub AddBehavior(name As CaseInsensitiveString, chance As Double,
@@ -3709,22 +3721,23 @@ Public Class SpriteImage
     Private _size As Vector2?
     Public ReadOnly Property Size As Vector2
         Get
-            If String.IsNullOrWhiteSpace(Path) Then Return Vector2.Zero
-            If _size Is Nothing Then
-                _size = Vector2.Zero
-                Try
-                    _size = ImageSize.GetSize(Path)
-                Catch ex As ArgumentException
-                    ' Leave size empty by default.
-                Catch ex As IOException
-                    ' Leave size empty by default.
-                Catch ex As UnauthorizedAccessException
-                    ' Leave size empty by default.
-                End Try
-            End If
+            If _size Is Nothing Then UpdateSize()
             Return _size.Value
         End Get
     End Property
+    Public Sub UpdateSize()
+        _size = Vector2.Zero
+        If String.IsNullOrWhiteSpace(Path) Then Return
+        Try
+            _size = ImageSize.GetSize(Path)
+        Catch ex As ArgumentException
+            ' Leave size empty by default.
+        Catch ex As IOException
+            ' Leave size empty by default.
+        Catch ex As UnauthorizedAccessException
+            ' Leave size empty by default.
+        End Try
+    End Sub
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Path: " & If(Path, "")
     End Function
