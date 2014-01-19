@@ -548,7 +548,7 @@
             /// buffer.</returns>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 8.</exception>
             private static GtkFrame FromBufferMethod(
-                byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode)
+                byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode)
             {
                 if (depth != 8)
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 8.");
@@ -1402,7 +1402,7 @@
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
         /// buffer.</returns>
         private GtkFrame GtkFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
-            int stride, int width, int height, int depth, int hashCode, string fileName)
+            int stride, int width, int height, byte depth, int hashCode, string fileName)
         {
             GtkFrame frame = GtkFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
             AlterPixbufForTransparency(fileName, frame.Image.Image);

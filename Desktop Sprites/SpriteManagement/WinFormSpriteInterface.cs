@@ -464,7 +464,7 @@
             /// <summary>
             /// Gets the bit depth of the image, either 8bbp or 4bbp. Does not apply for bitmaps.
             /// </summary>
-            public int Depth { get; private set; }
+            public byte Depth { get; private set; }
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
             /// loading a GDI+ bitmap from file.
@@ -493,7 +493,7 @@
             /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
             /// <param name="hashCode">A pre-generated hash code for the image.</param>
             public ImageData(byte[] data, RgbColor[] palette, int transparentIndex,
-                int stride, int width, int height, int depth, int hashCode)
+                int stride, int width, int height, byte depth, int hashCode)
             {
                 Data = data;
                 Height = height;
@@ -653,7 +653,7 @@
             /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
             /// </summary>
             private static readonly BufferToImage<ImageFrame> FromBufferInternal =
-                (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
+                (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode) =>
                 {
                     return new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, hashCode));
                 };
@@ -1142,7 +1142,7 @@
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> for the frame held in the raw
         /// buffer.</returns>
         private ImageFrame ImageFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
-            int stride, int width, int height, int depth, int hashCode, string fileName)
+            int stride, int width, int height, byte depth, int hashCode, string fileName)
         {
             return Disposable.SetupSafely(
                 ImageFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode),

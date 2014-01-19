@@ -67,7 +67,7 @@
     /// ]]></code></example>
     /// </remarks>
     public delegate T BufferToImage<T>(
-    byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode);
+    byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode);
     #endregion
 
     /// <summary>
@@ -87,8 +87,8 @@
         /// <summary>
         /// The method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
-        private static readonly BufferToImage<Bitmap> BufferToImageOfBitmapInternal = 
-            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, int depth, int hashCode) =>
+        private static readonly BufferToImage<Bitmap> BufferToImageOfBitmapInternal =
+            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode) =>
             {
                 PixelFormat targetFormat;
                 if (depth == 1)
