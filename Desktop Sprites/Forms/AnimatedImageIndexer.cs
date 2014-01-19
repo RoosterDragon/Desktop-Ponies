@@ -109,8 +109,8 @@
 
                 int seekTime = durations[0];
                 int frameIndex = 0;
-                while (seekTime <= value && ++frameIndex < FrameSelector.Maximum)
-                    seekTime += durations[frameIndex];
+                while (seekTime <= value && frameIndex < FrameSelector.Maximum)
+                    seekTime += durations[++frameIndex];
                 FrameSelector.Value = frameIndex;
 
                 OnIndexChanged();
