@@ -492,8 +492,9 @@
             /// <param name="height">The height of the image, in pixels.</param>
             /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
             /// <param name="hashCode">A pre-generated hash code for the image.</param>
+            /// <param name="paletteCache">The cache of color palettes, so that the new palette can be shared among images.</param>
             public ImageData(byte[] data, RgbColor[] palette, int transparentIndex,
-                int stride, int width, int height, byte depth, int hashCode)
+                int stride, int width, int height, byte depth, int hashCode, Dictionary<int[], int[]> paletteCache)
             {
                 Data = data;
                 Height = height;
@@ -506,6 +507,8 @@
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
                 if (transparentIndex != -1)
                     ArgbPalette[transparentIndex] = new ArgbColor().ToArgb();
+                lock (paletteCache)
+                    ArgbPalette = paletteCache.GetOrAdd(ArgbPalette, ArgbPalette);
                 TryDownscale();
             }
             /// <summary>
@@ -641,24 +644,6 @@
         private sealed class ImageFrame : SpriteFrame<ImageData>, IDisposable
         {
             /// <summary>
-            /// Gets the method that converts a buffer into an
-            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
-            /// </summary>
-            public static BufferToImage<ImageFrame> FromBuffer
-            {
-                get { return FromBufferInternal; }
-            }
-            /// <summary>
-            /// The method that converts a buffer into an
-            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
-            /// </summary>
-            private static readonly BufferToImage<ImageFrame> FromBufferInternal =
-                (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode) =>
-                {
-                    return new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, hashCode));
-                };
-
-            /// <summary>
             /// Represents the allowable set of depths that can be used when generating a
             /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>.
             /// </summary>
@@ -676,7 +661,7 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> class.
             /// </summary>
             /// <param name="imageData">The image data to use.</param>
-            private ImageFrame(ImageData imageData)
+            public ImageFrame(ImageData imageData)
                 : base(imageData)
             {
             }
@@ -728,6 +713,64 @@
         }
         #endregion
 
+        #region ArgbPaletteEqualityComparer class
+        /// <summary>
+        /// Compares arrays on 32-bit integers being used as ARGB color palettes for equality.
+        /// </summary>
+        private sealed class ArgbPaletteEqualityComparer : IEqualityComparer<int[]>
+        {
+            /// <summary>
+            /// Gets the comparer instance.
+            /// </summary>
+            public static readonly ArgbPaletteEqualityComparer Instance = new ArgbPaletteEqualityComparer();
+            /// <summary>
+            ///Initializes a new instance of the
+            ///<see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ArgbPaletteEqualityComparer"/> class.
+            /// </summary>
+            private ArgbPaletteEqualityComparer()
+            {
+            }
+            /// <summary>
+            /// Determines whether the specified arrays are structurally equal. Both arrays are assumed not null.
+            /// </summary>
+            /// <param name="x">The first array to compare.</param>
+            /// <param name="y">The second array to compare.</param>
+            /// <returns>Returns true if the specified arrays are structurally equal; otherwise, false.</returns>
+            public bool Equals(int[] x, int[] y)
+            {
+                if (x.Length != y.Length)
+                    return false;
+                for (int i = 0; i < x.Length; i++)
+                    if (x[i] != y[i])
+                        return false;
+                return true;
+            }
+            /// <summary>
+            /// Returns a hash code for the specified array based on the elements it contains. The array is assumed not null.
+            /// </summary>
+            /// <param name="obj">The array for which a hash code is to be returned.</param>
+            /// <returns>A hash code for the specified array.</returns>
+            public int GetHashCode(int[] obj)
+            {
+                const int OffsetBasis32 = unchecked((int)2166136261);
+                const int FnvPrime32 = 16777619;
+                int hash = OffsetBasis32;
+                foreach (int i in obj)
+                {
+                    hash ^= (i >> 24) & 0xFF;
+                    hash *= FnvPrime32;
+                    hash ^= (i >> 16) & 0xFF;
+                    hash *= FnvPrime32;
+                    hash ^= (i >> 8) & 0xFF;
+                    hash *= FnvPrime32;
+                    hash ^= (i >> 0) & 0xFF;
+                    hash *= FnvPrime32;
+                }
+                return hash;
+            }
+        }
+        #endregion
+
         #region Fields and Properties
         /// <summary>
         /// Gets or sets the FrameRecordCollector for debugging purposes.
@@ -751,6 +794,10 @@
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>, indexed by filename.
         /// </summary>
         private LazyDictionary<string, AnimatedImage<ImageFrame>> images;
+        /// <summary>
+        /// Cache of color palettes so that memory can be shared.
+        /// </summary>
+        private readonly Dictionary<int[], int[]> paletteCache = new Dictionary<int[], int[]>(ArgbPaletteEqualityComparer.Instance);
 
         /// <summary>
         /// The underlying form on which graphics are displayed.
@@ -1145,7 +1192,7 @@
             int stride, int width, int height, byte depth, int hashCode, string fileName)
         {
             return Disposable.SetupSafely(
-                ImageFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode),
+                new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, hashCode, paletteCache)),
                 frame =>
                 {
                     // Check for an alpha remapping table, and apply it if one exists.
