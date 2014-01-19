@@ -1198,6 +1198,7 @@ Public Class Pony
 
     Public Property CurrentBehaviorGroup As Integer
 
+    Private ReadOnly behaviorsAllowed As New HashSet(Of CaseInsensitiveString)()
     Private _currentInteraction As Interaction = Nothing
     Public Property CurrentInteraction As Interaction
         Get
@@ -2059,8 +2060,7 @@ Public Class Pony
 
             ' If we can, we should try and start an interaction.
             If Options.PonyInteractionsEnabled AndAlso Not IsInteracting AndAlso Not ReturningToScreenArea Then
-                Dim interact As Interaction = GetReadiedInteraction()
-                If interact IsNot Nothing Then StartInteraction(interact)
+                StartInteractionAtRandom()
             End If
 
             ' If we were trying to get out of a bad spot, and we find ourselves in a good area, continue on as normal...
@@ -2843,24 +2843,114 @@ Public Class Pony
         Next
     End Sub
 
-    Private Sub StartInteraction(interaction As Interaction)
+    Private Sub StartInteractionAtRandom()
+        'If we recently ran an interaction, don't start a new one until the delay expires.
+        If internalTime < interactionDelayUntil Then Return
+
+        For Each interaction In interactions
+            ' Interaction must pass random chance to occur.
+            If Rng.NextDouble() > interaction.Base.Chance Then Continue For
+            ' Interaction needs to have targets available and at least one available target within range.
+            Dim availableTargets As List(Of Pony) = Nothing
+            Dim trigger = GetInteractionTriggerIfConditionsMet(interaction, availableTargets)
+            If trigger Is Nothing Then Continue For
+            interaction.Trigger = trigger
+            ' Start the interaction using the available targets and the now generated list of allowed behaviors.
+            StartInteraction(interaction, availableTargets)
+        Next
+    End Sub
+
+    Private Function GetInteractionTriggerIfConditionsMet(interaction As Interaction,
+                                                          ByRef availableTargetsForAnyActivation As List(Of Pony)) As Pony
+        availableTargetsForAnyActivation = Nothing
+        ' Update set of behaviors available to this pony.
+        RebuildAllowedInteractionBehaviors(interaction)
+        ' If this pony cannot interact, we can bail out early.
+        If behaviorsAllowed.Count = 0 Then Return Nothing
+
+        Select Case interaction.Base.Activation
+            Case TargetActivation.All
+                Dim trigger As Pony = Nothing
+                For Each target In interaction.Targets
+                    If target.IsInteracting Then Return Nothing
+                    If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
+                    target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
+                    If behaviorsAllowed.Count = 0 Then Return Nothing
+                Next
+                Return trigger
+            Case TargetActivation.Any
+                Dim trigger As Pony = Nothing
+                For Each target In interaction.Targets
+                    If target.IsInteracting Then Continue For
+                    If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
+                    target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
+                    If behaviorsAllowed.Count = 0 Then Return Nothing
+                    If availableTargetsForAnyActivation Is Nothing Then availableTargetsForAnyActivation = New List(Of Pony)()
+                    availableTargetsForAnyActivation.Add(target)
+                Next
+                Return trigger
+            Case TargetActivation.One
+                For Each target In interaction.Targets
+                    If target.IsInteracting Then Continue For
+                    If IsInteractionTargetInRange(interaction, target) Then
+                        target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
+                        If behaviorsAllowed.Count = 0 Then
+                            RebuildAllowedInteractionBehaviors(interaction)
+                        Else
+                            Return target
+                        End If
+                    End If
+                Next
+                Return Nothing
+            Case Else
+                Throw New ArgumentException("interaction had an invalid Activation", "interaction")
+        End Select
+    End Function
+
+    Private Function IsInteractionTargetInRange(interaction As Interaction, target As Pony) As Boolean
+        Dim distance = Vector2.Distance(
+            TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2), CInt(CurrentImageSize.Y / 2)),
+            target.TopLeftLocation + New Size(CInt(target.CurrentImageSize.X / 2), CInt(target.CurrentImageSize.Y / 2)))
+        Return distance <= interaction.Base.Proximity
+    End Function
+
+    Private Sub RebuildAllowedInteractionBehaviors(interaction As Interaction)
+        behaviorsAllowed.Clear()
+        For Each behavior In interaction.Behaviors
+            behaviorsAllowed.Add(behavior.Name)
+        Next
+        PruneAllowableInteractionBehaviors(behaviorsAllowed)
+    End Sub
+
+    Private Sub PruneAllowableInteractionBehaviors(setToPrune As HashSet(Of CaseInsensitiveString))
+        For Each behavior In Behaviors
+            If behavior.Group <> behavior.AnyGroup AndAlso behavior.Group <> CurrentBehaviorGroup Then
+                setToPrune.Remove(behavior.Name)
+            End If
+        Next
+    End Sub
+
+    Private Sub StartInteraction(interaction As Interaction, availableTargetsForAnyActivation As List(Of Pony))
         isInteractionInitiator = True
         IsInteracting = True
         CurrentInteraction = interaction
-        SelectBehavior(interaction.Behaviors.RandomElement())
+        Dim randomBehaviorName = behaviorsAllowed.RandomElement()
+        SelectBehavior(Behaviors.First(Function(b) b.Name = randomBehaviorName))
 
         interaction.Initiator = Me
 
-        'do we interact with ALL targets, including copies, or just the pony that we ran into?
-        If interaction.Base.Activation <> TargetActivation.One Then
-            For Each targetPony In interaction.Targets
-                If Not targetPony.IsInteracting Then
-                    targetPony.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
-                End If
-            Next
-        Else
-            interaction.Trigger.StartInteractionAsTarget(CurrentBehavior.Name, interaction)
-        End If
+        Select Case interaction.Base.Activation
+            Case TargetActivation.All
+                For Each target In interaction.Targets
+                    target.StartInteractionAsTarget(randomBehaviorName, interaction)
+                Next
+            Case TargetActivation.Any
+                For Each target In availableTargetsForAnyActivation
+                    target.StartInteractionAsTarget(randomBehaviorName, interaction)
+                Next
+            Case TargetActivation.One
+                interaction.Trigger.StartInteractionAsTarget(randomBehaviorName, interaction)
+        End Select
     End Sub
 
     Private Sub StartInteractionAsTarget(behaviorName As CaseInsensitiveString, interaction As Interaction)
@@ -2874,43 +2964,6 @@ Public Class Pony
         CurrentInteraction = interaction
         SelectBehavior(behavior)
     End Sub
-
-    Private Function GetReadiedInteraction() As Interaction
-        'If we recently ran an interaction, don't start a new one until the delay expires.
-        If internalTime < interactionDelayUntil Then
-            Return Nothing
-        End If
-
-        For Each interaction In interactions
-            For Each target As Pony In interaction.Targets
-                ' Don't attempt to interact with a busy target.
-                If target.IsInteracting Then
-                    If interaction.Base.Activation = TargetActivation.All Then
-                        ' Need all targets but one is busy? Can't use this interaction then.
-                        Exit For
-                    Else
-                        ' Try a different target.
-                        Continue For
-                    End If
-                End If
-
-                ' Get distance between the pony and the possible target.
-                Dim distance = Vector2.Distance(TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2),
-                                                                           CInt(CurrentImageSize.Y / 2)),
-                                               target.TopLeftLocation + New Size(CInt(target.CurrentImageSize.X / 2),
-                                                                                 CInt(target.CurrentImageSize.Y / 2)))
-
-                ' Check target is in range, and perform a random check against the chance the interaction can occur.
-                If distance <= interaction.Base.Proximity AndAlso Rng.NextDouble() <= interaction.Base.Chance Then
-                    interaction.Trigger = target
-                    Return interaction
-                End If
-            Next
-        Next
-
-        ' No interactions ready to start at this time.
-        Return Nothing
-    End Function
 
     Public Function GetImageCenterOffset() As Size
         If isCustomImageCenterDefined Then
