@@ -38,7 +38,10 @@
         /// <summary>
         /// Gets a value indicating whether the image has more than one frame, and thus is animated.
         /// </summary>
-        public bool IsAnimated { get; private set; }
+        public bool IsAnimated
+        {
+            get { return FrameCount > 1; }
+        }
 
         /// <summary>
         /// Gets a value indicating the total running time of this animation, in milliseconds.
@@ -53,7 +56,7 @@
         /// </summary>
         public int FrameCount
         {
-            get { return frameIndexes.Length; }
+            get { return frameIndexes != null ? frameIndexes.Length : frames.Length; }
         }
 
         /// <summary>
@@ -145,9 +148,10 @@
             }
 
             frames = framesList.ToImmutableArray();
-            frameIndexes = frameIndexesList.ToImmutableArray();
-            durations = durationsList.ToImmutableArray();
-            IsAnimated = FrameCount > 1;
+            if (frames.Length != frameIndexesList.Count)
+                frameIndexes = frameIndexesList.ToImmutableArray();
+            if (commonFrameDuration == -1)
+                durations = durationsList.ToImmutableArray();
         }
 
         /// <summary>
@@ -194,11 +198,8 @@
         private void AnimatedImageFromStaticFormat(Func<string, T> staticImageFactory)
         {
             Size = ImageSize.GetSize(FilePath);
-            IsAnimated = false;
             LoopCount = 0;
-
             frames = new T[] { staticImageFactory(FilePath) }.ToImmutableArray();
-            frameIndexes = new int[] { 0 }.ToImmutableArray();
         }
 
         /// <summary>
@@ -259,7 +260,7 @@
                 if (LoopCount != 0 && completeLoops >= LoopCount)
                 {
                     // We have reached the end of looping, and thus want the final frame.
-                    frame = durations.Length - 1;
+                    frame = FrameCount - 1;
                 }
                 else
                 {
@@ -276,7 +277,10 @@
             }
 
             // Return the frame required.
-            return frameIndexes[frame];
+            if (frameIndexes != null)
+                return frameIndexes[frame];
+            else
+                return frame;
         }
 
         /// <summary>
