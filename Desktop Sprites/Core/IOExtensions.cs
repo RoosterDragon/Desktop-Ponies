@@ -26,7 +26,14 @@
         /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed.</exception>
         public static void ReadExact(this Stream stream, byte[] buffer, int offset, int count)
         {
-            if (Argument.EnsureNotNull(stream, "stream").Read(buffer, offset, count) != count)
+            Argument.EnsureNotNull(stream, "stream");
+            while (count > 0)
+            {
+                int bytesRead = stream.Read(buffer, offset, count);
+                offset += bytesRead;
+                count -= bytesRead;
+            }
+            if (count > 0)
                 throw InsufficientDataAvailableException();
         }
         /// <summary>
@@ -47,7 +54,14 @@
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
         public static void ReadExact(this BinaryReader reader, byte[] buffer, int index, int count)
         {
-            if (Argument.EnsureNotNull(reader, "reader").Read(buffer, index, count) != count)
+            Argument.EnsureNotNull(reader, "reader");
+            while (count > 0)
+            {
+                int bytesRead = reader.Read(buffer, index, count);
+                index += bytesRead;
+                count -= bytesRead;
+            }
+            if (count > 0)
                 throw InsufficientDataAvailableException();
         }
         /// <summary>
@@ -68,7 +82,14 @@
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
         public static void ReadExact(this BinaryReader reader, char[] buffer, int index, int count)
         {
-            if (Argument.EnsureNotNull(reader, "reader").Read(buffer, index, count) != count)
+            Argument.EnsureNotNull(reader, "reader");
+            while (count > 0)
+            {
+                int bytesRead = reader.Read(buffer, index, count);
+                index += bytesRead;
+                count -= bytesRead;
+            }
+            if (count > 0)
                 throw InsufficientDataAvailableException();
         }
         /// <summary>
