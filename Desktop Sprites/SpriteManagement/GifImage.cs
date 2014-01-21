@@ -357,6 +357,11 @@
                 /// </summary>
                 public void IncrementX()
                 {
+                    if (valuesPerByte == 1)
+                    {
+                        index++;
+                        return;
+                    }
                     shift -= bitsPerValue;
                     if (shift >= 0)
                     {
@@ -381,18 +386,14 @@
                     if (valuesPerByte == 1)
                     {
                         index = seek;
-                        // Initial values of the other fields are set for the case where values are simply retrieved from the buffer
-                        // without modification, since they need not change with position.
+                        return;
                     }
-                    else
-                    {
-                        index = seek / valuesPerByte;
-                        startShift = 8 - bitsPerValue;
-                        shift = startShift - bitsPerValue * (seek % valuesPerByte);
-                        lowMask = (byte)(byte.MaxValue >> startShift);
-                        highMask = (byte)(lowMask << startShift);
-                        currentMask = (byte)(lowMask << shift);
-                    }
+                    index = seek / valuesPerByte;
+                    startShift = 8 - bitsPerValue;
+                    shift = startShift - bitsPerValue * (seek % valuesPerByte);
+                    lowMask = (byte)(byte.MaxValue >> startShift);
+                    highMask = (byte)(lowMask << startShift);
+                    currentMask = (byte)(lowMask << shift);
                 }
                 /// <summary>
                 /// Gets the value at the current position of the iterator.
@@ -409,6 +410,11 @@
                 /// </param>
                 public void SetValue(byte value)
                 {
+                    if (valuesPerByte == 1)
+                    {
+                        buffer[index] = value;
+                        return;
+                    }
                     buffer[index] &= (byte)(~currentMask);
                     buffer[index] |= (byte)(value << shift);
                 }
@@ -789,6 +795,169 @@
         }
         #endregion
 
+        #region LzwDictionary class
+        /// <summary>
+        /// Processes LZW codes, providing decoded bytes.
+        /// </summary>
+        private class LzwDictionary
+        {
+            /// <summary>
+            /// Indicates the result of processing a code.
+            /// </summary>
+            public enum Result
+            {
+                /// <summary>
+                /// The end of information from the stream has been reached.
+                /// </summary>
+                EndOfInformation,
+                /// <summary>
+                /// The dictionary was reset.
+                /// </summary>
+                Cleared,
+                /// <summary>
+                /// The first code was processed and the value was pushed to the stack.
+                /// </summary>
+                FirstCode,
+                /// <summary>
+                /// A code was processed and the codeword values were pushed into the stack.
+                /// </summary>
+                PushedCodeword
+            }
+            // The values read in are variable length codewords, which can be of any length.
+            // The GIF specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
+            // Thus we need to maintain a dictionary of up to 4096 codewords (which each can be of any length).
+            // These codewords have a property that make them easy to store however.
+            // If some word w plus some character c is in the dictionary, then the word w will be in the dictionary.
+            // Thus the prefix word w can be used to lookup the character at the end of its length.
+            // The suffix character c on this word maps to an actual value that is added to the pixel stack.
+            /// <summary>
+            /// The lookup array of "prefix" words. The value is the index of the "suffix" character at the end of the given codeword.
+            /// </summary>
+            private short[] prefix = new short[MaxCodeWords];
+            /// <summary>
+            /// The lookup array of "suffix" characters. This holds the actual decompressed byte value for the given code character.
+            /// </summary>
+            private byte[] suffix = new byte[MaxCodeWords];
+            /// <summary>
+            /// This index indicates the first unused index in the dictionary.
+            /// </summary>
+            public short Available { get; private set; }
+            /// <summary>
+            /// Stores the root character at the end of a codeword.
+            /// </summary>
+            private byte rootCode;
+            /// <summary>
+            /// The clear code is the first available unused code. We will use values below this as root characters in the dictionary.
+            /// </summary>
+            private short clearCode;
+            /// <summary>
+            /// The last code added to the dictionary.
+            /// </summary>
+            private short codeLastAdded;
+
+            /// <summary>
+            /// Initializes a new instance of <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.LzwDictionary"/>.
+            /// </summary>
+            /// <param name="minimumCodeSize">The minimum length of codes in bits.</param>
+            public LzwDictionary(byte minimumCodeSize)
+            {
+                clearCode = (short)(1 << minimumCodeSize);
+                // Initialize table with root characters.
+                for (short i = 0; i < clearCode; i++)
+                {
+                    prefix[i] = 0;
+                    suffix[i] = (byte)i;
+                }
+                Reset();
+            }
+            /// <summary>
+            /// Resets the dictionary.
+            /// </summary>
+            private void Reset()
+            {
+                Available = (short)(clearCode + 2);
+                codeLastAdded = -1;
+            }
+            /// <summary>
+            /// Processes an incoming code, potentially adding it to the dictionary. If the code is not special, the codeword it represents
+            /// will be decoded into the given stack buffer.
+            /// </summary>
+            /// <param name="code">The new code to process.</param>
+            /// <param name="stack">A stack into which a decoded codeword should reside.</param>
+            /// <param name="stackIndex">The index to the first free element in the stack.</param>
+            /// <returns>The result of processing the code.</returns>
+            public Result ProcessCode(short code, byte[] stack, ref int stackIndex)
+            {
+                // Indicates the end of input data.
+                if (code > Available || code == clearCode + 1)
+                    return Result.EndOfInformation;
+
+                // A clear code means the decoder dictionary should be reset.
+                if (code == clearCode)
+                {
+                    Reset();
+                    return Result.Cleared;
+                }
+
+                // Record the first code after an initialization/reset.
+                if (codeLastAdded == -1)
+                {
+                    stack[stackIndex++] = suffix[code];
+                    codeLastAdded = code;
+                    rootCode = (byte)code;
+                    return Result.FirstCode;
+                }
+
+                DecompressCodeword(code, stack, ref stackIndex);
+                Add(code);
+                return Result.PushedCodeword;
+            }
+            /// <summary>
+            /// Decodes the the codeword the given code represents into the given stack buffer.
+            /// </summary>
+            /// <param name="code">The code.</param>
+            /// <param name="stack">A stack into which a decoded codeword should reside.</param>
+            /// <param name="stackIndex">The index to the first free element in the stack.</param>
+            private void DecompressCodeword(short code, byte[] stack, ref int stackIndex)
+            {
+                // Handle the case where a code word was not yet defined. This only happens in one special case.
+                // Given string s and character c, this happens only when we see the sequence s.c.s.c.s and the word s.c was already in
+                // the dictionary beforehand.
+                if (code == Available)
+                {
+                    stack[stackIndex++] = rootCode;
+                    code = codeLastAdded;
+                }
+                // Enumerate through the code word and push values to the stack.
+                while (code > clearCode)
+                {
+                    stack[stackIndex++] = suffix[code];
+                    code = prefix[code];
+                }
+                // Record and push the root character to the stack.
+                rootCode = suffix[code];
+                stack[stackIndex++] = rootCode;
+            }
+            /// <summary>
+            /// Adds a code to the dictionary.
+            /// </summary>
+            /// <param name="code">The code to add.</param>
+            private void Add(short code)
+            {
+                // Add words to the dictionary whilst it is not full.
+                // If it is full, we keep the same dictionary until we are reset.
+                if (Available < MaxCodeWords)
+                {
+                    // Add a new word to the dictionary.
+                    prefix[Available] = codeLastAdded;
+                    suffix[Available] = rootCode;
+                    Available++;
+                }
+                codeLastAdded = code;
+            }
+        }
+        #endregion
+
         #region LogicalScreenDescriptor class
         /// <summary>
         /// Provides a description of the image dimensions and global color table.
@@ -911,7 +1080,9 @@
             internal GraphicControlExtension(
                 DisposalMethod disposalMethod, bool userInputFlag, bool transparencyFlag, ushort delayTime, byte transparentColorIndex)
             {
-                Argument.EnsureEnumIsValid(disposalMethod, "disposalMethod");
+                if (disposalMethod > DisposalMethod.RestorePrevious)
+                    throw new System.ComponentModel.InvalidEnumArgumentException(
+                        "disposalMethod", (byte)disposalMethod, typeof(DisposalMethod));
 
                 DisposalMethod = disposalMethod;
                 UserInputExpected = userInputFlag;
@@ -1030,6 +1201,10 @@
             get { return Size.Height; }
         }
 
+        /// <summary>
+        /// The maximum number of codewords that can occur according to the GIF specification.
+        /// </summary>
+        private const int MaxCodeWords = 4096;
         /// <summary>
         /// Accesses the input stream being decoded.
         /// </summary>
@@ -1621,8 +1796,6 @@
             // Image pixel position data.
             int left = imageDescriptor.Subframe.Left;
             int top = imageDescriptor.Subframe.Top;
-            int right = imageDescriptor.Subframe.Right;
-            int bottom = imageDescriptor.Subframe.Bottom;
             // Iterator that will allow the subframe region to be traversed efficiently.
             DataBuffer.Iterator iterator = frameBuffer.GetIterator(left, top);
             // Index used for the transparent pixel, or -1 is transparency is not in use.
@@ -1630,178 +1803,141 @@
             // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
-
-            // The values read in are variable length codewords, which can be of any length.
-            // The GIF specification sets a maximum code size of 12, and thus a maximum codeword count of 2^12 = 4096.
-            // Thus we need to maintain a dictionary of up to 4096 codewords (which each can be of any length).
-            // These codewords have a property that make them easy to store however.
-            // If some word w plus some character c is in the dictionary, then the word w will be in the dictionary.
-            // Thus the prefix word w can be used to lookup the character at the end of its length.
-            // The suffix character c on this word maps to an actual value that is added to the pixel stack.
-
-            // The maximum number of codewords that can occur according to the GIF specification.
-            const int MaxCodeWords = 4096;
-            // The lookup array of "prefix" words. The value is the index of the "suffix" character at the end of the given codeword.
-            short[] prefix = new short[MaxCodeWords];
-            // The lookup array of "suffix" characters. This holds the actual decompressed byte value for the given code character.
-            byte[] suffix = new byte[MaxCodeWords];
+            
             // This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
             byte[] pixelStack = new byte[MaxCodeWords + 1];
+            // Variable for the next available index in the stack.
+            int stackIndex = 0;
 
-            // Indicates a null codeword.
-            const int NullCode = -1;
-            // The clear code is the first available unused code. We will use values below this as root characters in the dictionary.
-            int clearCode = 1 << lzwMinimumCodeSize;
-            // This code indicates the end of LZW compressed information.
-            int endOfInformation = clearCode + 1;
-            // This index indicates the first unused index in the dictionary.
-            int available = clearCode + 2;
+            // Dictionary maintaining codewords.
+            LzwDictionary dictionary = new LzwDictionary(lzwMinimumCodeSize);
             // The size of codes being read in, in bits.
             int codeSize = lzwMinimumCodeSize + 1;
             // The mask used to get the current code from the bit buffer.
             int codeMask = (1 << codeSize) - 1;
-            // Stores the old codeword.
-            int oldCode = NullCode;
-            // Stores the root character at the end of a codeword.
-            byte rootCode = 0;
 
             // Variables managing the data block buffer from which data is read in.
-            int blockIndex = 0;
-            int bytesLeftInBlock = 0;
             int bitsBuffered = 0;
             int bitBuffer = 0;
-            // Variable for the next available index in the stack.
-            int stackIndex = 0;
-
-            // Initialize table with root characters.
-            for (int i = 0; i < clearCode; i++)
-            {
-                prefix[i] = 0;
-                suffix[i] = (byte)i;
-            }
+            int blockIndex = 0;
+            int bytesLeftInBlock = 0;
             #endregion
 
             #region Decode GIF pixel stream.
             bool skipDataSubBlocks = true;
-            for (int pixelIndex = 0; pixelIndex < right * bottom; )
+            bool subframeComplete = false;
+            while (true)
             {
-                // Read some values into the pixel stack as it is empty.
-                if (stackIndex == 0)
+                // Buffer enough bits to read a code.
+                if (BufferBits(codeSize, ref bitsBuffered, ref bitBuffer, ref bytesLeftInBlock, ref blockIndex))
                 {
-                    #region Read in another byte from the block buffer if we need more bits.
-                    if (bitsBuffered < codeSize)
-                    {
-                        // Read in a new data block if we exhausted the block buffer.
-                        if (bytesLeftInBlock == 0)
-                        {
-                            // Get size of the next data block.
-                            bytesLeftInBlock = reader.ReadByte();
-                            // If we happen to read the block terminator, we are done reading image data.
-                            if (bytesLeftInBlock == 0)
-                            {
-                                // No need to skip remaining blocks, since we happened to read the terminator ourselves.
-                                skipDataSubBlocks = false;
-                                break;
-                            }
-                            // Read the data block of given size.
-                            reader.ReadExact(block, 0, bytesLeftInBlock);
-                            blockIndex = 0;
-                        }
-                        bitBuffer += (int)block[blockIndex++] << bitsBuffered;
-                        bitsBuffered += 8;
-                        bytesLeftInBlock--;
-                        continue;
-                    }
-                    #endregion
-
-                    // Get the next code from out bit buffer.
-                    int code = bitBuffer & codeMask;
-                    bitBuffer >>= codeSize;
-                    bitsBuffered -= codeSize;
-
-                    #region Interpret special codes.
-                    // Indicates the end of input data.
-                    if (code > available || code == endOfInformation)
-                        break;
-
-                    // A clear code means the decoder dictionary should be reset.
-                    if (code == clearCode)
-                    {
-                        codeSize = lzwMinimumCodeSize + 1;
-                        codeMask = (1 << codeSize) - 1;
-                        available = clearCode + 2;
-                        oldCode = NullCode;
-                        continue;
-                    }
-
-                    // Record the first code after an initialization/reset.
-                    if (oldCode == NullCode)
-                    {
-                        pixelStack[stackIndex++] = suffix[code];
-                        oldCode = code;
-                        rootCode = (byte)code;
-                        continue;
-                    }
-                    #endregion
-
-                    // Save the code we read in.
-                    // We will be using the code variable as an indexer to move through the word.
-                    int inCode = code;
-
-                    #region Get codeword values and push them to the stack.
-                    // Handle the case where a code word was not yet defined. This only happens in one special case.
-                    // Given string s and character c, this happens only when we see the sequence s.c.s.c.s and the word s.c was already in
-                    // the dictionary beforehand.
-                    if (code == available)
-                    {
-                        pixelStack[stackIndex++] = rootCode;
-                        code = oldCode;
-                    }
-                    // Enumerate through the code word and push values to the stack.
-                    while (code > clearCode)
-                    {
-                        pixelStack[stackIndex++] = suffix[code];
-                        code = prefix[code];
-                    }
-                    // Record and push the root character to the stack.
-                    rootCode = suffix[code];
-                    pixelStack[stackIndex++] = rootCode;
-                    #endregion
-
-                    #region Add a new codeword to the dictionary.
-                    // Add words to the dictionary whilst it is not full.
-                    // If it is full, we keep the same dictionary until the encoder sends a clear code.
-                    if (available < MaxCodeWords)
-                    {
-                        // Add a new word to the dictionary.
-                        prefix[available] = (short)oldCode;
-                        suffix[available] = rootCode;
-                        available++;
-
-                        // Increase the code size if the number of available codes now exceeds the number addressable by the current size.
-                        if (available < MaxCodeWords && (available & codeMask) == 0)
-                        {
-                            codeSize++;
-                            codeMask += available;
-                        }
-                    }
-                    #endregion
-
-                    // Note the previous codeword.
-                    oldCode = inCode;
+                    // No need to skip remaining blocks, since we happened to read the terminator ourselves.
+                    skipDataSubBlocks = false;
+                    break;
                 }
 
-                #region Pop a pixel off the pixel stack.
+                // Get the next code from our bit buffer.
+                short code = (short)(bitBuffer & codeMask);
+                bitBuffer >>= codeSize;
+                bitsBuffered -= codeSize;
+
+                // Process the code, pushing the codeword onto the pixel stack.
+                switch (dictionary.ProcessCode(code, pixelStack, ref stackIndex))
+                {
+                    case LzwDictionary.Result.EndOfInformation:
+                        subframeComplete = true;
+                        break;
+                    case LzwDictionary.Result.Cleared:
+                        codeSize = lzwMinimumCodeSize + 1;
+                        codeMask = (1 << codeSize) - 1;
+                        break;
+                    case LzwDictionary.Result.FirstCode:
+                        continue;
+                    case LzwDictionary.Result.PushedCodeword:
+                        // Increase the code size if the number of available codes now exceeds the number addressable by the current size.
+                        if (dictionary.Available < MaxCodeWords && (dictionary.Available & codeMask) == 0)
+                        {
+                            codeSize++;
+                            codeMask += dictionary.Available;
+                        }
+                        break;
+                }
+
+                // Flush the pixel stack and write resulting pixel values to the frame buffer.
+                if (!subframeComplete)
+                    subframeComplete = ApplyStackToFrame(pixelStack, ref stackIndex, 
+                        imageDescriptor, ref left, ref top, ref interlacePass, ref yIncrement,
+                        iterator, transparentIndex);
+            }
+            #endregion
+
+            // Read block terminator (and any trailing sub-blocks, though there should not be any).
+            if (skipDataSubBlocks)
+                SkipDataSubBlocks();
+        }
+        /// <summary>
+        /// Buffers bit until sufficient bits are available to process a code. If required, will read the next data block from the stream.
+        /// </summary>
+        /// <param name="codeSize">The number of bits currently required for codes.</param>
+        /// <param name="bitsBuffered">The number of bits currently buffered.</param>
+        /// <param name="bitBuffer">The bit buffer.</param>
+        /// <param name="bytesLeftInBlock">The number of bytes left in the data block.</param>
+        /// <param name="blockIndex">The index into the current data block from which bits are being streamed.</param>
+        /// <returns>Returns true if the block terminator was read, and the image stream has therefore ended; otherwise, false.</returns>
+        private bool BufferBits(int codeSize, ref int bitsBuffered, ref int bitBuffer, ref int bytesLeftInBlock, ref int blockIndex)
+        {
+            while (bitsBuffered < codeSize)
+            {
+                // Read in a new data block if we exhausted the block buffer.
+                if (bytesLeftInBlock == 0)
+                {
+                    // Get size of the next data block.
+                    bytesLeftInBlock = reader.ReadByte();
+                    // If we happen to read the block terminator, we are done reading image data.
+                    if (bytesLeftInBlock == 0)
+                        return true;
+                    // Read the data block of given size.
+                    reader.ReadExact(block, 0, bytesLeftInBlock);
+                    blockIndex = 0;
+                }
+                bitBuffer += (int)block[blockIndex++] << bitsBuffered;
+                bitsBuffered += 8;
+                bytesLeftInBlock--;
+            }
+            return false;
+        }
+        /// <summary>
+        /// Applies the current stack of pixels onto the frame buffer.
+        /// </summary>
+        /// <param name="pixelStack">A stack of pixel indexes to apply to the frame buffer.</param>
+        /// <param name="stackIndex">The index to the first free element in the stack.</param>
+        /// <param name="imageDescriptor">An <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.ImageDescriptor"/> describing the
+        /// subframe.</param>
+        /// <param name="left">A variable tracking the x-coordinate on the frame.</param>
+        /// <param name="top">A variable tracking the y-coordinate on the frame.</param>
+        /// <param name="interlacePass">A variable tracking the current interlacing pass.</param>
+        /// <param name="yIncrement">A variable tracking the amount to increment the y-coordinate by for interlaced passes.</param>
+        /// <param name="iterator">An iterator for setting values within the frame buffer.</param>
+        /// <param name="transparentIndex">The index for transparent pixels.</param>
+        /// <returns>Returns true if the frame buffer has been filled.</returns>
+        private bool ApplyStackToFrame(byte[] pixelStack, ref int stackIndex,
+            ImageDescriptor imageDescriptor, ref int left, ref int top, ref int interlacePass, ref int yIncrement,
+            DataBuffer.Iterator iterator, int transparentIndex)
+        {
+            int right = imageDescriptor.Subframe.Right;
+            while (stackIndex > 0)
+            {
                 // Apply pixel to our buffers.
                 byte pixel = pixelStack[--stackIndex];
                 if (pixel != transparentIndex)
                     ApplyPixelToFrame(iterator, pixel);
-                pixelIndex++;
 
-                // Move right one pixel.
-                left++;
-                iterator.IncrementX();
-                if (left >= right)
+                if (++left < right)
+                {
+                    // Move right one pixel.
+                    iterator.IncrementX();
+                }
+                else
                 {
                     // Move to next row. If we're not interlacing this just means the next row.
                     // If interlacing, we must fill in every 8th row, then every 4th, then every 2nd then every other row.
@@ -1810,6 +1946,7 @@
                     iterator.SetPosition(left, top);
 
                     // If we reached the end of this interlacing pass, go back to the top and fill in every row between the current rows.
+                    int bottom = imageDescriptor.Subframe.Bottom;
                     if (imageDescriptor.Interlaced && top >= bottom)
                     {
                         #region Choose next interlacing line.
@@ -1834,14 +1971,12 @@
                         while (top >= bottom);
                         #endregion
                     }
-                }
-                #endregion
-            }
-            #endregion
 
-            // Read block terminator (and any trailing sub-blocks, though there should not be any).
-            if (skipDataSubBlocks)
-                SkipDataSubBlocks();
+                    if (top >= bottom)
+                        return true;
+                }
+            }
+            return false;
         }
         /// <summary>
         /// Uses a value from the subframe and applies it onto the frame buffer.
@@ -1970,7 +2105,7 @@
         /// <summary>
         /// The color table used for the image.
         /// </summary>
-        private readonly ImmutableArray<RgbColor> colorTable;
+        private readonly RgbColor[] colorTable;
         /// <summary>
         /// The index of the transparent color in the <see cref="F:DesktopSprites.SpriteManagement.GifFrame`1.colorTable"/>, or -1 to
         /// indicate no transparent color.
@@ -1989,7 +2124,7 @@
         {
             Image = frame;
             Duration = duration;
-            this.colorTable = colorTable.ToImmutableArray();
+            this.colorTable = colorTable;
             this.transparentIndex = transparentIndex;
         }
         /// <summary>
