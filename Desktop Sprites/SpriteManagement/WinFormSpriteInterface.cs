@@ -1095,7 +1095,7 @@
                 {
                     parallelBlend = new Barrier(parallelBlendTotalSections);
                     for (int i = 0; i < parallelBlendThreads; i++)
-                        new Thread(o => AlphaBlendWorker(o)).Start(i);
+                        new Thread(AlphaBlendWorker) { Name = "WinFormSpriteInterface.AlphaBlendWorker" }.Start(i);
                 }
 
                 Monitor.Wait(appInitiated);
