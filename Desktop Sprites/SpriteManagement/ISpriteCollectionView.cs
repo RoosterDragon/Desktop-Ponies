@@ -94,6 +94,10 @@
         /// Gets a value indicating whether the interface has input focus.
         /// </summary>
         bool HasFocus { get; }
+        /// <summary>
+        /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.
+        /// </summary>
+        BufferPreprocess BufferPreprocess { get; set; }
 
         /// <summary>
         /// Occurs when a key is pressed while the interface has focus.
@@ -218,4 +222,22 @@
         /// </summary>
         Right = 4,
     }
+
+    /// <summary>
+    /// Defines a function that takes a decoded GIF buffer and applies a transformation. Any specified restrictions must be maintained by
+    /// the transforming function.
+    /// </summary>
+    /// <param name="buffer">The values that make up the image. The buffer is of logical size stride * height. It is of physical size
+    /// stride * height * depth / 8.</param>
+    /// <param name="palette">The color palette for the image. Each value in the buffer is an index into the array. Note the size of the
+    /// palette can exceed the maximum size addressable by values in the buffer.</param>
+    /// <param name="transparentIndex">The index of the transparent color, or -1 to indicate no transparency. Where possible, this index in
+    /// the palette should be replaced by transparency in the resulting frame, or else some suitable replacement. The color value in the
+    /// palette for this index is undefined.</param>
+    /// <param name="stride">The stride width, in bytes, of the buffer.</param>
+    /// <param name="width">The logical width of the image the buffer contains.</param>
+    /// <param name="height">The logical height of the image the buffer contains.</param>
+    /// <param name="depth">The bit depth of the buffer (either 1, 2, 4 or 8).</param>
+    public delegate void BufferPreprocess(
+    ref byte[] buffer, ref RgbColor[] palette, ref int transparentIndex, ref int stride, ref int width, ref int height, ref byte depth);
 }

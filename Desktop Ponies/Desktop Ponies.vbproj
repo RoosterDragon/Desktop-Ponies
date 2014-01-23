@@ -132,6 +132,7 @@
     <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DesktopPonies\GifProcessing.vb" />
     <Compile Include="DesktopPonies\MainWindow.vb" />
     <Compile Include="Program.vb" />
     <Compile Include="Core\BufferedCheckedListBox.vb">

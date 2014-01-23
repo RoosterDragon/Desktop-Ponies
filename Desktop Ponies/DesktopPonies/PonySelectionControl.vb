@@ -28,6 +28,7 @@ Public Class PonySelectionControl
             End If
         End Set
     End Property
+    Private originalImageSize As Size
     Private imageSize As Size
     Private timeIndex As TimeSpan
     Private flip As Boolean
@@ -47,11 +48,11 @@ Public Class PonySelectionControl
         PonyBase = ponyTemplate
         PonyName.Text = PonyBase.Directory
         Try
-            imageSize = DesktopSprites.Core.ImageSize.GetSize(imagePath)
+            originalImageSize = DesktopSprites.Core.ImageSize.GetSize(imagePath)
         Catch ex As Exception
             ' Leave size empty if it cannot be determined.
         End Try
-        imageSize = New Size(CInt(imageSize.Width * Options.ScaleFactor), CInt(imageSize.Height * Options.ScaleFactor))
+        imageSize = New Size(CInt(originalImageSize.Width * Options.ScaleFactor), CInt(originalImageSize.Height * Options.ScaleFactor))
         flip = flipImage
 
         Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadImage, imagePath)
@@ -62,8 +63,13 @@ Public Class PonySelectionControl
     Private Sub LoadImage(imagePath As Object)
         Try
             PonyImage = New AnimatedImage(Of BitmapFrame)(
-                                                       imagePath.ToString(), Function(file As String) New BitmapFrame(file),
-                                                       BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths)
+                imagePath.ToString(), Function(file As String) New BitmapFrame(file),
+                Function(buffer As Byte(), palette As RgbColor(), transparentIndex As Integer,
+                         stride As Integer, width As Integer, height As Integer, depth As Byte)
+                    GifProcessing.LosslessDownscale(buffer, palette, transparentIndex, stride, width, height, depth)
+                    Return BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth)
+                End Function,
+                BitmapFrame.AllowableBitDepths)
             Threading.Thread.MemoryBarrier()
         Catch ex As Exception
             ' Do without an image if it failed to load.
@@ -96,7 +102,7 @@ Public Class PonySelectionControl
 
     Public Sub ResizeToFit()
         If PonyImage IsNot Nothing Then imageSize =
-            New Size(CInt(PonyImage.Width * Options.ScaleFactor), CInt(PonyImage.Height * Options.ScaleFactor))
+            New Size(CInt(originalImageSize.Width * Options.ScaleFactor), CInt(originalImageSize.Height * Options.ScaleFactor))
         Dim nameWidth = TextRenderer.MeasureText(PonyName.Text, PonyName.Font).Width + PonyName.Margin.Horizontal
         Dim borderSize = Forms.GetBorderSize(BorderStyle)
 

@@ -330,6 +330,7 @@ Public NotInheritable Class Options
             viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface()
         End If
         viewer.ShowInTaskbar = ShowInTaskbar
+        viewer.BufferPreprocess = AddressOf GifProcessing.LosslessDownscale
         Return viewer
     End Function
 

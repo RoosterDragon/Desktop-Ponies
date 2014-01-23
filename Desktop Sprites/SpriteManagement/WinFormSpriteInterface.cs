@@ -432,39 +432,39 @@
         private sealed class ImageData : Disposable
         {
             /// <summary>
-            /// A GDI+ bitmap of the image. This will be null if the image is instead made up of an indexed array and color palette.
+            /// Gets the GDI+ bitmap of the image. This will be null if the image is instead made up of an indexed array and color palette.
             /// </summary>
-            public readonly Bitmap Bitmap;
+            public Bitmap Bitmap { get; private set; }
             /// <summary>
-            /// An indexed array of image data. Each value refers to an index in the color palette. This will be null if the image is
+            /// Gets the indexed array of image data. Each value refers to an index in the color palette. This will be null if the image is
             /// instead made up of a bitmap.
             /// </summary>
-            public byte[] Data;
+            public byte[] Data { get; private set; }
             /// <summary>
-            /// An array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
+            /// Gets the array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
             /// instead made up of a bitmap.
             /// </summary>
-            public readonly int[] ArgbPalette;
+            public int[] ArgbPalette { get; private set; }
             /// <summary>
-            /// The width of the image, in pixels.
+            /// Gets the width of the image, in pixels.
             /// </summary>
-            public int Width;
+            public int Width { get; private set; }
             /// <summary>
-            /// The height of the image, in pixels.
+            /// Gets the height of the image, in pixels.
             /// </summary>
-            public int Height;
+            public int Height { get; private set; }
             /// <summary>
-            /// The stride width of the image, in bytes.
+            /// Gets the stride width of the image, in bytes.
             /// </summary>
-            public int Stride;
-            /// <summary>
-            /// A hash code for the image.
-            /// </summary>
-            private readonly int hashCode;
+            public int Stride { get; private set; }
             /// <summary>
             /// Gets the bit depth of the image, either 8bbp or 4bbp. Does not apply for bitmaps.
             /// </summary>
             public byte Depth { get; private set; }
+            /// <summary>
+            /// A hash code for the image.
+            /// </summary>
+            private readonly int hashCode;
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
             /// loading a GDI+ bitmap from file.
@@ -491,17 +491,15 @@
             /// <param name="width">The width of the image, in pixels.</param>
             /// <param name="height">The height of the image, in pixels.</param>
             /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
-            /// <param name="hashCode">A pre-generated hash code for the image.</param>
             /// <param name="paletteCache">The cache of color palettes, so that the new palette can be shared among images.</param>
             public ImageData(byte[] data, RgbColor[] palette, int transparentIndex,
-                int stride, int width, int height, byte depth, int hashCode, Dictionary<int[], int[]> paletteCache)
+                int stride, int width, int height, byte depth, Dictionary<int[], int[]> paletteCache)
             {
                 Data = data;
-                Height = height;
-                Width = width;
                 Stride = stride;
+                Width = width;
+                Height = height;
                 Depth = depth;
-                this.hashCode = hashCode;
                 ArgbPalette = new int[palette.Length];
                 for (int i = 0; i < ArgbPalette.Length; i++)
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
@@ -509,112 +507,7 @@
                     ArgbPalette[transparentIndex] = new ArgbColor().ToArgb();
                 lock (paletteCache)
                     ArgbPalette = paletteCache.GetOrAdd(ArgbPalette, ArgbPalette);
-                TryDownscale();
-            }
-            /// <summary>
-            /// Attempts to downscale the image by a factor of 2, if this is a lossless transformation. This is to save on memory.
-            /// TODO: This is an overly specific to Desktop Ponies images hack - and should be moved into the assembly somehow.
-            /// </summary>
-            private void TryDownscale()
-            {
-                // Need image dimensions to be multiples of 2.
-                if (Width % 2 != 0 || Height % 2 != 0)
-                    return;
-                if (Depth == 8)
-                    TryDownscale8bbp();
-                else
-                    TryDownscale4bbp();
-            }
-            /// <summary>
-            /// Attempts to downscale an 8bbp encoded image by a factor of 2, if this is a lossless transformation.
-            /// </summary>
-            private void TryDownscale8bbp()
-            {
-                // Ensure each 2x2 block contains the same value.
-                int yMax = Height - 1;
-                for (int y = 0; y < yMax; y += 2)
-                {
-                    int currentRow = y * Stride;
-                    int nextRow = (y + 1) * Stride;
-                    int xMax = Stride - 1;
-                    for (int x = 0; x < xMax; x += 2)
-                    {
-                        int xPlusOne = x + 1;
-                        byte topLeft = Data[currentRow + x];
-                        if (topLeft != Data[currentRow + xPlusOne] ||
-                            topLeft != Data[nextRow + x] ||
-                            topLeft != Data[nextRow + xPlusOne])
-                            return;
-                    }
-                }
-
-                // We can downscale this image!
-                int newHeight = Height / 2;
-                int newWidth = Width / 2;
-                byte[] newData = new byte[newWidth * newHeight];
-                for (int y = 0; y < newHeight; y++)
-                {
-                    int newDataRow = y * newWidth;
-                    int dataRow = y * 2 * Stride;
-                    for (int x = 0; x < newWidth; x++)
-                        newData[newDataRow + x] = Data[dataRow + x * 2];
-                }
-
-                // Override with new data.
-                Data = newData;
-                Stride = Stride / 2;
-                Height = newHeight;
-                Width = newWidth;
-            }
-            /// <summary>
-            /// Attempts to downscale a 4bbp encoded image by a factor of 2, if this is a lossless transformation.
-            /// </summary>
-            private void TryDownscale4bbp()
-            {
-                // Ensure each 2x2 block contains the same value.
-                int yMax = Height - 1;
-                for (int y = 0; y < yMax; y += 2)
-                {
-                    int currentRow = y * Stride;
-                    int nextRow = (y + 1) * Stride;
-                    for (int x = 0; x < Stride; x++)
-                    {
-                        byte top = Data[currentRow + x];
-                        byte bottom = Data[nextRow + x];
-                        int topLeft = top >> 4;
-                        if (topLeft != (top & 0xF) ||
-                            topLeft != bottom >> 4 ||
-                            topLeft != (bottom & 0xF))
-                            return;
-                    }
-                }
-
-                // We can downscale this image!
-                int newStride = (int)Math.Ceiling(Stride / 2f);
-                int newHeight = Height / 2;
-                int newWidth = Width / 2;
-                bool aligned = newWidth % 2 == 0;
-                byte[] newData = new byte[newStride * newHeight];
-                for (int y = 0; y < newHeight; y++)
-                {
-                    int newDataRow = y * newStride;
-                    int dataRow = y * 2 * Stride;
-                    for (int x = 0; x < newStride; x++)
-                    {
-                        int oldIndex = dataRow + x * 2;
-                        int a = Data[oldIndex] >> 4;
-                        int b = 0;
-                        if (aligned || x * 2 + 1 < newWidth)
-                            b = Data[oldIndex + 1] >> 4;
-                        newData[newDataRow + x] = (byte)(a << 4 | b);
-                    }
-                }
-
-                // Override with new data.
-                Data = newData;
-                Stride = newStride;
-                Height = newHeight;
-                Width = newWidth;
+                hashCode = GifImage.GetHash(data, palette, transparentIndex, width, height);
             }
             /// <summary>
             /// Returns a hash code for this <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class.
@@ -724,8 +617,9 @@
             /// </summary>
             public static readonly ArgbPaletteEqualityComparer Instance = new ArgbPaletteEqualityComparer();
             /// <summary>
-            ///Initializes a new instance of the
-            ///<see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ArgbPaletteEqualityComparer"/> class.
+            /// Prevents a default instance of the
+            /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ArgbPaletteEqualityComparer"/> class from being
+            /// created.
             /// </summary>
             private ArgbPaletteEqualityComparer()
             {
@@ -827,11 +721,11 @@
         /// <summary>
         /// Number of additional threads used for parallel blending operations.
         /// </summary>
-        private static readonly int parallelBlendThreads = Environment.ProcessorCount - 1;
+        private static readonly int ParallelBlendThreads = Environment.ProcessorCount - 1;
         /// <summary>
         /// Number of threads total used for parallel blending operations (additional threads plus the main thread).
         /// </summary>
-        private static readonly int parallelBlendTotalSections = parallelBlendThreads + 1;
+        private static readonly int ParallelBlendTotalSections = ParallelBlendThreads + 1;
         /// <summary>
         /// The current image to be blended in parallel.
         /// </summary>
@@ -972,6 +866,10 @@
         {
             get { return Form.ActiveForm == form; }
         }
+        /// <summary>
+        /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.
+        /// </summary>
+        public BufferPreprocess BufferPreprocess { get; set; }
         #endregion
 
         #region Events
@@ -1085,16 +983,16 @@
                 images = new LazyDictionary<string, AnimatedImage<ImageFrame>>(
                     fileName => new AnimatedImage<ImageFrame>(
                         fileName, ImageFrameFromFile,
-                        (b, p, tI, s, w, h, d, hC) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
+                        (b, p, tI, s, w, h, d) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, fileName),
                         ImageFrame.AllowableBitDepths));
                 render = new MethodInvoker(Render);
                 using (var family = FontFamily.GenericSansSerif)
                     font = new Font(family, 12, GraphicsUnit.Pixel);
                 postUpdateInvalidRegion.MakeEmpty();
-                if (parallelBlendThreads > 0)
+                if (ParallelBlendThreads > 0)
                 {
-                    parallelBlend = new Barrier(parallelBlendTotalSections);
-                    for (int i = 0; i < parallelBlendThreads; i++)
+                    parallelBlend = new Barrier(ParallelBlendTotalSections);
+                    for (int i = 0; i < ParallelBlendThreads; i++)
                         new Thread(AlphaBlendWorker) { Name = "WinFormSpriteInterface.AlphaBlendWorker" }.Start(i);
                 }
 
@@ -1184,15 +1082,16 @@
         /// <param name="width">The logical width of the buffer.</param>
         /// <param name="height">The logical height of the buffer.</param>
         /// <param name="depth">The bit depth of the buffer.</param>
-        /// <param name="hashCode">The hash code of the frame.</param>
         /// <param name="fileName">The path to the GIF file being loaded.</param>
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> for the frame held in the raw
         /// buffer.</returns>
         private ImageFrame ImageFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
-            int stride, int width, int height, byte depth, int hashCode, string fileName)
+            int stride, int width, int height, byte depth, string fileName)
         {
+            if (BufferPreprocess != null)
+                BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
             return Disposable.SetupSafely(
-                new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, hashCode, paletteCache)),
+                new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, paletteCache)),
                 frame =>
                 {
                     // Check for an alpha remapping table, and apply it if one exists.
@@ -1480,7 +1379,7 @@
             // Publish current image details.
             parallelBlendImage = image;
             parallelBlendArea = area;
-            parallelBlendSections = Math.Min(parallelBlendTotalSections, area.Height);
+            parallelBlendSections = Math.Min(ParallelBlendTotalSections, area.Height);
             Thread.MemoryBarrier();
             // Start work.
             parallelBlend.SignalAndWait();

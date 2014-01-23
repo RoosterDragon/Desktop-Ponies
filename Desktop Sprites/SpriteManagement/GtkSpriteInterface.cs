@@ -543,12 +543,11 @@
             /// <param name="width">The logical width of the buffer.</param>
             /// <param name="height">The logical height of the buffer.</param>
             /// <param name="depth">The bit depth of the buffer.</param>
-            /// <param name="hashCode">The hash code of the frame.</param>
             /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
             /// buffer.</returns>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 8.</exception>
             private static GtkFrame FromBufferMethod(
-                byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode)
+                byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth)
             {
                 if (depth != 8)
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 8.");
@@ -597,6 +596,8 @@
 
                 // Create the image from the data array.
                 frameImage.Image = new Pixbuf(data, true, 8, width, height, width * 4);
+
+                int hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
 
                 return new GtkFrame(frameImage, hashCode);
             }
@@ -1169,6 +1170,11 @@
         }
 
         /// <summary>
+        /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.
+        /// </summary>
+        public BufferPreprocess BufferPreprocess { get; set; }
+
+        /// <summary>
         /// Gets or sets the FrameRecordCollector for debugging purposes.
         /// </summary>
         internal AnimationLoopBase.FrameRecordCollector Collector { get; set; }
@@ -1323,7 +1329,7 @@
             images = new LazyDictionary<string, AnimatedImage<GtkFrame>>(
                 fileName => new AnimatedImage<GtkFrame>(
                     fileName, GtkFrameFromFile,
-                    (b, p, tI, s, w, h, d, hC) => GtkFrameFromBuffer(b, p, tI, s, w, h, d, hC, fileName),
+                    (b, p, tI, s, w, h, d) => GtkFrameFromBuffer(b, p, tI, s, w, h, d, fileName),
                     GtkFrame.AllowableBitDepths));
 
             dedicatedAppThread = startNewThread;
@@ -1397,14 +1403,15 @@
         /// <param name="width">The logical width of the buffer.</param>
         /// <param name="height">The logical height of the buffer.</param>
         /// <param name="depth">The bit depth of the buffer.</param>
-        /// <param name="hashCode">The hash code of the frame.</param>
         /// <param name="fileName">The path to the GIF file being loaded.</param>
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
         /// buffer.</returns>
         private GtkFrame GtkFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
-            int stride, int width, int height, byte depth, int hashCode, string fileName)
+            int stride, int width, int height, byte depth, string fileName)
         {
-            GtkFrame frame = GtkFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
+            if (BufferPreprocess != null)
+                BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
+            GtkFrame frame = GtkFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth);
             AlterPixbufForTransparency(fileName, frame.Image.Image);
             return frame;
         }

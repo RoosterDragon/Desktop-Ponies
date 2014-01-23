@@ -25,7 +25,6 @@
     /// <param name="width">The logical width of the image the buffer contains.</param>
     /// <param name="height">The logical height of the image the buffer contains.</param>
     /// <param name="depth">The bit depth of the buffer (either 1, 2, 4 or 8).</param>
-    /// <param name="hashCode">A pre-calculated hash code of the frame.</param>
     /// <returns>A new <typeparamref name="T"/> image, constructed from the given raw buffer and palette.</returns>
     /// <remarks>
     /// <para>The <see cref="T:DesktopSprites.SpriteManagement.GifImage`1"/> will decode an image into a low-level buffer and palette.
@@ -59,15 +58,13 @@
     /// // Apply the transparent color. We assume our theoretical color has an alpha channel.
     /// if(transparentIndex != -1)
     ///     frame.Palette[transparentIndex] = Color.Transparent;
-    ///     
-    /// // Should you require it, a pre-calculated hash code for the image is provided.
     /// 
     /// // The image is complete.
     /// return frame;
     /// ]]></code></example>
     /// </remarks>
     public delegate T BufferToImage<T>(
-    byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode);
+    byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth);
     #endregion
 
     /// <summary>
@@ -88,7 +85,7 @@
         /// The method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
         private static readonly BufferToImage<Bitmap> BufferToImageOfBitmapInternal =
-            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode) =>
+            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth) =>
             {
                 PixelFormat targetFormat;
                 if (depth == 1)
@@ -151,6 +148,39 @@
         public static GifImage<Bitmap> OfBitmap(Stream stream)
         {
             return new GifImage<Bitmap>(stream, BufferToImageOfBitmap, AllowableDepthsForBitmap);
+        }
+
+        /// <summary>
+        /// Gets a hash code for a frame buffer.
+        /// </summary>
+        /// <param name="buffer">The values that make up the image.</param>
+        /// <param name="palette">The color palette for the image.</param>
+        /// <param name="transparentIndex">The index of the transparent color in the palette.</param>
+        /// <param name="width">The logical width of the image the buffer contains.</param>
+        /// <param name="height">The logical height of the image the buffer contains.</param>
+        /// <returns>A hash code for the current frame.</returns>
+        public static int GetHash(byte[] buffer, RgbColor[] palette, int transparentIndex, int width, int height)
+        {
+            Argument.EnsureNotNull(buffer, "buffer");
+            Argument.EnsureNotNull(palette, "palette");
+
+            // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
+            // the underlying buffer and color table conspire sufficiently.
+            int hash = Hash.Fnv1A32(buffer);
+            byte[] colorValues = new byte[palette.Length * 3];
+            int i = 0;
+            foreach (var color in palette)
+            {
+                colorValues[i++] = color.R;
+                colorValues[i++] = color.G;
+                colorValues[i++] = color.B;
+            }
+            hash = Hash.Fnv1A32(colorValues, hash);
+            hash = Hash.Fnv1A32(BitConverter.GetBytes(transparentIndex), hash);
+            hash = Hash.Fnv1A32(BitConverter.GetBytes(width), hash);
+            hash = Hash.Fnv1A32(BitConverter.GetBytes(height), hash);
+
+            return hash;
         }
     }
 
@@ -839,7 +869,7 @@
             /// </summary>
             private byte[] suffix = new byte[MaxCodeWords];
             /// <summary>
-            /// This index indicates the first unused index in the dictionary.
+            /// Gets the first unused index in the dictionary.
             /// </summary>
             public short Available { get; private set; }
             /// <summary>
@@ -856,7 +886,7 @@
             private short codeLastAdded;
 
             /// <summary>
-            /// Initializes a new instance of <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.LzwDictionary"/>.
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.LzwDictionary"/> class.
             /// </summary>
             /// <param name="minimumCodeSize">The minimum length of codes in bits.</param>
             public LzwDictionary(byte minimumCodeSize)
@@ -2036,54 +2066,13 @@
 
             // Create the frame image, and then the frame itself.
             int frameTransparentIndex = anyTransparencyUsed ? imageTransparentIndex : -1;
-            int hashCode = GetFrameHash(tableCopy, frameTransparentIndex);
             T frame =
                 createFrame(bufferCopy, tableCopy, frameTransparentIndex,
-                frameBuffer.Stride, frameBuffer.Size.Width, frameBuffer.Size.Height, frameBuffer.BitsPerValue, hashCode);
+                frameBuffer.Stride, frameBuffer.Size.Width, frameBuffer.Size.Height, frameBuffer.BitsPerValue);
             int delay = graphicControl != null ? graphicControl.Delay : 0;
             GifFrame<T> newFrame = new GifFrame<T>(frame, delay, tableCopy, frameTransparentIndex);
             frames.Add(newFrame);
             Duration += newFrame.Duration;
-        }
-        /// <summary>
-        /// Gets a hash code for the current frame, based on the attributes of the frame buffer.
-        /// </summary>
-        /// <param name="colors">The non-null array of colors used in the frame.</param>
-        /// <param name="transparentIndex">The index of the transparent color in the palette.</param>
-        /// <returns>A hash code for the current frame.</returns>
-        private int GetFrameHash(RgbColor[] colors, int transparentIndex)
-        {
-            // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
-            // the underlying buffer and color table conspire sufficiently.
-            int hash = Hash.Fnv1A32(frameBuffer.Buffer);
-            byte[] colorValues = new byte[colors.Length * 3];
-            int i = 0;
-            foreach (var color in colors)
-            {
-                colorValues[i++] = color.R;
-                colorValues[i++] = color.G;
-                colorValues[i++] = color.B;
-            }
-            hash = Hash.Fnv1A32Continue(colorValues, hash);
-            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(transparentIndex), hash);
-            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(frameBuffer.Size.Width), hash);
-            hash = Hash.Fnv1A32Continue(BitConverter.GetBytes(frameBuffer.Size.Height), hash);
-
-            //// Generate a hash code based on the resulting visual. Images which look the same will have the same code, even if their
-            //// underlying buffers and lookup indexes are different.
-            //int hash = Hash.Fnv1A32(
-            //    frameBuffer.FrameValues().SelectMany(colorIndex =>
-            //    {
-            //        // Default value is the ARGB code for transparent black.
-            //        int value = 0;
-            //        if (colorIndex != transparentIndex)
-            //            value = colors[colorIndex].ToArgb();
-            //        return BitConverter.GetBytes(value);
-            //    })
-            //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Width))
-            //    .Concat(BitConverter.GetBytes(frameBuffer.Size.Height)).ToArray());
-
-            return hash;
         }
     }
 

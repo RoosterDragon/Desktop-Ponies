@@ -32,9 +32,10 @@
         /// The method that converts a buffer into an <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/>.
         /// </summary>
         private static readonly BufferToImage<BitmapFrame> FromBufferInternal =
-            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth, int hashCode) =>
+            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth) =>
             {
-                Bitmap bitmap = GifImage.BufferToImageOfBitmap(buffer, palette, transparentIndex, stride, width, height, depth, hashCode);
+                Bitmap bitmap = GifImage.BufferToImageOfBitmap(buffer, palette, transparentIndex, stride, width, height, depth);
+                int hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
                 return new BitmapFrame(bitmap, hashCode);
             };
 
