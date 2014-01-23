@@ -286,6 +286,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Flash Sentry
 * Bot-chan
 
+#### Fleetfoot
+* Bot-chan
+
 #### Fleur de lis
 * Pony Noia
 
