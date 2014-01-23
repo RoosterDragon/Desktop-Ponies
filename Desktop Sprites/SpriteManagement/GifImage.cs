@@ -1805,7 +1805,7 @@
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
             
             // This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
-            byte[] pixelStack = new byte[MaxCodeWords + 1];
+            byte[] pixelStack = new byte[MaxCodeWords];
             // Variable for the next available index in the stack.
             int stackIndex = 0;
 
@@ -1862,6 +1862,12 @@
                         }
                         break;
                 }
+
+                // TODO: A possible performance improvement here is to remove the need for the intermediate pixel stack.
+                // If the length of the codewords was stored, then the index into the frame buffer could be advanced by the length of the
+                // codeword and then the codeword enumerated with values being directly processed by the ApplyStackToFrame method. The
+                // method would have to be able to traverse the frame buffer backwards, and in particular reverse the interlacing too.
+                // Fairly complex and not vital, but might shave 5-15% off decoding time.
 
                 // Flush the pixel stack and write resulting pixel values to the frame buffer.
                 if (!subframeComplete)
