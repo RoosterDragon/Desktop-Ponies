@@ -547,7 +547,7 @@
             /// buffer.</returns>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 8.</exception>
             private static GtkFrame FromBufferMethod(
-                byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth)
+                byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth)
             {
                 if (depth != 8)
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 8.");
@@ -1406,7 +1406,7 @@
         /// <param name="fileName">The path to the GIF file being loaded.</param>
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
         /// buffer.</returns>
-        private GtkFrame GtkFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
+        private GtkFrame GtkFrameFromBuffer(byte[] buffer, RgbColor[] palette, byte? transparentIndex,
             int stride, int width, int height, byte depth, string fileName)
         {
             if (BufferPreprocess != null)

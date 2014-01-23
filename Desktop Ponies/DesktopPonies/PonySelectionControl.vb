@@ -64,7 +64,7 @@ Public Class PonySelectionControl
         Try
             PonyImage = New AnimatedImage(Of BitmapFrame)(
                 imagePath.ToString(), Function(file As String) New BitmapFrame(file),
-                Function(buffer As Byte(), palette As RgbColor(), transparentIndex As Integer,
+                Function(buffer As Byte(), palette As RgbColor(), transparentIndex As Byte?,
                          stride As Integer, width As Integer, height As Integer, depth As Byte)
                     GifProcessing.LosslessDownscale(buffer, palette, transparentIndex, stride, width, height, depth)
                     Return BitmapFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth)

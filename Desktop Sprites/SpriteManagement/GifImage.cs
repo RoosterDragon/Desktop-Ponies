@@ -18,8 +18,8 @@
     /// stride * height * depth / 8.</param>
     /// <param name="palette">The color palette for the image. Each value in the buffer is an index into the array. Note the size of the
     /// palette can exceed the maximum size addressable by values in the buffer.</param>
-    /// <param name="transparentIndex">The index of the transparent color, or -1 to indicate no transparency. Where possible, this index in
-    /// the palette should be replaced by transparency in the resulting frame, or else some suitable replacement. The color value in the
+    /// <param name="transparentIndex">The index of the transparent color, or null to indicate no transparency. Where possible, this index
+    /// in the palette should be replaced by transparency in the resulting frame, or else some suitable replacement. The color value in the
     /// palette for this index is undefined.</param>
     /// <param name="stride">The stride width, in bytes, of the buffer.</param>
     /// <param name="width">The logical width of the image the buffer contains.</param>
@@ -64,7 +64,7 @@
     /// ]]></code></example>
     /// </remarks>
     public delegate T BufferToImage<T>(
-    byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth);
+    byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth);
     #endregion
 
     /// <summary>
@@ -85,7 +85,7 @@
         /// The method that converts a buffer into an <see cref="T:System.Drawing.Bitmap"/>.
         /// </summary>
         private static readonly BufferToImage<Bitmap> BufferToImageOfBitmapInternal =
-            (byte[] buffer, RgbColor[] palette, int transparentIndex, int stride, int width, int height, byte depth) =>
+            (byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth) =>
             {
                 PixelFormat targetFormat;
                 if (depth == 1)
@@ -118,8 +118,8 @@
                         bitmapPalette.Entries[i] = Color.FromArgb(palette[i].ToArgb());
 
                     // Apply transparency.
-                    if (transparentIndex != -1)
-                        bitmapPalette.Entries[transparentIndex] = Color.Transparent;
+                    if (transparentIndex != null)
+                        bitmapPalette.Entries[transparentIndex.Value] = Color.Transparent;
 
                     // Set palette on bitmap.
                     bitmap.Palette = bitmapPalette;
@@ -159,7 +159,7 @@
         /// <param name="width">The logical width of the image the buffer contains.</param>
         /// <param name="height">The logical height of the image the buffer contains.</param>
         /// <returns>A hash code for the current frame.</returns>
-        public static int GetHash(byte[] buffer, RgbColor[] palette, int transparentIndex, int width, int height)
+        public static int GetHash(byte[] buffer, RgbColor[] palette, byte? transparentIndex, int width, int height)
         {
             Argument.EnsureNotNull(buffer, "buffer");
             Argument.EnsureNotNull(palette, "palette");
@@ -176,7 +176,8 @@
                 colorValues[i++] = color.B;
             }
             hash = Hash.Fnv1A32(colorValues, hash);
-            hash = Hash.Fnv1A32(BitConverter.GetBytes(transparentIndex), hash);
+            if (transparentIndex != null)
+                hash = Hash.Fnv1A32(BitConverter.GetBytes(transparentIndex.Value), hash);
             hash = Hash.Fnv1A32(BitConverter.GetBytes(width), hash);
             hash = Hash.Fnv1A32(BitConverter.GetBytes(height), hash);
 
@@ -209,21 +210,18 @@
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
-        public Size Size { get; private set; }
+        public Size Size
+        {
+            get { return new Size(Width, Height); }
+        }
         /// <summary>
         /// Gets the width of the image.
         /// </summary>
-        public int Width
-        {
-            get { return Size.Width; }
-        }
+        public int Width { get; private set; }
         /// <summary>
         /// Gets the height of the image.
         /// </summary>
-        public int Height
-        {
-            get { return Size.Height; }
-        }
+        public int Height { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GifImage`1"/> class by decoding a GIF from the
@@ -253,7 +251,8 @@
             Duration = decoder.Duration;
             Iterations = decoder.Iterations;
             Frames = decoder.Frames;
-            Size = decoder.Size;
+            Width = decoder.Width;
+            Height = decoder.Height;
         }
     }
 
@@ -483,17 +482,21 @@
                 get { return (byte)((1 << BitsPerValue) - 1); }
             }
             /// <summary>
-            /// Gets the logical dimensions of the buffer.
+            /// Gets the logical width of the buffer.
             /// </summary>
-            public Size Size { get; private set; }
+            public ushort Width { get; private set; }
+            /// <summary>
+            /// Gets the logical height of the buffer.
+            /// </summary>
+            public ushort Height { get; private set; }
             /// <summary>
             /// The stride width of the buffer.
             /// </summary>
-            private int stride;
+            private ushort stride;
             /// <summary>
             /// Gets the stride width of the buffer.
             /// </summary>
-            public int Stride
+            public ushort Stride
             {
                 get
                 {
@@ -518,14 +521,15 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.DataBuffer"/> class capable of
             /// holding enough values for the specified dimensions, using the given number of bits to store each value.
             /// </summary>
-            /// <param name="dimensions">The dimensions of the buffer to create.</param>
+            /// <param name="width">The width of the buffer to create.</param>
+            /// <param name="height">The height of the buffer to create.</param>
             /// <param name="bitsPerValue">The number of bits used to store each value. Any values given must be representable in this
             /// number of bits. The number of bits can only be 1, 2, 4 or 8.</param>
             /// <param name="initialValue">The initial value to use for each entry in the buffer.</param>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="bitsPerValue"/> is not 1, 2, 4 or 8.-or-
             /// <paramref name="initialValue"/> is greater than the largest value that can be stored in the given number of bits.
             /// </exception>
-            public DataBuffer(Size dimensions, byte bitsPerValue, byte initialValue = 0)
+            public DataBuffer(ushort width, ushort height, byte bitsPerValue, byte initialValue = 0)
             {
                 if (bitsPerValue != 1 && bitsPerValue != 2 && bitsPerValue != 4 && bitsPerValue != 8)
                     throw new ArgumentOutOfRangeException("bitsPerValue", bitsPerValue, "bitsPerValue may only be 1, 2, 4 or 8.");
@@ -537,9 +541,10 @@
                         "initialValue is greater than the largest value that can be stored in the given number of bits (" +
                         MaxValue + ").");
 
-                Size = dimensions;
-                Stride = (int)Math.Ceiling((Size.Width * BitsPerValue) / 8f);
-                Buffer = new byte[Stride * Size.Height];
+                Width = width;
+                Height = height;
+                Stride = (ushort)Math.Ceiling((Width * BitsPerValue) / 8f);
+                Buffer = new byte[Stride * Height];
 
                 if (initialValue != 0)
                     FillBuffer(initialValue);
@@ -593,7 +598,7 @@
             private void FillBuffer(Rectangle bounds, bool fixedValues,
                 Func<int, int, byte> valueFactory, Func<int, byte> bufferValueFactory)
             {
-                if (!new Rectangle(Point.Empty, Size).Contains(bounds))
+                if (!new Rectangle(Point.Empty, new Size(Width, Height)).Contains(bounds))
                     throw new ArgumentException("Given bounds must not extend outside the area of the buffer.", "bounds");
 
                 // We want to set all the indices within the given area only.
@@ -748,10 +753,10 @@
                     throw new InvalidOperationException("The BitsPerValue for the buffer is already at its maximum of 8.");
 
                 byte newBitsPerValue = (byte)(BitsPerValue * 2);
-                DataBuffer newDataBuffer = new DataBuffer(Size, newBitsPerValue);
+                DataBuffer newDataBuffer = new DataBuffer(Width, Height, newBitsPerValue);
 
-                for (int y = 0; y < Size.Height; y++)
-                    for (int x = 0; x < Size.Width; x++)
+                for (int y = 0; y < Height; y++)
+                    for (int x = 0; x < Width; x++)
                         newDataBuffer.SetValue(x, y, GetValue(x, y));
 
                 BitsPerValue = newBitsPerValue;
@@ -784,7 +789,7 @@
                     for (int i = 0; i < Buffer.Length; i++)
                         yield return Buffer[i];
                 }
-                else if (Stride == Size.Width)
+                else if (Stride == Width)
                 {
                     // Values are packed, and so must be unpacked.
                     byte mask = (byte)(0xFF >> 8 - BitsPerValue);
@@ -811,7 +816,7 @@
                         {
                             yield return (byte)(value & mask);
                             value >>= BitsPerValue;
-                            if (++x >= Size.Width)
+                            if (++x >= Width)
                             {
                                 x = 0;
                                 y++;
@@ -995,16 +1000,13 @@
         private class LogicalScreenDescriptor
         {
             /// <summary>
-            /// Gets the dimensions, in pixels, of the logical screen.
+            /// Gets the width of the logical screen, in pixels.
             /// </summary>
-            public Size Size { get; private set; }
+            public ushort Width { get; private set; }
             /// <summary>
-            /// Gets the area, in pixels, of the logical screen.
+            /// Gets the height of the logical screen, in pixels.
             /// </summary>
-            public int Area
-            {
-                get { return Size.Width * Size.Height; }
-            }
+            public ushort Height { get; private set; }
             /// <summary>
             /// Gets a value indicating whether a global color table exists. If true, the
             /// <see cref="P:DesktopSprites.SpriteManagement.GifImage`1.LogicalScreenDescriptor.BackgroundIndex"/> property is meaningful.
@@ -1049,7 +1051,8 @@
                 bool globalColorTableFlag, byte colorResolution, bool sortFlag,
                 int sizeOfGlobalColorTable, byte backgroundColorIndex, byte pixelAspectRatio)
             {
-                Size = new Size(logicalScreenWidth, logicalScreenHeight);
+                Width = logicalScreenWidth;
+                Height = logicalScreenHeight;
                 GlobalTableExists = globalColorTableFlag;
                 OriginalBitsPerColor = colorResolution;
                 GlobalTableSorted = sortFlag;
@@ -1207,7 +1210,7 @@
         /// <summary>
         /// Gets the number of times this image plays. If 0, it loops indefinitely.
         /// </summary>
-        public int Iterations { get; private set; }
+        public ushort Iterations { get; private set; }
         /// <summary>
         /// Gets the frames that make up this GIF image.
         /// </summary>
@@ -1215,21 +1218,18 @@
         /// <summary>
         /// Gets the size of the image.
         /// </summary>
-        public Size Size { get; private set; }
+        public Size Size
+        {
+            get { return new Size(Width, Height); }
+        }
         /// <summary>
         /// Gets the width of the image.
         /// </summary>
-        public int Width
-        {
-            get { return Size.Width; }
-        }
+        public ushort Width { get; private set; }
         /// <summary>
         /// Gets the height of the image.
         /// </summary>
-        public int Height
-        {
-            get { return Size.Height; }
-        }
+        public ushort Height { get; private set; }
 
         /// <summary>
         /// The maximum number of codewords that can occur according to the GIF specification.
@@ -1347,8 +1347,8 @@
                 // Create the initial buffers.
                 DetermineTransparentIndexes();
                 byte targetBpp = TargetBitsPerPixel(colorTable.Length);
-                frameBuffer = new DataBuffer(Size, targetBpp, imageTransparentIndex);
-                previousFrameBuffer = new DataBuffer(Size, targetBpp, imageTransparentIndex);
+                frameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
+                previousFrameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
             }
             else
             {
@@ -1441,8 +1441,8 @@
 
             // Remap any old transparent indexes to their new values.
             if (oldImageTransparentIndex != imageTransparentIndex)
-                for (int x = 0; x < frameBuffer.Size.Width; x++)
-                    for (int y = 0; y < frameBuffer.Size.Height; y++)
+                for (int x = 0; x < frameBuffer.Width; x++)
+                    for (int y = 0; y < frameBuffer.Height; y++)
                     {
                         if (frameBuffer.GetValue(x, y) == oldImageTransparentIndex)
                             frameBuffer.SetValue(x, y, imageTransparentIndex);
@@ -1494,7 +1494,8 @@
         {
             // <Logical Screen> ::= Logical Screen Descriptor [Global Color Table]
             screenDescriptor = ReadLogicalScreenDescriptor();
-            Size = screenDescriptor.Size;
+            Width = screenDescriptor.Width;
+            Height = screenDescriptor.Height;
             ReadGlobalColorTable();
         }
         /// <summary>
@@ -1772,8 +1773,8 @@
                 imageTransparentIndex = 0;
                 imageTransparentIndexRemap = 0;
                 byte targetBpp = TargetBitsPerPixel(1);
-                frameBuffer = new DataBuffer(Size, targetBpp, imageTransparentIndex);
-                previousFrameBuffer = new DataBuffer(Size, targetBpp, imageTransparentIndex);
+                frameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
+                previousFrameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
             }
 
             // Read the image data onto the frame buffer, then create the resulting image.
@@ -2065,10 +2066,10 @@
             }
 
             // Create the frame image, and then the frame itself.
-            int frameTransparentIndex = anyTransparencyUsed ? imageTransparentIndex : -1;
+            byte? frameTransparentIndex = anyTransparencyUsed ? imageTransparentIndex : (byte?)null;
             T frame =
                 createFrame(bufferCopy, tableCopy, frameTransparentIndex,
-                frameBuffer.Stride, frameBuffer.Size.Width, frameBuffer.Size.Height, frameBuffer.BitsPerValue);
+                frameBuffer.Stride, frameBuffer.Width, frameBuffer.Height, frameBuffer.BitsPerValue);
             int delay = graphicControl != null ? graphicControl.Delay : 0;
             GifFrame<T> newFrame = new GifFrame<T>(frame, delay, tableCopy, frameTransparentIndex);
             frames.Add(newFrame);
@@ -2102,10 +2103,10 @@
         /// </summary>
         private readonly RgbColor[] colorTable;
         /// <summary>
-        /// The index of the transparent color in the <see cref="F:DesktopSprites.SpriteManagement.GifFrame`1.colorTable"/>, or -1 to
+        /// The index of the transparent color in the <see cref="F:DesktopSprites.SpriteManagement.GifFrame`1.colorTable"/>, or null to
         /// indicate no transparent color.
         /// </summary>
-        private readonly int transparentIndex;
+        private readonly byte? transparentIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GifFrame`1"/> class.
@@ -2113,9 +2114,9 @@
         /// <param name="frame">The image for this frame.</param>
         /// <param name="duration">The duration of this frame, in milliseconds.</param>
         /// <param name="colorTable">The color table used for the image.</param>
-        /// <param name="transparentIndex">The index of the transparent color in <paramref name="colorTable"/>, or -1 if there is no
+        /// <param name="transparentIndex">The index of the transparent color in <paramref name="colorTable"/>, or null if there is no
         /// transparent color.</param>
-        internal GifFrame(T frame, int duration, RgbColor[] colorTable, int transparentIndex)
+        internal GifFrame(T frame, int duration, RgbColor[] colorTable, byte? transparentIndex)
         {
             Image = frame;
             Duration = duration;
@@ -2132,8 +2133,8 @@
             for (int i = 0; i < ColorTableSize; i++)
                 colors[i] = new ArgbColor(255, colorTable[i]);
 
-            if (transparentIndex != -1)
-                colors[transparentIndex] = new ArgbColor(0, colorTable[transparentIndex]);
+            if (transparentIndex != null)
+                colors[transparentIndex.Value] = new ArgbColor(0, colorTable[transparentIndex.Value]);
 
             return colors;
         }

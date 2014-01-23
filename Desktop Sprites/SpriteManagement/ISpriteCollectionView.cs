@@ -231,13 +231,13 @@
     /// stride * height * depth / 8.</param>
     /// <param name="palette">The color palette for the image. Each value in the buffer is an index into the array. Note the size of the
     /// palette can exceed the maximum size addressable by values in the buffer.</param>
-    /// <param name="transparentIndex">The index of the transparent color, or -1 to indicate no transparency. Where possible, this index in
-    /// the palette should be replaced by transparency in the resulting frame, or else some suitable replacement. The color value in the
+    /// <param name="transparentIndex">The index of the transparent color, or null to indicate no transparency. Where possible, this index
+    /// in the palette should be replaced by transparency in the resulting frame, or else some suitable replacement. The color value in the
     /// palette for this index is undefined.</param>
     /// <param name="stride">The stride width, in bytes, of the buffer.</param>
     /// <param name="width">The logical width of the image the buffer contains.</param>
     /// <param name="height">The logical height of the image the buffer contains.</param>
     /// <param name="depth">The bit depth of the buffer (either 1, 2, 4 or 8).</param>
     public delegate void BufferPreprocess(
-    ref byte[] buffer, ref RgbColor[] palette, ref int transparentIndex, ref int stride, ref int width, ref int height, ref byte depth);
+    ref byte[] buffer, ref RgbColor[] palette, ref byte? transparentIndex, ref int stride, ref int width, ref int height, ref byte depth);
 }

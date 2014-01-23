@@ -485,14 +485,14 @@
             /// </summary>
             /// <param name="data">The 4bbp or 8bbp array of color palette indexes to use.</param>
             /// <param name="palette">The source color palette to use.</param>
-            /// <param name="transparentIndex">The index in the source palette that should be replaced with a transparent color, or -1 if
+            /// <param name="transparentIndex">The index in the source palette that should be replaced with a transparent color, or null if
             /// there is no transparent color in the image.</param>
             /// <param name="stride">The stride width of the data buffer, in bytes.</param>
             /// <param name="width">The width of the image, in pixels.</param>
             /// <param name="height">The height of the image, in pixels.</param>
             /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
             /// <param name="paletteCache">The cache of color palettes, so that the new palette can be shared among images.</param>
-            public ImageData(byte[] data, RgbColor[] palette, int transparentIndex,
+            public ImageData(byte[] data, RgbColor[] palette, byte? transparentIndex,
                 int stride, int width, int height, byte depth, Dictionary<int[], int[]> paletteCache)
             {
                 Data = data;
@@ -503,8 +503,8 @@
                 ArgbPalette = new int[palette.Length];
                 for (int i = 0; i < ArgbPalette.Length; i++)
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
-                if (transparentIndex != -1)
-                    ArgbPalette[transparentIndex] = new ArgbColor().ToArgb();
+                if (transparentIndex != null)
+                    ArgbPalette[transparentIndex.Value] = new ArgbColor().ToArgb();
                 lock (paletteCache)
                     ArgbPalette = paletteCache.GetOrAdd(ArgbPalette, ArgbPalette);
                 hashCode = GifImage.GetHash(data, palette, transparentIndex, width, height);
@@ -1085,7 +1085,7 @@
         /// <param name="fileName">The path to the GIF file being loaded.</param>
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/> for the frame held in the raw
         /// buffer.</returns>
-        private ImageFrame ImageFrameFromBuffer(byte[] buffer, RgbColor[] palette, int transparentIndex,
+        private ImageFrame ImageFrameFromBuffer(byte[] buffer, RgbColor[] palette, byte? transparentIndex,
             int stride, int width, int height, byte depth, string fileName)
         {
             if (BufferPreprocess != null)
