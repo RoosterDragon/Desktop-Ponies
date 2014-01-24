@@ -137,6 +137,11 @@
             {
                 control.EndInvoke(asyncResult);
             }
+            catch (ObjectDisposedException ex)
+            {
+                if (ex.ObjectName != control.GetType().Name)
+                    throw;
+            }
             finally
             {
                 asyncResult.AsyncWaitHandle.Dispose();
