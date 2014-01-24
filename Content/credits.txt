@@ -168,6 +168,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Braeburn
 * Anonycat
 
+#### Bulk Biceps
+* Bot-chan
+
 #### Caesar
 * Anonycat
 
@@ -337,9 +340,6 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Hoity-Toity
 * Pony Noia
-
-#### Horse Power
-* Bot-chan
 
 #### Horte Cuisine
 * Anonycat
