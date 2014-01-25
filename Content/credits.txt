@@ -695,6 +695,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Yamino [Sit, Stand, TrixieFireworks, Walk]
 * humle [Fireworks]
 * Starly [NakedStand, NakedTrot]
+* Bot-chan [Flowers]
 
 #### Twilight Sparkle
 * Jay Wright [Stand, Trot]
