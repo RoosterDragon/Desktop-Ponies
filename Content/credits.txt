@@ -265,6 +265,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Donut Joe
 * Bot-chan
 
+#### Dr. Caballeron
+* Bot-chan
+
 #### Dude
 * Bot-chan
 
