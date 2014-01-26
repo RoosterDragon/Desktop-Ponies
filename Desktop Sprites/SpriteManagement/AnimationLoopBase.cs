@@ -18,7 +18,7 @@
         #region ConcurrentReadOnlySpriteCollection struct
         /// <summary>
         /// Provides read-only access to the sprite collection. Multiple threads may enumerate the collection concurrently without external
-        /// synchronization. When mutating of the collection is required, the animation thread block until all enumerators complete.
+        /// synchronization. When mutating of the collection is required, the animation thread blocks until all enumerators complete.
         /// </summary>
         [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
         [System.Diagnostics.DebuggerTypeProxy(typeof(ConcurrentReadOnlySpriteCollection.DebugView))]
@@ -26,7 +26,7 @@
         {
             #region Enumerator struct
             /// <summary>
-            /// Enumerates the sprite collection. Enumerator is blocked until all mutations of the sprite collection complete, but the
+            /// Enumerates the sprite collection. Enumeration is blocked until all mutations of the sprite collection complete, but the
             /// collection may safely be enumerated from several threads at once whilst no mutations are occurring.
             /// </summary>
             public struct Enumerator : IEnumerator<ISprite>

@@ -29,6 +29,10 @@
         /// </summary>
         private IntPtr hBitmap;
         /// <summary>
+        /// Estimate of the number of unmanaged bytes thought to be allocated by the background buffer.
+        /// </summary>
+        private uint bitmapSizeInBytes;
+        /// <summary>
         /// Handle to the previous bitmap in the device context of the background buffer.
         /// </summary>
         private IntPtr hPrevBitmap;
@@ -53,6 +57,7 @@
                         Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
                     hBitmap = NativeMethods.CreateDIBSection(
                         hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
+                    GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);
                     hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
                     if (hPrevBitmap == IntPtr.Zero)
                         throw new Win32Exception();
@@ -129,6 +134,8 @@
                     BackgroundData = null;
                 }
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
+                GC.RemoveMemoryPressure(bitmapSizeInBytes);
+                bitmapSizeInBytes = 0;
                 if (!NativeMethods.DeleteObject(new HandleRef(this, hBitmap)))
                     throw new Win32Exception();
             }

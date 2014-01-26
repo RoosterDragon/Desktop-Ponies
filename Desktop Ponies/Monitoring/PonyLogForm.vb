@@ -48,7 +48,7 @@ Friend Class PonyLogForm
         While LogView.Nodes.Count > 800
             LogView.Nodes.RemoveAt(0)
         End While
-        LogView.Nodes(LogView.Nodes.Count - 1).EnsureVisible()
+        If LogView.Nodes.Count > 0 Then LogView.Nodes(LogView.Nodes.Count - 1).EnsureVisible()
         LogView.ResumeLayout()
     End Sub
 End Class

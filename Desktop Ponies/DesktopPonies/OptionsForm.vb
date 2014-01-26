@@ -257,12 +257,6 @@ Public Class OptionsForm
     Private Sub SizeScale_MouseUp(sender As Object, e As EventArgs) Handles SizeScale.MouseUp
         If initializing Then Return
         Options.ScaleFactor = SizeScale.Value / 100.0F
-        EvilGlobals.Main.PonySelectionPanel.SuspendLayout()
-        For Each control As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            control.ResizeToFit()
-            control.Invalidate()
-        Next
-        EvilGlobals.Main.PonySelectionPanel.ResumeLayout()
     End Sub
 
     Private Sub Volume_ValueChanged(sender As Object, e As EventArgs) Handles Volume.ValueChanged

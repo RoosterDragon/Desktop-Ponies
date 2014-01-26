@@ -45,6 +45,8 @@ Public NotInheritable Class EvilGlobals
     Private Shared Function IsDirectXSoundAvailable() As Boolean
         ' Check to see if the right version of DirectX is installed for sounds.
         Try
+            ' You may get a LoaderLock exception here when debugging. It does not occur normally - only under a debugger. Ignoring it
+            ' appears to be harmless and the load will not be affected.
             System.Reflection.Assembly.Load(
                 "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
             Return True

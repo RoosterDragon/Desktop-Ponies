@@ -167,8 +167,14 @@ Public Class DesktopPonyAnimator
                                   EvilGlobals.Main.SmartInvoke(
                                       Sub()
                                           Dim form = New OptionsForm()
+                                          Dim currentScale = Options.ScaleFactor
                                           form.Show()
-                                          AddHandler form.FormClosed, Sub() EvilGlobals.Main.ReloadFilterCategories()
+                                          AddHandler form.FormClosed, Sub()
+                                                                          EvilGlobals.Main.ReloadFilterCategories()
+                                                                          If currentScale <> Options.ScaleFactor Then
+                                                                              EvilGlobals.Main.ResizePreviewImages()
+                                                                          End If
+                                                                      End Sub
                                       End Sub)
                               End Sub))
         End If

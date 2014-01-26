@@ -25,7 +25,7 @@ Public Class MainForm
 
     Private preventLoadProfile As Boolean
 
-    Private notTaggedFilterIndex As Integer
+    Private notTaggedFilterIndex As Integer = -1
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
     Private ponyOffset As Integer
     Private ReadOnly selectionControlsFilteredVisible As IEnumerable(Of PonySelectionControl)
@@ -358,8 +358,12 @@ Public Class MainForm
 
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
         Using form = New OptionsForm()
+            Dim currentScale = Options.ScaleFactor
             form.ShowDialog(Me)
             ReloadFilterCategories()
+            If currentScale <> Options.ScaleFactor Then
+                ResizePreviewImages()
+            End If
         End Using
     End Sub
 
@@ -958,12 +962,30 @@ Public Class MainForm
     End Sub
 
     Friend Sub ReloadFilterCategories()
+        Dim currentSelection = New HashSet(Of CaseInsensitiveString)(FilterOptionsBox.CheckedItems.OfType(Of CaseInsensitiveString)())
+        Dim notTaggedChecked = notTaggedFilterIndex <> -1 AndAlso FilterOptionsBox.GetItemChecked(notTaggedFilterIndex)
         FilterOptionsBox.SuspendLayout()
         FilterOptionsBox.Items.Clear()
         FilterOptionsBox.Items.AddRange(PonyBase.StandardTags.Concat(Options.CustomTags).ToArray())
         notTaggedFilterIndex = FilterOptionsBox.Items.Add("[Not Tagged]")
+        For i = 0 To FilterOptionsBox.Items.Count - 1
+            If i = notTaggedFilterIndex Then
+                FilterOptionsBox.SetItemChecked(i, notTaggedChecked)
+            ElseIf currentSelection.Contains(DirectCast(FilterOptionsBox.Items(i), CaseInsensitiveString)) Then
+                FilterOptionsBox.SetItemChecked(i, True)
+            End If
+        Next
         FilterOptionsBox.ResumeLayout()
         RefilterSelection()
+    End Sub
+
+    Friend Sub ResizePreviewImages()
+        PonySelectionPanel.SuspendLayout()
+        For Each control As PonySelectionControl In PonySelectionPanel.Controls
+            control.ResizeToFit()
+            control.Invalidate()
+        Next
+        PonySelectionPanel.ResumeLayout()
     End Sub
 
     Private Sub Main_LocationChanged(sender As Object, e As EventArgs) Handles MyBase.LocationChanged

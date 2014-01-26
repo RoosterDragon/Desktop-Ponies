@@ -578,7 +578,7 @@
                 if (Flipped != flipFromOriginal)
                 {
                     Flipped = !Flipped;
-                    // TODO: Support flipping the raw bytes somehow?
+                    // TODO: Support drawing the raw buffer in a mirrored mode if required.
                     if (Image.Bitmap != null)
                         Image.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
                     else
