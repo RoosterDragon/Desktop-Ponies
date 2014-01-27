@@ -1770,10 +1770,7 @@ Public Class Pony
     ''' Returns a single pony uniformly selected at random from within a grouping of other ponies with the same base.
     ''' </summary>
     Private Shared uniformRandomSelectionFromPoniesGroupedByBase As Func(Of IGrouping(Of PonyBase, Pony), Pony) =
-        Function(group)
-            Dim duplicateTargets = group.ToImmutableArray()
-            Return duplicateTargets(Rng.Next(duplicateTargets.Length))
-        End Function
+        Function(group) group.RandomElement()
 #End Region
 
 #Region "EffectBaseRepeat Structure"
@@ -2443,9 +2440,10 @@ Public Class Pony
     ''' <summary>
     ''' Sets an actual pony to follow, based on the desired target. If an interaction is running, the initiator will prefer to follow any
     ''' involved interaction targets (if suitable) and any targets will prefer to follow the initiator, or then other targets (if
-    ''' suitable). Otherwise, a target is chosen uniformly from all available targets.
+    ''' suitable). Otherwise, a target is chosen uniformly from all available targets. The follow cool-down ent time will be reset.
     ''' </summary>
     Private Sub SetFollowTarget()
+        _followCooldownEndTime = TimeSpan.Zero
         If _followTarget Is Nothing AndAlso _currentBehavior.OriginalFollowTargetName <> "" Then
             ' If an interaction is running, we want to prefer those ponies involved in the interaction before trying other ponies.
             If _currentInteraction IsNot Nothing Then
@@ -2487,7 +2485,7 @@ Public Class Pony
         Dim suitableCandidates = allCandidates.Where(
             Function(p) Not p._expired AndAlso p.Base.Directory = _currentBehavior.OriginalFollowTargetName).ToImmutableArray()
         If suitableCandidates.Length > 0 Then
-            Return suitableCandidates(Rng.Next(suitableCandidates.Length))
+            Return suitableCandidates.RandomElement()
         Else
             Return Nothing
         End If
@@ -2646,7 +2644,7 @@ Public Class Pony
                 If (moves And AllowedMoves.HorizontalOnly) > 0 Then movesList.Add(AllowedMoves.HorizontalOnly)
                 If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
                 If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
-                Dim selectedDirection = movesList(Rng.Next(movesList.Count))
+                Dim selectedDirection = movesList.RandomElement()
                 Select Case selectedDirection
                     Case AllowedMoves.HorizontalOnly
                         _movement = New Vector2F(CSng(speed), 0)

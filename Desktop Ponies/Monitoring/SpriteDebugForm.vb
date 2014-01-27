@@ -8,6 +8,7 @@ Public Class SpriteDebugForm
     End Sub
 
     Public Sub UpdateSprites(sprites As IEnumerable(Of ISprite))
+        If Disposing OrElse IsDisposed Then Return
         PonyDataGridView.SuspendLayout()
         Dim i = 0
         For Each pony In sprites.OfType(Of Pony)().OrderBy(Function(p) If(p.Base.Directory, p.Base.DisplayName))
