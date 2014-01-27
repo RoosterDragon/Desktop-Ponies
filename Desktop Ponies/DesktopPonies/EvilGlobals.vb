@@ -14,11 +14,9 @@ Public NotInheritable Class EvilGlobals
     Public Shared Property InstallLocation As String = Path.GetDirectoryName(Application.ExecutablePath)
     Friend Shared Property Main As MainForm
 
-    Public Shared Property CursorLocation As Point
     Public Shared Property CurrentAnimator As PonyAnimator
     Public Shared Property CurrentViewer As ISpriteCollectionView
     Public Shared Property CurrentGame As Game
-    Public Shared Property PreviewWindowRectangle As Rectangle
 
     Private Shared screensaverSettingsPath As String = Path.Combine(Path.GetTempPath(), "DesktopPonies_ScreenSaver_Settings.ini")
 
@@ -27,7 +25,6 @@ Public NotInheritable Class EvilGlobals
     ''' </summary>
     Public Shared Property PoniesHaveLaunched As Boolean
     Public Shared Property InScreensaverMode As Boolean
-    Public Shared Property InPreviewMode As Boolean
 
     Private Shared ReadOnly directXSoundAvailableSync As New Object()
     Private Shared _directXSoundAvailable As Boolean?

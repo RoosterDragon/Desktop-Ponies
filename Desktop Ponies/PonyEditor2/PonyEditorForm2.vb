@@ -8,6 +8,7 @@ Public Class PonyEditorForm2
     Private Const ValidationOkIndex = 3
 
     Private ReadOnly worker As New IdleWorker(Me)
+    Private ReadOnly context As New PonyContext()
     Private ponies As PonyCollection
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
 
@@ -155,6 +156,7 @@ Public Class PonyEditorForm2
         worker.QueueTask(Sub()
                              EditorStatus.Text = "Loading..."
                              EditorProgressBar.Value = 0
+                             EditorProgressBar.Maximum = 0
                              EditorProgressBar.Style = ProgressBarStyle.Continuous
                              EditorProgressBar.Visible = True
                          End Sub)
@@ -169,12 +171,14 @@ Public Class PonyEditorForm2
 
         ponies = New PonyCollection(
             False,
-            Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum = count),
+            Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum += count),
             Sub(base) worker.QueueTask(
                 Sub()
                     AddPonyBaseToDocumentsView(base)
                     EditorProgressBar.Value += 1
-                End Sub))
+                End Sub),
+            Sub(count) worker.QueueTask(Sub() EditorProgressBar.Maximum += count),
+            Nothing)
         worker.QueueTask(AddressOf DocumentsView.Sort)
         worker.QueueTask(Sub()
                              poniesNode.Expand()
@@ -253,7 +257,7 @@ Public Class PonyEditorForm2
 
     Private Sub CreatePreview()
         If preview IsNot Nothing Then preview.Dispose()
-        preview = New PonyPreview(Me, ponies)
+        preview = New PonyPreview(Me, ponies, context)
         AddHandler preview.PreviewFocused, AddressOf Preview_PreviewFocused
         AddHandler preview.PreviewUnfocused, AddressOf Preview_PreviewUnfocused
     End Sub

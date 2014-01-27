@@ -193,15 +193,15 @@ Public Class MainForm
         ' Load ponies.
         ponies = New PonyCollection(
             True,
-            Sub(count)
-                worker.QueueTask(Sub() LoadingProgressBar.Maximum = count)
-            End Sub,
+            Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum += count),
             Sub(pony)
                 worker.QueueTask(Sub()
                                      AddToMenu(pony)
                                      LoadingProgressBar.Value += 1
                                  End Sub)
-            End Sub)
+            End Sub,
+            Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum += count),
+            Nothing)
 
         ' Sort controls by name.
         worker.QueueTask(Sub()
@@ -368,15 +368,12 @@ Public Class MainForm
     End Sub
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
-
-        EvilGlobals.InPreviewMode = True
         Me.Visible = False
         Using form = New PonyEditor()
             form.ShowDialog(Me)
 
             PonyShutdown()
 
-            EvilGlobals.InPreviewMode = False
             If Not Me.IsDisposed Then
                 Me.Visible = True
             End If
@@ -398,8 +395,8 @@ Public Class MainForm
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     startupPonies.Clear()
-                    PonyStartup()
-                    EvilGlobals.CurrentGame.Setup()
+                    PonyStartup(Function() New Game.GameAnimator(ponyViewer, startupPonies, ponies, gameForm.PonyContext, gameForm.Game))
+                    gameForm.Game.Setup()
                     animator.Start()
                 Else
                     If Me.IsDisposed = False Then
@@ -595,7 +592,6 @@ Public Class MainForm
                 End If
             Next
         ElseIf e.KeyChar = "#"c Then
-            EvilGlobals.InPreviewMode = True
             Using newEditor = New PonyEditorForm2()
                 newEditor.ShowDialog(Me)
                 If newEditor.ChangesMade Then
@@ -605,7 +601,6 @@ Public Class MainForm
                     LoadInternal()
                 End If
             End Using
-            EvilGlobals.InPreviewMode = False
         End If
     End Sub
 
@@ -726,6 +721,7 @@ Public Class MainForm
 
             ' Create the initial set of ponies to start.
             startupPonies.Clear()
+            Dim context = New PonyContext()
             Dim randomPoniesWanted As Integer
             For Each ponyBaseWanted In ponyBasesWanted
                 If ponyBaseWanted.Item1 = PonyBase.RandomDirectory Then
@@ -735,7 +731,7 @@ Public Class MainForm
                 Dim base = ponies.Bases.Single(Function(ponyBase) ponyBase.Directory = ponyBaseWanted.Item1)
                 ' Add the designated amount of a given pony.
                 For i = 1 To ponyBaseWanted.Item2
-                    startupPonies.Add(New Pony(base))
+                    startupPonies.Add(New Pony(context, base))
                 Next
             Next
 
@@ -748,12 +744,12 @@ Public Class MainForm
                 For i = 1 To randomPoniesWanted
                     If remainingPonyBases.Count = 0 Then Exit For
                     Dim index = Rng.Next(remainingPonyBases.Count)
-                    startupPonies.Add(New Pony(remainingPonyBases(index)))
+                    startupPonies.Add(New Pony(context, remainingPonyBases(index)))
                     If Options.NoRandomDuplicates Then remainingPonyBases.RemoveAt(index)
                 Next
             End If
 
-            PonyStartup()
+            PonyStartup(Function() New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context))
             LoadPoniesAsyncEnd(False)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
@@ -764,7 +760,7 @@ Public Class MainForm
         End Try
     End Sub
 
-    Private Sub PonyStartup()
+    Private Sub PonyStartup(createAnimator As Func(Of DesktopPonyAnimator))
         If EvilGlobals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
 
         AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
@@ -774,28 +770,26 @@ Public Class MainForm
             DirectCast(ponyViewer, WinFormSpriteInterface).ShowPerformanceGraph = Options.ShowPerformanceGraph
         End If
 
-        If Not EvilGlobals.InPreviewMode Then
-            ' Get a collection of all images to be loaded.
-            Dim images As New HashSet(Of String)(PathEquality.Comparer)
-            For Each pony In startupPonies
-                For Each behavior In pony.Behaviors
-                    images.Add(behavior.LeftImage.Path)
-                    images.Add(behavior.RightImage.Path)
-                    For Each effect In behavior.Effects
-                        images.Add(effect.LeftImage.Path)
-                        images.Add(effect.RightImage.Path)
-                    Next
+        ' Get a collection of all images to be loaded.
+        Dim images As New HashSet(Of String)(PathEquality.Comparer)
+        For Each pony In startupPonies
+            For Each behavior In pony.Base.Behaviors
+                images.Add(behavior.LeftImage.Path)
+                images.Add(behavior.RightImage.Path)
+                For Each effect In behavior.Effects
+                    images.Add(effect.LeftImage.Path)
+                    images.Add(effect.RightImage.Path)
                 Next
             Next
+        Next
 
-            worker.QueueTask(Sub()
-                                 LoadingProgressBar.Value = 0
-                                 LoadingProgressBar.Maximum = images.Count
-                             End Sub)
-            ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
-        End If
+        worker.QueueTask(Sub()
+                             LoadingProgressBar.Value = 0
+                             LoadingProgressBar.Maximum = images.Count
+                         End Sub)
+        ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
 
-        animator = New DesktopPonyAnimator(ponyViewer, startupPonies, ponies)
+        animator = createAnimator()
         AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
                                                    Sub() SmartInvoke(
                                                        Sub()

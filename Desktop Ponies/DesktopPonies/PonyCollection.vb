@@ -23,27 +23,31 @@ Public Class PonyCollection
     Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(Function(s) New List(Of InteractionBase)())
 
     Public Sub New(removeInvalidItems As Boolean)
-        Me.New(removeInvalidItems, Nothing, Nothing)
+        Me.New(removeInvalidItems, Nothing, Nothing, Nothing, Nothing)
     End Sub
 
-    Public Sub New(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
-        Threading.Tasks.Parallel.Invoke(
-            Sub() LoadPonyBases(removeInvalidItems, countCallback, loadCallback),
-            AddressOf LoadInteractions,
-            AddressOf LoadHouses)
-    End Sub
-
-    Private Sub LoadPonyBases(removeInvalidItems As Boolean, countCallback As Action(Of Integer), loadCallback As Action(Of PonyBase))
-        Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
+    Public Sub New(removeInvalidItems As Boolean,
+                   ponyCountCallback As Action(Of Integer), ponyLoadCallback As Action(Of PonyBase),
+                   houseCountCallback As Action(Of Integer), houseLoadCallback As Action(Of HouseBase))
         Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory))
-        If countCallback IsNot Nothing Then countCallback(ponyBaseDirectories.Length)
+        If ponyCountCallback IsNot Nothing Then ponyCountCallback(ponyBaseDirectories.Length)
+        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
+        If houseCountCallback IsNot Nothing Then houseCountCallback(houseDirectories.Length)
+        Threading.Tasks.Parallel.Invoke(
+            Sub() LoadPonyBases(removeInvalidItems, ponyBaseDirectories, ponyLoadCallback),
+            Sub() LoadHouses(houseDirectories, houseLoadCallback),
+            AddressOf LoadInteractions)
+    End Sub
+
+    Private Sub LoadPonyBases(removeInvalidItems As Boolean, ponyBaseDirectories As String(), ponyLoadCallback As Action(Of PonyBase))
+        Dim ponies As New Collections.Concurrent.ConcurrentBag(Of PonyBase)()
         Threading.Tasks.Parallel.ForEach(
             ponyBaseDirectories,
             Sub(folder)
                 Dim pony = PonyBase.Load(Me, folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1), removeInvalidItems)
                 If pony IsNot Nothing Then
                     ponies.Add(pony)
-                    If loadCallback IsNot Nothing Then loadCallback(pony)
+                    If ponyLoadCallback IsNot Nothing Then ponyLoadCallback(pony)
                 End If
             End Sub)
         Dim allBases = ponies.OrderBy(Function(pb) pb.Directory, StringComparer.OrdinalIgnoreCase).ToList()
@@ -55,9 +59,24 @@ Public Class PonyCollection
         _bases = allBases.ToImmutableArray()
     End Sub
 
+    Private Sub LoadHouses(houseDirectories As String(), houseLoadCallback As Action(Of HouseBase))
+        Dim houses As New Collections.Concurrent.ConcurrentBag(Of HouseBase)()
+        Threading.Tasks.Parallel.ForEach(
+            houseDirectories,
+            Sub(folder)
+                Try
+                    Dim house = New HouseBase(folder)
+                    houses.Add(house)
+                    If houseLoadCallback IsNot Nothing Then houseLoadCallback(house)
+                Catch ex As Exception
+                    ' Ignore errors from loading badly configured houses.
+                End Try
+            End Sub)
+        _houses = houses.OrderBy(Function(hb) hb.Name).ToImmutableArray()
+    End Sub
+
     Private Sub LoadInteractions()
         If Not File.Exists(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
-            Options.PonyInteractionsExist = False
             Exit Sub
         End If
         Dim newListFactory = Function(s As String) New List(Of InteractionBase)()
@@ -75,23 +94,6 @@ Public Class PonyCollection
                 End If
             Loop
         End Using
-    End Sub
-
-    Private Sub LoadHouses()
-        ' TODO: Hook up to count and load callbacks.
-        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
-        Dim houses As New Collections.Concurrent.ConcurrentBag(Of HouseBase)()
-        Threading.Tasks.Parallel.ForEach(
-            houseDirectories,
-            Sub(folder)
-                Try
-                    Dim base = New HouseBase(folder)
-                    houses.Add(base)
-                Catch ex As Exception
-                    ' Ignore errors from loading badly configured houses.
-                End Try
-            End Sub)
-        _houses = houses.OrderBy(Function(hb) hb.Name).ToImmutableArray()
     End Sub
 
     ''' <summary>

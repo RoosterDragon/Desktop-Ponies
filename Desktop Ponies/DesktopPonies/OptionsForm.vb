@@ -1,111 +1,117 @@
 ﻿Imports System.Globalization
 
 Public Class OptionsForm
-    Private selectingMonitors As Boolean
-    Private avoidanceZonePreviewGraphics As Graphics
-    Private initializing As Boolean = True
+    Private Const PreviewMargin = 5
+    Private Const SpeechMultiplier = 100
+    Private Const SizeMultiplier = 20
+    Private Const TimeMultiplier = 10
+    Private Const ExclusionMultiplier = 100
+    Private Const SoundMultiplier = 100
+    Private totalScreenBounds As Rectangle
+    Private updatingFromOptions As Boolean
 
     Public Sub New()
+        updatingFromOptions = True
         InitializeComponent()
         Icon = My.Resources.Twilight
     End Sub
 
     Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        MonitorsSelection.Items.AddRange(Screen.AllScreens)
+
+        SoundGroup.Visible = EvilGlobals.DirectXSoundAvailable
+
+        If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
+            ShowViewerInTaskbar.Visible = False
+            ShowPerformanceGraph.Visible = False
+        End If
+
+        If Not OperatingSystemInfo.IsWindows Then
+            ScreensaverGroup.Visible = False
+            WindowAvoidance.Visible = False
+            WindowContainment.Visible = False
+        End If
+
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
     End Sub
 
     Private Sub LoadInternal()
+        totalScreenBounds = Options.GetCombinedScreenBounds()
+
         EnableWaitCursor(True)
 
-        AvoidanceZonePreview.Image = New Bitmap(AvoidanceZonePreview.Size.Width, AvoidanceZonePreview.Size.Height)
-        avoidanceZonePreviewGraphics = Graphics.FromImage(AvoidanceZonePreview.Image)
-
-        MonitorsSelection.Items.AddRange(Screen.AllScreens.Select(Function(s) s.DeviceName).ToArray())
-
-        For i = 0 To MonitorsSelection.Items.Count - 1
-            MonitorsSelection.SetSelected(i, True)
-        Next
-
-        If Not EvilGlobals.DirectXSoundAvailable Then
-            SoundDisabledLabel.Visible = True
-            Sound.Enabled = False
-            Sound.Checked = False
-            ScreensaverSounds.Enabled = False
-            ScreensaverSounds.Checked = False
-        Else
-            SoundDisabledLabel.Visible = False
-            Sound.Enabled = True
-        End If
-
-        ' Set initial volume value, event handler will update values as needed.
-        Volume.Value = 650
-
-        ' This option is no longer available as there is no code to reliably determine if a fullscreen window is active at the moment.
-        SuspendForFullscreenApp.Visible = False
-        SuspendForFullscreenApp.Enabled = False
-        Options.SuspendForFullscreenApplication = False
-
-        If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
-            ShowViewerInTaskbar.Checked = False
-            ShowViewerInTaskbar.Enabled = False
-            ShowPerformanceGraph.Checked = False
-            ShowPerformanceGraph.Visible = False
-        End If
-
-        ' This option causes random crashes on Mac.
-        ' TODO: Determine cause of errors - appears to be threading related.
-        If OperatingSystemInfo.IsMacOSX Then
-            SpeechDisabledLabel.Visible = True
-            SpeechDisabled.Checked = True
-            SpeechGroup.Enabled = False
-            Options.PonySpeechEnabled = False
-        End If
-
-        initializing = False
         RefreshOptions()
+        ScreenCoveragePreview.Invalidate()
 
         Enabled = True
         UseWaitCursor = False
     End Sub
 
     Private Sub RefreshOptions()
-        PonySpeechChance.Value = CInt(Options.PonySpeechChance * 100)
-        SpeechDisabled.Checked = Not Options.PonySpeechEnabled
+        updatingFromOptions = True
 
-        CursorAvoidance.Checked = Options.CursorAvoidanceEnabled
-        CursorAvoidanceRadius.Value = CDec(Options.CursorAvoidanceSize)
-
-        PonyDragging.Checked = Options.PonyDraggingEnabled
-
-        Interactions.Checked = Options.PonyInteractionsEnabled
-        InteractionsMissingLabel.Visible = Options.PonyInteractionsExist
-        'Interactions_error_label.Visible = False
-        InteractionErrorsDisplayed.Checked = Options.DisplayPonyInteractionsErrors
-
-        SelectMonitors()
-
-        SizeScale.Value = CInt(Options.ScaleFactor * 100)
-        MaxPonies.Value = Options.MaxPonyCount
         Effects.Checked = Options.PonyEffectsEnabled
-        WindowAvoidance.Checked = Options.WindowAvoidanceEnabled
+        Speech.Checked = Options.PonySpeechEnabled
+        PonySpeechChance.Value = CInt(Options.PonySpeechChance * SpeechMultiplier)
+        Interactions.Checked = Options.PonyInteractionsEnabled
+        PonyDragging.Checked = Options.PonyDraggingEnabled
+        CursorAwareness.Checked = Options.CursorAvoidanceEnabled
+        CursorAvoidanceRadius.Value = CDec(Options.CursorAvoidanceSize)
         PoniesAvoidPonies.Checked = Options.PonyAvoidsPonies
-        PoniesStayInBoxes.Checked = Options.PonyStaysInBox
-        Teleport.Checked = Options.PonyTeleportEnabled
-        TimeScale.Value = CInt(Options.TimeFactor * 10)
-        Sound.Checked = Options.SoundEnabled
-        'SoundDisabledLabel.Visible = False
-        SoundLimitOneGlobally.Checked = Options.SoundSingleChannelOnly
-        SoundLimitOnePerPony.Checked = Not Options.SoundSingleChannelOnly
-        Volume.Value = CInt(Options.SoundVolume * 1000)
+        SizeScale.Value = CInt(Options.ScaleFactor * SizeMultiplier)
+        TimeScale.Value = CInt(Options.TimeFactor * TimeMultiplier)
+        MaxPonies.Value = Options.MaxPonyCount
+
         ShowViewerInTaskbar.Checked = Options.ShowInTaskbar
         AlwaysOnTop.Checked = Options.AlwaysOnTop
-        SuspendForFullscreenApp.Checked = Options.SuspendForFullscreenApplication
-        AvoidanceZoneX.Value = CDec(Options.ExclusionZone.X * 100)
-        AvoidanceZoneY.Value = CDec(Options.ExclusionZone.Y * 100)
-        AvoidanceZoneWidth.Value = CDec(Options.ExclusionZone.Width * 100)
-        AvoidanceZoneHeight.Value = CDec(Options.ExclusionZone.Height * 100)
-        ScreensaverSounds.Checked = Options.SoundEnabled
+        WindowAvoidance.Checked = Options.WindowAvoidanceEnabled
+        WindowContainment.Checked = Options.WindowContainment
 
+        Dim screenCoverageOption = If(Options.AllowedRegion Is Nothing, ScreenCoverageMonitors, ScreenCoverageArea)
+        screenCoverageOption.Checked = True
+        For Each screen In Options.Screens
+            For i = 0 To MonitorsSelection.Items.Count - 1
+                If Object.ReferenceEquals(MonitorsSelection.Items(i), screen) Then
+                    MonitorsSelection.SetSelected(i, True)
+                End If
+            Next
+        Next
+
+        ScreenAreaX.Minimum = totalScreenBounds.X
+        ScreenAreaX.Maximum = totalScreenBounds.X + totalScreenBounds.Width
+        ScreenAreaY.Minimum = totalScreenBounds.Y
+        ScreenAreaY.Maximum = totalScreenBounds.Y + totalScreenBounds.Height
+        ScreenAreaWidth.Maximum = totalScreenBounds.Width
+        ScreenAreaHeight.Maximum = totalScreenBounds.Height
+
+        Dim area = Options.GetAllowedArea()
+        ScreenAreaX.Value = area.X
+        ScreenAreaY.Value = area.Y
+        ScreenAreaWidth.Value = area.Width
+        ScreenAreaHeight.Value = area.Height
+
+        ScreenExclusion.Checked = Options.ExclusionZone.Width > 0 AndAlso Options.ExclusionZone.Height > 0
+        ExculsionAreaX.Value = CDec(Options.ExclusionZone.X * ExclusionMultiplier)
+        ExclusionAreaY.Value = CDec(Options.ExclusionZone.Y * ExclusionMultiplier)
+        ExclusionAreaWidth.Value = CDec(If(ScreenExclusion.Checked,
+                                           Options.ExclusionZone.Width * ExclusionMultiplier,
+                                           ExclusionMultiplier / 2))
+        ExclusionAreaHeight.Value = CDec(If(ScreenExclusion.Checked,
+                                            Options.ExclusionZone.Height * ExclusionMultiplier,
+                                            ExclusionMultiplier / 2))
+
+        Dim outOfBoundsOption = If(Options.PonyTeleportEnabled, OutOfBoundsTeleport, OutOfBoundsWalk)
+        outOfBoundsOption.Checked = True
+
+        Sound.Checked = Options.SoundEnabled
+        SoundLimitOneGlobally.Checked = Options.SoundSingleChannelOnly
+        SoundLimitOnePerPony.Checked = Not Options.SoundSingleChannelOnly
+        Volume.Value = CInt(Options.SoundVolume * SoundMultiplier)
+
+        EnablePonyLogs.Checked = Options.EnablePonyLogs
+        ShowPerformanceGraph.Checked = Options.ShowPerformanceGraph
+
+        ScreensaverSounds.Checked = Options.SoundEnabled
         Select Case Options.ScreensaverStyle
             Case Options.ScreensaverBackgroundStyle.Transparent
                 ScreensaverTransparent.Checked = True
@@ -115,24 +121,21 @@ Public Class OptionsForm
                 ScreensaverImage.Checked = True
         End Select
 
-        EnablePonyLogs.Checked = Options.EnablePonyLogs
-        ShowPerformanceGraph.Checked = Options.ShowPerformanceGraph
+        updatingFromOptions = False
     End Sub
 
-    Private Sub SelectMonitors()
-        selectingMonitors = True
-        MonitorsSelection.SelectedItems.Clear()
+    Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
+        Options.PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
 
-        For Each monitorLoop In Options.Screens
-            Dim monitor = monitorLoop
-            For i = 0 To MonitorsSelection.Items.Count - 1
-                If DirectCast(MonitorsSelection.Items(i), String) = monitor.DeviceName Then
-                    MonitorsSelection.SetSelected(i, True)
-                End If
-            Next
+        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
+            ponyPanel.PonyCount.Text = "0"
         Next
+    End Sub
 
-        selectingMonitors = False
+    Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
+        Using form = New FiltersForm()
+            form.ShowDialog(Me)
+        End Using
     End Sub
 
     Private Sub LoadButton_Click(sender As Object, e As EventArgs) Handles LoadButton.Click
@@ -148,7 +151,6 @@ Public Class OptionsForm
 
             Options.LoadProfile(profile, True)
             RefreshOptions()
-            SizeScale_ValueChanged(Nothing, Nothing)
         Catch ex As IO.IOException
             Program.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
         End Try
@@ -183,99 +185,245 @@ Public Class OptionsForm
         End Try
     End Sub
 
-    Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
-        Options.PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
-
-        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            ponyPanel.PonyCount.Text = "0"
-        Next
+    Private Sub Effects_CheckedChanged(sender As Object, e As EventArgs) Handles Effects.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.PonyEffectsEnabled = Effects.Checked
     End Sub
 
-    Private Sub AvoidanceZoneArea_ValueChanged(sender As Object, e As EventArgs) Handles AvoidanceZoneHeight.ValueChanged, AvoidanceZoneWidth.ValueChanged, AvoidanceZoneY.ValueChanged, AvoidanceZoneX.ValueChanged
-        If initializing Then Return
-        Options.ExclusionZone.X = AvoidanceZoneX.Value / 100
-        Options.ExclusionZone.Y = AvoidanceZoneY.Value / 100
-        Options.ExclusionZone.Width = AvoidanceZoneWidth.Value / 100
-        Options.ExclusionZone.Height = AvoidanceZoneHeight.Value / 100
-        If Not IsNothing(avoidanceZonePreviewGraphics) Then
-            avoidanceZonePreviewGraphics.Clear(Color.White)
-            avoidanceZonePreviewGraphics.FillRectangle(
-                Brushes.ForestGreen, Options.ExclusionZoneForBounds(Rectangle.Round(avoidanceZonePreviewGraphics.VisibleClipBounds)))
-            AvoidanceZonePreview.Invalidate()
-            AvoidanceZonePreview.Update()
-        End If
+    Private Sub Speech_CheckedChanged(sender As Object, e As EventArgs) Handles Speech.CheckedChanged
+        PonySpeechChance.Enabled = Speech.Checked
+        PonySpeechChanceLabel.Enabled = Speech.Checked
+        If updatingFromOptions Then Return
+        Options.PonySpeechEnabled = Speech.Checked
     End Sub
 
-    Private Sub MonitorsSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
-        If initializing Then Return
-        If selectingMonitors Then Exit Sub
+    Private Sub PonySpeechChance_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged
+        If updatingFromOptions Then Return
+        Options.PonySpeechChance = PonySpeechChance.Value / SpeechMultiplier
+    End Sub
 
-        If MonitorsSelection.SelectedItems.Count = 0 Then
-            MonitorsMinimumLabel.Visible = True
-            Exit Sub
-        Else
-            MonitorsMinimumLabel.Visible = False
-        End If
+    Private Sub Interactions_CheckedChanged(sender As Object, e As EventArgs) Handles Interactions.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.PonyInteractionsEnabled = Interactions.Checked
+    End Sub
 
-        Dim newScreens = New List(Of Screen)()
-        For i = 0 To MonitorsSelection.SelectedItems.Count - 1
-            For Each monitor In Screen.AllScreens
-                If monitor.DeviceName = DirectCast(MonitorsSelection.SelectedItems(i), String) Then
-                    newScreens.Add(monitor)
-                End If
-            Next
-        Next
-        Options.Screens = newScreens.ToImmutableArray()
+    Private Sub PonyDragging_CheckedChanged(sender As Object, e As EventArgs) Handles PonyDragging.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.PonyDraggingEnabled = PonyDragging.Checked
+    End Sub
 
-        If IsNothing(EvilGlobals.CurrentViewer) Then
-            'done
-            Exit Sub
-        ElseIf TypeOf EvilGlobals.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
-            Dim area = Options.GetCombinedScreenArea()
-            DirectCast(EvilGlobals.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).DisplayBounds = area
-        End If
-
+    Private Sub CursorAwareness_CheckedChanged(sender As Object, e As EventArgs) Handles CursorAwareness.CheckedChanged
+        CursorAvoidanceRadius.Enabled = CursorAwareness.Checked
+        CursorAvoidanceRadiusLabel.Enabled = CursorAwareness.Checked
+        If updatingFromOptions Then Return
+        Options.CursorAvoidanceEnabled = CursorAwareness.Checked
     End Sub
 
     Private Sub CursorAvoidanceRadius_ValueChanged(sender As Object, e As EventArgs) Handles CursorAvoidanceRadius.ValueChanged
-        If initializing Then Return
+        If updatingFromOptions Then Return
         Options.CursorAvoidanceSize = CursorAvoidanceRadius.Value
     End Sub
 
-    Private Sub WindowAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles WindowAvoidance.CheckedChanged
-        If initializing Then Return
-        PoniesAvoidPonies.Enabled = WindowAvoidance.Checked
-        PoniesStayInBoxes.Enabled = WindowAvoidance.Checked
-        Options.WindowAvoidanceEnabled = WindowAvoidance.Checked
+    Private Sub PoniesAvoidPonies_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesAvoidPonies.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.PonyAvoidsPonies = PoniesAvoidPonies.Checked
     End Sub
 
     Private Sub SizeScale_ValueChanged(sender As Object, e As EventArgs) Handles SizeScale.ValueChanged
-        If initializing Then Return
-        SizeScaleValueLabel.Text = Math.Round(SizeScale.Value / 100.0F, 2) & "x"
+        Dim value = CSng(SizeScale.Value / SizeMultiplier)
+        SizeScaleValueLabel.Text = value.ToString("0.##x", CultureInfo.CurrentCulture)
+        If updatingFromOptions Then Return
+        Options.ScaleFactor = value
     End Sub
 
-    Private Sub SizeScale_MouseUp(sender As Object, e As EventArgs) Handles SizeScale.MouseUp
-        If initializing Then Return
-        Options.ScaleFactor = SizeScale.Value / 100.0F
+    Private Sub TimeScale_ValueChanged(sender As Object, e As EventArgs) Handles TimeScale.ValueChanged
+        Dim value = CSng(TimeScale.Value / TimeMultiplier)
+        TimeScaleValueLabel.Text = value.ToString("0.0x", CultureInfo.CurrentCulture)
+        If updatingFromOptions Then Return
+        Options.TimeFactor = value
+    End Sub
+
+    Private Sub MaxPonies_ValueChanged(sender As Object, e As EventArgs) Handles MaxPonies.ValueChanged
+        If updatingFromOptions Then Return
+        Options.MaxPonyCount = CInt(MaxPonies.Value)
+    End Sub
+
+    Private Sub ShowInTaskbar_CheckedChanged(sender As Object, e As EventArgs) Handles ShowViewerInTaskbar.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.ShowInTaskbar = ShowViewerInTaskbar.Checked
+    End Sub
+
+    Private Sub AlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.AlwaysOnTop = AlwaysOnTop.Checked
+    End Sub
+
+    Private Sub WindowAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles WindowAvoidance.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.WindowAvoidanceEnabled = WindowAvoidance.Checked
+    End Sub
+
+    Private Sub WindowContainment_CheckedChanged(sender As Object, e As EventArgs) Handles WindowContainment.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.WindowContainment = WindowContainment.Checked
+    End Sub
+
+    Private Sub ScreenCoverageMonitors_CheckedChanged(sender As Object, e As EventArgs) Handles ScreenCoverageMonitors.CheckedChanged
+        MonitorsSelection.Enabled = ScreenCoverageMonitors.Checked
+        ScreenAreaTable.Enabled = Not ScreenCoverageMonitors.Checked
+        If updatingFromOptions Then Return
+        If Not ScreenCoverageMonitors.Checked Then Return
+        UpdateScreens()
+    End Sub
+
+    Private Sub UpdateScreens()
+        Options.AllowedRegion = Nothing
+        If MonitorsSelection.SelectedItems.Count > 0 Then
+            Options.Screens = MonitorsSelection.SelectedItems.Cast(Of Screen).ToImmutableArray()
+        Else
+            Options.Screens = {Screen.PrimaryScreen}.ToImmutableArray()
+        End If
+        ScreenCoveragePreview.Invalidate()
+    End Sub
+
+    Private Sub ScreenCoverageArea_CheckedChanged(sender As Object, e As EventArgs) Handles ScreenCoverageArea.CheckedChanged
+        ScreenAreaTable.Enabled = ScreenCoverageArea.Checked
+        If updatingFromOptions Then Return
+        If Not ScreenCoverageArea.Checked Then Return
+        UpdateArea()
+    End Sub
+
+    Private Sub UpdateArea()
+        Options.AllowedRegion = Rectangle.Intersect(totalScreenBounds,
+                                                    New Rectangle(CInt(ScreenAreaX.Value), CInt(ScreenAreaY.Value),
+                                                                  CInt(ScreenAreaWidth.Value), CInt(ScreenAreaHeight.Value)))
+        ScreenCoveragePreview.Invalidate()
+    End Sub
+
+    Private Sub ScreenAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles ScreenExclusion.CheckedChanged
+        AvoidanceAreaTable.Enabled = ScreenExclusion.Checked
+        If updatingFromOptions Then Return
+        UpdateExclusionZone()
+    End Sub
+
+    Private Sub UpdateExclusionZone()
+        If ScreenExclusion.Checked Then
+            Options.ExclusionZone = New RectangleF(ExculsionAreaX.Value / 100, ExclusionAreaY.Value / 100,
+                                                   ExclusionAreaWidth.Value / 100, ExclusionAreaHeight.Value / 100)
+        Else
+            Options.ExclusionZone = RectangleF.Empty
+        End If
+        ScreenCoveragePreview.Invalidate()
+    End Sub
+
+    Private Sub MonitorsSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MonitorsSelection.SelectedIndexChanged
+        If updatingFromOptions Then Return
+        If Not ScreenCoverageMonitors.Checked Then Return
+        UpdateScreens()
+    End Sub
+
+    Private Sub ScreenArea_ValueChanged(sender As Object, e As EventArgs) Handles ScreenAreaX.ValueChanged,
+        ScreenAreaY.ValueChanged, ScreenAreaWidth.ValueChanged, ScreenAreaHeight.ValueChanged
+        If updatingFromOptions Then Return
+        If Not ScreenCoverageArea.Checked Then Return
+        UpdateArea()
+    End Sub
+
+    Private Sub AvoidanceArea_ValueChanged(sender As Object, e As EventArgs) Handles ExculsionAreaX.ValueChanged,
+        ExclusionAreaY.ValueChanged, ExclusionAreaWidth.ValueChanged, ExclusionAreaHeight.ValueChanged
+        If updatingFromOptions Then Return
+        Options.ExclusionZone = New RectangleF(ExculsionAreaX.Value / ExclusionMultiplier,
+                                               ExclusionAreaY.Value / ExclusionMultiplier,
+                                               ExclusionAreaWidth.Value / ExclusionMultiplier,
+                                               ExclusionAreaHeight.Value / ExclusionMultiplier)
+        ScreenCoveragePreview.Invalidate()
+    End Sub
+
+    Private Sub OutOfBoundsTeleport_CheckedChanged(sender As Object, e As EventArgs) Handles OutOfBoundsTeleport.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.PonyTeleportEnabled = OutOfBoundsTeleport.Checked
+    End Sub
+
+    Private Sub ScreenCoveragePreview_Paint(sender As Object, e As PaintEventArgs) Handles ScreenCoveragePreview.Paint
+        Dim xScale = (ScreenCoveragePreview.ClientSize.Width - 2 * PreviewMargin) / totalScreenBounds.Width
+        Dim yScale = (ScreenCoveragePreview.ClientSize.Height - 2 * PreviewMargin) / totalScreenBounds.Height
+        Dim scale = Math.Min(xScale, yScale)
+
+        Dim g = e.Graphics
+        g.Clear(Color.White)
+
+        For Each s In Screen.AllScreens
+            Dim area = DrawScreenPreviewRectangle(scale, s.Bounds, 255, Color.Blue, Color.Cyan, g)
+            g.DrawString(s.DeviceName, SystemFonts.SmallCaptionFont, Brushes.Navy, area.Location)
+        Next
+
+        Dim allowedArea = Options.GetAllowedArea()
+        DrawScreenPreviewRectangle(scale, allowedArea, 128, Color.Green, Color.Lime, g)
+
+        Dim exclusionArea = Options.GetExclusionArea(allowedArea, Options.ExclusionZone)
+        DrawScreenPreviewRectangle(scale, exclusionArea, 128, Color.Red, Color.Orange, g)
+    End Sub
+
+    Private Function DrawScreenPreviewRectangle(scale As Double, rectArea As Rectangle, opacity As Byte,
+                                           lineColor As Color, fillColor As Color, graphics As Graphics) As Rectangle
+        Dim scaledRectArea = rectArea
+        scaledRectArea.Location -= New Size(totalScreenBounds.Location)
+        scaledRectArea.Location = New Point(CInt(scaledRectArea.X * scale), CInt(scaledRectArea.Y * scale))
+        scaledRectArea.Location += New Size(PreviewMargin, PreviewMargin)
+        scaledRectArea.Size = New Size(CInt(scaledRectArea.Width * scale), CInt(scaledRectArea.Height * scale))
+        Using pen = New Pen(Color.FromArgb(opacity, lineColor)),
+            brush = New SolidBrush(Color.FromArgb(opacity, fillColor))
+            graphics.FillRectangle(brush, scaledRectArea)
+            graphics.DrawRectangle(pen, scaledRectArea.X, scaledRectArea.Y, scaledRectArea.Width - 1, scaledRectArea.Height - 1)
+        End Using
+        Return scaledRectArea
+    End Function
+
+    Private Sub Sound_CheckedChanged(sender As Object, e As EventArgs) Handles Sound.CheckedChanged
+        SoundLimitOnePerPony.Enabled = Sound.Checked
+        SoundLimitOneGlobally.Enabled = Sound.Checked
+        Volume.Enabled = Sound.Checked
+        VolumeLabel.Enabled = Sound.Checked
+        VolumeValueLabel.Enabled = Sound.Checked
+        If updatingFromOptions Then Return
+        Options.SoundEnabled = Sound.Checked
+    End Sub
+
+    Private Sub SoundLimitOnePerPony_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOnePerPony.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.SoundSingleChannelOnly = Not SoundLimitOnePerPony.Checked
+    End Sub
+
+    Private Sub SoundLimitOneGlobally_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOneGlobally.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.SoundSingleChannelOnly = SoundLimitOneGlobally.Checked
     End Sub
 
     Private Sub Volume_ValueChanged(sender As Object, e As EventArgs) Handles Volume.ValueChanged
-        If initializing Then Return
-
-        'The slider is in %, we need to convert that to the volume that an
-        'Microsoft.DirectX.AudioVideoPlayback.Audio.volume would take.
-        'which is from -10000 to 0 (0 being the loudest), on a logarithmic scale.
-
-        'SoundVolume = CInt(4342 * Math.Log(Volume.Value / 100) - 10000)
-        Options.SoundVolume = CSng(Volume.Value / 1000)
-
-        VolumeValueLabel.Text = (Volume.Value / 100).ToString(CultureInfo.CurrentCulture)
+        Dim value = CSng(Volume.Value / SoundMultiplier)
+        VolumeValueLabel.Text = (value * 10).ToString("0.0", CultureInfo.CurrentCulture)
+        If updatingFromOptions Then Return
+        Options.SoundVolume = value
     End Sub
 
-    Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
-        Using form = New FiltersForm()
-            form.ShowDialog(Me)
-        End Using
+    Private Sub ShowPonyLogs_CheckedChanged(sender As Object, e As EventArgs) Handles EnablePonyLogs.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.EnablePonyLogs = EnablePonyLogs.Checked
+    End Sub
+
+    Private Sub PerformanceGraph_CheckedChanged(sender As Object, e As EventArgs) Handles ShowPerformanceGraph.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.ShowPerformanceGraph = ShowPerformanceGraph.Checked
+    End Sub
+
+    Private Sub ScreensaverSounds_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverSounds.CheckedChanged
+        If updatingFromOptions Then Return
+        Options.SoundEnabled = ScreensaverSounds.Checked
+    End Sub
+
+    Private Sub ScreensaverTransparent_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverTransparent.CheckedChanged
+        If updatingFromOptions Then Return
+        If ScreensaverTransparent.Checked Then Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.Transparent
     End Sub
 
     Private Sub ScreensaverColorButton_Click(sender As Object, e As EventArgs) Handles ScreensaverColorButton.Click
@@ -289,31 +437,23 @@ Public Class OptionsForm
     End Sub
 
     Private Sub ScreensaverColor_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverColor.CheckedChanged
-        If initializing Then Return
-        If ScreensaverColor.Checked Then
-            ScreensaverColorNeededLabel.Visible = Options.ScreensaverBackgroundColor.A < 255
-            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor
-        Else
-            ScreensaverColorNeededLabel.Visible = False
-        End If
+        ScreensaverColorNeededLabel.Visible = ScreensaverColor.Checked AndAlso Options.ScreensaverBackgroundColor.A < 255
+        If updatingFromOptions Then Return
+        If ScreensaverColor.Checked Then Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.SolidColor
     End Sub
 
     Private Sub ScreensaverImage_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverImage.CheckedChanged
-        If initializing Then Return
-        If ScreensaverImage.Checked Then
-            If Options.ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(Options.ScreensaverBackgroundImagePath) Then
-                ScreensaverImageNeededLabel.Visible = True
-            End If
-            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage
-        Else
-            ScreensaverImageNeededLabel.Visible = False
-        End If
+        ScreensaverImageNeededLabel.Visible = ScreensaverImage.Checked AndAlso
+            (Options.ScreensaverBackgroundImagePath = "" OrElse Not IO.File.Exists(Options.ScreensaverBackgroundImagePath))
+        If updatingFromOptions Then Return
+        If ScreensaverImage.Checked Then Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.BackgroundImage
     End Sub
 
     Private Sub ScreensaverImageButton_Click(sender As Object, e As EventArgs) Handles ScreensaverImageButton.Click
         Using dialog As New OpenFileDialog
             dialog.Title = "Select your screensaver background image..."
-            dialog.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*"
+            dialog.Filter = "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg, *.jpeg)|*.jpg;*.jpeg" &
+                "|Image Files (*.gif, *.png, *.jpg, *.jpeg)|*.gif;*.png;*.jpg;*.jpeg"
             dialog.FilterIndex = 4
             dialog.Multiselect = False
 
@@ -331,138 +471,5 @@ Public Class OptionsForm
                 End If
             End If
         End Using
-    End Sub
-
-    Private Sub ShowInTaskbar_CheckedChanged(sender As Object, e As EventArgs) Handles ShowViewerInTaskbar.CheckedChanged
-        If initializing Then Return
-        Options.ShowInTaskbar = ShowViewerInTaskbar.Checked
-        If EvilGlobals.CurrentViewer IsNot Nothing Then
-            EvilGlobals.CurrentViewer.ShowInTaskbar = Options.ShowInTaskbar
-        End If
-    End Sub
-
-    Private Sub AlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles AlwaysOnTop.CheckedChanged
-        If initializing Then Return
-        Options.AlwaysOnTop = AlwaysOnTop.Checked
-        If Not IsNothing(EvilGlobals.CurrentViewer) Then
-            EvilGlobals.CurrentViewer.Topmost = Options.AlwaysOnTop
-        End If
-    End Sub
-
-    Private Sub TimeScale_Scroll(sender As Object, e As EventArgs) Handles TimeScale.Scroll
-        If initializing Then Return
-        Options.TimeFactor = TimeScale.Value / 10.0F
-        TimeScaleValueLabel.Text = Options.TimeFactor.ToString("0.0x", Globalization.CultureInfo.CurrentCulture)
-    End Sub
-
-    Private Sub PonySpeechChance_ValueChanged(sender As Object, e As EventArgs) Handles PonySpeechChance.ValueChanged
-        If initializing Then Return
-        Options.PonySpeechChance = PonySpeechChance.Value / 100
-    End Sub
-
-    Private Sub SpeechDisabled_CheckedChanged(sender As Object, e As EventArgs) Handles SpeechDisabled.CheckedChanged
-        If initializing Then Return
-        Options.PonySpeechEnabled = Not SpeechDisabled.Checked
-    End Sub
-
-    Private Sub CursorAvoidance_CheckedChanged(sender As Object, e As EventArgs) Handles CursorAvoidance.CheckedChanged
-        If initializing Then Return
-        Options.CursorAvoidanceEnabled = CursorAvoidance.Checked
-    End Sub
-
-    Private Sub PonyDragging_CheckedChanged(sender As Object, e As EventArgs) Handles PonyDragging.CheckedChanged
-        If initializing Then Return
-        Options.PonyDraggingEnabled = PonyDragging.Checked
-    End Sub
-
-    Private Sub Interactions_CheckedChanged(sender As Object, e As EventArgs) Handles Interactions.CheckedChanged
-        If initializing Then Return
-        Options.PonyInteractionsEnabled = Interactions.Checked
-    End Sub
-
-    Private Sub InteractionErrorsDisplayed_CheckedChanged(sender As Object, e As EventArgs) Handles InteractionErrorsDisplayed.CheckedChanged
-        If initializing Then Return
-        Options.DisplayPonyInteractionsErrors = InteractionErrorsDisplayed.Checked
-    End Sub
-
-    Private Sub MaxPonies_ValueChanged(sender As Object, e As EventArgs) Handles MaxPonies.ValueChanged
-        If initializing Then Return
-        Options.MaxPonyCount = CInt(MaxPonies.Value)
-    End Sub
-
-    Private Sub Effects_CheckedChanged(sender As Object, e As EventArgs) Handles Effects.CheckedChanged
-        If initializing Then Return
-        Options.PonyEffectsEnabled = Effects.Checked
-    End Sub
-
-    Private Sub PoniesAvoidPonies_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesAvoidPonies.CheckedChanged
-        If initializing Then Return
-        Options.PonyAvoidsPonies = PoniesAvoidPonies.Checked
-    End Sub
-
-    Private Sub PoniesStayInBoxes_CheckedChanged(sender As Object, e As EventArgs) Handles PoniesStayInBoxes.CheckedChanged
-        If initializing Then Return
-        Options.PonyStaysInBox = PoniesStayInBoxes.Checked
-    End Sub
-
-    Private Sub Teleport_CheckedChanged(sender As Object, e As EventArgs) Handles Teleport.CheckedChanged
-        If initializing Then Return
-        Options.PonyTeleportEnabled = Teleport.Checked
-    End Sub
-
-    Private Sub Sound_CheckedChanged(sender As Object, e As EventArgs) Handles Sound.CheckedChanged
-        If initializing Then Return
-        Options.SoundEnabled = Sound.Checked
-    End Sub
-
-    Private Sub SoundLimitOneGlobally_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOneGlobally.CheckedChanged
-        If initializing Then Return
-        Options.SoundSingleChannelOnly = SoundLimitOneGlobally.Checked
-    End Sub
-
-    Private Sub SoundLimitOnePerPony_CheckedChanged(sender As Object, e As EventArgs) Handles SoundLimitOnePerPony.CheckedChanged
-        If initializing Then Return
-        Options.SoundSingleChannelOnly = Not SoundLimitOnePerPony.Checked
-    End Sub
-
-    Private Sub SuspendForFullscreenApp_CheckedChanged(sender As Object, e As EventArgs) Handles SuspendForFullscreenApp.CheckedChanged
-        If initializing Then Return
-        Options.SuspendForFullscreenApplication = SuspendForFullscreenApp.Checked
-    End Sub
-
-    Private Sub ScreensaverSounds_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverSounds.CheckedChanged
-        If initializing Then Return
-        Options.SoundEnabled = ScreensaverSounds.Checked
-    End Sub
-
-    Private Sub ScreensaverTransparent_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverTransparent.CheckedChanged
-        If initializing Then Return
-        If ScreensaverTransparent.Checked Then
-            Options.ScreensaverStyle = Options.ScreensaverBackgroundStyle.Transparent
-        End If
-    End Sub
-
-    Private Sub ShowPonyLogs_CheckedChanged(sender As Object, e As EventArgs) Handles EnablePonyLogs.CheckedChanged
-        If initializing Then Return
-        Options.EnablePonyLogs = EnablePonyLogs.Checked
-    End Sub
-
-    Private Sub PerformanceGraph_CheckedChanged(sender As Object, e As EventArgs) Handles ShowPerformanceGraph.CheckedChanged
-        If initializing Then Return
-        Options.ShowPerformanceGraph = ShowPerformanceGraph.Checked
-        If EvilGlobals.CurrentViewer IsNot Nothing AndAlso
-            TypeOf EvilGlobals.CurrentViewer Is DesktopSprites.SpriteManagement.WinFormSpriteInterface Then
-            DirectCast(EvilGlobals.CurrentViewer, DesktopSprites.SpriteManagement.WinFormSpriteInterface).ShowPerformanceGraph =
-                Options.ShowPerformanceGraph
-        End If
-    End Sub
-
-    Private Sub CloseButton_Click(sender As Object, e As EventArgs) Handles CloseButton.Click
-        Close()
-    End Sub
-
-    Private Sub OptionsForm_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        If avoidanceZonePreviewGraphics IsNot Nothing Then avoidanceZonePreviewGraphics.Dispose()
-        If AvoidanceZonePreview.Image IsNot Nothing Then AvoidanceZonePreview.Image.Dispose()
     End Sub
 End Class

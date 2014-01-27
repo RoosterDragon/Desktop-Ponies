@@ -11,6 +11,41 @@ Public Class PonyAnimator
 
     Protected Property ExitWhenNoSprites As Boolean = True
     Protected ReadOnly PonyCollection As PonyCollection
+    Protected ReadOnly PonyContext As PonyContext
+    Private _manualControlPlayerOne As Pony
+    Protected Property ManualControlPlayerOne As Pony
+        Get
+            Return _manualControlPlayerOne
+        End Get
+        Set(value As Pony)
+            If _manualControlPlayerOne IsNot Nothing Then
+                _manualControlPlayerOne.SpeedOverride = Nothing
+                _manualControlPlayerOne.DestinationOverride = Nothing
+            End If
+            If Object.ReferenceEquals(_manualControlPlayerTwo, value) Then
+                _manualControlPlayerTwo = Nothing
+            End If
+            _manualControlPlayerOne = value
+        End Set
+    End Property
+    Private _manualControlPlayerTwo As Pony
+    Protected Property ManualControlPlayerTwo As Pony
+        Get
+            Return _manualControlPlayerTwo
+        End Get
+        Set(value As Pony)
+            If _manualControlPlayerTwo IsNot Nothing Then
+                _manualControlPlayerTwo.SpeedOverride = Nothing
+                _manualControlPlayerTwo.DestinationOverride = Nothing
+            End If
+            If Object.ReferenceEquals(_manualControlPlayerOne, value) Then
+                _manualControlPlayerOne = Nothing
+            End If
+            _manualControlPlayerTwo = value
+        End Set
+    End Property
+    Public Property AllowManualControl As Boolean
+
     Private ReadOnly activeSounds As New List(Of Object)()
     Private globalSoundEnd As Date
     Private ReadOnly soundEndBySprite As New Dictionary(Of ISoundfulSprite, Date)()
@@ -41,9 +76,12 @@ Public Class PonyAnimator
                                                                    Return a.Region.Bottom - b.Region.Bottom
                                                                End Function
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite), ponyCollection As PonyCollection)
+    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                   ponyCollection As PonyCollection, ponyContext As PonyContext)
         MyBase.New(spriteViewer, spriteCollection)
         Me.PonyCollection = Argument.EnsureNotNull(ponyCollection, "ponyCollection")
+        Me.PonyContext = Argument.EnsureNotNull(ponyContext, "ponyContext")
+        Me.PonyContext.Sprites = Sprites
 
         MaximumFramesPerSecond = 25
         Viewer.WindowTitle = "Desktop Ponies"
@@ -125,7 +163,20 @@ Public Class PonyAnimator
     ''' Updates the ponies and effect. Cycles houses.
     ''' </summary>
     Protected Overrides Sub Update()
-        EvilGlobals.CursorLocation = Viewer.CursorPosition
+        If PonyContext.PendingSprites.Count > 0 Then
+            QueueAddRangeAndStart(PonyContext.PendingSprites)
+            PonyContext.PendingSprites.Clear()
+        End If
+        PonyContext.CursorLocation = Viewer.CursorPosition
+        SynchronizeContext()
+        PostSynchronizeUpdate()
+        Viewer.ShowInTaskbar = Options.ShowInTaskbar
+        Viewer.Topmost = Options.AlwaysOnTop
+        Dim winFormSpriteInterface = TryCast(Viewer, WinFormSpriteInterface)
+        If winFormSpriteInterface IsNot Nothing Then
+            winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
+            winFormSpriteInterface.ShowPerformanceGraph = Options.ShowPerformanceGraph
+        End If
 
         ' When the cursor moves, or a mouse button is pressed, end the screensaver.
         If EvilGlobals.InScreensaverMode Then
@@ -159,11 +210,20 @@ Public Class PonyAnimator
             UpdateIfHouse(sprite)
         Next
 
-        ' Run game update loop.
-        ' TODO: Refactor game loop into a new derived class.
-        If EvilGlobals.CurrentGame IsNot Nothing Then
-            EvilGlobals.CurrentGame.Update()
-            If Me.Disposed Then Return
+        ' Handle player controlled movement.
+        If AllowManualControl Then
+            ManualControl(ManualControlPlayerOne,
+                          KeyboardState.IsKeyPressed(Keys.Up),
+                          KeyboardState.IsKeyPressed(Keys.Down),
+                          KeyboardState.IsKeyPressed(Keys.Left),
+                          KeyboardState.IsKeyPressed(Keys.Right),
+                          KeyboardState.IsKeyPressed(Keys.RShiftKey))
+            ManualControl(ManualControlPlayerTwo,
+                          KeyboardState.IsKeyPressed(Keys.W),
+                          KeyboardState.IsKeyPressed(Keys.S),
+                          KeyboardState.IsKeyPressed(Keys.A),
+                          KeyboardState.IsKeyPressed(Keys.D),
+                          KeyboardState.IsKeyPressed(Keys.LShiftKey))
         End If
 
         ' Process queued actions now, so the sprite collection is up to date. Then we can tell if interactions need to be reinitialized.
@@ -185,12 +245,40 @@ Public Class PonyAnimator
         End If
     End Sub
 
+    Protected Overridable Sub SynchronizeContext()
+        PonyContext.SynchronizeWithGlobalOptions()
+    End Sub
+
+    Protected Overridable Sub PostSynchronizeUpdate()
+    End Sub
+
     Private Function UpdateIfHouse(sprite As ISprite) As Boolean
         Dim house = TryCast(sprite, House)
         If house Is Nothing Then Return False
         house.Cycle(ElapsedTime, PonyCollection.Bases)
         Return True
     End Function
+
+    Private Sub ManualControl(pony As Pony, up As Boolean, down As Boolean, left As Boolean, right As Boolean, speedBoost As Boolean)
+        If pony Is Nothing Then Return
+        Dim movement As Vector2F
+        If up Then movement.Y -= 1
+        If down Then movement.Y += 1
+        If left Then movement.X -= 1
+        If right Then movement.X += 1
+        Dim length = movement.Length()
+        If length > 0 Then
+            movement /= length
+            Dim baseSpeed = If(EvilGlobals.CurrentGame IsNot Nothing, If(EvilGlobals.CurrentGame.Name = "Ping Pong Pony", 267, 167), 100)
+            Dim speed = If(speedBoost, baseSpeed * 2, baseSpeed)
+            movement *= speed
+            pony.SpeedOverride = speed
+            pony.DestinationOverride = pony.Location + movement
+        Else
+            pony.SpeedOverride = 0
+            pony.DestinationOverride = pony.Location
+        End If
+    End Sub
 
     Private Sub PlaySounds()
         ' Sound must be enabled for the mode we are in.
@@ -266,6 +354,10 @@ Public Class PonyAnimator
 
     Protected Friend Sub AddEffect(effect As Effect)
         QueueAddAndStart(effect)
+    End Sub
+
+    Protected Friend Sub RemoveSprite(sprite As ISprite)
+        QueueRemove(sprite)
     End Sub
 
     Protected Friend Sub Clear()

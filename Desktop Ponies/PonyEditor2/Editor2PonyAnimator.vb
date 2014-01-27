@@ -8,8 +8,9 @@ Public Class Editor2PonyAnimator
     Private preview As PonyPreview
     Private editorMenu As ISimpleContextMenu
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, ponyCollection As PonyCollection, preview As PonyPreview)
-        MyBase.New(spriteViewer, Nothing, ponyCollection)
+    Public Sub New(spriteViewer As ISpriteCollectionView, ponyCollection As PonyCollection, ponyContext As PonyContext,
+                   preview As PonyPreview)
+        MyBase.New(spriteViewer, Nothing, ponyCollection, ponyContext)
         ExitWhenNoSprites = False
         Me.preview = preview
         AddHandler Viewer.InterfaceClosed, Sub() Finish()
@@ -61,5 +62,9 @@ Public Class Editor2PonyAnimator
     Protected Overrides Sub Update()
         MyBase.Update()
         preview.AnimatorUpdate()
+    End Sub
+
+    Protected Overrides Sub SynchronizeContext()
+        PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
     End Sub
 End Class

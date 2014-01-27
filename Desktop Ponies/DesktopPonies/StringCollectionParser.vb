@@ -40,10 +40,8 @@ Public Class StringCollectionParser
         End Get
     End Property
     Public Sub New(itemsToParse As String(), itemNames As String())
-        Argument.EnsureNotNull(itemsToParse, "itemsToParse")
-        Argument.EnsureNotNull(itemNames, "itemNames")
-        items = itemsToParse
-        Me.itemNames = itemNames
+        items = Argument.EnsureNotNull(itemsToParse, "itemsToParse")
+        Me.itemNames = If(itemNames, {})
     End Sub
     Protected Function GetNextItem() As String
         Dim item As String = Nothing
@@ -166,6 +164,39 @@ Public Class StringCollectionParser
             Return Parsed.Failed(Of Integer)(s, failReason)
         End If
     End Function
+    Public Function ParseSingle() As Single
+        Return ParseSingle(Single.MinValue, Single.MaxValue)
+    End Function
+    Public Function ParseSingle(fallback As Single) As Single
+        Return ParseSingle(fallback, Single.MinValue, Single.MaxValue)
+    End Function
+    Public Function ParseSingle(min As Single, max As Single) As Single
+        Return ParseSingleInternal(Nothing, min, max)
+    End Function
+    Public Function ParseSingle(fallback As Single, min As Single, max As Single) As Single
+        Return ParseSingleInternal(fallback, min, max)
+    End Function
+    Private Function ParseSingleInternal(fallback As Single?, min As Single, max As Single) As Single
+        Return HandleParsed(ParsedSingle(GetNextItem(), fallback, min, max))
+    End Function
+    Private Shared Function ParsedSingle(s As String, fallback As Single?, min As Single, max As Single) As Parsed(Of Single)
+        If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
+        Dim failReason As String = Nothing
+        Dim result As Single
+        If Not Single.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, result) Then
+            failReason = String.Format(CultureInfo.CurrentCulture, FloatFailureFormat, s)
+        End If
+        If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
+            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
+        End If
+        If failReason Is Nothing Then
+            Return Parsed.Success(result)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback.Value, failReason)
+        Else
+            Return Parsed.Failed(Of Single)(s, failReason)
+        End If
+    End Function
     Public Function ParseDouble() As Double
         Return ParseDouble(Double.MinValue, Double.MaxValue)
     End Function
@@ -197,6 +228,26 @@ Public Class StringCollectionParser
             Return Parsed.Fallback(s, fallback.Value, failReason)
         Else
             Return Parsed.Failed(Of Double)(s, failReason)
+        End If
+    End Function
+    Public Function ParseEnum(Of TEnum As Structure)() As TEnum
+        ParseEnum(Of TEnum)(Nothing)
+    End Function
+    Public Function ParseEnum(Of TEnum As Structure)(fallback As TEnum?) As TEnum
+        Return HandleParsed(ParsedEnum(GetNextItem(), fallback))
+    End Function
+    Private Shared Function ParsedEnum(Of TEnum As Structure)(s As String, fallback As TEnum?) As Parsed(Of TEnum)
+        Dim result As TEnum
+        If [Enum].TryParse(s, result) Then
+            Return Parsed.Success(result)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback.Value,
+                                   String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
+                                                 s, String.Join(", ", [Enum].GetValues(GetType(TEnum)))))
+        Else
+            Return Parsed.Failed(Of TEnum)(s,
+                                           String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
+                                                         s, String.Join(", ", [Enum].GetValues(GetType(TEnum)))))
         End If
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T)) As T

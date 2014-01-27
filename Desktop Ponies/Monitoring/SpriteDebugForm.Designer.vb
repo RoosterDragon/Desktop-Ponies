@@ -28,12 +28,13 @@ Partial Class SpriteDebugForm
         Me.colLocation = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colTimeLeft = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colDestinationCoords = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colMovement = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colDestination = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colBehaviorTarget = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFollowTarget = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colVisualOverrideBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colLog = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colGameAction = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SpriteContainer.Panel1.SuspendLayout()
         Me.SpriteContainer.SuspendLayout()
         Me.SuspendLayout()
@@ -49,7 +50,7 @@ Partial Class SpriteDebugForm
         '
         Me.SpriteContainer.Panel1.Controls.Add(Me.PonyDataGridView)
         Me.SpriteContainer.Panel2Collapsed = True
-        Me.SpriteContainer.Size = New System.Drawing.Size(1022, 208)
+        Me.SpriteContainer.Size = New System.Drawing.Size(984, 208)
         Me.SpriteContainer.SplitterDistance = 183
         Me.SpriteContainer.TabIndex = 0
         '
@@ -59,12 +60,12 @@ Partial Class SpriteDebugForm
         Me.PonyDataGridView.AllowUserToDeleteRows = False
         Me.PonyDataGridView.AllowUserToOrderColumns = True
         Me.PonyDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.PonyDataGridView.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colName, Me.colLocation, Me.colBehavior, Me.colTimeLeft, Me.colDestinationCoords, Me.colDestination, Me.colBehaviorTarget, Me.colFollowTarget, Me.colVisualOverrideBehavior, Me.colLog})
+        Me.PonyDataGridView.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colName, Me.colLocation, Me.colBehavior, Me.colTimeLeft, Me.colMovement, Me.colDestination, Me.colBehaviorTarget, Me.colFollowTarget, Me.colVisualOverrideBehavior, Me.colLog, Me.colGameAction})
         Me.PonyDataGridView.Dock = System.Windows.Forms.DockStyle.Fill
         Me.PonyDataGridView.Location = New System.Drawing.Point(0, 0)
         Me.PonyDataGridView.Name = "PonyDataGridView"
         Me.PonyDataGridView.ReadOnly = True
-        Me.PonyDataGridView.Size = New System.Drawing.Size(1022, 208)
+        Me.PonyDataGridView.Size = New System.Drawing.Size(984, 208)
         Me.PonyDataGridView.TabIndex = 0
         '
         'colName
@@ -85,18 +86,20 @@ Partial Class SpriteDebugForm
         Me.colBehavior.HeaderText = "Behavior"
         Me.colBehavior.Name = "colBehavior"
         Me.colBehavior.ReadOnly = True
+        Me.colBehavior.Width = 80
         '
         'colTimeLeft
         '
         Me.colTimeLeft.HeaderText = "Time Left"
         Me.colTimeLeft.Name = "colTimeLeft"
         Me.colTimeLeft.ReadOnly = True
+        Me.colTimeLeft.Width = 50
         '
-        'colDestinationCoords
+        'colMovement
         '
-        Me.colDestinationCoords.HeaderText = "DestinationCoords"
-        Me.colDestinationCoords.Name = "colDestinationCoords"
-        Me.colDestinationCoords.ReadOnly = True
+        Me.colMovement.HeaderText = "Movement"
+        Me.colMovement.Name = "colMovement"
+        Me.colMovement.ReadOnly = True
         '
         'colDestination
         '
@@ -106,21 +109,24 @@ Partial Class SpriteDebugForm
         '
         'colBehaviorTarget
         '
-        Me.colBehaviorTarget.HeaderText = "Bhvr Target"
+        Me.colBehaviorTarget.HeaderText = "Behavior Target"
         Me.colBehaviorTarget.Name = "colBehaviorTarget"
         Me.colBehaviorTarget.ReadOnly = True
+        Me.colBehaviorTarget.Width = 80
         '
         'colFollowTarget
         '
         Me.colFollowTarget.HeaderText = "Follow Target"
         Me.colFollowTarget.Name = "colFollowTarget"
         Me.colFollowTarget.ReadOnly = True
+        Me.colFollowTarget.Width = 80
         '
         'colVisualOverrideBehavior
         '
         Me.colVisualOverrideBehavior.HeaderText = "Visual Ovrd Bhvr"
         Me.colVisualOverrideBehavior.Name = "colVisualOverrideBehavior"
         Me.colVisualOverrideBehavior.ReadOnly = True
+        Me.colVisualOverrideBehavior.Width = 80
         '
         'colLog
         '
@@ -131,9 +137,16 @@ Partial Class SpriteDebugForm
         Me.colLog.UseColumnTextForButtonValue = True
         Me.colLog.Width = 50
         '
+        'colGameAction
+        '
+        Me.colGameAction.HeaderText = "Game Action"
+        Me.colGameAction.Name = "colGameAction"
+        Me.colGameAction.ReadOnly = True
+        Me.colGameAction.Width = 90
+        '
         'SpriteDebugForm
         '
-        Me.ClientSize = New System.Drawing.Size(1022, 208)
+        Me.ClientSize = New System.Drawing.Size(984, 208)
         Me.Controls.Add(Me.SpriteContainer)
         Me.Name = "SpriteDebugForm"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
@@ -149,10 +162,11 @@ Partial Class SpriteDebugForm
     Friend WithEvents colLocation As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colBehavior As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colTimeLeft As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colDestinationCoords As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colMovement As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colDestination As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colBehaviorTarget As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colFollowTarget As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colVisualOverrideBehavior As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colLog As System.Windows.Forms.DataGridViewButtonColumn
+    Friend WithEvents colGameAction As System.Windows.Forms.DataGridViewTextBoxColumn
 End Class

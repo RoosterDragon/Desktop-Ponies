@@ -2,10 +2,21 @@
 
 Public Class GameSelectionForm
     Private games As List(Of Game)
-    Private game As Game
+    Private _game As Game
+    Public ReadOnly Property Game As Game
+        Get
+            Return _game
+        End Get
+    End Property
     Private team1 As Game.Team
     Private team2 As Game.Team
     Private ReadOnly ponies As PonyCollection
+    Private ReadOnly context As New PonyContext()
+    Public ReadOnly Property PonyContext As PonyContext
+        Get
+            Return context
+        End Get
+    End Property
 
     Public Sub New(collection As PonyCollection)
         InitializeComponent()
@@ -20,11 +31,11 @@ Public Class GameSelectionForm
     Private Sub LoadInternal()
         EnableWaitCursor(True)
 
-        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(EvilGlobals.InstallLocation, game.RootDirectory))
+        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(EvilGlobals.InstallLocation, Game.RootDirectory))
         games = New List(Of Game)(gameDirectories.Length)
         For Each gameDirectory In gameDirectories
             Try
-                games.Add(New Game(ponies, gameDirectory))
+                games.Add(New Game(ponies, context, gameDirectory))
             Catch ex As Exception
                 Program.NotifyUserOfNonFatalException(ex, "Error loading game: " & gameDirectory)
             End Try
@@ -57,7 +68,7 @@ Public Class GameSelectionForm
 
         Dim gameImageList As New ImageList() With {.ImageSize = New Size(75, 75)}
         For Each game As Game In games
-            gameImageList.Images.Add(Image.FromFile(game.Balls(0).Handler.Behaviors(0).RightImage.Path))
+            gameImageList.Images.Add(Image.FromFile(game.Balls(0).Handler.Base.Behaviors(0).RightImage.Path))
         Next
 
         GameList.LargeImageList = gameImageList
@@ -81,7 +92,7 @@ Public Class GameSelectionForm
 
         If GameList.SelectedIndices.Count = 0 Then Exit Sub
 
-        If Not IsNothing(game) AndAlso game.Name <> games(GameList.SelectedIndices(0)).Name Then
+        If Not IsNothing(_game) AndAlso _game.Name <> games(GameList.SelectedIndices(0)).Name Then
             GameTeam1.TeamPanel.Controls.Clear()
             GameTeam2.TeamPanel.Controls.Clear()
             For Each position In team1.Positions
@@ -94,12 +105,12 @@ Public Class GameSelectionForm
             team2 = Nothing
         End If
 
-        game = games(GameList.SelectedIndices(0))
+        _game = games(GameList.SelectedIndices(0))
 
-        GameDescriptionLabel.Text = game.Name & ": " & game.Description
+        GameDescriptionLabel.Text = _game.Name & ": " & _game.Description
 
-        team1 = game.Teams(0)
-        team2 = game.Teams(1)
+        team1 = _game.Teams(0)
+        team2 = _game.Teams(1)
 
         GameTeam1.TeamNameLabel.Text = team1.Name
         GameTeam2.TeamNameLabel.Text = team2.Name
@@ -109,7 +120,7 @@ Public Class GameSelectionForm
         Dim last_y_team1 As Integer = 0
         Dim last_y_team2 As Integer = 0
 
-        For Each team As Game.Team In game.Teams
+        For Each team As Game.Team In _game.Teams
             For Each Position As Game.Position In team.Positions
 
                 Position.Player = Nothing
@@ -142,7 +153,7 @@ Public Class GameSelectionForm
                         new_label.Location = New Point(10, picturebox.Location.Y + picturebox.Size.Height)
                         last_y_team2 += picturebox.Size.Height + new_label.Size.Height + 10
                     Case Else
-                        Throw New NotImplementedException("Games with more than one team can not be used yet - Not implemented.  Unable to use game: " & game.Name)
+                        Throw New NotImplementedException("Games with more than one team can not be used yet - Not implemented.  Unable to use game: " & _game.Name)
 
                 End Select
 
@@ -175,7 +186,7 @@ Public Class GameSelectionForm
         Else
             selection -= 1
         End If
-        Dim pony = New Pony(ponies.Bases(selection))
+        Dim pony = New Game.GamePony(context, ponies.Bases(selection))
 
         Dim empty_spot_found = False
 
@@ -185,12 +196,12 @@ Public Class GameSelectionForm
             If Control.GetType Is GetType(PictureBox) Then
                 Dim picturebox As PictureBox = CType(Control, Windows.Forms.PictureBox)
                 If picturebox.Name = "NotSet" Then
-                    picturebox.Name = pony.Directory
+                    picturebox.Name = pony.Base.Directory
                     Select Case team
                         Case 1
-                            picturebox.Image = Image.FromFile(pony.Behaviors(0).RightImage.Path)
+                            picturebox.Image = Image.FromFile(pony.Base.Behaviors(0).RightImage.Path)
                         Case 2
-                            picturebox.Image = Image.FromFile(pony.Behaviors(0).LeftImage.Path)
+                            picturebox.Image = Image.FromFile(pony.Base.Behaviors(0).LeftImage.Path)
                     End Select
                     empty_spot_found = True
                     position_picturebox = picturebox
@@ -200,7 +211,7 @@ Public Class GameSelectionForm
         Next
 
         If empty_spot_found = False Then
-            If IsNothing(game) Then
+            If IsNothing(_game) Then
                 MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Else
                 MessageBox.Show(Me, "Team is full!", "Team Full", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -291,7 +302,7 @@ Public Class GameSelectionForm
 
     Private Sub PlayButton_Click(sender As Object, e As EventArgs) Handles PlayButton.Click
 
-        If IsNothing(game) Then
+        If IsNothing(_game) Then
             MessageBox.Show(Me, "Select a game first!", "No Game Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
@@ -309,10 +320,11 @@ Public Class GameSelectionForm
             Exit Sub
         End If
 
-        game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
+        _game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
+        context.Region = _game.GameScreen.WorkingArea
 
         Me.DialogResult = DialogResult.OK
-        EvilGlobals.CurrentGame = game
+        EvilGlobals.CurrentGame = _game
     End Sub
 
     Private Sub SetStage(stage As Byte)

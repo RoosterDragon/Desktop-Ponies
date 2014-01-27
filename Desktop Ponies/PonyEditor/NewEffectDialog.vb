@@ -66,7 +66,7 @@ Public Class NewEffectDialog
 
         Dim parentBehavior As Behavior = Nothing
 
-        For Each behavior In _editor.PreviewPony.Behaviors
+        For Each behavior In _editor.PreviewPony.Base.Behaviors
             If behavior.Name = DirectCast(Behavior_Box.SelectedItem, CaseInsensitiveString) Then
                 parentBehavior = behavior
                 Exit For

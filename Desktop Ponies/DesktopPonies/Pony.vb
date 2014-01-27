@@ -377,6 +377,20 @@ Public Class PonyBase
         Next
     End Sub
 
+    ''' <summary>
+    ''' Gets the name of the behavior group with the specified number.
+    ''' </summary>
+    ''' <param name="groupNumber">The numeric ID of the behavior group whose name should be retrieved.</param>
+    ''' <returns>"Any" if the group number matches the group number for the Any group else the name of the behavior group with the
+    ''' specified number in behavior groups for this pony base, otherwise; null.</returns>
+    Public Function GetBehaviorGroupName(groupNumber As Integer) As String
+        If groupNumber = Behavior.AnyGroup Then Return "Any"
+        For Each group In BehaviorGroups
+            If group.Number = groupNumber Then Return group.Name
+        Next
+        Return Nothing
+    End Function
+
     Public Sub AddBehavior(name As CaseInsensitiveString, chance As Double,
                        maxDuration As Double, minDuration As Double, speed As Double,
                        rightImagePath As String, leftImagePath As String,
@@ -631,16 +645,14 @@ End Class
 
 #Region "Interaction class"
 Public Class Interaction
-
     Private _base As InteractionBase
     Public ReadOnly Property Base As InteractionBase
         Get
             Return _base
         End Get
     End Property
-
-    Public Property Initiator As Pony
     Public Property Trigger As Pony
+    Public Property Initiator As Pony
     Private ReadOnly _involvedTargets As New HashSet(Of Pony)()
     Public ReadOnly Property InvolvedTargets As HashSet(Of Pony)
         Get
@@ -653,17 +665,11 @@ Public Class Interaction
             Return _targets
         End Get
     End Property
-    Private ReadOnly _behaviors As New List(Of Behavior)()
-    Public ReadOnly Property Behaviors As List(Of Behavior)
-        Get
-            Return _behaviors
-        End Get
-    End Property
+    Public Property Behaviors As ImmutableArray(Of Behavior)
 
     Public Sub New(base As InteractionBase)
         _base = Argument.EnsureNotNull(base, "base")
     End Sub
-
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Base.Name: " & Base.Name
     End Function
@@ -1130,17 +1136,381 @@ Public Class Speech
 End Class
 #End Region
 
-#Region "Pony class"
-Public Class Pony
-    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite, ISoundfulSprite
+#Region "PonyContext class"
+Public Class PonyContext
+    Private ReadOnly syncGuard As New Object()
+
+    Private _effectsEnabled As Boolean
+    Public Property EffectsEnabled() As Boolean
+        Get
+            SyncLock syncGuard
+                Return _effectsEnabled
+            End SyncLock
+        End Get
+        Set(ByVal value As Boolean)
+            SyncLock syncGuard
+                _effectsEnabled = value
+            End SyncLock
+        End Set
+    End Property
+    Private _speechEnabled As Boolean
+    Public Property SpeechEnabled As Boolean
+        Get
+            SyncLock syncGuard
+                Return _speechEnabled
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock syncGuard
+                _speechEnabled = value
+            End SyncLock
+        End Set
+    End Property
+    Private _interactionsEnabled As Boolean
+    Public Property InteractionsEnabled As Boolean
+        Get
+            SyncLock syncGuard
+                Return _interactionsEnabled
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            _interactionsEnabled = value
+        End Set
+    End Property
+
+    Private _randomSpeechChance As Double
+    Public Property RandomSpeechChance As Double
+        Get
+            SyncLock syncGuard
+                Return _randomSpeechChance
+            End SyncLock
+        End Get
+        Set(value As Double)
+            SyncLock syncGuard
+                _randomSpeechChance = value
+            End SyncLock
+        End Set
+    End Property
+
+    Private _cursorAvoidanceEnabled As Boolean
+    Public Property CursorAvoidanceEnabled As Boolean
+        Get
+            SyncLock syncGuard
+                Return _cursorAvoidanceEnabled
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock syncGuard
+                _cursorAvoidanceEnabled = value
+            End SyncLock
+        End Set
+    End Property
+    Private _cursorAvoidanceRadius As Single
+    Public Property CursorAvoidanceRadius() As Single
+        Get
+            SyncLock syncGuard
+                Return _cursorAvoidanceRadius
+            End SyncLock
+        End Get
+        Set(ByVal value As Single)
+            If value < 0 Then Throw New ArgumentOutOfRangeException("value", value, "value must be greater than or equal to zero.")
+            SyncLock syncGuard
+                _cursorAvoidanceRadius = value
+            End SyncLock
+        End Set
+    End Property
+    Private _draggingEnabled As Boolean
+    Public Property DraggingEnabled() As Boolean
+        Get
+            SyncLock syncGuard
+                Return _draggingEnabled
+            End SyncLock
+        End Get
+        Set(ByVal value As Boolean)
+            SyncLock syncGuard
+                _draggingEnabled = value
+            End SyncLock
+        End Set
+    End Property
+
+    Private _ponyAvoidanceEnabled As Boolean
+    Public Property PonyAvoidanceEnabled As Boolean
+        Get
+            SyncLock syncGuard
+                Return _ponyAvoidanceEnabled
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock syncGuard
+                _ponyAvoidanceEnabled = value
+            End SyncLock
+        End Set
+    End Property
+    Private _windowAvoidanceEnabled As Boolean
+    Public Property WindowAvoidanceEnabled As Boolean
+        Get
+            SyncLock syncGuard
+                Return _windowAvoidanceEnabled
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock syncGuard
+                _windowAvoidanceEnabled = value
+            End SyncLock
+        End Set
+    End Property
+    Private _stayInContainingWindow As Boolean
+    Public Property StayInContainingWindow As Boolean
+        Get
+            SyncLock syncGuard
+                Return _stayInContainingWindow
+            End SyncLock
+        End Get
+        Set(value As Boolean)
+            SyncLock syncGuard
+                _stayInContainingWindow = value
+            End SyncLock
+        End Set
+    End Property
+
+    Private _timeFactor As Double
+    Public Property TimeFactor As Double
+        Get
+            SyncLock syncGuard
+                Return _timeFactor
+            End SyncLock
+        End Get
+        Set(value As Double)
+            If value < 0.1 OrElse value > 10 Then
+                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.1 and 10 inclusive.")
+            End If
+            SyncLock syncGuard
+                _timeFactor = value
+            End SyncLock
+        End Set
+    End Property
+    Private _scaleFactor As Single
+    Public Property ScaleFactor As Single
+        Get
+            SyncLock syncGuard
+                Return _scaleFactor
+            End SyncLock
+        End Get
+        Set(value As Single)
+            If value < 0.25 OrElse value > 4 Then
+                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.25 and 4 inclusive.")
+            End If
+            SyncLock syncGuard
+                _scaleFactor = value
+            End SyncLock
+        End Set
+    End Property
+    Private _region As Rectangle
+    ''' <summary>
+    ''' Gets or sets the region in screen coordinates in which the ponies should be contained.
+    ''' </summary>
+    Public Property Region As Rectangle
+        Get
+            SyncLock syncGuard
+                Return _region
+            End SyncLock
+        End Get
+        Set(value As Rectangle)
+            If _region.Width < 0 OrElse _region.Height < 0 Then
+                Throw New ArgumentException("region must have non-negative width and height.", "value")
+            End If
+            SyncLock syncGuard
+                _region = value
+            End SyncLock
+        End Set
+    End Property
+    Private _exclusionZone As RectangleF
+    ''' <summary>
+    ''' Gets or sets a zone within the region that should be avoided. These values are normalized and define the relative zone to avoid
+    ''' with regards to the current region.
+    ''' </summary>
+    Public Property ExclusionZone() As RectangleF
+        Get
+            SyncLock syncGuard
+                Return _exclusionZone
+            End SyncLock
+        End Get
+        Set(ByVal value As RectangleF)
+            If Not New RectangleF(0, 0, 1, 1).Contains(value) Then
+                Throw New ArgumentOutOfRangeException("value", value, "value must contain normalized values.")
+            End If
+            SyncLock syncGuard
+                _exclusionZone = value
+            End SyncLock
+        End Set
+    End Property
+    ''' <summary>
+    ''' Gets the region in screen coordinates which should be avoided.
+    ''' </summary>
+    Public ReadOnly Property ExclusionRegion As Rectangle
+        Get
+            Return Options.GetExclusionArea(Region, ExclusionZone)
+        End Get
+    End Property
+    Private _teleportationEnabled As Boolean
+    Public Property TeleportationEnabled() As Boolean
+        Get
+            SyncLock syncGuard
+                Return _teleportationEnabled
+            End SyncLock
+        End Get
+        Set(ByVal value As Boolean)
+            SyncLock syncGuard
+                _teleportationEnabled = value
+            End SyncLock
+        End Set
+    End Property
+
+    Private _cursorLocation As Vector2
+    ''' <summary>
+    ''' Gets or sets the current cursor location. The animator should update this so that other elements in the context can access it.
+    ''' </summary>
+    Public Property CursorLocation As Vector2
+        Get
+            SyncLock syncGuard
+                Return _cursorLocation
+            End SyncLock
+        End Get
+        Set(value As Vector2)
+            SyncLock syncGuard
+                _cursorLocation = value
+            End SyncLock
+        End Set
+    End Property
+
+    Private ReadOnly _pendingSprites As List(Of ISprite)
+    ''' <summary>
+    ''' Gets a collection where new sprites can be added from anything that has access to this context. The sprite animator should add all
+    ''' sprites in this collection when it is convenient, and then clear it.
+    ''' </summary>
+    Public ReadOnly Property PendingSprites As List(Of ISprite)
+        Get
+            SyncLock syncGuard
+                Return _pendingSprites
+            End SyncLock
+        End Get
+    End Property
+    ''' <summary>
+    ''' Gets or sets the collection of sprites to which this pony belongs, and that may be searched when looking for targets to follow.
+    ''' </summary>
+    Private _sprites As ICollection(Of ISprite)
+    Public Property Sprites As ICollection(Of ISprite)
+        Get
+            SyncLock syncGuard
+                Return _sprites
+            End SyncLock
+        End Get
+        Set(value As ICollection(Of ISprite))
+            SyncLock syncGuard
+                _sprites = value
+            End SyncLock
+        End Set
+    End Property
+    ''' <summary>
+    ''' Iterates the current collection of sprites producing ponies other than the specified pony.
+    ''' </summary>
+    ''' <param name="except">The pony to exclude from iteration when iterating the collection.</param>
+    ''' <returns>An enumerable for other ponies in the current sprite collection.</returns>
+    Public Iterator Function OtherPonies(except As Pony) As IEnumerable(Of Pony)
+        For Each sprite In Sprites
+            If Object.ReferenceEquals(except, sprite) Then Continue For
+            Dim pony = TryCast(sprite, Pony)
+            If pony Is Nothing Then Continue For
+            Yield pony
+        Next
+    End Function
 
     ''' <summary>
-    ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to UpdateOnce().
+    ''' Initializes a new instance of the <see cref="PonyContext"/> class using the current global options.
     ''' </summary>
-    Private Const StepRate = 1000.0 / 30.0
+    Public Sub New()
+        SyncLock syncGuard
+            _cursorLocation = New Vector2(Integer.MinValue, Integer.MinValue)
+            _pendingSprites = New List(Of ISprite)()
+        End SyncLock
+        SynchronizeWithGlobalOptions()
+    End Sub
+
+    ''' <summary>
+    ''' Synchronizes context settings with the current global options.
+    ''' </summary>
+    Public Sub SynchronizeWithGlobalOptions()
+        SyncLock syncGuard
+            _effectsEnabled = Options.PonyEffectsEnabled
+            _speechEnabled = Options.PonySpeechEnabled
+            _interactionsEnabled = Options.PonyInteractionsEnabled
+            _randomSpeechChance = Options.PonySpeechChance
+            _cursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
+            _cursorAvoidanceRadius = Options.CursorAvoidanceSize
+            _draggingEnabled = Options.PonyDraggingEnabled
+            _ponyAvoidanceEnabled = Options.PonyAvoidsPonies
+            _windowAvoidanceEnabled = Options.WindowAvoidanceEnabled
+            _stayInContainingWindow = Options.WindowContainment
+            _timeFactor = Options.TimeFactor
+            _scaleFactor = Options.ScaleFactor
+            _region = Options.GetAllowedArea()
+            _exclusionZone = Options.ExclusionZone
+            _teleportationEnabled = Options.PonyTeleportEnabled
+        End SyncLock
+    End Sub
+
+    ''' <summary>
+    ''' Synchronizes context settings with the current global options, except for window avoidance and containment which are disabled. No
+    ''' exclusion zone is applied. Teleportation is enabled. The region is not set (it should be set as needed).
+    ''' </summary>
+    Public Sub SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
+        SyncLock syncGuard
+            _effectsEnabled = Options.PonyEffectsEnabled
+            _speechEnabled = Options.PonySpeechEnabled
+            _interactionsEnabled = Options.PonyInteractionsEnabled
+            _randomSpeechChance = Options.PonySpeechChance
+            _cursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
+            _cursorAvoidanceRadius = Options.CursorAvoidanceSize
+            _draggingEnabled = Options.PonyDraggingEnabled
+            _ponyAvoidanceEnabled = Options.PonyAvoidsPonies
+            _windowAvoidanceEnabled = False
+            _stayInContainingWindow = False
+            _timeFactor = Options.TimeFactor
+            _scaleFactor = Options.ScaleFactor
+            _exclusionZone = RectangleF.Empty
+            _teleportationEnabled = True
+        End SyncLock
+    End Sub
+End Class
+#End Region
+
+#Region "Pony class"
+''' <summary>
+''' Defines a sprite instance modeled on a <see cref="PonyBase"/>.
+''' </summary>
+Public Class Pony
+    Implements ISpeakingSprite, IDraggableSprite, IExpireableSprite, ISoundfulSprite
+    Private ReadOnly _context As PonyContext
+    ''' <summary>
+    ''' Gets the context that affects how this pony behaves.
+    ''' </summary>
+    Public ReadOnly Property Context() As PonyContext
+        Get
+            Return _context
+        End Get
+    End Property
+    Private ReadOnly _base As PonyBase
+    ''' <summary>
+    ''' Gets the base on which this sprite instance is modeled.
+    ''' </summary>
+    Public ReadOnly Property Base() As PonyBase
+        Get
+            Return _base
+        End Get
+    End Property
 
 #Region "Update Records"
-    Friend UpdateRecord As List(Of Record)
+    Friend ReadOnly UpdateRecord As List(Of Record)
 
     Friend Structure Record
         Public Time As TimeSpan
@@ -1157,1666 +1527,1432 @@ Public Class Pony
     Private Sub AddUpdateRecord(info As String)
         If UpdateRecord Is Nothing Then Return
         SyncLock UpdateRecord
-            UpdateRecord.Add(New Record(internalTime, info))
+            UpdateRecord.Add(New Record(_currentTime, info))
         End SyncLock
     End Sub
 
-    Private Sub AddUpdateRecord(info As String, info2 As String)
+    Private Sub AddUpdateRecord(info As String, info2 As Object)
         If UpdateRecord Is Nothing Then Return
         SyncLock UpdateRecord
-            UpdateRecord.Add(New Record(internalTime, info + info2))
+            UpdateRecord.Add(New Record(_currentTime, info & info2.ToString()))
         End SyncLock
     End Sub
 #End Region
 
-#Region "Fields"
-    Private ReadOnly _base As PonyBase
-    Public ReadOnly Property Base() As PonyBase
-        Get
-            Return _base
-        End Get
-    End Property
+#Region "Private State"
+    ''' <summary>
+    ''' Represents an arbitrary small non-zero floating-point value that should be used to specify a range within which floating-point
+    ''' values should be considered equal.
+    ''' </summary>
+    Private Const Epsilon As Single = 1 / 2 ^ 24
+    ''' <summary>
+    ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to StepOnce().
+    ''' </summary>
+    Private Const StepSize = 1000.0 / StepRate
+    ''' <summary>
+    ''' Number of simulation steps that are taken per second.
+    ''' </summary>
+    Private Const StepRate = 25.0
+    ''' <summary>
+    ''' Represents the current temporal dimension of the pony. This will be a multiple of the number of steps taken.
+    ''' </summary>
+    Private _currentTime As TimeSpan
+    ''' <summary>
+    ''' The external time value when Start() or Update() was last called.
+    ''' </summary>
+    Private _lastUpdateTime As TimeSpan
+    ''' <summary>
+    ''' Indicates whether Expire() has been called.
+    ''' </summary>
+    Private _expired As Boolean
 
-#Region "Compatibility Properties"
-    Friend ReadOnly Property Directory() As String
-        Get
-            Return Base.Directory
-        End Get
-    End Property
-    Public ReadOnly Property DisplayName() As String
-        Get
-            Return Base.DisplayName
-        End Get
-    End Property
-    Friend ReadOnly Property Behaviors() As List(Of Behavior)
-        Get
-            Return Base.Behaviors
-        End Get
-    End Property
+    ''' <summary>
+    ''' The time when a behavior was started.
+    ''' </summary>
+    Private _behaviorStartTime As TimeSpan
+    ''' <summary>
+    ''' The desired duration of the current behavior, after which it should be ended.
+    ''' </summary>
+    Private _behaviorDesiredDuration As TimeSpan
+    ''' <summary>
+    ''' The currently active behavior which defines how the pony acts.
+    ''' </summary>
+    Private _currentBehavior As Behavior
+    ''' <summary>
+    ''' A behavior which, is specified, should be used to provide the current image instead of the current behavior (but nothing else).
+    ''' </summary>
+    Private _visualOverrideBehavior As Behavior
+    ''' <summary>
+    ''' Indicates if the pony is facing left or right.
+    ''' </summary>
+    Private _facingRight As Boolean
+    ''' <summary>
+    ''' The location of the center point of the pony.
+    ''' </summary>
+    Private _location As Vector2F = New Vector2F(Single.NaN, Single.NaN)
+    ''' <summary>
+    ''' A vector defining the movement to be applied to the location with each step.
+    ''' </summary>
+    Private _movement As Vector2F
+    ''' <summary>
+    ''' Indicates if a movement vector based on the allowed movement of the current behavior should be generated during this step.
+    ''' </summary>
+    Private _movementWithoutDestinationNeeded As Boolean
+    ''' <summary>
+    ''' Another pony instance which should be followed, if specified.
+    ''' </summary>
+    Private _followTarget As Pony
+    ''' <summary>
+    ''' The destination vector that should be reached. This will either be the custom override value, an absolute screen location, or based
+    ''' on the location of the follow target. If not specified, the pony may move freely as specified by the current behavior.
+    ''' </summary>
+    Private _destination As Vector2F?
+    ''' <summary>
+    ''' Indicates if the pony ended the last step within the bounds of the context region.
+    ''' </summary>
+    Private _lastStepWasInBounds As Boolean
+    ''' <summary>
+    ''' Indicates when the pony may resume rebounding off of low priority bounds.
+    ''' </summary>
+    Private _reboundCooldownEndTime As TimeSpan
+    ''' <summary>
+    ''' Indicates when a pony following a target may resume following the target.
+    ''' </summary>
+    Private _followCooldownEndTime As TimeSpan
+
+    ''' <summary>
+    ''' Minimum duration that must elapse after a speech ends before a random speech can be activated.
+    ''' </summary>
+    Private Shared ReadOnly _randomSpeechDelayDuration As TimeSpan = TimeSpan.FromSeconds(10)
+    ''' <summary>
+    ''' The time a speech was last started.
+    ''' </summary>
+    Private _speechStartTime As TimeSpan = -_randomSpeechDelayDuration
+    ''' <summary>
+    ''' Duration for which the current speech should last.
+    ''' </summary>
+    Private _speechDuration As TimeSpan
+    ''' <summary>
+    ''' The current speech text to be displayed, if specified.
+    ''' </summary>
+    Private _currentSpeechText As String
+    ''' <summary>
+    ''' The current speech sound file to be started, if specified.
+    ''' </summary>
+    Private _currentSpeechSound As String
+
+    ''' <summary>
+    ''' A collection of effect bases that should be repeated until the current behavior ends.
+    ''' </summary>
+    Private ReadOnly _effectBasesToRepeat As New List(Of EffectBaseRepeat)()
+    ''' <summary>
+    ''' A collection of effects that should be expired once the current behavior ends.
+    ''' </summary>
+    Private ReadOnly _effectsToManuallyExpire As New List(Of Effect)()
+    ''' <summary>
+    ''' A collection of unexpired effects that were started by this pony.
+    ''' </summary>
+    Private ReadOnly _activeEffects As New HashSet(Of Effect)()
+
+    ''' <summary>
+    ''' A collection of valid interactions (depending on what sprites were available when interactions were last initialized).
+    ''' </summary>
+    Private ReadOnly interactions As New List(Of Interaction)()
+    ''' <summary>
+    ''' The interaction that this pony is currently involved with.
+    ''' </summary>
+    Private _currentInteraction As Interaction
+    ''' <summary>
+    ''' Time after which the last interaction has cooled off. Before this, the pony should not be considered eligible for further
+    ''' interactions.
+    ''' </summary>
+    Private _interactionCooldownEndTime As TimeSpan
+    ''' <summary>
+    ''' Indicates the behaviors allowed for the interaction under consideration.
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private ReadOnly _behaviorsAllowed As New HashSet(Of CaseInsensitiveString)()
+
+    ''' <summary>
+    ''' Indicates if the pony is currently in a state reacting to mouseover.
+    ''' </summary>
+    Private _inMouseoverState As Boolean
+    ''' <summary>
+    ''' Indicates if the pony is currently in a state reacting to being dragged.
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private _inDragState As Boolean
+    ''' <summary>
+    ''' Indicates if the pony is currently in a state reacting to being asleep.
+    ''' </summary>
+    Private _inSleepState As Boolean
+    ''' <summary>
+    ''' Records the last active behavior before the mouseover or sleep state was activated.
+    ''' </summary>
+    Private _behaviorBeforeSpecialStateOverride As Behavior
+    ''' <summary>
+    ''' The behavior to use during dragging.
+    ''' </summary>
+    Private _dragBehavior As Behavior
+    ''' <summary>
+    ''' The behavior to use during mouseover.
+    ''' </summary>
+    Private _mouseoverBehavior As Behavior
+    ''' <summary>
+    ''' The behavior to use when asleep.
+    ''' </summary>
+    Private _sleepBehavior As Behavior
+    ''' <summary>
+    ''' Indicates if the pony is at the destination override location (or if this has not been evaluated since the override was set).
+    ''' </summary>
+    Private _atDestinationOverride As Boolean?
+    ''' <summary>
+    ''' Indicates if a pony has reached a destination designed to bring if back into bounds (or null if this has not been evaluated since
+    ''' the destination to bring the pony back within bounds was set).
+    ''' </summary>
+    Private _inRegion As Boolean?
+
+#Region "Cached Delegates"
+    ''' <summary>
+    ''' A predicate that unconditionally returns true regardless of the behavior.
+    ''' </summary>
+    Private Shared truthPredicate As Predicate(Of Behavior) = Function(behavior) True
+    ''' <summary>
+    ''' A predicate that filters for behaviors that do not move.
+    ''' </summary>
+    Private Shared stationaryBehaviorPredicate As Predicate(Of Behavior) = AddressOf IsStationaryBehavior
+    ''' <summary>
+    ''' A predicate that filters for behaviors that move.
+    ''' </summary>
+    Private Shared movingBehaviorPredicate As Predicate(Of Behavior) = AddressOf IsMovingBehavior
+    ''' <summary>
+    ''' Determines if a behavior is stationary.
+    ''' </summary>
+    ''' <param name="behavior">A behavior to test.</param>
+    ''' <returns>Returns true if the behavior is stationary, otherwise; false.</returns>
+    Private Shared Function IsStationaryBehavior(behavior As Behavior) As Boolean
+        Return behavior.SpeedInPixelsPerSecond = 0
+    End Function
+    ''' <summary>
+    ''' Determines if a behavior is moving.
+    ''' </summary>
+    ''' <param name="behavior">A behavior to test.</param>
+    ''' <returns>Returns true if the behavior is moving, otherwise; false.</returns>
+    Private Shared Function IsMovingBehavior(behavior As Behavior) As Boolean
+        Return behavior.SpeedInPixelsPerSecond > 0
+    End Function
+    ''' <summary>
+    ''' Array containing the stationary behavior predicate.
+    ''' </summary>
+    Private Shared stationaryBehaviorPredicateInArray As Predicate(Of Behavior)() = {stationaryBehaviorPredicate}
+    ''' <summary>
+    ''' Array containing the moving behavior predicate.
+    ''' </summary>
+    Private Shared movingBehaviorPredicateInArray As Predicate(Of Behavior)() = {movingBehaviorPredicate}
+    ''' <summary>
+    ''' Array containing the stationary behavior and then the truth predicate.
+    ''' </summary>
+    Private Shared stationaryBehaviorAndTruthPredicateInArray As Predicate(Of Behavior)() = {stationaryBehaviorPredicate, truthPredicate}
+    ''' <summary>
+    ''' Array containing the moving behavior and then the truth predicate.
+    ''' </summary>
+    Private Shared movingBehaviorAndTruthPredicateInArray As Predicate(Of Behavior)() = {movingBehaviorPredicate, truthPredicate}
+    ''' <summary>
+    ''' A predicate that filters behaviors that are in the any group or current behavior group and allowed for use at random.
+    ''' </summary>
+    Private behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
+        Function(b) Not b.Skip AndAlso (b.Group = Behavior.AnyGroup OrElse b.Group = CurrentBehaviorGroup)
+    ''' <summary>
+    ''' A projection that retrieves the pony base from a pony.
+    ''' </summary>
+    Private Shared baseProjection As Func(Of Pony, PonyBase) = Function(p) p.Base
+    ''' <summary>
+    ''' Returns a single pony uniformly selected at random from within a grouping of other ponies with the same base.
+    ''' </summary>
+    Private Shared uniformRandomSelectionFromPoniesGroupedByBase As Func(Of IGrouping(Of PonyBase, Pony), Pony) =
+        Function(group)
+            Dim duplicateTargets = group.ToImmutableArray()
+            Return duplicateTargets(Rng.Next(duplicateTargets.Length))
+        End Function
 #End Region
 
-    Private _expired As Boolean
-    Private ReadOnly interactions As New List(Of Interaction)()
+#Region "EffectBaseRepeat Structure"
+    ''' <summary>
+    ''' Tracks when a repeating effect was last used.
+    ''' </summary>
+    Private Structure EffectBaseRepeat
+        ''' <summary>
+        ''' The effect base.
+        ''' </summary>
+        Public ReadOnly EffectBase As EffectBase
+        ''' <summary>
+        ''' The time an instance of this effect was last started.
+        ''' </summary>
+        Public ReadOnly LastStartTime As TimeSpan
+        ''' <summary>
+        ''' Initializes a new instance of the <see cref="EffectBaseRepeat"/> structure.
+        ''' </summary>
+        ''' <param name="effectBase">The base for the repeating effect.</param>
+        ''' <param name="lastStartTime">The time an instance of this effect was last started.</param>
+        Public Sub New(effectBase As EffectBase, lastStartTime As TimeSpan)
+            Me.EffectBase = effectBase
+            Me.LastStartTime = lastStartTime
+        End Sub
+    End Structure
+#End Region
+#End Region
 
-    Public Property Sleep As Boolean
-    Private _sleeping As Boolean
-    Public ReadOnly Property Sleeping As Boolean
+#Region "Public State Access"
+    ''' <summary>
+    ''' Gets or sets the center location of the pony.
+    ''' </summary>
+    Public Property Location As Vector2F
         Get
-            Return _sleeping
+            Return _location
         End Get
-    End Property
-
-    Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
-
-    Public Property CurrentBehaviorGroup As Integer
-
-    Private ReadOnly behaviorsAllowed As New HashSet(Of CaseInsensitiveString)()
-    Private _currentInteraction As Interaction = Nothing
-    Public Property CurrentInteraction As Interaction
-        Get
-            Return _currentInteraction
-        End Get
-        Private Set(value As Interaction)
-            _currentInteraction = value
+        Set(value As Vector2F)
+            _location = value
+            AddUpdateRecord("Location set externally ", _location)
         End Set
     End Property
-    Private isInteractionInitiator As Boolean
-
-    Public Property IsInteracting As Boolean
-    Public Property PlayingGame As Boolean
-
-    Private verticalMovementAllowed As Boolean
-    Private horizontalMovementAllowed As Boolean
-    Public Property facingUp As Boolean
-    Public Property facingRight As Boolean = True
     ''' <summary>
-    ''' The angle to travel in, if moving diagonally (in radians).
+    ''' Gets or sets the target to follow. This value may be changed during update cycles, if you would like to override the follow target
+    ''' indefinitely, use FollowTargetOverride instead.
     ''' </summary>
-    Public Property Diagonal As Double
-
+    Public Property FollowTarget As Pony
+        Get
+            Return _followTarget
+        End Get
+        Set(value As Pony)
+            _followTarget = value
+            AddUpdateRecord("FollowTarget set externally ", If(_followTarget Is Nothing, "[None]", _followTarget.Base.Directory))
+        End Set
+    End Property
     ''' <summary>
-    ''' Time until interactions should be disabled.
-    ''' Stops interactions from repeating too soon after one another.
-    ''' Only affects the triggering pony and not targets.
+    ''' Gets the currently calculated destination coordinates of the pony, if any.
     ''' </summary>
-    Private interactionDelayUntil As TimeSpan
-
-    Private _currentBehavior As Behavior
-    Public Property CurrentBehavior As Behavior
+    Public ReadOnly Property Destination As Vector2F?
+        Get
+            Return _destination
+        End Get
+    End Property
+    ''' <summary>
+    ''' Gets the currently calculated movement vector (which defines both direction and speed) of the pony.
+    ''' </summary>
+    Public ReadOnly Property Movement As Vector2F
+        Get
+            Return _movement
+        End Get
+    End Property
+    ''' <summary>
+    ''' Gets the current behavior of the pony.
+    ''' </summary>
+    Public ReadOnly Property CurrentBehavior As Behavior
         Get
             Return _currentBehavior
         End Get
-        Friend Set(value As Behavior)
-            If Not ValidateBehavior(value) Then Return
-            _currentBehavior = value
-            If Not (ManualControlPlayerOne OrElse ManualControlPlayerTwo) Then
-                SetAllowableDirections()
-            End If
-        End Set
     End Property
-
-    Private ReadOnly validateBehaviorPredicate As New Func(Of Behavior, Boolean)(AddressOf ValidateBehavior)
-    Private Function ValidateBehavior(behavior As Behavior) As Boolean
-        Return behavior Is Nothing OrElse Base.ValidatedOnLoad OrElse
-            (File.Exists(behavior.LeftImage.Path) AndAlso File.Exists(behavior.RightImage.Path))
-    End Function
-
-    Private currentCustomImageCenter As Size
-    Private ReadOnly Property isCustomImageCenterDefined As Boolean
+    ''' <summary>
+    ''' Gets the current behavior group number of the pony.
+    ''' </summary>
+    Public ReadOnly Property CurrentBehaviorGroup As Integer
         Get
-            Return currentCustomImageCenter <> Size.Empty
+            Return If(_currentBehavior Is Nothing, Behavior.AnyGroup, _currentBehavior.Group)
         End Get
     End Property
-
     ''' <summary>
-    ''' Only used when temporarily pausing, like when the mouse hovers over us.
+    ''' Gets the behavior being used to visually override the current behavior, if any.
     ''' </summary>
-    Private previousBehavior As Behavior
-
-    ''' <summary>
-    ''' When set, specifics the alternate set of images that should replace those of the current behavior.
-    ''' </summary>
-    Friend visualOverrideBehavior As Behavior
-
-    Private _returningToScreenArea As Boolean
-    Public Property ReturningToScreenArea As Boolean
+    Public ReadOnly Property VisualOverrideBehavior As Behavior
         Get
-            Return _returningToScreenArea
-        End Get
-        Private Set(value As Boolean)
-            _returningToScreenArea = value
-        End Set
-    End Property
-
-    ''' <summary>
-    ''' Used when going back "in" houses.
-    ''' </summary>
-    Public Property GoingHome As Boolean
-    ''' <summary>
-    ''' Used when a pony has been recalled and is just about to "enter" a house
-    ''' </summary>
-    Public Property OpeningDoor As Boolean
-
-    ''' <summary>
-    ''' Should we stop because the cursor is hovered over?
-    ''' </summary>
-    Private CursorOverPony As Boolean
-
-    ''' <summary>
-    ''' Are we actually halted now?
-    ''' </summary>
-    Private HaltedForCursor As Boolean
-    ''' <summary>
-    ''' Number of ticks for which the pony is immune to cursor interaction.
-    ''' </summary>
-    Private CursorImmunity As Integer = 0
-    Private currentMouseoverBehavior As Behavior
-
-    Public Property Destination As Vector2
-    Public Property AtDestination As Boolean
-    Private ReadOnly Property hasDestination As Boolean
-        Get
-            Return Destination <> Vector2.Zero
+            Return _visualOverrideBehavior
         End Get
     End Property
-
     ''' <summary>
-    ''' Used in the Paint() sub to help stop flickering between left and right images under certain circumstances.
+    ''' Gets the time remaining until the current behavior ends.
     ''' </summary>
-    Private paintStop As Boolean
-
-    Private _topLeftLocation As Point
-    ''' <summary>
-    ''' The location on the screen.
-    ''' </summary>
-    Public ReadOnly Property TopLeftLocation As Point
+    Public ReadOnly Property BehaviorRemainingDuration As TimeSpan
         Get
-            Return _topLeftLocation
+            Return (_behaviorStartTime + _behaviorDesiredDuration) - _currentTime
         End Get
     End Property
-
     ''' <summary>
-    ''' Gets or sets the location of the center of the pony.
+    ''' Gets a value indicating if the pony is busy and should not be considered for interactions. A pony is busy when it is interacting or
+    ''' in a special state (mouseover, drag, sleep or a movement or destination override has been given).
     ''' </summary>
-    Public Property Location As Point
+    Public ReadOnly Property IsBusy As Boolean
         Get
-            Return CenterLocation()
+            Return _currentInteraction IsNot Nothing OrElse
+                _inMouseoverState OrElse
+                _inDragState OrElse
+                _inSleepState OrElse
+                MovementOverride IsNot Nothing OrElse
+                DestinationOverride IsNot Nothing
         End Get
-        Set(value As Point)
-            _topLeftLocation = Point.Round(value - GetImageCenterOffset())
-        End Set
     End Property
-
     ''' <summary>
-    ''' Used for predicting future movement (just more of what we last did)
+    ''' Gets a value indicating whether the pony is currently at its destination, if one is set.
     ''' </summary>
-    Private lastMovement As Vector2F
-
-    Private ReadOnly _activeEffects As New HashSet(Of Effect)()
-
-    Public Property BehaviorStartTime As TimeSpan
-    Public Property BehaviorDesiredDuration As TimeSpan
-
-    Public Property ManualControlPlayerOne As Boolean
-    Public Property ManualControlPlayerTwo As Boolean
-    Private _manualControlAction As Boolean
-    Public ReadOnly Property ManualControlAction As Boolean
+    Public ReadOnly Property AtDestination As Boolean
         Get
-            Return _manualControlAction
-        End Get
-    End Property
-
-    Private ReadOnly effectsLastUsed As New Dictionary(Of EffectBase, TimeSpan)()
-    Private ReadOnly effectsAlreadyPlayedForBehavior As New HashSet(Of EffectBase)()
-
-    Public Property destinationCoords As Point
-    Public Property followTargetName As String = ""
-    Public Property followTarget As ISprite
-    'Try to get the point where an object is going to, and go to that instead of where it is currently at.
-    Public Property leadTarget As Boolean
-
-    'Used when following.
-    Private _delay As Integer
-    Public Property Delay As Integer
-        Get
-            Return _delay
-        End Get
-        Private Set(value As Integer)
-            _delay = value
-        End Set
-    End Property
-    Private blocked As Boolean
-
-    Private lastSpeakTime As TimeSpan = TimeSpan.FromDays(-1)
-    Private lastSpeakLine As String
-    Private lastSpeakSound As String
-    Friend internalTime As TimeSpan
-    Private lastUpdateTime As TimeSpan
-
-    Private ReadOnly possibleMoveModes As New List(Of AllowedMoves)(3)
-
-    Private optionsScaleFactor As Single
-    Public ReadOnly Property Scale() As Double
-        Get
-            Return If(Base.Scale <> 0, Base.Scale, optionsScaleFactor)
+            Return _destination IsNot Nothing AndAlso Vector2F.DistanceSquared(_location, _destination.Value) < Epsilon
         End Get
     End Property
 #End Region
 
-    ' TODO: Review accessibility.
-
-    Public Sub New(base As PonyBase)
+    ''' <summary>
+    ''' Initializes a new instance of the <see cref="Pony"/> class.
+    ''' </summary>
+    ''' <param name="context">The context within which the pony is contained. This will affect how it acts.</param>
+    ''' <param name="base">The base on which this instance should be modeled.</param>
+    ''' <exception cref="ArgumentNullException"><paramref name="context"/> is null.-or-<paramref name="base"/> is null.</exception>
+    ''' <exception cref="ArgumentException"><paramref name="base"/> does not contain at least one behavior that can be used at random from
+    ''' the 'any' group, or it does not contain a suitable mouseover behavior.</exception>
+    Public Sub New(context As PonyContext, base As PonyBase)
+        _context = Argument.EnsureNotNull(context, "context")
         _base = Argument.EnsureNotNull(base, "base")
+        If base.Behaviors.Count = 0 Then Throw New ArgumentException("base must contain at least one behavior.", "base")
+        Dim fallbackStationaryBehavior = GetBehaviorMatching(
+            Function(b) b.SpeedInPixelsPerSecond = 0 AndAlso Not b.Skip AndAlso b.TargetMode = TargetMode.None,
+            Function(b) b.SpeedInPixelsPerSecond = 0)
+        _mouseoverBehavior = If(GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
+                                fallbackStationaryBehavior)
+        If _mouseoverBehavior Is Nothing Then
+            _mouseoverBehavior = base.Behaviors(0)
+            For i = 1 To base.Behaviors.Count - 1
+                If base.Behaviors(i).SpeedInPixelsPerSecond < _mouseoverBehavior.SpeedInPixelsPerSecond Then
+                    _mouseoverBehavior = base.Behaviors(i)
+                End If
+            Next
+        End If
+        Dim flaggedSleepBehavior = GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.Sleep))
+        _sleepBehavior = If(flaggedSleepBehavior, fallbackStationaryBehavior)
+        _dragBehavior = If(GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.Dragged)),
+                           If(flaggedSleepBehavior, _mouseoverBehavior))
         If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
     End Sub
 
     ''' <summary>
-    ''' Starts the sprite.
+    ''' Gets the current image (based on the visual override behavior, current behavior and facing).
     ''' </summary>
-    ''' <param name="startTime">The current time of the animator, which will be the temporal zero point for this sprite.</param>
+    Private ReadOnly Property currentImage As CenterableSpriteImage
+        Get
+            Dim behavior = If(If(_visualOverrideBehavior, _currentBehavior), Base.Behaviors(0))
+            Return If(_facingRight, behavior.RightImage, behavior.LeftImage)
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the path to the image file that should be used to display the sprite.
+    ''' </summary>
+    Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
+        Get
+            Return currentImage.Path
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets a value indicating whether the image should be flipped horizontally from its original orientation.
+    ''' </summary>
+    Private ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
+        Get
+            Return False
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the non-aligned region the sprite currently occupies.
+    ''' </summary>
+    Private ReadOnly Property regionF As RectangleF
+        Get
+            Return GetRegionFForImage(currentImage)
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the region the sprite currently occupies.
+    ''' </summary>
+    Public ReadOnly Property Region As Rectangle Implements ISprite.Region
+        Get
+            Return New Rectangle(Vector2.Round(regionF.Location), Vector2.Truncate(regionF.Size))
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the time index into the current image (for animated images).
+    ''' </summary>
+    Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
+        Get
+            Return _currentTime - _behaviorStartTime
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the current speech text that is being spoken by the sprite, or null to indicate nothing is being spoken.
+    ''' </summary>
+    Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
+        Get
+            Return _currentSpeechText
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets the path to the sound file that should be played starting as of this update, or null to indicate nothing new should be
+    ''' started.
+    ''' </summary>
+    Public ReadOnly Property SoundPath As String Implements ISoundfulSprite.SoundPath
+        Get
+            Return _currentSpeechSound
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Gets or sets whether the sprite should be in a state where it acts as if dragged by the cursor.
+    ''' </summary>
+    Public Property Drag As Boolean Implements IDraggableSprite.Drag
+
+    ''' <summary>
+    ''' Occurs when <see cref="Expire"/> is called.
+    ''' </summary>
+    Public Event Expired As EventHandler Implements IExpireableSprite.Expired
+
+    ''' <summary>
+    ''' Gets or sets whether the sprite should be in a state where it 'sleeps' and does not move, interact or react.
+    ''' </summary>
+    Public Property Sleep As Boolean
+
+    ''' <summary>
+    ''' Gets or sets a value for the movement direction of the pony (the magnitude is not considered) to be used as long as the pony is not
+    ''' in a mouseover, drag or sleeping state. Once this override is applied during an update, it is cleared and the pony will resume
+    ''' normal movement rules unless it is overridden again. If null, the pony will move according to the destination override.
+    ''' </summary>
+    Public Property MovementOverride As Vector2F?
+
+    ''' <summary>
+    ''' Gets or sets the desired movement speed of the pony in pixels per second. If null, the speed is determined by the current behavior.
+    ''' </summary>
+    Public Property SpeedOverride As Double?
+
+    ''' <summary>
+    ''' Gets or sets a destination in screen coordinates that the pony should seek out, ignoring other destinations specified by behaviors.
+    ''' Normal behavior transitions are suspended whilst this is set. If null, the pony will seek out destinations specified by behaviors
+    ''' or move freely as normal.
+    ''' </summary>
+    Public Property DestinationOverride As Vector2F?
+
+    ''' <summary>
+    ''' Gets or sets a target to follow indefinitely, overriding the follow target specified for the behavior, if any. If null, the a
+    ''' target is selected based on the current behavior from available ponies in the context.
+    ''' </summary>
+    Public Property FollowTargetOverride As Pony
+
+    ''' <summary>
+    ''' Starts the sprite using the given time as a zero point.
+    ''' </summary>
+    ''' <param name="startTime">The time that will be used as a zero point against the time given in future updates.</param>
     Public Sub Start(startTime As TimeSpan) Implements ISprite.Start
-        CurrentBehavior = Behaviors.FirstOrDefault(validateBehaviorPredicate)
-        internalTime = startTime
-        lastUpdateTime = startTime
-        optionsScaleFactor = Options.ScaleFactor
-        Teleport()
+        AddUpdateRecord("Starting at ", startTime)
+        _currentTime = startTime
+        _lastUpdateTime = startTime
+        SetBehaviorInternal()
+        Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
+        _location = currentImage.Center * Context.ScaleFactor +
+            New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
+        EnsureWithinBounds(True)
     End Sub
 
     ''' <summary>
-    ''' Teleport the pony to a random location within bounds.
+    ''' Updates the sprite to the given instant in time.
     ''' </summary>
-    Private Sub Teleport()
-        ' If we are in preview mode, just teleport into the center for consistency.
-        If EvilGlobals.InPreviewMode Then
-            Location = Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
-            Exit Sub
-        End If
-
-        ' Try an arbitrary number of times to find a point a point in bounds that is not also in the exclusion zone.
-        ' TODO: Create method that will uniformly choose a random location from allowable points, also taking into account image sizing.
-        Dim teleportLocation As Point
-        For tries = 0 To 300
-            Dim area = Options.Screens.RandomElement().WorkingArea
-            teleportLocation = New Point(
-                CInt(area.X + Rng.NextDouble() * area.Width),
-                CInt(area.Y + Rng.NextDouble() * area.Height))
-            If Not IsPonyIntersectingWithAvoidanceArea(teleportLocation) Then Exit For
-        Next
-        Location = teleportLocation
-    End Sub
-
-    ''' <summary>
-    ''' Updates the sprite, bringing its state as close to the specified time as possible.
-    ''' </summary>
-    ''' <param name="updateTime">The current time of the animator, to which the sprite should match its state.</param>
+    ''' <param name="updateTime">The instant in time which the sprite should update itself to.</param>
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
         ' Find out how far behind the sprite is since its last update, and catch up.
         ' The time factor here means the internal time of the sprite can be advanced at different rates than the external time.
         ' This fixed time step method of updating is prone to temporal aliasing, but this is largely unnoticeable compared to the generally
         ' low frame rate of animations and lack of spatial anti-aliasing since the images are pixel art. That said, the time scaling should
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
-        ' performance as UpdateOnce must be evaluated many times to catch up).
-        lastSpeakSound = Nothing
-        Dim difference = updateTime - lastUpdateTime
-        While difference.TotalMilliseconds > 0 AndAlso Not _expired
-            UpdateOnce()
-            difference -= TimeSpan.FromMilliseconds(StepRate / Options.TimeFactor)
+        ' performance as StepOnce must be evaluated many times to catch up).
+        _currentSpeechSound = Nothing
+        Dim difference = updateTime - _lastUpdateTime
+        While Not _expired AndAlso difference.TotalMilliseconds > 0
+            StepOnce()
+            difference -= TimeSpan.FromMilliseconds(StepSize / Context.TimeFactor)
         End While
-        lastUpdateTime = updateTime - difference
+        _lastUpdateTime = updateTime - difference
     End Sub
 
     ''' <summary>
-    ''' Advances the internal time state of the pony by the step rate with each call.
+    ''' Advances the temporal state of the pony by a single fixed time step.
     ''' </summary>
-    Private Sub UpdateOnce()
-        ' If there are no behaviors that can be undertaken, there's nothing that needs updating anyway.
-        If Not Behaviors.Any(validateBehaviorPredicate) Then
-            CurrentBehavior = Nothing
-            Return
-        End If
+    Private Sub StepOnce()
+        _currentTime += TimeSpan.FromMilliseconds(StepSize)
 
-        optionsScaleFactor = Options.ScaleFactor
-        internalTime += TimeSpan.FromMilliseconds(StepRate)
-
-        ' Expire any speech.
-        If internalTime - lastSpeakTime > TimeSpan.FromSeconds(2) Then lastSpeakLine = Nothing
-
-        ' Handle switching pony between active and asleep.
-        Dim wantToSleep = Sleep OrElse BeingDragged
-        If wantToSleep AndAlso Not _sleeping Then
-            PutToSleep()
-            AddUpdateRecord("Pony should be sleeping.")
-            Exit Sub
-        ElseIf Not wantToSleep AndAlso _sleeping Then
-            WakeUp()
-        End If
-
-        If BeingDragged Then Location = EvilGlobals.CursorLocation
-
-        ' If we have no specified behavior, make sure the returning to screen flag is not set.
-        If CurrentBehavior Is Nothing Then ReturningToScreenArea = False
-
-        ' If we're not in a special mode, we need to check if behaviors should be cycled.
-        If Not PlayingGame AndAlso Not ReturningToScreenArea Then
-            If CurrentBehavior Is Nothing Then
-                ' If a current behavior has yet to be specified, we need to pick something to do.
-                CancelInteraction()
-                SelectBehavior()
-                AddUpdateRecord("Selected a new behavior at random (UpdateOnce). Behavior: ", CurrentBehavior.Name)
-            ElseIf internalTime > (BehaviorStartTime + BehaviorDesiredDuration) AndAlso
-                Not ManualControlPlayerOne AndAlso
-                Not ManualControlPlayerTwo Then
-                ' The behavior has expired and we are not under manual control.
-
-                ' If the cursor is hovered over the pony, just keep repeating the current behavior. Otherwise, the current behavior should 
-                ' be ended and a new one selected.
-                If CursorOverPony Then
-                    SelectBehavior(CurrentBehavior)
-                    AddUpdateRecord("Repeating current behavior; cursor is over the pony. Behavior: ", CurrentBehavior.Name)
-                Else
-                    ' Speak the end line for the behavior, if one is specified.
-                    If CurrentBehavior.EndLine IsNot Nothing Then PonySpeak(CurrentBehavior.EndLine)
-                    ' Use the next behavior in the chain if one is specified, else select one at random.
-                    AddUpdateRecord("Switching to the next behavior in the chain. Linked: ",
-                                    If(CurrentBehavior.LinkedBehavior IsNot Nothing,
-                                       CurrentBehavior.LinkedBehavior.Name.ToString(), "<null>"))
-                    SelectBehavior(CurrentBehavior.LinkedBehavior)
-                End If
+        _destination = Nothing
+        HandleSleep()
+        HandleMouseoverAndDrag()
+        SendToCustomDestination("override", DestinationOverride, _atDestinationOverride)
+        HandleFollowTargetOverride()
+        StartInteractionAtRandom()
+        If _currentTime - _behaviorStartTime > _behaviorDesiredDuration Then
+            AddUpdateRecord("Expiring behavior.")
+            ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
+            If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False)
+            If _currentBehavior.EndLine IsNot Nothing Then SpeakInternal(_currentBehavior.EndLine)
+            SetBehaviorInternal(_currentBehavior.LinkedBehavior)
+            If _currentBehavior.StartLine IsNot Nothing Then
+                SpeakInternal(_currentBehavior.StartLine)
+            ElseIf _currentBehavior.EndLine Is Nothing AndAlso Rng.NextDouble() < Context.RandomSpeechChance Then
+                SpeakInternal()
             End If
-
-            ' Account for changes in mouseover state.
-            ChangeMouseOverMode()
+            StartEffects()
         End If
-
-        ' Now a behavior has been set, move accordingly.
-        Move()
-        ' Activate any effects associated with the new behavior.
-        ActivateEffects(internalTime)
-
-        If AtDestination AndAlso GoingHome AndAlso OpeningDoor AndAlso Delay <= 0 Then
-            Expire()
-        End If
+        If _currentTime - _speechStartTime > _speechDuration Then _currentSpeechText = Nothing
+        If _followTarget IsNot Nothing AndAlso _followTarget._expired Then _followTarget = Nothing
+        EnsureWithinBounds(Context.TeleportationEnabled)
+        UpdateDestination()
+        UpdateMovement()
+        SetVisualOverrideBehavior()
+        UpdateLocation()
+        RepeatEffects()
     End Sub
 
     ''' <summary>
-    ''' Chooses a behavior to use for sleeping and activates it with no timeout.
+    ''' Transfers the pony in and out of the sleeping state. The sleep state will be set. The behavior will be set as a side effect of
+    ''' state transitions. The behavior desired duration will be modified to prevent the behavior expiring whilst in the sleep state.
     ''' </summary>
-    Public Sub PutToSleep()
-        ' Choose, in descending order of preference:
-        ' - The dragging behavior, when actively being dragged
-        ' - The dedicated sleeping behavior
-        ' - The dedicated mouseover behavior
-        ' - Any no movement behavior
-        ' - The current behavior as a last resort
-
-        Dim sleepBehavior As Behavior = Nothing
-        If BeingDragged Then sleepBehavior = GetAppropriateBehavior(AllowedMoves.Dragged, False)
-        If sleepBehavior Is Nothing Then sleepBehavior = GetAppropriateBehavior(AllowedMoves.Sleep, False)
-        If sleepBehavior Is Nothing Then sleepBehavior = GetAppropriateBehavior(AllowedMoves.MouseOver, False)
-        If sleepBehavior Is Nothing Then sleepBehavior = GetAppropriateBehavior(AllowedMoves.None, False)
-        If sleepBehavior Is Nothing Then sleepBehavior = CurrentBehavior
-
-        SelectBehavior(sleepBehavior)
-        BehaviorDesiredDuration = TimeSpan.FromHours(8)
-        Paint()
-        _sleeping = True
-    End Sub
-
-    ''' <summary>
-    ''' Wakes a pony from their sleeping behavior.
-    ''' </summary>
-    Public Sub WakeUp()
-        _sleeping = False
-        CursorOverPony = False
-
-        'Ponies added during sleep will not be initialized yet, so don't paint them.
-        If CurrentBehavior IsNot Nothing Then
-            BehaviorDesiredDuration = TimeSpan.Zero
-            Paint()
+    Private Sub HandleSleep()
+        If Sleep AndAlso Not _inSleepState Then
+            AddUpdateRecord("Entering sleep state.")
+            _inSleepState = True
+            _behaviorBeforeSpecialStateOverride = _currentBehavior
+            SetBehaviorInternal(_sleepBehavior)
+        ElseIf Not Sleep AndAlso _inSleepState Then
+            AddUpdateRecord("Exiting sleep state.")
+            _inSleepState = False
+            If _currentInteraction Is Nothing Then SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
+            _behaviorBeforeSpecialStateOverride = Nothing
         End If
+        If _inSleepState Then ExtendBehaviorDurationIndefinitely()
     End Sub
 
     ''' <summary>
-    ''' Cancels the interaction the pony is involved in. If the pony is the initiator of an interaction, ensures it is canceled for all the
-    ''' targets of the interaction.
+    ''' If not asleep or interacting, transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and
+    ''' behavior before mouseover will be set. The behavior will be set as a side effect of state transitions. Transitioning into the
+    ''' mouseover state will trigger a random speech. The behavior desired duration will be modified to prevent behaviors expiring whilst
+    ''' in the mouseover or drag states. Entering the mouseover or drag states is restricted by the current context.
     ''' </summary>
-    Private Sub CancelInteraction()
-        IsInteracting = False
-
-        If CurrentInteraction Is Nothing Then Exit Sub
-
-        If isInteractionInitiator Then
-            For Each pony In CurrentInteraction.Targets
-                ' Check the target is still running the interaction that the current pony initiated, then cancel it.
-                If Not ReferenceEquals(Me, pony) AndAlso
-                    pony.CurrentInteraction IsNot Nothing AndAlso
-                    pony.CurrentInteraction.Initiator IsNot Nothing AndAlso
-                    ReferenceEquals(Me, pony.CurrentInteraction.Initiator) Then
-                    pony.CancelInteraction()
-                End If
-            Next
+    Private Sub HandleMouseoverAndDrag()
+        If _inSleepState OrElse _currentInteraction IsNot Nothing Then Return
+        Dim mouseoverImage = If(_facingRight, _mouseoverBehavior.RightImage, _mouseoverBehavior.LeftImage)
+        Dim mouseoverRegion = RectangleF.Intersect(regionF, GetRegionFForImage(mouseoverImage))
+        Dim isMouseOver = mouseoverRegion.Contains(Context.CursorLocation.X, Context.CursorLocation.Y)
+        If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState Then
+            AddUpdateRecord("Entering mouseover state.")
+            _inMouseoverState = True
+            _behaviorBeforeSpecialStateOverride = _currentBehavior
+            SetBehaviorInternal(_mouseoverBehavior)
+            SpeakInternal()
         End If
-
-        AddUpdateRecord("Canceled interaction. IsInteractionInitiator: ", isInteractionInitiator.ToString())
-
-        interactionDelayUntil = internalTime + CurrentInteraction.Base.ReactivationDelay
-        CurrentInteraction = Nothing
-        isInteractionInitiator = False
+        If Context.DraggingEnabled AndAlso Drag AndAlso Not _inDragState Then
+            AddUpdateRecord("Entering drag state.")
+            _inDragState = True
+            SetBehaviorInternal(_dragBehavior)
+        ElseIf Not Drag AndAlso _inDragState Then
+            AddUpdateRecord("Exiting drag state.")
+            _inDragState = False
+            SetBehaviorInternal(_mouseoverBehavior)
+        End If
+        If Not isMouseOver AndAlso _inMouseoverState Then
+            AddUpdateRecord("Exiting mouseover state.")
+            _inMouseoverState = False
+            If _currentInteraction Is Nothing Then SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
+            _behaviorBeforeSpecialStateOverride = Nothing
+        End If
+        If _inMouseoverState OrElse _inDragState Then ExtendBehaviorDurationIndefinitely()
     End Sub
 
     ''' <summary>
-    ''' Ends the current behavior and begins a new behavior. One is chosen at random unless a behavior is specified.
+    ''' Sends a pony to a custom destination if a destination has not yet been specified. Behaviors are automatically selected to give
+    ''' appropriate speeds. A field must be provided for tracking if the pony is at the custom destination. The destination will be set,
+    ''' only if it has yet to be set and the custom destination is defined. The provided at custom destination flag will be set or unset
+    ''' accordingly.
     ''' </summary>
-    ''' <param name="specifiedBehavior">The behavior that the pony should switch to, or null to choose one at random.</param>
-    Public Sub SelectBehavior(Optional specifiedBehavior As Behavior = Nothing)
-        ' Having no specified behavior when interacting means we've run to the last part of a chain and should end the interaction.
-        If IsInteracting AndAlso isInteractionInitiator AndAlso specifiedBehavior Is Nothing Then CancelInteraction()
-
-        ' Clear following state.
-        followTarget = Nothing
-        followTargetName = ""
-
-        If specifiedBehavior Is Nothing Then
-            ' Pick a behavior at random. If a valid behavior cannot be selected after an arbitrary number of tries, just continue using the
-            ' current behavior for now.
-            Dim foundAtRandom As Boolean
-            For i = 0 To 200
-                Dim potentialBehavior = Behaviors.RandomElement()
-
-                ' The behavior can't be disallowed from running randomly, and it must in in the same group or the "any" group.
-                ' Then, do a random test against the chance the behavior can occur.
-                If Not potentialBehavior.Skip AndAlso
-                    (potentialBehavior.Group = CurrentBehaviorGroup OrElse potentialBehavior.Group = Behavior.AnyGroup) AndAlso
-                    Rng.NextDouble() <= potentialBehavior.Chance Then
-
-                    ' See if the behavior specifies that we follow another object.
-                    followTargetName = potentialBehavior.OriginalFollowTargetName
-                    Destination = DetermineDestination()
-
-                    ' The behavior specifies an object to follow, but no instance of that object is present.
-                    ' We can't use this behavior, so we'll have to choose another.
-                    If Not hasDestination AndAlso potentialBehavior.OriginalFollowTargetName <> "" Then
-                        followTargetName = ""
-                        Continue For
-                    End If
-
-                    ' We managed to decide on a behavior at random.
-                    CurrentBehavior = potentialBehavior
-                    foundAtRandom = True
-                    AddUpdateRecord("Selected a new behavior at random (SelectBehavior). Behavior: ", CurrentBehavior.Name)
-                    Exit For
-                End If
-            Next
-
-            ' If we couldn't find one at random, we need to switch to a default behavior. The current interaction behavior is likely not
-            ' suitable to repeat.
-            If Not foundAtRandom AndAlso (IsInteracting OrElse CurrentBehavior Is Nothing) Then
-                CurrentBehavior = Behaviors.First(validateBehaviorPredicate)
-                AddUpdateRecord(
-                    If(IsInteracting,
-                       "Random selection failed. Using default behavior as interaction is running. (SelectBehavior). Behavior: ",
-                       "Random selection failed. Using default behavior as no behavior has been set yet. (SelectBehavior). Behavior: "),
-                    CurrentBehavior.Name)
-            ElseIf Not foundAtRandom Then
-                AddUpdateRecord(
-                    "Random selection failed. Continuing current behavior as no interaction is running. (SelectBehavior). Behavior: ",
-                    CurrentBehavior.Name)
+    ''' <param name="destinationDescription">A description of the destination for record purposes.</param>
+    ''' <param name="customDestination">The custom destination to move to, or null to specify it should not be moved to.</param>
+    ''' <param name="atCustomDestination">A field that tracks if the pony is at the custom destination, or null to indicate it is not
+    ''' attempting to reach this destination.</param>
+    Private Sub SendToCustomDestination(destinationDescription As String,
+                                        customDestination As Vector2F?, ByRef atCustomDestination As Boolean?)
+        If _destination Is Nothing AndAlso customDestination IsNot Nothing Then
+            Dim nowAtCustomDestination = Vector2F.DistanceSquared(Location, customDestination.Value) < Epsilon
+            If nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse Not atCustomDestination.Value) Then
+                AddUpdateRecord("Entering stopped behavior for custom destination ", destinationDescription)
+                EndInteraction(True)
+                SetBehaviorInternal(GetBehaviorMatching(stationaryBehaviorAndTruthPredicateInArray))
+            ElseIf Not nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse atCustomDestination.Value) Then
+                AddUpdateRecord("Entering moving behavior for custom destination ", destinationDescription)
+                EndInteraction(True)
+                ' TODO: Match behavior chosen to speed override, if any.
+                ' TODO: Add a field for custom speed to allow pony to move around even if it lacks the ability?
+                SetBehaviorInternal(GetBehaviorMatching(movingBehaviorAndTruthPredicateInArray))
             End If
+            atCustomDestination = nowAtCustomDestination
+            _destination = customDestination
+            ExtendBehaviorDurationIndefinitely()
         Else
-            followTargetName = specifiedBehavior.OriginalFollowTargetName
-            Destination = DetermineDestination()
-
-            ' The behavior specifies an object to follow, but no instance of that object is present.
-            ' We can't use this behavior, so we'll have to choose another at random.
-            If Not hasDestination AndAlso specifiedBehavior.OriginalFollowTargetName <> "" AndAlso
-                Not EvilGlobals.InPreviewMode Then
-                SelectBehavior()
-                Exit Sub
-            End If
-            CurrentBehavior = specifiedBehavior
-            AddUpdateRecord("Selected a specified behavior (SelectBehavior). Behavior: ", CurrentBehavior.Name)
+            atCustomDestination = Nothing
         End If
-
-        Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
-
-        CurrentBehaviorGroup = CurrentBehavior.Group
-
-        ' Reset effects.
-        effectsAlreadyPlayedForBehavior.Clear()
-
-        BehaviorStartTime = internalTime
-        Dim minDuration = CurrentBehavior.MinDuration
-        Dim maxDuration = CurrentBehavior.MaxDuration
-        If minDuration > maxDuration Then
-            minDuration = CurrentBehavior.MaxDuration
-            maxDuration = CurrentBehavior.MinDuration
-        End If
-        BehaviorDesiredDuration = TimeSpan.FromSeconds(minDuration + Rng.NextDouble() * (maxDuration - minDuration))
-
-        ' Speak the starting line now, if one is specified; otherwise speak a random line by chance, but only if it won't get in the way
-        ' later.
-        If CurrentBehavior.StartLine IsNot Nothing Then
-            PonySpeak(CurrentBehavior.StartLine)
-        ElseIf followTargetName = "" AndAlso Not IsInteracting AndAlso
-            CurrentBehavior.EndLine Is Nothing AndAlso Rng.NextDouble() <= Options.PonySpeechChance Then
-            PonySpeak()
-        End If
-
-        If CurrentBehavior.AllowedMovement = AllowedMoves.None OrElse
-            CurrentBehavior.AllowedMovement = AllowedMoves.MouseOver OrElse
-            CurrentBehavior.AllowedMovement = AllowedMoves.Sleep OrElse
-            CurrentBehavior.AllowedMovement = AllowedMoves.Dragged Then
-            ' Prevent any movement for these states.
-            horizontalMovementAllowed = False
-            verticalMovementAllowed = False
-        Else
-            ' Set directions that may be moved in for this behavior.
-            SetAllowableDirections()
-        End If
-
-        ' Choose to face/move along each axis at random.
-        facingUp = Rng.NextDouble() < 0.5
-        facingRight = Rng.NextDouble() < 0.5
     End Sub
 
     ''' <summary>
-    ''' Chooses allowable movements states for the pony based on its current behavior.
+    ''' If the pony is outside the allowed region, provides a destination within the allowed region.
     ''' </summary>
-    Private Sub SetAllowableDirections()
-        ' Determine move modes that can be used.
-        possibleMoveModes.Clear()
-        If CurrentBehavior IsNot Nothing Then
-            If (CurrentBehavior.AllowedMovement And AllowedMoves.HorizontalOnly) = AllowedMoves.HorizontalOnly Then
-                possibleMoveModes.Add(AllowedMoves.HorizontalOnly)
+    ''' <returns>If the pony is outside the allowed region, a destination within the allowed region, otherwise; null.</returns>
+    Private Function GetInRegionDestination() As Vector2F?
+        Dim contextRegion = Context.Region
+        Dim exclusionRegion = Context.ExclusionRegion
+        Dim currentRegion = regionF
+        Dim destination = _location
+
+        ' Move back into the overall region allowed by the context.
+        If Not CType(contextRegion, RectangleF).Contains(currentRegion) Then
+            Dim leftDistance = contextRegion.Left - currentRegion.Left
+            Dim rightDistance = currentRegion.Right - contextRegion.Right
+            Dim topDistance = contextRegion.Top - currentRegion.Top
+            Dim bottomDistance = currentRegion.Bottom - contextRegion.Bottom
+
+            If leftDistance > 0 Then
+                destination.X += leftDistance
+            ElseIf rightDistance > 0 Then
+                destination.X -= rightDistance
             End If
-            If (CurrentBehavior.AllowedMovement And AllowedMoves.VerticalOnly) = AllowedMoves.VerticalOnly Then
-                possibleMoveModes.Add(AllowedMoves.VerticalOnly)
-            End If
-            If (CurrentBehavior.AllowedMovement And AllowedMoves.DiagonalOnly) = AllowedMoves.DiagonalOnly Then
-                possibleMoveModes.Add(AllowedMoves.DiagonalOnly)
+
+            If topDistance > 0 Then
+                destination.Y += topDistance
+            ElseIf bottomDistance > 0 Then
+                destination.Y -= bottomDistance
             End If
         End If
 
-        ' Select a mode at random, or else deny movement.
-        Dim selectedMoveMode As AllowedMoves = AllowedMoves.None
-        If possibleMoveModes.Count > 0 Then
-            selectedMoveMode = possibleMoveModes.RandomElement()
+        ' Move out of the exclusion region defined by the context.
+        If exclusionRegion.Size <> Size.Empty AndAlso currentRegion.IntersectsWith(exclusionRegion) Then
+            ' Account for changed destination due to moving back within the overall region.
+            Dim change = Vector2.Ceiling(destination - _location)
+            currentRegion.Location += New Size(change.X, change.Y)
+
+            ' Determine the distance to each of the exclusion region edges.
+            Dim leftDistance = currentRegion.Right - exclusionRegion.Left
+            Dim rightDistance = exclusionRegion.Right - currentRegion.Left
+            Dim topDistance = currentRegion.Bottom - exclusionRegion.Top
+            Dim bottomDistance = exclusionRegion.Bottom - currentRegion.Top
+
+            ' Determines which exclusion zone edges have enough space between them and the context edges to contain the sprite.
+            Dim leftHasSpace = exclusionRegion.Left - contextRegion.Left >= currentRegion.Width
+            Dim rightHasSpace = contextRegion.Right - exclusionRegion.Right >= currentRegion.Width
+            Dim topHasSpace = exclusionRegion.Top - contextRegion.Top >= currentRegion.Height
+            Dim bottomHasSpace = contextRegion.Bottom - exclusionRegion.Bottom >= currentRegion.Height
+
+            ' Determine the closest edge that has enough room for the sprite.
+            Dim minDistance = Single.MaxValue
+            If leftHasSpace Then minDistance = leftDistance
+            If rightHasSpace AndAlso rightDistance < minDistance Then minDistance = rightDistance
+            If topHasSpace AndAlso topDistance < minDistance Then minDistance = topDistance
+            If bottomHasSpace AndAlso bottomDistance < minDistance Then minDistance = bottomDistance
+
+            ' We will move to the closest edge that has sufficient room.
+            ' If there exists no such edge, we'll just have to ignore the exclusion region since it covers too much area.
+            If leftDistance = minDistance AndAlso leftHasSpace Then
+                destination.X -= leftDistance
+            ElseIf rightDistance = minDistance AndAlso rightHasSpace Then
+                destination.X += rightDistance
+            ElseIf topDistance = minDistance AndAlso topHasSpace Then
+                destination.Y -= topDistance
+            ElseIf bottomDistance = minDistance AndAlso bottomHasSpace Then
+                destination.Y += bottomDistance
+            End If
         End If
 
-        ' Depending on mode, set allowable movement state for the pony.
-        Select Case selectedMoveMode
-            Case AllowedMoves.None
-                verticalMovementAllowed = False
-                horizontalMovementAllowed = False
-                Diagonal = 0
-            Case AllowedMoves.HorizontalOnly
-                horizontalMovementAllowed = True
-                verticalMovementAllowed = False
-                Diagonal = 0
-            Case AllowedMoves.VerticalOnly
-                horizontalMovementAllowed = False
-                verticalMovementAllowed = True
-                Diagonal = 0
-            Case AllowedMoves.DiagonalOnly
-                horizontalMovementAllowed = True
-                verticalMovementAllowed = True
-                ' Pick a random angle to travel at.
-                If facingUp Then
-                    Diagonal = ((Rng.NextDouble() * 35) + 15) * (Math.PI / 180)
-                Else
-                    Diagonal = ((Rng.NextDouble() * 35) + 310) * (Math.PI / 180)
-                End If
-                If Not facingRight Then Diagonal = Math.PI - Diagonal
-        End Select
+        ' Return the destination that brings us within bounds. If we are already in bounds, return null.
+        If Vector2F.DistanceSquared(destination, _location) < Epsilon Then Return Nothing
+        Return destination
+    End Function
+
+    ''' <summary>
+    ''' Extends the behavior desired duration to last indefinitely - preventing it expiring.
+    ''' </summary>
+    Private Sub ExtendBehaviorDurationIndefinitely()
+        _behaviorDesiredDuration = _currentTime + TimeSpan.FromSeconds(_currentBehavior.MaxDuration)
     End Sub
 
-    Private ReadOnly isSpeechInUsableGroupPredicate As New Func(Of Speech, Boolean)(
-        Function(s) s.Group = Behavior.AnyGroup OrElse s.Group = CurrentBehavior.Group)
     ''' <summary>
-    ''' Prompts the pony to speak a line if it has not done so recently. A random line is chosen unless one is specified.
+    ''' If an override for the follow target has been set that has not expired, sets this as the current follow target.
     ''' </summary>
-    ''' <param name="line">The line the pony should speak, or null to choose one at random.</param>
-    Public Sub PonySpeak(Optional line As Speech = Nothing)
-        'When the cursor is over us, don't talk too often.
-        If CursorOverPony AndAlso (internalTime - lastSpeakTime).TotalSeconds < 15 Then
-            Return
+    Private Sub HandleFollowTargetOverride()
+        If FollowTargetOverride IsNot Nothing AndAlso Not FollowTargetOverride._expired Then
+            _followTarget = FollowTargetOverride
         End If
+    End Sub
+
+    ''' <summary>
+    ''' If the context allows speech; speaks the suggested speech, or else a random speech. The start speech time and current speech text
+    ''' are set.
+    ''' </summary>
+    ''' <param name="suggested">A speech to speak, or null to choose one at random. Randomly chosen speeches are limited: 10 seconds since
+    ''' the last speech must have passed and no interaction or follow target may be active. A random speech is then uniformly selected from
+    ''' the any group, or current behavior group.</param>
+    Public Sub Speak(Optional suggested As Speech = Nothing)
+        AddUpdateRecord("Speak called externally")
+        SpeakInternal(suggested)
+    End Sub
+
+    ''' <summary>
+    ''' If the context allows speech; speaks the suggested speech, or else a random speech. The start speech time and current speech text
+    ''' are set.
+    ''' </summary>
+    ''' <param name="suggested">A speech to speak, or null to choose one at random. Randomly chosen speeches are limited: 10 seconds since
+    ''' the last speech must have passed and no interaction or follow target may be active. A random speech is then uniformly selected from
+    ''' the any group, or current behavior group.</param>
+    Private Sub SpeakInternal(Optional suggested As Speech = Nothing)
+        If Not Context.SpeechEnabled Then Return
 
         ' Select a line at random from the lines that may be played at random that are in the current group.
-        If line Is Nothing Then
+        If suggested Is Nothing Then
             If Base.Speeches.Count = 0 Then Return
-            Dim randomGroupLines = Base.SpeechesRandom.Where(isSpeechInUsableGroupPredicate).ToArray()
+            If _currentInteraction IsNot Nothing OrElse
+                _followTarget IsNot Nothing OrElse
+                _currentTime - (_speechStartTime + _speechDuration) < _randomSpeechDelayDuration Then Return
+            Dim randomGroupLines = Base.SpeechesRandom.Where(
+                Function(s) s.Group = Behavior.AnyGroup OrElse s.Group = _currentBehavior.Group).ToImmutableArray()
             If randomGroupLines.Length = 0 Then Return
-            line = randomGroupLines.RandomElement()
+            suggested = randomGroupLines.RandomElement()
         End If
 
         ' Set the line text to be displayed.
-        If Options.PonySpeechEnabled Then
-            lastSpeakTime = internalTime
-            lastSpeakLine = Me.DisplayName & ": " & ControlChars.Quote & line.Text & ControlChars.Quote
-        End If
-
-        ' Start the sound file playing.
-        If line.SoundFile <> "" Then
-            lastSpeakSound = line.SoundFile
-        End If
+        _speechStartTime = _currentTime
+        _currentSpeechText = Base.DisplayName & ": " & ControlChars.Quote & suggested.Text & ControlChars.Quote
+        _speechDuration = TimeSpan.FromSeconds(0.5 + _currentSpeechText.Length / 15)
+        _currentSpeechSound = suggested.SoundFile
+        AddUpdateRecord("Speak using line ", suggested.Name)
     End Sub
 
     ''' <summary>
-    ''' Checks the current mouseover state of the pony and toggles between mouseover modes accordingly.
+    ''' Activates the suggested behavior, or else a random behavior. The current behavior, behavior start time, behavior desired duration
+    ''' and follow target will be set. If an interaction was running, and there is no linked behavior for the current behavior, the
+    ''' interaction is ended. The current interaction and interaction cool down are set in this case. Any effects for the last behavior
+    ''' tied to its duration will end, and any repeating effects no longer repeated. The movement without destination flag will be set.
+    ''' If the context allows effects, starts any effects for the behavior immediately, and sets up repeating effects if required.
     ''' </summary>
-    Private Sub ChangeMouseOverMode()
-        If CursorOverPony AndAlso Not HaltedForCursor Then
-            ' The cursor has moved over us and we should halt.
-            HaltedForCursor = True
-            previousBehavior = CurrentBehavior
-
-            ' Remove effects for the previous behavior. We don't want them lingering when the behavior restarts after the mouse moves away.
-            If _activeEffects.Count > 0 Then
-                For Each effect In _activeEffects.Where(Function(e) e.Base.BehaviorName = previousBehavior.Name).ToImmutableArray()
-                    effect.Expire()
-                Next
-            End If
-
-            ' Change to mouseover behavior.
-            CurrentBehavior = currentMouseoverBehavior
-            effectsAlreadyPlayedForBehavior.Clear()
-            Paint()
-            AddUpdateRecord("Changed into mouseover state.")
-        ElseIf Not CursorOverPony And HaltedForCursor Then
-            ' The cursor has moved away from us and we no longer need to be halted.
-            HaltedForCursor = False
-            CurrentBehavior = previousBehavior
-            Paint()
-            AddUpdateRecord("Changed out of mouseover state.")
-        End If
+    ''' <param name="suggested">A behavior to activate, or null to choose one at random. A random behavior is uniformly selected from the
+    ''' any group, or current behavior group. If there are no such behaviors (i.e. the current group is the any group and there are no
+    ''' behaviors in that group) then one is uniformly selected from all behaviors. If there are no behaviors, an exception is thrown.
+    ''' </param>
+    ''' <param name="speak">Indicates if the start line for the behavior should be spoken, if one exists.</param>
+    Public Sub SetBehavior(Optional suggested As Behavior = Nothing, Optional speak As Boolean = True)
+        AddUpdateRecord("SetBehavior called externally")
+        EndInteraction(True)
+        SetBehaviorInternal(suggested)
+        If _currentBehavior.StartLine IsNot Nothing Then SpeakInternal(_currentBehavior.StartLine)
+        StartEffects()
     End Sub
 
-    Friend Sub Move()
-        Diagnostics.Debug.Assert(CurrentBehavior IsNot Nothing)
+    ''' <summary>
+    ''' Activates the suggested behavior, or else a random behavior. The current behavior, behavior start time, behavior desired duration
+    ''' and follow target will be set. If an interaction was running, and there is no linked behavior for the current behavior, the
+    ''' interaction is ended. The current interaction and interaction cool down are set in this case. Any effects for the last behavior
+    ''' tied to its duration will end, and any repeating effects no longer repeated. The movement without destination flag will be set.
+    ''' </summary>
+    ''' <param name="suggested">A behavior to activate, or null to choose one at random. A random behavior is uniformly selected from the
+    ''' any group, or current behavior group. If there are no such behaviors (i.e. the current group is the any group and there are no
+    ''' behaviors in that group) then one is uniformly selected from all behaviors. If there are no behaviors, an exception is thrown.
+    ''' </param>
+    Private Sub SetBehaviorInternal(Optional suggested As Behavior = Nothing)
+        _followTarget = Nothing
+        _destination = Nothing
+        _movementWithoutDestinationNeeded = True
 
-        If Not PlayingGame AndAlso Not ReturningToScreenArea Then
-            destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord,
-                                          CurrentBehavior.OriginalDestinationYCoord)
-        End If
+        _currentBehavior = If(suggested, GetRandomBehavior())
+        If _currentBehavior Is Nothing Then Throw New InvalidOperationException("There are no behaviors - cannot set one at random.")
 
-        blocked = False
-
-        If CursorImmunity > 0 Then CursorImmunity -= 1
-
-        If ReturningToScreenArea AndAlso Options.PonyTeleportEnabled Then
-            StopReturningToScreenArea()
-            AddUpdateRecord("Stopped returning to screen area: Teleport option is enabled.")
-            Exit Sub
-        End If
-
-        Dim speed As Double = ScaledSpeed()
-
-        If EvilGlobals.CurrentGame Is Nothing OrElse
-            (EvilGlobals.CurrentGame IsNot Nothing AndAlso
-             EvilGlobals.CurrentGame.Status <> Game.GameStatus.Setup) Then
-            ' User input will dictate our movement.
-            If ManualControlPlayerOne Then
-                speed = ManualControl(KeyboardState.IsKeyPressed(Keys.RControlKey),
-                                      KeyboardState.IsKeyPressed(Keys.Up),
-                                      KeyboardState.IsKeyPressed(Keys.Down),
-                                      KeyboardState.IsKeyPressed(Keys.Left),
-                                      KeyboardState.IsKeyPressed(Keys.Right),
-                                      KeyboardState.IsKeyPressed(Keys.RShiftKey))
-            ElseIf ManualControlPlayerTwo Then
-                speed = ManualControl(KeyboardState.IsKeyPressed(Keys.LControlKey),
-                                      KeyboardState.IsKeyPressed(Keys.W),
-                                      KeyboardState.IsKeyPressed(Keys.S),
-                                      KeyboardState.IsKeyPressed(Keys.A),
-                                      KeyboardState.IsKeyPressed(Keys.D),
-                                      KeyboardState.IsKeyPressed(Keys.LShiftKey))
-            End If
-        End If
-
-        'If the behavior specified a follow object, or a point to go to, figure out where that is.
-        Destination = DetermineDestination()
-
-        Dim movement As Vector2F
-
-        ' Don't follow a destination if we are under player control unless there is a game playing and it is in setup mode.
-        Dim distance As Double
-        If hasDestination AndAlso
-            ((Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo) OrElse
-             (EvilGlobals.CurrentGame IsNot Nothing AndAlso EvilGlobals.CurrentGame.Status = Game.GameStatus.Setup)) Then
-            ' A destination has been specified and the pony should head there.
-            distance = Vector2.Distance(CenterLocation, Destination)
-            ' Avoid division by zero.
-            If distance = 0 Then distance = 1
-
-            If GetDestinationDirectionHorizontal(Destination) = Direction.MiddleLeft Then
-                facingRight = False
-                movement.X = CSng(((CenterLocation.X - Destination.X) / (distance)) * -speed)
-            Else
-                facingRight = True
-                movement.X = CSng(((Destination.X - CenterLocation.X) / (distance)) * speed)
-            End If
-
-            movement.Y = CSng(((CenterLocation.Y - Destination.Y) / (distance)) * -speed)
-
-            ' We do not want to detect if we are at the destination if we are trying to move on-screen - we might stop at the destination
-            ' and not get out of the area we want to avoid.
-            ' However, we DO want to detect if we are exactly at our destination - our speed will go to 0 and we will be forever stuck
-            ' there.
-            If (distance <= 7) OrElse
-                (ReturningToScreenArea AndAlso Vector2.Equals(CenterLocation(), Destination) AndAlso movement = Vector2F.Zero) Then
-                movement = Vector2F.Zero
-
-                AtDestination = True
-                If ReturningToScreenArea Then
-                    StopReturningToScreenArea()
-                    AddUpdateRecord("Stopped returning to screen area; reached onscreen destination.")
-                    Exit Sub
-                End If
-
-                If GoingHome Then
-                    ' Don't disappear immediately when reaching a "house" - wait a bit.
-                    If Not OpeningDoor Then
-                        Delay = 90
-                        OpeningDoor = True
-                    Else
-                        Delay -= 1
-                    End If
-                Else
-                    'If this behavior links to another, we should end this one so we can move on to the next link.
-                    If Not IsNothing(CurrentBehavior.LinkedBehavior) AndAlso speed <> 0 Then
-                        BehaviorDesiredDuration = TimeSpan.Zero
-                        Destination = Vector2.Zero
-                        AddUpdateRecord("Reached destination, readying to switch to next behavior in sequence.")
-                    End If
-                End If
-
-            Else
-                'We're not yet at our destination
-
-                'If we were marked as being at our destination in our last move,
-                'if means the target moved slightly.  We should pause a bit before continuing to follow.
-                If AtDestination Then
-                    Delay = 60
-                End If
-
-                'Only continue if the delay has expired.
-                If Delay > 0 Then
-                    AtDestination = False
-                    Delay -= 1
-                    Paint()
-                    AddUpdateRecord("Delay finished (destination). Terminating move function.")
-                    Exit Sub
-                End If
-
-                AtDestination = False
-            End If
+        If suggested Is Nothing Then
+            AddUpdateRecord("SetBehavior at random ", _currentBehavior.Name)
         Else
-            ' There is no destination, go wherever.
-
-            If Delay > 0 Then
-                Delay -= 1
-                Paint()
-                AddUpdateRecord("Delay finished (no destination). Terminating move function.")
-                Exit Sub
-            End If
-
-            ' If moving diagonally.
-            If Diagonal <> 0 Then
-                'Opposite = Hypotenuse * cosine of the angle
-                movement.X = CSng(Math.Sqrt((speed ^ 2) * 2) * Math.Cos(Diagonal))
-                'Adjacent = Hypotenuse * cosine of the angle
-                '(negative because we are using pixel coordinates - down is positive)
-                movement.Y = CSng(-Math.Sqrt((speed ^ 2) * 2) * Math.Sin(Diagonal))
-                facingRight = (movement.X >= 0)
-            Else
-                ' Not moving diagonally.
-                movement.X = If(horizontalMovementAllowed, CSng(speed), 0)
-                movement.Y = If(verticalMovementAllowed, CSng(speed), 0)
-
-                If Not facingRight Then movement.X = -movement.X
-
-                If (facingUp AndAlso movement.Y > 0) OrElse
-                    (Not facingUp AndAlso movement.Y < 0) Then
-                    movement.Y = -movement.Y
-                End If
-            End If
+            AddUpdateRecord("SetBehavior with suggested ", suggested.Name)
         End If
 
-        Dim newLocation = Vector2.Round(New Vector2F(Location) + movement)
-        Dim newTopLeftLocation = newLocation - New Vector2(GetImageCenterOffset())
-
-        UpdateCurrentMouseoverBehavior()
-        Dim isNearCursorNow = IsPonyNearMouseCursor(Location)
-        Dim isNearCursorFuture = IsPonyNearMouseCursor(newLocation)
-
-        Dim isOnscreenNow = IsPonyContainedInCanvas(Location)
-        Dim isOnscreenFuture = IsPonyContainedInCanvas(newLocation)
-
-        ' TODO: Refactor and extract.
-        'Dim playingGameAndOutOfBounds = PlayingGame AndAlso
-        '    EvilGlobals.CurrentGame.Status <> Game.GameStatus.Setup AndAlso
-        '    Not IsPonyInBox(newTopLeftLocation, Game.Position.Allowed_Area)
-        Dim playingGameAndOutOfBounds = False
-
-        Dim isEnteringWindowNow = False
-        If Options.WindowAvoidanceEnabled AndAlso Not ReturningToScreenArea Then
-            isEnteringWindowNow = IsPonyEnteringWindow(TopLeftLocation, Vector2.Round(New Vector2F(TopLeftLocation) + movement), movement)
-        End If
-
-        Dim isInAvoidanceZoneNow = IsPonyIntersectingWithAvoidanceArea(Location)
-        Dim isInAvoidanceZoneFuture = IsPonyIntersectingWithAvoidanceArea(newLocation)
-
-        'if we ARE currently in the cursor's zone, then say that we should be halted (cursor_halt), save our current behavior so we 
-        'can continue later, and set the current behavior to nothing so it will be changed.
-        CursorOverPony = isNearCursorNow
-        If isNearCursorNow Then
-            If ReturningToScreenArea Then
-                StopReturningToScreenArea() 'clear destination if moving_onscreen, otherwise we will get confused later.
-                AddUpdateRecord("Stopped returning to screen area; pony is near the cursor now.")
-            End If
-            Paint() 'enable effects on mouseover.
-            PonySpeak()
-            AddUpdateRecord("Painted and terminated move; pony is near the cursor now.")
-            Exit Sub
-        ElseIf HaltedForCursor Then
-            'if we're not in the cursor's way, but still flagged that we are, exit mouseover mode.
-            CursorOverPony = False
-            CursorImmunity = 30
-            AddUpdateRecord("Exiting mouseover mode state.")
-            Exit Sub
-        End If
-
-        ' if we are heading into the cursor, change directions
-        If isNearCursorFuture Then
-            CursorOverPony = False
-            CursorImmunity = 60
-
-            ' For normal movement, simply bounce to move away from the cursor.
-            ' If we have a destination, then the cursor is blocking the way and the behavior should be aborted.
-            ' TODO: Review abortion.
-            If Not hasDestination Then
-                Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
-            Else
-                CurrentBehavior = GetAppropriateBehaviorOrFallback(CurrentBehavior.AllowedMovement, False)
-            End If
-            AddUpdateRecord("Avoiding cursor.")
-            Exit Sub
-        End If
-
-        ' Check whether movement leaves in us an allowable area.
-        If ReturningToScreenArea OrElse (isOnscreenFuture AndAlso Not isInAvoidanceZoneFuture AndAlso Not playingGameAndOutOfBounds) Then
-            ' We are in and will remain in an allowable area, or at least moving towards an allowable area.
-
-            ' Check if we need to rebound off a window.
-            If isEnteringWindowNow Then
-                If Not hasDestination Then
-                    Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
-                    AddUpdateRecord("Avoiding window.")
-                Else
-                    AddUpdateRecord("Wanted to avoid window, but instead pressing to destination.")
-                End If
-                Exit Sub
-            End If
-
-            ' Everything's cool. Move and repaint.
-            Location = newLocation
-            lastMovement = movement
-
-            Dim useVisualOverride = (followTarget IsNot Nothing AndAlso
-                                     (CurrentBehavior.AutoSelectImagesOnFollow OrElse
-                                      CurrentBehavior.FollowMovingBehavior IsNot Nothing OrElse
-                                      CurrentBehavior.FollowStoppedBehavior IsNot Nothing)) OrElse
-                              (EvilGlobals.CurrentGame IsNot Nothing AndAlso AtDestination)
-            Paint(useVisualOverride)
-            AddUpdateRecord("Standard paint. VisualOverride: ", useVisualOverride.ToString())
-
-            ' If we can, we should try and start an interaction.
-            If Options.PonyInteractionsEnabled AndAlso Not IsInteracting AndAlso Not ReturningToScreenArea Then
-                StartInteractionAtRandom()
-            End If
-
-            ' If we were trying to get out of a bad spot, and we find ourselves in a good area, continue on as normal...
-            If ReturningToScreenArea AndAlso isOnscreenNow AndAlso Not isInAvoidanceZoneFuture AndAlso Not playingGameAndOutOfBounds Then
-                StopReturningToScreenArea()
-                AddUpdateRecord("Stopped returning to screen area; made it out of disallowed region.")
-            Else
-                'except if the user made changes to the avoidance area to include our current safe spot (we were already trying to avoid the area),
-                'then get a new safe spot.
-                If ReturningToScreenArea AndAlso
-                    (IsPonyIntersectingWithAvoidanceArea(Destination) OrElse Not IsPonyContainedInCanvas(Destination)) Then
-                    destinationCoords = FindSafeDestination()
-                End If
-            End If
-
-            'if we were trying to get out of a bad area, but we are not moving, then continue on as normal.
-            If ReturningToScreenArea AndAlso CurrentBehavior.Speed = 0 Then
-                StopReturningToScreenArea()
-                AddUpdateRecord("Stopped returning to screen area; current behavior has speed of zero.")
-            End If
-
-            'We are done.
-            Exit Sub
+        _behaviorStartTime = _currentTime
+        If _inMouseoverState OrElse _inDragState Then
+            _behaviorDesiredDuration = TimeSpan.FromDays(1)
         Else
-            ' The anticipated move puts us in a disallowed area.
-            ' Sanity check time - are we even on screen now?
-            If isInAvoidanceZoneNow OrElse Not isOnscreenNow Then
-                'we are no where! Find out where it is safe to be and run!
-                If EvilGlobals.InPreviewMode OrElse Options.PonyTeleportEnabled Then
-                    Teleport()
-                    AddUpdateRecord("Teleporting back onscreen.")
-                    Exit Sub
-                End If
-
-                Dim safespot = FindSafeDestination()
-                ReturningToScreenArea = True
-
-                If CurrentBehavior.Speed = 0 Then
-                    CurrentBehavior = GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
-                End If
-
-                followTarget = Nothing
-                followTargetName = ""
-                destinationCoords = safespot
-
-                Paint(False)
-                AddUpdateRecord("Walking back on-screen.")
-                Exit Sub
-            End If
+            _behaviorDesiredDuration = TimeSpan.FromSeconds(
+                _currentBehavior.MinDuration + Rng.NextDouble() * (_currentBehavior.MaxDuration - _currentBehavior.MinDuration))
         End If
+        SetFollowTarget()
 
-        ' Nothing to worry about, we are on screen, but our current behavior would take us off-screen in the next move. Just do something
-        ' else.
-        ' If we are moving to a destination, our path is blocked: we'll wait for a bit.
-        ' If we are just moving normally, just "bounce" off of the barrier.
-        If Not hasDestination Then
-            Bounce(Me, TopLeftLocation, newTopLeftLocation, movement)
-            'we need to paint to reset the image centers
-            Paint()
-            AddUpdateRecord("Bounced and painted - rebounded off screen edge.")
-        Else
-            If IsNothing(followTarget) Then
-                speed = 0
-            Else
-                'do nothing but stare longingly in the direction of the object we want to follow...
-                blocked = True
-                Paint()
-                AddUpdateRecord("Painted; but currently blocked from following target.")
-            End If
-        End If
-    End Sub
-
-    Private Sub UpdateCurrentMouseoverBehavior()
-        Dim updateNeeded = currentMouseoverBehavior Is Nothing OrElse currentMouseoverBehavior.Group <> CurrentBehaviorGroup
-        If Not updateNeeded Then Return
-        Dim fallback = GetAppropriateBehaviorOrFallback(AllowedMoves.None, False)
-        Dim preferred = Behaviors.FirstOrDefault(
-            Function(b) b.AllowedMovement = AllowedMoves.MouseOver AndAlso b.Group = CurrentBehaviorGroup)
-        currentMouseoverBehavior = If(preferred, fallback)
-    End Sub
-
-    Private Function DetermineDestination() As Point
-        ' If we are off-screen and trying to get back on, just return the pre-calculated coordinates.
-        If ReturningToScreenArea Then Return destinationCoords
-
-        ' If being recalled to a house.
-        If GoingHome Then Return Destination
-
-        ' If we should be following something, but we don't know what yet, select a pony/effect to follow.
-        If (followTargetName <> "" AndAlso IsNothing(followTarget)) Then
-            ' If we are interacting, and the name of the pony we should be following matches that of the trigger, follow that one.
-            ' Otherwise, we may end up following the wrong copy if there are more than one.
-            If IsInteracting AndAlso followTargetName = CurrentInteraction.Trigger.Directory Then
-                followTarget = CurrentInteraction.Trigger
-                Return New Point(CurrentInteraction.Trigger.CenterLocation.X + destinationCoords.X,
-                                 CurrentInteraction.Trigger.CenterLocation.Y + destinationCoords.Y)
-            End If
-            ' For the reverse case of a trigger pony trying to find out which initiator to follow when interacting.
-            If IsInteracting AndAlso Not IsNothing(CurrentInteraction.Initiator) AndAlso
-                followTargetName = CurrentInteraction.Initiator.Directory Then
-                followTarget = CurrentInteraction.Initiator
-                Return New Point(CurrentInteraction.Initiator.CenterLocation.X + destinationCoords.X,
-                                 CurrentInteraction.Initiator.CenterLocation.Y + destinationCoords.Y)
-            End If
-
-            ' If not interacting, or following a different pony, we need to figure out which ones and follow one at random.
-            Dim poniesToFollow As New List(Of Pony)
-            For Each ponyToFollow In EvilGlobals.CurrentAnimator.Ponies()
-                If ponyToFollow.Directory = followTargetName Then
-                    poniesToFollow.Add(ponyToFollow)
-                End If
-            Next
-            If poniesToFollow.Count <> 0 Then
-                Dim ponyToFollow = poniesToFollow.RandomElement()
-                followTarget = ponyToFollow
-                Return New Point(ponyToFollow.CenterLocation.X + destinationCoords.X,
-                                 ponyToFollow.CenterLocation.Y + destinationCoords.Y)
-            End If
-
-            ' We can't find the object to follow, so specify no destination.
-            Return Point.Empty
-        End If
-
-        If followTarget IsNot Nothing Then
-            ' We've already selected an object to follow previously.
-            Dim followPony = TryCast(followTarget, Pony)
-            If followPony IsNot Nothing Then
-                If leadTarget Then
-                    Return followPony.FutureLocation()
-                Else
-                    Return New Point(CInt(followPony.CenterLocation.X + (followPony.Scale * destinationCoords.X)), _
-                                     CInt(followPony.CenterLocation.Y + (followPony.Scale * destinationCoords.Y)))
-                End If
-            Else
-                Dim followEffect As Effect = DirectCast(followTarget, Effect)
-                Return New Point(followEffect.Center.X + destinationCoords.X, followEffect.Center.Y + destinationCoords.Y)
-            End If
-        End If
-
-        ' We are not following an object, but going to a point on the screen.
-        If destinationCoords.X <> 0 AndAlso destinationCoords.Y <> 0 Then
-            Dim area = Options.GetCombinedScreenArea()
-            Return New Point(CInt(0.01 * destinationCoords.X * area.Width),
-                             CInt(0.01 * destinationCoords.Y * area.Height))
-        End If
-
-        ' We have no given destination.
-        Return Point.Empty
-    End Function
-
-    Private Sub StopReturningToScreenArea()
-        ReturningToScreenArea = False
-        destinationCoords = New Point(CurrentBehavior.OriginalDestinationXCoord, CurrentBehavior.OriginalDestinationYCoord)
-        followTargetName = CurrentBehavior.OriginalFollowTargetName
-        Paint()
-    End Sub
-
-    Friend Sub ActivateEffects(currentTime As TimeSpan)
-
-        If Options.PonyEffectsEnabled AndAlso
-            Not _sleeping AndAlso
-            Not BeingDragged AndAlso
-            Not ReturningToScreenArea Then
-            For Each effect In CurrentBehavior.Effects
-                If Not effectsLastUsed.ContainsKey(effect) Then
-                    effectsLastUsed(effect) = TimeSpan.Zero
-                End If
-                If (currentTime - effectsLastUsed(effect)).TotalMilliseconds >= effect.RepeatDelay * 1000 Then
-
-                    If effect.RepeatDelay = 0 Then
-                        If effectsAlreadyPlayedForBehavior.Contains(effect) Then Continue For
-                    End If
-
-                    effectsAlreadyPlayedForBehavior.Add(effect)
-
-                    Dim newEffect = New Effect(effect, Not facingRight,
-                                               Function() New Vector2F(Me.TopLeftLocation),
-                                               Function() Me.CurrentImageSize,
-                                               Function() CSng(Me.Scale))
-
-                    If newEffect.Base.Duration <> 0 Then
-                        newEffect.DesiredDuration = TimeSpan.FromSeconds(newEffect.Base.Duration)
-                    Else
-                        If Me.HaltedForCursor Then
-                            newEffect.DesiredDuration = TimeSpan.FromSeconds(CurrentBehavior.MaxDuration)
-                        Else
-                            newEffect.DesiredDuration = BehaviorDesiredDuration - Me.ImageTimeIndex
-                        End If
-                    End If
-
-                    EvilGlobals.CurrentAnimator.AddEffect(newEffect)
-                    AddHandler newEffect.Expired, Sub() _activeEffects.Remove(newEffect)
-                    _activeEffects.Add(newEffect)
-
-                    effectsLastUsed(effect) = currentTime
-
-                End If
-            Next
-        End If
-
-    End Sub
-
-    'reverse directions as if we were bouncing off a boundary.
-    Private Sub Bounce(pony As Pony, topLeftLocation As Point, newTopLeftLocation As Point, movement As SizeF)
-        If movement = SizeF.Empty Then Exit Sub
-
-        'if we are moving in a simple direction (up/down, left/right) just reverse direction
-        If movement.Width = 0 AndAlso movement.Height <> 0 Then
-            facingUp = Not facingUp
-            If Diagonal <> 0 Then Diagonal = 2 * Math.PI - Diagonal
-            Exit Sub
-        End If
-        If movement.Width <> 0 AndAlso movement.Height = 0 Then
-            facingRight = Not facingRight
-            If Diagonal <> 0 Then Diagonal = Math.PI - Diagonal
-            Exit Sub
-        End If
-
-        'if we were moving in a composite direction, we need to determine which component is bad
-
-        Dim x_bad = False
-        Dim y_bad = False
-
-        Dim newTopLeftLocationXOnly As New Point(newTopLeftLocation.X, topLeftLocation.Y)
-        Dim newTopLeftLocationYOnly As New Point(topLeftLocation.X, newTopLeftLocation.Y)
-        Dim centerOffset = GetImageCenterOffset()
-        Dim newLocationXOnly = newTopLeftLocationXOnly + centerOffset
-        Dim newLocationYOnly = newTopLeftLocationYOnly + centerOffset
-
-        If movement.Width <> 0 AndAlso movement.Height <> 0 Then
-            If Not pony.IsPonyContainedInCanvas(newLocationXOnly) OrElse
-                pony.IsPonyIntersectingWithAvoidanceArea(newLocationXOnly) OrElse
-                pony.IsPonyEnteringWindow(topLeftLocation, newTopLeftLocationXOnly, New SizeF(movement.Width, 0)) Then
-                x_bad = True
-            End If
-            If Not pony.IsPonyContainedInCanvas(newLocationYOnly) OrElse
-                pony.IsPonyIntersectingWithAvoidanceArea(newLocationYOnly) OrElse
-                pony.IsPonyEnteringWindow(topLeftLocation, newTopLeftLocationYOnly, New SizeF(0, movement.Height)) Then
-                y_bad = True
-            End If
-        End If
-
-        If Not x_bad AndAlso Not y_bad Then
-            facingUp = Not facingUp
-            facingRight = Not facingRight
-            If Diagonal <> 0 Then
-                Diagonal = Math.PI - Diagonal
-                Diagonal = 2 * Math.PI - Diagonal
-            End If
-            Exit Sub
-        End If
-
-        If x_bad AndAlso y_bad Then
-            facingUp = Not facingUp
-            facingRight = Not facingRight
-            If Diagonal <> 0 Then
-                Diagonal = Math.PI - Diagonal
-                Diagonal = 2 * Math.PI - Diagonal
-            End If
-            Exit Sub
-        End If
-
-        If x_bad Then
-            facingRight = Not facingRight
-            If Diagonal <> 0 Then
-                Diagonal = Math.PI - Diagonal
-            End If
-            Exit Sub
-        End If
-        If y_bad Then
-            facingUp = Not facingUp
-            If Diagonal <> 0 Then
-                Diagonal = 2 * Math.PI - Diagonal
-            End If
-        End If
-
-    End Sub
-
-    Friend Function GetBehaviorGroupName(groupnumber As Integer) As String
-
-        If groupnumber = 0 Then
-            Return "Any"
-        End If
-
-        For Each group In Base.BehaviorGroups
-            If group.Number = groupnumber Then
-                Return group.Name
-            End If
+        ' Clean up old effects from the previous behavior.
+        For Each effect In _effectsToManuallyExpire
+            effect.Expire()
         Next
-
-        Return "Unnamed"
-
-    End Function
-
-    'Return our future location in one second if we go straight in the current direction
-    Friend Function FutureLocation(Optional ticks As Integer = 1000) As Point
-        Dim Number_Of_Interations = ticks / (1000.0F / EvilGlobals.CurrentAnimator.MaximumFramesPerSecond)  'get the # of intervals in one second
-        Return Point.Round(CType(TopLeftLocation, Vector2) + lastMovement * Number_Of_Interations)
-    End Function
-
-    Private Sub Paint(Optional useOverrideBehavior As Boolean = True)
-        visualOverrideBehavior = Nothing
-
-        'If we are going to a particular point or following something, we need to pick the 
-        'appropriate graphics to how we are moving instead of using what the behavior specifies.
-        If hasDestination AndAlso Not ManualControlPlayerOne AndAlso Not ManualControlPlayerTwo Then ' AndAlso Not Playing_Game Then
-
-            Dim horizontalDistance = Math.Abs(Destination.X - CenterLocation.X)
-            Dim verticalDistance = Math.Abs(Destination.Y - CenterLocation.Y)
-
-            'We are supposed to be following, so say we can move any direction to do that.
-            Dim allowedMovement = AllowedMoves.All
-
-            'if the distance to the destination is mostly horizontal, or mostly vertical, set the movement to either of those
-            'This allows Pegasi to fly up to reach their target instead of walking straight up.
-            'This is weighted more on the vertical side for better effect
-            If horizontalDistance * 0.75 > verticalDistance Then
-                allowedMovement = allowedMovement And AllowedMoves.HorizontalOnly
-            Else
-                allowedMovement = allowedMovement And AllowedMoves.VerticalOnly
-            End If
-
-            If AtDestination OrElse blocked OrElse CurrentBehavior.Speed = 0 OrElse Delay > 0 Then
-                allowedMovement = AllowedMoves.None
-                Dim paint_stop_now = paintStop
-                paintStop = True
-
-                'If at our destination, we want to allow one final animation change.  
-                'However after that, we want to stop painting as we may be stuck in a left-right loop
-                'Detect here if the destination is between the right and left image centers, which would cause flickering between the two.
-                If paint_stop_now Then
-
-                    If Destination.X >= CurrentBehavior.LeftImage.Center.X + TopLeftLocation.X AndAlso
-                        Destination.X < CurrentBehavior.RightImage.Center.X + TopLeftLocation.X Then
-                        '  Console.WriteLine(Me.Name & " paint stopped")
-                        Exit Sub
-                    End If
-
-                End If
-
-            Else
-                paintStop = False
-            End If
-
-            If useOverrideBehavior Then
-                ' Chosen an appropriate behavior to use for visual override.
-                ' Use the specified behaviors for following if possible, otherwise find a suitable one given our movement requirements.
-                Dim appropriateBehavior As Behavior = Nothing
-                If allowedMovement = AllowedMoves.None Then
-                    appropriateBehavior = CurrentBehavior.FollowStoppedBehavior
-                Else
-                    appropriateBehavior = CurrentBehavior.FollowMovingBehavior
-                End If
-                If CurrentBehavior.AutoSelectImagesOnFollow OrElse appropriateBehavior Is Nothing Then
-                    appropriateBehavior = GetAppropriateBehaviorOrFallback(allowedMovement, True)
-                End If
-                If ValidateBehavior(appropriateBehavior) Then visualOverrideBehavior = appropriateBehavior
-            End If
-        Else
-            paintStop = False
-        End If
-
-        Dim newCenter = Size.Round(If(facingRight, CurrentBehavior.RightImage.Center, CurrentBehavior.LeftImage.Center) * CSng(Scale))
-
-        If Not isCustomImageCenterDefined Then
-            currentCustomImageCenter = newCenter
-        End If
-
-        'reposition the form based on the new image center, if different:
-        If isCustomImageCenterDefined AndAlso currentCustomImageCenter <> newCenter Then
-            Location = New Point(Location.X - newCenter.Width + currentCustomImageCenter.Width,
-                                 Location.Y - newCenter.Height + currentCustomImageCenter.Height)
-            currentCustomImageCenter = newCenter
-        End If
-
+        _effectsToManuallyExpire.Clear()
+        _effectBasesToRepeat.Clear()
     End Sub
 
-    'You can place effects at an offset to the pony, and also set them to the left or the right of themselves for big effects.
-    Friend Shared Function GetEffectLocation(effectImageSize As Size, dir As Direction,
-                                             parentTopLeftLocation As Vector2F, parentSize As Vector2,
-                                             centering As Direction, scale As Single, globalScale As Single) As Vector2
-
-        Dim scaledParentSize = parentSize * CSng(scale)
-        scaledParentSize.X *= DirectionWeightHorizontal(dir)
-        scaledParentSize.Y *= DirectionWeightVertical(dir)
-
-        Dim locationOnParent = parentTopLeftLocation + scaledParentSize
-
-        Dim scaledEffectSize = New Vector2F(effectImageSize) * globalScale
-        scaledEffectSize.X *= DirectionWeightHorizontal(centering)
-        scaledEffectSize.Y *= DirectionWeightVertical(centering)
-
-        Return Vector2.Round(locationOnParent - scaledEffectSize)
-    End Function
-
-    Private Shared Function DirectionWeightHorizontal(dir As Direction) As Single
-        Select Case dir
-            Case Direction.TopLeft, Direction.MiddleLeft, Direction.BottomLeft
-                Return 0
-            Case Direction.TopCenter, Direction.MiddleCenter, Direction.BottomCenter
-                Return 0.5
-            Case Direction.TopRight, Direction.MiddleRight, Direction.BottomRight
-                Return 1
-            Case Direction.Random, Direction.RandomNotCenter
-                Return CSng(Rng.NextDouble())
-        End Select
-        Return Single.NaN
-    End Function
-
-    Private Shared Function DirectionWeightVertical(dir As Direction) As Single
-        Select Case dir
-            Case Direction.TopLeft, Direction.TopCenter, Direction.TopRight
-                Return 0
-            Case Direction.MiddleLeft, Direction.MiddleCenter, Direction.MiddleRight
-                Return 0.5
-            Case Direction.BottomLeft, Direction.BottomCenter, Direction.BottomRight
-                Return 1
-            Case Direction.Random, Direction.RandomNotCenter
-                Return CSng(Rng.NextDouble())
-        End Select
-        Return Single.NaN
-    End Function
-
-    Private Function GetAppropriateBehavior(movement As AllowedMoves, speed As Boolean,
-                                           Optional suggestedBehavior As Behavior = Nothing,
-                                           Optional currentGroupOnly As Boolean = True) As Behavior
-        'does the current behavior work?
-        If CurrentBehavior IsNot Nothing Then
-            If movement = AllowedMoves.All OrElse (CurrentBehavior.AllowedMovement And movement) = movement Then
-                If CurrentBehavior.Speed = 0 AndAlso movement = AllowedMoves.None Then Return CurrentBehavior
-                If CurrentBehavior.Speed <> 0 AndAlso movement = AllowedMoves.All Then Return CurrentBehavior
-            End If
+    ''' <summary>
+    ''' Uniformly selects a random behavior from those in the any group or the current behavior group. If there are none in those groups,
+    ''' uniformly selects one at random from all behaviors.
+    ''' </summary>
+    ''' <returns>A behavior selected uniformly from available candidates, or all behaviors if there are no available candidates, or null if
+    ''' there are no behaviors.</returns>
+    Private Function GetRandomBehavior() As Behavior
+        Dim candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
+        If candidates.Count = 0 Then candidates = Base.Behaviors
+        If candidates.Count = 0 Then
+            Return Nothing
+        ElseIf candidates.Count = 1 Then
+            Return candidates(0)
+        Else
+            Dim totalChance = 0.0
+            For Each behavior In candidates
+                totalChance += behavior.Chance
+            Next
+            Dim randomChance = Rng.NextDouble() * totalChance
+            Dim currentChance = 0.0
+            Dim randomChoice As Behavior = Nothing
+            For Each candidate In candidates
+                randomChoice = candidate
+                currentChance += candidate.Chance
+                If currentChance >= randomChance Then Exit For
+            Next
+            Return randomChoice
         End If
+    End Function
 
-        For Each behavior In Behaviors
-            If currentGroupOnly AndAlso behavior.Group <> CurrentBehaviorGroup Then Continue For
-
-            If behavior.AllowedMovement = AllowedMoves.Sleep AndAlso
-                movement <> AllowedMoves.Sleep AndAlso
-                movement <> AllowedMoves.Dragged Then
-                Continue For
-            End If
-
-            'skip behaviors that are parts of a chain and shouldn't be used individually
-            'however, when being dragged or sleeping, we may still need to consider these.
-            If behavior.Skip AndAlso
-                movement <> AllowedMoves.Dragged AndAlso
-                movement <> AllowedMoves.Sleep Then
-                Continue For
-            End If
-
-            If movement = AllowedMoves.All OrElse (behavior.AllowedMovement And movement) = movement Then
-
-                If behavior.Speed = 0 AndAlso movement <> AllowedMoves.All Then Return behavior
-
-                'see if the specified behavior works.  If not, we'll find another.
-                If suggestedBehavior IsNot Nothing Then
-                    If movement = AllowedMoves.All OrElse (suggestedBehavior.AllowedMovement And movement) = movement Then
-                        If hasDestination Then
-                            facingRight = (GetDestinationDirectionHorizontal(Destination) = Direction.MiddleRight)
-                        End If
-                        Return suggestedBehavior
-                    End If
-                End If
-
-                'if this behavior has a destination or an object to follow, don't use it.
-                If (destinationCoords.X <> 0 OrElse destinationCoords.Y <> 0 OrElse followTargetName <> "") AndAlso
-                    Not PlayingGame AndAlso
-                    Not ReturningToScreenArea Then
-                    Continue For
-                End If
-
-                'If the user is pressing shift while "taking control"
-                If speed Then
-                    If Math.Abs(behavior.Speed) > 0 Then Return behavior
-                Else
-                    If behavior.Speed <> 0 Then Return behavior
-                End If
-            End If
+    ''' <summary>
+    ''' Iterates over all specified predicates searching the first the behavior that satisfies the predicate.
+    ''' </summary>
+    ''' <param name="predicates">An ordered set of predicates to match by, in descending order of preference.</param>
+    ''' <returns>The first behavior that matches the predicates as tested in descending order, otherwise null.</returns>
+    Private Function GetBehaviorMatching(ParamArray predicates As Predicate(Of Behavior)()) As Behavior
+        For Each predicate In predicates
+            For Each behavior In Base.Behaviors
+                If predicate(behavior) Then Return behavior
+            Next
         Next
-
         Return Nothing
     End Function
 
     ''' <summary>
-    ''' Returns a behavior that best matches the desired allowable movement and speed. If no such behavior exists, a suitable fallback is 
-    ''' returned (typically the current behavior).
+    ''' Sets an actual pony to follow, based on the desired target. If an interaction is running, the initiator will prefer to follow any
+    ''' involved interaction targets (if suitable) and any targets will prefer to follow the initiator, or then other targets (if
+    ''' suitable). Otherwise, a target is chosen uniformly from all available targets.
     ''' </summary>
-    ''' <param name="movement">The movement to match (as best as possible).</param>
-    ''' <param name="speed">Is the user pressing the "speed" override key.</param>
-    ''' <param name="suggestedBehavior">A suggested behavior to test first. This will be returned if it meets the requirements
-    ''' sufficiently.</param>
-    ''' <returns>The suggested behavior, if it meets the requirements, otherwise any behavior with meets the requirements sufficiently. If 
-    ''' no behavior matches sufficiently a fallback is returned, typically the current behavior.
-    ''' </returns>
-    Friend Function GetAppropriateBehaviorOrFallback(movement As AllowedMoves, speed As Boolean,
-                                           Optional suggestedBehavior As Behavior = Nothing) As Behavior
-        Dim behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior)
-        If behavior Is Nothing Then behavior = CurrentBehavior
-        If behavior Is Nothing Then behavior = GetAppropriateBehavior(movement, speed, suggestedBehavior, False)
-        If behavior Is Nothing Then behavior = Behaviors.RandomElement()
-        Return behavior
-    End Function
-
-    'Test to see if we overlap with another application's window.
-    <Security.Permissions.PermissionSet(Security.Permissions.SecurityAction.Demand, Name:="FullTrust")>
-    Private Function IsPonyEnteringWindow(topLeftLocation As Point, newTopLeftLocation As Point, movement As SizeF) As Boolean
-        If Not OperatingSystemInfo.IsWindows Then Return False
-
-        Try
-            If EvilGlobals.InPreviewMode Then Return False
-            If Not Options.WindowAvoidanceEnabled Then Return False
-
-            If movement = SizeF.Empty Then Return False
-
-            Dim current_window_1 = Interop.Win32.WindowFromPoint(
-                New Interop.Win32.POINT(topLeftLocation.X, topLeftLocation.Y))
-            Dim current_window_2 = Interop.Win32.WindowFromPoint(
-                New Interop.Win32.POINT(CInt(topLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(topLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-            Dim current_window_3 = Interop.Win32.WindowFromPoint(
-                New Interop.Win32.POINT(CInt(topLeftLocation.X + (Scale * CurrentImageSize.X)), topLeftLocation.Y))
-            Dim current_window_4 = Interop.Win32.WindowFromPoint(
-                New Interop.Win32.POINT(topLeftLocation.X, CInt(topLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-
-            'the current position is already half-way between windows.  don't worry about it
-            If current_window_1 <> current_window_2 OrElse current_window_1 <> current_window_3 OrElse current_window_1 <> current_window_4 Then
-                Return False
-            End If
-
-            'find out where we are going
-            Dim new_window_1 As IntPtr = IntPtr.Zero 'top_left
-            Dim new_window_2 As IntPtr = IntPtr.Zero  'bottom_right
-            Dim new_window_3 As IntPtr = IntPtr.Zero  'top_right
-            Dim new_window_4 As IntPtr = IntPtr.Zero  'bottom_left
-
-            Select Case movement.Width
-                Case Is > 0
-                    new_window_2 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-                    new_window_3 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), newTopLeftLocation.Y))
-                Case Is < 0
-                    new_window_1 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(newTopLeftLocation.X, newTopLeftLocation.Y))
-                    new_window_4 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(newTopLeftLocation.X, CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-            End Select
-
-            Select Case movement.Height
-                Case Is > 0
-                    If (new_window_2) = IntPtr.Zero Then new_window_2 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-                    If (new_window_4) = IntPtr.Zero Then new_window_4 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(newTopLeftLocation.X, CInt(newTopLeftLocation.Y + (Scale * CurrentImageSize.Y))))
-                Case Is < 0
-                    If (new_window_1) = IntPtr.Zero Then new_window_1 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(newTopLeftLocation.X, newTopLeftLocation.Y))
-                    If (new_window_3) = IntPtr.Zero Then new_window_3 = Interop.Win32.WindowFromPoint(
-                        New Interop.Win32.POINT(CInt(newTopLeftLocation.X + (Scale * CurrentImageSize.X)), newTopLeftLocation.Y))
-            End Select
-
-
-            Dim collisionWindows As New List(Of IntPtr)
-
-            If (new_window_1 <> IntPtr.Zero AndAlso new_window_1 <> current_window_1) Then collisionWindows.Add(new_window_1)
-            If (new_window_2 <> IntPtr.Zero AndAlso new_window_2 <> current_window_2) Then collisionWindows.Add(new_window_2)
-            If (new_window_3 <> IntPtr.Zero AndAlso new_window_3 <> current_window_3) Then collisionWindows.Add(new_window_3)
-            If (new_window_4 <> IntPtr.Zero AndAlso new_window_4 <> current_window_4) Then collisionWindows.Add(new_window_4)
-
-            If collisionWindows.Count <> 0 Then
-
-                Dim pony_collision_count = 0
-                Dim ignored_collision_count = 0
-
-                'need our own PID for window avoidance (ignoring collisions with other ponies)
-                Dim currentProcessId As IntPtr
-                If Options.PonyAvoidsPonies Then
-                    Using currentProcess = Diagnostics.Process.GetCurrentProcess()
-                        currentProcessId = currentProcess.Handle
-                    End Using
-                End If
-
-                For Each collisionWindow In collisionWindows
-
-                    If Options.PonyAvoidsPonies AndAlso Options.PonyStaysInBox Then
-                        Exit For
-                    End If
-
-                    'ignore collisions with other ponies or effects
-                    If Options.PonyAvoidsPonies Then
-                        Dim collisisonWindowProcessId As IntPtr
-                        Interop.Win32.GetWindowThreadProcessId(collisionWindow, collisisonWindowProcessId)
-                        If collisisonWindowProcessId = currentProcessId Then
-                            pony_collision_count += 1
-                        End If
+    Private Sub SetFollowTarget()
+        If _followTarget Is Nothing AndAlso _currentBehavior.OriginalFollowTargetName <> "" Then
+            ' If an interaction is running, we want to prefer those ponies involved in the interaction before trying other ponies.
+            If _currentInteraction IsNot Nothing Then
+                If ReferenceEquals(Me, _currentInteraction.Initiator) Then
+                    ' If we are the interaction initiator, prefer an involved target.
+                    AddUpdateRecord("SetFollowTarget using candidates involved in the interaction.")
+                    _followTarget = GetRandomFollowTarget(_currentInteraction.InvolvedTargets)
+                Else
+                    ' If we are an interaction target, prefer to follow the initiator if they are suitable.
+                    ' Otherwise follow any of the other targets - but avoid following ourselves since we are a target.
+                    If _currentBehavior.OriginalFollowTargetName = _currentInteraction.Initiator.Base.Directory Then
+                        AddUpdateRecord("SetFollowTarget using interaction initiator.")
+                        _followTarget = _currentInteraction.Initiator
                     Else
-
-                        'we are colliding with another window boundary.
-                        'are we already inside of it, and therefore should go through to the outside?
-                        'or are we on the outside, and need to stay out?
-
-                        If Options.PonyStaysInBox Then Continue For
-
-                        Dim collisionArea As New Interop.Win32.RECT
-                        Interop.Win32.GetWindowRect(collisionWindow, collisionArea)
-                        If IsPonyIntersectingWithRect(topLeftLocation + GetImageCenterOffset(), Rectangle.FromLTRB(
-                                       collisionArea.Left, collisionArea.Top, collisionArea.Right, collisionArea.Bottom)) Then
-                            ignored_collision_count += 1
-                        End If
+                        AddUpdateRecord("SetFollowTarget using candidates involved in the interaction (avoiding self).")
+                        _followTarget = GetRandomFollowTarget(_currentInteraction.InvolvedTargets.Where(
+                                                              Function(p) Not ReferenceEquals(Me, p)))
                     End If
-                Next
-
-                If pony_collision_count + ignored_collision_count = collisionWindows.Count Then
-                    Return False
                 End If
-
-                Return True
-            Else
-                Return False
             End If
-
-        Catch ex As Exception
-            Options.WindowAvoidanceEnabled = False
-            Program.NotifyUserOfNonFatalException(ex, "Error attempting to avoid windows. Window avoidance has been disabled.")
-            Return False
-        End Try
-
-    End Function
-
-    Friend Function IsPonyContainedInCanvas(centerLocation As Point) As Boolean
-        Return IsPonyContainedInRect(centerLocation, Options.GetCombinedScreenArea())
-    End Function
-
-    Friend Function IsPonyContainedInScreen(centerLocation As Point, screen As Screen) As Boolean
-        Return IsPonyContainedInRect(centerLocation, screen.WorkingArea)
-    End Function
-
-    Friend Function IsPonyContainedInRect(centerLocation As Point, rect As Rectangle) As Boolean
-        Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
-        Return rect.Contains(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
-    End Function
-
-    Friend Function IsPonyIntersectingWithRect(centerLocation As Point, rect As Rectangle) As Boolean
-        Dim sz = New Size(CInt(CurrentImageSize.X * Scale), CInt(CurrentImageSize.Y * Scale))
-        Return rect.IntersectsWith(New Rectangle(New Vector2(centerLocation) - currentImage.Center, sz))
-    End Function
-
-    Private Function IsPonyIntersectingWithAvoidanceArea(centerLocation As Point) As Boolean
-        If CurrentBehavior Is Nothing Then Return False
-
-        If EvilGlobals.InPreviewMode Then
-            Dim previewArea = EvilGlobals.PreviewWindowRectangle
-            If CurrentImageSize.X > previewArea.Width OrElse CurrentImageSize.Y > previewArea.Height Then
-                Return False
+            If _followTarget Is Nothing Then
+                ' Pick any pony at random.
+                AddUpdateRecord("SetFollowTarget using random from context (avoiding self).")
+                _followTarget = GetRandomFollowTarget(Context.OtherPonies(Me))
             End If
-            Return Not IsPonyContainedInRect(centerLocation, previewArea)
         End If
+    End Sub
 
-        If Options.ExclusionZone.IsEmpty Then
-            Return False
+    ''' <summary>
+    ''' Uniformly selects at random a follow target from all specified candidate ponies which are eligible to be followed for the current
+    ''' behavior.
+    ''' </summary>
+    ''' <param name="allCandidates">A selection of candidate ponies. This may include ponies unsuitable for following according to the
+    ''' current behavior, as these will be filtered out. Expired candidates are also filtered out. The current instance must not be present
+    ''' in the collection.</param>
+    ''' <returns>A randomly selected target from all suitable candidates for the current behavior, or null if one could not be found.
+    ''' </returns>
+    Private Function GetRandomFollowTarget(allCandidates As IEnumerable(Of Pony)) As Pony
+        Dim suitableCandidates = allCandidates.Where(
+            Function(p) Not p._expired AndAlso p.Base.Directory = _currentBehavior.OriginalFollowTargetName).ToImmutableArray()
+        If suitableCandidates.Length > 0 Then
+            Return suitableCandidates(Rng.Next(suitableCandidates.Length))
+        Else
+            Return Nothing
         End If
-
-        Return IsPonyIntersectingWithRect(centerLocation, Options.ExclusionZoneForBounds(Options.GetCombinedScreenArea()))
-    End Function
-
-    Private Function IsPonyNearMouseCursor(centerLocation As Point) As Boolean
-        If Not Options.CursorAvoidanceEnabled Then Return False
-        If EvilGlobals.InScreensaverMode Then Return False
-        If CursorImmunity > 0 Then Return False
-        If IsInteracting Then Return False
-        If ManualControlPlayerOne OrElse ManualControlPlayerTwo Then Return False
-
-        Return Vector2.Distance(centerLocation, EvilGlobals.CursorLocation) <= Options.CursorAvoidanceSize
     End Function
 
     ''' <summary>
-    ''' Returns a random location that is within the allowable regions to be in.
+    ''' Sets the visual override behavior. The behavior used is either directly specified by the current behavior, or else a suitable
+    ''' behavior is determined automatically. If a suitable override is not found, or one is not required, the override will be cleared.
+    ''' Thus, the images to use fall back to the current behavior.
     ''' </summary>
-    ''' <returns>The center of the preview area in preview mode, otherwise a random location within the allowable region, if one can be
-    ''' found; otherwise Point.Empty.</returns>
-    Private Function FindSafeDestination() As Point
-        If EvilGlobals.InPreviewMode Then Return Point.Round(EvilGlobals.PreviewWindowRectangle.Center())
+    Private Sub SetVisualOverrideBehavior()
+        _visualOverrideBehavior = Nothing
+        If _followTarget IsNot Nothing OrElse _currentBehavior.TargetMode = TargetMode.Point Then
+            Dim currentSpeed = _movement.Length()
+            If Not _currentBehavior.AutoSelectImagesOnFollow Then
+                If currentSpeed = 0 Then
+                    _visualOverrideBehavior = _currentBehavior.FollowStoppedBehavior
+                Else
+                    _visualOverrideBehavior = _currentBehavior.FollowMovingBehavior
+                End If
+            End If
+            ' TODO: Improve visual override matching - match by speed and maybe restrict to current group?
+            If _visualOverrideBehavior Is Nothing Then
+                If currentSpeed = 0 Then
+                    _visualOverrideBehavior = GetBehaviorMatching(stationaryBehaviorPredicateInArray)
+                Else
+                    _visualOverrideBehavior = GetBehaviorMatching(movingBehaviorPredicateInArray)
+                End If
+            End If
+        End If
+    End Sub
 
-        For i = 0 To 300
-            Dim randomScreen = Options.Screens.RandomElement()
-            Dim teleportLocation = New Point(
-                CInt(randomScreen.WorkingArea.X + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Width)),
-                CInt(randomScreen.WorkingArea.Y + Math.Round(Rng.NextDouble() * randomScreen.WorkingArea.Height)))
-            If Not IsPonyIntersectingWithAvoidanceArea(teleportLocation) Then Return teleportLocation
+    ''' <summary>
+    ''' When a pony is not busy, ensures the pony is within the allowed area. If it is not it will be teleported within bounds if this is
+    ''' allowed, otherwise it will be given a custom destination to return it to the allowed area.
+    ''' </summary>
+    ''' <param name="teleport">Indicates whether the pony should be teleported within bounds immediately, otherwise it will move normally
+    ''' back within bounds.</param>
+    Private Sub EnsureWithinBounds(teleport As Boolean)
+        If IsBusy Then Return
+        Dim inRegionDestination = GetInRegionDestination()
+        If teleport Then
+            If inRegionDestination IsNot Nothing Then
+                _location = inRegionDestination.Value
+                _lastStepWasInBounds = True
+            End If
+            _inRegion = Nothing
+        Else
+            SendToCustomDestination("return to allowed region", inRegionDestination, _inRegion)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Updates the destination vector. It will be left alone if previously set this step otherwise it will be set to the current
+    ''' overridden follow target (if any), the current follow target (if any), point to an absolute screen location (if specified) or else
+    ''' be cleared. When following, the follow cool-down end time will be set to provide short pauses when resuming following of a target.
+    ''' </summary>
+    Private Sub UpdateDestination()
+        ' If a destination has already been set for this step, don't set another.
+        If _destination IsNot Nothing Then Return
+
+        If FollowTargetOverride IsNot Nothing AndAlso _followTarget IsNot Nothing Then
+            ' Move to the overridden follow target.
+            _destination = _followTarget._location
+            DelayFollow()
+            Return
+        End If
+        Dim offsetVector = New Vector2(_currentBehavior.OriginalDestinationXCoord, _currentBehavior.OriginalDestinationYCoord)
+        If _followTarget IsNot Nothing Then
+            ' Move to follow target.
+            ' Here the offset represents a custom offset from the center of the target.
+            _destination = _followTarget._location + offsetVector
+            DelayFollow()
+            Return
+        ElseIf offsetVector <> Vector2.Zero Then
+            ' We need to head to some point relative to the display area.
+            ' Here the offset represents the relative location normalized to a scale of 0-100 along each axis.
+            Dim relativeDestination = offsetVector * 0.01F
+            Dim region = Context.Region
+            _destination = New Vector2F(region.Location) +
+                New Vector2F(relativeDestination.X * region.Width, relativeDestination.Y * region.Height)
+            Return
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Provides a short delay for a follow target to move away from its follower to make following look more natural. The follow cool-down
+    ''' end time and destination vector may be set.
+    ''' </summary>
+    Private Sub DelayFollow()
+        ' If we're at the destination, we won't start following for a short while to generate "natural" pauses when a pony catches up with
+        ' its target.
+        If AtDestination Then _followCooldownEndTime = _currentTime + TimeSpan.FromSeconds(2)
+        If _followCooldownEndTime > _currentTime Then _destination = _location
+    End Sub
+
+    ''' <summary>
+    ''' Updates the movement vector. The will be zeroed when in the mouseover, drag or sleep states, will use the movement override value
+    ''' if specified and then clear that value, else it will be calculated so as to move towards a destination (if specified) or else be
+    ''' set to a free movement state as specified by the current behavior if the movement without destination needed flag is set (this flag
+    ''' then becomes unset). Otherwise no change is made. The facing state may also be set.
+    ''' </summary>
+    Private Sub UpdateMovement()
+        Dim normalizeForSpeed = False
+        Dim scaleSpeedUp = False
+        If _inMouseoverState OrElse _inDragState OrElse _inSleepState Then
+            ' No movement whilst in special state modes.
+            _movement = Vector2F.Zero
+        ElseIf MovementOverride IsNot Nothing Then
+            ' Set movement to override vector.
+            _movement = MovementOverride.Value
+            MovementOverride = Nothing
+            normalizeForSpeed = True
+            scaleSpeedUp = True
+            _movementWithoutDestinationNeeded = False
+        ElseIf _destination IsNot Nothing Then
+            ' Set movement with destination.
+            _movement = _destination.Value - _location
+            normalizeForSpeed = True
+        ElseIf _movementWithoutDestinationNeeded Then
+            ' Move freely based on current behavior with no defined destination.
+            SetMovementWithoutDestination()
+            _movementWithoutDestinationNeeded = False
+        End If
+        ' Scale movement so the magnitude matches the desired speed.
+        If normalizeForSpeed Then
+            Dim magnitude = _movement.Length()
+            If magnitude > Epsilon Then
+                Dim speed = CSng(GetSpeedInPixelsPerSecond() / StepRate)
+                ' When seeking a destination, just cap movement to speed, but if applying a movement override, set our speed outright.
+                If magnitude > speed OrElse scaleSpeedUp Then _movement = _movement / magnitude * speed
+                _facingRight = _movement.X > 0
+            End If
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Gets the desired speed of the pony in pixels per second.
+    ''' </summary>
+    ''' <returns>The speed override value if set, otherwise; the speed desired by the current behavior.</returns>
+    Private Function GetSpeedInPixelsPerSecond() As Double
+        Return If(SpeedOverride, _currentBehavior.SpeedInPixelsPerSecond)
+    End Function
+
+    ''' <summary>
+    ''' Sets the movement vector depending on the allowed moves and speed of the current behavior. The facing state will also be set
+    ''' randomly.
+    ''' </summary>
+    Private Sub SetMovementWithoutDestination()
+        _movement = Vector2F.Zero
+        Dim speed = GetSpeedInPixelsPerSecond() / StepRate
+        If speed > 0 Then
+            Dim moves = _currentBehavior.AllowedMovement And AllowedMoves.All
+            If moves > 0 Then
+                Dim movesList As New List(Of AllowedMoves)()
+                If (moves And AllowedMoves.HorizontalOnly) > 0 Then movesList.Add(AllowedMoves.HorizontalOnly)
+                If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
+                If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
+                Dim selectedDirection = movesList(Rng.Next(movesList.Count))
+                Select Case selectedDirection
+                    Case AllowedMoves.HorizontalOnly
+                        _movement = New Vector2F(CSng(speed), 0)
+                    Case AllowedMoves.VerticalOnly
+                        _movement = New Vector2F(0, CSng(speed))
+                    Case AllowedMoves.DiagonalOnly
+                        _movement = New Vector2F(CSng(speed * Math.Sin(Math.PI / 4)), CSng(speed * Math.Cos(Math.PI / 4)))
+                End Select
+                _facingRight = Rng.NextDouble() < 0.5
+                If Not _facingRight Then _movement.X = -_movement.X
+                If Rng.NextDouble() < 0.5 Then _movement.Y = -_movement.Y
+            End If
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' If the context allows effects, starts any effects specified by the current behavior immediately, and sets up repeating effects if
+    ''' required.
+    ''' </summary>
+    Private Sub StartEffects()
+        If Not Context.EffectsEnabled Then Return
+        For Each effectBase In _currentBehavior.Effects
+            StartNewEffect(effectBase)
+            If effectBase.RepeatDelay > 0 Then
+                _effectBasesToRepeat.Add(New EffectBaseRepeat(effectBase, _currentTime))
+            End If
         Next
+    End Sub
 
-        Return Point.Empty
-    End Function
-
-    Friend Function GetDestinationDirectionHorizontal(destination As Vector2F) As Direction
-        Dim rightImageCenterX = TopLeftLocation.X + (Scale * CurrentBehavior.RightImage.Center.X)
-        Dim leftImageCenterX = TopLeftLocation.X + (Scale * CurrentBehavior.LeftImage.Center.X)
-        If (rightImageCenterX > destination.X AndAlso leftImageCenterX < destination.X) OrElse
-            destination.X - CenterLocation.X <= 0 Then
-            Return Direction.MiddleLeft
+    ''' <summary>
+    ''' Starts a new effect modeled on the specified base, and adds it to the pending sprites for the assigned context. Effects which last
+    ''' until the next behavior change are remembered.
+    ''' </summary>
+    ''' <param name="effectBase">The base which is used as a model for the new effect instance.</param>
+    Private Sub StartNewEffect(effectBase As EffectBase)
+        Dim effect = New Effect(effectBase, Not _facingRight,
+                                Function() Me.regionF.Location,
+                                Function() Me.Region.Size,
+                                Context)
+        If effectBase.Duration = 0 Then
+            _effectsToManuallyExpire.Add(effect)
         Else
-            Return Direction.MiddleRight
+            effect.DesiredDuration = TimeSpan.FromSeconds(effectBase.Duration)
         End If
-    End Function
+        _activeEffects.Add(effect)
+        AddHandler effect.Expired, Sub() _activeEffects.Remove(effect)
+        Context.PendingSprites.Add(effect)
+    End Sub
 
-    Friend Function GetDestinationDirectionVertical(destination As Vector2F) As Direction
-        Dim rightImageCenterY = TopLeftLocation.Y + (Scale * CurrentBehavior.RightImage.Center.Y)
-        Dim leftImageCenterY = TopLeftLocation.Y + (Scale * CurrentBehavior.LeftImage.Center.Y)
-        If (rightImageCenterY > destination.Y AndAlso leftImageCenterY < destination.Y) OrElse
-           (rightImageCenterY < destination.Y AndAlso leftImageCenterY > destination.Y) OrElse
-           destination.Y - CenterLocation.Y <= 0 Then
-            Return Direction.TopCenter
+    ''' <summary>
+    ''' Updates the collection of effect bases to repeat, by starting a new effect each time the repeat delay elapses since an effect of
+    ''' its type was last deployed.
+    ''' </summary>
+    Private Sub RepeatEffects()
+        ' TODO: Update this method to start effects at the correct time - i.e. at the time in the past when the delay expired.
+        For i = 0 To _effectBasesToRepeat.Count - 1
+            Dim repeatState = _effectBasesToRepeat(i)
+            Dim base = repeatState.EffectBase
+            If repeatState.LastStartTime - _currentTime > TimeSpan.FromSeconds(base.RepeatDelay) Then
+                StartNewEffect(base)
+                _effectBasesToRepeat(i) = New EffectBaseRepeat(base, _currentTime)
+            End If
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Updates the location vector. When in the drag state, this will be the cursor location according to the current context, otherwise
+    ''' the movement vector will be applied. When moving according to this vector, ponies may not stray entirely outside the context
+    ''' boundary and will be teleported to its outer edge if they stray too far. If the are close enough to the boundary, rebounding off
+    ''' other regions is considered. The movement vector and facing will be updated when teleporting or rebounding. The last step was in
+    ''' bounds value will be set.
+    ''' </summary>
+    Private Sub UpdateLocation()
+        If _inDragState Then
+            _location = Context.CursorLocation
         Else
-            Return Direction.BottomCenter
+            _location += _movement
+            If _destination Is Nothing AndAlso Not TeleportToBoundaryIfOutside() Then ReboundOffRegions()
         End If
+        _lastStepWasInBounds =
+            CType(Context.Region, RectangleF).Contains(regionF) AndAlso Not regionF.IntersectsWith(Context.ExclusionRegion)
+    End Sub
+
+    ''' <summary>
+    ''' If there is no overlap between the pony region and the context region, the location is adjusted so the the nearest two edges become
+    ''' collinear. In effect, the pony is clamped to the outer edge of the boundary. The movement vector and facing state will be changed
+    ''' to put the pony on a course to within the context region.
+    ''' </summary>
+    ''' <returns>Return true if the pony was teleported to the boundary edge, otherwise; false.</returns>
+    Private Function TeleportToBoundaryIfOutside() As Boolean
+        Dim contextRegion = Context.Region
+        Dim currentRegion = regionF
+        Dim initialLocation = _location
+        If contextRegion.Top > currentRegion.Bottom Then
+            _location.Y += contextRegion.Top - currentRegion.Bottom
+            If _movement.Y < 0 Then _movement.Y = -_movement.Y
+        ElseIf currentRegion.Top > contextRegion.Bottom Then
+            _location.Y -= currentRegion.Top - contextRegion.Bottom
+            If _movement.Y > 0 Then _movement.Y = -_movement.Y
+        End If
+        If contextRegion.Left > currentRegion.Right Then
+            _location.X += contextRegion.Left - currentRegion.Right
+            If _movement.X < 0 Then _movement.X = -_movement.X
+        ElseIf currentRegion.Left > contextRegion.Right Then
+            _location.X -= currentRegion.Left - contextRegion.Right
+            If _movement.X > 0 Then _movement.X = -_movement.X
+        End If
+        If _movement.X <> 0 Then _facingRight = _movement.X > 0
+        Dim teleported = initialLocation <> _location
+        If teleported Then AddUpdateRecord("Teleported back to outer boundary edge.")
+        Return teleported
     End Function
 
-    Private ReadOnly Property currentImage As CenterableSpriteImage
+    ''' <summary>
+    ''' Handles rebounding off various regions. Low priority regions are considered first. These regions are window containment, window
+    ''' avoidance, pony avoidance and cursor avoidance (the context has a setting to ignore each of these types of region). If a rebound
+    ''' occurs on any of these regions, the rebound cool-down end time is set to prevent these low priority regions being considered too
+    ''' often. This prevents the pony flickering back and forth in tight areas. Finally the pony is rebounded away from the exclusion
+    ''' region and within the overall context region. The location vector, movement vector and facing state will be updated if required.
+    ''' </summary>
+    Private Sub ReboundOffRegions()
+        If _reboundCooldownEndTime <= _currentTime Then
+            Dim rebounded = False
+            If Context.StayInContainingWindow AndAlso OperatingSystemInfo.IsWindows Then
+                Dim windowRect = WindowRegionAtCenter()
+                If windowRect IsNot Nothing AndAlso windowRect.Value.Contains(Region) Then
+                    rebounded = rebounded Or ReboundIntoContainmentRegion(windowRect.Value, "a window")
+                End If
+            End If
+            If Context.WindowAvoidanceEnabled Then
+                For Each windowRect In NearbyWindowRegions
+                    rebounded = rebounded Or ReboundOutOfExclusionRegion(windowRect, "a window", False)
+                Next
+            End If
+            If Context.PonyAvoidanceEnabled AndAlso Context.Sprites.Count <= 25 Then
+                ' This simplistic method for pony collisions is n^2. This should be fine for most use cases of a few ponies, but we
+                ' will give up on collision avoidance once there are more than a handful of ponies to prevent a bottleneck.
+                For Each pony In Context.OtherPonies(Me)
+                    rebounded = rebounded Or ReboundOutOfExclusionRegion(pony.Region, "another pony", True)
+                Next
+            End If
+            If Context.CursorAvoidanceEnabled Then
+                rebounded = rebounded Or ReboundToAvoidCursor()
+            End If
+            ' Prevent rebounding off low priority regions too often. This allows the pony to break free from overly crowded areas rather
+            ' than constantly switching direction and causing visual nastiness.
+            If rebounded Then _reboundCooldownEndTime = _currentTime + TimeSpan.FromSeconds(1)
+        End If
+        If _lastStepWasInBounds Then ReboundOutOfExclusionRegion(Context.ExclusionRegion, "exclusion region", True)
+        ReboundIntoContainmentRegion(Context.Region, "containment region")
+    End Sub
+
+    ''' <summary>
+    ''' If any of the pony region extends outside the contained region, the movement will be mirrored accordingly to send them heading back
+    ''' into bounds. If the last step was within bounds, the location is updated to give the appearance of reflecting off the boundary. The
+    ''' location vector, movement vector and facing state will be updated if required.
+    ''' </summary>
+    ''' <param name="containmentRegion">The region the pony should be contained within.</param>
+    ''' <param name="regionName">The name of the region the pony should be excluded from, for record purposes.</param>
+    ''' <returns>Return true if the pony rebounded off a boundary edge, otherwise; false.</returns>
+    Private Function ReboundIntoContainmentRegion(containmentRegion As Rectangle, regionName As String) As Boolean
+        If Not _lastStepWasInBounds Then Return False
+        Dim currentRegion = regionF
+        Dim initialLocation = _location
+        If containmentRegion.Top > currentRegion.Top Then
+            _location.Y += 2 * (containmentRegion.Top - currentRegion.Top)
+            If _movement.Y < 0 Then _movement.Y = -_movement.Y
+        ElseIf currentRegion.Bottom > containmentRegion.Bottom Then
+            _location.Y -= 2 * (currentRegion.Bottom - containmentRegion.Bottom)
+            If _movement.Y > 0 Then _movement.Y = -_movement.Y
+        End If
+        If containmentRegion.Left > currentRegion.Left Then
+            _location.X += 2 * (containmentRegion.Left - currentRegion.Left)
+            If _movement.X < 0 Then _movement.X = -_movement.X
+        ElseIf currentRegion.Right > containmentRegion.Right Then
+            _location.X -= 2 * (currentRegion.Right - containmentRegion.Right)
+            If _movement.X > 0 Then _movement.X = -_movement.X
+        End If
+        If _movement.X <> 0 Then _facingRight = _movement.X > 0
+        Dim rebounded = initialLocation <> _location
+        If rebounded Then AddUpdateRecord("Rebounded back into ", regionName)
+        Return rebounded
+    End Function
+
+    ''' <summary>
+    ''' If any of the pony intersects with the exclusion region, the movement will be mirrored accordingly to send them heading back
+    ''' into bounds. If the last step was within bounds, the location is updated to give the appearance of reflecting off the boundary. The
+    ''' location vector, movement vector and facing state will be updated if required.
+    ''' </summary>
+    ''' <param name="exclusionRegion">The region the pony should be excluded from.</param>
+    ''' <param name="regionName">The name of the region the pony should be excluded from, for record purposes.</param>
+    ''' <param name="moveAwayIfContained">If the pony is entirely contained within the exclusion region (as opposed to merely
+    ''' intersecting), indicates if it should still attempt to move away, otherwise; no movement will be attempted.</param>
+    ''' <returns>Return true if the pony rebounded off an exclusion region edge, otherwise; false.</returns>
+    Private Function ReboundOutOfExclusionRegion(exclusionRegion As Rectangle, regionName As String,
+                                                 moveAwayIfContained As Boolean) As Boolean
+        Dim currentRegion = regionF
+        If exclusionRegion.Size = Size.Empty OrElse Not currentRegion.IntersectsWith(exclusionRegion) Then Return False
+        If Not moveAwayIfContained AndAlso CType(exclusionRegion, RectangleF).Contains(currentRegion) Then Return False
+
+        ' Determine the distance to each of the exclusion region edges.
+        Dim leftDistance = currentRegion.Right - exclusionRegion.Left
+        Dim rightDistance = exclusionRegion.Right - currentRegion.Left
+        Dim topDistance = currentRegion.Bottom - exclusionRegion.Top
+        Dim bottomDistance = exclusionRegion.Bottom - currentRegion.Top
+
+        ' Determine the closest edge that has enough room for the sprite.
+        Dim minDistance = Math.Min(Math.Min(leftDistance, rightDistance), Math.Min(topDistance, bottomDistance))
+
+        ' Rebound off the closest edge.
+        If leftDistance = minDistance Then
+            If _movement.X > 0 Then _movement.X = -_movement.X
+            _location.X += 2 * _movement.X
+        ElseIf rightDistance = minDistance Then
+            If _movement.X < 0 Then _movement.X = -_movement.X
+            _location.X += 2 * _movement.X
+        ElseIf topDistance = minDistance Then
+            If _movement.Y > 0 Then _movement.Y = -_movement.Y
+            _location.Y += 2 * _movement.Y
+        ElseIf bottomDistance = minDistance Then
+            If _movement.Y < 0 Then _movement.Y = -_movement.Y
+            _location.Y += 2 * _movement.Y
+        End If
+        If _movement.X <> 0 Then _facingRight = _movement.X > 0
+        AddUpdateRecord("Rebounded out of ", regionName)
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' If the current location is now under the mouse, but the pony is not in mouseover mode, negates the movement vector and adjusts the
+    ''' location as if the pony rebounded off the cursor to avoid it. The location vector, movement vector and facing state will be updated
+    ''' if required.
+    ''' </summary>
+    ''' <returns>Return true if the pony rebounded off the cursor, otherwise; false.</returns>
+    Private Function ReboundToAvoidCursor() As Boolean
+        If _inMouseoverState Then Return False
+        Dim isMouseOver =
+            Vector2F.DistanceSquared(_location, Context.CursorLocation) < Context.CursorAvoidanceRadius ^ 2
+        If isMouseOver Then
+            Dim initialMovement = _movement
+            If _location.X < Context.CursorLocation.X Then
+                If _movement.X > 0 Then _movement.X = -_movement.X
+            Else
+                If _movement.X < 0 Then _movement.X = -_movement.X
+            End If
+            If _location.Y < Context.CursorLocation.Y Then
+                If _movement.Y > 0 Then _movement.Y = -_movement.Y
+            Else
+                If _movement.Y < 0 Then _movement.Y = -_movement.Y
+            End If
+            If initialMovement <> _movement Then
+                _location += _movement
+                If _movement.X <> 0 Then _facingRight = _movement.X > 0
+                AddUpdateRecord("Rebounded to avoid cursor.")
+                Return True
+            End If
+        End If
+        Return False
+    End Function
+
+    ''' <summary>
+    ''' Gets the bounding rectangle of the window at the center of the sprite region, if any.
+    ''' </summary>
+    ''' <returns>The bounding rectangle of the window at the center of the sprite region, if any.</returns>
+    Private Function WindowRegionAtCenter() As Rectangle?
+        Dim currentRegion = Region
+        Dim regionCenter = Point.Round(currentRegion.Center())
+        Dim hWnd = Interop.Win32.WindowFromPoint(New Interop.Win32.POINT(regionCenter.X, regionCenter.Y))
+        If hWnd = IntPtr.Zero Then Return Nothing
+        Dim windowRect As Interop.Win32.RECT
+        If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New System.ComponentModel.Win32Exception()
+        Return Rectangle.FromLTRB(windowRect.Left, windowRect.Top, windowRect.Right, windowRect.Bottom)
+    End Function
+
+    ''' <summary>
+    ''' Gets the bounding rectangles of up to four windows at the corner of each point on the sprite region.
+    ''' </summary>
+    Private ReadOnly Iterator Property NearbyWindowRegions As IEnumerable(Of Rectangle)
         Get
-            Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
-            If behavior Is Nothing Then Return Nothing
-            Return If(facingRight, behavior.RightImage, behavior.LeftImage)
+            If Not OperatingSystemInfo.IsWindows Then Return
+            Dim currentRegion = Region
+            For Each corner In {New Interop.Win32.POINT(currentRegion.Left, currentRegion.Top),
+                                New Interop.Win32.POINT(currentRegion.Right, currentRegion.Top),
+                                New Interop.Win32.POINT(currentRegion.Left, currentRegion.Bottom),
+                                New Interop.Win32.POINT(currentRegion.Right, currentRegion.Bottom)}
+                Dim hWnd = Interop.Win32.WindowFromPoint(corner)
+                If hWnd <> IntPtr.Zero Then
+                    Dim windowRect As Interop.Win32.RECT
+                    If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New System.ComponentModel.Win32Exception()
+                    Yield Rectangle.FromLTRB(windowRect.Left, windowRect.Top, windowRect.Right, windowRect.Bottom)
+                End If
+            Next
         End Get
     End Property
-
-    Private ReadOnly Property CurrentImageSize As Vector2
-        Get
-            Return If(currentImage Is Nothing, Vector2.Zero, currentImage.Size)
-        End Get
-    End Property
-
-    Friend Function CenterLocation() As Point
-        Return TopLeftLocation + GetImageCenterOffset()
-    End Function
 
     ''' <summary>
     ''' Using the collection of interaction bases available to the base of this pony, generates interactions that can be used depending on
     ''' the other available sprites that can be interacted with. These interactions will be triggered during update cycles.
     ''' </summary>
-    ''' <param name="otherPonies">The other ponies available to interact with.</param>
-    Public Sub InitializeInteractions(otherPonies As IEnumerable(Of Pony))
-        Argument.EnsureNotNull(otherPonies, "otherPonies")
+    ''' <param name="currentPonies">The ponies available to interact with. This may include the current instance, but must not contain
+    ''' duplicate references.</param>
+    Public Sub InitializeInteractions(currentPonies As IEnumerable(Of Pony))
+        Argument.EnsureNotNull(currentPonies, "currentPonies")
 
-        If Directory Is Nothing Then Return
+        AddUpdateRecord("Initializing interactions")
+        If Base.Directory Is Nothing Then Return
 
         interactions.Clear()
         For Each interactionBase In Base.Interactions
@@ -2825,7 +2961,7 @@ Public Class Pony
             ' Get all actual instances of target ponies.
             interaction.Targets.Clear()
             Dim missingTargetNames = New HashSet(Of String)(interactionBase.TargetNames)
-            For Each candidatePony In otherPonies
+            For Each candidatePony In currentPonies
                 If Not ReferenceEquals(Me, candidatePony) AndAlso interactionBase.TargetNames.Contains(candidatePony.Base.Directory) Then
                     missingTargetNames.Remove(candidatePony.Base.Directory)
                     interaction.Targets.Add(candidatePony)
@@ -2848,16 +2984,20 @@ Public Class Pony
             ' We need at least one common behavior to exist on all targets, or we cannot run the interaction.
             If commonBehaviors.Count = 0 Then Continue For
             ' Keep a copy of behaviors for the current pony for use when the interaction is activated later.
-            interaction.Behaviors.AddRange(Base.Behaviors.Where(Function(b) commonBehaviors.Contains(b.Name)))
+            interaction.Behaviors = Base.Behaviors.Where(Function(b) commonBehaviors.Contains(b.Name)).ToImmutableArray()
 
             ' We can list this as a possible interaction.
             interactions.Add(interaction)
         Next
     End Sub
 
+    ''' <summary>
+    ''' Considers available interactions if the cool-down has expired. If an interaction passes the various checks specified in
+    ''' GetInteractionTriggerIfConditionsMet and a chance roll then it will be started. See StartInteraction for affected state.
+    ''' </summary>
     Private Sub StartInteractionAtRandom()
         'If we recently ran an interaction, don't start a new one until the delay expires.
-        If internalTime < interactionDelayUntil Then Return
+        If _currentTime < _interactionCooldownEndTime Then Return
 
         For Each interaction In interactions
             ' Interaction must pass random chance to occur.
@@ -2872,41 +3012,53 @@ Public Class Pony
         Next
     End Sub
 
+    ''' <summary>
+    ''' Checks available targets for the specified interaction and returns the triggering pony if the interaction can be run at this time.
+    ''' Targets must be available according to the interaction activation policy. The behaviors allowed set will be updated as a result.
+    ''' This set considers the behaviors allowed by the interaction and then restricts behaviors by those available to each target pony
+    ''' under the current behavior group. If this set is empty then the interaction is not eligible. At least one of the targets must be in
+    ''' range for the interaction to be eligible.
+    ''' </summary>
+    ''' <param name="interaction">The interaction to consider for eligibility. The behaviors allowed will be updated based on the behaviors
+    ''' allowed by this interaction and those available to its targets.</param>
+    ''' <param name="availableTargetsForAnyActivation">If the interaction specifies an activation policy of Any, returns a list of those
+    ''' targets available to participate in the interaction.</param>
+    ''' <returns>The pony that triggered the interaction, if it is eligible; otherwise, null.</returns>
     Private Function GetInteractionTriggerIfConditionsMet(interaction As Interaction,
                                                           ByRef availableTargetsForAnyActivation As List(Of Pony)) As Pony
         availableTargetsForAnyActivation = Nothing
         ' Update set of behaviors available to this pony.
         RebuildAllowedInteractionBehaviors(interaction)
         ' If this pony cannot interact, we can bail out early.
-        If behaviorsAllowed.Count = 0 Then Return Nothing
+        If _behaviorsAllowed.Count = 0 Then Return Nothing
 
         Select Case interaction.Base.Activation
             Case TargetActivation.All
                 Dim trigger As Pony = Nothing
                 For Each target In interaction.Targets
-                    If target.IsInteracting Then Return Nothing
+                    If target.IsBusy Then Return Nothing
                     If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
-                    target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
-                    If behaviorsAllowed.Count = 0 Then Return Nothing
+                    target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
+                    If _behaviorsAllowed.Count = 0 Then Return Nothing
                 Next
                 Return trigger
             Case TargetActivation.Any
                 Dim trigger As Pony = Nothing
                 For Each target In interaction.Targets
-                    If target.IsInteracting Then Continue For
+                    If target.IsBusy Then Continue For
                     If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
-                    target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
-                    If behaviorsAllowed.Count = 0 Then Return Nothing
+                    target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
+                    If _behaviorsAllowed.Count = 0 Then Return Nothing
                     If availableTargetsForAnyActivation Is Nothing Then availableTargetsForAnyActivation = New List(Of Pony)()
                     availableTargetsForAnyActivation.Add(target)
                 Next
                 Return trigger
             Case TargetActivation.One
                 For Each target In interaction.Targets
-                    If target.IsInteracting Then Continue For
+                    If target.IsBusy Then Continue For
                     If IsInteractionTargetInRange(interaction, target) Then
-                        target.PruneAllowableInteractionBehaviors(behaviorsAllowed)
-                        If behaviorsAllowed.Count = 0 Then
+                        target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
+                        If _behaviorsAllowed.Count = 0 Then
                             RebuildAllowedInteractionBehaviors(interaction)
                         Else
                             Return target
@@ -2919,37 +3071,54 @@ Public Class Pony
         End Select
     End Function
 
+    ''' <summary>
+    ''' Determines if the specified pony is within range of the specified interaction.
+    ''' </summary>
+    ''' <param name="interaction">The interaction to consider.</param>
+    ''' <param name="target">The target pony to check the range against.</param>
+    ''' <returns>Returns true if the pony is within range; otherwise, false.</returns>
     Private Function IsInteractionTargetInRange(interaction As Interaction, target As Pony) As Boolean
-        Dim distance = Vector2.Distance(
-            TopLeftLocation + New Size(CInt(CurrentImageSize.X / 2), CInt(CurrentImageSize.Y / 2)),
-            target.TopLeftLocation + New Size(CInt(target.CurrentImageSize.X / 2), CInt(target.CurrentImageSize.Y / 2)))
-        Return distance <= interaction.Base.Proximity
+        Return Vector2F.DistanceSquared(Location, target.Location) <= interaction.Base.Proximity ^ 2
     End Function
 
+    ''' <summary>
+    ''' Resets the behaviors allowed to those allowed by the specified interaction, and available to the pony under the current behavior
+    ''' group.
+    ''' </summary>
+    ''' <param name="interaction">The interaction which defines the set of behaviors allowed.</param>
     Private Sub RebuildAllowedInteractionBehaviors(interaction As Interaction)
-        behaviorsAllowed.Clear()
+        _behaviorsAllowed.Clear()
         For Each behavior In interaction.Behaviors
-            behaviorsAllowed.Add(behavior.Name)
+            _behaviorsAllowed.Add(behavior.Name)
         Next
-        PruneAllowableInteractionBehaviors(behaviorsAllowed)
+        PruneAllowableInteractionBehaviors(_behaviorsAllowed)
     End Sub
 
+    ''' <summary>
+    ''' Removes behaviors from the specified set where they are not available to this pony under the current behavior group.
+    ''' </summary>
+    ''' <param name="setToPrune">The set of behaviors names from which ineligible behaviors should be removed.</param>
     Private Sub PruneAllowableInteractionBehaviors(setToPrune As HashSet(Of CaseInsensitiveString))
-        For Each behavior In Behaviors
+        For Each behavior In Base.Behaviors
             If behavior.Group <> behavior.AnyGroup AndAlso behavior.Group <> CurrentBehaviorGroup Then
                 setToPrune.Remove(behavior.Name)
             End If
         Next
     End Sub
 
+    ''' <summary>
+    ''' Starts the specified interaction, specifying this pony as the initiator. This sets the current interaction and effects a behavior
+    ''' transition to a random behavior from those in the behaviors allowed. Targets will be started as interaction targets using this same
+    ''' behavior.
+    ''' </summary>
+    ''' <param name="interaction">The interaction to start.</param>
+    ''' <param name="availableTargetsForAnyActivation">If the interaction specifies an activation policy of Any, this should be a list of
+    ''' ponies that are available and who should be start the interaction as targets.</param>
     Private Sub StartInteraction(interaction As Interaction, availableTargetsForAnyActivation As List(Of Pony))
-        isInteractionInitiator = True
-        IsInteracting = True
-        CurrentInteraction = interaction
-        Dim randomBehaviorName = behaviorsAllowed.RandomElement()
-        SelectBehavior(Behaviors.First(Function(b) b.Name = randomBehaviorName))
-
+        _currentInteraction = interaction
         interaction.Initiator = Me
+        Dim randomBehaviorName = _behaviorsAllowed.RandomElement()
+        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = randomBehaviorName))
 
         Select Case interaction.Base.Activation
             Case TargetActivation.All
@@ -2965,132 +3134,74 @@ Public Class Pony
         End Select
     End Sub
 
+    ''' <summary>
+    ''' Starts the specified interaction as a target. This sets the current interaction and effects a behavior transition. This pony will
+    ''' be added to the involved targets of the interaction.
+    ''' </summary>
+    ''' <param name="behaviorName">The name of the behavior to run (which references the same behavior the initiator chose).</param>
+    ''' <param name="interaction">The interaction which becomes the current interaction, and in which this pony becomes and involved
+    ''' target.</param>
     Private Sub StartInteractionAsTarget(behaviorName As CaseInsensitiveString, interaction As Interaction)
-        Dim behavior = Behaviors.FirstOrDefault(Function(b) b.Name = behaviorName)
-        If behavior Is Nothing Then
-            Diagnostics.Debug.Assert(behavior IsNot Nothing, "Could not find interaction behavior.")
-            Return
-        End If
-        isInteractionInitiator = False
-        IsInteracting = True
-        CurrentInteraction = interaction
-        SelectBehavior(behavior)
+        AddUpdateRecord("Starting interaction as target ", interaction.Base.Name)
+        _currentInteraction = interaction
+        _currentInteraction.InvolvedTargets.Add(Me)
+        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = behaviorName))
     End Sub
 
-    Public Function GetImageCenterOffset() As Size
-        If isCustomImageCenterDefined Then
-            Return currentCustomImageCenter
-        ElseIf CurrentBehavior IsNot Nothing Then
-            Return New Size(CInt(CurrentImageSize.X * Scale / 2.0), CInt(CurrentImageSize.Y * Scale / 2.0))
+    ''' <summary>
+    ''' Ends the current interaction. If this pony is the initiator, calls EndInteraction() on all target ponies still running the
+    ''' interaction and removes itself as the interaction initiator. If this pony is a target, removes itself from the involved targets of
+    ''' the interaction. The current interaction and interaction cool down will be set.
+    ''' </summary>
+    ''' <param name="forcedCancel">Indicates if this interaction is being abruptly canceled ahead of schedule. For records only.</param>
+    Private Sub EndInteraction(forcedCancel As Boolean)
+        If _currentInteraction Is Nothing Then Return
+        AddUpdateRecord(If(forcedCancel, "Canceling interaction.", "Ending interaction."))
+        If ReferenceEquals(Me, _currentInteraction.Initiator) Then
+            For Each pony In _currentInteraction.Targets
+                ' Check the target is still running the same interaction.
+                If ReferenceEquals(_currentInteraction, pony._currentInteraction) Then
+                    pony.EndInteraction(forcedCancel)
+                End If
+            Next
+            _currentInteraction.Initiator = Nothing
         Else
-            Return Size.Empty
+            _currentInteraction.InvolvedTargets.Remove(Me)
         End If
+
+        _interactionCooldownEndTime = _currentTime + _currentInteraction.Base.ReactivationDelay
+        _currentInteraction = Nothing
+    End Sub
+
+    ''' <summary>
+    ''' Gets the non-aligned region the pony would occupy for the specified image, scaled by the context scale factor.
+    ''' </summary>
+    ''' <param name="image">The image which defines a size and center which determines the region around the current location.</param>
+    ''' <returns>A region where the current location of the pony and image center coincide, whose size is that of the image scaled by the
+    ''' context scale factor.</returns>
+    Private Function GetRegionFForImage(image As SpriteImage) As RectangleF
+        Return New RectangleF(_location - image.Center * Context.ScaleFactor, image.Size * Context.ScaleFactor)
     End Function
 
-    Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
-        Get
-            Return lastSpeakLine
-        End Get
-    End Property
-
-    Public ReadOnly Property SoundPath As String Implements ISoundfulSprite.SoundPath
-        Get
-            Return lastSpeakSound
-        End Get
-    End Property
-
-    Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
-        Get
-            Return internalTime - BehaviorStartTime
-        End Get
-    End Property
-
-    Public ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
-        Get
-            Return False
-        End Get
-    End Property
-
-    Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
-        Get
-            Dim behavior = If(visualOverrideBehavior, CurrentBehavior)
-            If behavior Is Nothing Then Return Nothing
-            Dim path = If(facingRight, behavior.RightImage.Path, behavior.LeftImage.Path)
-            Return path
-        End Get
-    End Property
-
-    Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
-        Get
-            Return New Rectangle(TopLeftLocation, Vector2.Truncate(CurrentImageSize * optionsScaleFactor))
-        End Get
-    End Property
-
+    ''' <summary>
+    ''' Marks the pony as expired, and expires any effects belonging to this pony.
+    ''' </summary>
     Public Sub Expire() Implements IExpireableSprite.Expire
         If _expired Then Return
+        AddUpdateRecord("Expiring.")
         _expired = True
-        For Each effect In _activeEffects.ToImmutableArray()
-            effect.Expire()
-        Next
+        If _activeEffects.Count > 0 Then
+            For Each effect In _activeEffects.ToImmutableArray()
+                effect.Expire()
+            Next
+        End If
         RaiseEvent Expired(Me, EventArgs.Empty)
     End Sub
 
-    Public Event Expired As EventHandler Implements IExpireableSprite.Expired
-
-    Private Function ManualControl(ponyAction As Boolean,
-                              ponyUp As Boolean, ponyDown As Boolean, ponyLeft As Boolean, ponyRight As Boolean,
-                              ponySpeed As Boolean) As Double
-        Diagonal = 0
-        _manualControlAction = ponyAction
-        If Not PlayingGame AndAlso ponyAction Then
-            CursorOverPony = True
-            Paint() 'enable effects on mouseover.
-            Return ScaledSpeed()
-        Else
-            'if we're not in the cursor's way, but still flagged that we are, exit mouseover mode.
-            If HaltedForCursor Then
-                CursorOverPony = False
-                Return ScaledSpeed()
-            End If
-        End If
-
-        Dim appropriateMovement = AllowedMoves.None
-        verticalMovementAllowed = False
-        horizontalMovementAllowed = False
-        If ponyUp AndAlso Not ponyDown Then
-            facingUp = True
-            verticalMovementAllowed = True
-            appropriateMovement = appropriateMovement Or AllowedMoves.VerticalOnly
-        End If
-        If ponyDown AndAlso Not ponyUp Then
-            facingUp = False
-            verticalMovementAllowed = True
-            appropriateMovement = appropriateMovement Or AllowedMoves.VerticalOnly
-        End If
-        If ponyRight AndAlso Not ponyLeft Then
-            facingRight = True
-            horizontalMovementAllowed = True
-            appropriateMovement = appropriateMovement Or AllowedMoves.HorizontalOnly
-        End If
-        If ponyLeft AndAlso Not ponyRight Then
-            facingRight = False
-            horizontalMovementAllowed = True
-            appropriateMovement = appropriateMovement Or AllowedMoves.HorizontalOnly
-        End If
-        If appropriateMovement = (AllowedMoves.HorizontalOnly Or AllowedMoves.VerticalOnly) Then
-            appropriateMovement = AllowedMoves.DiagonalOnly
-        End If
-        CurrentBehavior = GetAppropriateBehaviorOrFallback(appropriateMovement, ponySpeed)
-        Dim speedupFactor = If(ponySpeed, 2, 1)
-        Return If(appropriateMovement = AllowedMoves.None, 0, ScaledSpeed() * speedupFactor)
-    End Function
-
-    Public Property SpeedOverride As Double?
-
-    Private Function ScaledSpeed() As Double
-        Return If(SpeedOverride Is Nothing, CurrentBehavior.Speed * Scale, SpeedOverride.Value)
-    End Function
-
+    ''' <summary>
+    ''' Returns a string that represents the current pony.
+    ''' </summary>
+    ''' <returns>A string that represents the current pony.</returns>
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Base.Directory: " & Base.Directory
     End Function
@@ -3224,10 +3335,16 @@ Public Class Effect
     Implements IDraggableSprite, IExpireableSprite
     Private Shared ReadOnly DirectionCount As Integer = [Enum].GetValues(GetType(Direction)).Length
 
-    Private _base As EffectBase
+    Private ReadOnly _base As EffectBase
     Public ReadOnly Property Base As EffectBase
         Get
             Return _base
+        End Get
+    End Property
+    Private ReadOnly _context As PonyContext
+    Public ReadOnly Property Context As PonyContext
+        Get
+            Return _context
         End Get
     End Property
 
@@ -3245,13 +3362,21 @@ Public Class Effect
 
     Private ReadOnly locationProvider As Func(Of Vector2F)
     Private ReadOnly sizeProvider As Func(Of Vector2)
-    Private ReadOnly scaleProvider As Func(Of Single)
 
     Public Sub New(base As EffectBase, startFacingLeft As Boolean,
-                   locationProvider As Func(Of Vector2F), sizeProvider As Func(Of Vector2), scaleProvider As Func(Of Single))
+                   locationProvider As Func(Of Vector2F), sizeProvider As Func(Of Vector2), context As PonyContext)
         Argument.EnsureNotNull(base, "base")
+        If base.Follow AndAlso (locationProvider Is Nothing OrElse sizeProvider Is Nothing) Then
+            Throw New ArgumentException(
+                "If the effect base specifies the effect should follow its parent, " &
+                "then the locationProvider and sizeProvider for the parent must not be null.")
+        End If
+        _context = Argument.EnsureNotNull(context, "context")
+
         _base = base
         FacingLeft = startFacingLeft
+        Me.locationProvider = locationProvider
+        Me.sizeProvider = sizeProvider
 
         If PlacementDirection = Direction.RandomNotCenter Then
             PlacementDirection = CType(Math.Round(Rng.NextDouble() * DirectionCount - 3, 0), Direction)
@@ -3270,23 +3395,11 @@ Public Class Effect
         Else
             Centering = If(FacingLeft, base.CenteringLeft, base.CenteringRight)
         End If
-
-        Me.locationProvider = locationProvider
-        Me.sizeProvider = sizeProvider
-        Me.scaleProvider = scaleProvider
-    End Sub
-
-    Public Sub Teleport()
-        Dim screen = Options.Screens.RandomElement()
-        TopLeftLocation = New Point(
-            CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
-            CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
     End Sub
 
     Public Function Center() As Point
-        Dim scale = If(scaleProvider Is Nothing, 1, scaleProvider())
-        Return New Point(CInt(Me.TopLeftLocation.X + ((scale * CurrentImageSize.Width) / 2)),
-                         CInt(Me.TopLeftLocation.Y + ((scale * CurrentImageSize.Height) / 2)))
+        Return New Point(CInt(Me.TopLeftLocation.X + (CurrentImageSize.Width / 2)),
+                         CInt(Me.TopLeftLocation.Y + (CurrentImageSize.Height / 2)))
     End Function
 
     Public ReadOnly Property CurrentImagePath() As String
@@ -3304,13 +3417,12 @@ Public Class Effect
     Public Sub Start(_startTime As TimeSpan) Implements ISprite.Start
         startTime = _startTime
         internalTime = startTime
-        If locationProvider IsNot Nothing AndAlso sizeProvider IsNot Nothing AndAlso scaleProvider IsNot Nothing Then
-            TopLeftLocation = Pony.GetEffectLocation(CurrentImageSize,
+        If locationProvider IsNot Nothing AndAlso sizeProvider IsNot Nothing Then
+            TopLeftLocation = GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
                                               locationProvider(),
                                               sizeProvider(),
                                               Centering,
-                                              scaleProvider(),
                                               Options.ScaleFactor)
         End If
     End Sub
@@ -3319,20 +3431,62 @@ Public Class Effect
         internalTime = updateTime
         If _expired Then Return
         If Base.Follow Then
-            TopLeftLocation = Pony.GetEffectLocation(CurrentImageSize,
+            TopLeftLocation = GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
                                               locationProvider(),
                                               sizeProvider(),
                                               Centering,
-                                              scaleProvider(),
                                               Options.ScaleFactor)
         ElseIf BeingDragged Then
-            TopLeftLocation = EvilGlobals.CursorLocation - New Size(CInt(CurrentImageSize.Width / 2), CInt(CurrentImageSize.Height / 2))
+            TopLeftLocation = _context.CursorLocation - New Vector2(CurrentImageSize) / 2
         End If
         If DesiredDuration IsNot Nothing AndAlso ImageTimeIndex > DesiredDuration.Value Then
             Expire()
         End If
     End Sub
+
+    Public Shared Function GetEffectLocation(effectImageSize As Size, dir As Direction,
+                                         parentTopLeftLocation As Vector2F, parentSize As Vector2F,
+                                         centering As Direction, effectImageScale As Single) As Vector2
+        parentSize.X *= DirectionWeightHorizontal(dir)
+        parentSize.Y *= DirectionWeightVertical(dir)
+
+        Dim locationOnParent = parentTopLeftLocation + parentSize
+
+        Dim scaledEffectSize = New Vector2F(effectImageSize) * effectImageScale
+        scaledEffectSize.X *= DirectionWeightHorizontal(centering)
+        scaledEffectSize.Y *= DirectionWeightVertical(centering)
+
+        Return Vector2.Round(locationOnParent - scaledEffectSize)
+    End Function
+
+    Private Shared Function DirectionWeightHorizontal(dir As Direction) As Single
+        Select Case dir
+            Case Direction.TopLeft, Direction.MiddleLeft, Direction.BottomLeft
+                Return 0
+            Case Direction.TopCenter, Direction.MiddleCenter, Direction.BottomCenter
+                Return 0.5
+            Case Direction.TopRight, Direction.MiddleRight, Direction.BottomRight
+                Return 1
+            Case Direction.Random, Direction.RandomNotCenter
+                Return CSng(Rng.NextDouble())
+        End Select
+        Return Single.NaN
+    End Function
+
+    Private Shared Function DirectionWeightVertical(dir As Direction) As Single
+        Select Case dir
+            Case Direction.TopLeft, Direction.TopCenter, Direction.TopRight
+                Return 0
+            Case Direction.MiddleLeft, Direction.MiddleCenter, Direction.MiddleRight
+                Return 0.5
+            Case Direction.BottomLeft, Direction.BottomCenter, Direction.BottomRight
+                Return 1
+            Case Direction.Random, Direction.RandomNotCenter
+                Return CSng(Rng.NextDouble())
+        End Select
+        Return Single.NaN
+    End Function
 
     Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
@@ -3380,7 +3534,7 @@ Public Class HouseBase
     Public Const RootDirectory = "Houses"
     Public Const ConfigFilename = "house.ini"
 
-    ' TODO: Move this somewhere sensible.
+    ' TODO: Move this options form field somewhere sensible.
     Friend OptionsForm As HouseOptionsForm
 
     Private ReadOnly _directory As String
@@ -3521,7 +3675,6 @@ End Class
 #Region "House class"
 Public Class House
     Inherits Effect
-
     Private ReadOnly deployedPonies As New List(Of Pony)()
 
     Private lastCycleTime As TimeSpan
@@ -3533,23 +3686,30 @@ Public Class House
         End Get
     End Property
 
-    Public Sub New(houseBase As HouseBase)
-        MyBase.New(houseBase, True, Nothing, Nothing, Nothing)
+    Public Sub New(ponyContext As PonyContext, houseBase As HouseBase)
+        MyBase.New(houseBase, True, Nothing, Nothing, ponyContext)
         _houseBase = houseBase
     End Sub
 
     Public Sub InitializeVisitorList()
         deployedPonies.Clear()
-        For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
+        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
             SyncLock HouseBase.Visitors
                 For Each guest In HouseBase.Visitors
-                    If Pony.Directory = guest Then
-                        deployedPonies.Add(Pony)
+                    If pony.Base.Directory = guest Then
+                        deployedPonies.Add(pony)
                         Exit For
                     End If
                 Next
             End SyncLock
         Next
+    End Sub
+
+    Public Sub Teleport()
+        Dim screen = Options.Screens.RandomElement()
+        TopLeftLocation = New Point(
+            CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
+            CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
     End Sub
 
     ''' <summary>
@@ -3612,8 +3772,8 @@ Public Class House
             End If
         End SyncLock
 
-        For Each p In EvilGlobals.CurrentAnimator.Ponies()
-            choices.Remove(p.Directory)
+        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+            choices.Remove(pony.Base.Directory)
         Next
 
         choices.Remove(PonyBase.RandomDirectory)
@@ -3625,9 +3785,9 @@ Public Class House
         For Each ponyBase In ponyBases
             If ponyBase.Directory = selected_name Then
 
-                Dim deployed_pony = New Pony(ponyBase)
+                Dim deployed_pony = New Pony(Context, ponyBase)
 
-                deployed_pony.Location = instance.TopLeftLocation + New Size(HouseBase.DoorPosition)
+                deployed_pony.Location = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))
 
                 EvilGlobals.CurrentAnimator.AddPony(deployed_pony)
                 deployedPonies.Add(deployed_pony)
@@ -3648,8 +3808,8 @@ Public Class House
         SyncLock HouseBase.Visitors
             For Each visitor In HouseBase.Visitors
                 If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                    For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
-                        choices.Add(Pony.Directory)
+                    For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+                        choices.Add(pony.Base.Directory)
                     Next
                     all = True
                     Exit For
@@ -3657,10 +3817,10 @@ Public Class House
             Next
 
             If all = False Then
-                For Each Pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
+                For Each pony In EvilGlobals.CurrentAnimator.Ponies()
                     For Each otherpony In HouseBase.Visitors
-                        If Pony.Directory = otherpony Then
-                            choices.Add(Pony.Directory)
+                        If pony.Base.Directory = otherpony Then
+                            choices.Add(pony.Base.Directory)
                             Exit For
                         End If
                     Next
@@ -3672,23 +3832,12 @@ Public Class House
 
         Dim selected_name = choices.RandomElement()
 
-        For Each pony As Pony In EvilGlobals.CurrentAnimator.Ponies()
-            If pony.Directory = selected_name Then
-
-                If pony.IsInteracting Then Exit Sub
-                If pony.BeingDragged Then Exit Sub
-
-                If pony.Sleeping Then pony.WakeUp()
-
-                pony.Destination = instance.TopLeftLocation + New Size(HouseBase.DoorPosition)
-                pony.GoingHome = True
-                pony.CurrentBehavior = pony.GetAppropriateBehaviorOrFallback(AllowedMoves.All, False)
-                pony.BehaviorDesiredDuration = TimeSpan.FromMinutes(5)
-
+        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+            If pony.Base.Directory = selected_name Then
+                If pony.IsBusy Then Continue For
+                pony.DestinationOverride = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))
                 deployedPonies.Remove(pony)
-
-                Console.WriteLine(Me.Base.Name & " - Recalled " & pony.Directory)
-
+                Console.WriteLine(Me.Base.Name & " - Recalled " & pony.Base.Directory)
                 Exit Sub
             End If
         Next

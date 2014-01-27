@@ -72,6 +72,7 @@ Partial Class MainForm
         Me.LayoutTable.SetColumnSpan(Me.LoadingProgressBar, 2)
         Me.LoadingProgressBar.Dock = System.Windows.Forms.DockStyle.Fill
         Me.LoadingProgressBar.Location = New System.Drawing.Point(3, 484)
+        Me.LoadingProgressBar.Maximum = 0
         Me.LoadingProgressBar.Name = "LoadingProgressBar"
         Me.LoadingProgressBar.Size = New System.Drawing.Size(728, 23)
         Me.LoadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous

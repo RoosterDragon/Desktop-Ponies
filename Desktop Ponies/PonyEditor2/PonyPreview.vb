@@ -3,8 +3,10 @@ Imports System.Globalization
 
 Public Class PonyPreview
     Private loaded As Boolean
-    Private editorForm As PonyEditorForm2
-    Private ponies As PonyCollection
+    Private ReadOnly editorForm As PonyEditorForm2
+    Private ReadOnly ponies As PonyCollection
+    Private ReadOnly context As PonyContext
+    Private ReadOnly worker As New IdleWorker(Me)
     Private editorAnimator As Editor2PonyAnimator
     Private editorInterface As ISpriteCollectionView
     Private previewPony As Pony
@@ -17,9 +19,10 @@ Public Class PonyPreview
     Public Event PreviewFocused As EventHandler
     Public Event PreviewUnfocused As EventHandler
 
-    Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection)
+    Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection, context As PonyContext)
         Me.editorForm = Argument.EnsureNotNull(editorForm, "editorForm")
         Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
+        Me.context = Argument.EnsureNotNull(context, "context")
         InitializeComponent()
         AddHandler Disposed, Sub()
                                  Threading.Interlocked.Exchange(disposedFlag, 1)
@@ -51,11 +54,7 @@ Public Class PonyPreview
     End Sub
 
     Private Sub DetermineScreenLocation(sender As Object, e As EventArgs)
-        Dim bounds = PreviewPanel.RectangleToScreen(PreviewPanel.ClientRectangle)
-        EvilGlobals.PreviewWindowRectangle = bounds
-        If TypeOf editorInterface Is WinFormSpriteInterface Then
-            DirectCast(editorInterface, WinFormSpriteInterface).DisplayBounds = bounds
-        End If
+        context.Region = PreviewPanel.RectangleToScreen(PreviewPanel.ClientRectangle)
     End Sub
 
     Private Sub PreviewPanel_Paint(sender As Object, e As PaintEventArgs) Handles PreviewPanel.Paint
@@ -72,7 +71,7 @@ Public Class PonyPreview
         AddHandler editorInterface.Focused, Sub() RaiseEvent PreviewFocused(Me, EventArgs.Empty)
         AddHandler editorInterface.Unfocused, Sub() RaiseEvent PreviewUnfocused(Me, EventArgs.Empty)
         DetermineParentsAndScreenLocation(Me, EventArgs.Empty)
-        editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, Me)
+        editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, context, Me)
         EvilGlobals.CurrentAnimator = editorAnimator
         editorAnimator.Start()
         loaded = True
@@ -84,7 +83,7 @@ Public Class PonyPreview
         editorAnimator.Clear()
         SyncLock previewPonyGuard
             previewPonyReady = False
-            previewPony = New Pony(base)
+            previewPony = New Pony(context, base)
         End SyncLock
         editorAnimator.AddPonyNotify(previewPony, Sub(pony) HandleAddedNotification(pony, startBehavior))
         PonyNameValueLabel.Text = base.Directory
@@ -98,7 +97,7 @@ Public Class PonyPreview
                 previewPonyReady = True
                 editorAnimator.ChangeEditorMenu(previewPony.Base)
                 If startBehavior IsNot Nothing Then
-                    previewPony.SelectBehavior(startBehavior)
+                    previewPony.SetBehavior(startBehavior)
                 End If
             End If
         End SyncLock
@@ -113,7 +112,7 @@ Public Class PonyPreview
     End Function
 
     Public Sub RunBehavior(behavior As Behavior)
-        previewPony.SelectBehavior(behavior)
+        previewPony.SetBehavior(behavior)
         If Not Object.ReferenceEquals(previewPony.CurrentBehavior, behavior) Then
             ShowDialogOverPreview(
                 Function() MessageBox.Show(Me, "Couldn't run this behavior. Maybe images are missing or it is not set up correctly.",
@@ -142,30 +141,24 @@ Public Class PonyPreview
     End Property
 
     Public Sub AnimatorStart()
-        If disposedFlag = 1 Then Return
-        Try
-            BeginInvoke(New EventHandler(AddressOf DetermineScreenLocation))
-        Catch ex As InvalidOperationException
-            If disposedFlag <> 1 Then Throw
-        End Try
+        worker.QueueTask(
+            Sub()
+                If disposedFlag = 1 Then Return
+                DetermineScreenLocation(Me, EventArgs.Empty)
+            End Sub)
     End Sub
 
     Public Sub AnimatorUpdate()
-        If disposedFlag = 1 Then Return
-        Try
-            BeginInvoke(New MethodInvoker(
-                Sub()
-                    SyncLock previewPonyGuard
-                        If previewPony Is Nothing OrElse Not previewPonyReady Then Return
-                        BehaviorNameValueLabel.Text =
-                            If(previewPony.CurrentBehavior Is Nothing, "", previewPony.CurrentBehavior.Name.ToString())
-                        TimeLeftValueLabel.Text =
-                            (previewPony.BehaviorDesiredDuration - previewPony.ImageTimeIndex).
-                            TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
-                    End SyncLock
-                End Sub))
-        Catch ex As InvalidOperationException
-            If disposedFlag <> 1 Then Throw
-        End Try
+        worker.QueueTask(
+            Sub()
+                If disposedFlag = 1 Then Return
+                SyncLock previewPonyGuard
+                    If previewPony Is Nothing OrElse Not previewPonyReady Then Return
+                    BehaviorNameValueLabel.Text =
+                        If(previewPony.CurrentBehavior Is Nothing, "", previewPony.CurrentBehavior.Name.ToString())
+                    TimeLeftValueLabel.Text =
+                        previewPony.BehaviorRemainingDuration.TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
+                End SyncLock
+            End Sub)
     End Sub
 End Class

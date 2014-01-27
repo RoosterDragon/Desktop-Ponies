@@ -12,8 +12,8 @@ Friend Class PonyLogForm
         Icon = My.Resources.Twilight
 
         _pony = pony
-        Text = _pony.DisplayName & " Logs - Desktop Ponies"
-        lblPony.Text = _pony.DisplayName
+        Text = _pony.Base.DisplayName & " Logs - Desktop Ponies"
+        lblPony.Text = _pony.Base.DisplayName
         UpdateLogs()
     End Sub
 

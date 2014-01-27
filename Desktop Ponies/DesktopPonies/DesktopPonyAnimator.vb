@@ -8,14 +8,15 @@ Public Class DesktopPonyAnimator
     Protected selectedHouse As House
     Protected selectedPony As Pony
 
+    Private optionsForm As OptionsForm
     Private spriteDebugForm As SpriteDebugForm
     Private countSinceLastDebug As Integer
 
     Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
-                   ponyCollection As PonyCollection)
-        MyBase.New(spriteViewer, spriteCollection, ponyCollection)
+                   ponyCollection As PonyCollection, ponyContext As PonyContext)
+        MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
 
-        If Options.EnablePonyLogs AndAlso Not EvilGlobals.InPreviewMode AndAlso Not OperatingSystemInfo.IsMacOSX Then
+        If Options.EnablePonyLogs AndAlso Not OperatingSystemInfo.IsMacOSX Then
             EvilGlobals.Main.SmartInvoke(Sub()
                                              spriteDebugForm = New SpriteDebugForm()
                                              spriteDebugForm.Show()
@@ -27,10 +28,6 @@ Public Class DesktopPonyAnimator
 
         CreatePonyMenu()
         CreateHouseMenu()
-    End Sub
-
-    Public Sub EmulateMouseClick(e As SimpleMouseEventArgs)
-        Viewer_MouseClick(Viewer, e)
     End Sub
 
     Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
@@ -46,10 +43,10 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub DisplayPonyMenu(location As Point)
-        Dim directory = If(selectedPony Is Nothing, "", selectedPony.Directory)
+        Dim directory = If(selectedPony Is Nothing, "", selectedPony.Base.Directory)
         Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.Sleep)
-        Dim manualControlP1 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerOne)
-        Dim manualControlP2 = If(selectedPony Is Nothing, False, selectedPony.ManualControlPlayerTwo)
+        Dim manualControlP1 = Object.ReferenceEquals(ManualControlPlayerOne, selectedPony)
+        Dim manualControlP2 = Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony)
 
         Dim i = 0
         ponyMenu.Items(i).Text = "Remove " & directory
@@ -118,7 +115,7 @@ Public Class DesktopPonyAnimator
                     End If
                     QueueRemove(Function(sprite)
                                     Dim pony = TryCast(sprite, Pony)
-                                    Return pony IsNot Nothing AndAlso pony.Directory = selectedPony.Directory
+                                    Return pony IsNot Nothing AndAlso pony.Base.Directory = selectedPony.Base.Directory
                                 End Function)
                 End Sub))
         menuItems.AddLast(New SimpleContextMenuItem())
@@ -146,16 +143,16 @@ Public Class DesktopPonyAnimator
                     Nothing,
                     Sub()
                         If selectedPony Is Nothing Then Return
-                        selectedPony.ManualControlPlayerOne = Not selectedPony.ManualControlPlayerOne
-                        If selectedPony.ManualControlPlayerOne Then selectedPony.ManualControlPlayerTwo = False
+                        Dim controlToggle = If(Object.ReferenceEquals(ManualControlPlayerOne, selectedPony), Nothing, selectedPony)
+                        ManualControlPlayerOne = controlToggle
                     End Sub))
             menuItems.AddLast(
                 New SimpleContextMenuItem(
                     Nothing,
                     Sub()
                         If selectedPony Is Nothing Then Return
-                        selectedPony.ManualControlPlayerTwo = Not selectedPony.ManualControlPlayerTwo
-                        If selectedPony.ManualControlPlayerTwo Then selectedPony.ManualControlPlayerOne = False
+                        Dim controlToggle = If(Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony), Nothing, selectedPony)
+                        ManualControlPlayerTwo = controlToggle
                     End Sub))
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
@@ -166,15 +163,19 @@ Public Class DesktopPonyAnimator
                                   If EvilGlobals.Main Is Nothing Then Return
                                   EvilGlobals.Main.SmartInvoke(
                                       Sub()
-                                          Dim form = New OptionsForm()
-                                          Dim currentScale = Options.ScaleFactor
-                                          form.Show()
-                                          AddHandler form.FormClosed, Sub()
-                                                                          EvilGlobals.Main.ReloadFilterCategories()
-                                                                          If currentScale <> Options.ScaleFactor Then
-                                                                              EvilGlobals.Main.ResizePreviewImages()
-                                                                          End If
-                                                                      End Sub
+                                          If optionsForm Is Nothing Then
+                                              Dim currentScale = Options.ScaleFactor
+                                              optionsForm = New OptionsForm()
+                                              AddHandler optionsForm.FormClosed, Sub()
+                                                                                     optionsForm = Nothing
+                                                                                     EvilGlobals.Main.ReloadFilterCategories()
+                                                                                     If currentScale <> Options.ScaleFactor Then
+                                                                                         EvilGlobals.Main.ResizePreviewImages()
+                                                                                     End If
+                                                                                 End Sub
+                                              optionsForm.Show()
+                                          End If
+                                          optionsForm.BringToFront()
                                       End Sub)
                               End Sub))
         End If
@@ -214,8 +215,9 @@ Public Class DesktopPonyAnimator
     Protected Overrides Sub Update()
         MyBase.Update()
         countSinceLastDebug += 1
-        If spriteDebugForm IsNot Nothing AndAlso countSinceLastDebug = 5 Then
-            spriteDebugForm.SmartInvoke(Sub() spriteDebugForm.UpdateSprites(Sprites))
+        Dim form = spriteDebugForm
+        If form IsNot Nothing AndAlso countSinceLastDebug = 5 Then
+            form.SmartInvoke(Sub() form.UpdateSprites(Sprites))
             countSinceLastDebug = 0
         End If
     End Sub
@@ -281,7 +283,7 @@ Public Class DesktopPonyAnimator
         End If
         For Each ponyBase In PonyCollection.Bases
             If ponyBase.Directory = ponyName Then
-                Dim newPony = New Pony(ponyBase)
+                Dim newPony = New Pony(PonyContext, ponyBase)
                 AddPony(newPony)
             End If
         Next
@@ -293,7 +295,7 @@ Public Class DesktopPonyAnimator
                             "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
-        Dim newHouse = New House(houseBase)
+        Dim newHouse = New House(PonyContext, houseBase)
         newHouse.InitializeVisitorList()
         newHouse.Teleport()
         QueueAddAndStart(newHouse)
@@ -302,6 +304,7 @@ Public Class DesktopPonyAnimator
     Protected Overrides Sub Dispose(disposing As Boolean)
         MyBase.Dispose(disposing)
         If disposing Then
+            If optionsForm IsNot Nothing Then EvilGlobals.Main.SmartInvoke(AddressOf optionsForm.Dispose)
             If spriteDebugForm IsNot Nothing Then EvilGlobals.Main.SmartInvoke(AddressOf spriteDebugForm.Dispose)
         End If
     End Sub

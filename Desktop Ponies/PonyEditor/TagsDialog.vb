@@ -22,7 +22,7 @@
     End Sub
 
     Private Sub Tags_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.Text = "Tags for " & _editor.PreviewPony.Directory
+        Me.Text = "Tags for " & _editor.PreviewPony.Base.Directory
 
         For Each tag As CaseInsensitiveString In PonyBase.StandardTags.Concat(Options.CustomTags)
             PonyFilterList.Items.Add(tag)

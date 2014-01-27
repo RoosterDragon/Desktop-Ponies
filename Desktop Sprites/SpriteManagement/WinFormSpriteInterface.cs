@@ -1258,7 +1258,7 @@
                     Size timingsSize = Size.Ceiling(form.BackgroundGraphics.MeasureString(timingsInfo, font));
 
                     // Set location and get area of graph draw.
-                    Point offset = new Point(10, 10) + translate;
+                    Point offset = new Point(10, 10);
                     Point graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
                     Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
                     postUpdateInvalidRegion.Union(recorderGraphArea);
@@ -1749,7 +1749,16 @@
                 speakingSprite.Region.Y - speechSize.Height - 1);
             speechSize.Width += 1;
             speechSize.Height += 1;
-            return new Rectangle(location, speechSize);
+            var region = new Rectangle(location, speechSize);
+            if (region.Left < DisplayBounds.Left)
+                region.X += DisplayBounds.Left - region.Left;
+            else if (region.Right > DisplayBounds.Right)
+                region.X -= region.Right - DisplayBounds.Right;
+            if (region.Top < DisplayBounds.Top)
+                region.Y += DisplayBounds.Top - region.Top;
+            else if (region.Bottom > DisplayBounds.Bottom)
+                region.Y -= region.Bottom - DisplayBounds.Bottom;
+            return region;
         }
 
         /// <summary>

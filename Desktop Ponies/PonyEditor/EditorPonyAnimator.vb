@@ -7,8 +7,9 @@ Public Class EditorPonyAnimator
     Private editor As PonyEditor
     Private editorMenu As ISimpleContextMenu
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, ponyCollection As PonyCollection, editor As PonyEditor)
-        MyBase.New(spriteViewer, Nothing, ponyCollection)
+    Public Sub New(spriteViewer As ISpriteCollectionView, ponyCollection As PonyCollection, ponyContext As PonyContext,
+                   editor As PonyEditor)
+        MyBase.New(spriteViewer, Nothing, ponyCollection, ponyContext)
         ExitWhenNoSprites = False
         Me.editor = editor
         AddHandler Viewer.InterfaceClosed, Sub() Finish()
@@ -32,8 +33,8 @@ Public Class EditorPonyAnimator
     End Sub
 
     Public Overrides Sub Start()
-        editor.SmartInvoke(Sub() EvilGlobals.PreviewWindowRectangle =
-                               editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle))
+        PonyContext.Region = Rectangle.Empty
+        editor.SmartInvoke(AddressOf SetBounds)
         MyBase.Start()
     End Sub
 
@@ -46,8 +47,7 @@ Public Class EditorPonyAnimator
             editor.BeginInvoke(New MethodInvoker(
                                 Sub()
                                     If editor.IsClosing Then Exit Sub
-                                    EvilGlobals.PreviewWindowRectangle =
-                                        editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle)
+                                    SetBounds()
                                 End Sub))
         End If
         MyBase.Update()
@@ -67,21 +67,30 @@ Public Class EditorPonyAnimator
                                          End If
                                          editor.GroupValueLabel.Text =
                                              editor.PreviewPony.CurrentBehaviorGroup & " - " &
-                                             editor.PreviewPony.GetBehaviorGroupName(editor.PreviewPony.CurrentBehaviorGroup)
+                                             editor.PreviewPony.Base.GetBehaviorGroupName(editor.PreviewPony.CurrentBehaviorGroup)
                                          editor.TimeLeftValueLabel.Text =
-                                             (editor.PreviewPony.BehaviorDesiredDuration - editor.PreviewPony.ImageTimeIndex).
+                                             editor.PreviewPony.BehaviorRemainingDuration.
                                              TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture)
                                      End If
                                  End Sub))
         End If
     End Sub
 
+    Private Sub SetBounds()
+        Dim bounds = editor.PonyPreviewPanel.RectangleToScreen(editor.PonyPreviewPanel.ClientRectangle)
+        PonyContext.Region = bounds
+    End Sub
+
     Private Function SpriteIsOldInteractionTarget(sprite As ISprite) As Boolean
         Dim pony = TryCast(sprite, Pony)
         Return pony IsNot Nothing AndAlso
             Not Object.ReferenceEquals(pony, editor.PreviewPony) AndAlso
-            Not Object.ReferenceEquals(pony, editor.PreviewPony.followTarget)
+            Not Object.ReferenceEquals(pony, editor.PreviewPony.FollowTarget)
     End Function
+
+    Protected Overrides Sub SynchronizeContext()
+        PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
+    End Sub
 
     Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
         If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then

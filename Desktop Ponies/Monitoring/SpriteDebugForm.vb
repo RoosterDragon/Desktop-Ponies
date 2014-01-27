@@ -10,17 +10,30 @@ Public Class SpriteDebugForm
     Public Sub UpdateSprites(sprites As IEnumerable(Of ISprite))
         PonyDataGridView.SuspendLayout()
         Dim i = 0
-        For Each pony In sprites.OfType(Of Pony)().OrderBy(Function(p) p.DisplayName)
+        For Each pony In sprites.OfType(Of Pony)().OrderBy(Function(p) If(p.Base.Directory, p.Base.DisplayName))
             If i = PonyDataGridView.Rows.Count Then PonyDataGridView.Rows.Add()
-            PonyDataGridView.Rows(i).SetValues(pony.DisplayName, pony.Region.Location, pony.CurrentBehavior.Name,
-                                      ((pony.BehaviorStartTime + pony.BehaviorDesiredDuration) - pony.internalTime).
-                                      TotalSeconds.ToString("0.00s", CultureInfo.CurrentCulture),
-                                      pony.destinationCoords, pony.Destination,
-                                      pony.CurrentBehavior.OriginalFollowTargetName, pony.followTargetName,
-                                      If(pony.visualOverrideBehavior IsNot Nothing, pony.visualOverrideBehavior.Name, Nothing))
+            Dim gamePony = TryCast(pony, Game.GamePony)
+            PonyDataGridView.Rows(i).SetValues(
+                If(pony.Base.Directory, pony.Base.DisplayName),
+                pony.Location.ToString("0.00"),
+                pony.CurrentBehavior.Name,
+                pony.BehaviorRemainingDuration.TotalSeconds.ToString("0.00s", CultureInfo.CurrentCulture),
+                pony.Movement.ToString("0.00"),
+                If(pony.Destination IsNot Nothing, pony.Destination.Value.ToString("0.00"), Nothing),
+                pony.CurrentBehavior.OriginalFollowTargetName,
+                If(pony.FollowTarget IsNot Nothing, If(pony.FollowTarget.Base.Directory, pony.FollowTarget.Base.DisplayName), Nothing),
+                If(pony.VisualOverrideBehavior IsNot Nothing, pony.VisualOverrideBehavior.Name, Nothing),
+                Nothing,
+                If(gamePony IsNot Nothing AndAlso gamePony.CurrentPosition IsNot Nothing,
+                   gamePony.CurrentPosition.CurrentAction.ToString(), Nothing))
             PonyDataGridView.Rows(i).Tag = pony
             i += 1
         Next
+        While i < PonyDataGridView.RowCount
+            PonyDataGridView.Rows(i).SetValues(New Object(PonyDataGridView.ColumnCount - 1) {})
+            PonyDataGridView.Rows(i).Tag = Nothing
+            i += 1
+        End While
         PonyDataGridView.ResumeLayout()
     End Sub
 
@@ -32,7 +45,6 @@ Public Class SpriteDebugForm
             If pony IsNot Nothing Then
                 Dim form = New PonyLogForm(pony)
                 form.Show(Me)
-                PonyDataGridView.Rows(e.RowIndex).Cells(e.ColumnIndex).Tag = form
             End If
         End If
     End Sub

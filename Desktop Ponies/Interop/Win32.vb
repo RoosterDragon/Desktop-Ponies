@@ -26,11 +26,11 @@ Namespace Interop.Win32
     End Structure
 
     Friend Module NativeMethods
-        Public Declare Function WindowFromPoint Lib "user32.dll" (<[In]()> point As POINT) As IntPtr
-        Public Declare Function GetWindowThreadProcessId Lib "user32.dll" _
-            (<[In]()> hWnd As IntPtr, <[Out](), [Optional]()> ByRef lpdwProcessId As IntPtr) As UInteger
+        <DllImport("user32")>
+        Public Function WindowFromPoint(<[In]> Point As POINT) As IntPtr
+        End Function
         <DllImport("user32", SetLastError:=True)>
-        Public Function GetWindowRect(<[In]()> hWnd As IntPtr, <Out()> ByRef lpRect As RECT) As <MarshalAs(UnmanagedType.Bool)> Boolean
+        Public Function GetWindowRect(<[In]> hWnd As IntPtr, <Out> ByRef lpRect As RECT) As <MarshalAs(UnmanagedType.Bool)> Boolean
         End Function
         <DllImport("user32")>
         Public Function GetKeyState(vKey As Integer) As Short

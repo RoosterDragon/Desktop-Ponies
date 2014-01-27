@@ -69,7 +69,7 @@ Friend Class MainWindow
                 Dim currentTotal As Double
                 ponies = New PonyCollection(
                     True,
-                    Sub(count) total = count,
+                    Sub(count) total += count,
                     Sub(base)
                         currentTotal += 1
                         Invoke(
@@ -77,7 +77,9 @@ Friend Class MainWindow
                                 AddPonySelector(base)
                                 progressBar.Fraction = currentTotal / total
                             End Sub)
-                    End Sub)
+                    End Sub,
+                    Sub(count) total += count,
+                    Nothing)
                 Invoke(
                     Sub()
                         For Each base In ponies.Bases
@@ -124,10 +126,11 @@ Friend Class MainWindow
     End Sub
 
     Private Sub GoButton_Clicked(sender As Object, e As EventArgs)
+        Dim context = New PonyContext()
         Dim startupPonies As New List(Of Pony)()
         For Each kvp In ponyCounts
             For i = 1 To kvp.Value
-                startupPonies.Add(New Pony(kvp.Key))
+                startupPonies.Add(New Pony(context, kvp.Key))
             Next
         Next
 
@@ -150,7 +153,7 @@ Friend Class MainWindow
 
                 Dim images As New HashSet(Of String)(PathEquality.Comparer)
                 For Each pony In startupPonies
-                    For Each behavior In pony.Behaviors
+                    For Each behavior In pony.Base.Behaviors
                         images.Add(behavior.LeftImage.Path)
                         images.Add(behavior.RightImage.Path)
                         For Each effect In behavior.Effects
@@ -165,7 +168,7 @@ Friend Class MainWindow
                                               Invoke(Sub() progressBar.Fraction = imagesLoadedCount / images.Count)
                                           End Sub)
 
-                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies)
+                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies, context)
                 AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
                                                            Sub() Invoke(
                                                                Sub()

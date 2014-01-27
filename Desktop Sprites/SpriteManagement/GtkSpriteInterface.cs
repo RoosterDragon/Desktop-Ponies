@@ -15,6 +15,7 @@
     // TODO: See what can be done to improve the memory leak. The way Gtk+ seems to handle unmanaged resources does not seem to perform
     // well in a managed environment, and Dispose() does not follow the usual C# idiom.
     // TODO: Fix abysmal performance.
+    // TODO: Scaled drawing is not yet supported. Need to be able to adjust clipping masks and drawn images to fit given scale.
 
     /// <summary>
     /// Creates a series of windows using Gtk# to display sprites.

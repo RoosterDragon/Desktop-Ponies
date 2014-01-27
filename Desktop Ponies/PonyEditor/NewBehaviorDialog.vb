@@ -22,7 +22,7 @@ Public Class NewBehaviorDialog
             Exit Sub
         End If
 
-        For Each behavior In _editor.PreviewPony.Behaviors
+        For Each behavior In _editor.PreviewPony.Base.Behaviors
             If behavior.Name = NameTextbox.Text Then
                 MessageBox.Show(Me, "Behavior '" & behavior.Name & "' already exists for this pony. Please select another name.",
                                 "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)

@@ -7,27 +7,30 @@ Public Class Game
     Public Const ConfigFilename = "game.ini"
 
     Public Enum BallType
-        Soccer = 0 'Is pushed around and slows to a stop.  No Gravity
-        Baseball = 1 'Is thrown and arcs, then slows if not caught.
-        PingPong = 2 'Bounces around and doesn't stop/slow
-        Dodge = 3 'Travels in a straight line and is destroyed when impacting barriers
+        ''' <summary>
+        ''' Is pushed around and slows to a stop.  No Gravity
+        ''' </summary>
+        Soccer
+        ''' <summary>
+        ''' Bounces around and doesn't stop/slow
+        ''' </summary>
+        PingPong
     End Enum
 
     Public Enum GameStatus
-        Setup = 0
-        Ready = 1
-        InProgress = 2
-        'RoundFinishing = 3
-        'NextRoundSetup = 4
-        'Finishing = 5
-        Completed = 6
+        Setup
+        SetupWaitForPositions
+        SetupAddBalls
+        SetupReadyBalls
+        InProgress
+        Completed
     End Enum
 
     Private Enum ScoreStyle
-        BallAtGoal = 0
-        BallHitsOtherTeam = 1
-        BallDestroyed = 2
-        BallAtSides = 3
+        BallAtGoal
+        BallHitsOtherTeam
+        BallDestroyed
+        BallAtSides
     End Enum
 
     Public Enum PlayerActionType
@@ -38,7 +41,7 @@ Public Class Game
         ThrowBallToGoal = 4
         ThrowBallToTeammate = 5
         ThrowBallAtTarget = 6
-        ThrowBallReflect = 7 'ball bounces off
+        ThrowBallReflect = 7
         ApproachOwnGoal = 8
         ApproachTargetGoal = 9
         LeadBall = 10
@@ -48,6 +51,13 @@ Public Class Game
 
     Public Property Name As String = ""
     Public Property Description As String = ""
+
+    Private ReadOnly _speedOverride As Double
+    Public ReadOnly Property SpeedOverride As Double
+        Get
+            Return _speedOverride
+        End Get
+    End Property
 
     Private Const MinTeams As Integer = 2
     Private ReadOnly _teams As New List(Of Team)()
@@ -79,7 +89,10 @@ Public Class Game
 
     Public Property GameScreen As Screen
 
-    Public Sub New(collection As PonyCollection, directory As String)
+    Private manualControlPlayerOne As Pony
+    Private manualControlPlayerTwo As Pony
+
+    Public Sub New(ponyCollection As PonyCollection, ponyContext As PonyContext, directory As String)
         Dim gameData As String = Nothing
         Dim descriptionData As String = Nothing
         Dim positionData As New List(Of String)()
@@ -110,7 +123,8 @@ Public Class Game
                         goalData.Add(line)
                     Case "scoreboard"
                         scoreboard = New GameScoreboard(columns(1), columns(2),
-                                                        Path.Combine(directory, Trim(columns(3).Replace(ControlChars.Quote, ""))))
+                                                        Path.Combine(directory, Trim(columns(3).Replace(ControlChars.Quote, ""))),
+                                                        ponyContext)
                     Case Else
                         Throw New InvalidDataException("Invalid line in config file: " & line)
                 End Select
@@ -123,6 +137,7 @@ Public Class Game
 
         Dim gameColumns = CommaSplitBraceQualified(gameData)
         Name = gameColumns(1).Replace(ControlChars.Quote, "")
+        _speedOverride = If(Name = "Ping Pong Pony", 267, 167)
 
         Dim descriptionColumns = CommaSplitQuoteQualified(descriptionData)
         If descriptionColumns.Length >= 2 Then
@@ -174,7 +189,7 @@ Public Class Game
             Dim columns = CommaSplitBraceQualified(line)
             Dim newGoal As New GoalArea(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
                                         Path.Combine(directory, Trim(columns(2).Replace(ControlChars.Quote, ""))),
-                                        columns(3))
+                                        columns(3), ponyContext)
             goals.Add(newGoal)
         Next
 
@@ -188,7 +203,7 @@ Public Class Game
             Dim columns = CommaSplitBraceQualified(line)
             Dim newPosition As New Position(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture), columns(3),
                                              columns(4), columns(5), columns(6), columns(7), columns(8), columns(9), columns(10),
-                                             columns(11))
+                                             columns(11), Me)
             Teams(Integer.Parse(columns(2), CultureInfo.InvariantCulture) - 1).Positions.Add(newPosition)
         Next
 
@@ -198,35 +213,11 @@ Public Class Game
                                      Trim(columns(2)), Trim(columns(3)), Trim(columns(4)), Trim(columns(5)), Trim(columns(6)),
                                      Integer.Parse(columns(7), CultureInfo.InvariantCulture),
                                      Integer.Parse(columns(8), CultureInfo.InvariantCulture), directory & Path.DirectorySeparatorChar,
-                                     collection)
+                                     ponyCollection, ponyContext)
             Balls.Add(newBall)
         Next
 
         Status = GameStatus.Setup
-    End Sub
-
-    Public Sub CleanUp()
-        For Each Ball In Balls
-            'Ball.Handler.Close()
-            activeBalls.Remove(Ball)
-        Next
-
-        EvilGlobals.CurrentAnimator.Clear()
-
-        'For Each goal In Goals
-        '    goal.Visible = False
-        'Next
-
-        'ScoreBoard.Visible = False
-
-        Teams(0).Score = 0
-        Teams(1).Score = 0
-
-        'For Each position In AllPlayers
-        '    position.Player.Close()
-        'Next
-
-        allPlayers.Clear()
     End Sub
 
     Public Sub Setup()
@@ -248,9 +239,8 @@ Public Class Game
         For Each team In Teams
             Dim positionsToRemove As New List(Of Position)
             For Each position In team.Positions
-                position.Initialize(GameScreen)
                 If position.Player IsNot Nothing Then
-                    position.Player.PlayingGame = True
+                    position.Initialize(GameScreen)
                     EvilGlobals.CurrentAnimator.AddPony(position.Player)
                     allPlayers.Add(position)
                 Else
@@ -266,8 +256,6 @@ Public Class Game
             ball.Initialize(GameScreen)
         Next
 
-        Options.Screens = {GameScreen}.ToImmutableArray()
-
         If Options.ScaleFactor <> 1 Then
             MessageBox.Show(String.Format(CultureInfo.CurrentCulture,
                                           "Note: Games may not work properly if you use a scale factor other than 1." &
@@ -275,59 +263,67 @@ Public Class Game
         End If
     End Sub
 
-    Public Sub Update()
+    Public Sub Update(manualControlPlayerOne As Pony, manualControlPlayerTwo As Pony)
+        Me.manualControlPlayerOne = manualControlPlayerOne
+        Me.manualControlPlayerTwo = manualControlPlayerTwo
         Select Case Status
             Case GameStatus.Setup
-                Dim allInPosition = True
+                For Each ball In Balls
+                    ball.LastHandledBy = Nothing
+                Next
                 For Each team In Teams
                     For Each position In team.Positions
-                        If position.CurrentAction <> PlayerActionType.ReturnToStart OrElse
-                            position.Player.CurrentBehavior.AllowedMovement = AllowedMoves.None Then
-                            ' Go to starting position.
-                            position.SetFollowBehavior(Nothing, Nothing, True)
-                        End If
-                        If Not position.Player.AtDestination Then allInPosition = False
+                        EvilGlobals.CurrentAnimator.AllowManualControl = False
+                        position.SetDestinationToStartLocation()
+                        position.CurrentAction = PlayerActionType.ReturnToStart
+                        position.CurrentActionGroup = Nothing
                     Next
                 Next
-                If allInPosition Then Status = GameStatus.Ready
-            Case GameStatus.Ready
+                Status = GameStatus.SetupWaitForPositions
+            Case GameStatus.SetupWaitForPositions
+                For Each team In Teams
+                    For Each position In team.Positions
+                        If Not position.Player.AtDestination Then Exit Select
+                    Next
+                Next
+                Status = GameStatus.SetupAddBalls
+            Case GameStatus.SetupAddBalls
                 For Each position In allPlayers
                     position.CurrentAction = PlayerActionType.NotSet
-                    position.CurrentActionGroup = Nothing
                 Next
-
                 For Each ball In Balls
                     activeBalls.Add(ball)
                     EvilGlobals.CurrentAnimator.AddPony(ball.Handler)
-                    ball.Handler.CurrentBehavior = ball.Handler.Behaviors(1)
+                Next
+                Status = GameStatus.SetupReadyBalls
+            Case GameStatus.SetupReadyBalls
+                EvilGlobals.CurrentAnimator.AllowManualControl = True
+                For Each ball In Balls
+                    ball.Handler.SpeedOverride = Nothing
+                    ball.Handler.SetBehavior(ball.Handler.Base.Behaviors(0))
                     ball.Handler.Location = ball.StartPosition
-                    ball.Update()
-                    If ball.Type = BallType.PingPong Then
+                    ball.UpdateSpeed()
+                    If ball.BallType = BallType.PingPong Then
                         ball.Kick(5, Rng.NextDouble() * (2 * Math.PI), Nothing)
                     End If
                     If activeBalls.Count >= minBalls Then Exit For
                 Next
-
                 Status = GameStatus.InProgress
             Case GameStatus.InProgress
+                For Each ball In activeBalls
+                    ball.UpdateSpeed()
+                Next
                 For Each team In Teams
                     For Each position In team.Positions
                         position.DecideOnAction(Me)
                         position.PushBackOverlappingPonies(allPlayers)
-                        'Position.Player.Update(EvilGlobals.CurrentAnimator.ElapsedTime)
                     Next
                 Next
-
-                For Each ball In activeBalls
-                    ball.Update()
-                Next
-
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        ball.Handler.Expire()
+                        EvilGlobals.CurrentAnimator.RemoveSprite(ball.Handler)
                     Next
-
                     For Each team In Teams
                         If team.Score >= maxScore Then
                             Status = GameStatus.Completed
@@ -343,6 +339,15 @@ Public Class Game
                 Throw New NotImplementedException("State not implemented: " & Status)
         End Select
     End Sub
+
+    Private Function IsUnderManualControl(pony As Pony) As Boolean
+        Return Object.ReferenceEquals(pony, manualControlPlayerOne) OrElse Object.ReferenceEquals(pony, manualControlPlayerTwo)
+    End Function
+
+    Private Function IsUnderManualControlAndActionWanted(pony As Pony) As Boolean
+        Return (Object.ReferenceEquals(pony, manualControlPlayerOne) AndAlso KeyboardState.IsKeyPressed(Keys.RControlKey)) OrElse
+            (Object.ReferenceEquals(pony, manualControlPlayerTwo) AndAlso KeyboardState.IsKeyPressed(Keys.LControlKey))
+    End Function
 
     Private Function CheckForScore() As Boolean
         For Each ball In Balls
@@ -364,7 +369,7 @@ Public Class Game
             If scoringStyles.Contains(ScoreStyle.BallAtGoal) Then
                 For Each goal In goals
                     Dim goalArea As New Rectangle(goal.HostEffect.TopLeftLocation, goal.HostEffect.CurrentImageSize)
-                    If ball.Handler.IsPonyContainedInRect(ball.Handler.Location, goalArea) Then
+                    If ball.Handler.IsPonyContainedInRect(Vector2.Round(ball.Handler.Location), goalArea) Then
                         For Each team In Teams
                             If ReferenceEquals(team.Goal, goal) AndAlso
                                 ball.LastHandledBy IsNot Nothing AndAlso
@@ -385,58 +390,95 @@ Public Class Game
         Return False
     End Function
 
-    Private Shared Function GetBallLastHandlerTeam(ball As Ball) As Team
+    Public Sub CleanUp()
+        For Each Ball In Balls
+            activeBalls.Remove(Ball)
+        Next
 
-        If IsNothing(ball.LastHandledBy) Then Return Nothing
+        EvilGlobals.CurrentAnimator.Clear()
 
-        Return ball.LastHandledBy.Team
+        Teams(0).Score = 0
+        Teams(1).Score = 0
 
-    End Function
+        allPlayers.Clear()
+    End Sub
 
     Public Class Ball
-        Public Property Type As BallType
-        Public Property StartPosition As Point
-        Private initialPosition As Point
-        Private friction As Double = 0.992
-        Public Property LastHandledBy As Position
-        Private speed As Double
+        Private ReadOnly _ballType As BallType
+        Public ReadOnly Property BallType As BallType
+            Get
+                Return _ballType
+            End Get
+        End Property
+        Private ReadOnly context As PonyContext
+        Private ReadOnly handlerBase As PonyBase
+        Private _handler As GamePony
+        Public ReadOnly Property Handler As GamePony
+            Get
+                If _handler Is Nothing Then
+                    _handler = New GamePony(context, handlerBase)
+                    AddHandler _handler.Expired, Sub() _handler = Nothing
+                End If
+                Return _handler
+            End Get
+        End Property
+        Private _startPosition As Vector2
+        Public ReadOnly Property StartPosition As Vector2
+            Get
+                Return _startPosition
+            End Get
+        End Property
 
-        Public Property Handler As Pony 'the ball is a pony type that move like a pony
+        Public Property LastHandledBy As Position
 
         Public Sub New(_type As String, idle_image_filename As String, slow_right_image_filename As String, slow_left_image_filename As String,
                 fast_right_image_filename As String, fast_left_image_filename As String, x_location As Integer, y_location As Integer,
-                files_path As String, collection As PonyCollection)
+                files_path As String, ponyCollection As PonyCollection, ponyContext As PonyContext)
+            context = Argument.EnsureNotNull(ponyContext, "ponyContext")
 
             ' We need to duplicate the new pony as only "duplicates" are fully loaded. A new pony by itself is considered a template.
-            Dim handlerBase = PonyBase.CreateInMemory(collection)
+            handlerBase = PonyBase.CreateInMemory(ponyCollection)
             handlerBase.DisplayName = "Ball"
-            Handler = New Pony(handlerBase)
 
-            handlerBase.AddBehavior("idle", 100, 99, 99, 0,
-                                    files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
-                                    files_path & Replace(idle_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.None, "", "", "", "", "")
-            handlerBase.AddBehavior("slow", 100, 99, 99, 3,
-                                    files_path & Replace(slow_right_image_filename, ControlChars.Quote, ""),
-                                    files_path & Replace(slow_left_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.All, "", "", "", "", "")
-            handlerBase.AddBehavior("fast", 100, 99, 99, 5,
-                                    files_path & Replace(fast_right_image_filename, ControlChars.Quote, ""),
-                                    files_path & Replace(fast_left_image_filename, ControlChars.Quote, ""),
-                                    AllowedMoves.All, "", "", "", "", "")
+            Dim idleBehavior = New Behavior(handlerBase) With {
+                .Name = "idle",
+                .MinDuration = 600,
+                .MaxDuration = 600,
+                .Speed = 0,
+                .AllowedMovement = AllowedMoves.None}
+            Dim idleImagePath = files_path & Replace(idle_image_filename, ControlChars.Quote, "")
+            idleBehavior.LeftImage.Path = idleImagePath
+            idleBehavior.RightImage.Path = idleImagePath
+            handlerBase.Behaviors.Add(idleBehavior)
 
-            initialPosition = New Point(x_location, y_location)
+            Dim slowBehavior = New Behavior(handlerBase) With {
+                .Name = "slow",
+                .MinDuration = 600,
+                .MaxDuration = 600,
+                .Speed = 3,
+                .AllowedMovement = AllowedMoves.All}
+            slowBehavior.LeftImage.Path = files_path & Replace(slow_left_image_filename, ControlChars.Quote, "")
+            slowBehavior.RightImage.Path = files_path & Replace(slow_right_image_filename, ControlChars.Quote, "")
+            handlerBase.Behaviors.Add(slowBehavior)
+
+            Dim fastBehavior = New Behavior(handlerBase) With {
+                .Name = "fast",
+                .MinDuration = 600,
+                .MaxDuration = 600,
+                .Speed = 5,
+                .AllowedMovement = AllowedMoves.All}
+            Dim fastImagePath = files_path & Replace(idle_image_filename, ControlChars.Quote, "")
+            fastBehavior.LeftImage.Path = files_path & Replace(fast_left_image_filename, ControlChars.Quote, "")
+            fastBehavior.RightImage.Path = files_path & Replace(fast_right_image_filename, ControlChars.Quote, "")
+            handlerBase.Behaviors.Add(fastBehavior)
+
+            _startPosition = New Vector2(x_location, y_location)
 
             Select Case LCase(Trim(_type))
-
                 Case "soccer"
-                    Type = BallType.Soccer
-                Case "baseball"
-                    Type = BallType.Baseball
+                    _ballType = BallType.Soccer
                 Case "pingpong"
-                    Type = BallType.PingPong
-                Case "dodge"
-                    Type = BallType.Dodge
+                    _ballType = BallType.PingPong
                 Case Else
                     Throw New ArgumentException("Invalid ball type: " & _type, _type)
             End Select
@@ -445,56 +487,39 @@ Public Class Game
         Public Sub Initialize(gameScreen As Screen)
             Argument.EnsureNotNull(gameScreen, "gameScreen")
 
-            StartPosition = New Point(
-                CInt(initialPosition.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
-                CInt(initialPosition.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
+            _startPosition = New Vector2(
+                CInt(StartPosition.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
+                CInt(StartPosition.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
 
             Handler.Location = StartPosition
         End Sub
 
-        Public Function Center() As PointF
-            Return Me.Handler.Location
-        End Function
-
-        Public Sub Update()
-            Dim up = True
-            Dim right = True
-            Dim angle As Double = 0
-
-            Select Case Type
-                Case BallType.Soccer
-                    speed = Handler.CurrentBehavior.Speed * friction
-                Case BallType.PingPong
-                    speed = Handler.CurrentBehavior.Speed
+        Public Sub UpdateSpeed()
+            Dim currentHandlerSpeed As Double = If(Handler.SpeedOverride, Handler.CurrentBehavior.SpeedInPixelsPerSecond)
+            If BallType = BallType.Soccer Then
+                currentHandlerSpeed *= 0.98
+                Handler.SpeedOverride = currentHandlerSpeed
+            End If
+            Dim behaviorIndex As Integer
+            Select Case currentHandlerSpeed
+                Case Is < 1
+                    behaviorIndex = 0
+                Case Is < 100
+                    behaviorIndex = 1
+                Case Else
+                    behaviorIndex = 2
             End Select
-
-            up = Handler.facingUp
-            right = Handler.facingRight
-            angle = Handler.Diagonal
-
-            Select Case Handler.CurrentBehavior.Speed
-                Case Is < 0.1
-                    speed = 0
-                    Handler.CurrentBehavior = Handler.Behaviors(0)
-                Case Is < 3
-                    Handler.CurrentBehavior = Handler.Behaviors(1)
-                Case Is > 3
-                    Handler.CurrentBehavior = Handler.Behaviors(2)
-            End Select
-
-            speed = Handler.CurrentBehavior.Speed
-            Handler.facingUp = up
-            Handler.facingRight = right
-            Handler.Diagonal = angle
-            Handler.Move()
+            Dim newBehavior = Handler.Base.Behaviors(behaviorIndex)
+            If Not Object.ReferenceEquals(newBehavior, Handler.CurrentBehavior) Then
+                Handler.SetBehavior(newBehavior)
+                Handler.MovementOverride = Handler.Movement
+            End If
         End Sub
 
         Public Sub Kick(_speed As Double, _angle As Double, kicker As Position)
             LastHandledBy = kicker
-
-            Handler.CurrentBehavior = Handler.GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
-            speed = _speed
-            Handler.Diagonal = _angle
+            Handler.SpeedOverride = _speed * (1000.0 / 30.0)
+            Handler.MovementOverride = New Vector2F(CSng(Math.Cos(_angle)), CSng(Math.Sin(_angle)))
         End Sub
     End Class
 
@@ -522,14 +547,14 @@ Public Class Game
         Public Property TeamNumber As Integer ' 0 = a score any team
         Private startPoint As Point
 
-        Public Sub New(_teamNumber As Integer, imageFilename As String, location As String)
+        Public Sub New(_teamNumber As Integer, imageFilename As String, location As String, context As PonyContext)
             If Not File.Exists(imageFilename) Then
                 Throw New FileNotFoundException("File does not exist: " & imageFilename)
             End If
 
             TeamNumber = _teamNumber
             Dim base As New EffectBase("Team " & TeamNumber & "'s Goal", imageFilename, imageFilename)
-            HostEffect = New Effect(base, True, Nothing, Nothing, Nothing)
+            HostEffect = New Effect(base, True, Nothing, Nothing, context)
 
             Dim locationParts = Split(location, ",")
             startPoint = New Point(
@@ -568,13 +593,13 @@ Public Class Game
             End Get
         End Property
 
-        Public Sub New(x As String, y As String, imageFilename As String)
+        Public Sub New(x As String, y As String, imageFilename As String, context As PonyContext)
             If Not File.Exists(imageFilename) Then
                 Throw New FileNotFoundException("File does not exist: " & imageFilename)
             End If
 
             Dim base As New EffectBase("Scoreboard", imageFilename, imageFilename)
-            HostEffect = New Effect(base, True, Nothing, Nothing, Nothing)
+            HostEffect = New Effect(base, True, Nothing, Nothing, context)
 
             startPoint = New Point(
                 Integer.Parse(x, CultureInfo.InvariantCulture),
@@ -653,11 +678,22 @@ Public Class Game
         Public Property Name As String
         Public Property TeamNumber As Integer
         Public Property Team As Team
-        Public Property Player As Pony
-        Private allowedArea As Rectangle? 'nothing means allowed anywhere
+        Private _player As GamePony
+        Public Property Player As GamePony
+            Get
+                Return _player
+            End Get
+            Set(value As GamePony)
+                If _player IsNot Nothing Then _player.CurrentPosition = Nothing
+                _player = value
+                If _player IsNot Nothing Then _player.CurrentPosition = Me
+            End Set
+        End Property
+        Private allowedArea As Rectangle
         Private startLocation As Point
         Public Property CurrentAction As PlayerActionType
         Public Property CurrentActionGroup As List(Of PlayerActionType)
+        Private ReadOnly game As Game
 
         Public Property Required As Boolean
 
@@ -665,7 +701,7 @@ Public Class Game
 
         Private lastKickTime As DateTime = DateTime.MinValue
 
-        Private nearestBallDistance As Integer
+        Private nearestBallDistance As Double
 
         Public Property SelectionMenuPictureBox As PictureBox
 
@@ -678,8 +714,10 @@ Public Class Game
 
         Public Sub New(_Name As String, _team_number As Integer, _start_location As String, _Allowed_area As String,
                 _Have_Ball_Actions As String, _Hostile_Ball_Actions As String, _Friendly_Ball_Actions As String, _
-                _Neutral_Ball_Actions As String, _Distance_Ball_Actions As String, _No_Ball_Actions As String, _required As String)
+                _Neutral_Ball_Actions As String, _Distance_Ball_Actions As String, _No_Ball_Actions As String, _required As String,
+                game As Game)
             Argument.EnsureNotNull(_Name, "_Name")
+            Me.game = Argument.EnsureNotNull(game, "game")
 
             Name = Trim(_Name.Replace(ControlChars.Quote, ""))
             TeamNumber = _team_number
@@ -729,8 +767,6 @@ Public Class Game
                     list.Add(CType([Enum].Parse(GetType(PlayerActionType), action), PlayerActionType))
                 Next
             Next
-
-
         End Sub
 
         Public Sub Initialize(gameScreen As Screen)
@@ -741,55 +777,48 @@ Public Class Game
                     CInt(Double.Parse(areaPoints(1), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y),
                     CInt(Double.Parse(areaPoints(2), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Width),
                     CInt(Double.Parse(areaPoints(3), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Height))
+            Else
+                allowedArea = gameScreen.WorkingArea
             End If
+            startLocation = New Point(
+                CInt(startLocation.X * 0.01 * allowedArea.Width + allowedArea.X),
+                CInt(startLocation.Y * 0.01 * allowedArea.Height + allowedArea.Y))
+            Player.SpeedOverride = If(game.Name = "Ping Pong Pony", 267, 167)
         End Sub
 
         Public Sub DecideOnAction(game As Game)
             Argument.EnsureNotNull(game, "game")
-            Dim nearest_ball = GetNearestBall(game.activeBalls)
-
-            If IsNothing(nearest_ball) Then
-                PerformAction(noBallActions, Nothing)
+            Dim nearestBall = GetNearestBall(game.activeBalls)
+            Dim screenDiagonal = Math.Sqrt((game.GameScreen.WorkingArea.Height) ^ 2 + (game.GameScreen.WorkingArea.Width) ^ 2)
+            If nearestBallDistance > screenDiagonal / 2 Then
+                PerformAction(distantBallActions, nearestBall)
+                Exit Sub
+            End If
+            If nearestBallDistance <= (Player.Region.Width / 2) + 50 Then
+                PerformAction(haveBallActions, nearestBall)
                 Exit Sub
             End If
 
-            Dim screen_diagonal = Math.Sqrt((game.GameScreen.WorkingArea.Height) ^ 2 + (game.GameScreen.WorkingArea.Width) ^ 2)
-            If nearestBallDistance > screen_diagonal * (1 / 2) Then 'AndAlso _
-                PerformAction(distantBallActions, nearest_ball)
-                Exit Sub
-            End If
-
-            If nearestBallDistance <= (Player.Region.Width / 2) + 50 Then ' / 2 Then
-                PerformAction(haveBallActions, nearest_ball)
-                Exit Sub
-            End If
-
-            Dim BallOwner_Team = game.GetBallLastHandlerTeam(nearest_ball)
-
-            If IsNothing(BallOwner_Team) Then
-                PerformAction(neutralBallActions, nearest_ball)
-                Exit Sub
-            End If
-
-            If BallOwner_Team.Number = TeamNumber Then
-                PerformAction(friendlyBallActions, nearest_ball)
-                Exit Sub
+            Dim ballLastHandledByTeam = If(nearestBall.LastHandledBy IsNot Nothing, nearestBall.LastHandledBy.Team, Nothing)
+            If ballLastHandledByTeam Is Nothing Then
+                PerformAction(neutralBallActions, nearestBall)
+            ElseIf ballLastHandledByTeam.Number = TeamNumber Then
+                PerformAction(friendlyBallActions, nearestBall)
             Else
-                PerformAction(hostileBallActions, nearest_ball)
-                Exit Sub
+                PerformAction(hostileBallActions, nearestBall)
             End If
-
         End Sub
 
         Private Sub PerformAction(actionList As List(Of PlayerActionType), ball As Ball)
-            If Not IsNothing(CurrentActionGroup) Then ' AndAlso Not ReferenceEquals(Current_Action_Group, Have_Ball_Actions) Then
+            If CurrentActionGroup IsNot Nothing Then
                 If ReferenceEquals(actionList, CurrentActionGroup) Then
                     'we are already doing an action from this list
 
                     'if we recently kicked the ball, don't do it for 2 seconds.
                     If ReferenceEquals(CurrentActionGroup, haveBallActions) Then
                         If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
-                            If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) > 1 AndAlso (Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo) Then
+                            If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) > 1 AndAlso
+                                game.IsUnderManualControl(Player) Then
                                 Speak("Can't kick again so soon!")
                             End If
 
@@ -804,26 +833,26 @@ Public Class Game
                 End If
             End If
 
-            Dim selected_action = actionList.RandomElement()
-            Select Case selected_action
+            Dim selectedAction = actionList.RandomElement()
+            Select Case selectedAction
                 Case PlayerActionType.NotSet
-                    Throw New Exception("Can't do this action (reserved): " & selected_action)
+                    Throw New Exception("Can't do this action (reserved): " & selectedAction)
                 Case PlayerActionType.ReturnToStart
-                    SetFollowBehavior(Nothing, Nothing, True)
+                    SetDestinationToStartLocation()
                 Case PlayerActionType.ChaseBall
-                    SetFollowBehavior(ball.Handler.Directory, ball.Handler)
+                    SetFollowBehavior(ball.Handler)
                 Case PlayerActionType.LeadBall
-                    SetFollowBehavior(ball.Handler.Directory, ball.Handler, False, True)
+                    SetFollowBehavior(ball.Handler)
                 Case PlayerActionType.AvoidBall
-                    Throw New NotImplementedException("Not implemented yet: action type " & selected_action)
+                    Throw New NotImplementedException("Not implemented yet: action type " & selectedAction)
                 Case PlayerActionType.ThrowBallToGoal
                     If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
                         'can't kick again so soon
                         Exit Sub
                     End If
                     'If ponies are being controlled, don't kick unless the action key (control - left or right) is being pushed
-                    If Player.ManualControlPlayerOne AndAlso Not Player.ManualControlAction Then Exit Sub
-                    If Player.ManualControlPlayerTwo AndAlso Not Player.ManualControlAction Then Exit Sub
+                    If game.IsUnderManualControl(Player) AndAlso
+                        Not game.IsUnderManualControlAndActionWanted(Player) Then Exit Sub
                     KickBall(ball, 10, GetOtherTeamGoal(), Nothing, Me, "*Kick*!")
                     lastKickTime = DateTime.UtcNow
                 Case PlayerActionType.ThrowBallToTeammate
@@ -833,84 +862,66 @@ Public Class Game
                     End If
 
                     'don't pass if we are under control - kick instead.
-                    If Player.ManualControlPlayerOne Then Exit Sub
-                    If Player.ManualControlPlayerTwo Then Exit Sub
+                    If game.IsUnderManualControl(Player) Then Exit Sub
 
-                    Dim open_teammate = GetOpenTeammate(Me.Team, GetOtherTeamGoal())
-                    If IsNothing(open_teammate) Then
+                    lastKickTime = DateTime.UtcNow
+                    Dim openTeammate = GetOpenTeammate()
+                    If openTeammate Is Nothing Then
                         'no teammates to pass to, kick to goal instead, unless a player controlled pony.
-                        If Player.ManualControlPlayerOne OrElse Player.ManualControlPlayerTwo Then Exit Sub
+                        If game.IsUnderManualControl(Player) Then Exit Sub
                         KickBall(ball, 10, GetOtherTeamGoal(), Nothing, Me, "*Kick*!")
-                        lastKickTime = DateTime.UtcNow
                         Exit Sub
                     End If
 
-                    KickBall(ball, 10, Nothing, open_teammate, Me, "*Pass*!")
-                    lastKickTime = DateTime.UtcNow
-
+                    KickBall(ball, 10, Nothing, openTeammate, Me, "*Pass*!")
                 Case PlayerActionType.ThrowBallReflect
                     If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
                         'can't kick again so soon
                         Exit Sub
                     End If
 
-                    If Player.ManualControlPlayerOne AndAlso Not Player.ManualControlAction Then Exit Sub
-                    If Player.ManualControlPlayerTwo AndAlso Not Player.ManualControlAction Then Exit Sub
+                    If game.IsUnderManualControl(Player) AndAlso
+                        Not game.IsUnderManualControlAndActionWanted(Player) Then Exit Sub
 
                     BounceBall(ball, 7, Me, "*Ping*!")
                     lastKickTime = DateTime.UtcNow
-
                 Case PlayerActionType.ApproachOwnGoal
-                    Dim goal = GetTeamGoal()
-                    SetFollowBehavior(goal.HostEffect.Base.Name, goal.HostEffect)
-
+                    SetDestination(GetTeamGoal().HostEffect.Center())
                 Case PlayerActionType.ApproachTargetGoal
-                    Dim goal = GetOtherTeamGoal()
-                    SetFollowBehavior(goal.HostEffect.Base.Name, goal.HostEffect)
-
+                    SetDestination(GetOtherTeamGoal().HostEffect.Center())
                 Case PlayerActionType.Idle
                     If CurrentAction = PlayerActionType.Idle Then Exit Sub
-                    Player.followTarget = Nothing
-                    Player.followTargetName = ""
-
-                    If Player.ManualControlPlayerOne Then Exit Sub
-                    If Player.ManualControlPlayerTwo Then Exit Sub
-
-                    Player.SelectBehavior()
-                    SpeedOverride(True)
-
+                    Player.FollowTargetOverride = Nothing
+                    If game.IsUnderManualControl(Player) Then Exit Sub
+                    Console.WriteLine(Player.Base.Directory & " Calling SetBehavior from Idle action " & DateTime.UtcNow)
+                    Player.SetBehavior(Nothing, False)
                 Case Else
                     EvilGlobals.CurrentAnimator.Pause(False)
-                    Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selected_action)
+                    Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selectedAction)
             End Select
 
-            CurrentAction = selected_action
+            CurrentAction = selectedAction
             CurrentActionGroup = actionList
-
         End Sub
 
         Private Function GetNearestBall(balls As List(Of Ball)) As Ball
-            Dim nearest_ball As Ball = Nothing
-            Dim nearest_ball_distance As Double = Double.MaxValue
-
+            Argument.EnsureNotNullOrEmpty(balls, "balls")
+            Dim nearestBallDistanceSquared = Single.MaxValue
+            Dim nearestBall As Ball = Nothing
             For Each ball In balls
-                Dim distance = Vector2F.Distance(New Vector2F(Player.Location), ball.Center)
-                If distance < nearest_ball_distance Then
-                    nearest_ball_distance = distance
-                    nearest_ball = ball
+                Dim distanceSquared = Vector2F.DistanceSquared(Player.Location, ball.Handler.Location)
+                If distanceSquared < nearestBallDistanceSquared Then
+                    nearestBallDistanceSquared = distanceSquared
+                    nearestBall = ball
                 End If
             Next
-
-            If IsNothing(nearest_ball) Then Throw New Exception("No available balls found when checking distance!")
-
-            Me.nearestBallDistance = CInt(nearest_ball_distance)
-            Return nearest_ball
-
+            nearestBallDistance = Math.Sqrt(nearestBallDistanceSquared)
+            Return nearestBall
         End Function
 
         Private Function GetOtherTeamGoal() As GoalArea
 
-            For Each goal In EvilGlobals.CurrentGame.goals
+            For Each goal In game.goals
                 If goal.TeamNumber <> TeamNumber Then
                     Return goal
                 End If
@@ -922,7 +933,7 @@ Public Class Game
 
         Private Function GetTeamGoal() As GoalArea
 
-            For Each goal In EvilGlobals.CurrentGame.goals
+            For Each goal In game.goals
                 If goal.TeamNumber = TeamNumber Then
                     Return goal
                 End If
@@ -932,31 +943,19 @@ Public Class Game
 
         End Function
 
-        Public Sub SetFollowBehavior(targetName As String, target As ISprite,
-                                      Optional returnToStart As Boolean = False, Optional leadTarget As Boolean = False)
+        Public Sub SetDestinationToStartLocation()
+            SetDestination(startLocation)
+        End Sub
 
-            SpeedOverride(True)
+        Public Sub SetDestination(destination As Point)
+            Player.SpeedOverride = game.SpeedOverride
+            Player.DestinationOverride = New Vector2(destination)
+            Player.FollowTargetOverride = Nothing
+        End Sub
 
-            Player.CurrentBehavior = Player.GetAppropriateBehaviorOrFallback(AllowedMoves.All, True)
-            'Player.CurrentBehavior = Player.GetAppropriateBehaviorForSpeed()
-            Player.followTarget = Nothing
-            Player.followTargetName = ""
-
-            If returnToStart Then
-                Player.destinationCoords = startLocation
-                Exit Sub
-            Else
-                Player.followTargetName = If(targetName, "")
-                Player.followTarget = target
-                Player.destinationCoords = Point.Empty
-                If leadTarget Then
-                    Player.leadTarget = True
-                End If
-
-                'If EvilGlobals.Main.current_game.Name = "Ping Pong Pony" Then
-                '    Player.current_behavior.speed = Player.current_behavior.original_speed * 1.5
-                'End If
-            End If
+        Public Sub SetFollowBehavior(target As GamePony)
+            Player.DestinationOverride = Nothing
+            Player.FollowTargetOverride = target
         End Sub
 
         Private Sub KickBall(ball As Ball, speed As Double, targetGoal As GoalArea, targetPony As Pony,
@@ -965,8 +964,6 @@ Public Class Game
                 Speak("Missed!")
                 Exit Sub
             End If
-
-            speed = kicker.Player.Scale * speed
 
             Speak(line)
 
@@ -978,7 +975,6 @@ Public Class Game
                 angle = GetAngleToObject(targetGoal.Center())
             End If
 
-
             'add a bit of inaccuracy
             If Rng.NextDouble() < 0.5 Then
                 angle += Rng.NextDouble() * (Math.PI / 8)
@@ -987,11 +983,10 @@ Public Class Game
             End If
 
             ball.Kick(speed, angle, kicker)
-
         End Sub
 
         Private Sub BounceBall(ball As Ball, speed As Double, kicker As Position, line As String)
-            If EvilGlobals.CurrentGame.Name = "Ping Pong Pony" Then
+            If game.Name = "Ping Pong Pony" Then
                 'avoid bouncing the ball back into our own goal.
                 If Not IsNothing(ball.LastHandledBy) AndAlso ReferenceEquals(ball.LastHandledBy, Me) Then
                     Exit Sub
@@ -1001,9 +996,9 @@ Public Class Game
             Speak(line)
 
             Dim angle As Double
-            Dim gamescreen = EvilGlobals.CurrentGame.GameScreen
+            Dim gamescreen = game.GameScreen
 
-            If ball.Handler.Diagonal < (Math.PI / 2) OrElse ball.Handler.Diagonal > (3 / 2) * Math.PI Then
+            If ball.Handler.Movement.X >= 0 Then
                 'ball is going to the right, it will 'bounce' to the left.
                 angle = Math.PI
             Else
@@ -1019,7 +1014,6 @@ Public Class Game
             Dim kicker_height = kicker.Player.Region.Height / 1.5
 
             If kicker_center.X < (gamescreen.WorkingArea.Width * 0.5) Then
-
                 If y_difference > 0 Then
                     angle += (Math.PI / 4) * (Math.Abs(y_difference) / kicker_height)
                 Else
@@ -1055,47 +1049,23 @@ Public Class Game
                 angle = Math.PI * (5 / 3)
             End If
 
-            ball.Kick(speed * kicker.Player.Scale, angle, kicker)
+            ball.Kick(speed, angle, kicker)
 
         End Sub
 
-        'returns radians
-        Private Function GetAngleToObject(target As PointF) As Double
-
-            'opposite = y_distance
-            Dim opposite = Player.Location.Y - target.Y
-
-            'adjacent = x_distance
-            Dim adjacent = Player.Location.X - target.X
-
-            Dim hypotenuse As Double = Math.Sqrt(opposite ^ 2 + adjacent ^ 2)
-
-            'sin(angle) = opposite / h
-            'angle = asin(opposite / h)
-
-            Dim angle = Math.Asin(Math.Abs(opposite) / hypotenuse)
-
-            ' if the target is below, flip the angle to the 4th quadrant
-            If target.Y > Player.Location.Y Then
-                angle = (2 * Math.PI) - angle
-                'if the target is to the left, flip the angle to 3rd quadrant
-                If target.X < Player.Location.X Then
-                    angle = Math.PI - angle
-                End If
-            Else
-                ' If the target is above and to the left, flip the angle to the 2nd quadrant.
-                If target.X < Player.Location.X Then
-                    angle = Math.PI - angle
-                End If
-            End If
-
-            Return angle
-
+        ''' <summary>
+        ''' Calculates the angle to the target in radians.
+        ''' </summary>
+        ''' <param name="target">The target location.</param>
+        ''' <returns>The angle to the target in radians.</returns>
+        Private Function GetAngleToObject(target As Vector2F) As Double
+            Dim a = Player.Location
+            Dim b = target
+            Return Math.Atan2(b.Y - a.Y, b.X - a.X)
         End Function
 
         Private Sub Speak(line As String)
-            Dim new_line As New Speech() With {.Name = "Kick", .Text = line, .Skip = True, .Group = 0}
-            Player.PonySpeak(new_line)
+            Player.Speak(New Speech() With {.Name = line, .Text = line})
         End Sub
 
         Public Sub PushBackOverlappingPonies(allPositions As List(Of Position))
@@ -1105,98 +1075,104 @@ Public Class Game
                 Dim otherpony = otherposition.Player
                 If ReferenceEquals(Me.Player, otherpony) Then Continue For
 
-
-                If DoesPonyOverlap(Me.Player, otherpony) Then
-                    'Push overlapping ponies a bit apart
-                    PonyPush(Me.Player, otherpony)
-                    Exit Sub
-                End If
-
-
+                ' Push overlapping ponies a bit apart.
+                PonyPush(Me.Player, otherpony)
             Next
-
         End Sub
 
-        Private Shared Function DoesPonyOverlap(pony As Pony, otherPony As Pony) As Boolean
+        Private Sub PonyPush(pony1 As GamePony, pony2 As GamePony)
+            Dim region1 = pony1.Region
+            Dim region2 = pony2.Region
 
-            Dim otherpony_area As New Rectangle(otherPony.Region.X, _
-                                             otherPony.Region.Y, _
-                                             CInt(otherPony.Region.Width * otherPony.Scale),
-                                             CInt(otherPony.Region.Height * otherPony.Scale))
+            If Not region1.IntersectsWith(region2) Then Return
+            
+            Dim leftDistance = region1.Right - region2.Left
+            Dim rightDistance = region2.Right - region1.Left
+            Dim topDistance = region1.Bottom - region2.Top
+            Dim bottomDistance = region2.Bottom - region1.Top
 
+            Dim minDistance = leftDistance
+            If rightDistance < minDistance Then minDistance = rightDistance
+            If topDistance < minDistance Then minDistance = topDistance
+            If bottomDistance < minDistance Then minDistance = bottomDistance
 
-            If otherpony_area.IntersectsWith(New Rectangle(pony.Region.Location, New Size(CInt(pony.Scale * pony.Region.Width), _
-                                                                                    CInt(pony.Scale * pony.Region.Height)))) Then
-                Return True
-            Else
-                Return False
+            Dim change As New Vector2F
+            Dim pushDistance = Math.Min(2.0F, minDistance)
+            If leftDistance = minDistance Then
+                change.X -= pushDistance
+            ElseIf rightDistance = minDistance Then
+                change.X += pushDistance
+            ElseIf topDistance = minDistance Then
+                change.Y -= pushDistance
+            ElseIf bottomDistance = minDistance Then
+                change.Y += pushDistance
             End If
 
-        End Function
-
-        Private Sub PonyPush(pony1 As Pony, pony2 As Pony)
-
-            Dim xchange = 1
-            Dim ychange = 2
-            If pony1.GetDestinationDirectionHorizontal(New Vector2F(pony2.Location)) = Direction.MiddleLeft Then
-                xchange = -1
-            End If
-            If pony1.GetDestinationDirectionVertical(New Vector2F(pony2.Location)) = Direction.TopCenter Then
-                ychange = -2
-            End If
-
-            Dim change = New Size(xchange, ychange)
-            Dim newLocation = Point.Round(pony1.Location + change)
-
-            If pony1.IsPonyContainedInScreen(newLocation, EvilGlobals.CurrentGame.GameScreen) AndAlso
-                (Not allowedArea.HasValue OrElse pony1.IsPonyContainedInRect(newLocation, allowedArea.Value)) Then
-                pony1.Location = newLocation
-            End If
-
+            Dim newLocation = pony1.Location + change
+            If pony1.IsPonyContainedInRect(newLocation, allowedArea) Then pony1.Location = newLocation
         End Sub
 
-        'get a teammate that is not near any enemy players and is closer to the goal than we are.
-        Private Function GetOpenTeammate(team As Team, goal As GoalArea) As Pony
-
-            Dim open_teammates As New List(Of Pony)
-
-            For Each Position In team.Positions
-
-                If ReferenceEquals(Position, Me) Then
-                    Continue For
-                End If
+        ''' <summary>
+        ''' Gets a teammate that is not near any enemy players and is closer to the goal than we are.
+        ''' </summary>
+        ''' <returns>A teammate that is not near any enemy players and is closer to the goal than we are.</returns>
+        Private Function GetOpenTeammate() As Pony
+            Dim goal = GetOtherTeamGoal()
+            Dim distanceToGoalSquared = Vector2F.DistanceSquared(Player.Location, goal.Center())
+            Dim openTeammates As List(Of Pony) = Nothing
+            For Each friendlyPosition In Team.Positions
+                If ReferenceEquals(friendlyPosition, Me) Then Continue For
 
                 Dim open = True
-                For Each other_position As Position In EvilGlobals.CurrentGame.allPlayers
-                    If other_position.Team.Name = Me.Team.Name Then
-                        Continue For
-                    End If
-
-                    Dim distance = Vector2.Distance(Position.Player.Location, other_position.Player.Location)
-                    If distance <= 200 Then
+                For Each enemyPosition In game.allPlayers
+                    If enemyPosition.Team.Name = Team.Name Then Continue For
+                    Dim distanceSquared = Vector2F.DistanceSquared(friendlyPosition.Player.Location, enemyPosition.Player.Location)
+                    If distanceSquared <= 200 ^ 2 Then
                         open = False
+                        Exit For
                     End If
                 Next
 
-                Dim me_distance_to_goal = Vector2F.Distance(New Vector2F(Player.Location), goal.Center())
-                Dim teammate_distance_to_goal = Vector2F.Distance(New Vector2F(Position.Player.Location), goal.Center())
-
-                If open = True AndAlso teammate_distance_to_goal <= me_distance_to_goal Then
-                    open_teammates.Add(Position.Player)
+                If open Then
+                    Dim friendlyDistanceToGoalSquared = Vector2F.DistanceSquared(friendlyPosition.Player.Location, goal.Center())
+                    If friendlyDistanceToGoalSquared <= distanceToGoalSquared Then
+                        If openTeammates Is Nothing Then openTeammates = New List(Of Pony)()
+                        openTeammates.Add(friendlyPosition.Player)
+                    End If
                 End If
             Next
-
-            If open_teammates.Count = 0 Then Return Nothing
-            Return open_teammates.RandomElement()
+            If openTeammates Is Nothing OrElse openTeammates.Count = 0 Then Return Nothing
+            Return openTeammates.RandomElement()
         End Function
+    End Class
 
-        Private Sub SpeedOverride(enable As Boolean)
-            If enable Then
-                Player.SpeedOverride = If(EvilGlobals.CurrentGame.Name = "Ping Pong Pony", 8 * Player.Scale, 5 * Player.Scale)
-            Else
-                Player.SpeedOverride = Nothing
-            End If
+    Public Class GamePony
+        Inherits Pony
+        Public Property CurrentPosition As Position
+        Public Sub New(context As PonyContext, base As PonyBase)
+            MyBase.New(context, base)
         End Sub
+        Public Function IsPonyContainedInRect(centerLocation As Vector2F, rect As RectangleF) As Boolean
+            Dim sz = Region.Size
+            Return rect.Contains(New RectangleF(centerLocation - (New Vector2F(sz.Width, sz.Height) / 2), sz))
+        End Function
+    End Class
 
+    Public Class GameAnimator
+        Inherits DesktopPonyAnimator
+        Private ReadOnly game As Game
+        Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                       ponyCollection As PonyCollection, ponyContext As PonyContext, game As Game)
+            MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
+            Me.game = Argument.EnsureNotNull(game, "game")
+        End Sub
+        Protected Overrides Sub SynchronizeContext()
+            PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
+            PonyContext.Region = game.GameScreen.WorkingArea
+        End Sub
+        Protected Overrides Sub PostSynchronizeUpdate()
+            game.Update(ManualControlPlayerOne, ManualControlPlayerTwo)
+            MyBase.PostSynchronizeUpdate()
+        End Sub
     End Class
 End Class

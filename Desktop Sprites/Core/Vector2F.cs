@@ -141,7 +141,17 @@
         /// <returns>A string representation of this vector.</returns>
         public override string ToString()
         {
-            return string.Format("({0}, {1})", X, Y);
+            return "(" + X.ToString() + ", " + Y.ToString() + ")";
+        }
+        /// <summary>
+        /// Returns a representation of this vector in Cartesian notation, e.g. "(0, 0)".
+        /// </summary>
+        /// <param name="format">A numeric format string.</param>
+        /// <returns>A string representation of this vector.</returns>
+        /// <exception cref="T:System.FormatException"><paramref name="format"/> is invalid.</exception>
+        public string ToString(string format)
+        {
+            return "(" + X.ToString(format) + ", " + Y.ToString(format) + ")";
         }
         /// <summary>
         /// Tests whether the specified object is a vector structure and is equal to this vector.
@@ -249,6 +259,14 @@
         public float Length()
         {
             return Distance(this, Zero);
+        }
+        /// <summary>
+        /// Calculates the square of the length of this vector.
+        /// </summary>
+        /// <returns>The square of the distance of this vector from the origin.</returns>
+        public float LengthSquared()
+        {
+            return DistanceSquared(this, Zero);
         }
     }
 }

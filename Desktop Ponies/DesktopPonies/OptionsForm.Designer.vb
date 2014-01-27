@@ -22,18 +22,8 @@ Partial Class OptionsForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.AvoidanceZoneLocationLabel = New System.Windows.Forms.Label()
-        Me.AvoidanceZoneSizeLabel = New System.Windows.Forms.Label()
-        Me.AvoidanceZonePreviewLabel = New System.Windows.Forms.Label()
-        Me.AvoidanceZoneY = New System.Windows.Forms.NumericUpDown()
-        Me.AvoidanceZoneHeight = New System.Windows.Forms.NumericUpDown()
-        Me.AvoidanceZoneX = New System.Windows.Forms.NumericUpDown()
-        Me.AvoidanceZoneWidth = New System.Windows.Forms.NumericUpDown()
-        Me.AvoidanceZonePreview = New System.Windows.Forms.PictureBox()
-        Me.MonitorsLabel = New System.Windows.Forms.Label()
         Me.MonitorsSelection = New System.Windows.Forms.ListBox()
-        Me.MonitorsMinimumLabel = New System.Windows.Forms.Label()
-        Me.CursorAvoidance = New System.Windows.Forms.CheckBox()
+        Me.CursorAwareness = New System.Windows.Forms.CheckBox()
         Me.CursorAvoidanceRadius = New System.Windows.Forms.NumericUpDown()
         Me.CursorAvoidanceRadiusLabel = New System.Windows.Forms.Label()
         Me.PonyDragging = New System.Windows.Forms.CheckBox()
@@ -41,34 +31,23 @@ Partial Class OptionsForm
         Me.PonySpeechChanceLabel = New System.Windows.Forms.Label()
         Me.MaxPonies = New System.Windows.Forms.NumericUpDown()
         Me.MaxPoniesLabel = New System.Windows.Forms.Label()
-        Me.MaxPoniesWarningLabel = New System.Windows.Forms.Label()
-        Me.CloseButton = New System.Windows.Forms.Button()
         Me.SaveButton = New System.Windows.Forms.Button()
         Me.LoadButton = New System.Windows.Forms.Button()
         Me.ResetButton = New System.Windows.Forms.Button()
         Me.Effects = New System.Windows.Forms.CheckBox()
         Me.Sound = New System.Windows.Forms.CheckBox()
         Me.Interactions = New System.Windows.Forms.CheckBox()
-        Me.InteractionsMissingLabel = New System.Windows.Forms.Label()
-        Me.InteractionsErrorLabel = New System.Windows.Forms.Label()
         Me.WindowAvoidance = New System.Windows.Forms.CheckBox()
-        Me.SpeechDisabled = New System.Windows.Forms.CheckBox()
-        Me.InteractionErrorsDisplayed = New System.Windows.Forms.CheckBox()
-        Me.InteractionErrorsDisplayedLabel = New System.Windows.Forms.Label()
+        Me.Speech = New System.Windows.Forms.CheckBox()
         Me.PoniesAvoidPonies = New System.Windows.Forms.CheckBox()
-        Me.PoniesStayInBoxes = New System.Windows.Forms.CheckBox()
-        Me.AvoidanceZoneGroup = New System.Windows.Forms.GroupBox()
-        Me.AvoidanceZoneAreaTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.WindowContainment = New System.Windows.Forms.CheckBox()
         Me.SizeScale = New System.Windows.Forms.TrackBar()
         Me.SizeScaleLabel = New System.Windows.Forms.Label()
         Me.SizeScaleValueLabel = New System.Windows.Forms.Label()
         Me.CustomFiltersButton = New System.Windows.Forms.Button()
-        Me.SoundDisabledLabel = New System.Windows.Forms.Label()
         Me.ScreensaverSounds = New System.Windows.Forms.CheckBox()
         Me.SoundLimitOneGlobally = New System.Windows.Forms.RadioButton()
         Me.SoundLimitOnePerPony = New System.Windows.Forms.RadioButton()
-        Me.Teleport = New System.Windows.Forms.CheckBox()
-        Me.TeleportLabel = New System.Windows.Forms.Label()
         Me.ScreensaverGroup = New System.Windows.Forms.GroupBox()
         Me.ScreensaverBackgroundTable = New System.Windows.Forms.TableLayoutPanel()
         Me.ScreensaverColorButton = New System.Windows.Forms.Button()
@@ -80,279 +59,184 @@ Partial Class OptionsForm
         Me.ScreensaverImage = New System.Windows.Forms.RadioButton()
         Me.ScreensaverBackgroundLabel = New System.Windows.Forms.Label()
         Me.AlwaysOnTop = New System.Windows.Forms.CheckBox()
-        Me.AlwaysOnTopLabel = New System.Windows.Forms.Label()
-        Me.SuspendForFullscreenApp = New System.Windows.Forms.CheckBox()
         Me.Volume = New System.Windows.Forms.TrackBar()
         Me.VolumeLabel = New System.Windows.Forms.Label()
         Me.VolumeValueLabel = New System.Windows.Forms.Label()
         Me.TimeScaleValueLabel = New System.Windows.Forms.Label()
         Me.TimeScaleLabel = New System.Windows.Forms.Label()
         Me.TimeScale = New System.Windows.Forms.TrackBar()
-        Me.SpeechGroup = New System.Windows.Forms.GroupBox()
-        Me.SpeechDisabledLabel = New System.Windows.Forms.Label()
-        Me.CursorGroup = New System.Windows.Forms.GroupBox()
-        Me.InteractionsGroup = New System.Windows.Forms.GroupBox()
-        Me.InteractionsTable = New System.Windows.Forms.TableLayoutPanel()
         Me.WindowsGroup = New System.Windows.Forms.GroupBox()
         Me.ShowViewerInTaskbar = New System.Windows.Forms.CheckBox()
         Me.ScreenGroup = New System.Windows.Forms.GroupBox()
+        Me.OutOfBoundsLabel = New System.Windows.Forms.Label()
+        Me.OutOfBoundsWalk = New System.Windows.Forms.RadioButton()
+        Me.OutOfBoundsTeleport = New System.Windows.Forms.RadioButton()
+        Me.ScreenCoveragePreviewLabel = New System.Windows.Forms.Label()
+        Me.ScreenCoveragePreview = New System.Windows.Forms.Panel()
+        Me.ScreenCoveragePanel = New System.Windows.Forms.Panel()
+        Me.AvoidanceAreaTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.AvoidanceAreaHeightLabel = New System.Windows.Forms.Label()
+        Me.ExclusionAreaHeight = New System.Windows.Forms.NumericUpDown()
+        Me.AvoidanceAreaWidthLabel = New System.Windows.Forms.Label()
+        Me.ExclusionAreaWidth = New System.Windows.Forms.NumericUpDown()
+        Me.AvoidanceAreaYLabel = New System.Windows.Forms.Label()
+        Me.AvoidanceAreaXLabel = New System.Windows.Forms.Label()
+        Me.ExculsionAreaX = New System.Windows.Forms.NumericUpDown()
+        Me.ExclusionAreaY = New System.Windows.Forms.NumericUpDown()
+        Me.ScreenAreaTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.ScreenAreaHeightLabel = New System.Windows.Forms.Label()
+        Me.ScreenAreaHeight = New System.Windows.Forms.NumericUpDown()
+        Me.ScreenAreaWidthLabel = New System.Windows.Forms.Label()
+        Me.ScreenAreaWidth = New System.Windows.Forms.NumericUpDown()
+        Me.ScreenAreaYLabel = New System.Windows.Forms.Label()
+        Me.ScreenAreaXLabel = New System.Windows.Forms.Label()
+        Me.ScreenAreaX = New System.Windows.Forms.NumericUpDown()
+        Me.ScreenAreaY = New System.Windows.Forms.NumericUpDown()
+        Me.ScreenExclusion = New System.Windows.Forms.CheckBox()
+        Me.ScreenCoverageArea = New System.Windows.Forms.RadioButton()
+        Me.ScreenCoverageMonitors = New System.Windows.Forms.RadioButton()
+        Me.ScreenLabel = New System.Windows.Forms.Label()
         Me.SoundGroup = New System.Windows.Forms.GroupBox()
-        Me.GeneralGroup = New System.Windows.Forms.GroupBox()
         Me.MonitoringGroup = New System.Windows.Forms.GroupBox()
         Me.ShowPerformanceGraph = New System.Windows.Forms.CheckBox()
         Me.EnablePonyLogs = New System.Windows.Forms.CheckBox()
-        Me.AvoidanceZoneGroup.SuspendLayout()
-        Me.AvoidanceZoneAreaTable.SuspendLayout()
+        Me.PoniesGroup = New System.Windows.Forms.GroupBox()
         Me.ScreensaverGroup.SuspendLayout()
         Me.ScreensaverBackgroundTable.SuspendLayout()
-        Me.SpeechGroup.SuspendLayout()
-        Me.CursorGroup.SuspendLayout()
-        Me.InteractionsGroup.SuspendLayout()
-        Me.InteractionsTable.SuspendLayout()
         Me.WindowsGroup.SuspendLayout()
         Me.ScreenGroup.SuspendLayout()
+        Me.ScreenCoveragePanel.SuspendLayout()
+        Me.AvoidanceAreaTable.SuspendLayout()
+        Me.ScreenAreaTable.SuspendLayout()
         Me.SoundGroup.SuspendLayout()
-        Me.GeneralGroup.SuspendLayout()
         Me.MonitoringGroup.SuspendLayout()
+        Me.PoniesGroup.SuspendLayout()
         Me.SuspendLayout()
-        '
-        'AvoidanceZoneLocationLabel
-        '
-        Me.AvoidanceZoneLocationLabel.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AvoidanceZoneLocationLabel.Location = New System.Drawing.Point(3, 0)
-        Me.AvoidanceZoneLocationLabel.Name = "AvoidanceZoneLocationLabel"
-        Me.AvoidanceZoneLocationLabel.Size = New System.Drawing.Size(74, 26)
-        Me.AvoidanceZoneLocationLabel.TabIndex = 0
-        Me.AvoidanceZoneLocationLabel.Text = "Location (X,Y)"
-        Me.AvoidanceZoneLocationLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'AvoidanceZoneSizeLabel
-        '
-        Me.AvoidanceZoneSizeLabel.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AvoidanceZoneSizeLabel.Location = New System.Drawing.Point(3, 26)
-        Me.AvoidanceZoneSizeLabel.Name = "AvoidanceZoneSizeLabel"
-        Me.AvoidanceZoneSizeLabel.Size = New System.Drawing.Size(74, 26)
-        Me.AvoidanceZoneSizeLabel.TabIndex = 3
-        Me.AvoidanceZoneSizeLabel.Text = "Size (X,Y)"
-        Me.AvoidanceZoneSizeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'AvoidanceZonePreviewLabel
-        '
-        Me.AvoidanceZonePreviewLabel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AvoidanceZonePreviewLabel.Location = New System.Drawing.Point(6, 189)
-        Me.AvoidanceZonePreviewLabel.Name = "AvoidanceZonePreviewLabel"
-        Me.AvoidanceZonePreviewLabel.Size = New System.Drawing.Size(257, 13)
-        Me.AvoidanceZonePreviewLabel.TabIndex = 1
-        Me.AvoidanceZonePreviewLabel.Text = "Pony Avoidance Zone Preview"
-        Me.AvoidanceZonePreviewLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'AvoidanceZoneY
-        '
-        Me.AvoidanceZoneY.Location = New System.Drawing.Point(135, 3)
-        Me.AvoidanceZoneY.Name = "AvoidanceZoneY"
-        Me.AvoidanceZoneY.Size = New System.Drawing.Size(46, 20)
-        Me.AvoidanceZoneY.TabIndex = 2
-        '
-        'AvoidanceZoneHeight
-        '
-        Me.AvoidanceZoneHeight.Location = New System.Drawing.Point(135, 29)
-        Me.AvoidanceZoneHeight.Name = "AvoidanceZoneHeight"
-        Me.AvoidanceZoneHeight.Size = New System.Drawing.Size(46, 20)
-        Me.AvoidanceZoneHeight.TabIndex = 5
-        '
-        'AvoidanceZoneX
-        '
-        Me.AvoidanceZoneX.Location = New System.Drawing.Point(83, 3)
-        Me.AvoidanceZoneX.Name = "AvoidanceZoneX"
-        Me.AvoidanceZoneX.Size = New System.Drawing.Size(46, 20)
-        Me.AvoidanceZoneX.TabIndex = 1
-        '
-        'AvoidanceZoneWidth
-        '
-        Me.AvoidanceZoneWidth.Location = New System.Drawing.Point(83, 29)
-        Me.AvoidanceZoneWidth.Name = "AvoidanceZoneWidth"
-        Me.AvoidanceZoneWidth.Size = New System.Drawing.Size(46, 20)
-        Me.AvoidanceZoneWidth.TabIndex = 4
-        '
-        'AvoidanceZonePreview
-        '
-        Me.AvoidanceZonePreview.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AvoidanceZonePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.AvoidanceZonePreview.Location = New System.Drawing.Point(6, 77)
-        Me.AvoidanceZonePreview.Name = "AvoidanceZonePreview"
-        Me.AvoidanceZonePreview.Size = New System.Drawing.Size(257, 109)
-        Me.AvoidanceZonePreview.TabIndex = 15
-        Me.AvoidanceZonePreview.TabStop = False
-        '
-        'MonitorsLabel
-        '
-        Me.MonitorsLabel.AutoSize = True
-        Me.MonitorsLabel.Location = New System.Drawing.Point(42, 19)
-        Me.MonitorsLabel.Name = "MonitorsLabel"
-        Me.MonitorsLabel.Size = New System.Drawing.Size(82, 13)
-        Me.MonitorsLabel.TabIndex = 0
-        Me.MonitorsLabel.Text = "Monitors to use:"
         '
         'MonitorsSelection
         '
         Me.MonitorsSelection.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.MonitorsSelection.DisplayMember = "DeviceName"
+        Me.MonitorsSelection.Enabled = False
         Me.MonitorsSelection.FormattingEnabled = True
-        Me.MonitorsSelection.Location = New System.Drawing.Point(130, 19)
+        Me.MonitorsSelection.Location = New System.Drawing.Point(3, 26)
         Me.MonitorsSelection.Name = "MonitorsSelection"
         Me.MonitorsSelection.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple
-        Me.MonitorsSelection.Size = New System.Drawing.Size(222, 56)
-        Me.MonitorsSelection.TabIndex = 2
+        Me.MonitorsSelection.Size = New System.Drawing.Size(236, 43)
+        Me.MonitorsSelection.TabIndex = 1
         '
-        'MonitorsMinimumLabel
+        'CursorAwareness
         '
-        Me.MonitorsMinimumLabel.ForeColor = System.Drawing.Color.Maroon
-        Me.MonitorsMinimumLabel.Location = New System.Drawing.Point(16, 32)
-        Me.MonitorsMinimumLabel.Name = "MonitorsMinimumLabel"
-        Me.MonitorsMinimumLabel.Size = New System.Drawing.Size(108, 42)
-        Me.MonitorsMinimumLabel.TabIndex = 1
-        Me.MonitorsMinimumLabel.Text = "(You need at least one monitor selected)"
-        Me.MonitorsMinimumLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.MonitorsMinimumLabel.Visible = False
-        '
-        'CursorAvoidance
-        '
-        Me.CursorAvoidance.AutoSize = True
-        Me.CursorAvoidance.Checked = True
-        Me.CursorAvoidance.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.CursorAvoidance.Location = New System.Drawing.Point(6, 19)
-        Me.CursorAvoidance.Name = "CursorAvoidance"
-        Me.CursorAvoidance.Size = New System.Drawing.Size(245, 17)
-        Me.CursorAvoidance.TabIndex = 0
-        Me.CursorAvoidance.Text = "Ponies avoid cursor / stop when hovered over"
-        Me.CursorAvoidance.UseVisualStyleBackColor = True
+        Me.CursorAwareness.AutoSize = True
+        Me.CursorAwareness.Location = New System.Drawing.Point(6, 130)
+        Me.CursorAwareness.Name = "CursorAwareness"
+        Me.CursorAwareness.Size = New System.Drawing.Size(245, 17)
+        Me.CursorAwareness.TabIndex = 6
+        Me.CursorAwareness.Text = "Ponies avoid cursor / stop when hovered over"
+        Me.CursorAwareness.UseVisualStyleBackColor = True
         '
         'CursorAvoidanceRadius
         '
+        Me.CursorAvoidanceRadius.Enabled = False
         Me.CursorAvoidanceRadius.Increment = New Decimal(New Integer() {5, 0, 0, 0})
-        Me.CursorAvoidanceRadius.Location = New System.Drawing.Point(187, 42)
+        Me.CursorAvoidanceRadius.Location = New System.Drawing.Point(184, 151)
         Me.CursorAvoidanceRadius.Maximum = New Decimal(New Integer() {10000, 0, 0, 0})
         Me.CursorAvoidanceRadius.Name = "CursorAvoidanceRadius"
-        Me.CursorAvoidanceRadius.Size = New System.Drawing.Size(76, 20)
-        Me.CursorAvoidanceRadius.TabIndex = 2
-        Me.CursorAvoidanceRadius.Value = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.CursorAvoidanceRadius.Size = New System.Drawing.Size(66, 20)
+        Me.CursorAvoidanceRadius.TabIndex = 8
         '
         'CursorAvoidanceRadiusLabel
         '
         Me.CursorAvoidanceRadiusLabel.AutoSize = True
-        Me.CursorAvoidanceRadiusLabel.Location = New System.Drawing.Point(6, 46)
+        Me.CursorAvoidanceRadiusLabel.Enabled = False
+        Me.CursorAvoidanceRadiusLabel.Location = New System.Drawing.Point(6, 153)
+        Me.CursorAvoidanceRadiusLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.CursorAvoidanceRadiusLabel.Name = "CursorAvoidanceRadiusLabel"
-        Me.CursorAvoidanceRadiusLabel.Size = New System.Drawing.Size(175, 13)
-        Me.CursorAvoidanceRadiusLabel.TabIndex = 1
-        Me.CursorAvoidanceRadiusLabel.Text = "Size of area around cursor to avoid:"
+        Me.CursorAvoidanceRadiusLabel.Size = New System.Drawing.Size(172, 13)
+        Me.CursorAvoidanceRadiusLabel.TabIndex = 7
+        Me.CursorAvoidanceRadiusLabel.Text = "Radius around cursor to avoid (px):"
         '
         'PonyDragging
         '
         Me.PonyDragging.AutoSize = True
-        Me.PonyDragging.Checked = True
-        Me.PonyDragging.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.PonyDragging.Location = New System.Drawing.Point(6, 68)
+        Me.PonyDragging.Location = New System.Drawing.Point(6, 107)
         Me.PonyDragging.Name = "PonyDragging"
-        Me.PonyDragging.Size = New System.Drawing.Size(246, 17)
-        Me.PonyDragging.TabIndex = 3
-        Me.PonyDragging.Text = "Ponies can be dragged around with the mouse"
+        Me.PonyDragging.Size = New System.Drawing.Size(105, 17)
+        Me.PonyDragging.TabIndex = 5
+        Me.PonyDragging.Text = "Enable Dragging"
         Me.PonyDragging.UseVisualStyleBackColor = True
         '
         'PonySpeechChance
         '
-        Me.PonySpeechChance.Increment = New Decimal(New Integer() {5, 0, 0, 0})
-        Me.PonySpeechChance.Location = New System.Drawing.Point(159, 39)
+        Me.PonySpeechChance.Enabled = False
+        Me.PonySpeechChance.Location = New System.Drawing.Point(159, 63)
         Me.PonySpeechChance.Name = "PonySpeechChance"
         Me.PonySpeechChance.Size = New System.Drawing.Size(50, 20)
-        Me.PonySpeechChance.TabIndex = 2
-        Me.PonySpeechChance.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        Me.PonySpeechChance.TabIndex = 3
         '
         'PonySpeechChanceLabel
         '
         Me.PonySpeechChanceLabel.AutoSize = True
-        Me.PonySpeechChanceLabel.Location = New System.Drawing.Point(6, 41)
+        Me.PonySpeechChanceLabel.Enabled = False
+        Me.PonySpeechChanceLabel.Location = New System.Drawing.Point(6, 65)
+        Me.PonySpeechChanceLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.PonySpeechChanceLabel.Name = "PonySpeechChanceLabel"
         Me.PonySpeechChanceLabel.Size = New System.Drawing.Size(147, 13)
-        Me.PonySpeechChanceLabel.TabIndex = 1
+        Me.PonySpeechChanceLabel.TabIndex = 2
         Me.PonySpeechChanceLabel.Text = "Random Speech Chance (%):"
         '
         'MaxPonies
         '
-        Me.MaxPonies.Location = New System.Drawing.Point(129, 42)
-        Me.MaxPonies.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
+        Me.MaxPonies.Increment = New Decimal(New Integer() {10, 0, 0, 0})
+        Me.MaxPonies.Location = New System.Drawing.Point(129, 295)
+        Me.MaxPonies.Maximum = New Decimal(New Integer() {10000, 0, 0, 0})
+        Me.MaxPonies.Minimum = New Decimal(New Integer() {10, 0, 0, 0})
         Me.MaxPonies.Name = "MaxPonies"
-        Me.MaxPonies.Size = New System.Drawing.Size(50, 20)
-        Me.MaxPonies.TabIndex = 2
-        Me.MaxPonies.Value = New Decimal(New Integer() {300, 0, 0, 0})
+        Me.MaxPonies.Size = New System.Drawing.Size(60, 20)
+        Me.MaxPonies.TabIndex = 17
+        Me.MaxPonies.Value = New Decimal(New Integer() {10, 0, 0, 0})
         '
         'MaxPoniesLabel
         '
         Me.MaxPoniesLabel.AutoSize = True
-        Me.MaxPoniesLabel.Location = New System.Drawing.Point(6, 44)
+        Me.MaxPoniesLabel.Location = New System.Drawing.Point(6, 297)
+        Me.MaxPoniesLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.MaxPoniesLabel.Name = "MaxPoniesLabel"
         Me.MaxPoniesLabel.Size = New System.Drawing.Size(117, 13)
-        Me.MaxPoniesLabel.TabIndex = 1
+        Me.MaxPoniesLabel.TabIndex = 16
         Me.MaxPoniesLabel.Text = "Max Number of Ponies:"
-        '
-        'MaxPoniesWarningLabel
-        '
-        Me.MaxPoniesWarningLabel.AutoSize = True
-        Me.MaxPoniesWarningLabel.ForeColor = System.Drawing.Color.DarkRed
-        Me.MaxPoniesWarningLabel.Location = New System.Drawing.Point(6, 65)
-        Me.MaxPoniesWarningLabel.Name = "MaxPoniesWarningLabel"
-        Me.MaxPoniesWarningLabel.Size = New System.Drawing.Size(210, 26)
-        Me.MaxPoniesWarningLabel.TabIndex = 3
-        Me.MaxPoniesWarningLabel.Text = "**** WARNING: Too many ponies may  ****" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "**** make your computer run slowly ****"
-        Me.MaxPoniesWarningLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'CloseButton
-        '
-        Me.CloseButton.Location = New System.Drawing.Point(777, 501)
-        Me.CloseButton.Name = "CloseButton"
-        Me.CloseButton.Size = New System.Drawing.Size(103, 23)
-        Me.CloseButton.TabIndex = 13
-        Me.CloseButton.Text = "Close"
-        Me.CloseButton.UseVisualStyleBackColor = True
         '
         'SaveButton
         '
-        Me.SaveButton.Location = New System.Drawing.Point(777, 394)
+        Me.SaveButton.Location = New System.Drawing.Point(655, 467)
         Me.SaveButton.Name = "SaveButton"
         Me.SaveButton.Size = New System.Drawing.Size(103, 23)
-        Me.SaveButton.TabIndex = 10
+        Me.SaveButton.TabIndex = 9
         Me.SaveButton.Text = "SAVE"
         Me.SaveButton.UseVisualStyleBackColor = True
         '
         'LoadButton
         '
-        Me.LoadButton.Location = New System.Drawing.Point(777, 365)
+        Me.LoadButton.Location = New System.Drawing.Point(656, 438)
         Me.LoadButton.Name = "LoadButton"
         Me.LoadButton.Size = New System.Drawing.Size(103, 23)
-        Me.LoadButton.TabIndex = 9
+        Me.LoadButton.TabIndex = 8
         Me.LoadButton.Text = "LOAD"
         Me.LoadButton.UseVisualStyleBackColor = True
         '
         'ResetButton
         '
-        Me.ResetButton.Location = New System.Drawing.Point(777, 423)
+        Me.ResetButton.Location = New System.Drawing.Point(547, 438)
         Me.ResetButton.Name = "ResetButton"
         Me.ResetButton.Size = New System.Drawing.Size(103, 23)
-        Me.ResetButton.TabIndex = 11
+        Me.ResetButton.TabIndex = 6
         Me.ResetButton.Text = "RESET"
         Me.ResetButton.UseVisualStyleBackColor = True
         '
         'Effects
         '
         Me.Effects.AutoSize = True
-        Me.Effects.Checked = True
-        Me.Effects.CheckState = System.Windows.Forms.CheckState.Checked
         Me.Effects.Location = New System.Drawing.Point(6, 19)
         Me.Effects.Name = "Effects"
         Me.Effects.Size = New System.Drawing.Size(95, 17)
@@ -373,190 +257,97 @@ Partial Class OptionsForm
         'Interactions
         '
         Me.Interactions.AutoSize = True
-        Me.Interactions.Checked = True
-        Me.Interactions.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.Interactions.Location = New System.Drawing.Point(3, 3)
+        Me.Interactions.Location = New System.Drawing.Point(6, 84)
         Me.Interactions.Name = "Interactions"
         Me.Interactions.Size = New System.Drawing.Size(117, 17)
-        Me.Interactions.TabIndex = 0
+        Me.Interactions.TabIndex = 4
         Me.Interactions.Text = "Enable Interactions"
         Me.Interactions.UseVisualStyleBackColor = True
-        '
-        'InteractionsMissingLabel
-        '
-        Me.InteractionsMissingLabel.AutoSize = True
-        Me.InteractionsMissingLabel.ForeColor = System.Drawing.Color.DarkRed
-        Me.InteractionsMissingLabel.Location = New System.Drawing.Point(3, 23)
-        Me.InteractionsMissingLabel.Name = "InteractionsMissingLabel"
-        Me.InteractionsMissingLabel.Size = New System.Drawing.Size(190, 13)
-        Me.InteractionsMissingLabel.TabIndex = 1
-        Me.InteractionsMissingLabel.Text = "*Disabled due to no interactions.ini file*"
-        Me.InteractionsMissingLabel.Visible = False
-        '
-        'InteractionsErrorLabel
-        '
-        Me.InteractionsErrorLabel.AutoSize = True
-        Me.InteractionsErrorLabel.ForeColor = System.Drawing.Color.DarkRed
-        Me.InteractionsErrorLabel.Location = New System.Drawing.Point(3, 36)
-        Me.InteractionsErrorLabel.Name = "InteractionsErrorLabel"
-        Me.InteractionsErrorLabel.Size = New System.Drawing.Size(113, 13)
-        Me.InteractionsErrorLabel.TabIndex = 2
-        Me.InteractionsErrorLabel.Text = "*Disabled due to error*"
-        Me.InteractionsErrorLabel.Visible = False
         '
         'WindowAvoidance
         '
         Me.WindowAvoidance.AutoSize = True
-        Me.WindowAvoidance.Location = New System.Drawing.Point(6, 78)
+        Me.WindowAvoidance.Location = New System.Drawing.Point(6, 65)
         Me.WindowAvoidance.Name = "WindowAvoidance"
         Me.WindowAvoidance.Size = New System.Drawing.Size(184, 17)
         Me.WindowAvoidance.TabIndex = 2
         Me.WindowAvoidance.Text = "Ponies try to avoid other windows"
         Me.WindowAvoidance.UseVisualStyleBackColor = True
         '
-        'SpeechDisabled
+        'Speech
         '
-        Me.SpeechDisabled.AutoSize = True
-        Me.SpeechDisabled.Location = New System.Drawing.Point(6, 19)
-        Me.SpeechDisabled.Name = "SpeechDisabled"
-        Me.SpeechDisabled.Size = New System.Drawing.Size(132, 17)
-        Me.SpeechDisabled.TabIndex = 0
-        Me.SpeechDisabled.Text = "Disable all speech text"
-        Me.SpeechDisabled.UseVisualStyleBackColor = True
-        '
-        'InteractionErrorsDisplayed
-        '
-        Me.InteractionErrorsDisplayed.AutoSize = True
-        Me.InteractionErrorsDisplayed.Location = New System.Drawing.Point(3, 52)
-        Me.InteractionErrorsDisplayed.Name = "InteractionErrorsDisplayed"
-        Me.InteractionErrorsDisplayed.Size = New System.Drawing.Size(135, 17)
-        Me.InteractionErrorsDisplayed.TabIndex = 3
-        Me.InteractionErrorsDisplayed.Text = "Show Interaction errors"
-        Me.InteractionErrorsDisplayed.UseVisualStyleBackColor = True
-        '
-        'InteractionErrorsDisplayedLabel
-        '
-        Me.InteractionErrorsDisplayedLabel.AutoSize = True
-        Me.InteractionErrorsDisplayedLabel.Location = New System.Drawing.Point(3, 72)
-        Me.InteractionErrorsDisplayedLabel.Name = "InteractionErrorsDisplayedLabel"
-        Me.InteractionErrorsDisplayedLabel.Size = New System.Drawing.Size(183, 13)
-        Me.InteractionErrorsDisplayedLabel.TabIndex = 4
-        Me.InteractionErrorsDisplayedLabel.Text = "(Unchecked: Silently disable on error)"
+        Me.Speech.AutoSize = True
+        Me.Speech.Location = New System.Drawing.Point(6, 42)
+        Me.Speech.Name = "Speech"
+        Me.Speech.Size = New System.Drawing.Size(99, 17)
+        Me.Speech.TabIndex = 1
+        Me.Speech.Text = "Enable Speech"
+        Me.Speech.UseVisualStyleBackColor = True
         '
         'PoniesAvoidPonies
         '
         Me.PoniesAvoidPonies.AutoSize = True
-        Me.PoniesAvoidPonies.Location = New System.Drawing.Point(27, 101)
+        Me.PoniesAvoidPonies.Location = New System.Drawing.Point(6, 172)
         Me.PoniesAvoidPonies.Name = "PoniesAvoidPonies"
         Me.PoniesAvoidPonies.Size = New System.Drawing.Size(174, 17)
-        Me.PoniesAvoidPonies.TabIndex = 3
+        Me.PoniesAvoidPonies.TabIndex = 9
         Me.PoniesAvoidPonies.Text = "Ponies try to avoid other ponies"
         Me.PoniesAvoidPonies.UseVisualStyleBackColor = True
         '
-        'PoniesStayInBoxes
+        'WindowContainment
         '
-        Me.PoniesStayInBoxes.AutoSize = True
-        Me.PoniesStayInBoxes.Location = New System.Drawing.Point(27, 124)
-        Me.PoniesStayInBoxes.Name = "PoniesStayInBoxes"
-        Me.PoniesStayInBoxes.Size = New System.Drawing.Size(228, 17)
-        Me.PoniesStayInBoxes.TabIndex = 4
-        Me.PoniesStayInBoxes.Text = "Ponies don't leave windows they are inside"
-        Me.PoniesStayInBoxes.UseVisualStyleBackColor = True
-        '
-        'AvoidanceZoneGroup
-        '
-        Me.AvoidanceZoneGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZoneAreaTable)
-        Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZonePreviewLabel)
-        Me.AvoidanceZoneGroup.Controls.Add(Me.AvoidanceZonePreview)
-        Me.AvoidanceZoneGroup.Location = New System.Drawing.Point(247, 122)
-        Me.AvoidanceZoneGroup.Name = "AvoidanceZoneGroup"
-        Me.AvoidanceZoneGroup.Size = New System.Drawing.Size(269, 218)
-        Me.AvoidanceZoneGroup.TabIndex = 4
-        Me.AvoidanceZoneGroup.TabStop = False
-        Me.AvoidanceZoneGroup.Text = "Avoidance Zone (""Everfree Forest"")"
-        '
-        'AvoidanceZoneAreaTable
-        '
-        Me.AvoidanceZoneAreaTable.AutoSize = True
-        Me.AvoidanceZoneAreaTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.AvoidanceZoneAreaTable.ColumnCount = 3
-        Me.AvoidanceZoneAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.AvoidanceZoneAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.AvoidanceZoneAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneLocationLabel, 0, 0)
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneSizeLabel, 0, 1)
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneY, 2, 0)
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneWidth, 1, 1)
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneX, 1, 0)
-        Me.AvoidanceZoneAreaTable.Controls.Add(Me.AvoidanceZoneHeight, 2, 1)
-        Me.AvoidanceZoneAreaTable.Location = New System.Drawing.Point(6, 19)
-        Me.AvoidanceZoneAreaTable.Name = "AvoidanceZoneAreaTable"
-        Me.AvoidanceZoneAreaTable.RowCount = 2
-        Me.AvoidanceZoneAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.AvoidanceZoneAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.AvoidanceZoneAreaTable.Size = New System.Drawing.Size(184, 52)
-        Me.AvoidanceZoneAreaTable.TabIndex = 0
+        Me.WindowContainment.AutoSize = True
+        Me.WindowContainment.Location = New System.Drawing.Point(6, 88)
+        Me.WindowContainment.Name = "WindowContainment"
+        Me.WindowContainment.Size = New System.Drawing.Size(228, 17)
+        Me.WindowContainment.TabIndex = 3
+        Me.WindowContainment.Text = "Ponies don't leave windows they are inside"
+        Me.WindowContainment.UseVisualStyleBackColor = True
         '
         'SizeScale
         '
-        Me.SizeScale.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.SizeScale.LargeChange = 25
-        Me.SizeScale.Location = New System.Drawing.Point(6, 113)
-        Me.SizeScale.Maximum = 500
-        Me.SizeScale.Minimum = 25
+        Me.SizeScale.Location = New System.Drawing.Point(6, 195)
+        Me.SizeScale.Maximum = 100
+        Me.SizeScale.Minimum = 5
         Me.SizeScale.Name = "SizeScale"
-        Me.SizeScale.Size = New System.Drawing.Size(217, 45)
-        Me.SizeScale.TabIndex = 6
-        Me.SizeScale.TickFrequency = 25
-        Me.SizeScale.TickStyle = System.Windows.Forms.TickStyle.TopLeft
-        Me.SizeScale.Value = 100
+        Me.SizeScale.Size = New System.Drawing.Size(244, 45)
+        Me.SizeScale.TabIndex = 10
+        Me.SizeScale.TickFrequency = 5
+        Me.SizeScale.Value = 5
         '
         'SizeScaleLabel
         '
         Me.SizeScaleLabel.AutoSize = True
-        Me.SizeScaleLabel.Location = New System.Drawing.Point(6, 97)
+        Me.SizeScaleLabel.Location = New System.Drawing.Point(6, 227)
+        Me.SizeScaleLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.SizeScaleLabel.Name = "SizeScaleLabel"
         Me.SizeScaleLabel.Size = New System.Drawing.Size(62, 13)
-        Me.SizeScaleLabel.TabIndex = 4
+        Me.SizeScaleLabel.TabIndex = 11
         Me.SizeScaleLabel.Text = "Pony Sizes:"
         '
         'SizeScaleValueLabel
         '
-        Me.SizeScaleValueLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.SizeScaleValueLabel.AutoSize = True
-        Me.SizeScaleValueLabel.Location = New System.Drawing.Point(191, 97)
+        Me.SizeScaleValueLabel.Location = New System.Drawing.Point(74, 227)
+        Me.SizeScaleValueLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.SizeScaleValueLabel.Name = "SizeScaleValueLabel"
         Me.SizeScaleValueLabel.Size = New System.Drawing.Size(18, 13)
-        Me.SizeScaleValueLabel.TabIndex = 5
-        Me.SizeScaleValueLabel.Text = "1x"
+        Me.SizeScaleValueLabel.TabIndex = 12
+        Me.SizeScaleValueLabel.Text = "0x"
         '
         'CustomFiltersButton
         '
-        Me.CustomFiltersButton.Location = New System.Drawing.Point(777, 472)
+        Me.CustomFiltersButton.Location = New System.Drawing.Point(547, 466)
         Me.CustomFiltersButton.Name = "CustomFiltersButton"
         Me.CustomFiltersButton.Size = New System.Drawing.Size(103, 23)
-        Me.CustomFiltersButton.TabIndex = 12
+        Me.CustomFiltersButton.TabIndex = 7
         Me.CustomFiltersButton.Text = "Custom Filters"
         Me.CustomFiltersButton.UseVisualStyleBackColor = True
-        '
-        'SoundDisabledLabel
-        '
-        Me.SoundDisabledLabel.AutoSize = True
-        Me.SoundDisabledLabel.ForeColor = System.Drawing.Color.DarkRed
-        Me.SoundDisabledLabel.Location = New System.Drawing.Point(6, 39)
-        Me.SoundDisabledLabel.Name = "SoundDisabledLabel"
-        Me.SoundDisabledLabel.Size = New System.Drawing.Size(257, 13)
-        Me.SoundDisabledLabel.TabIndex = 1
-        Me.SoundDisabledLabel.Text = "*Disabled due to missing or incorrect DirectX version*"
-        Me.SoundDisabledLabel.Visible = False
         '
         'ScreensaverSounds
         '
         Me.ScreensaverSounds.AutoSize = True
-        Me.ScreensaverSounds.Checked = True
-        Me.ScreensaverSounds.CheckState = System.Windows.Forms.CheckState.Checked
         Me.ScreensaverSounds.Location = New System.Drawing.Point(6, 19)
         Me.ScreensaverSounds.Name = "ScreensaverSounds"
         Me.ScreensaverSounds.Size = New System.Drawing.Size(201, 17)
@@ -567,10 +358,11 @@ Partial Class OptionsForm
         'SoundLimitOneGlobally
         '
         Me.SoundLimitOneGlobally.AutoSize = True
-        Me.SoundLimitOneGlobally.Location = New System.Drawing.Point(6, 78)
+        Me.SoundLimitOneGlobally.Enabled = False
+        Me.SoundLimitOneGlobally.Location = New System.Drawing.Point(6, 65)
         Me.SoundLimitOneGlobally.Name = "SoundLimitOneGlobally"
         Me.SoundLimitOneGlobally.Size = New System.Drawing.Size(159, 17)
-        Me.SoundLimitOneGlobally.TabIndex = 3
+        Me.SoundLimitOneGlobally.TabIndex = 2
         Me.SoundLimitOneGlobally.Text = "Limit sounds to one at a time"
         Me.SoundLimitOneGlobally.UseVisualStyleBackColor = True
         '
@@ -578,32 +370,14 @@ Partial Class OptionsForm
         '
         Me.SoundLimitOnePerPony.AutoSize = True
         Me.SoundLimitOnePerPony.Checked = True
-        Me.SoundLimitOnePerPony.Location = New System.Drawing.Point(6, 55)
+        Me.SoundLimitOnePerPony.Enabled = False
+        Me.SoundLimitOnePerPony.Location = New System.Drawing.Point(6, 42)
         Me.SoundLimitOnePerPony.Name = "SoundLimitOnePerPony"
         Me.SoundLimitOnePerPony.Size = New System.Drawing.Size(160, 17)
-        Me.SoundLimitOnePerPony.TabIndex = 2
+        Me.SoundLimitOnePerPony.TabIndex = 1
         Me.SoundLimitOnePerPony.TabStop = True
         Me.SoundLimitOnePerPony.Text = "Limit sounds to one per pony"
         Me.SoundLimitOnePerPony.UseVisualStyleBackColor = True
-        '
-        'Teleport
-        '
-        Me.Teleport.AutoSize = True
-        Me.Teleport.Location = New System.Drawing.Point(6, 104)
-        Me.Teleport.Name = "Teleport"
-        Me.Teleport.Size = New System.Drawing.Size(306, 17)
-        Me.Teleport.TabIndex = 4
-        Me.Teleport.Text = "Ponies teleport out of disallowed areas/screens immediately"
-        Me.Teleport.UseVisualStyleBackColor = True
-        '
-        'TeleportLabel
-        '
-        Me.TeleportLabel.AutoSize = True
-        Me.TeleportLabel.Location = New System.Drawing.Point(6, 124)
-        Me.TeleportLabel.Name = "TeleportLabel"
-        Me.TeleportLabel.Size = New System.Drawing.Size(274, 13)
-        Me.TeleportLabel.TabIndex = 5
-        Me.TeleportLabel.Text = "(Unchecked: Ponies slowly walk out of disallowed areas)"
         '
         'ScreensaverGroup
         '
@@ -611,10 +385,10 @@ Partial Class OptionsForm
         Me.ScreensaverGroup.Controls.Add(Me.ScreensaverBackgroundTable)
         Me.ScreensaverGroup.Controls.Add(Me.ScreensaverBackgroundLabel)
         Me.ScreensaverGroup.Controls.Add(Me.ScreensaverSounds)
-        Me.ScreensaverGroup.Location = New System.Drawing.Point(12, 259)
+        Me.ScreensaverGroup.Location = New System.Drawing.Point(534, 263)
         Me.ScreensaverGroup.Name = "ScreensaverGroup"
-        Me.ScreensaverGroup.Size = New System.Drawing.Size(229, 181)
-        Me.ScreensaverGroup.TabIndex = 1
+        Me.ScreensaverGroup.Size = New System.Drawing.Size(236, 150)
+        Me.ScreensaverGroup.TabIndex = 5
         Me.ScreensaverGroup.TabStop = False
         Me.ScreensaverGroup.Text = "Screensaver"
         '
@@ -682,12 +456,10 @@ Partial Class OptionsForm
         'ScreensaverTransparent
         '
         Me.ScreensaverTransparent.AutoSize = True
-        Me.ScreensaverTransparent.Checked = True
         Me.ScreensaverTransparent.Location = New System.Drawing.Point(3, 3)
         Me.ScreensaverTransparent.Name = "ScreensaverTransparent"
         Me.ScreensaverTransparent.Size = New System.Drawing.Size(117, 17)
         Me.ScreensaverTransparent.TabIndex = 0
-        Me.ScreensaverTransparent.TabStop = True
         Me.ScreensaverTransparent.Text = "None (Transparent)"
         Me.ScreensaverTransparent.UseVisualStyleBackColor = True
         '
@@ -739,54 +511,33 @@ Partial Class OptionsForm
         'AlwaysOnTop
         '
         Me.AlwaysOnTop.AutoSize = True
-        Me.AlwaysOnTop.Checked = True
-        Me.AlwaysOnTop.CheckState = System.Windows.Forms.CheckState.Checked
         Me.AlwaysOnTop.Location = New System.Drawing.Point(6, 42)
         Me.AlwaysOnTop.Name = "AlwaysOnTop"
         Me.AlwaysOnTop.Size = New System.Drawing.Size(227, 17)
-        Me.AlwaysOnTop.TabIndex = 0
+        Me.AlwaysOnTop.TabIndex = 1
         Me.AlwaysOnTop.Text = "Ponies are always on top of other windows"
         Me.AlwaysOnTop.UseVisualStyleBackColor = True
-        '
-        'AlwaysOnTopLabel
-        '
-        Me.AlwaysOnTopLabel.AutoSize = True
-        Me.AlwaysOnTopLabel.Location = New System.Drawing.Point(6, 62)
-        Me.AlwaysOnTopLabel.Name = "AlwaysOnTopLabel"
-        Me.AlwaysOnTopLabel.Size = New System.Drawing.Size(304, 13)
-        Me.AlwaysOnTopLabel.TabIndex = 1
-        Me.AlwaysOnTopLabel.Text = "(Unchecked: Ponies walk behind windows you are working on)"
-        '
-        'SuspendForFullscreenApp
-        '
-        Me.SuspendForFullscreenApp.AutoSize = True
-        Me.SuspendForFullscreenApp.Location = New System.Drawing.Point(6, 81)
-        Me.SuspendForFullscreenApp.Name = "SuspendForFullscreenApp"
-        Me.SuspendForFullscreenApp.Size = New System.Drawing.Size(337, 17)
-        Me.SuspendForFullscreenApp.TabIndex = 3
-        Me.SuspendForFullscreenApp.Text = "Suspend and hide ponies when a full screen application is running"
-        Me.SuspendForFullscreenApp.UseVisualStyleBackColor = True
         '
         'Volume
         '
         Me.Volume.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Volume.LargeChange = 100
-        Me.Volume.Location = New System.Drawing.Point(6, 114)
-        Me.Volume.Maximum = 1000
-        Me.Volume.Minimum = 100
+        Me.Volume.Enabled = False
+        Me.Volume.LargeChange = 10
+        Me.Volume.Location = New System.Drawing.Point(6, 88)
+        Me.Volume.Maximum = 100
+        Me.Volume.Minimum = 10
         Me.Volume.Name = "Volume"
-        Me.Volume.Size = New System.Drawing.Size(257, 45)
-        Me.Volume.SmallChange = 25
-        Me.Volume.TabIndex = 6
-        Me.Volume.TickFrequency = 100
-        Me.Volume.TickStyle = System.Windows.Forms.TickStyle.TopLeft
-        Me.Volume.Value = 750
+        Me.Volume.Size = New System.Drawing.Size(238, 45)
+        Me.Volume.TabIndex = 3
+        Me.Volume.TickFrequency = 10
+        Me.Volume.Value = 10
         '
         'VolumeLabel
         '
         Me.VolumeLabel.AutoSize = True
-        Me.VolumeLabel.Location = New System.Drawing.Point(6, 98)
+        Me.VolumeLabel.Enabled = False
+        Me.VolumeLabel.Location = New System.Drawing.Point(6, 120)
         Me.VolumeLabel.Name = "VolumeLabel"
         Me.VolumeLabel.Size = New System.Drawing.Size(79, 13)
         Me.VolumeLabel.TabIndex = 4
@@ -795,217 +546,419 @@ Partial Class OptionsForm
         'VolumeValueLabel
         '
         Me.VolumeValueLabel.AutoSize = True
-        Me.VolumeValueLabel.Location = New System.Drawing.Point(230, 98)
+        Me.VolumeValueLabel.Enabled = False
+        Me.VolumeValueLabel.Location = New System.Drawing.Point(91, 120)
         Me.VolumeValueLabel.Name = "VolumeValueLabel"
         Me.VolumeValueLabel.Size = New System.Drawing.Size(22, 13)
         Me.VolumeValueLabel.TabIndex = 5
-        Me.VolumeValueLabel.Text = "7.5"
+        Me.VolumeValueLabel.Text = "0.0"
         '
         'TimeScaleValueLabel
         '
-        Me.TimeScaleValueLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.TimeScaleValueLabel.AutoSize = True
-        Me.TimeScaleValueLabel.Location = New System.Drawing.Point(191, 161)
+        Me.TimeScaleValueLabel.Location = New System.Drawing.Point(83, 276)
+        Me.TimeScaleValueLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.TimeScaleValueLabel.Name = "TimeScaleValueLabel"
         Me.TimeScaleValueLabel.Size = New System.Drawing.Size(18, 13)
-        Me.TimeScaleValueLabel.TabIndex = 8
-        Me.TimeScaleValueLabel.Text = "1x"
+        Me.TimeScaleValueLabel.TabIndex = 15
+        Me.TimeScaleValueLabel.Text = "0x"
         '
         'TimeScaleLabel
         '
         Me.TimeScaleLabel.AutoSize = True
-        Me.TimeScaleLabel.Location = New System.Drawing.Point(6, 161)
+        Me.TimeScaleLabel.Location = New System.Drawing.Point(6, 276)
+        Me.TimeScaleLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.TimeScaleLabel.Name = "TimeScaleLabel"
-        Me.TimeScaleLabel.Size = New System.Drawing.Size(77, 13)
-        Me.TimeScaleLabel.TabIndex = 7
-        Me.TimeScaleLabel.Text = "Time Dialation:"
+        Me.TimeScaleLabel.Size = New System.Drawing.Size(71, 13)
+        Me.TimeScaleLabel.TabIndex = 14
+        Me.TimeScaleLabel.Text = "Time Dilation:"
         '
         'TimeScale
         '
-        Me.TimeScale.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TimeScale.LargeChange = 25
-        Me.TimeScale.Location = New System.Drawing.Point(6, 177)
+        Me.TimeScale.LargeChange = 10
+        Me.TimeScale.Location = New System.Drawing.Point(6, 246)
         Me.TimeScale.Maximum = 40
         Me.TimeScale.Minimum = 1
         Me.TimeScale.Name = "TimeScale"
-        Me.TimeScale.Size = New System.Drawing.Size(217, 45)
-        Me.TimeScale.TabIndex = 9
+        Me.TimeScale.Size = New System.Drawing.Size(244, 45)
+        Me.TimeScale.TabIndex = 13
         Me.TimeScale.TickFrequency = 10
-        Me.TimeScale.TickStyle = System.Windows.Forms.TickStyle.TopLeft
-        Me.TimeScale.Value = 10
-        '
-        'SpeechGroup
-        '
-        Me.SpeechGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.SpeechGroup.Controls.Add(Me.SpeechDisabledLabel)
-        Me.SpeechGroup.Controls.Add(Me.SpeechDisabled)
-        Me.SpeechGroup.Controls.Add(Me.PonySpeechChance)
-        Me.SpeechGroup.Controls.Add(Me.PonySpeechChanceLabel)
-        Me.SpeechGroup.Location = New System.Drawing.Point(12, 446)
-        Me.SpeechGroup.Name = "SpeechGroup"
-        Me.SpeechGroup.Size = New System.Drawing.Size(229, 78)
-        Me.SpeechGroup.TabIndex = 2
-        Me.SpeechGroup.TabStop = False
-        Me.SpeechGroup.Text = "Speech"
-        '
-        'SpeechDisabledLabel
-        '
-        Me.SpeechDisabledLabel.AutoSize = True
-        Me.SpeechDisabledLabel.ForeColor = System.Drawing.Color.DarkRed
-        Me.SpeechDisabledLabel.Location = New System.Drawing.Point(6, 60)
-        Me.SpeechDisabledLabel.Name = "SpeechDisabledLabel"
-        Me.SpeechDisabledLabel.Size = New System.Drawing.Size(135, 13)
-        Me.SpeechDisabledLabel.TabIndex = 3
-        Me.SpeechDisabledLabel.Text = "*Unavailable on Mac OSX*"
-        Me.SpeechDisabledLabel.Visible = False
-        '
-        'CursorGroup
-        '
-        Me.CursorGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.CursorGroup.Controls.Add(Me.CursorAvoidance)
-        Me.CursorGroup.Controls.Add(Me.CursorAvoidanceRadiusLabel)
-        Me.CursorGroup.Controls.Add(Me.CursorAvoidanceRadius)
-        Me.CursorGroup.Controls.Add(Me.PonyDragging)
-        Me.CursorGroup.Location = New System.Drawing.Point(247, 12)
-        Me.CursorGroup.Name = "CursorGroup"
-        Me.CursorGroup.Size = New System.Drawing.Size(269, 104)
-        Me.CursorGroup.TabIndex = 3
-        Me.CursorGroup.TabStop = False
-        Me.CursorGroup.Text = "Cursor"
-        '
-        'InteractionsGroup
-        '
-        Me.InteractionsGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.InteractionsGroup.Controls.Add(Me.InteractionsTable)
-        Me.InteractionsGroup.Location = New System.Drawing.Point(522, 346)
-        Me.InteractionsGroup.Name = "InteractionsGroup"
-        Me.InteractionsGroup.Size = New System.Drawing.Size(249, 111)
-        Me.InteractionsGroup.TabIndex = 8
-        Me.InteractionsGroup.TabStop = False
-        Me.InteractionsGroup.Text = "Interactions"
-        '
-        'InteractionsTable
-        '
-        Me.InteractionsTable.AutoSize = True
-        Me.InteractionsTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.InteractionsTable.ColumnCount = 1
-        Me.InteractionsTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.InteractionsTable.Controls.Add(Me.Interactions, 0, 0)
-        Me.InteractionsTable.Controls.Add(Me.InteractionErrorsDisplayedLabel, 0, 4)
-        Me.InteractionsTable.Controls.Add(Me.InteractionErrorsDisplayed, 0, 3)
-        Me.InteractionsTable.Controls.Add(Me.InteractionsErrorLabel, 0, 2)
-        Me.InteractionsTable.Controls.Add(Me.InteractionsMissingLabel, 0, 1)
-        Me.InteractionsTable.Location = New System.Drawing.Point(6, 19)
-        Me.InteractionsTable.Name = "InteractionsTable"
-        Me.InteractionsTable.RowCount = 5
-        Me.InteractionsTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.InteractionsTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.InteractionsTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.InteractionsTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.InteractionsTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.InteractionsTable.Size = New System.Drawing.Size(196, 85)
-        Me.InteractionsTable.TabIndex = 0
+        Me.TimeScale.Value = 1
         '
         'WindowsGroup
         '
         Me.WindowsGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.WindowsGroup.Controls.Add(Me.ShowViewerInTaskbar)
         Me.WindowsGroup.Controls.Add(Me.WindowAvoidance)
-        Me.WindowsGroup.Controls.Add(Me.PoniesAvoidPonies)
-        Me.WindowsGroup.Controls.Add(Me.PoniesStayInBoxes)
+        Me.WindowsGroup.Controls.Add(Me.WindowContainment)
         Me.WindowsGroup.Controls.Add(Me.AlwaysOnTop)
-        Me.WindowsGroup.Controls.Add(Me.AlwaysOnTopLabel)
-        Me.WindowsGroup.Location = New System.Drawing.Point(522, 194)
+        Me.WindowsGroup.Location = New System.Drawing.Point(12, 347)
         Me.WindowsGroup.Name = "WindowsGroup"
-        Me.WindowsGroup.Size = New System.Drawing.Size(358, 146)
-        Me.WindowsGroup.TabIndex = 7
+        Me.WindowsGroup.Size = New System.Drawing.Size(260, 142)
+        Me.WindowsGroup.TabIndex = 1
         Me.WindowsGroup.TabStop = False
         Me.WindowsGroup.Text = "Windows"
         '
         'ShowViewerInTaskbar
         '
         Me.ShowViewerInTaskbar.AutoSize = True
-        Me.ShowViewerInTaskbar.Checked = True
-        Me.ShowViewerInTaskbar.CheckState = System.Windows.Forms.CheckState.Checked
         Me.ShowViewerInTaskbar.Location = New System.Drawing.Point(6, 19)
         Me.ShowViewerInTaskbar.Name = "ShowViewerInTaskbar"
         Me.ShowViewerInTaskbar.Size = New System.Drawing.Size(136, 17)
-        Me.ShowViewerInTaskbar.TabIndex = 5
+        Me.ShowViewerInTaskbar.TabIndex = 0
         Me.ShowViewerInTaskbar.Text = "Show ponies in taskbar"
         Me.ShowViewerInTaskbar.UseVisualStyleBackColor = True
         '
         'ScreenGroup
         '
         Me.ScreenGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.ScreenGroup.Controls.Add(Me.SuspendForFullscreenApp)
-        Me.ScreenGroup.Controls.Add(Me.Teleport)
-        Me.ScreenGroup.Controls.Add(Me.TeleportLabel)
-        Me.ScreenGroup.Controls.Add(Me.MonitorsLabel)
-        Me.ScreenGroup.Controls.Add(Me.MonitorsSelection)
-        Me.ScreenGroup.Controls.Add(Me.MonitorsMinimumLabel)
-        Me.ScreenGroup.Location = New System.Drawing.Point(522, 12)
+        Me.ScreenGroup.Controls.Add(Me.OutOfBoundsLabel)
+        Me.ScreenGroup.Controls.Add(Me.OutOfBoundsWalk)
+        Me.ScreenGroup.Controls.Add(Me.OutOfBoundsTeleport)
+        Me.ScreenGroup.Controls.Add(Me.ScreenCoveragePreviewLabel)
+        Me.ScreenGroup.Controls.Add(Me.ScreenCoveragePreview)
+        Me.ScreenGroup.Controls.Add(Me.ScreenCoveragePanel)
+        Me.ScreenGroup.Controls.Add(Me.ScreenLabel)
+        Me.ScreenGroup.Location = New System.Drawing.Point(278, 12)
         Me.ScreenGroup.Name = "ScreenGroup"
-        Me.ScreenGroup.Size = New System.Drawing.Size(358, 176)
-        Me.ScreenGroup.TabIndex = 6
+        Me.ScreenGroup.Size = New System.Drawing.Size(490, 245)
+        Me.ScreenGroup.TabIndex = 2
         Me.ScreenGroup.TabStop = False
         Me.ScreenGroup.Text = "Screen"
+        '
+        'OutOfBoundsLabel
+        '
+        Me.OutOfBoundsLabel.AutoSize = True
+        Me.OutOfBoundsLabel.Location = New System.Drawing.Point(253, 16)
+        Me.OutOfBoundsLabel.Name = "OutOfBoundsLabel"
+        Me.OutOfBoundsLabel.Size = New System.Drawing.Size(211, 13)
+        Me.OutOfBoundsLabel.TabIndex = 2
+        Me.OutOfBoundsLabel.Text = "What happens if ponies are out of bounds?"
+        '
+        'OutOfBoundsWalk
+        '
+        Me.OutOfBoundsWalk.AutoSize = True
+        Me.OutOfBoundsWalk.Location = New System.Drawing.Point(256, 55)
+        Me.OutOfBoundsWalk.Name = "OutOfBoundsWalk"
+        Me.OutOfBoundsWalk.Size = New System.Drawing.Size(177, 17)
+        Me.OutOfBoundsWalk.TabIndex = 4
+        Me.OutOfBoundsWalk.TabStop = True
+        Me.OutOfBoundsWalk.Text = "Ponies walk back within bounds"
+        Me.OutOfBoundsWalk.UseVisualStyleBackColor = True
+        '
+        'OutOfBoundsTeleport
+        '
+        Me.OutOfBoundsTeleport.AutoSize = True
+        Me.OutOfBoundsTeleport.Location = New System.Drawing.Point(256, 32)
+        Me.OutOfBoundsTeleport.Name = "OutOfBoundsTeleport"
+        Me.OutOfBoundsTeleport.Size = New System.Drawing.Size(171, 17)
+        Me.OutOfBoundsTeleport.TabIndex = 3
+        Me.OutOfBoundsTeleport.TabStop = True
+        Me.OutOfBoundsTeleport.Text = "Ponies teleport back in bounds"
+        Me.OutOfBoundsTeleport.UseVisualStyleBackColor = True
+        '
+        'ScreenCoveragePreviewLabel
+        '
+        Me.ScreenCoveragePreviewLabel.AutoSize = True
+        Me.ScreenCoveragePreviewLabel.Location = New System.Drawing.Point(333, 221)
+        Me.ScreenCoveragePreviewLabel.Name = "ScreenCoveragePreviewLabel"
+        Me.ScreenCoveragePreviewLabel.Size = New System.Drawing.Size(70, 13)
+        Me.ScreenCoveragePreviewLabel.TabIndex = 6
+        Me.ScreenCoveragePreviewLabel.Text = "Area Preview"
+        '
+        'ScreenCoveragePreview
+        '
+        Me.ScreenCoveragePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.ScreenCoveragePreview.Location = New System.Drawing.Point(256, 78)
+        Me.ScreenCoveragePreview.Name = "ScreenCoveragePreview"
+        Me.ScreenCoveragePreview.Size = New System.Drawing.Size(225, 140)
+        Me.ScreenCoveragePreview.TabIndex = 5
+        '
+        'ScreenCoveragePanel
+        '
+        Me.ScreenCoveragePanel.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenCoveragePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.ScreenCoveragePanel.Controls.Add(Me.AvoidanceAreaTable)
+        Me.ScreenCoveragePanel.Controls.Add(Me.ScreenAreaTable)
+        Me.ScreenCoveragePanel.Controls.Add(Me.ScreenExclusion)
+        Me.ScreenCoveragePanel.Controls.Add(Me.ScreenCoverageArea)
+        Me.ScreenCoveragePanel.Controls.Add(Me.ScreenCoverageMonitors)
+        Me.ScreenCoveragePanel.Controls.Add(Me.MonitorsSelection)
+        Me.ScreenCoveragePanel.Location = New System.Drawing.Point(6, 32)
+        Me.ScreenCoveragePanel.Name = "ScreenCoveragePanel"
+        Me.ScreenCoveragePanel.Size = New System.Drawing.Size(244, 207)
+        Me.ScreenCoveragePanel.TabIndex = 1
+        '
+        'AvoidanceAreaTable
+        '
+        Me.AvoidanceAreaTable.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.AvoidanceAreaTable.ColumnCount = 4
+        Me.AvoidanceAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.AvoidanceAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.AvoidanceAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.AvoidanceAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.AvoidanceAreaTable.Controls.Add(Me.AvoidanceAreaHeightLabel, 3, 0)
+        Me.AvoidanceAreaTable.Controls.Add(Me.ExclusionAreaHeight, 3, 1)
+        Me.AvoidanceAreaTable.Controls.Add(Me.AvoidanceAreaWidthLabel, 2, 0)
+        Me.AvoidanceAreaTable.Controls.Add(Me.ExclusionAreaWidth, 2, 1)
+        Me.AvoidanceAreaTable.Controls.Add(Me.AvoidanceAreaYLabel, 1, 0)
+        Me.AvoidanceAreaTable.Controls.Add(Me.AvoidanceAreaXLabel, 0, 0)
+        Me.AvoidanceAreaTable.Controls.Add(Me.ExculsionAreaX, 0, 1)
+        Me.AvoidanceAreaTable.Controls.Add(Me.ExclusionAreaY, 1, 1)
+        Me.AvoidanceAreaTable.Enabled = False
+        Me.AvoidanceAreaTable.Location = New System.Drawing.Point(3, 162)
+        Me.AvoidanceAreaTable.Name = "AvoidanceAreaTable"
+        Me.AvoidanceAreaTable.RowCount = 2
+        Me.AvoidanceAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.AvoidanceAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.AvoidanceAreaTable.Size = New System.Drawing.Size(236, 39)
+        Me.AvoidanceAreaTable.TabIndex = 4
+        '
+        'AvoidanceAreaHeightLabel
+        '
+        Me.AvoidanceAreaHeightLabel.AutoSize = True
+        Me.AvoidanceAreaHeightLabel.Location = New System.Drawing.Point(180, 0)
+        Me.AvoidanceAreaHeightLabel.Name = "AvoidanceAreaHeightLabel"
+        Me.AvoidanceAreaHeightLabel.Size = New System.Drawing.Size(41, 13)
+        Me.AvoidanceAreaHeightLabel.TabIndex = 6
+        Me.AvoidanceAreaHeightLabel.Text = "Height:"
+        '
+        'ExclusionAreaHeight
+        '
+        Me.ExclusionAreaHeight.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ExclusionAreaHeight.DecimalPlaces = 1
+        Me.ExclusionAreaHeight.Location = New System.Drawing.Point(180, 16)
+        Me.ExclusionAreaHeight.Name = "ExclusionAreaHeight"
+        Me.ExclusionAreaHeight.Size = New System.Drawing.Size(53, 20)
+        Me.ExclusionAreaHeight.TabIndex = 7
+        '
+        'AvoidanceAreaWidthLabel
+        '
+        Me.AvoidanceAreaWidthLabel.AutoSize = True
+        Me.AvoidanceAreaWidthLabel.Location = New System.Drawing.Point(121, 0)
+        Me.AvoidanceAreaWidthLabel.Name = "AvoidanceAreaWidthLabel"
+        Me.AvoidanceAreaWidthLabel.Size = New System.Drawing.Size(38, 13)
+        Me.AvoidanceAreaWidthLabel.TabIndex = 4
+        Me.AvoidanceAreaWidthLabel.Text = "Width:"
+        '
+        'ExclusionAreaWidth
+        '
+        Me.ExclusionAreaWidth.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ExclusionAreaWidth.DecimalPlaces = 1
+        Me.ExclusionAreaWidth.Location = New System.Drawing.Point(121, 16)
+        Me.ExclusionAreaWidth.Name = "ExclusionAreaWidth"
+        Me.ExclusionAreaWidth.Size = New System.Drawing.Size(53, 20)
+        Me.ExclusionAreaWidth.TabIndex = 5
+        '
+        'AvoidanceAreaYLabel
+        '
+        Me.AvoidanceAreaYLabel.AutoSize = True
+        Me.AvoidanceAreaYLabel.Location = New System.Drawing.Point(62, 0)
+        Me.AvoidanceAreaYLabel.Name = "AvoidanceAreaYLabel"
+        Me.AvoidanceAreaYLabel.Size = New System.Drawing.Size(17, 13)
+        Me.AvoidanceAreaYLabel.TabIndex = 2
+        Me.AvoidanceAreaYLabel.Text = "Y:"
+        '
+        'AvoidanceAreaXLabel
+        '
+        Me.AvoidanceAreaXLabel.AutoSize = True
+        Me.AvoidanceAreaXLabel.Location = New System.Drawing.Point(3, 0)
+        Me.AvoidanceAreaXLabel.Name = "AvoidanceAreaXLabel"
+        Me.AvoidanceAreaXLabel.Size = New System.Drawing.Size(17, 13)
+        Me.AvoidanceAreaXLabel.TabIndex = 0
+        Me.AvoidanceAreaXLabel.Text = "X:"
+        '
+        'ExculsionAreaX
+        '
+        Me.ExculsionAreaX.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ExculsionAreaX.DecimalPlaces = 1
+        Me.ExculsionAreaX.Location = New System.Drawing.Point(3, 16)
+        Me.ExculsionAreaX.Name = "ExculsionAreaX"
+        Me.ExculsionAreaX.Size = New System.Drawing.Size(53, 20)
+        Me.ExculsionAreaX.TabIndex = 1
+        '
+        'ExclusionAreaY
+        '
+        Me.ExclusionAreaY.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ExclusionAreaY.DecimalPlaces = 1
+        Me.ExclusionAreaY.Location = New System.Drawing.Point(62, 16)
+        Me.ExclusionAreaY.Name = "ExclusionAreaY"
+        Me.ExclusionAreaY.Size = New System.Drawing.Size(53, 20)
+        Me.ExclusionAreaY.TabIndex = 3
+        '
+        'ScreenAreaTable
+        '
+        Me.ScreenAreaTable.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenAreaTable.ColumnCount = 4
+        Me.ScreenAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.ScreenAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.ScreenAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.ScreenAreaTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25.0!))
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaHeightLabel, 3, 0)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaHeight, 3, 1)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaWidthLabel, 2, 0)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaWidth, 2, 1)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaYLabel, 1, 0)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaXLabel, 0, 0)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaX, 0, 1)
+        Me.ScreenAreaTable.Controls.Add(Me.ScreenAreaY, 1, 1)
+        Me.ScreenAreaTable.Enabled = False
+        Me.ScreenAreaTable.Location = New System.Drawing.Point(3, 94)
+        Me.ScreenAreaTable.Name = "ScreenAreaTable"
+        Me.ScreenAreaTable.RowCount = 2
+        Me.ScreenAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.ScreenAreaTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.ScreenAreaTable.Size = New System.Drawing.Size(236, 39)
+        Me.ScreenAreaTable.TabIndex = 2
+        '
+        'ScreenAreaHeightLabel
+        '
+        Me.ScreenAreaHeightLabel.AutoSize = True
+        Me.ScreenAreaHeightLabel.Location = New System.Drawing.Point(180, 0)
+        Me.ScreenAreaHeightLabel.Name = "ScreenAreaHeightLabel"
+        Me.ScreenAreaHeightLabel.Size = New System.Drawing.Size(41, 13)
+        Me.ScreenAreaHeightLabel.TabIndex = 6
+        Me.ScreenAreaHeightLabel.Text = "Height:"
+        '
+        'ScreenAreaHeight
+        '
+        Me.ScreenAreaHeight.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenAreaHeight.Location = New System.Drawing.Point(180, 16)
+        Me.ScreenAreaHeight.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
+        Me.ScreenAreaHeight.Name = "ScreenAreaHeight"
+        Me.ScreenAreaHeight.Size = New System.Drawing.Size(53, 20)
+        Me.ScreenAreaHeight.TabIndex = 7
+        Me.ScreenAreaHeight.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        '
+        'ScreenAreaWidthLabel
+        '
+        Me.ScreenAreaWidthLabel.AutoSize = True
+        Me.ScreenAreaWidthLabel.Location = New System.Drawing.Point(121, 0)
+        Me.ScreenAreaWidthLabel.Name = "ScreenAreaWidthLabel"
+        Me.ScreenAreaWidthLabel.Size = New System.Drawing.Size(38, 13)
+        Me.ScreenAreaWidthLabel.TabIndex = 4
+        Me.ScreenAreaWidthLabel.Text = "Width:"
+        '
+        'ScreenAreaWidth
+        '
+        Me.ScreenAreaWidth.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenAreaWidth.Location = New System.Drawing.Point(121, 16)
+        Me.ScreenAreaWidth.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
+        Me.ScreenAreaWidth.Name = "ScreenAreaWidth"
+        Me.ScreenAreaWidth.Size = New System.Drawing.Size(53, 20)
+        Me.ScreenAreaWidth.TabIndex = 5
+        Me.ScreenAreaWidth.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        '
+        'ScreenAreaYLabel
+        '
+        Me.ScreenAreaYLabel.AutoSize = True
+        Me.ScreenAreaYLabel.Location = New System.Drawing.Point(62, 0)
+        Me.ScreenAreaYLabel.Name = "ScreenAreaYLabel"
+        Me.ScreenAreaYLabel.Size = New System.Drawing.Size(17, 13)
+        Me.ScreenAreaYLabel.TabIndex = 2
+        Me.ScreenAreaYLabel.Text = "Y:"
+        '
+        'ScreenAreaXLabel
+        '
+        Me.ScreenAreaXLabel.AutoSize = True
+        Me.ScreenAreaXLabel.Location = New System.Drawing.Point(3, 0)
+        Me.ScreenAreaXLabel.Name = "ScreenAreaXLabel"
+        Me.ScreenAreaXLabel.Size = New System.Drawing.Size(17, 13)
+        Me.ScreenAreaXLabel.TabIndex = 0
+        Me.ScreenAreaXLabel.Text = "X:"
+        '
+        'ScreenAreaX
+        '
+        Me.ScreenAreaX.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenAreaX.Location = New System.Drawing.Point(3, 16)
+        Me.ScreenAreaX.Name = "ScreenAreaX"
+        Me.ScreenAreaX.Size = New System.Drawing.Size(53, 20)
+        Me.ScreenAreaX.TabIndex = 1
+        '
+        'ScreenAreaY
+        '
+        Me.ScreenAreaY.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ScreenAreaY.Location = New System.Drawing.Point(62, 16)
+        Me.ScreenAreaY.Name = "ScreenAreaY"
+        Me.ScreenAreaY.Size = New System.Drawing.Size(53, 20)
+        Me.ScreenAreaY.TabIndex = 3
+        '
+        'ScreenExclusion
+        '
+        Me.ScreenExclusion.AutoSize = True
+        Me.ScreenExclusion.Location = New System.Drawing.Point(3, 139)
+        Me.ScreenExclusion.Name = "ScreenExclusion"
+        Me.ScreenExclusion.Size = New System.Drawing.Size(155, 17)
+        Me.ScreenExclusion.TabIndex = 3
+        Me.ScreenExclusion.Text = "Avoid a portion of this area:"
+        Me.ScreenExclusion.UseVisualStyleBackColor = True
+        '
+        'ScreenCoverageArea
+        '
+        Me.ScreenCoverageArea.AutoSize = True
+        Me.ScreenCoverageArea.Location = New System.Drawing.Point(3, 75)
+        Me.ScreenCoverageArea.Name = "ScreenCoverageArea"
+        Me.ScreenCoverageArea.Size = New System.Drawing.Size(235, 17)
+        Me.ScreenCoverageArea.TabIndex = 1
+        Me.ScreenCoverageArea.Text = "Select area within which ponies may appear:"
+        Me.ScreenCoverageArea.UseVisualStyleBackColor = True
+        '
+        'ScreenCoverageMonitors
+        '
+        Me.ScreenCoverageMonitors.AutoSize = True
+        Me.ScreenCoverageMonitors.Location = New System.Drawing.Point(3, 3)
+        Me.ScreenCoverageMonitors.Name = "ScreenCoverageMonitors"
+        Me.ScreenCoverageMonitors.Size = New System.Drawing.Size(238, 17)
+        Me.ScreenCoverageMonitors.TabIndex = 0
+        Me.ScreenCoverageMonitors.Text = "Select monitors on which ponies may appear:"
+        Me.ScreenCoverageMonitors.UseVisualStyleBackColor = True
+        '
+        'ScreenLabel
+        '
+        Me.ScreenLabel.AutoSize = True
+        Me.ScreenLabel.Location = New System.Drawing.Point(6, 16)
+        Me.ScreenLabel.Name = "ScreenLabel"
+        Me.ScreenLabel.Size = New System.Drawing.Size(224, 13)
+        Me.ScreenLabel.TabIndex = 0
+        Me.ScreenLabel.Text = "Choose the area in which ponies are allowed: "
         '
         'SoundGroup
         '
         Me.SoundGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.SoundGroup.Controls.Add(Me.VolumeLabel)
+        Me.SoundGroup.Controls.Add(Me.VolumeValueLabel)
         Me.SoundGroup.Controls.Add(Me.Sound)
-        Me.SoundGroup.Controls.Add(Me.SoundDisabledLabel)
         Me.SoundGroup.Controls.Add(Me.SoundLimitOneGlobally)
         Me.SoundGroup.Controls.Add(Me.SoundLimitOnePerPony)
-        Me.SoundGroup.Controls.Add(Me.VolumeLabel)
         Me.SoundGroup.Controls.Add(Me.Volume)
-        Me.SoundGroup.Controls.Add(Me.VolumeValueLabel)
-        Me.SoundGroup.Location = New System.Drawing.Point(247, 346)
+        Me.SoundGroup.Location = New System.Drawing.Point(278, 263)
         Me.SoundGroup.Name = "SoundGroup"
-        Me.SoundGroup.Size = New System.Drawing.Size(269, 178)
-        Me.SoundGroup.TabIndex = 5
+        Me.SoundGroup.Size = New System.Drawing.Size(250, 150)
+        Me.SoundGroup.TabIndex = 3
         Me.SoundGroup.TabStop = False
         Me.SoundGroup.Text = "Sound"
-        '
-        'GeneralGroup
-        '
-        Me.GeneralGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.GeneralGroup.Controls.Add(Me.Effects)
-        Me.GeneralGroup.Controls.Add(Me.MaxPoniesLabel)
-        Me.GeneralGroup.Controls.Add(Me.MaxPonies)
-        Me.GeneralGroup.Controls.Add(Me.MaxPoniesWarningLabel)
-        Me.GeneralGroup.Controls.Add(Me.SizeScaleLabel)
-        Me.GeneralGroup.Controls.Add(Me.SizeScale)
-        Me.GeneralGroup.Controls.Add(Me.TimeScaleValueLabel)
-        Me.GeneralGroup.Controls.Add(Me.SizeScaleValueLabel)
-        Me.GeneralGroup.Controls.Add(Me.TimeScaleLabel)
-        Me.GeneralGroup.Controls.Add(Me.TimeScale)
-        Me.GeneralGroup.Location = New System.Drawing.Point(12, 12)
-        Me.GeneralGroup.Name = "GeneralGroup"
-        Me.GeneralGroup.Size = New System.Drawing.Size(229, 241)
-        Me.GeneralGroup.TabIndex = 0
-        Me.GeneralGroup.TabStop = False
-        Me.GeneralGroup.Text = "General"
         '
         'MonitoringGroup
         '
         Me.MonitoringGroup.Controls.Add(Me.ShowPerformanceGraph)
         Me.MonitoringGroup.Controls.Add(Me.EnablePonyLogs)
-        Me.MonitoringGroup.Location = New System.Drawing.Point(521, 463)
+        Me.MonitoringGroup.Location = New System.Drawing.Point(278, 419)
         Me.MonitoringGroup.Name = "MonitoringGroup"
-        Me.MonitoringGroup.Size = New System.Drawing.Size(250, 61)
-        Me.MonitoringGroup.TabIndex = 14
+        Me.MonitoringGroup.Size = New System.Drawing.Size(250, 70)
+        Me.MonitoringGroup.TabIndex = 4
         Me.MonitoringGroup.TabStop = False
-        Me.MonitoringGroup.Text = "Monitoring"
+        Me.MonitoringGroup.Text = "Monitoring (applies for this session only)"
         '
         'ShowPerformanceGraph
         '
         Me.ShowPerformanceGraph.AutoSize = True
-        Me.ShowPerformanceGraph.Location = New System.Drawing.Point(6, 38)
+        Me.ShowPerformanceGraph.Location = New System.Drawing.Point(6, 42)
         Me.ShowPerformanceGraph.Name = "ShowPerformanceGraph"
         Me.ShowPerformanceGraph.Size = New System.Drawing.Size(145, 17)
-        Me.ShowPerformanceGraph.TabIndex = 4
+        Me.ShowPerformanceGraph.TabIndex = 1
         Me.ShowPerformanceGraph.Text = "Show performance graph"
         Me.ShowPerformanceGraph.UseVisualStyleBackColor = True
         '
@@ -1015,77 +968,83 @@ Partial Class OptionsForm
         Me.EnablePonyLogs.Location = New System.Drawing.Point(6, 19)
         Me.EnablePonyLogs.Name = "EnablePonyLogs"
         Me.EnablePonyLogs.Size = New System.Drawing.Size(174, 17)
-        Me.EnablePonyLogs.TabIndex = 3
+        Me.EnablePonyLogs.TabIndex = 0
         Me.EnablePonyLogs.Text = "Enable pony logs when running"
         Me.EnablePonyLogs.UseVisualStyleBackColor = True
+        '
+        'PoniesGroup
+        '
+        Me.PoniesGroup.Controls.Add(Me.MaxPonies)
+        Me.PoniesGroup.Controls.Add(Me.MaxPoniesLabel)
+        Me.PoniesGroup.Controls.Add(Me.SizeScaleValueLabel)
+        Me.PoniesGroup.Controls.Add(Me.PonyDragging)
+        Me.PoniesGroup.Controls.Add(Me.CursorAvoidanceRadius)
+        Me.PoniesGroup.Controls.Add(Me.PoniesAvoidPonies)
+        Me.PoniesGroup.Controls.Add(Me.TimeScaleValueLabel)
+        Me.PoniesGroup.Controls.Add(Me.CursorAvoidanceRadiusLabel)
+        Me.PoniesGroup.Controls.Add(Me.TimeScaleLabel)
+        Me.PoniesGroup.Controls.Add(Me.TimeScale)
+        Me.PoniesGroup.Controls.Add(Me.CursorAwareness)
+        Me.PoniesGroup.Controls.Add(Me.Interactions)
+        Me.PoniesGroup.Controls.Add(Me.PonySpeechChance)
+        Me.PoniesGroup.Controls.Add(Me.Speech)
+        Me.PoniesGroup.Controls.Add(Me.SizeScaleLabel)
+        Me.PoniesGroup.Controls.Add(Me.SizeScale)
+        Me.PoniesGroup.Controls.Add(Me.PonySpeechChanceLabel)
+        Me.PoniesGroup.Controls.Add(Me.Effects)
+        Me.PoniesGroup.Location = New System.Drawing.Point(12, 12)
+        Me.PoniesGroup.Name = "PoniesGroup"
+        Me.PoniesGroup.Size = New System.Drawing.Size(260, 329)
+        Me.PoniesGroup.TabIndex = 0
+        Me.PoniesGroup.TabStop = False
+        Me.PoniesGroup.Text = "Ponies"
         '
         'OptionsForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.AutoScroll = True
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
-        Me.ClientSize = New System.Drawing.Size(892, 536)
-        Me.ControlBox = False
+        Me.ClientSize = New System.Drawing.Size(784, 512)
+        Me.Controls.Add(Me.PoniesGroup)
         Me.Controls.Add(Me.MonitoringGroup)
-        Me.Controls.Add(Me.GeneralGroup)
         Me.Controls.Add(Me.SoundGroup)
         Me.Controls.Add(Me.ScreenGroup)
         Me.Controls.Add(Me.WindowsGroup)
-        Me.Controls.Add(Me.InteractionsGroup)
-        Me.Controls.Add(Me.CursorGroup)
-        Me.Controls.Add(Me.SpeechGroup)
-        Me.Controls.Add(Me.AvoidanceZoneGroup)
         Me.Controls.Add(Me.ScreensaverGroup)
         Me.Controls.Add(Me.CustomFiltersButton)
         Me.Controls.Add(Me.ResetButton)
         Me.Controls.Add(Me.LoadButton)
         Me.Controls.Add(Me.SaveButton)
-        Me.Controls.Add(Me.CloseButton)
-        Me.MinimumSize = New System.Drawing.Size(400, 300)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
         Me.Name = "OptionsForm"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Options - Desktop Ponies"
-        Me.AvoidanceZoneGroup.ResumeLayout(False)
-        Me.AvoidanceZoneGroup.PerformLayout()
-        Me.AvoidanceZoneAreaTable.ResumeLayout(False)
         Me.ScreensaverGroup.ResumeLayout(False)
         Me.ScreensaverGroup.PerformLayout()
         Me.ScreensaverBackgroundTable.ResumeLayout(False)
         Me.ScreensaverBackgroundTable.PerformLayout()
-        Me.SpeechGroup.ResumeLayout(False)
-        Me.SpeechGroup.PerformLayout()
-        Me.CursorGroup.ResumeLayout(False)
-        Me.CursorGroup.PerformLayout()
-        Me.InteractionsGroup.ResumeLayout(False)
-        Me.InteractionsGroup.PerformLayout()
-        Me.InteractionsTable.ResumeLayout(False)
-        Me.InteractionsTable.PerformLayout()
         Me.WindowsGroup.ResumeLayout(False)
         Me.WindowsGroup.PerformLayout()
         Me.ScreenGroup.ResumeLayout(False)
         Me.ScreenGroup.PerformLayout()
+        Me.ScreenCoveragePanel.ResumeLayout(False)
+        Me.ScreenCoveragePanel.PerformLayout()
+        Me.AvoidanceAreaTable.ResumeLayout(False)
+        Me.AvoidanceAreaTable.PerformLayout()
+        Me.ScreenAreaTable.ResumeLayout(False)
+        Me.ScreenAreaTable.PerformLayout()
         Me.SoundGroup.ResumeLayout(False)
         Me.SoundGroup.PerformLayout()
-        Me.GeneralGroup.ResumeLayout(False)
-        Me.GeneralGroup.PerformLayout()
         Me.MonitoringGroup.ResumeLayout(False)
         Me.MonitoringGroup.PerformLayout()
+        Me.PoniesGroup.ResumeLayout(False)
+        Me.PoniesGroup.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
-    Friend WithEvents AvoidanceZoneLocationLabel As System.Windows.Forms.Label
-    Friend WithEvents AvoidanceZoneSizeLabel As System.Windows.Forms.Label
-    Friend WithEvents AvoidanceZonePreviewLabel As System.Windows.Forms.Label
-    Friend WithEvents AvoidanceZoneY As System.Windows.Forms.NumericUpDown
-    Friend WithEvents AvoidanceZoneHeight As System.Windows.Forms.NumericUpDown
-    Friend WithEvents AvoidanceZoneX As System.Windows.Forms.NumericUpDown
-    Friend WithEvents AvoidanceZoneWidth As System.Windows.Forms.NumericUpDown
-    Friend WithEvents AvoidanceZonePreview As System.Windows.Forms.PictureBox
-    Friend WithEvents MonitorsLabel As System.Windows.Forms.Label
     Friend WithEvents MonitorsSelection As System.Windows.Forms.ListBox
-    Friend WithEvents MonitorsMinimumLabel As System.Windows.Forms.Label
-    Friend WithEvents CursorAvoidance As System.Windows.Forms.CheckBox
+    Friend WithEvents CursorAwareness As System.Windows.Forms.CheckBox
     Friend WithEvents CursorAvoidanceRadius As System.Windows.Forms.NumericUpDown
     Friend WithEvents CursorAvoidanceRadiusLabel As System.Windows.Forms.Label
     Friend WithEvents PonyDragging As System.Windows.Forms.CheckBox
@@ -1093,33 +1052,23 @@ Partial Class OptionsForm
     Friend WithEvents PonySpeechChanceLabel As System.Windows.Forms.Label
     Friend WithEvents MaxPonies As System.Windows.Forms.NumericUpDown
     Friend WithEvents MaxPoniesLabel As System.Windows.Forms.Label
-    Friend WithEvents MaxPoniesWarningLabel As System.Windows.Forms.Label
-    Friend WithEvents CloseButton As System.Windows.Forms.Button
     Friend WithEvents SaveButton As System.Windows.Forms.Button
     Friend WithEvents LoadButton As System.Windows.Forms.Button
     Friend WithEvents ResetButton As System.Windows.Forms.Button
     Friend WithEvents Effects As System.Windows.Forms.CheckBox
     Friend WithEvents Sound As System.Windows.Forms.CheckBox
     Friend WithEvents Interactions As System.Windows.Forms.CheckBox
-    Friend WithEvents InteractionsMissingLabel As System.Windows.Forms.Label
-    Friend WithEvents InteractionsErrorLabel As System.Windows.Forms.Label
     Friend WithEvents WindowAvoidance As System.Windows.Forms.CheckBox
-    Friend WithEvents SpeechDisabled As System.Windows.Forms.CheckBox
-    Friend WithEvents InteractionErrorsDisplayed As System.Windows.Forms.CheckBox
-    Friend WithEvents InteractionErrorsDisplayedLabel As System.Windows.Forms.Label
+    Friend WithEvents Speech As System.Windows.Forms.CheckBox
     Friend WithEvents PoniesAvoidPonies As System.Windows.Forms.CheckBox
-    Friend WithEvents PoniesStayInBoxes As System.Windows.Forms.CheckBox
-    Friend WithEvents AvoidanceZoneGroup As System.Windows.Forms.GroupBox
+    Friend WithEvents WindowContainment As System.Windows.Forms.CheckBox
     Friend WithEvents SizeScale As System.Windows.Forms.TrackBar
     Friend WithEvents SizeScaleLabel As System.Windows.Forms.Label
     Friend WithEvents SizeScaleValueLabel As System.Windows.Forms.Label
     Friend WithEvents CustomFiltersButton As System.Windows.Forms.Button
-    Friend WithEvents SoundDisabledLabel As System.Windows.Forms.Label
     Friend WithEvents ScreensaverSounds As System.Windows.Forms.CheckBox
     Friend WithEvents SoundLimitOneGlobally As System.Windows.Forms.RadioButton
     Friend WithEvents SoundLimitOnePerPony As System.Windows.Forms.RadioButton
-    Friend WithEvents Teleport As System.Windows.Forms.CheckBox
-    Friend WithEvents TeleportLabel As System.Windows.Forms.Label
     Friend WithEvents ScreensaverGroup As System.Windows.Forms.GroupBox
     Friend WithEvents ScreensaverImageButton As System.Windows.Forms.Button
     Friend WithEvents ScreensaverImage As System.Windows.Forms.RadioButton
@@ -1130,27 +1079,47 @@ Partial Class OptionsForm
     Friend WithEvents ScreensaverImageNeededLabel As System.Windows.Forms.Label
     Friend WithEvents ScreensaverColorNeededLabel As System.Windows.Forms.Label
     Friend WithEvents AlwaysOnTop As System.Windows.Forms.CheckBox
-    Friend WithEvents AlwaysOnTopLabel As System.Windows.Forms.Label
-    Friend WithEvents SuspendForFullscreenApp As System.Windows.Forms.CheckBox
     Friend WithEvents Volume As System.Windows.Forms.TrackBar
     Friend WithEvents VolumeLabel As System.Windows.Forms.Label
     Friend WithEvents VolumeValueLabel As System.Windows.Forms.Label
     Friend WithEvents TimeScaleValueLabel As System.Windows.Forms.Label
     Friend WithEvents TimeScaleLabel As System.Windows.Forms.Label
     Friend WithEvents TimeScale As System.Windows.Forms.TrackBar
-    Friend WithEvents SpeechGroup As System.Windows.Forms.GroupBox
-    Friend WithEvents CursorGroup As System.Windows.Forms.GroupBox
-    Friend WithEvents InteractionsGroup As System.Windows.Forms.GroupBox
     Friend WithEvents WindowsGroup As System.Windows.Forms.GroupBox
-    Friend WithEvents AvoidanceZoneAreaTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents ScreensaverBackgroundTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents ScreenGroup As System.Windows.Forms.GroupBox
     Friend WithEvents SoundGroup As System.Windows.Forms.GroupBox
-    Friend WithEvents GeneralGroup As System.Windows.Forms.GroupBox
-    Friend WithEvents SpeechDisabledLabel As System.Windows.Forms.Label
-    Friend WithEvents InteractionsTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents ShowViewerInTaskbar As System.Windows.Forms.CheckBox
     Friend WithEvents MonitoringGroup As System.Windows.Forms.GroupBox
     Friend WithEvents EnablePonyLogs As System.Windows.Forms.CheckBox
     Friend WithEvents ShowPerformanceGraph As System.Windows.Forms.CheckBox
+    Friend WithEvents PoniesGroup As System.Windows.Forms.GroupBox
+    Friend WithEvents ScreenCoveragePanel As System.Windows.Forms.Panel
+    Friend WithEvents ScreenAreaTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents ScreenAreaHeightLabel As System.Windows.Forms.Label
+    Friend WithEvents ScreenAreaHeight As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ScreenAreaWidthLabel As System.Windows.Forms.Label
+    Friend WithEvents ScreenAreaWidth As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ScreenAreaYLabel As System.Windows.Forms.Label
+    Friend WithEvents ScreenAreaXLabel As System.Windows.Forms.Label
+    Friend WithEvents ScreenAreaX As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ScreenAreaY As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ScreenExclusion As System.Windows.Forms.CheckBox
+    Friend WithEvents ScreenCoverageArea As System.Windows.Forms.RadioButton
+    Friend WithEvents ScreenCoverageMonitors As System.Windows.Forms.RadioButton
+    Friend WithEvents ScreenLabel As System.Windows.Forms.Label
+    Friend WithEvents AvoidanceAreaTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents AvoidanceAreaHeightLabel As System.Windows.Forms.Label
+    Friend WithEvents ExclusionAreaHeight As System.Windows.Forms.NumericUpDown
+    Friend WithEvents AvoidanceAreaWidthLabel As System.Windows.Forms.Label
+    Friend WithEvents ExclusionAreaWidth As System.Windows.Forms.NumericUpDown
+    Friend WithEvents AvoidanceAreaYLabel As System.Windows.Forms.Label
+    Friend WithEvents AvoidanceAreaXLabel As System.Windows.Forms.Label
+    Friend WithEvents ExculsionAreaX As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ExclusionAreaY As System.Windows.Forms.NumericUpDown
+    Friend WithEvents ScreenCoveragePreview As System.Windows.Forms.Panel
+    Friend WithEvents ScreenCoveragePreviewLabel As System.Windows.Forms.Label
+    Friend WithEvents OutOfBoundsWalk As System.Windows.Forms.RadioButton
+    Friend WithEvents OutOfBoundsTeleport As System.Windows.Forms.RadioButton
+    Friend WithEvents OutOfBoundsLabel As System.Windows.Forms.Label
 End Class

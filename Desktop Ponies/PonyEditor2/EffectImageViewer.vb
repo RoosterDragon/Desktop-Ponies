@@ -68,8 +68,8 @@ Public Class EffectImageViewer
         If Time > loopTime Then Time = TimeSpan.Zero
 
         Dim imageLocation As Vector2
-        Dim effectLocation = Pony.GetEffectLocation(
-            EffectImage.Size, Placement, imageLocation, Image.Size, Centering, 1, Options.ScaleFactor)
+        Dim effectLocation = Effect.GetEffectLocation(
+            EffectImage.Size, Placement, imageLocation, New Vector2(Image.Size), Centering, Options.ScaleFactor)
         If effectLocation.X < 0 Then
             imageLocation.X -= effectLocation.X
             effectLocation.X = 0
