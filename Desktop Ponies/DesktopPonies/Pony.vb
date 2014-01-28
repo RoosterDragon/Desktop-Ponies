@@ -704,8 +704,8 @@ Public Class Behavior
     ''' </summary>
     Public Property MinDuration As Double
 
-    Private _rightImage As New CenterableSpriteImage()
-    Private _leftImage As New CenterableSpriteImage()
+    Private _rightImage As New CenterableSpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}
+    Private _leftImage As New CenterableSpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
     Public ReadOnly Property RightImage As CenterableSpriteImage
         Get
             Return _rightImage
@@ -996,12 +996,14 @@ Public Class Behavior
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
         Dim copy = DirectCast(MyBase.MemberwiseClone(), Behavior)
-        copy._leftImage = New CenterableSpriteImage()
-        copy._leftImage.Path = _leftImage.Path
-        copy._leftImage.CustomCenter = _leftImage.CustomCenter
-        copy._rightImage = New CenterableSpriteImage()
-        copy._rightImage.Path = _rightImage.Path
-        copy._rightImage.CustomCenter = _rightImage.CustomCenter
+        copy._leftImage = New CenterableSpriteImage() With {.Path = _leftImage.Path,
+                                                            .CustomCenter = _leftImage.CustomCenter,
+                                                            .RoundingPolicyX = _leftImage.RoundingPolicyX,
+                                                            .RoundingPolicyY = _leftImage.RoundingPolicyY}
+        copy._rightImage = New CenterableSpriteImage() With {.Path = _rightImage.Path,
+                                                             .CustomCenter = _rightImage.CustomCenter,
+                                                             .RoundingPolicyX = _rightImage.RoundingPolicyX,
+                                                             .RoundingPolicyY = _rightImage.RoundingPolicyY}
         Return copy
     End Function
 
@@ -3213,8 +3215,8 @@ Public Class EffectBase
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property BehaviorName As CaseInsensitiveString
     Public Property ParentPonyBase As PonyBase
-    Private _leftImage As New SpriteImage()
-    Private _rightImage As New SpriteImage()
+    Private _leftImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
+    Private _rightImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}
     Public ReadOnly Property LeftImage As SpriteImage
         Get
             Return _leftImage
@@ -3308,10 +3310,12 @@ Public Class EffectBase
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
         Dim copy = DirectCast(MyBase.MemberwiseClone(), EffectBase)
-        copy._leftImage = New CenterableSpriteImage()
-        copy._leftImage.Path = _leftImage.Path
-        copy._rightImage = New CenterableSpriteImage()
-        copy._rightImage.Path = _rightImage.Path
+        copy._leftImage = New SpriteImage() With {.Path = _leftImage.Path,
+                                                  .RoundingPolicyX = _leftImage.RoundingPolicyX,
+                                                  .RoundingPolicyY = _leftImage.RoundingPolicyY}
+        copy._rightImage = New SpriteImage() With {.Path = _rightImage.Path,
+                                                   .RoundingPolicyX = _rightImage.RoundingPolicyX,
+                                                   .RoundingPolicyY = _rightImage.RoundingPolicyY}
         Return copy
     End Function
 
@@ -3849,6 +3853,13 @@ End Class
 #End Region
 
 #Region "SpriteImage classes"
+Public Enum RoundingPolicy
+    ToEven = MidpointRounding.ToEven
+    AwayFromZero = MidpointRounding.AwayFromZero
+    Floor
+    Ceiling
+End Enum
+
 Public Class SpriteImage
     Private _path As String
     Public Property Path As String
@@ -3862,9 +3873,35 @@ Public Class SpriteImage
     End Property
     Public Overridable ReadOnly Property Center As Vector2
         Get
-            Return Size / 2
+            Dim x = (Size.X - 1) / 2
+            Dim y = (Size.Y - 1) / 2
+            Dim roundedX As Integer
+            Dim roundedY As Integer
+            Select Case RoundingPolicyX
+                Case RoundingPolicy.Floor
+                    roundedX = CInt(Math.Floor(x))
+                Case RoundingPolicy.Ceiling
+                    roundedX = CInt(Math.Ceiling(x))
+                Case RoundingPolicy.ToEven
+                    roundedX = CInt(Math.Round(x, MidpointRounding.ToEven))
+                Case RoundingPolicy.AwayFromZero
+                    roundedX = CInt(Math.Round(x, MidpointRounding.AwayFromZero))
+            End Select
+            Select Case RoundingPolicyY
+                Case RoundingPolicy.Floor
+                    roundedY = CInt(Math.Floor(y))
+                Case RoundingPolicy.Ceiling
+                    roundedY = CInt(Math.Ceiling(y))
+                Case RoundingPolicy.ToEven
+                    roundedY = CInt(Math.Round(y, MidpointRounding.ToEven))
+                Case RoundingPolicy.AwayFromZero
+                    roundedY = CInt(Math.Round(y, MidpointRounding.AwayFromZero))
+            End Select
+            Return New Size(roundedX, roundedY)
         End Get
     End Property
+    Public Property RoundingPolicyX As RoundingPolicy
+    Public Property RoundingPolicyY As RoundingPolicy
     Private _size As Vector2?
     Public ReadOnly Property Size As Vector2
         Get

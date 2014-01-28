@@ -76,8 +76,8 @@ Public Class ImageCentersForm
             rightFrameCount = 0
         End Try
 
-        leftCenter = If(behavior.LeftImage.CustomCenter, behavior.LeftImage.Center)
-        rightCenter = If(behavior.RightImage.CustomCenter, behavior.RightImage.Center)
+        leftCenter = behavior.LeftImage.Center
+        rightCenter = behavior.RightImage.Center
         leftPreviousCenter = leftCenter
         rightPreviousCenter = rightCenter
 
@@ -111,27 +111,39 @@ Public Class ImageCentersForm
             rightGraphics.Clear(clearColor)
             leftGraphics.Clear(clearColor)
 
-            Using redPen As New Pen(Color.Red, 2)
+            Using redPen As New Pen(Color.FromArgb(196, Color.Red))
                 Dim left = New Point(CInt(LeftImageBox.Width / 2 - leftImage.Width / 2),
                                      CInt(LeftImageBox.Height / 2 - leftImage.Height / 2))
                 leftGraphics.DrawImage(leftImage, left)
                 left += New Size(leftCenter)
                 leftGraphics.DrawLine(redPen,
-                                       New Point(left.X - 5, left.Y - 5),
-                                       New Point(left.X + 5, left.Y + 5))
+                                      New Point(left.X - 5, left.Y),
+                                      New Point(left.X - 1, left.Y))
                 leftGraphics.DrawLine(redPen,
-                                       New Point(left.X + 5, left.Y - 5),
-                                       New Point(left.X - 5, left.Y + 5))
+                                      New Point(left.X + 1, left.Y),
+                                      New Point(left.X + 5, left.Y))
+                leftGraphics.DrawLine(redPen,
+                                      New Point(left.X, left.Y - 5),
+                                      New Point(left.X, left.Y - 1))
+                leftGraphics.DrawLine(redPen,
+                                      New Point(left.X, left.Y + 1),
+                                      New Point(left.X, left.Y + 5))
                 Dim right = New Point(CInt(RightImageBox.Width / 2 - rightImage.Width / 2),
-                                     CInt(RightImageBox.Height / 2 - rightImage.Height / 2))
+                                      CInt(RightImageBox.Height / 2 - rightImage.Height / 2))
                 rightGraphics.DrawImage(rightImage, right)
                 right += New Size(rightCenter)
                 rightGraphics.DrawLine(redPen,
-                                        New Point(right.X - 5, right.Y - 5),
-                                        New Point(right.X + 5, right.Y + 5))
+                                       New Point(right.X - 5, right.Y),
+                                       New Point(right.X - 1, right.Y))
                 rightGraphics.DrawLine(redPen,
-                                        New Point(right.X + 5, right.Y - 5),
-                                        New Point(right.X - 5, right.Y + 5))
+                                       New Point(right.X + 1, right.Y),
+                                       New Point(right.X + 5, right.Y))
+                rightGraphics.DrawLine(redPen,
+                                       New Point(right.X, right.Y - 5),
+                                       New Point(right.X, right.Y - 1))
+                rightGraphics.DrawLine(redPen,
+                                       New Point(right.X, right.Y + 1),
+                                       New Point(right.X, right.Y + 5))
             End Using
 
             LeftImageBox.Invalidate()
@@ -152,7 +164,7 @@ Public Class ImageCentersForm
     Private Sub RightImageBox_Click(sender As Object, e As MouseEventArgs) Handles RightImageBox.MouseClick
         SetRightCenter(e.Location -
                        New Size(CInt(RightImageBox.Width / 2), CInt(RightImageBox.Height / 2)) +
-                      New Size(CInt(rightImage.Width / 2), CInt(rightImage.Height / 2)))
+                       New Size(CInt(rightImage.Width / 2), CInt(rightImage.Height / 2)))
     End Sub
 
     Private Sub LeftCenter_ValueChanged(sender As Object, e As EventArgs) Handles LeftCenterX.ValueChanged, LeftCenterY.ValueChanged
@@ -172,11 +184,11 @@ Public Class ImageCentersForm
     End Sub
 
     Private Sub LeftImageMirrorButton_Click(sender As Object, e As EventArgs) Handles LeftImageMirrorButton.Click
-        SetRightCenter(New Point(leftImage.Width - leftCenter.X, leftCenter.Y))
+        SetRightCenter(New Point(leftImage.Width - 1 - leftCenter.X, leftCenter.Y))
     End Sub
 
     Private Sub RightImageMirrorButton_Click(sender As Object, e As EventArgs) Handles RightImageMirrorButton.Click
-        SetLeftCenter(New Point(rightImage.Width - rightCenter.X, rightCenter.Y))
+        SetLeftCenter(New Point(rightImage.Width - 1 - rightCenter.X, rightCenter.Y))
     End Sub
 
     Private Sub SetLeftCenter(center As Point)
