@@ -63,6 +63,9 @@
                 ponyThumbnail = Nothing
         End Select
 
+        OffsetTypeFixedOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Fixed
+        OffsetTypeMirrorOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Mirror
+
         RedrawFollowPoint()
 
         Enabled = True
@@ -137,6 +140,8 @@
         End If
         RelativeToLabel.Text = relativeTo
         UnitsLabel.Text = units
+
+        OffsetTypeGroup.Visible = FollowOption.Checked
 
         RedrawFollowPoint()
     End Sub
@@ -214,6 +219,8 @@
             behaviorToChange.FollowMovingBehaviorName = DirectCast(MovingComboBox.SelectedItem, CaseInsensitiveString)
             behaviorToChange.FollowStoppedBehaviorName = DirectCast(StoppedComboBox.SelectedItem, CaseInsensitiveString)
         End If
+
+        behaviorToChange.FollowOffset = If(OffsetTypeMirrorOption.Checked, FollowOffsetType.Mirror, FollowOffsetType.Fixed)
 
         DialogResult = DialogResult.OK
         Me.Close()

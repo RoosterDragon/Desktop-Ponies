@@ -812,6 +812,7 @@ Public Class Behavior
     End Property
     Public Property AutoSelectImagesOnFollow As Boolean = True
     Public Property Group As Integer = AnyGroup
+    Public Property FollowOffset As FollowOffsetType
 
     Public ReadOnly Property Effects As EffectsEnumerable
         Get
@@ -902,7 +903,7 @@ Public Class Behavior
                                              "Follow Target", "Auto Select Follow Images",
                                              "Follow Stopped Behavior", "Follow Moving Behavior",
                                              "Right Image Center", "Left Image Center",
-                                             "Prevent Animation Loop", "Group"})
+                                             "Prevent Animation Loop", "Group", "Follow Offset Type"})
         p.NoParse()
         b.Name = If(p.NotNullOrWhiteSpace(), "")
         b.Chance = p.ParseDouble(0, 0, 1)
@@ -937,6 +938,7 @@ Public Class Behavior
         If b.LeftImage.CustomCenter = Vector2.Zero Then b.LeftImage.CustomCenter = Nothing
         b.DoNotRepeatImageAnimations = p.ParseBoolean(False)
         b.Group = p.ParseInt32(AnyGroup, 0, 100)
+        b.FollowOffset = p.ParseEnum(FollowOffsetType.Fixed)
 
         issues = p.Issues.ToImmutableArray()
         result = b
@@ -991,7 +993,8 @@ Public Class Behavior
             Quoted(leftCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
                    leftCenter.Y.ToString(CultureInfo.InvariantCulture)),
             DoNotRepeatImageAnimations,
-            Group.ToString(CultureInfo.InvariantCulture))
+            Group.ToString(CultureInfo.InvariantCulture),
+            FollowOffset.ToString())
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
@@ -1617,10 +1620,6 @@ Public Class Pony
     ''' Indicates when the pony may resume rebounding off of low priority bounds.
     ''' </summary>
     Private _reboundCooldownEndTime As TimeSpan
-    ''' <summary>
-    ''' Indicates when a pony following a target may resume following the target.
-    ''' </summary>
-    Private _followCooldownEndTime As TimeSpan
 
     ''' <summary>
     ''' Minimum duration that must elapse after a speech ends before a random speech can be activated.
@@ -2445,7 +2444,6 @@ Public Class Pony
     ''' suitable). Otherwise, a target is chosen uniformly from all available targets. The follow cool-down ent time will be reset.
     ''' </summary>
     Private Sub SetFollowTarget()
-        _followCooldownEndTime = TimeSpan.Zero
         If _followTarget Is Nothing AndAlso _currentBehavior.OriginalFollowTargetName <> "" Then
             ' If an interaction is running, we want to prefer those ponies involved in the interaction before trying other ponies.
             If _currentInteraction IsNot Nothing Then
@@ -2543,7 +2541,7 @@ Public Class Pony
     ''' <summary>
     ''' Updates the destination vector. It will be left alone if previously set this step otherwise it will be set to the current
     ''' overridden follow target (if any), the current follow target (if any), point to an absolute screen location (if specified) or else
-    ''' be cleared. When following, the follow cool-down end time will be set to provide short pauses when resuming following of a target.
+    ''' be cleared.
     ''' </summary>
     Private Sub UpdateDestination()
         ' If a destination has already been set for this step, don't set another.
@@ -2552,15 +2550,15 @@ Public Class Pony
         If FollowTargetOverride IsNot Nothing AndAlso _followTarget IsNot Nothing Then
             ' Move to the overridden follow target.
             _destination = _followTarget._location
-            DelayFollow()
             Return
         End If
         Dim offsetVector = New Vector2(_currentBehavior.OriginalDestinationXCoord, _currentBehavior.OriginalDestinationYCoord)
         If _followTarget IsNot Nothing Then
             ' Move to follow target.
             ' Here the offset represents a custom offset from the center of the target.
+            If _currentBehavior.FollowOffset = FollowOffsetType.Mirror AndAlso
+                Not _followTarget._facingRight Then offsetVector.X = -offsetVector.X
             _destination = _followTarget._location + offsetVector
-            DelayFollow()
             Return
         ElseIf offsetVector <> Vector2.Zero Then
             ' We need to head to some point relative to the display area.
@@ -2571,17 +2569,6 @@ Public Class Pony
                 New Vector2F(relativeDestination.X * region.Width, relativeDestination.Y * region.Height)
             Return
         End If
-    End Sub
-
-    ''' <summary>
-    ''' Provides a short delay for a follow target to move away from its follower to make following look more natural. The follow cool-down
-    ''' end time and destination vector may be set.
-    ''' </summary>
-    Private Sub DelayFollow()
-        ' If we're at the destination, we won't start following for a short while to generate "natural" pauses when a pony catches up with
-        ' its target.
-        If AtDestination Then _followCooldownEndTime = _currentTime + TimeSpan.FromSeconds(2)
-        If _followCooldownEndTime > _currentTime Then _destination = _location
     End Sub
 
     ''' <summary>
@@ -4013,6 +4000,20 @@ Public Enum TargetActivation
     ''' All targets must participate in the interaction, the interaction cannot proceed unless all targets are present.
     ''' </summary>
     All
+End Enum
+
+''' <summary>
+''' Specifies how the offset vector is to be treated for follow targets.
+''' </summary>
+Public Enum FollowOffsetType
+    ''' <summary>
+    ''' The offset vector is fixed and does not change.
+    ''' </summary>
+    Fixed
+    ''' <summary>
+    ''' The offset vector is horizontally mirrored when the pony is facing left.
+    ''' </summary>
+    Mirror
 End Enum
 
 Public Module EnumConversions

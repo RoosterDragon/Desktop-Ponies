@@ -44,7 +44,11 @@ Partial Class FollowTargetDialog
         Me.MovingComboBox = New System.Windows.Forms.ComboBox()
         Me.StoppedLabel = New System.Windows.Forms.Label()
         Me.MovingLabel = New System.Windows.Forms.Label()
+        Me.OffsetTypeGroup = New System.Windows.Forms.GroupBox()
+        Me.OffsetTypeMirrorOption = New System.Windows.Forms.RadioButton()
+        Me.OffsetTypeFixedOption = New System.Windows.Forms.RadioButton()
         Me.CommandsTable.SuspendLayout()
+        Me.OffsetTypeGroup.SuspendLayout()
         Me.SuspendLayout()
         '
         'CommandsTable
@@ -60,7 +64,7 @@ Partial Class FollowTargetDialog
         Me.CommandsTable.RowCount = 1
         Me.CommandsTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.CommandsTable.Size = New System.Drawing.Size(476, 29)
-        Me.CommandsTable.TabIndex = 20
+        Me.CommandsTable.TabIndex = 18
         '
         'Cancel_Button
         '
@@ -117,10 +121,10 @@ Partial Class FollowTargetDialog
         'UnitsLabel
         '
         Me.UnitsLabel.AutoSize = True
-        Me.UnitsLabel.Location = New System.Drawing.Point(35, 363)
+        Me.UnitsLabel.Location = New System.Drawing.Point(35, 328)
         Me.UnitsLabel.Name = "UnitsLabel"
         Me.UnitsLabel.Size = New System.Drawing.Size(48, 13)
-        Me.UnitsLabel.TabIndex = 15
+        Me.UnitsLabel.TabIndex = 12
         Me.UnitsLabel.Text = "Location"
         '
         'PointPreviewLabel
@@ -129,22 +133,22 @@ Partial Class FollowTargetDialog
         Me.PointPreviewLabel.Location = New System.Drawing.Point(296, 302)
         Me.PointPreviewLabel.Name = "PointPreviewLabel"
         Me.PointPreviewLabel.Size = New System.Drawing.Size(119, 13)
-        Me.PointPreviewLabel.TabIndex = 19
+        Me.PointPreviewLabel.TabIndex = 17
         Me.PointPreviewLabel.Text = "Point selection preview:"
         '
         'PointY
         '
-        Me.PointY.Location = New System.Drawing.Point(145, 379)
+        Me.PointY.Location = New System.Drawing.Point(145, 344)
         Me.PointY.Name = "PointY"
         Me.PointY.Size = New System.Drawing.Size(46, 20)
-        Me.PointY.TabIndex = 17
+        Me.PointY.TabIndex = 14
         '
         'PointX
         '
-        Me.PointX.Location = New System.Drawing.Point(72, 379)
+        Me.PointX.Location = New System.Drawing.Point(72, 344)
         Me.PointX.Name = "PointX"
         Me.PointX.Size = New System.Drawing.Size(46, 20)
-        Me.PointX.TabIndex = 16
+        Me.PointX.TabIndex = 13
         '
         'PointPreviewArea
         '
@@ -153,7 +157,7 @@ Partial Class FollowTargetDialog
         Me.PointPreviewArea.InitialImage = Nothing
         Me.PointPreviewArea.Location = New System.Drawing.Point(251, 328)
         Me.PointPreviewArea.Name = "PointPreviewArea"
-        Me.PointPreviewArea.Size = New System.Drawing.Size(227, 123)
+        Me.PointPreviewArea.Size = New System.Drawing.Size(237, 123)
         Me.PointPreviewArea.TabIndex = 28
         Me.PointPreviewArea.TabStop = False
         '
@@ -178,10 +182,10 @@ Partial Class FollowTargetDialog
         'RelativeToLabel
         '
         Me.RelativeToLabel.AutoSize = True
-        Me.RelativeToLabel.Location = New System.Drawing.Point(69, 402)
+        Me.RelativeToLabel.Location = New System.Drawing.Point(69, 367)
         Me.RelativeToLabel.Name = "RelativeToLabel"
         Me.RelativeToLabel.Size = New System.Drawing.Size(118, 13)
-        Me.RelativeToLabel.TabIndex = 18
+        Me.RelativeToLabel.TabIndex = 15
         Me.RelativeToLabel.Text = "(relative to pony center)"
         '
         'NoTargetOption
@@ -224,7 +228,7 @@ Partial Class FollowTargetDialog
         Me.StoppedComboBox.Location = New System.Drawing.Point(42, 264)
         Me.StoppedComboBox.Name = "StoppedComboBox"
         Me.StoppedComboBox.Size = New System.Drawing.Size(161, 21)
-        Me.StoppedComboBox.TabIndex = 11
+        Me.StoppedComboBox.TabIndex = 9
         '
         'MovingComboBox
         '
@@ -233,7 +237,7 @@ Partial Class FollowTargetDialog
         Me.MovingComboBox.Location = New System.Drawing.Point(279, 264)
         Me.MovingComboBox.Name = "MovingComboBox"
         Me.MovingComboBox.Size = New System.Drawing.Size(161, 21)
-        Me.MovingComboBox.TabIndex = 13
+        Me.MovingComboBox.TabIndex = 11
         '
         'StoppedLabel
         '
@@ -241,7 +245,7 @@ Partial Class FollowTargetDialog
         Me.StoppedLabel.Location = New System.Drawing.Point(24, 248)
         Me.StoppedLabel.Name = "StoppedLabel"
         Me.StoppedLabel.Size = New System.Drawing.Size(144, 13)
-        Me.StoppedLabel.TabIndex = 10
+        Me.StoppedLabel.TabIndex = 8
         Me.StoppedLabel.Text = "Behavior for stopped images:"
         '
         'MovingLabel
@@ -250,8 +254,41 @@ Partial Class FollowTargetDialog
         Me.MovingLabel.Location = New System.Drawing.Point(248, 248)
         Me.MovingLabel.Name = "MovingLabel"
         Me.MovingLabel.Size = New System.Drawing.Size(140, 13)
-        Me.MovingLabel.TabIndex = 12
+        Me.MovingLabel.TabIndex = 10
         Me.MovingLabel.Text = "Behavior for moving images:"
+        '
+        'OffsetTypeGroup
+        '
+        Me.OffsetTypeGroup.Controls.Add(Me.OffsetTypeMirrorOption)
+        Me.OffsetTypeGroup.Controls.Add(Me.OffsetTypeFixedOption)
+        Me.OffsetTypeGroup.Location = New System.Drawing.Point(12, 383)
+        Me.OffsetTypeGroup.Name = "OffsetTypeGroup"
+        Me.OffsetTypeGroup.Size = New System.Drawing.Size(233, 68)
+        Me.OffsetTypeGroup.TabIndex = 16
+        Me.OffsetTypeGroup.TabStop = False
+        Me.OffsetTypeGroup.Text = "Offset Type"
+        '
+        'OffsetTypeMirrorOption
+        '
+        Me.OffsetTypeMirrorOption.AutoSize = True
+        Me.OffsetTypeMirrorOption.Location = New System.Drawing.Point(6, 42)
+        Me.OffsetTypeMirrorOption.Name = "OffsetTypeMirrorOption"
+        Me.OffsetTypeMirrorOption.Size = New System.Drawing.Size(214, 17)
+        Me.OffsetTypeMirrorOption.TabIndex = 1
+        Me.OffsetTypeMirrorOption.Text = "Mirror - value is mirrored when facing left"
+        Me.OffsetTypeMirrorOption.UseVisualStyleBackColor = True
+        '
+        'OffsetTypeFixedOption
+        '
+        Me.OffsetTypeFixedOption.AutoSize = True
+        Me.OffsetTypeFixedOption.Checked = True
+        Me.OffsetTypeFixedOption.Location = New System.Drawing.Point(6, 19)
+        Me.OffsetTypeFixedOption.Name = "OffsetTypeFixedOption"
+        Me.OffsetTypeFixedOption.Size = New System.Drawing.Size(145, 17)
+        Me.OffsetTypeFixedOption.TabIndex = 0
+        Me.OffsetTypeFixedOption.TabStop = True
+        Me.OffsetTypeFixedOption.Text = "Fixed - value is used as is"
+        Me.OffsetTypeFixedOption.UseVisualStyleBackColor = True
         '
         'FollowTargetDialog
         '
@@ -261,6 +298,7 @@ Partial Class FollowTargetDialog
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
         Me.ClientSize = New System.Drawing.Size(500, 507)
+        Me.Controls.Add(Me.OffsetTypeGroup)
         Me.Controls.Add(Me.MovingLabel)
         Me.Controls.Add(Me.StoppedLabel)
         Me.Controls.Add(Me.MovingComboBox)
@@ -289,6 +327,8 @@ Partial Class FollowTargetDialog
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Select following parameters..."
         Me.CommandsTable.ResumeLayout(False)
+        Me.OffsetTypeGroup.ResumeLayout(False)
+        Me.OffsetTypeGroup.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -314,5 +354,8 @@ Partial Class FollowTargetDialog
     Friend WithEvents MovingComboBox As System.Windows.Forms.ComboBox
     Friend WithEvents StoppedLabel As System.Windows.Forms.Label
     Friend WithEvents MovingLabel As System.Windows.Forms.Label
+    Friend WithEvents OffsetTypeGroup As System.Windows.Forms.GroupBox
+    Friend WithEvents OffsetTypeMirrorOption As System.Windows.Forms.RadioButton
+    Friend WithEvents OffsetTypeFixedOption As System.Windows.Forms.RadioButton
 
 End Class
