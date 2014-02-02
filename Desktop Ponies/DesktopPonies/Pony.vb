@@ -1671,7 +1671,6 @@ Public Class Pony
     ''' <summary>
     ''' Indicates the behaviors allowed for the interaction under consideration.
     ''' </summary>
-    ''' <remarks></remarks>
     Private ReadOnly _behaviorsAllowed As New HashSet(Of CaseInsensitiveString)()
 
     ''' <summary>
@@ -1681,7 +1680,6 @@ Public Class Pony
     ''' <summary>
     ''' Indicates if the pony is currently in a state reacting to being dragged.
     ''' </summary>
-    ''' <remarks></remarks>
     Private _inDragState As Boolean
     ''' <summary>
     ''' Indicates if the pony is currently in a state reacting to being asleep.
@@ -2094,7 +2092,7 @@ Public Class Pony
         If _currentTime - _behaviorStartTime > _behaviorDesiredDuration Then
             AddUpdateRecord("Expiring behavior.")
             ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
-            If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False)
+            If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False, False)
             If _currentBehavior.EndLine IsNot Nothing Then SpeakInternal(_currentBehavior.EndLine)
             SetBehaviorInternal(_currentBehavior.LinkedBehavior)
             If _currentBehavior.StartLine IsNot Nothing Then
@@ -2134,17 +2132,19 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' If not asleep or interacting, transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and
-    ''' behavior before mouseover will be set. The behavior will be set as a side effect of state transitions. Transitioning into the
-    ''' mouseover state will trigger a random speech. The behavior desired duration will be modified to prevent behaviors expiring whilst
-    ''' in the mouseover or drag states. Entering the mouseover or drag states is restricted by the current context.
+    ''' If not asleep, transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and behavior before
+    ''' mouseover will be set. The behavior will be set as a side effect of state transitions. Transitioning into the mouseover state will
+    ''' trigger a random speech. The behavior desired duration will be modified to prevent behaviors expiring whilst in the mouseover or
+    ''' drag states. Entering the mouseover or drag states is restricted by the current context. If the pony is interacting then the
+    ''' mouseover state is not entered. If dragging begins, the interaction is ended and the behavior before mouseover is cleared. The pony
+    ''' resumes a random behavior on exiting drag.
     ''' </summary>
     Private Sub HandleMouseoverAndDrag()
-        If _inSleepState OrElse _currentInteraction IsNot Nothing Then Return
+        If _inSleepState Then Return
         Dim mouseoverImage = If(_facingRight, _mouseoverBehavior.RightImage, _mouseoverBehavior.LeftImage)
         Dim mouseoverRegion = RectangleF.Intersect(regionF, GetRegionFForImage(mouseoverImage))
         Dim isMouseOver = mouseoverRegion.Contains(Context.CursorLocation.X, Context.CursorLocation.Y)
-        If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState Then
+        If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso _currentInteraction Is Nothing Then
             AddUpdateRecord("Entering mouseover state.")
             _inMouseoverState = True
             _behaviorBeforeSpecialStateOverride = _currentBehavior
@@ -2154,16 +2154,26 @@ Public Class Pony
         If Context.DraggingEnabled AndAlso Drag AndAlso Not _inDragState Then
             AddUpdateRecord("Entering drag state.")
             _inDragState = True
+            If _behaviorBeforeSpecialStateOverride Is Nothing Then _behaviorBeforeSpecialStateOverride = _currentBehavior
+            If _currentInteraction IsNot Nothing Then
+                EndInteraction(True, True)
+                _behaviorBeforeSpecialStateOverride = Nothing
+            End If
             SetBehaviorInternal(_dragBehavior)
         ElseIf Not Drag AndAlso _inDragState Then
             AddUpdateRecord("Exiting drag state.")
             _inDragState = False
-            SetBehaviorInternal(_mouseoverBehavior)
+            If Context.CursorAvoidanceEnabled Then
+                SetBehaviorInternal(_mouseoverBehavior)
+            Else
+                SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
+                _behaviorBeforeSpecialStateOverride = Nothing
+            End If
         End If
         If Not isMouseOver AndAlso _inMouseoverState Then
             AddUpdateRecord("Exiting mouseover state.")
             _inMouseoverState = False
-            If _currentInteraction Is Nothing Then SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
+            SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
             _behaviorBeforeSpecialStateOverride = Nothing
         End If
         If _inMouseoverState OrElse _inDragState Then ExtendBehaviorDurationIndefinitely()
@@ -2185,11 +2195,11 @@ Public Class Pony
             Dim nowAtCustomDestination = Vector2F.DistanceSquared(Location, customDestination.Value) < Epsilon
             If nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse Not atCustomDestination.Value) Then
                 AddUpdateRecord("Entering stopped behavior for custom destination ", destinationDescription)
-                EndInteraction(True)
+                EndInteraction(True, False)
                 SetBehaviorInternal(GetBehaviorMatching(stationaryBehaviorAndTruthPredicateInArray))
             ElseIf Not nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse atCustomDestination.Value) Then
                 AddUpdateRecord("Entering moving behavior for custom destination ", destinationDescription)
-                EndInteraction(True)
+                EndInteraction(True, False)
                 ' TODO: Match behavior chosen to speed override, if any.
                 ' TODO: Add a field for custom speed to allow pony to move around even if it lacks the ability?
                 SetBehaviorInternal(GetBehaviorMatching(movingBehaviorAndTruthPredicateInArray))
@@ -2347,7 +2357,7 @@ Public Class Pony
     ''' <param name="speak">Indicates if the start line for the behavior should be spoken, if one exists.</param>
     Public Sub SetBehavior(Optional suggested As Behavior = Nothing, Optional speak As Boolean = True)
         AddUpdateRecord("SetBehavior called externally")
-        EndInteraction(True)
+        EndInteraction(True, False)
         SetBehaviorInternal(suggested)
         If _currentBehavior.StartLine IsNot Nothing Then SpeakInternal(_currentBehavior.StartLine)
         StartEffects()
@@ -3136,28 +3146,50 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Ends the current interaction. If this pony is the initiator, calls EndInteraction() on all target ponies still running the
-    ''' interaction and removes itself as the interaction initiator. If this pony is a target, removes itself from the involved targets of
-    ''' the interaction. The current interaction and interaction cool down will be set.
+    ''' Ends the current interaction. If a cancel was forced and this pony is a target, calls EndInteraction() on the initiator instead. If
+    ''' this pony is the initiator, it removes itself as the interaction initiator and calls EndInteraction() on all target ponies still
+    ''' running the interaction. If this pony is a target, removes itself from the involved targets of the interaction. The current
+    ''' interaction and interaction cool down will be set.
     ''' </summary>
-    ''' <param name="forcedCancel">Indicates if this interaction is being abruptly canceled ahead of schedule. For records only.</param>
-    Private Sub EndInteraction(forcedCancel As Boolean)
+    ''' <param name="forcedCancel">Indicates if this interaction is being abruptly canceled ahead of schedule. If so, the cool down will be
+    ''' limited at 30 seconds since the interaction did not complete.</param>
+    ''' <param name="resetBehaviorAfterCancel">If true, will activate a random behavior after ending the interaction.</param>
+    Private Sub EndInteraction(forcedCancel As Boolean, resetBehaviorAfterCancel As Boolean)
         If _currentInteraction Is Nothing Then Return
+
+        If forcedCancel AndAlso _currentInteraction.Initiator IsNot Nothing AndAlso
+            Not ReferenceEquals(Me, _currentInteraction.Initiator) Then
+            ' If we need to force a cancel, delegate the task to the initiator of the interaction.
+            AddUpdateRecord("Asking initiator to cancel interaction.")
+            _currentInteraction.Initiator.EndInteraction(forcedCancel, resetBehaviorAfterCancel)
+            Return
+        End If
+
         AddUpdateRecord(If(forcedCancel, "Canceling interaction.", "Ending interaction."))
+
         If ReferenceEquals(Me, _currentInteraction.Initiator) Then
+            ' The initiator should remove themselves, and then ask all targets to end too.
+            _currentInteraction.Initiator = Nothing
             For Each pony In _currentInteraction.Targets
                 ' Check the target is still running the same interaction.
                 If ReferenceEquals(_currentInteraction, pony._currentInteraction) Then
-                    pony.EndInteraction(forcedCancel)
+                    pony.EndInteraction(forcedCancel, resetBehaviorAfterCancel)
                 End If
             Next
-            _currentInteraction.Initiator = Nothing
         Else
             _currentInteraction.InvolvedTargets.Remove(Me)
         End If
 
-        _interactionCooldownEndTime = _currentTime + _currentInteraction.Base.ReactivationDelay
+        Dim delay = _currentInteraction.Base.ReactivationDelay
+        If forcedCancel Then
+            ' If an interaction we ended early, we will apply a shorter delay since it didn't complete.
+            Dim cancelDelay = TimeSpan.FromSeconds(30)
+            If cancelDelay < delay Then delay = cancelDelay
+        End If
+        _interactionCooldownEndTime = _currentTime + delay
         _currentInteraction = Nothing
+
+        If resetBehaviorAfterCancel Then SetBehaviorInternal()
     End Sub
 
     ''' <summary>
