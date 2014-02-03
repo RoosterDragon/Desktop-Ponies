@@ -2170,7 +2170,7 @@ Public Class Pony
                 _behaviorBeforeSpecialStateOverride = Nothing
             End If
         End If
-        If Not isMouseOver AndAlso _inMouseoverState Then
+        If Not _inDragState AndAlso Not isMouseOver AndAlso _inMouseoverState Then
             AddUpdateRecord("Exiting mouseover state.")
             _inMouseoverState = False
             SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
