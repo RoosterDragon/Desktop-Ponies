@@ -1143,171 +1143,51 @@ End Class
 
 #Region "PonyContext class"
 Public Class PonyContext
-    Private ReadOnly syncGuard As New Object()
-
-    Private _effectsEnabled As Boolean
-    Public Property EffectsEnabled() As Boolean
-        Get
-            SyncLock syncGuard
-                Return _effectsEnabled
-            End SyncLock
-        End Get
-        Set(ByVal value As Boolean)
-            SyncLock syncGuard
-                _effectsEnabled = value
-            End SyncLock
-        End Set
-    End Property
-    Private _speechEnabled As Boolean
+    Public Property EffectsEnabled As Boolean
     Public Property SpeechEnabled As Boolean
-        Get
-            SyncLock syncGuard
-                Return _speechEnabled
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            SyncLock syncGuard
-                _speechEnabled = value
-            End SyncLock
-        End Set
-    End Property
-    Private _interactionsEnabled As Boolean
     Public Property InteractionsEnabled As Boolean
-        Get
-            SyncLock syncGuard
-                Return _interactionsEnabled
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            _interactionsEnabled = value
-        End Set
-    End Property
 
-    Private _randomSpeechChance As Double
     Public Property RandomSpeechChance As Double
-        Get
-            SyncLock syncGuard
-                Return _randomSpeechChance
-            End SyncLock
-        End Get
-        Set(value As Double)
-            SyncLock syncGuard
-                _randomSpeechChance = value
-            End SyncLock
-        End Set
-    End Property
 
-    Private _cursorAvoidanceEnabled As Boolean
     Public Property CursorAvoidanceEnabled As Boolean
-        Get
-            SyncLock syncGuard
-                Return _cursorAvoidanceEnabled
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            SyncLock syncGuard
-                _cursorAvoidanceEnabled = value
-            End SyncLock
-        End Set
-    End Property
     Private _cursorAvoidanceRadius As Single
-    Public Property CursorAvoidanceRadius() As Single
+    Public Property CursorAvoidanceRadius As Single
         Get
-            SyncLock syncGuard
-                Return _cursorAvoidanceRadius
-            End SyncLock
+            Return _cursorAvoidanceRadius
         End Get
         Set(ByVal value As Single)
             If value < 0 Then Throw New ArgumentOutOfRangeException("value", value, "value must be greater than or equal to zero.")
-            SyncLock syncGuard
-                _cursorAvoidanceRadius = value
-            End SyncLock
+            _cursorAvoidanceRadius = value
         End Set
     End Property
-    Private _draggingEnabled As Boolean
-    Public Property DraggingEnabled() As Boolean
-        Get
-            SyncLock syncGuard
-                Return _draggingEnabled
-            End SyncLock
-        End Get
-        Set(ByVal value As Boolean)
-            SyncLock syncGuard
-                _draggingEnabled = value
-            End SyncLock
-        End Set
-    End Property
+    Public Property DraggingEnabled As Boolean
 
-    Private _ponyAvoidanceEnabled As Boolean
     Public Property PonyAvoidanceEnabled As Boolean
-        Get
-            SyncLock syncGuard
-                Return _ponyAvoidanceEnabled
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            SyncLock syncGuard
-                _ponyAvoidanceEnabled = value
-            End SyncLock
-        End Set
-    End Property
-    Private _windowAvoidanceEnabled As Boolean
     Public Property WindowAvoidanceEnabled As Boolean
-        Get
-            SyncLock syncGuard
-                Return _windowAvoidanceEnabled
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            SyncLock syncGuard
-                _windowAvoidanceEnabled = value
-            End SyncLock
-        End Set
-    End Property
-    Private _stayInContainingWindow As Boolean
     Public Property StayInContainingWindow As Boolean
-        Get
-            SyncLock syncGuard
-                Return _stayInContainingWindow
-            End SyncLock
-        End Get
-        Set(value As Boolean)
-            SyncLock syncGuard
-                _stayInContainingWindow = value
-            End SyncLock
-        End Set
-    End Property
 
     Private _timeFactor As Double
     Public Property TimeFactor As Double
         Get
-            SyncLock syncGuard
-                Return _timeFactor
-            End SyncLock
+            Return _timeFactor
         End Get
         Set(value As Double)
             If value < 0.1 OrElse value > 10 Then
                 Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.1 and 10 inclusive.")
             End If
-            SyncLock syncGuard
-                _timeFactor = value
-            End SyncLock
+            _timeFactor = value
         End Set
     End Property
     Private _scaleFactor As Single
     Public Property ScaleFactor As Single
         Get
-            SyncLock syncGuard
-                Return _scaleFactor
-            End SyncLock
+            Return _scaleFactor
         End Get
         Set(value As Single)
             If value < 0.25 OrElse value > 4 Then
                 Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.25 and 4 inclusive.")
             End If
-            SyncLock syncGuard
-                _scaleFactor = value
-            End SyncLock
+            _scaleFactor = value
         End Set
     End Property
     Private _region As Rectangle
@@ -1316,17 +1196,13 @@ Public Class PonyContext
     ''' </summary>
     Public Property Region As Rectangle
         Get
-            SyncLock syncGuard
-                Return _region
-            End SyncLock
+            Return _region
         End Get
         Set(value As Rectangle)
             If _region.Width < 0 OrElse _region.Height < 0 Then
                 Throw New ArgumentException("region must have non-negative width and height.", "value")
             End If
-            SyncLock syncGuard
-                _region = value
-            End SyncLock
+            _region = value
         End Set
     End Property
     Private _exclusionZone As RectangleF
@@ -1334,19 +1210,15 @@ Public Class PonyContext
     ''' Gets or sets a zone within the region that should be avoided. These values are normalized and define the relative zone to avoid
     ''' with regards to the current region.
     ''' </summary>
-    Public Property ExclusionZone() As RectangleF
+    Public Property ExclusionZone As RectangleF
         Get
-            SyncLock syncGuard
-                Return _exclusionZone
-            End SyncLock
+            Return _exclusionZone
         End Get
         Set(ByVal value As RectangleF)
             If Not New RectangleF(0, 0, 1, 1).Contains(value) Then
                 Throw New ArgumentOutOfRangeException("value", value, "value must contain normalized values.")
             End If
-            SyncLock syncGuard
-                _exclusionZone = value
-            End SyncLock
+            _exclusionZone = value
         End Set
     End Property
     ''' <summary>
@@ -1357,65 +1229,27 @@ Public Class PonyContext
             Return Options.GetExclusionArea(Region, ExclusionZone)
         End Get
     End Property
-    Private _teleportationEnabled As Boolean
-    Public Property TeleportationEnabled() As Boolean
-        Get
-            SyncLock syncGuard
-                Return _teleportationEnabled
-            End SyncLock
-        End Get
-        Set(ByVal value As Boolean)
-            SyncLock syncGuard
-                _teleportationEnabled = value
-            End SyncLock
-        End Set
-    End Property
+    Public Property TeleportationEnabled As Boolean
 
-    Private _cursorLocation As Vector2
     ''' <summary>
     ''' Gets or sets the current cursor location. The animator should update this so that other elements in the context can access it.
     ''' </summary>
-    Public Property CursorLocation As Vector2
-        Get
-            SyncLock syncGuard
-                Return _cursorLocation
-            End SyncLock
-        End Get
-        Set(value As Vector2)
-            SyncLock syncGuard
-                _cursorLocation = value
-            End SyncLock
-        End Set
-    End Property
+    Public Property CursorLocation As New Vector2(Integer.MinValue, Integer.MinValue)
 
-    Private ReadOnly _pendingSprites As List(Of ISprite)
+    Private ReadOnly _pendingSprites As New List(Of ISprite)()
     ''' <summary>
     ''' Gets a collection where new sprites can be added from anything that has access to this context. The sprite animator should add all
     ''' sprites in this collection when it is convenient, and then clear it.
     ''' </summary>
     Public ReadOnly Property PendingSprites As List(Of ISprite)
         Get
-            SyncLock syncGuard
-                Return _pendingSprites
-            End SyncLock
+            Return _pendingSprites
         End Get
     End Property
     ''' <summary>
     ''' Gets or sets the collection of sprites to which this pony belongs, and that may be searched when looking for targets to follow.
     ''' </summary>
-    Private _sprites As ICollection(Of ISprite)
     Public Property Sprites As ICollection(Of ISprite)
-        Get
-            SyncLock syncGuard
-                Return _sprites
-            End SyncLock
-        End Get
-        Set(value As ICollection(Of ISprite))
-            SyncLock syncGuard
-                _sprites = value
-            End SyncLock
-        End Set
-    End Property
     ''' <summary>
     ''' Iterates the current collection of sprites producing ponies other than the specified pony.
     ''' </summary>
@@ -1434,10 +1268,6 @@ Public Class PonyContext
     ''' Initializes a new instance of the <see cref="PonyContext"/> class using the current global options.
     ''' </summary>
     Public Sub New()
-        SyncLock syncGuard
-            _cursorLocation = New Vector2(Integer.MinValue, Integer.MinValue)
-            _pendingSprites = New List(Of ISprite)()
-        End SyncLock
         SynchronizeWithGlobalOptions()
     End Sub
 
@@ -1445,23 +1275,21 @@ Public Class PonyContext
     ''' Synchronizes context settings with the current global options.
     ''' </summary>
     Public Sub SynchronizeWithGlobalOptions()
-        SyncLock syncGuard
-            _effectsEnabled = Options.PonyEffectsEnabled
-            _speechEnabled = Options.PonySpeechEnabled
-            _interactionsEnabled = Options.PonyInteractionsEnabled
-            _randomSpeechChance = Options.PonySpeechChance
-            _cursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
-            _cursorAvoidanceRadius = Options.CursorAvoidanceSize
-            _draggingEnabled = Options.PonyDraggingEnabled
-            _ponyAvoidanceEnabled = Options.PonyAvoidsPonies
-            _windowAvoidanceEnabled = Options.WindowAvoidanceEnabled
-            _stayInContainingWindow = Options.WindowContainment
-            _timeFactor = Options.TimeFactor
-            _scaleFactor = Options.ScaleFactor
-            _region = Options.GetAllowedArea()
-            _exclusionZone = Options.ExclusionZone
-            _teleportationEnabled = Options.PonyTeleportEnabled
-        End SyncLock
+        EffectsEnabled = Options.PonyEffectsEnabled
+        SpeechEnabled = Options.PonySpeechEnabled
+        InteractionsEnabled = Options.PonyInteractionsEnabled
+        RandomSpeechChance = Options.PonySpeechChance
+        CursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
+        CursorAvoidanceRadius = Options.CursorAvoidanceSize
+        DraggingEnabled = Options.PonyDraggingEnabled
+        PonyAvoidanceEnabled = Options.PonyAvoidsPonies
+        WindowAvoidanceEnabled = Options.WindowAvoidanceEnabled
+        StayInContainingWindow = Options.WindowContainment
+        TimeFactor = Options.TimeFactor
+        ScaleFactor = Options.ScaleFactor
+        Region = Options.GetAllowedArea()
+        ExclusionZone = Options.ExclusionZone
+        TeleportationEnabled = Options.PonyTeleportEnabled
     End Sub
 
     ''' <summary>
@@ -1469,22 +1297,20 @@ Public Class PonyContext
     ''' exclusion zone is applied. Teleportation is enabled. The region is not set (it should be set as needed).
     ''' </summary>
     Public Sub SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
-        SyncLock syncGuard
-            _effectsEnabled = Options.PonyEffectsEnabled
-            _speechEnabled = Options.PonySpeechEnabled
-            _interactionsEnabled = Options.PonyInteractionsEnabled
-            _randomSpeechChance = Options.PonySpeechChance
-            _cursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
-            _cursorAvoidanceRadius = Options.CursorAvoidanceSize
-            _draggingEnabled = Options.PonyDraggingEnabled
-            _ponyAvoidanceEnabled = Options.PonyAvoidsPonies
-            _windowAvoidanceEnabled = False
-            _stayInContainingWindow = False
-            _timeFactor = Options.TimeFactor
-            _scaleFactor = Options.ScaleFactor
-            _exclusionZone = RectangleF.Empty
-            _teleportationEnabled = True
-        End SyncLock
+        EffectsEnabled = Options.PonyEffectsEnabled
+        SpeechEnabled = Options.PonySpeechEnabled
+        InteractionsEnabled = Options.PonyInteractionsEnabled
+        RandomSpeechChance = Options.PonySpeechChance
+        CursorAvoidanceEnabled = Options.CursorAvoidanceEnabled
+        CursorAvoidanceRadius = Options.CursorAvoidanceSize
+        DraggingEnabled = Options.PonyDraggingEnabled
+        PonyAvoidanceEnabled = Options.PonyAvoidsPonies
+        WindowAvoidanceEnabled = False
+        StayInContainingWindow = False
+        TimeFactor = Options.TimeFactor
+        ScaleFactor = Options.ScaleFactor
+        ExclusionZone = RectangleF.Empty
+        TeleportationEnabled = True
     End Sub
 End Class
 #End Region
@@ -3216,8 +3042,7 @@ Public Class Pony
     ''' <returns>A region where the current location of the pony and image center coincide, whose size is that of the image scaled by the
     ''' context scale factor.</returns>
     Private Function GetRegionFForImage(image As SpriteImage) As RectangleF
-        Dim scale = Context.ScaleFactor
-        Return New RectangleF(_location - image.Center * scale, image.Size * scale)
+        Return New RectangleF(_location - image.Center * Context.ScaleFactor, image.Size * Context.ScaleFactor)
     End Function
 
     ''' <summary>
