@@ -378,14 +378,16 @@ Public Class PonyAnimator
     End Sub
 
     Public Overrides Sub Finish()
-        RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
-        RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
-        RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
-        RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
-        RemoveHandler SpritesRemoved, AddressOf InvalidateInteractions
-        For Each expireableSprite In Sprites.OfType(Of IExpireableSprite)()
-            RemoveExpiredHandlerAndExpireSprite(expireableSprite)
-        Next
+        If Not Disposed Then
+            RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
+            RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
+            RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
+            RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
+            RemoveHandler SpritesRemoved, AddressOf InvalidateInteractions
+            For Each expireableSprite In Sprites.OfType(Of IExpireableSprite)()
+                RemoveExpiredHandlerAndExpireSprite(expireableSprite)
+            Next
+        End If
         MyBase.Finish()
     End Sub
 
