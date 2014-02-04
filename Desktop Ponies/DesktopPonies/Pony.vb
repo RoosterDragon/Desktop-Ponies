@@ -1592,6 +1592,10 @@ Public Class Pony
     ''' </summary>
     Private _facingRight As Boolean
     ''' <summary>
+    ''' The axis-aligned region the sprite currently occupies. Only accurate at specific times - use regionF for an up-to-date value.
+    ''' </summary>
+    Private _region As Rectangle
+    ''' <summary>
     ''' The location of the center point of the pony.
     ''' </summary>
     Private _location As Vector2F = New Vector2F(Single.NaN, Single.NaN)
@@ -1970,7 +1974,7 @@ Public Class Pony
     ''' </summary>
     Public ReadOnly Property Region As Rectangle Implements ISprite.Region
         Get
-            Return New Rectangle(Vector2.Round(regionF.Location), Vector2.Truncate(regionF.Size))
+            Return _region
         End Get
     End Property
 
@@ -2109,6 +2113,7 @@ Public Class Pony
         UpdateMovement()
         SetVisualOverrideBehavior()
         UpdateLocation()
+        UpdateRegion()
         RepeatEffects()
     End Sub
 
@@ -2681,7 +2686,7 @@ Public Class Pony
     Private Sub StartNewEffect(effectBase As EffectBase)
         Dim effect = New Effect(effectBase, Not _facingRight,
                                 Function() Me.regionF.Location,
-                                Function() Me.Region.Size,
+                                Function() Me._region.Size,
                                 Context)
         If effectBase.Duration = 0 Then
             _effectsToManuallyExpire.Add(effect)
@@ -2721,10 +2726,20 @@ Public Class Pony
             _location = Context.CursorLocation
         Else
             _location += _movement
+            UpdateRegion()
             If _destination Is Nothing AndAlso Not TeleportToBoundaryIfOutside() Then ReboundOffRegions()
         End If
+        Dim currentRegion = regionF
         _lastStepWasInBounds =
-            CType(Context.Region, RectangleF).Contains(regionF) AndAlso Not regionF.IntersectsWith(Context.ExclusionRegion)
+            CType(Context.Region, RectangleF).Contains(currentRegion) AndAlso Not currentRegion.IntersectsWith(Context.ExclusionRegion)
+    End Sub
+
+    ''' <summary>
+    ''' Updates the region based on the current location, image and scale factor.
+    ''' </summary>
+    Private Sub UpdateRegion()
+        Dim currentRegion = regionF
+        _region = New Rectangle(Vector2.Round(currentRegion.Location), Vector2.Truncate(currentRegion.Size))
     End Sub
 
     ''' <summary>
@@ -2769,7 +2784,7 @@ Public Class Pony
             Dim rebounded = False
             If Context.StayInContainingWindow AndAlso OperatingSystemInfo.IsWindows Then
                 Dim windowRect = WindowRegionAtCenter()
-                If windowRect IsNot Nothing AndAlso windowRect.Value.Contains(Region) Then
+                If windowRect IsNot Nothing AndAlso windowRect.Value.Contains(_region) Then
                     rebounded = rebounded Or ReboundIntoContainmentRegion(windowRect.Value, "a window")
                 End If
             End If
@@ -2782,7 +2797,7 @@ Public Class Pony
                 ' This simplistic method for pony collisions is n^2. This should be fine for most use cases of a few ponies, but we
                 ' will give up on collision avoidance once there are more than a handful of ponies to prevent a bottleneck.
                 For Each pony In Context.OtherPonies(Me)
-                    rebounded = rebounded Or ReboundOutOfExclusionRegion(pony.Region, "another pony", True)
+                    rebounded = rebounded Or ReboundOutOfExclusionRegion(pony._region, "another pony", True)
                 Next
             End If
             If Context.CursorAvoidanceEnabled Then
@@ -2909,8 +2924,7 @@ Public Class Pony
     ''' </summary>
     ''' <returns>The bounding rectangle of the window at the center of the sprite region, if any.</returns>
     Private Function WindowRegionAtCenter() As Rectangle?
-        Dim currentRegion = Region
-        Dim regionCenter = Point.Round(currentRegion.Center())
+        Dim regionCenter = Point.Round(regionF.Center())
         Dim hWnd = Interop.Win32.WindowFromPoint(New Interop.Win32.POINT(regionCenter.X, regionCenter.Y))
         If hWnd = IntPtr.Zero Then Return Nothing
         Dim windowRect As Interop.Win32.RECT
@@ -2924,11 +2938,10 @@ Public Class Pony
     Private ReadOnly Iterator Property NearbyWindowRegions As IEnumerable(Of Rectangle)
         Get
             If Not OperatingSystemInfo.IsWindows Then Return
-            Dim currentRegion = Region
-            For Each corner In {New Interop.Win32.POINT(currentRegion.Left, currentRegion.Top),
-                                New Interop.Win32.POINT(currentRegion.Right, currentRegion.Top),
-                                New Interop.Win32.POINT(currentRegion.Left, currentRegion.Bottom),
-                                New Interop.Win32.POINT(currentRegion.Right, currentRegion.Bottom)}
+            For Each corner In {New Interop.Win32.POINT(_region.Left, _region.Top),
+                                New Interop.Win32.POINT(_region.Right, _region.Top),
+                                New Interop.Win32.POINT(_region.Left, _region.Bottom),
+                                New Interop.Win32.POINT(_region.Right, _region.Bottom)}
                 Dim hWnd = Interop.Win32.WindowFromPoint(corner)
                 If hWnd <> IntPtr.Zero Then
                     Dim windowRect As Interop.Win32.RECT
@@ -3199,7 +3212,8 @@ Public Class Pony
     ''' <returns>A region where the current location of the pony and image center coincide, whose size is that of the image scaled by the
     ''' context scale factor.</returns>
     Private Function GetRegionFForImage(image As SpriteImage) As RectangleF
-        Return New RectangleF(_location - image.Center * Context.ScaleFactor, image.Size * Context.ScaleFactor)
+        Dim scale = Context.ScaleFactor
+        Return New RectangleF(_location - image.Center * scale, image.Size * scale)
     End Function
 
     ''' <summary>
