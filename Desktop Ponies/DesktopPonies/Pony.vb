@@ -2059,6 +2059,7 @@ Public Class Pony
         _location = currentImage.Center * Context.ScaleFactor +
             New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
         EnsureWithinBounds(True)
+        UpdateRegion()
     End Sub
 
     ''' <summary>
@@ -2146,9 +2147,9 @@ Public Class Pony
     ''' </summary>
     Private Sub HandleMouseoverAndDrag()
         If _inSleepState Then Return
+        Dim cursorLocation = CType(Context.CursorLocation, Point)
         Dim mouseoverImage = If(_facingRight, _mouseoverBehavior.RightImage, _mouseoverBehavior.LeftImage)
-        Dim mouseoverRegion = RectangleF.Intersect(regionF, GetRegionFForImage(mouseoverImage))
-        Dim isMouseOver = mouseoverRegion.Contains(Context.CursorLocation.X, Context.CursorLocation.Y)
+        Dim isMouseOver = Region.Contains(cursorLocation) AndAlso GetRegionFForImage(mouseoverImage).Contains(cursorLocation)
         If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso _currentInteraction Is Nothing Then
             AddUpdateRecord("Entering mouseover state.")
             _inMouseoverState = True
@@ -2855,8 +2856,9 @@ Public Class Pony
     ''' <returns>Return true if the pony rebounded off an exclusion region edge, otherwise; false.</returns>
     Private Function ReboundOutOfExclusionRegion(exclusionRegion As Rectangle, regionName As String,
                                                  moveAwayIfContained As Boolean) As Boolean
+        If exclusionRegion.Size = Size.Empty Then Return False
         Dim currentRegion = regionF
-        If exclusionRegion.Size = Size.Empty OrElse Not currentRegion.IntersectsWith(exclusionRegion) Then Return False
+        If Not currentRegion.IntersectsWith(exclusionRegion) Then Return False
         If Not moveAwayIfContained AndAlso CType(exclusionRegion, RectangleF).Contains(currentRegion) Then Return False
 
         ' Determine the distance to each of the exclusion region edges.
