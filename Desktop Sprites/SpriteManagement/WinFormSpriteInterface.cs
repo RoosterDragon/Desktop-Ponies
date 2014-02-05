@@ -827,8 +827,15 @@
         /// </summary>
         public bool ShowInTaskbar
         {
-            get { return form.ShowInTaskbar; }
-            set { ApplicationInvoke(() => form.ShowInTaskbar = value); }
+            get
+            {
+                return form.ShowInTaskbar;
+            }
+            set
+            {
+                if (form.ShowInTaskbar != value)
+                    ApplicationInvoke(() => form.ShowInTaskbar = value);
+            }
         }
         /// <summary>
         /// Gets or sets the display boundary of the form. When setting, the form will be cleared of any drawn sprites.
