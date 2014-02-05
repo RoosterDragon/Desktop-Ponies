@@ -2724,7 +2724,7 @@ Public Class Pony
     Private Function ReboundToAvoidCursor() As Boolean
         If _inMouseoverState Then Return False
         Dim isMouseOver =
-            Vector2F.DistanceSquared(_location, Context.CursorLocation) < Context.CursorAvoidanceRadius ^ 2
+            Vector2F.DistanceSquared(_location, Context.CursorLocation) < Context.CursorAvoidanceRadius * Context.CursorAvoidanceRadius
         If isMouseOver Then
             Dim initialMovement = _movement
             If _location.X < Context.CursorLocation.X Then

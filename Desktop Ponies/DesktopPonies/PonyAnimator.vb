@@ -64,17 +64,13 @@ Public Class PonyAnimator
     ''' <summary>
     ''' Provides the z-order comparison. This sorts ponies based on the y-coordinate of the baseline of their image.
     ''' </summary>
-    Private Shared ReadOnly zOrder As Comparison(Of ISprite) = Function(a, b)
-                                                                   If EvilGlobals.CurrentGame IsNot Nothing Then
-                                                                       Dim aIsDisplay = TypeOf a Is Game.GameScoreboard.ScoreDisplay
-                                                                       Dim bIsDisplay = TypeOf b Is Game.GameScoreboard.ScoreDisplay
-                                                                       If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
-                                                                   End If
-                                                                   Dim aIsHouse = TypeOf a Is House
-                                                                   Dim bIsHouse = TypeOf b Is House
-                                                                   If aIsHouse Xor bIsHouse Then Return If(aIsHouse, -1, 1)
-                                                                   Return a.Region.Bottom - b.Region.Bottom
-                                                               End Function
+    Private Shared ReadOnly _zOrderer As Comparison(Of ISprite) = Function(a, b) a.Region.Bottom - b.Region.Bottom
+
+    Protected Overridable ReadOnly Property ZOrderer As Comparison(Of ISprite)
+        Get
+            Return _zOrderer
+        End Get
+    End Property
 
     Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
                    ponyCollection As PonyCollection, ponyContext As PonyContext)
@@ -160,7 +156,7 @@ Public Class PonyAnimator
     End Sub
 
     ''' <summary>
-    ''' Updates the ponies and effect. Cycles houses.
+    ''' Updates the ponies and effects.
     ''' </summary>
     Protected Overrides Sub Update()
         If PonyContext.PendingSprites.Count > 0 Then
@@ -205,11 +201,6 @@ Public Class PonyAnimator
             End If
         End If
 
-        ' Cycle houses.
-        For Each sprite In Sprites
-            UpdateIfHouse(sprite)
-        Next
-
         ' Handle player controlled movement.
         If AllowManualControl Then
             ManualControl(ManualControlPlayerOne,
@@ -238,7 +229,7 @@ Public Class PonyAnimator
             Finish(ExitRequest.ReturnToMenu)
             Return
         End If
-        Sort(zOrder)
+        Sort(ZOrderer)
         If EvilGlobals.DirectXSoundAvailable Then
             PlaySounds()
             CleanupSounds()
@@ -251,13 +242,6 @@ Public Class PonyAnimator
 
     Protected Overridable Sub PostSynchronizeUpdate()
     End Sub
-
-    Private Function UpdateIfHouse(sprite As ISprite) As Boolean
-        Dim house = TryCast(sprite, House)
-        If house Is Nothing Then Return False
-        house.Cycle(ElapsedTime, PonyCollection.Bases)
-        Return True
-    End Function
 
     Private Sub ManualControl(pony As Pony, up As Boolean, down As Boolean, left As Boolean, right As Boolean, speedBoost As Boolean)
         If pony Is Nothing Then Return

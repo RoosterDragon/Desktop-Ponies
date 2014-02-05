@@ -12,6 +12,13 @@ Public Class DesktopPonyAnimator
     Private spriteDebugForm As SpriteDebugForm
     Private countSinceLastDebug As Integer
 
+    Private ReadOnly _zOrderer As Comparison(Of ISprite) = Function(a, b)
+                                                               Dim aIsHouse = TypeOf a Is House
+                                                               Dim bIsHouse = TypeOf b Is House
+                                                               If aIsHouse Xor bIsHouse Then Return If(aIsHouse, -1, 1)
+                                                               Return MyBase.ZOrderer(a, b)
+                                                           End Function
+
     Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
                    ponyCollection As PonyCollection, ponyContext As PonyContext)
         MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
@@ -29,6 +36,12 @@ Public Class DesktopPonyAnimator
         CreatePonyMenu()
         CreateHouseMenu()
     End Sub
+
+    Protected Overrides ReadOnly Property ZOrderer As Comparison(Of ISprite)
+        Get
+            Return _zOrderer
+        End Get
+    End Property
 
     Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
         If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then
@@ -210,6 +223,15 @@ Public Class DesktopPonyAnimator
         End If
         menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub() selectedHouse.Expire()))
         houseMenu = Viewer.CreateContextMenu(menuItems)
+    End Sub
+
+    Protected Overrides Sub PostSynchronizeUpdate()
+        MyBase.PostSynchronizeUpdate()
+        For Each sprite In Sprites
+            Dim house = TryCast(sprite, House)
+            If house Is Nothing Then Continue For
+            house.Cycle(ElapsedTime, PonyCollection.Bases)
+        Next
     End Sub
 
     Protected Overrides Sub Update()

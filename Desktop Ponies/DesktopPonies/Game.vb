@@ -1166,6 +1166,17 @@ Public Class Game
             MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
             Me.game = Argument.EnsureNotNull(game, "game")
         End Sub
+        Private ReadOnly _zOrderer As Comparison(Of ISprite) = Function(a, b)
+                                                                   Dim aIsDisplay = TypeOf a Is GameScoreboard.ScoreDisplay
+                                                                   Dim bIsDisplay = TypeOf b Is GameScoreboard.ScoreDisplay
+                                                                   If aIsDisplay Xor bIsDisplay Then Return If(aIsDisplay, 1, -1)
+                                                                   Return MyBase.ZOrderer(a, b)
+                                                               End Function
+        Protected Overrides ReadOnly Property ZOrderer As Comparison(Of ISprite)
+            Get
+                Return _zOrderer
+            End Get
+        End Property
         Protected Overrides Sub SynchronizeContext()
             PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
             PonyContext.Region = game.GameScreen.WorkingArea
