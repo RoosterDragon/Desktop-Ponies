@@ -36,7 +36,6 @@
                 Console.WriteLine("Optimizing finished.");
                 Console.WriteLine();
             }
-            contentChanged = FixRunOnMacLineEndings(contentDirectory) || contentChanged;
             if (contentChanged)
                 Console.WriteLine("Content has changed and you should ensure it is copied to output. (Rebuilding will work).");
             else if (ConsoleReadYesNoQuit("Package output?"))
@@ -387,20 +386,6 @@
                 }
                 ConsoleReplacePreviousLine("PNGs optimized");
             }
-        }
-
-        private static bool FixRunOnMacLineEndings(string sourceDirectory)
-        {
-            string fileName = Path.Combine(sourceDirectory, "RunOnMac.command");
-            string fileContents = File.ReadAllText(fileName);
-            string fixedFileContents = fileContents.Replace("\r\n", "\n");
-            bool sameText = fileContents == fixedFileContents;
-            if (!sameText)
-            {
-                File.WriteAllText(fileName, fixedFileContents);
-                Console.WriteLine("Had to fix line endings in RunOnMac.command. Ensure this file is copied to output directory.");
-            }
-            return sameText;
         }
 
         private static void PackageReleaseFiles(string sourceDirectory, string destinationDirectory, string version)
