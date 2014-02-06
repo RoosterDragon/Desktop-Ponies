@@ -37,9 +37,14 @@
                 Console.WriteLine();
             }
             if (contentChanged)
+            {
                 Console.WriteLine("Content has changed and you should ensure it is copied to output. (Rebuilding will work).");
+            }
             else if (ConsoleReadYesNoQuit("Package output?"))
+            {
+                CleanPdbFiles(releaseDirectory, solutionDirectory);
                 PackageReleaseFiles(releaseDirectory, solutionDirectory, new Version(dpVersion).ToDisplayString());
+            }
 
             Console.WriteLine("Finished. Press any key to exit...");
             Console.Read();
@@ -385,6 +390,20 @@
                     }
                 }
                 ConsoleReplacePreviousLine("PNGs optimized");
+            }
+        }
+
+        private static void CleanPdbFiles(string sourceDirectory, string solutionDirectory)
+        {
+            string solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
+            string solutionParentDirectoryLower = solutionParentDirectory.ToLowerInvariant();
+            string cleanedDirectory = new string('_', solutionParentDirectory.Length);
+            foreach (var fileName in Directory.EnumerateFiles(sourceDirectory, "*.pdb"))
+            {
+                string contents = File.ReadAllText(fileName);
+                contents = contents.Replace(solutionParentDirectory, cleanedDirectory);
+                contents = contents.Replace(solutionParentDirectoryLower, cleanedDirectory);
+                File.WriteAllText(fileName, contents);
             }
         }
 
