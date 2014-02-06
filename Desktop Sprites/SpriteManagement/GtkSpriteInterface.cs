@@ -730,17 +730,26 @@
             /// The method that runs on activation, queued to the <see cref="T:System.Threading.ThreadPool"/>.
             /// </summary>
             private EventHandler queuedActivatedMethod;
+            /// <summary>
+            /// The method that runs on button press, queued to the <see cref="T:System.Threading.ThreadPool"/>.
+            /// </summary>
+            private ButtonPressEventHandler queuedButtonPressMethod;
+            /// <summary>
+            /// Indicates if the item exists on a top level menu, instead of a sub-menu.
+            /// </summary>
+            private bool topLevel;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>
             /// class for the given <see cref="T:Gtk.SeparatorMenuItem"/>.
             /// </summary>
             /// <param name="separatorItem">The underlying <see cref="T:Gtk.SeparatorMenuItem"/> that this class wraps.</param>
+            /// <param name="topLevel">Indicates if the menu item is in a top level menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="separatorItem"/> is null.</exception>
-            public GtkContextMenuItem(SeparatorMenuItem separatorItem)
+            public GtkContextMenuItem(SeparatorMenuItem separatorItem, bool topLevel)
             {
                 Argument.EnsureNotNull(separatorItem, "separatorItem");
-
+                this.topLevel = topLevel;
                 item = separatorItem;
             }
             /// <summary>
@@ -749,11 +758,12 @@
             /// </summary>
             /// <param name="menuItem">The underlying <see cref="T:Gtk.MenuItem"/> that this class wraps.</param>
             /// <param name="activated">The method to be run when the item is activated.</param>
+            /// <param name="topLevel">Indicates if the menu item is in a top level menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.</exception>
-            public GtkContextMenuItem(MenuItem menuItem, EventHandler activated)
+            public GtkContextMenuItem(MenuItem menuItem, EventHandler activated, bool topLevel)
             {
                 Argument.EnsureNotNull(menuItem, "menuItem");
-
+                this.topLevel = topLevel;
                 item = menuItem;
                 Activated = activated;
             }
@@ -765,15 +775,18 @@
             /// <param name="subItems">The items to appear in the sub-menu.</param>
             /// <param name="parent">The <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> that will own this
             /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenuItem"/>.</param>
+            /// <param name="topLevel">Indicates if the menu item is in a top level menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.-or-<paramref name="subItems"/> is
             /// null.-or-<paramref name="parent"/> is null.</exception>
             /// <exception cref="T:System.ArgumentException"><paramref name="subItems"/> is empty.</exception>
-            public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent)
+            public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent,
+                bool topLevel)
             {
                 Argument.EnsureNotNull(menuItem, "menuItem");
                 Argument.EnsureNotNullOrEmpty(subItems, "subItems");
+                this.topLevel = topLevel;
                 item = menuItem;
-                GtkContextMenu gtkContextMenu = new GtkContextMenu(parent, subItems);
+                GtkContextMenu gtkContextMenu = new GtkContextMenu(parent, subItems, false);
                 item.Submenu = gtkContextMenu;
                 SubItems = gtkContextMenu.Items;
             }
@@ -832,14 +845,22 @@
                         throw new InvalidOperationException("Cannot set the activation method on this type of item.");
                     if (queuedActivatedMethod != null)
                         item.Activated -= queuedActivatedMethod;
+                    if (queuedButtonPressMethod != null)
+                        item.ButtonPressEvent -= queuedButtonPressMethod;
 
                     activatedMethod = value;
                     queuedActivatedMethod = null;
+                    queuedButtonPressMethod = null;
 
                     if (activatedMethod != null)
                     {
                         queuedActivatedMethod = (o, args) => ThreadPool.QueueUserWorkItem(obj => activatedMethod(o, args));
                         item.Activated += queuedActivatedMethod;
+                        if (!topLevel)
+                        {
+                            queuedButtonPressMethod = (o, args) => ThreadPool.QueueUserWorkItem(obj => activatedMethod(o, args));
+                            item.ButtonPressEvent += queuedButtonPressMethod;
+                        }
                     }
                 }
             }
@@ -887,9 +908,10 @@
             /// <param name="parent">The <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> that will own this
             /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.</param>
             /// <param name="menuItems">The items which should be displayed in this menu.</param>
+            /// <param name="topLevel">Indicates if the menu is a top level menu, instead of a sub-menu.</param>
             /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItems"/> is 
             /// null.</exception>
-            public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
+            public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems, bool topLevel)
             {
                 Argument.EnsureNotNull(parent, "parent");
                 Argument.EnsureNotNull(menuItems, "menuItems");
@@ -911,11 +933,11 @@
 
                     GtkContextMenuItem gtkContextMenuItem;
                     if (menuItem.IsSeparator)
-                        gtkContextMenuItem = new GtkContextMenuItem((SeparatorMenuItem)gtkMenuItem);
+                        gtkContextMenuItem = new GtkContextMenuItem((SeparatorMenuItem)gtkMenuItem, topLevel);
                     else if (menuItem.SubItems == null)
-                        gtkContextMenuItem = new GtkContextMenuItem(gtkMenuItem, menuItem.Activated);
+                        gtkContextMenuItem = new GtkContextMenuItem(gtkMenuItem, menuItem.Activated, topLevel);
                     else
-                        gtkContextMenuItem = new GtkContextMenuItem(gtkMenuItem, menuItem.SubItems, owner);
+                        gtkContextMenuItem = new GtkContextMenuItem(gtkMenuItem, menuItem.SubItems, owner, topLevel);
 
                     items.Add(gtkContextMenuItem);
                 }
@@ -1503,7 +1525,7 @@
             EnsureNotDisposed();
 
             GtkContextMenu menu = null;
-            ApplicationInvoke(() => menu = new GtkContextMenu(this, menuItems));
+            ApplicationInvoke(() => menu = new GtkContextMenu(this, menuItems, true));
             contextMenus.AddLast(menu);
             return menu;
         }
