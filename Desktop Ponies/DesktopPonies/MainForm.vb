@@ -538,16 +538,19 @@ Public Class MainForm
 
         Dim localOffset = 0
         Dim visibleCount = 0
+        Dim filterCount = 0
         For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
             Dim makeVisible = False
+            Dim filteredVisible = selectionControlFilter(selectionControl)
             If Not PaginationEnabled.Checked Then
                 ' If pagination is disabled, simply show/hide the control according to the current filter.
-                makeVisible = selectionControlFilter(selectionControl)
-            ElseIf selectionControlFilter(selectionControl) Then
+                makeVisible = filteredVisible
+            ElseIf filteredVisible Then
                 ' If pagination is enabled, we will show it if it is filtered visible and within the page range.
                 makeVisible = localOffset >= ponyOffset AndAlso visibleCount < PoniesPerPage.Value
                 localOffset += 1
             End If
+            If filteredVisible Then filterCount += 1
             If makeVisible Then visibleCount += 1
             Dim visibleChanged = selectionControl.Visible <> makeVisible
             selectionControl.Visible = makeVisible
@@ -556,18 +559,20 @@ Public Class MainForm
         PonySelectionPanel.ResumeLayout()
 
         If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
-            PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture, "Viewing {0} ponies", visibleCount)
+            PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture,
+                                                     "Viewing {0} ponies",
+                                                     filterCount)
         Else
             PonyPaginationLabel.Text =
             String.Format(CultureInfo.CurrentCulture,
                           "Viewing {0} to {1} of {2} ponies",
                           ponyOffset + 1,
-                          Math.Min(ponyOffset + PoniesPerPage.Value, visibleCount),
-                          visibleCount)
+                          Math.Min(ponyOffset + PoniesPerPage.Value, filterCount),
+                          filterCount)
         End If
 
         Dim min = ponyOffset = 0
-        Dim max = ponyOffset >= visibleCount - PoniesPerPage.Value
+        Dim max = ponyOffset >= filterCount - PoniesPerPage.Value
         FirstPageButton.Enabled = Not min
         PreviousPageButton.Enabled = Not min
         PreviousPonyButton.Enabled = Not min
