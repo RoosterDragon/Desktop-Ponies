@@ -2830,12 +2830,12 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' If the context allows interactions, considers available interactions if the cool-down has expired. If an interaction passes the
-    ''' various checks specified in GetInteractionTriggerIfConditionsMet and a chance roll then it will be started. See StartInteraction
-    ''' for affected state.
+    ''' If the context allows interactions and the pony is not busy, considers available interactions if the cool-down has expired. If an
+    ''' interaction passes the various checks specified in GetInteractionTriggerIfConditionsMet and a chance roll then it will be started.
+    ''' See StartInteraction for affected state.
     ''' </summary>
     Private Sub StartInteractionAtRandom()
-        If Not Context.InteractionsEnabled Then Return
+        If Not Context.InteractionsEnabled OrElse IsBusy Then Return
         'If we recently ran an interaction, don't start a new one until the delay expires.
         If _currentTime < _interactionCooldownEndTime Then Return
 
