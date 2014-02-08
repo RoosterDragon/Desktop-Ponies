@@ -30,6 +30,7 @@ Public Class OptionsForm
             ScreensaverGroup.Visible = False
             WindowAvoidance.Visible = False
             WindowContainment.Visible = False
+            SizeScale.Enabled = False
         End If
 
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
