@@ -780,9 +780,13 @@
         private readonly ManualResetEvent running = new ManualResetEvent(true);
 #if DEBUG
         /// <summary>
-        /// Tracks lost time from long delays when debugging the application.
+        /// Tracks total lost time from long delays when debugging the application.
         /// </summary>
-        private TimeSpan lostTime = TimeSpan.Zero;
+        private TimeSpan totalLostTime = TimeSpan.Zero;
+        /// <summary>
+        /// Tracks lost time for a frame from long delays when debugging the application.
+        /// </summary>
+        private TimeSpan frameLostTime = TimeSpan.Zero;
 #endif
         /// <summary>
         /// The total elapsed time that animation has been running.
@@ -797,7 +801,7 @@
             {
 #if DEBUG
                 lock (tickSync)
-                    return elapsedTime - lostTime;
+                    return elapsedTime - totalLostTime;
 #else
                 lock (tickSync)
                     return elapsedTime;
@@ -1171,7 +1175,7 @@
                 else
                 {
                     frameTime = minimumTickInterval;
-                    lostTime += tickElapsed - TimeSpan.FromMilliseconds(frameTime);
+                    frameLostTime += tickElapsed - TimeSpan.FromMilliseconds(frameTime);
                 }
 #else
                 float frameTime = (float)(elapsedWatch.Elapsed - ElapsedTime).TotalMilliseconds;
@@ -1244,6 +1248,10 @@
             lock (tickSync)
             {
                 elapsedTime = elapsedWatch.Elapsed;
+#if DEBUG
+                totalLostTime += frameLostTime;
+                frameLostTime = TimeSpan.Zero;
+#endif
                 ProcessQueuedActions();
                 foreach (ISprite sprite in Sprites)
                     sprite.Update(ElapsedTime);
