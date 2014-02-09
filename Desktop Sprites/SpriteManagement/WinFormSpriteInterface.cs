@@ -62,7 +62,6 @@
             {
                 base.OnResize(e);
                 BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                BackgroundGraphics.PixelOffsetMode = PixelOffsetMode.Half;
             }
         }
         #endregion
