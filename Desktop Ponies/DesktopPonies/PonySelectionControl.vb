@@ -125,6 +125,7 @@ Public Class PonySelectionControl
             Dim image = PonyImage
             If image Is Nothing Then Return
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
+            e.Graphics.PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
             image(timeIndex).Flip(flip)
             Dim bitmap = image(timeIndex).Image
             e.Graphics.DrawImage(bitmap, ponyImageArea)
