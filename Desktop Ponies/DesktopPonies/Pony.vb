@@ -1976,7 +1976,8 @@ Public Class Pony
         Dim cursorLocation = CType(Context.CursorLocation, Point)
         Dim mouseoverImage = If(_facingRight, _mouseoverBehavior.RightImage, _mouseoverBehavior.LeftImage)
         Dim isMouseOver = Region.Contains(cursorLocation) AndAlso GetRegionFForImage(mouseoverImage).Contains(cursorLocation)
-        If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso _currentInteraction Is Nothing Then
+        If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso
+            Not _inDragState AndAlso _currentInteraction Is Nothing Then
             AddUpdateRecord("Entering mouseover state.")
             _inMouseoverState = True
             _behaviorBeforeSpecialStateOverride = _currentBehavior
@@ -1996,6 +1997,7 @@ Public Class Pony
             AddUpdateRecord("Exiting drag state.")
             _inDragState = False
             If Context.CursorAvoidanceEnabled Then
+                _inMouseoverState = True
                 SetBehaviorInternal(_mouseoverBehavior)
             Else
                 SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
