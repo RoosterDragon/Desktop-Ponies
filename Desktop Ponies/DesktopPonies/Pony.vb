@@ -2553,9 +2553,9 @@ Public Class Pony
             Dim internalStartTime = lastInternalStartTime + repeatDelay
             While _currentTime - internalStartTime >= TimeSpan.Zero
                 Dim offset = -_movement * CSng((_currentTime - internalStartTime).TotalMilliseconds / StepSize)
+                lastExternalStartTime += TimeSpan.FromMilliseconds(repeatDelay.TotalMilliseconds / Context.TimeFactor)
                 StartNewEffect(base, lastExternalStartTime, internalStartTime, offset)
                 lastInternalStartTime = internalStartTime
-                lastExternalStartTime += TimeSpan.FromMilliseconds(repeatDelay.TotalMilliseconds / Context.TimeFactor)
                 internalStartTime += repeatDelay
             End While
             _effectBasesToRepeat(i) = New EffectBaseRepeat(base, lastExternalStartTime, lastInternalStartTime)
