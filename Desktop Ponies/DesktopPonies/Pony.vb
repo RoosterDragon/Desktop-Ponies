@@ -1375,15 +1375,15 @@ Public Class Pony
     ''' Represents an arbitrary small non-zero floating-point value that should be used to specify a range within which floating-point
     ''' values should be considered equal.
     ''' </summary>
-    Private Const Epsilon As Single = 1 / 2 ^ 24
+    Friend Const Epsilon As Single = 1 / 2 ^ 24
     ''' <summary>
     ''' Number of milliseconds by which the internal temporal state of the sprite should be advanced with each call to StepOnce().
     ''' </summary>
-    Private Const StepSize = 1000.0 / StepRate
+    Friend Const StepSize = 1000.0 / StepRate
     ''' <summary>
     ''' Number of simulation steps that are taken per second.
     ''' </summary>
-    Private Const StepRate = 25.0
+    Friend Const StepRate = 25.0
     ''' <summary>
     ''' Represents the current temporal dimension of the pony. This will be a multiple of the number of steps taken.
     ''' </summary>
@@ -1612,17 +1612,23 @@ Public Class Pony
         ''' </summary>
         Public ReadOnly EffectBase As EffectBase
         ''' <summary>
-        ''' The time an instance of this effect was last started.
+        ''' The external time an instance of this effect was last started.
         ''' </summary>
-        Public ReadOnly LastStartTime As TimeSpan
+        Public ReadOnly LastExternalStartTime As TimeSpan
+        ''' <summary>
+        ''' The internal time an instance of this effect was last started.
+        ''' </summary>
+        Public ReadOnly LastInternalStartTime As TimeSpan
         ''' <summary>
         ''' Initializes a new instance of the <see cref="EffectBaseRepeat"/> structure.
         ''' </summary>
         ''' <param name="effectBase">The base for the repeating effect.</param>
-        ''' <param name="lastStartTime">The time an instance of this effect was last started.</param>
-        Public Sub New(effectBase As EffectBase, lastStartTime As TimeSpan)
+        ''' <param name="lastExternalStartTime">The external time an instance of this effect was last started.</param>
+        ''' <param name="lastInternalStartTime">The internal time an instance of this effect was last started.</param>
+        Public Sub New(effectBase As EffectBase, lastExternalStartTime As TimeSpan, lastInternalStartTime As TimeSpan)
             Me.EffectBase = effectBase
-            Me.LastStartTime = lastStartTime
+            Me.LastExternalStartTime = lastExternalStartTime
+            Me.LastInternalStartTime = lastInternalStartTime
         End Sub
     End Structure
 #End Region
@@ -1900,12 +1906,11 @@ Public Class Pony
         ' be constrained from being too low (which will exaggerate the temporal aliasing until it is noticeable) or too high (which kills
         ' performance as StepOnce must be evaluated many times to catch up).
         _currentSpeechSound = Nothing
-        Dim difference = updateTime - _lastUpdateTime
-        While Not _expired AndAlso difference.TotalMilliseconds > 0
+        Dim scaledStepSize = TimeSpan.FromMilliseconds(StepSize / Context.TimeFactor)
+        While Not _expired AndAlso updateTime - _lastUpdateTime >= scaledStepSize
+            _lastUpdateTime += scaledStepSize
             StepOnce()
-            difference -= TimeSpan.FromMilliseconds(StepSize / Context.TimeFactor)
         End While
-        _lastUpdateTime = updateTime - difference
     End Sub
 
     ''' <summary>
@@ -2494,29 +2499,35 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' If the context allows effects, starts any effects specified by the current behavior immediately, and sets up repeating effects if
-    ''' required.
+    ''' Starts any effects specified by the current behavior immediately, and sets up repeating effects if required.
     ''' </summary>
     Private Sub StartEffects()
-        If Not Context.EffectsEnabled Then Return
         For Each effectBase In _currentBehavior.Effects
-            StartNewEffect(effectBase)
+            StartNewEffect(effectBase, _lastUpdateTime, _currentTime, Vector2F.Zero)
             If effectBase.RepeatDelay > 0 Then
-                _effectBasesToRepeat.Add(New EffectBaseRepeat(effectBase, _currentTime))
+                _effectBasesToRepeat.Add(New EffectBaseRepeat(effectBase, _lastUpdateTime, _currentTime))
             End If
         Next
     End Sub
 
     ''' <summary>
-    ''' Starts a new effect modeled on the specified base, and adds it to the pending sprites for the assigned context. Effects which last
-    ''' until the next behavior change are remembered.
+    ''' If the context allows effects, starts a new effect modeled on the specified base, and adds it to the pending sprites for the
+    ''' assigned context. Effects which last until the next behavior change are remembered.
     ''' </summary>
     ''' <param name="effectBase">The base which is used as a model for the new effect instance.</param>
-    Private Sub StartNewEffect(effectBase As EffectBase)
+    ''' <param name="externalStartTime">The external zero time that this effects starts from.</param>
+    ''' <param name="internalStartTime">The internal zero time that this effects starts from.</param>
+    ''' <param name="initialLocationOffset">An offset from the current location of the pony that determines that augments the start
+    ''' location.</param>
+    Private Sub StartNewEffect(effectBase As EffectBase,
+                               externalStartTime As TimeSpan,
+                               internalStartTime As TimeSpan,
+                               initialLocationOffset As Vector2F)
+        If Not Context.EffectsEnabled Then Return
         Dim effect = New Effect(effectBase, Not _facingRight,
                                 Function() Me.regionF.Location,
                                 Function() Me._region.Size,
-                                Context)
+                                Context, externalStartTime, internalStartTime, initialLocationOffset)
         If effectBase.Duration = 0 Then
             _effectsToManuallyExpire.Add(effect)
         Else
@@ -2532,14 +2543,22 @@ Public Class Pony
     ''' its type was last deployed.
     ''' </summary>
     Private Sub RepeatEffects()
-        ' TODO: Update this method to start effects at the correct time - i.e. at the time in the past when the delay expired.
         For i = 0 To _effectBasesToRepeat.Count - 1
             Dim repeatState = _effectBasesToRepeat(i)
             Dim base = repeatState.EffectBase
-            If repeatState.LastStartTime - _currentTime > TimeSpan.FromSeconds(base.RepeatDelay) Then
-                StartNewEffect(base)
-                _effectBasesToRepeat(i) = New EffectBaseRepeat(base, _currentTime)
-            End If
+            Dim repeatDelay = TimeSpan.FromSeconds(base.RepeatDelay)
+            Dim lastExternalStartTime = repeatState.LastExternalStartTime
+            Dim lastInternalStartTime = repeatState.LastInternalStartTime
+            Dim externalStartTime = _lastUpdateTime
+            Dim internalStartTime = lastInternalStartTime + repeatDelay
+            While _currentTime - internalStartTime >= TimeSpan.Zero
+                Dim offset = -_movement * CSng((_currentTime - internalStartTime).TotalMilliseconds / StepSize)
+                StartNewEffect(base, lastExternalStartTime, internalStartTime, offset)
+                lastInternalStartTime = internalStartTime
+                lastExternalStartTime += TimeSpan.FromMilliseconds(repeatDelay.TotalMilliseconds / Context.TimeFactor)
+                internalStartTime += repeatDelay
+            End While
+            _effectBasesToRepeat(i) = New EffectBaseRepeat(base, lastExternalStartTime, lastInternalStartTime)
         Next
     End Sub
 
@@ -3214,13 +3233,16 @@ Public Class Effect
         End Get
     End Property
 
-    Private startTime As TimeSpan
-    Private internalTime As TimeSpan
+    Private _externalStartTime As TimeSpan
+    Private _internalStartTime As TimeSpan
+    Private _currentTime As TimeSpan
+    Private _lastUpdateTime As TimeSpan
 
     Public Property DesiredDuration As TimeSpan?
-    Private _expired As Boolean
+    Friend _expired As Boolean
 
     Public Property TopLeftLocation As Point
+    Private initialLocationOffset As Vector2F
     Public Property FacingLeft As Boolean
     Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
     Public Property PlacementDirection As Direction
@@ -3229,8 +3251,14 @@ Public Class Effect
     Private ReadOnly locationProvider As Func(Of Vector2F)
     Private ReadOnly sizeProvider As Func(Of Vector2)
 
+    Public Sub New(base As EffectBase, context As PonyContext)
+        Me.New(base, True, Nothing, Nothing, context, TimeSpan.Zero, TimeSpan.Zero, Vector2F.Zero)
+    End Sub
+
     Public Sub New(base As EffectBase, startFacingLeft As Boolean,
-                   locationProvider As Func(Of Vector2F), sizeProvider As Func(Of Vector2), context As PonyContext)
+                   locationProvider As Func(Of Vector2F), sizeProvider As Func(Of Vector2),
+                   context As PonyContext, externalStartTime As TimeSpan, internalStartTime As TimeSpan,
+                   initialLocationOffset As Vector2F)
         Argument.EnsureNotNull(base, "base")
         If base.Follow AndAlso (locationProvider Is Nothing OrElse sizeProvider Is Nothing) Then
             Throw New ArgumentException(
@@ -3240,9 +3268,14 @@ Public Class Effect
         _context = Argument.EnsureNotNull(context, "context")
 
         _base = base
+        _externalStartTime = externalStartTime
+        _internalStartTime = internalStartTime
+        _lastUpdateTime = externalStartTime
+        _currentTime = internalStartTime
         FacingLeft = startFacingLeft
         Me.locationProvider = locationProvider
         Me.sizeProvider = sizeProvider
+        Me.initialLocationOffset = initialLocationOffset
 
         If PlacementDirection = Direction.RandomNotCenter Then
             PlacementDirection = CType(Math.Round(Rng.NextDouble() * DirectionCount - 3, 0), Direction)
@@ -3281,21 +3314,24 @@ Public Class Effect
     End Property
 
     Public Sub Start(_startTime As TimeSpan) Implements ISprite.Start
-        startTime = _startTime
-        internalTime = startTime
         If locationProvider IsNot Nothing AndAlso sizeProvider IsNot Nothing Then
             TopLeftLocation = GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
-                                              locationProvider(),
+                                              locationProvider() + initialLocationOffset,
                                               sizeProvider(),
                                               Centering,
-                                              Options.ScaleFactor)
+                                              Context.ScaleFactor)
         End If
+        Update(_startTime)
     End Sub
 
     Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
-        internalTime = updateTime
         If _expired Then Return
+        Dim scaledStepSize = TimeSpan.FromMilliseconds(Pony.StepSize / Context.TimeFactor)
+        While updateTime - _lastUpdateTime >= scaledStepSize
+            _lastUpdateTime += scaledStepSize
+            _currentTime += TimeSpan.FromMilliseconds(Pony.StepSize)
+        End While
         If Base.Follow Then
             TopLeftLocation = GetEffectLocation(CurrentImageSize,
                                               PlacementDirection,
@@ -3356,7 +3392,7 @@ Public Class Effect
 
     Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
-            Return internalTime - startTime
+            Return _currentTime - _internalStartTime
         End Get
     End Property
 
@@ -3553,7 +3589,7 @@ Public Class House
     End Property
 
     Public Sub New(ponyContext As PonyContext, houseBase As HouseBase)
-        MyBase.New(houseBase, True, Nothing, Nothing, ponyContext)
+        MyBase.New(houseBase, ponyContext)
         _houseBase = houseBase
     End Sub
 
