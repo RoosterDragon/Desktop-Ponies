@@ -1007,8 +1007,8 @@
             queuedSpriteActions.Enqueue(() =>
             {
                 sprites.AddLast(sprite);
-                sprite.Start(ElapsedTime);
                 SpriteAdded.Raise(this, () => new CollectionItemChangedEventArgs<ISprite>(sprite));
+                sprite.Start(ElapsedTime);
             });
         }
 
@@ -1030,9 +1030,14 @@
                     if (sprite == null)
                         continue;
                     this.sprites.AddLast(sprite);
-                    sprite.Start(ElapsedTime);
                 }
                 SpritesAdded.Raise(this, () => new CollectionItemsChangedEventArgs<ISprite>(items));
+                foreach (ISprite sprite in items)
+                {
+                    if (sprite == null)
+                        continue;
+                    sprite.Start(ElapsedTime);
+                }
             });
         }
 
