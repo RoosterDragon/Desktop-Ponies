@@ -92,6 +92,16 @@ Public Class EditorPonyAnimator
         PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
     End Sub
 
+    Protected Overrides Sub SynchronizeViewer()
+        Viewer.ShowInTaskbar = False
+        Viewer.Topmost = True
+        Dim winFormSpriteInterface = TryCast(Viewer, WinFormSpriteInterface)
+        If winFormSpriteInterface IsNot Nothing Then
+            winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
+            winFormSpriteInterface.ShowPerformanceGraph = False
+        End If
+    End Sub
+
     Private Sub Viewer_MouseClick(sender As Object, e As SimpleMouseEventArgs)
         If (e.Buttons And SimpleMouseButtons.Right) = SimpleMouseButtons.Right Then
             If editorMenu IsNot Nothing Then editorMenu.Show(e.X, e.Y)

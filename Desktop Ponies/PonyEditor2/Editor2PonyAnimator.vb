@@ -67,4 +67,14 @@ Public Class Editor2PonyAnimator
     Protected Overrides Sub SynchronizeContext()
         PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
     End Sub
+
+    Protected Overrides Sub SynchronizeViewer()
+        Viewer.ShowInTaskbar = False
+        Viewer.Topmost = True
+        Dim winFormSpriteInterface = TryCast(Viewer, WinFormSpriteInterface)
+        If winFormSpriteInterface IsNot Nothing Then
+            winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
+            winFormSpriteInterface.ShowPerformanceGraph = False
+        End If
+    End Sub
 End Class

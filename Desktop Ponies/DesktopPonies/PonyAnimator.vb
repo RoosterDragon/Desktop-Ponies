@@ -6,7 +6,7 @@ Public Enum ExitRequest
     ExitApplication
 End Enum
 
-Public Class PonyAnimator
+Public MustInherit Class PonyAnimator
     Inherits AnimationLoopBase
 
     Protected Property ExitWhenNoSprites As Boolean = True
@@ -165,14 +165,7 @@ Public Class PonyAnimator
         End If
         PonyContext.CursorLocation = Viewer.CursorPosition
         SynchronizeContext()
-        PostSynchronizeUpdate()
-        Viewer.ShowInTaskbar = Options.ShowInTaskbar
-        Viewer.Topmost = Options.AlwaysOnTop
-        Dim winFormSpriteInterface = TryCast(Viewer, WinFormSpriteInterface)
-        If winFormSpriteInterface IsNot Nothing Then
-            winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
-            winFormSpriteInterface.ShowPerformanceGraph = Options.ShowPerformanceGraph
-        End If
+        SynchronizeViewer()
 
         ' When the cursor moves, or a mouse button is pressed, end the screensaver.
         If EvilGlobals.InScreensaverMode Then
@@ -240,8 +233,7 @@ Public Class PonyAnimator
         PonyContext.SynchronizeWithGlobalOptions()
     End Sub
 
-    Protected Overridable Sub PostSynchronizeUpdate()
-    End Sub
+    Protected MustOverride Sub SynchronizeViewer()
 
     Private Sub ManualControl(pony As Pony, up As Boolean, down As Boolean, left As Boolean, right As Boolean, speedBoost As Boolean)
         If pony Is Nothing Then Return

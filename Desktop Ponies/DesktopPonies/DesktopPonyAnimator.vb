@@ -225,13 +225,23 @@ Public Class DesktopPonyAnimator
         houseMenu = Viewer.CreateContextMenu(menuItems)
     End Sub
 
-    Protected Overrides Sub PostSynchronizeUpdate()
-        MyBase.PostSynchronizeUpdate()
+    Protected Overrides Sub SynchronizeContext()
+        MyBase.SynchronizeContext()
         For Each sprite In Sprites
             Dim house = TryCast(sprite, House)
             If house Is Nothing Then Continue For
             house.Cycle(ElapsedTime, PonyCollection.Bases)
         Next
+    End Sub
+
+    Protected Overrides Sub SynchronizeViewer()
+        Viewer.ShowInTaskbar = Options.ShowInTaskbar
+        Viewer.Topmost = Options.AlwaysOnTop
+        Dim winFormSpriteInterface = TryCast(Viewer, WinFormSpriteInterface)
+        If winFormSpriteInterface IsNot Nothing Then
+            winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
+            winFormSpriteInterface.ShowPerformanceGraph = Options.ShowPerformanceGraph
+        End If
     End Sub
 
     Protected Overrides Sub Update()

@@ -1181,10 +1181,7 @@ Public Class Game
         Protected Overrides Sub SynchronizeContext()
             PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
             PonyContext.Region = game.GameScreen.WorkingArea
-        End Sub
-        Protected Overrides Sub PostSynchronizeUpdate()
             game.Update(ManualControlPlayerOne, ManualControlPlayerTwo)
-            MyBase.PostSynchronizeUpdate()
         End Sub
     End Class
 End Class
