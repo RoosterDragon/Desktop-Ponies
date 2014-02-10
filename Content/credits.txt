@@ -145,7 +145,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Anonycat [Stand]
 * StarStep [Stand, Trot, Buck, Sleep]
 
-#### Big Macintosh
+#### Big McIntosh
 * Bot-chan
 
 #### Blinkie Pie
@@ -455,7 +455,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Photo Finish
 * Pony Noia
 
-#### Pinkamina Diane Pie
+#### Pinkamena Diane Pie
 * supersaiyanmikito [Stand, Trot]
 * Jay Wright [Stand, Trot]
 * Anonycat [Madame LaFlour, MrTurnip, Rocky, SirLintsALot]
@@ -505,7 +505,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Prince Blueblood
 * Bot-chan
 
-#### Princess Cadence
+#### Princess Cadance
 * emeralddarkness [Stand]
 * Bot-chan [Walk, Flight]
 
@@ -636,7 +636,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sheriff Silverstar
 * Anonycat
 
-#### Shining Armour
+#### Shining Armor
 * emeralddarkness [Stand, Trot]
 * StarStep [Trot]
 * Images modified from Fancypants.
