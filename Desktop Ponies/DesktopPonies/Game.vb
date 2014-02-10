@@ -579,10 +579,10 @@ Public Class Game
         Public Property HostEffect As Effect
         Private startPoint As Point
 
-        Private teamOneNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(66, 107)}
-        Private teamTwoNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(66, 150)}
-        Private teamOneScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(130, 113)}
-        Private teamTwoScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Size(135, 156)}
+        Private teamOneNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Vector2F(66, 107)}
+        Private teamTwoNameDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Vector2F(66, 150)}
+        Private teamOneScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Vector2F(130, 113)}
+        Private teamTwoScoreDisplay As New ScoreDisplay(Me) With {.LocalPosition = New Vector2F(135, 156)}
 
         Public ReadOnly Iterator Property ScoreDisplays As IEnumerable(Of ScoreDisplay)
             Get
@@ -628,7 +628,7 @@ Public Class Game
 
             Public Property Text As String
             Private parent As GameScoreboard
-            Public Property LocalPosition As Size
+            Public Property LocalPosition As Vector2F
 
             Public Sub New(parentBoard As GameScoreboard)
                 parent = parentBoard
@@ -660,7 +660,8 @@ Public Class Game
 
             Public ReadOnly Property Region As Rectangle Implements ISprite.Region
                 Get
-                    Return New Rectangle(parent.HostEffect.TopLeftLocation + LocalPosition, Size.Empty)
+                    Return New Rectangle(Vector2.Round(New Vector2(parent.HostEffect.TopLeftLocation) +
+                                                       LocalPosition * parent.HostEffect.Context.ScaleFactor), Size.Empty)
                 End Get
             End Property
 
