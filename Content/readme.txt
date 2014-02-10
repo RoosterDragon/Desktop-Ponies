@@ -26,7 +26,10 @@ Installation
 * Unix
     You will need the latest stable version of mono. You can also download it from here: 
     http://www.go-mono.com/mono-downloads/download.html
-    Alternativly install these packages: libmono-system-xml-linq4.0-cil, libmono-microsoft-visualbasic10.0-cil, libgtk2.0-cil
+    Alternatively you can install the prerequisite packages for your platform. You will need packages for the mono runtime, visual basic, and gtk 2.
+    These vary by distro, but here's a couple of known invocations:
+        - Debian or Debian based (e.g. Ubuntu): apt-get install libmono-system-xml-linq4.0-cil libmono-microsoft-visualbasic10.0-cil libgtk2.0-cil
+        - Arch Linux: pacman -S mono mono-basic gtk-sharp-2
     Once installed, you can start the program from the command line with "mono 'Desktop Ponies.exe'".
     It is recommended to run "mozroots --import --ask-remove" from the command line to install default Mozilla web certificates,
     which will allow the program to check online for updates.
@@ -64,6 +67,25 @@ Screensaver (Windows Only)
 Change Log
 
 Latest changes:
+
+v1.44:
+- Added Nurse Snowheart, Nurse Sweetheart, Fleetfoot, Cheese Sandwich and the Power Ponies by Bot-chan.
+- Added Ms Harshwhinny by RoboKitty.
+- Renamed Horse Power to Bulk Biceps.
+- Renamed Pinkamina Diane Pie to Pinkamena Diane Pie.
+- Renamed Princess Cadence to Princess Cadance.
+- Renamed Shining Armour to Shining Armor.
+- Renamed Big Macintosh to Big McIntosh.
+- You can now set the area ponies appear by manually entering an area, if you want finer control than a per-monitor selection.
+- Setting up image centers has been made easier, you can type in the values and mirror them between the left and right images.
+- The options screen has been tidied up, and a few minor issues with options have been fixed.
+- Interactions are now also restricted by behavior groups.
+- Interupting a pony during an interaction they are taking part in will cancel the interaction amoung those involved.
+- A new attribute has been added for behaviors - "Image Offset Type". If a behavior specifies a pony to follow, you can specify
+  if the offset should be mirrored when the target switches direction by choosing the "Mirror" setting. The default setting of
+  "Fixed" does not change the offset and matches how Desktop Ponies has treated the offset in the past.
+- Fixed a problem where attempting to add new ponies via the context menu on Linux/Mac would sometimes not work.
+- Fixed a crash that would occur very rarely when returning to the menu or closing the program.
 
 v1.43:
 - Added Ahuizotl, Mane-iac, Suri Polomare, Scootaloo fly animation, Spitfire's cutie mark,
