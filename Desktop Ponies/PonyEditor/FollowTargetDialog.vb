@@ -184,7 +184,7 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If Not AutoSelectImageCheckbox.Checked AndAlso
+        If Not NoTargetOption.Checked AndAlso Not AutoSelectImageCheckbox.Checked AndAlso
             (MovingComboBox.SelectedItem Is Nothing OrElse StoppedComboBox.SelectedItem Is Nothing) Then
             MessageBox.Show(Me, "If you disable auto-selection of images, " &
                             "then you must specify a moving behavior and a stopped behavior to get the images from." &
