@@ -52,30 +52,26 @@
                 // Lazily initialize the graphics buffer.
                 if (backgroundGraphics == null)
                 {
-                    IntPtr backgroundBits;
-                    var bitmapInfo = new BITMAPINFO(new BITMAPINFOHEADER(
-                        Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
-                    hBitmap = NativeMethods.CreateDIBSection(
-                        hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
-                    GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);
-                    hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
-                    if (hPrevBitmap == IntPtr.Zero)
-                        throw new Win32Exception();
+                    InitializeBuffer();
                     backgroundGraphics = Graphics.FromHdc(hdcBackground);
-                    unsafe
-                    {
-                        BackgroundData = (int*)backgroundBits.ToPointer();
-                    }
                 }
                 return backgroundGraphics;
             }
         }
         /// <summary>
+        /// A pointer to the array of raw pixels of the background graphics buffer.
+        /// </summary>
+        private unsafe int* backgroundData;
+        /// <summary>
         /// Gets a pointer to the array of raw pixels of the background graphics buffer which may be operated on directly for speed. The
         /// array is of length Width * Height. Each element is a packed 32-bit ARGB value. This buffer is recreated whenever the form is
         /// resized.
         /// </summary>
-        public unsafe int* BackgroundData { get; private set; }
+        public unsafe int* GetBackgroundData()
+        {
+            InitializeBuffer();
+            return backgroundData;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.AlphaForm"/> class.
@@ -116,6 +112,31 @@
         }
 
         /// <summary>
+        /// Initializes the unmanaged graphics buffer if it has yet to be initialized.
+        /// </summary>
+        private void InitializeBuffer()
+        {
+            unsafe
+            {
+                if (backgroundData != null)
+                    return;
+            }
+            IntPtr backgroundBits;
+            var bitmapInfo = new BITMAPINFO(new BITMAPINFOHEADER(
+                Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
+            hBitmap = NativeMethods.CreateDIBSection(
+                hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
+            GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);
+            hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
+            if (hPrevBitmap == IntPtr.Zero)
+                throw new Win32Exception();
+            unsafe
+            {
+                backgroundData = (int*)backgroundBits.ToPointer();
+            }
+        }
+
+        /// <summary>
         /// Releases the buffer resources.
         /// </summary>
         /// <param name="disposing">Indicates if managed resources should be disposed in addition to unmanaged resources; otherwise, only
@@ -131,7 +152,7 @@
             {
                 unsafe
                 {
-                    BackgroundData = null;
+                    backgroundData = null;
                 }
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
                 GC.RemoveMemoryPressure(bitmapSizeInBytes);

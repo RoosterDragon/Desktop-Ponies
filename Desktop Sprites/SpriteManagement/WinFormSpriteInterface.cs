@@ -739,6 +739,10 @@
         /// </summary>
         private int parallelBlendSections;
         /// <summary>
+        /// A pointer to the current buffer from the form background.
+        /// </summary>
+        private unsafe int* backgroundData;
+        /// <summary>
         /// Synchronization object for parallel rendering threads.
         /// </summary>
         private readonly Barrier parallelBlend;
@@ -1337,6 +1341,10 @@
                         var area = OffsetRectangle(sprite.Region, translate);
                         ImageFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
                         frame.Flip(sprite.FlipImage);
+                        unsafe
+                        {
+                            backgroundData = form.GetBackgroundData();
+                        }
                         if (frame.Image.Bitmap != null)
                             form.BackgroundGraphics.DrawImage(frame.Image.Bitmap, area);
                         else if (sprites.Count <= ParallelBlendingThreshold)
@@ -1547,7 +1555,6 @@
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
-            int* backgroundData = form.BackgroundData;
             for (int y = yMin; y < yMax; y++)
             {
                 for (int x = xMin; x < xMax; x++)
@@ -1558,7 +1565,7 @@
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
-                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                        AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
@@ -1584,7 +1591,6 @@
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
-            int* backgroundData = form.BackgroundData;
             for (int y = yMin; y < yMax; y++)
             {
                 for (int x = xMin; x < xMax; x++)
@@ -1600,7 +1606,7 @@
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
-                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                        AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
@@ -1629,7 +1635,6 @@
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
-            int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
             for (int y = yMin; y < yMax; y++)
             {
@@ -1645,7 +1650,7 @@
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
-                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                        AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
@@ -1674,7 +1679,6 @@
             
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
-            int* backgroundData = form.BackgroundData;
             int imageStride = image.Stride;
             for (int y = yMin; y < yMax; y++)
             {
@@ -1696,7 +1700,7 @@
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
-                        AlphaBlendPixel(backgroundData, backgroundIndex, srcColor, srcAlpha);
+                        AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
                     backgroundIndex++;
                 }
                 backgroundIndex += backgroundIndexRowChange;
@@ -1707,12 +1711,11 @@
         /// <summary>
         /// Blends a translucent source color with the form background.
         /// </summary>
-        /// <param name="backgroundData">A pointer to the BackgroundData of the form.</param>
-        /// <param name="backgroundIndex">The index into the <paramref name="backgroundData"/> array that represents the destination pixel.
+        /// <param name="backgroundIndex">The index into the background data array that represents the destination pixel.
         /// </param>
         /// <param name="srcColor">The source pixel to blend with the form.</param>
         /// <param name="srcAlpha">The alpha value of the source pixel.</param>
-        private unsafe void AlphaBlendPixel(int* backgroundData, int backgroundIndex, int srcColor, int srcAlpha)
+        private unsafe void AlphaBlendPixel(int backgroundIndex, int srcColor, int srcAlpha)
         {
             int dstColor = backgroundData[backgroundIndex];
             int dstAlpha = (dstColor >> 24) & 0xFF;
