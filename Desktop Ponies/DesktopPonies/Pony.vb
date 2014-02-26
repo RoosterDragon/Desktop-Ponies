@@ -2465,7 +2465,7 @@ Public Class Pony
                 Not _followTarget._facingRight Then offsetVector.X = -offsetVector.X
             _destination = _followTarget._location + offsetVector
             Return
-        ElseIf offsetVector <> Vector2.Zero Then
+        ElseIf _currentBehavior.TargetMode = TargetMode.Point Then
             ' We need to head to some point relative to the display area.
             ' Here the offset represents the relative location normalized to a scale of 0-100 along each axis.
             Dim relativeDestination = offsetVector * 0.01F
