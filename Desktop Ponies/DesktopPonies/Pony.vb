@@ -1684,7 +1684,7 @@ Public Class Pony
     ''' </summary>
     Public ReadOnly Property CurrentBehaviorGroup As Integer
         Get
-            Return If(_currentBehavior Is Nothing, Behavior.AnyGroup, _currentBehavior.Group)
+            Return If(_currentBehavior Is Nothing, Base.Behaviors(0).Group, _currentBehavior.Group)
         End Get
     End Property
     ''' <summary>
