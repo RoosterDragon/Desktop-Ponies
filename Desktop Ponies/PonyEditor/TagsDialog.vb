@@ -12,17 +12,17 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        _editor.PreviewPony.Base.Tags.Clear()
-        _editor.PreviewPony.Base.Tags.RemoveWhere(
+        _editor.CurrentBase.Tags.Clear()
+        _editor.CurrentBase.Tags.RemoveWhere(
             Function(tag) Options.CustomTags.Contains(tag) OrElse PonyBase.StandardTags.Contains(tag))
-        _editor.PreviewPony.Base.Tags.UnionWith(PonyFilterList.CheckedItems.Cast(Of CaseInsensitiveString)())
+        _editor.CurrentBase.Tags.UnionWith(PonyFilterList.CheckedItems.Cast(Of CaseInsensitiveString)())
 
         DialogResult = DialogResult.OK
         Me.Close()
     End Sub
 
     Private Sub Tags_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.Text = "Tags for " & _editor.PreviewPony.Base.Directory
+        Me.Text = "Tags for " & _editor.CurrentBase.Directory
 
         For Each tag As CaseInsensitiveString In PonyBase.StandardTags.Concat(Options.CustomTags)
             PonyFilterList.Items.Add(tag)
@@ -30,7 +30,7 @@
 
         For i = 0 To PonyFilterList.Items.Count - 1
             Dim tag = DirectCast(PonyFilterList.Items(i), CaseInsensitiveString)
-            If _editor.PreviewPony.Base.Tags.Contains(tag) Then
+            If _editor.CurrentBase.Tags.Contains(tag) Then
                 PonyFilterList.SetItemChecked(i, True)
             End If
         Next

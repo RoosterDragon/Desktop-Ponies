@@ -2,10 +2,13 @@
 Imports System.IO
 
 Public Class NewPonyDialog
-    Private _editor As PonyEditor
-    Public Sub New(editor As PonyEditor)
+    Private ReadOnly _ponies As PonyCollection
+    Private ReadOnly _newBase As PonyBase
+    Public Sub New(ponies As PonyCollection)
         InitializeComponent()
-        _editor = editor
+        _ponies = ponies
+        _newBase = PonyBase.CreateInMemory(ponies)
+        _newBase.DisplayName = "New Pony"
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -38,15 +41,15 @@ Public Class NewPonyDialog
             Return False
         End If
 
-        For Each ponyBase In _editor.PreviewPony.Base.Collection.Bases
+        For Each ponyBase In _ponies.Bases
             If String.Equals(ponyBase.Directory, newName, StringComparison.OrdinalIgnoreCase) Then
                 MsgBox("A pony with this name already exists!  Please select another name or rename the other pony.")
                 Return False
             End If
         Next
 
-        If _editor.PreviewPony.Base.ChangeDirectory(newName) Then
-            _editor.PreviewPony.Base.DisplayName = newName
+        If _newBase.ChangeDirectory(newName) Then
+            _newBase.DisplayName = newName
             Return True
         Else
             MessageBox.Show(Me, "Failed to create this pony. Try again, or perhaps try another name.",

@@ -22,7 +22,7 @@ Public Class NewBehaviorDialog
             Exit Sub
         End If
 
-        For Each behavior In _editor.PreviewPony.Base.Behaviors
+        For Each behavior In _editor.CurrentBase.Behaviors
             If behavior.Name = NameTextbox.Text Then
                 MessageBox.Show(Me, "Behavior '" & behavior.Name & "' already exists for this pony. Please select another name.",
                                 "Duplicate Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -106,7 +106,7 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        _editor.PreviewPony.Base.AddBehavior(NameTextbox.Text,
+        _editor.CurrentBase.AddBehavior(NameTextbox.Text,
                                              chance / 100,
                                              maxDuration,
                                              minDuration,
@@ -242,7 +242,7 @@ Public Class NewBehaviorDialog
 
     Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
 
-        Dim new_behavior As New Behavior(_editor.PreviewPony.Base)
+        Dim new_behavior As New Behavior(_editor.CurrentBase)
 
         Using dialog = New FollowTargetDialog(new_behavior)
             dialog.ShowDialog(Me)

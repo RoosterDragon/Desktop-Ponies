@@ -44,6 +44,12 @@ Public Class PonyEditor
             Return _previewPony
         End Get
     End Property
+    Private _currentBase As PonyBase
+    Public ReadOnly Property CurrentBase As PonyBase
+        Get
+            Return _currentBase
+        End Get
+    End Property
 
     ''' <summary>
     ''' Used so we can swap grid positions and keep track of how everything is sorted when we refresh.
@@ -136,7 +142,7 @@ Public Class PonyEditor
     End Function
 
     Private Sub UpdatePreviewListImage()
-        Dim newImage = GetListImage(PreviewPony.Base, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
+        Dim newImage = GetListImage(CurrentBase, 50, PonyList.BackColor, Function(b) b.LeftImage.Path)
         Dim oldImage = ponyImageList.Images(PonyList.SelectedIndices(0))
         ponyImageList.Images(PonyList.SelectedIndices(0)) = newImage
         PonyList.Refresh()
@@ -174,24 +180,18 @@ Public Class PonyEditor
                              SaveSortOrder()
                              RestoreSortOrder()
                          End Sub)
+        worker.QueueTask(Sub()
+                             EnableWaitCursor(False)
 
-        Dim base = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase)
-        Threading.ThreadPool.QueueUserWorkItem(
-            Sub()
-                _previewPony = New Pony(context, base)
-                worker.QueueTask(Sub()
-                                     EnableWaitCursor(False)
+                             _currentBase = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase)
+                             LoadPonyInfo()
 
-                                     If PreviewPony.Base.Behaviors.Any() Then editorAnimator.AddPony(PreviewPony)
-                                     LoadPonyInfo()
-
-                                     PausePonyButton.Text = "Pause Pony"
-                                     PonyName.Enabled = True
-                                     Enabled = True
-                                     editorAnimator.Resume()
-                                     UseWaitCursor = False
-                                 End Sub)
-            End Sub)
+                             PausePonyButton.Text = "Pause Pony"
+                             PonyName.Enabled = True
+                             Enabled = True
+                             editorAnimator.Resume()
+                             UseWaitCursor = False
+                         End Sub)
     End Sub
 
     'This is used to keep track of the links in each behavior chain.
@@ -210,6 +210,12 @@ Public Class PonyEditor
         Try
             If alreadyUpdating Then Exit Sub
 
+            If PreviewPony IsNot Nothing Then editorAnimator.RemoveSprite(PreviewPony)
+            If CurrentBase.Behaviors.Any() Then
+                _previewPony = New Pony(context, CurrentBase)
+                editorAnimator.AddPony(PreviewPony)
+            End If
+
             alreadyUpdating = True
 
             BehaviorsGrid.SuspendLayout()
@@ -222,7 +228,7 @@ Public Class PonyEditor
             InteractionsGrid.Rows.Clear()
             SpeechesGrid.Rows.Clear()
 
-            PonyName.Text = PreviewPony.Base.DisplayName
+            PonyName.Text = CurrentBase.DisplayName
 
             CurrentBehaviorValueLabel.Text = "N/A"
             TimeLeftValueLabel.Text = "N/A"
@@ -240,26 +246,26 @@ Public Class PonyEditor
             colBehaviorEndSpeech.Items.Add(none)
 
             Dim unnamedCounter = 1
-            For Each speech In PreviewPony.Base.Speeches
+            For Each speech In CurrentBase.Speeches
                 If speech.Name = speech.Unnamed Then
                     speech.Name = speech.Unnamed & " #" & unnamedCounter
                     unnamedCounter += 1
                 End If
 
                 SpeechesGrid.Rows.Add(
-                    speech.Name, speech.Name, speech.Group, PreviewPony.Base.GetBehaviorGroupName(speech.Group), speech.Text,
+                    speech.Name, speech.Name, speech.Group, CurrentBase.GetBehaviorGroupName(speech.Group), speech.Text,
                     GetFilename(speech.SoundFile), (Not speech.Skip).ToString())
                 colBehaviorStartSpeech.Items.Add(speech.Name)
                 colBehaviorEndSpeech.Items.Add(speech.Name)
             Next
 
-            For Each behavior In PreviewPony.Base.Behaviors
+            For Each behavior In CurrentBase.Behaviors
                 colBehaviorLinked.Items.Add(behavior.Name)
                 colEffectBehavior.Items.Add(behavior.Name)
             Next
 
             Dim behaviorSequencesByName = DetermineBehaviorSequences()
-            For Each behavior In PreviewPony.Base.Behaviors
+            For Each behavior In CurrentBase.Behaviors
                 Dim followName As String = ""
                 Select Case behavior.TargetMode
                     Case TargetMode.Pony
@@ -280,7 +286,7 @@ Public Class PonyEditor
                     behavior.Name,
                     behavior.Name,
                     behavior.Group,
-                    PreviewPony.Base.GetBehaviorGroupName(behavior.Group),
+                    CurrentBase.GetBehaviorGroupName(behavior.Group),
                     chance,
                     behavior.MaxDuration,
                     behavior.MinDuration,
@@ -297,7 +303,7 @@ Public Class PonyEditor
                     behavior.DoNotRepeatImageAnimations)
             Next
 
-            For Each effect In PreviewPony.Base.Effects
+            For Each effect In CurrentBase.Effects
                 EffectsGrid.Rows.Add(
                     effect.Name,
                     effect.Name,
@@ -314,7 +320,7 @@ Public Class PonyEditor
                     effect.DoNotRepeatImageAnimations)
             Next
 
-            For Each interaction In PreviewPony.Base.Interactions
+            For Each interaction In CurrentBase.Interactions
                 InteractionsGrid.Rows.Add(
                     interaction.Name,
                     interaction.Name,
@@ -332,7 +338,7 @@ Public Class PonyEditor
 
             Dim behaviorNames As New HashSet(Of CaseInsensitiveString)()
             Dim effectNames As New HashSet(Of CaseInsensitiveString)()
-            For Each behavior In PreviewPony.Base.Behaviors
+            For Each behavior In CurrentBase.Behaviors
                 If Not behaviorNames.Add(behavior.Name) Then
                     conflicts.Add("Behavior: " & behavior.Name)
                 End If
@@ -345,14 +351,14 @@ Public Class PonyEditor
             Next
 
             Dim speechNames As New HashSet(Of CaseInsensitiveString)()
-            For Each speech In PreviewPony.Base.Speeches
+            For Each speech In CurrentBase.Speeches
                 If Not speechNames.Add(speech.Name) Then
                     conflicts.Add("Speech: " & speech.Name)
                 End If
             Next
 
             Dim interactionNames As New HashSet(Of CaseInsensitiveString)()
-            For Each interaction In PreviewPony.Base.Interactions
+            For Each interaction In CurrentBase.Interactions
                 If Not interactionNames.Add(interaction.Name) Then
                     conflicts.Add("Interaction: " & interaction.Name)
                 End If
@@ -371,7 +377,7 @@ Public Class PonyEditor
             InteractionsGrid.ResumeLayout()
             SpeechesGrid.ResumeLayout()
 
-            editorAnimator.CreateEditorMenu(PreviewPony.Base)
+            editorAnimator.CreateEditorMenu(CurrentBase)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
             Me.Close()
@@ -382,11 +388,11 @@ Public Class PonyEditor
         'Go through each behavior to see which ones are part of a chain, and if so, which order they go in.
         Dim chainsByBehaviorName As New Dictionary(Of CaseInsensitiveString, List(Of ChainLink))()
         Dim linkSeries = 1
-        Dim behaviorsByName = PreviewPony.Base.Behaviors.ToDictionary(Function(b) b.Name)
+        Dim behaviorsByName = CurrentBase.Behaviors.ToDictionary(Function(b) b.Name)
         Dim behaviorNamesInChain = New HashSet(Of CaseInsensitiveString)()
         Dim behaviorNamesLinkedTo = New HashSet(Of CaseInsensitiveString)(
-                                    PreviewPony.Base.Behaviors.Select(Function(b) b.LinkedBehaviorName))
-        For Each behavior In PreviewPony.Base.Behaviors
+                                    CurrentBase.Behaviors.Select(Function(b) b.LinkedBehaviorName))
+        For Each behavior In CurrentBase.Behaviors
             ' Don't bother building a chain for behaviors that aren't linked.
             If behavior.LinkedBehaviorName = "" Then Continue For
             ' We will only start chains from the head elements in any chain.
@@ -416,7 +422,7 @@ Public Class PonyEditor
         Next
         Dim behaviorSequencesByName As New Dictionary(Of CaseInsensitiveString, String)()
         Dim sequence As New System.Text.StringBuilder()
-        For Each behavior In PreviewPony.Base.Behaviors
+        For Each behavior In CurrentBase.Behaviors
             Dim links As List(Of ChainLink) = Nothing
             If chainsByBehaviorName.TryGetValue(behavior.Name, links) Then
                 For Each link In links
@@ -488,7 +494,7 @@ Public Class PonyEditor
     Private Sub BehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellClick
         If e.RowIndex < 0 Then Return
         Try
-            Dim behavior = GetGridItem(sender, e, colBehaviorOriginalName, PreviewPony.Base.Behaviors)
+            Dim behavior = GetGridItem(sender, e, colBehaviorOriginalName, CurrentBase.Behaviors)
             If behavior Is Nothing Then Return
 
             Select Case e.ColumnIndex
@@ -497,7 +503,7 @@ Public Class PonyEditor
 
                 Case colBehaviorRightImage.Index
                     HidePony()
-                    Dim newImagePath = AddPicture(PreviewPony.Base.Directory & " Right Image...")
+                    Dim newImagePath = AddPicture(CurrentBase.Directory & " Right Image...")
                     If newImagePath IsNot Nothing Then
                         behavior.RightImage.Path = newImagePath
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorRightImage.Index).Value = GetFilename(newImagePath)
@@ -507,12 +513,12 @@ Public Class PonyEditor
 
                 Case colBehaviorLeftImage.Index
                     HidePony()
-                    Dim newImagePath = AddPicture(PreviewPony.Base.Directory & " Left Image...")
+                    Dim newImagePath = AddPicture(CurrentBase.Directory & " Left Image...")
                     If newImagePath IsNot Nothing Then
                         behavior.LeftImage.Path = newImagePath
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorLeftImage.Index).Value = GetFilename(newImagePath)
                         ImageSizeCheck(behavior.LeftImage.Size)
-                        If Object.ReferenceEquals(behavior, PreviewPony.Base.Behaviors(0)) Then
+                        If Object.ReferenceEquals(behavior, CurrentBase.Behaviors(0)) Then
                             UpdatePreviewListImage()
                         End If
                     End If
@@ -534,7 +540,7 @@ Public Class PonyEditor
     Private Sub EffectsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles EffectsGrid.CellClick
         If e.RowIndex < 0 Then Return
         Try
-            Dim effect = GetGridItem(sender, e, colEffectOriginalName, PreviewPony.Base.Effects)
+            Dim effect = GetGridItem(sender, e, colEffectOriginalName, CurrentBase.Effects)
             If effect Is Nothing Then Return
 
             Select Case e.ColumnIndex
@@ -568,7 +574,7 @@ Public Class PonyEditor
     Private Sub SpeechesGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles SpeechesGrid.CellClick
         If e.RowIndex < 0 Then Return
         Try
-            Dim speech = GetGridItem(sender, e, colSpeechOriginalName, PreviewPony.Base.Speeches)
+            Dim speech = GetGridItem(sender, e, colSpeechOriginalName, CurrentBase.Speeches)
             If speech Is Nothing Then Return
 
             Select Case e.ColumnIndex
@@ -592,14 +598,14 @@ Public Class PonyEditor
     Private Sub InteractionsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles InteractionsGrid.CellClick
         If e.RowIndex < 0 Then Return
         Try
-            Dim interaction = GetGridItem(sender, e, colInteractionOriginalName, PreviewPony.Base.Interactions)
+            Dim interaction = GetGridItem(sender, e, colInteractionOriginalName, CurrentBase.Interactions)
             If interaction Is Nothing Then Return
 
             Dim changeMade = False
             Select Case e.ColumnIndex
                 Case colInteractionTargets.Index, colInteractionBehaviors.Index
                     HidePony()
-                    Using form = New NewInteractionDialog(interaction, PreviewPony.Base)
+                    Using form = New NewInteractionDialog(interaction, CurrentBase)
                         form.ShowDialog(Me)
                         changeMade = form.DialogResult = DialogResult.OK
                     End Using
@@ -626,7 +632,7 @@ Public Class PonyEditor
     Private Sub BehaviorsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellValueChanged
         If alreadyUpdating OrElse e.RowIndex < 0 Then Return
         Try
-            Dim behavior = GetGridItem(sender, e, colBehaviorOriginalName, PreviewPony.Base.Behaviors)
+            Dim behavior = GetGridItem(sender, e, colBehaviorOriginalName, CurrentBase.Behaviors)
             If behavior Is Nothing Then Return
 
             Dim newValue = BehaviorsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value.ToString()
@@ -643,7 +649,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each behavior In PreviewPony.Base.Behaviors
+                        For Each behavior In CurrentBase.Behaviors
                             If behavior.Name = newValue Then
                                 MsgBox("Behavior names must be unique. Behavior '" & newValue & "' already exists.")
                                 BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorName.Index).Value = behavior.Name
@@ -734,17 +740,17 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        If PreviewPony.Base.GetBehaviorGroupName(behavior.Group) Is Nothing Then
-                            PreviewPony.Base.BehaviorGroups.Add(New BehaviorGroup(newValue, behavior.Group))
+                        If CurrentBase.GetBehaviorGroupName(behavior.Group) Is Nothing Then
+                            CurrentBase.BehaviorGroups.Add(New BehaviorGroup(newValue, behavior.Group))
                         Else
-                            For Each behaviorgroup In PreviewPony.Base.BehaviorGroups
+                            For Each behaviorgroup In CurrentBase.BehaviorGroups
                                 If behaviorgroup.Name = newValue Then
                                     MsgBox("Error:  That group name already exists under a different ID.")
                                     Exit Sub
                                 End If
                             Next
 
-                            For Each behaviorgroup In PreviewPony.Base.BehaviorGroups
+                            For Each behaviorgroup In CurrentBase.BehaviorGroups
                                 If behaviorgroup.Number = behavior.Group Then
                                     behaviorgroup.Name = newValue
                                 End If
@@ -768,7 +774,7 @@ Public Class PonyEditor
     Private Sub EffectsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles EffectsGrid.CellValueChanged
         If alreadyUpdating OrElse e.RowIndex < 0 Then Return
         Try
-            Dim effect = GetGridItem(sender, e, colEffectOriginalName, PreviewPony.Base.Effects)
+            Dim effect = GetGridItem(sender, e, colEffectOriginalName, CurrentBase.Effects)
             If effect Is Nothing Then Return
 
             Dim newValue = EffectsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value.ToString()
@@ -841,7 +847,7 @@ Public Class PonyEditor
     Private Sub SpeechesGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles SpeechesGrid.CellValueChanged
         If alreadyUpdating OrElse e.RowIndex < 0 Then Return
         Try
-            Dim speech = GetGridItem(sender, e, colSpeechOriginalName, PreviewPony.Base.Speeches)
+            Dim speech = GetGridItem(sender, e, colSpeechOriginalName, CurrentBase.Speeches)
             If speech Is Nothing Then Return
 
             Dim newValue = SpeechesGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value.ToString()
@@ -859,7 +865,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each otherSpeech In PreviewPony.Base.Speeches
+                        For Each otherSpeech In CurrentBase.Speeches
                             If otherSpeech.Name = newValue Then
                                 MsgBox("Speech names must be unique. Speech '" & newValue & "' already exists.")
                                 SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechName.Index).Value = speech.Name
@@ -895,7 +901,7 @@ Public Class PonyEditor
     Private Sub InteractionsGrid_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles InteractionsGrid.CellValueChanged
         If alreadyUpdating OrElse e.RowIndex < 0 Then Return
         Try
-            Dim interaction = GetGridItem(sender, e, colInteractionOriginalName, PreviewPony.Base.Interactions)
+            Dim interaction = GetGridItem(sender, e, colInteractionOriginalName, CurrentBase.Interactions)
             If interaction Is Nothing Then Return
 
             Dim newValue = InteractionsGrid.Rows(e.RowIndex).Cells(e.ColumnIndex).Value.ToString()
@@ -912,7 +918,7 @@ Public Class PonyEditor
                             Exit Sub
                         End If
 
-                        For Each i In PreviewPony.Base.Interactions
+                        For Each i In CurrentBase.Interactions
                             If i.Name = newValue Then
                                 InteractionsGrid.Rows(e.RowIndex).Cells(colInteractionName.Index).Value = interaction.Name
                                 MessageBox.Show(Me, "Interaction '" & newValue & "' already exists for this pony. Please select another name.",
@@ -1043,11 +1049,11 @@ Public Class PonyEditor
             ShowPony()
 
             If addedNew Then
-                If PreviewPony.Base.Behaviors.Count = 1 Then
+                If CurrentBase.Behaviors.Count = 1 Then
                     editorAnimator.AddPony(PreviewPony)
                     UpdatePreviewListImage()
                 End If
-                PreviewPony.SetBehavior(PreviewPony.Base.Behaviors(0))
+                PreviewPony.SetBehavior(CurrentBase.Behaviors(0))
                 LoadPonyInfo()
                 hasSaved = False
             End If
@@ -1118,14 +1124,15 @@ Public Class PonyEditor
             End If
 
             HidePony()
-            Using dialog = New NewInteractionDialog(Nothing, PreviewPony.Base)
+
+            Using dialog = New NewInteractionDialog(Nothing, CurrentBase)
                 dialog.ShowDialog(Me)
             End Using
+
             ShowPony()
 
             LoadPonyInfo()
             hasSaved = False
-
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error creating new interaction. The editor will now close.")
             Me.Close()
@@ -1138,7 +1145,7 @@ Public Class PonyEditor
                 "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|All Files (*.*)|*.*"
             OpenPictureDialog.FilterIndex = 4
             OpenPictureDialog.InitialDirectory = Path.Combine(
-                EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Base.Directory)
+                EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory)
 
             If text Is Nothing Then
                 OpenPictureDialog.Title = "Select picture..."
@@ -1158,7 +1165,7 @@ Public Class PonyEditor
             Image.FromFile(imagePath)
 
             Dim desiredPath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
-                                           PreviewPony.Base.Directory, GetFilename(imagePath))
+                                           CurrentBase.Directory, GetFilename(imagePath))
 
             If desiredPath <> imagePath Then
                 Try
@@ -1190,7 +1197,7 @@ Public Class PonyEditor
         Using dialog = New NewSpeechDialog(Me)
             dialog.OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
             dialog.OpenSoundDialog.InitialDirectory = Path.Combine(
-                EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Base.Directory)
+                EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory)
             If dialog.OpenSoundDialog.ShowDialog() = DialogResult.OK Then
                 sound_path = dialog.OpenSoundDialog.FileName
             End If
@@ -1201,7 +1208,7 @@ Public Class PonyEditor
         End If
 
         Dim new_path = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
-                                       PreviewPony.Base.Directory, GetFilename(sound_path))
+                                       CurrentBase.Directory, GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not File.Exists(new_path) Then
@@ -1221,41 +1228,41 @@ Public Class PonyEditor
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
 
             If Object.ReferenceEquals(grid, EffectsGrid) Then
-                Dim effectToRemove = PreviewPony.Base.Effects.Single(
+                Dim effectToRemove = CurrentBase.Effects.Single(
                     Function(effect) effect.Name = DirectCast(e.Row.Cells(colEffectName.Index).Value, CaseInsensitiveString))
-                PreviewPony.Base.Effects.Remove(effectToRemove)
+                CurrentBase.Effects.Remove(effectToRemove)
             ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
                 Dim todelete As Behavior = Nothing
-                For Each behavior In PreviewPony.Base.Behaviors
+                For Each behavior In CurrentBase.Behaviors
                     If DirectCast(e.Row.Cells(colBehaviorName.Index).Value, CaseInsensitiveString) = behavior.Name Then
                         todelete = behavior
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPony.Base.Behaviors.Remove(todelete)
+                    CurrentBase.Behaviors.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, InteractionsGrid) Then
                 Dim todelete As InteractionBase = Nothing
-                For Each interaction In PreviewPony.Base.Interactions
+                For Each interaction In CurrentBase.Interactions
                     If DirectCast(e.Row.Cells(colInteractionName.Index).Value, CaseInsensitiveString) = interaction.Name Then
                         todelete = interaction
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPony.Base.Interactions.Remove(todelete)
+                    CurrentBase.Interactions.Remove(todelete)
                 End If
             ElseIf Object.ReferenceEquals(grid, SpeechesGrid) Then
                 Dim todelete As Speech = Nothing
-                For Each speech In PreviewPony.Base.Speeches
+                For Each speech In CurrentBase.Speeches
                     If DirectCast(e.Row.Cells(colSpeechName.Index).Value, CaseInsensitiveString) = speech.Name Then
                         todelete = speech
                         Exit For
                     End If
                 Next
                 If Not IsNothing(todelete) Then
-                    PreviewPony.Base.Speeches.Remove(todelete)
+                    CurrentBase.Speeches.Remove(todelete)
                 End If
             Else
                 Throw New Exception("Unknown grid when deleting row: " & grid.Name)
@@ -1356,7 +1363,7 @@ Public Class PonyEditor
 
     Private Sub PonyName_TextChanged(sender As Object, e As EventArgs) Handles PonyName.TextChanged
         If Not alreadyUpdating Then
-            PreviewPony.Base.DisplayName = PonyName.Text
+            CurrentBase.DisplayName = PonyName.Text
             hasSaved = False
         End If
     End Sub
@@ -1367,22 +1374,9 @@ Public Class PonyEditor
             If PreventStateChange("Save changes before creating a new pony?") Then Return
 
             HidePony()
-
-            Dim previousPony As Pony = Nothing
-            If Not IsNothing(PreviewPony) Then
-                previousPony = PreviewPony
-            End If
-
-            Dim base = PonyBase.CreateInMemory(ponies)
-            base.DisplayName = "New Pony"
-            _previewPony = New Pony(context, base)
-
-            Using dialog = New NewPonyDialog(Me)
+            Using dialog = New NewPonyDialog(ponies)
                 If dialog.ShowDialog(Me) = DialogResult.Cancel Then
-                    If Not IsNothing(previousPony) Then
-                        _previewPony = previousPony
-                        ShowPony()
-                    End If
+                    ShowPony()
                     Exit Sub
                 End If
             End Using
@@ -1406,7 +1400,7 @@ Public Class PonyEditor
             PausePonyButton.Enabled = False
             If editorAnimator.Started Then editorAnimator.Pause(False)
             _changesMade = True
-            PreviewPony.Base.Save()
+            CurrentBase.Save()
             RefreshButton_Click(RefreshButton, EventArgs.Empty)
             If editorAnimator.Started Then editorAnimator.Resume()
             PausePonyButton.Enabled = True
@@ -1484,20 +1478,20 @@ Public Class PonyEditor
         HidePony()
         ImagesContextMenu.Hide()
         If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
-            Using form = New ImageCentersForm(PreviewPony.Base)
+            Using form = New ImageCentersForm(CurrentBase)
                 form.ShowDialog(Me)
             End Using
             hasSaved = False
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(
-                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Base.Directory))
+                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
             Using form = New DesktopSprites.Forms.GifFramesForm(
-                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, PreviewPony.Base.Directory))
+                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)

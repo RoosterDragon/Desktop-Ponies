@@ -66,7 +66,7 @@ Public Class NewEffectDialog
 
         Dim parentBehavior As Behavior = Nothing
 
-        For Each behavior In _editor.PreviewPony.Base.Behaviors
+        For Each behavior In _editor.CurrentBase.Behaviors
             If behavior.Name = DirectCast(Behavior_Box.SelectedItem, CaseInsensitiveString) Then
                 parentBehavior = behavior
                 Exit For
@@ -86,7 +86,7 @@ Public Class NewEffectDialog
                                  DirectionFromString(DirectCast(R_Centering_Box.SelectedItem, String)),
                                  DirectionFromString(DirectCast(L_Placement_Box.SelectedItem, String)),
                                  DirectionFromString(DirectCast(L_Centering_Box.SelectedItem, String)),
-                                 follow_checkbox.Checked, DontRepeat_CheckBox.Checked, _editor.PreviewPony.Base)
+                                 follow_checkbox.Checked, DontRepeat_CheckBox.Checked, _editor.CurrentBase)
         Me.Close()
     End Sub
 
