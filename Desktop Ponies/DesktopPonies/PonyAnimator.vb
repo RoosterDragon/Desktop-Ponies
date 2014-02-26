@@ -168,7 +168,9 @@ Public MustInherit Class PonyAnimator
         End If
         PonyContext.CursorLocation = Viewer.CursorPosition
         SynchronizeContext()
+        If Disposed Then Return
         SynchronizeViewer()
+        If Disposed Then Return
 
         ' When the cursor moves, or a mouse button is pressed, end the screensaver.
         If EvilGlobals.InScreensaverMode Then
