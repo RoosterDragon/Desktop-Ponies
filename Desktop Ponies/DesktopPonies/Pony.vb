@@ -1018,7 +1018,15 @@ Public Class Behavior
                 Referential.CheckUnique("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
                 Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
                 Referential.CheckUnique("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.CheckUnique("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory))}.
+                Referential.CheckUnique("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory)),
+                If(TargetMode <> DesktopPonies.TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
+                   String.IsNullOrEmpty(FollowStoppedBehaviorName),
+                   New ParseIssue("Follow Stopped Behavior", FollowStoppedBehaviorName,
+                                  "Auto select will be used.", "Manual image selection was specified but no behavior is set."), Nothing),
+                If(TargetMode <> DesktopPonies.TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
+                   String.IsNullOrEmpty(FollowMovingBehaviorName),
+                   New ParseIssue("Follow Moving Behavior", FollowMovingBehaviorName,
+                                  "Auto select will be used.", "Manual image selection was specified but no behavior is set."), Nothing)}.
         Where(Function(pi) pi.PropertyName IsNot Nothing).ToImmutableArray()
     End Function
 
