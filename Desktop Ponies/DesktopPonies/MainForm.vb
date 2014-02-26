@@ -44,6 +44,7 @@ Public Class MainForm
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
+        Threading.ThreadPool.QueueUserWorkItem(Sub() CheckForNewVersion())
     End Sub
 
     ''' <summary>
@@ -106,7 +107,6 @@ Public Class MainForm
         End If
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
-        Threading.ThreadPool.QueueUserWorkItem(Sub() CheckForNewVersion())
     End Sub
 
     Private Function ProcessCommandLine() As Boolean
