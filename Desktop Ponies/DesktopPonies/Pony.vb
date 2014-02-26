@@ -3611,10 +3611,11 @@ Public Class House
     End Sub
 
     Public Sub Teleport()
-        Dim screen = Options.Screens.RandomElement()
+        ' TODO: Change this to also respect the exclusion region.
+        Dim region = Options.GetAllowedArea()
         TopLeftLocation = New Point(
-            CInt(screen.WorkingArea.X + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Width - CurrentImageSize.Width), 0)),
-            CInt(screen.WorkingArea.Y + Math.Round(Rng.NextDouble() * (screen.WorkingArea.Height - CurrentImageSize.Height), 0)))
+            CInt(region.X + Rng.NextDouble() * (region.Width - CurrentImageSize.Width)),
+            CInt(region.Y + Rng.NextDouble() * (region.Height - CurrentImageSize.Height)))
     End Sub
 
     ''' <summary>
