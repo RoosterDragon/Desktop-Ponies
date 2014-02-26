@@ -152,6 +152,9 @@ Public MustInherit Class PonyAnimator
 
     Public Overrides Sub Start()
         InitializeInteractions()
+        ' We need to set this before showing the viewer on Windows. If we need to hide it from the taskbar after showing it, the window
+        ' ordering gets a bit screwed up for some reason.
+        Viewer.ShowInTaskbar = False
         MyBase.Start()
     End Sub
 
