@@ -2328,7 +2328,7 @@ Public Class Pony
     ''' <summary>
     ''' Sets an actual pony to follow, based on the desired target. If an interaction is running, the initiator will prefer to follow any
     ''' involved interaction targets (if suitable) and any targets will prefer to follow the initiator, or then other targets (if
-    ''' suitable). Otherwise, a target is chosen uniformly from all available targets. The follow cool-down ent time will be reset.
+    ''' suitable). Otherwise, a target is chosen uniformly from all available targets.
     ''' </summary>
     Private Sub SetFollowTarget()
         If _followTarget Is Nothing AndAlso _currentBehavior.OriginalFollowTargetName <> "" Then
