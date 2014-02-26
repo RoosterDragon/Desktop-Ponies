@@ -1595,6 +1595,12 @@ Public Class Pony
     ''' </summary>
     Private Shared movingBehaviorAndTruthPredicateInArray As Predicate(Of Behavior)() = {movingBehaviorPredicate, truthPredicate}
     ''' <summary>
+    ''' A predicate that filters behaviors that are in the any group or current behavior group, allowed for use at random and that have a
+    ''' reachable target.
+    ''' </summary>
+    Private behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate As Func(Of Behavior, Boolean) =
+        Function(b) Not b.Skip AndAlso (b.Group = Behavior.AnyGroup OrElse b.Group = CurrentBehaviorGroup) AndAlso TargetReachable(b)
+    ''' <summary>
     ''' A predicate that filters behaviors that are in the any group or current behavior group and allowed for use at random.
     ''' </summary>
     Private behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
@@ -2280,14 +2286,15 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Uniformly selects a random behavior from those in the any group or the current behavior group that is allowed to be used at random.
-    ''' If no behaviors match those criteria, then all behaviors allowed for use at random are considered. If still no behaviors match,
-    ''' then one is uniformly selected at random from all behaviors.
+    ''' Uniformly selects a random behavior from available candidate behaviors. The set of candidate behaviors are those allowed for use at
+    ''' random in the current behavior group that have a reachable target. If none match, the reachable target restriction is lifted, then
+    ''' the group restriction, and then the use at random restriction (meaning all behaviors are then candidates).
     ''' </summary>
     ''' <returns>A behavior selected uniformly from available candidates, or all behaviors if there are no available candidates, or null if
     ''' there are no behaviors.</returns>
     Private Function GetRandomBehavior() As Behavior
-        Dim candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
+        Dim candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate).ToList()
+        If candidates.Count = 0 Then candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
         If candidates.Count = 0 Then candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomPredicate).ToList()
         If candidates.Count = 0 Then candidates = Base.Behaviors
         If candidates.Count = 0 Then
@@ -2358,6 +2365,17 @@ Public Class Pony
             End If
         End If
     End Sub
+
+    ''' <summary>
+    ''' Determines if a behavior has a reachable follow target. 
+    ''' </summary>
+    ''' <param name="behavior">The behavior to test.</param>
+    ''' <returns>Returns true if the target mode is not a pony or if a pony matching the target name is present in the current context.
+    ''' </returns>
+    Private Function TargetReachable(behavior As Behavior) As Boolean
+        If behavior.TargetMode <> TargetMode.Pony Then Return True
+        Return Context.OtherPonies(Me).Any(Function(p) Not p._expired AndAlso p.Base.Directory = behavior.OriginalFollowTargetName)
+    End Function
 
     ''' <summary>
     ''' Uniformly selects at random a follow target from all specified candidate ponies which are eligible to be followed for the current
