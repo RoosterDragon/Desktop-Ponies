@@ -1592,14 +1592,9 @@ Public Class Pony
     Private behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
         Function(b) Not b.Skip AndAlso (b.Group = Behavior.AnyGroup OrElse b.Group = CurrentBehaviorGroup)
     ''' <summary>
-    ''' A projection that retrieves the pony base from a pony.
+    ''' A predicate that filters behaviors that are allowed for use at random.
     ''' </summary>
-    Private Shared baseProjection As Func(Of Pony, PonyBase) = Function(p) p.Base
-    ''' <summary>
-    ''' Returns a single pony uniformly selected at random from within a grouping of other ponies with the same base.
-    ''' </summary>
-    Private Shared uniformRandomSelectionFromPoniesGroupedByBase As Func(Of IGrouping(Of PonyBase, Pony), Pony) =
-        Function(group) group.RandomElement()
+    Private Shared behaviorsAllowedAtRandomPredicate As Func(Of Behavior, Boolean) = Function(b) Not b.Skip
 #End Region
 
 #Region "EffectBaseRepeat Structure"
@@ -2277,13 +2272,15 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Uniformly selects a random behavior from those in the any group or the current behavior group. If there are none in those groups,
-    ''' uniformly selects one at random from all behaviors.
+    ''' Uniformly selects a random behavior from those in the any group or the current behavior group that is allowed to be used at random.
+    ''' If no behaviors match those criteria, then all behaviors allowed for use at random are considered. If still no behaviors match,
+    ''' then one is uniformly selected at random from all behaviors.
     ''' </summary>
     ''' <returns>A behavior selected uniformly from available candidates, or all behaviors if there are no available candidates, or null if
     ''' there are no behaviors.</returns>
     Private Function GetRandomBehavior() As Behavior
         Dim candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
+        If candidates.Count = 0 Then candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomPredicate).ToList()
         If candidates.Count = 0 Then candidates = Base.Behaviors
         If candidates.Count = 0 Then
             Return Nothing
