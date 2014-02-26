@@ -1520,13 +1520,13 @@ Public Class Pony
     ''' </summary>
     Private _behaviorBeforeSpecialStateOverride As Behavior
     ''' <summary>
-    ''' The behavior to use during dragging.
+    ''' The behavior to use during dragging for each behavior group.
     ''' </summary>
-    Private _dragBehavior As Behavior
+    Private _dragBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
     ''' <summary>
-    ''' The behavior to use during mouseover.
+    ''' The behavior to use during mouseover for each behavior group.
     ''' </summary>
-    Private _mouseoverBehavior As Behavior
+    Private _mouseoverBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
     ''' <summary>
     ''' The behavior to use when asleep.
     ''' </summary>
@@ -1744,25 +1744,54 @@ Public Class Pony
         _context = Argument.EnsureNotNull(context, "context")
         _base = Argument.EnsureNotNull(base, "base")
         If base.Behaviors.Count = 0 Then Throw New ArgumentException("base must contain at least one behavior.", "base")
+
+        Dim flaggedSleepBehavior = GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.Sleep))
+        _sleepBehavior = If(flaggedSleepBehavior, GetFallbackStationaryBehavior(Behavior.AnyGroup))
+
+        Dim mouseoverBehaviorsByGroup = New Dictionary(Of Integer, Behavior)()
+        Dim dragBehaviorsByGroup = New Dictionary(Of Integer, Behavior)()
+        _mouseoverBehaviorsByGroup = mouseoverBehaviorsByGroup.AsReadOnly()
+        _dragBehaviorsByGroup = dragBehaviorsByGroup.AsReadOnly()
+        Dim groups = New HashSet(Of Integer)(base.Behaviors.Select(Function(b) b.Group))
+        For Each group In groups
+            Dim fallbackStationaryBehavior = GetFallbackStationaryBehavior(group)
+            Dim mouseoverBehavior = If(GetBehaviorMatching(
+                                        Function(b) b.group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
+                                    fallbackStationaryBehavior)
+            mouseoverBehaviorsByGroup.Add(group, mouseoverBehavior)
+            Dim dragBehavior = If(GetBehaviorMatching(
+                                  Function(b) b.group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.Dragged)),
+                              If(flaggedSleepBehavior, mouseoverBehavior))
+            dragBehaviorsByGroup.Add(group, dragBehavior)
+        Next
+
+        If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
+    End Sub
+
+    ''' <summary>
+    ''' Gets a stationary behavior for the specified group. Matches are preferred on group, zero speed, not being skipped and having no
+    ''' follow target. Restrictions are relaxed if a match can't be found: the skip and follow target requirements are ignored first. If
+    ''' there is still no match these checks are repeated without the group restriction. If still there is no match the behavior with the
+    ''' slowest movement is used as the ultimate fallback.
+    ''' </summary>
+    ''' <param name="group">The group number from which a behavior should be preferably matched.</param>
+    ''' <returns>A behavior suitable for use in a stationary position. A behavior is always returned.</returns>
+    Private Function GetFallbackStationaryBehavior(group As Integer) As Behavior
         Dim fallbackStationaryBehavior = GetBehaviorMatching(
+            Function(b) b.Group = group AndAlso b.SpeedInPixelsPerSecond = 0 AndAlso Not b.Skip AndAlso b.TargetMode = TargetMode.None,
+            Function(b) b.Group = group AndAlso b.SpeedInPixelsPerSecond = 0,
             Function(b) b.SpeedInPixelsPerSecond = 0 AndAlso Not b.Skip AndAlso b.TargetMode = TargetMode.None,
             Function(b) b.SpeedInPixelsPerSecond = 0)
-        _mouseoverBehavior = If(GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
-                                fallbackStationaryBehavior)
-        If _mouseoverBehavior Is Nothing Then
-            _mouseoverBehavior = base.Behaviors(0)
-            For i = 1 To base.Behaviors.Count - 1
-                If base.Behaviors(i).SpeedInPixelsPerSecond < _mouseoverBehavior.SpeedInPixelsPerSecond Then
-                    _mouseoverBehavior = base.Behaviors(i)
+        If fallbackStationaryBehavior Is Nothing Then
+            fallbackStationaryBehavior = Base.Behaviors(0)
+            For i = 1 To Base.Behaviors.Count - 1
+                If Base.Behaviors(i).SpeedInPixelsPerSecond < fallbackStationaryBehavior.SpeedInPixelsPerSecond Then
+                    fallbackStationaryBehavior = Base.Behaviors(i)
                 End If
             Next
         End If
-        Dim flaggedSleepBehavior = GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.Sleep))
-        _sleepBehavior = If(flaggedSleepBehavior, fallbackStationaryBehavior)
-        _dragBehavior = If(GetBehaviorMatching(Function(b) b.AllowedMovement.HasFlag(AllowedMoves.Dragged)),
-                           If(flaggedSleepBehavior, _mouseoverBehavior))
-        If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
-    End Sub
+        Return fallbackStationaryBehavior
+    End Function
 
     ''' <summary>
     ''' Gets the current image (based on the visual override behavior, current behavior and facing).
@@ -1979,14 +2008,15 @@ Public Class Pony
     Private Sub HandleMouseoverAndDrag()
         If _inSleepState Then Return
         Dim cursorLocation = CType(Context.CursorLocation, Point)
-        Dim mouseoverImage = If(_facingRight, _mouseoverBehavior.RightImage, _mouseoverBehavior.LeftImage)
+        Dim mouseoverBehavior = _mouseoverBehaviorsByGroup(CurrentBehaviorGroup)
+        Dim mouseoverImage = If(_facingRight, mouseoverBehavior.RightImage, mouseoverBehavior.LeftImage)
         Dim isMouseOver = Region.Contains(cursorLocation) AndAlso GetRegionFForImage(mouseoverImage).Contains(cursorLocation)
         If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso
             Not _inDragState AndAlso _currentInteraction Is Nothing Then
             AddUpdateRecord("Entering mouseover state.")
             _inMouseoverState = True
             _behaviorBeforeSpecialStateOverride = _currentBehavior
-            SetBehaviorInternal(_mouseoverBehavior)
+            SetBehaviorInternal(mouseoverBehavior)
             SpeakInternal()
         End If
         If Context.DraggingEnabled AndAlso Drag AndAlso Not _inDragState Then
@@ -1997,13 +2027,13 @@ Public Class Pony
                 EndInteraction(True, True)
                 _behaviorBeforeSpecialStateOverride = Nothing
             End If
-            SetBehaviorInternal(_dragBehavior)
+            SetBehaviorInternal(_dragBehaviorsByGroup(CurrentBehaviorGroup))
         ElseIf Not Drag AndAlso _inDragState Then
             AddUpdateRecord("Exiting drag state.")
             _inDragState = False
             If Context.CursorAvoidanceEnabled Then
                 _inMouseoverState = True
-                SetBehaviorInternal(_mouseoverBehavior)
+                SetBehaviorInternal(_mouseoverBehaviorsByGroup(CurrentBehaviorGroup))
             Else
                 SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
                 _behaviorBeforeSpecialStateOverride = Nothing
