@@ -1925,7 +1925,7 @@ Public Class Pony
         SendToCustomDestination("override", DestinationOverride, _atDestinationOverride)
         HandleFollowTargetOverride()
         StartInteractionAtRandom()
-        If _currentTime - _behaviorStartTime > _behaviorDesiredDuration Then
+        If _behaviorDesiredDuration < _currentTime - _behaviorStartTime Then
             AddUpdateRecord("Expiring behavior.")
             ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
             If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False, False)
@@ -2128,7 +2128,10 @@ Public Class Pony
     ''' Extends the behavior desired duration to last indefinitely - preventing it expiring.
     ''' </summary>
     Private Sub ExtendBehaviorDurationIndefinitely()
-        _behaviorDesiredDuration = _currentTime + TimeSpan.FromSeconds(_currentBehavior.MaxDuration)
+        Dim behaviorCurrentDuration = _currentTime - _behaviorStartTime
+        If _behaviorDesiredDuration < behaviorCurrentDuration Then
+            _behaviorDesiredDuration = behaviorCurrentDuration
+        End If
     End Sub
 
     ''' <summary>
