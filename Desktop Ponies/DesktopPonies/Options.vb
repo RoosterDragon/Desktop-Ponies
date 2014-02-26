@@ -183,6 +183,7 @@ Public NotInheritable Class Options
                             newTags.Add(columns(1))
                     End Select
                 End While
+                If newScreens.Count = 0 Then newScreens.Add(Screen.PrimaryScreen)
                 Screens = newScreens.ToImmutableArray()
                 PonyCounts = newCounts.AsReadOnly()
                 CustomTags = newTags.ToImmutableArray()
