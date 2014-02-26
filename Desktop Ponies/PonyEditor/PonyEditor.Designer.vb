@@ -162,6 +162,7 @@ Partial Class PonyEditor
         'PonyName
         '
         Me.PonyName.Anchor = System.Windows.Forms.AnchorStyles.Bottom
+        Me.PonyName.Enabled = False
         Me.PonyName.Location = New System.Drawing.Point(289, 244)
         Me.PonyName.Name = "PonyName"
         Me.PonyName.Size = New System.Drawing.Size(125, 20)

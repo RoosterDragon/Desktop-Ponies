@@ -186,6 +186,7 @@ Public Class PonyEditor
                                      LoadPonyInfo()
 
                                      PausePonyButton.Text = "Pause Pony"
+                                     PonyName.Enabled = True
                                      Enabled = True
                                      editorAnimator.Resume()
                                      UseWaitCursor = False
