@@ -53,6 +53,7 @@ Public MustInherit Class PonyAnimator
     Private draggedSprite As IDraggableSprite
     Private initialCursorPosition As Point?
     Private interactionsNeedReinitializing As Boolean
+    Private ReadOnly removeExpiredSpriteHandler As EventHandler = AddressOf RemoveExpiredSprite
 
     Private _exitRequested As ExitRequest
     Public ReadOnly Property ExitRequested As ExitRequest
@@ -86,7 +87,7 @@ Public MustInherit Class PonyAnimator
         AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 
         If spriteCollection IsNot Nothing Then
-            AttachedExpiredHandlers(spriteCollection.OfType(Of IExpireableSprite)())
+            AttachExpiredHandlers(spriteCollection.OfType(Of IExpireableSprite)())
         End If
 
         AddHandler SpriteAdded, AddressOf InvalidateInteractions
@@ -110,16 +111,16 @@ Public MustInherit Class PonyAnimator
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
         Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
-        If expireableSprite IsNot Nothing Then AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        If expireableSprite IsNot Nothing Then AddHandler expireableSprite.Expired, removeExpiredSpriteHandler
     End Sub
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
-        AttachedExpiredHandlers(e.Items.OfType(Of IExpireableSprite)())
+        AttachExpiredHandlers(e.Items.OfType(Of IExpireableSprite)())
     End Sub
 
-    Private Sub AttachedExpiredHandlers(expirableSprites As IEnumerable(Of IExpireableSprite))
+    Private Sub AttachExpiredHandlers(expirableSprites As IEnumerable(Of IExpireableSprite))
         For Each expireableSprite In expirableSprites
-            AddHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+            AddHandler expireableSprite.Expired, removeExpiredSpriteHandler
         Next
     End Sub
 
@@ -139,7 +140,7 @@ Public MustInherit Class PonyAnimator
     End Sub
 
     Private Sub RemoveExpiredHandlerAndExpireSprite(expireableSprite As IExpireableSprite)
-        RemoveHandler expireableSprite.Expired, AddressOf RemoveExpiredSprite
+        RemoveHandler expireableSprite.Expired, removeExpiredSpriteHandler
         expireableSprite.Expire()
     End Sub
 
