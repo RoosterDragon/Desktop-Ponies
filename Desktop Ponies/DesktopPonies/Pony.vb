@@ -1924,7 +1924,7 @@ Public Class Pony
         AddUpdateRecord("Starting at ", startTime)
         _currentTime = startTime
         _lastUpdateTime = startTime
-        SetBehaviorInternal()
+        SetBehaviorInternal(Nothing, True)
         Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
         _location = currentImage.Center * Context.ScaleFactor +
             New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
@@ -1968,10 +1968,9 @@ Public Class Pony
             ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
             If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False, False)
             If _currentBehavior.EndLine IsNot Nothing Then SpeakInternal(_currentBehavior.EndLine)
-            SetBehaviorInternal(_currentBehavior.LinkedBehavior)
-            If _currentBehavior.StartLine IsNot Nothing Then
-                SpeakInternal(_currentBehavior.StartLine)
-            ElseIf _currentBehavior.EndLine Is Nothing AndAlso Rng.NextDouble() < Context.RandomSpeechChance Then
+            SetBehaviorInternal(_currentBehavior.LinkedBehavior, True)
+            If _currentBehavior.StartLine Is Nothing AndAlso _currentBehavior.EndLine Is Nothing AndAlso
+                Rng.NextDouble() < Context.RandomSpeechChance Then
                 SpeakInternal()
             End If
             StartEffects()
@@ -2239,8 +2238,7 @@ Public Class Pony
     Public Sub SetBehavior(Optional suggested As Behavior = Nothing, Optional speak As Boolean = True)
         AddUpdateRecord("SetBehavior called externally")
         EndInteraction(True, False)
-        SetBehaviorInternal(suggested)
-        If _currentBehavior.StartLine IsNot Nothing Then SpeakInternal(_currentBehavior.StartLine)
+        SetBehaviorInternal(suggested, speak)
         StartEffects()
     End Sub
 
@@ -2254,7 +2252,8 @@ Public Class Pony
     ''' any group, or current behavior group. If there are no such behaviors (i.e. the current group is the any group and there are no
     ''' behaviors in that group) then one is uniformly selected from all behaviors. If there are no behaviors, an exception is thrown.
     ''' </param>
-    Private Sub SetBehaviorInternal(Optional suggested As Behavior = Nothing)
+    ''' <param name="speak">Indicates if the start line for the behavior should be spoken, if one exists.</param>
+    Private Sub SetBehaviorInternal(Optional suggested As Behavior = Nothing, Optional speak As Boolean = False)
         _followTarget = Nothing
         _destination = Nothing
         _movementWithoutDestinationNeeded = True
@@ -2283,6 +2282,8 @@ Public Class Pony
         Next
         _effectsToManuallyExpire.Clear()
         _effectBasesToRepeat.Clear()
+
+        If speak AndAlso _currentBehavior.StartLine IsNot Nothing Then SpeakInternal(_currentBehavior.StartLine)
     End Sub
 
     ''' <summary>
@@ -3035,7 +3036,7 @@ Public Class Pony
         _currentInteraction = interaction
         interaction.Initiator = Me
         Dim randomBehaviorName = _behaviorsAllowed.RandomElement()
-        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = randomBehaviorName))
+        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = randomBehaviorName), True)
 
         Select Case interaction.Base.Activation
             Case TargetActivation.All
@@ -3062,7 +3063,7 @@ Public Class Pony
         AddUpdateRecord("Starting interaction as target ", interaction.Base.Name)
         _currentInteraction = interaction
         _currentInteraction.InvolvedTargets.Add(Me)
-        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = behaviorName))
+        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = behaviorName), True)
     End Sub
 
     ''' <summary>
