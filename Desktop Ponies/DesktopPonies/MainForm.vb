@@ -19,7 +19,6 @@ Public Class MainForm
 
     Private animator As DesktopPonyAnimator
     Private ponyViewer As ISpriteCollectionView
-    Private ReadOnly startupPonies As New List(Of Pony)()
     Private ponies As PonyCollection
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
 
@@ -394,8 +393,7 @@ Public Class MainForm
             Me.Visible = False
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
-                    startupPonies.Clear()
-                    PonyStartup(Function() New Game.GameAnimator(ponyViewer, startupPonies, ponies, gameForm.PonyContext, gameForm.Game))
+                    PonyStartup(Function() New Game.GameAnimator(ponyViewer, {}, ponies, gameForm.PonyContext, gameForm.Game), {})
                     gameForm.Game.Setup()
                     animator.Start()
                 Else
@@ -725,7 +723,7 @@ Public Class MainForm
             End If
 
             ' Create the initial set of ponies to start.
-            startupPonies.Clear()
+            Dim startupPonies As New List(Of Pony)()
             Dim context = New PonyContext()
             Dim randomPoniesWanted As Integer
             For Each ponyBaseWanted In ponyBasesWanted
@@ -754,7 +752,7 @@ Public Class MainForm
                 Next
             End If
 
-            PonyStartup(Function() New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context))
+            PonyStartup(Function() New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context), startupPonies)
             LoadPoniesAsyncEnd(False)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
@@ -765,7 +763,7 @@ Public Class MainForm
         End Try
     End Sub
 
-    Private Sub PonyStartup(createAnimator As Func(Of DesktopPonyAnimator))
+    Private Sub PonyStartup(createAnimator As Func(Of DesktopPonyAnimator), startupPonies As IEnumerable(Of Pony))
         If EvilGlobals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
 
         AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
