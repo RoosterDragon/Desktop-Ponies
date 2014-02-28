@@ -398,13 +398,45 @@
             string solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
             string solutionParentDirectoryLower = solutionParentDirectory.ToLowerInvariant();
             string cleanedDirectory = new string('_', solutionParentDirectory.Length);
+            var encoding = System.Text.Encoding.UTF8;
+            byte[] solutionParentDirectoryEncoded = encoding.GetBytes(solutionParentDirectory);
+            byte[] solutionParentDirectoryLowerEncoded = encoding.GetBytes(solutionParentDirectoryLower);
+            byte[] cleanedDirectoryEncoded = encoding.GetBytes(cleanedDirectory);
             foreach (var fileName in Directory.EnumerateFiles(sourceDirectory, "*.pdb"))
             {
-                string contents = File.ReadAllText(fileName);
-                contents = contents.Replace(solutionParentDirectory, cleanedDirectory);
-                contents = contents.Replace(solutionParentDirectoryLower, cleanedDirectory);
-                File.WriteAllText(fileName, contents);
+                byte[] contents = File.ReadAllBytes(fileName);
+                contents = Replace(contents, solutionParentDirectoryEncoded, cleanedDirectoryEncoded);
+                contents = Replace(contents, solutionParentDirectoryLowerEncoded, cleanedDirectoryEncoded);
+                File.WriteAllBytes(fileName, contents);
             }
+        }
+
+        private static byte[] Replace(byte[] source, byte[] oldValue, byte[] newValue)
+        {
+            List<byte> destination = new List<byte>(source.Length);
+            int contentsIndex = 0;
+            int nextMatch;
+            while ((nextMatch = IndexOf(source, oldValue, contentsIndex)) != -1)
+            {
+                destination.AddRange(source.Skip(contentsIndex).Take(nextMatch - contentsIndex));
+                destination.AddRange(newValue);
+                contentsIndex = nextMatch + oldValue.Length;
+            }
+            destination.AddRange(source.Skip(contentsIndex));
+            return destination.ToArray();
+        }
+
+        private static int IndexOf(byte[] source, byte[] value, int startIndex)
+        {
+            for (int sourceIndex = startIndex; sourceIndex < source.Length - value.Length; sourceIndex++)
+            {
+                int src = sourceIndex;
+                int val = 0;
+                while (source[src++] == value[val++] && val < value.Length) { }
+                if (val >= value.Length)
+                    return sourceIndex;
+            }
+            return -1;
         }
 
         private static void PackageReleaseFiles(string sourceDirectory, string destinationDirectory, string version)
