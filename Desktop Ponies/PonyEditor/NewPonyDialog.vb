@@ -43,7 +43,8 @@ Public Class NewPonyDialog
 
         For Each ponyBase In _ponies.Bases
             If String.Equals(ponyBase.Directory, newName, StringComparison.OrdinalIgnoreCase) Then
-                MsgBox("A pony with this name already exists!  Please select another name or rename the other pony.")
+                MessageBox.Show(Me, "A pony with this name already exists! Please select another name or rename the other pony first.",
+                                "Duplicate Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return False
             End If
         Next

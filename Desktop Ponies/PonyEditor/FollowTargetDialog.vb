@@ -50,9 +50,6 @@
             StoppedComboBox.SelectedItem = behaviorToChange.FollowStoppedBehaviorName
         End If
 
-        PointX.Value = behaviorToChange.OriginalDestinationXCoord
-        PointY.Value = behaviorToChange.OriginalDestinationYCoord
-
         Select Case behaviorToChange.TargetMode
             Case TargetMode.Pony
                 FollowOption.Checked = True
@@ -62,6 +59,9 @@
                 NoTargetOption.Checked = True
                 ponyThumbnail = Nothing
         End Select
+
+        PointX.Value = behaviorToChange.OriginalDestinationXCoord
+        PointY.Value = behaviorToChange.OriginalDestinationYCoord
 
         OffsetTypeFixedOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Fixed
         OffsetTypeMirrorOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Mirror

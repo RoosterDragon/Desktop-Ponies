@@ -9,9 +9,11 @@ Public Class NewBehaviorDialog
     Dim right_image_path As String = ""
 
     Private _editor As PonyEditor
+    Private newBehavior As Behavior
     Public Sub New(editor As PonyEditor)
         InitializeComponent()
         _editor = editor
+        newBehavior = New Behavior(_editor.CurrentBase)
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -106,28 +108,22 @@ Public Class NewBehaviorDialog
 
         If end_line = "None" Then end_line = ""
 
-        _editor.CurrentBase.AddBehavior(NameTextbox.Text,
-                                             chance / 100,
-                                             maxDuration,
-                                             minDuration,
-                                             speed,
-                                             right_image_path,
-                                             left_image_path,
-                                             AllowedMovesFromString(DirectCast(Movement_Combobox.SelectedItem, String)),
-                                             linked_behavior,
-                                             start_line,
-                                             end_line,
-                                             "",
-                                             "",
-                                             skip,
-                                             follow_x,
-                                             follow_y,
-                                             follow_name,
-                                             False,
-                                             Nothing,
-                                             Nothing,
-                                             DontRepeat_CheckBox.Checked,
-                                             CInt(Group_Numberbox.Value))
+        newBehavior.Name = NameTextbox.Text
+        newBehavior.Chance = chance / 100
+        newBehavior.MinDuration = minDuration
+        newBehavior.MaxDuration = maxDuration
+        newBehavior.Speed = speed
+        newBehavior.LeftImage.Path = left_image_path
+        newBehavior.RightImage.Path = right_image_path
+        newBehavior.AllowedMovement = AllowedMovesFromString(DirectCast(Movement_Combobox.SelectedItem, String))
+        newBehavior.LinkedBehaviorName = linked_behavior
+        newBehavior.StartLineName = start_line
+        newBehavior.EndLineName = end_line
+        newBehavior.Skip = skip
+        newBehavior.DoNotRepeatImageAnimations = DontRepeat_CheckBox.Checked
+        newBehavior.Group = CInt(Group_Numberbox.Value)
+
+        _editor.CurrentBase.Behaviors.Add(newBehavior)
 
         DialogResult = Windows.Forms.DialogResult.OK
         Me.Close()
@@ -180,7 +176,7 @@ Public Class NewBehaviorDialog
 
         End With
 
-        Follow_Box.Text = "None"
+        Follow_Box.Text = "[None]"
 
     End Sub
 
@@ -241,58 +237,40 @@ Public Class NewBehaviorDialog
     End Sub
 
     Private Sub SetFollow_Button_Click(sender As Object, e As EventArgs) Handles SetFollow_Button.Click
-
-        Dim new_behavior As New Behavior(_editor.CurrentBase)
-
-        Using dialog = New FollowTargetDialog(new_behavior)
+        Using dialog = New FollowTargetDialog(newBehavior)
             dialog.ShowDialog(Me)
         End Using
 
-        If new_behavior.OriginalFollowTargetName <> "" Then
-            follow_name = new_behavior.OriginalFollowTargetName
-        Else
-            If new_behavior.OriginalDestinationXCoord <> 0 AndAlso new_behavior.OriginalDestinationYCoord <> 0 Then
-                follow_name = new_behavior.OriginalDestinationXCoord & " , " & new_behavior.OriginalDestinationYCoord
-            End If
-        End If
-
-        Follow_Box.Text = follow_name
-        follow_name = new_behavior.OriginalFollowTargetName
-        follow_x = new_behavior.OriginalDestinationXCoord
-        follow_y = new_behavior.OriginalDestinationYCoord
+        Follow_Box.Text = If(newBehavior.TargetMode = TargetMode.Pony, newBehavior.OriginalFollowTargetName,
+                             If(newBehavior.TargetMode = TargetMode.Point, New Vector2(newBehavior.OriginalDestinationXCoord,
+                                                                                       newBehavior.OriginalDestinationYCoord).ToString(),
+                                                                               "[None]"))
 
     End Sub
 
-    Friend Shared Function GetGifTotalRuntime(image As Image) As Double
-
+    Private Shared Function GetGifTotalRuntime(image As Image) As Double
         Try
-            Dim gif_dimensions = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))
-            Dim gif_framecount = image.GetFrameCount(gif_dimensions)
+            Dim dimension = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))
+            Dim frameCount = image.GetFrameCount(dimension)
 
-            Dim PropertyTagFrameDelay As Integer = &H5100 '"from gdiplugimaging.h"
+            Const PropertyTagFrameDelay As Integer = &H5100 ' From gdiplugimaging.h
+            Dim frameDelaysItem = image.GetPropertyItem(PropertyTagFrameDelay)
+            Dim frameDelaysItemValue = frameDelaysItem.Value
 
-            Dim propertyitem = image.GetPropertyItem(PropertyTagFrameDelay)
-
-            Dim bytes() = propertyitem.Value
-
-            Dim delays(gif_framecount) As Integer
-
-            For frame = 0 To gif_framecount - 1
-                delays(frame) = BitConverter.ToInt32(bytes, frame * 4)
+            Dim delays(frameCount) As Integer
+            For frame = 0 To frameCount - 1
+                delays(frame) = BitConverter.ToInt32(frameDelaysItemValue, frame * 4)
             Next
 
-            Dim total_delay As Integer = 0
+            Dim totalDelay = 0
             For Each delay In delays
-                total_delay += delay
+                totalDelay += delay
             Next
 
-            Return total_delay / 100
-
+            Return totalDelay / 100
         Catch ex As Exception
-
-            'could not get timing info.
+            ' Could not get timing info.
             Return 0
-
         End Try
     End Function
 

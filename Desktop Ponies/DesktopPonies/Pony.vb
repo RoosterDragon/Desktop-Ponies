@@ -391,67 +391,6 @@ Public Class PonyBase
         Return Nothing
     End Function
 
-    Public Sub AddBehavior(name As CaseInsensitiveString, chance As Double,
-                       maxDuration As Double, minDuration As Double, speed As Double,
-                       rightImagePath As String, leftImagePath As String,
-                       allowedMoves As AllowedMoves, linkedBehaviorName As CaseInsensitiveString,
-                       startLineName As CaseInsensitiveString, endLineName As CaseInsensitiveString,
-                       followStoppedBehaviorName As CaseInsensitiveString,
-                       followMovingBehaviorName As CaseInsensitiveString,
-                       Optional skip As Boolean = False,
-                       Optional xCoord As Integer = Nothing, Optional yCoord As Integer = Nothing,
-                       Optional followObjectName As String = "",
-                       Optional autoSelectImagesOnFollow As Boolean = True,
-                       Optional rightImageCenter As Point = Nothing, Optional leftImageCenter As Point = Nothing,
-                       Optional doNotRepeatImageAnimations As Boolean = False, Optional group As Integer = 0)
-
-        Dim newBehavior As New Behavior(Me)
-
-        If Not File.Exists(rightImagePath) Then
-            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & rightImagePath)
-        End If
-
-        If Not File.Exists(leftImagePath) Then
-            Throw New FileNotFoundException("Image file does not exists for behavior " & name & " for pony " & Me.Directory & ". Path: " & leftImagePath)
-        End If
-
-        newBehavior.Name = name
-        newBehavior.Chance = chance
-        newBehavior.MaxDuration = maxDuration
-        newBehavior.MinDuration = minDuration
-        newBehavior.Speed = speed
-        newBehavior.AllowedMovement = allowedMoves
-        newBehavior.DoNotRepeatImageAnimations = doNotRepeatImageAnimations
-        newBehavior.StartLineName = startLineName
-        newBehavior.EndLineName = endLineName
-        newBehavior.Group = group
-        newBehavior.Skip = skip
-
-        'These coordinates are either a position on the screen to go to, if no object to follow is specified,
-        'or, the offset from the center of the object to go to (upper left, below, etc)
-        newBehavior.AutoSelectImagesOnFollow = autoSelectImagesOnFollow
-
-        'When the pony if off-screen we overwrite the follow parameters to get them on-screen again.
-        'we save the original parameters here.
-        newBehavior.OriginalDestinationXCoord = xCoord
-        newBehavior.OriginalDestinationYCoord = yCoord
-        newBehavior.OriginalFollowTargetName = followObjectName
-
-        newBehavior.FollowMovingBehaviorName = followMovingBehaviorName
-        newBehavior.FollowStoppedBehaviorName = followStoppedBehaviorName
-
-        newBehavior.LinkedBehaviorName = linkedBehaviorName
-
-        newBehavior.LeftImage.Path = leftImagePath
-        newBehavior.RightImage.Path = rightImagePath
-
-        newBehavior.RightImage.CustomCenter = If(rightImageCenter = Point.Empty, Nothing, rightImageCenter)
-        newBehavior.LeftImage.CustomCenter = If(leftImageCenter = Point.Empty, Nothing, leftImageCenter)
-
-        Behaviors.Add(newBehavior)
-
-    End Sub
-
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
         Dim configFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)

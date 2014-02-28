@@ -211,6 +211,7 @@ Public Class PonyEditor
             If alreadyUpdating Then Exit Sub
 
             If PreviewPony IsNot Nothing Then editorAnimator.RemoveSprite(PreviewPony)
+            _previewPony = Nothing
             If CurrentBase.Behaviors.Any() Then
                 _previewPony = New Pony(context, CurrentBase)
                 editorAnimator.AddPony(PreviewPony)
@@ -1034,8 +1035,7 @@ Public Class PonyEditor
 
     Private Sub NewBehaviorButton_Click(sender As Object, e As EventArgs) Handles NewBehaviorButton.Click
         Try
-
-            If IsNothing(PreviewPony) Then
+            If CurrentBase Is Nothing Then
                 MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
@@ -1050,6 +1050,7 @@ Public Class PonyEditor
 
             If addedNew Then
                 If CurrentBase.Behaviors.Count = 1 Then
+                    _previewPony = New Pony(context, CurrentBase)
                     editorAnimator.AddPony(PreviewPony)
                     UpdatePreviewListImage()
                 End If
@@ -1067,7 +1068,7 @@ Public Class PonyEditor
 
     Private Sub NewSpeechButton_Click(sender As Object, e As EventArgs) Handles NewSpeechButton.Click
         Try
-            If IsNothing(PreviewPony) Then
+            If CurrentBase Is Nothing Then
                 MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
@@ -1091,8 +1092,7 @@ Public Class PonyEditor
 
     Private Sub NewEffectButton_Click(sender As Object, e As EventArgs) Handles NewEffectButton.Click
         Try
-
-            If IsNothing(PreviewPony) Then
+            If CurrentBase Is Nothing Then
                 MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
@@ -1116,8 +1116,7 @@ Public Class PonyEditor
 
     Private Sub NewInteractionButton_Click(sender As Object, e As EventArgs) Handles NewInteractionButton.Click
         Try
-
-            If IsNothing(PreviewPony) Then
+            If CurrentBase Is Nothing Then
                 MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Exit Sub
@@ -1450,8 +1449,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
-
-        If IsNothing(PreviewPony) Then
+        If CurrentBase Is Nothing Then
             MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
@@ -1466,7 +1464,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub ImagesButton_Click(sender As Object, e As EventArgs) Handles ImagesButton.Click
-        If PreviewPony Is Nothing Then
+        If CurrentBase Is Nothing Then
             MessageBox.Show(Me, "Select a pony or create a new one first.",
                                 "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Else
