@@ -231,7 +231,7 @@ Public MustInherit Class PonyAnimator
         Sort(ZOrderer)
         If EvilGlobals.DirectXSoundAvailable Then
             PlaySounds()
-            CleanupSounds()
+            CleanupSounds(False)
         End If
     End Sub
 
@@ -307,12 +307,13 @@ Public MustInherit Class PonyAnimator
         Next
     End Sub
 
-    Private Sub CleanupSounds()
+    Private Sub CleanupSounds(force As Boolean)
         Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
 
         For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In activeSounds
-            If sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
+            If force OrElse sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
                 sound.CurrentPosition >= sound.Duration Then
+                sound.StopWhenReady()
                 sound.Dispose()
                 If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
                 soundsToRemove.AddLast(sound)
@@ -361,6 +362,7 @@ Public MustInherit Class PonyAnimator
 
     Public Overrides Sub Finish()
         If Not Disposed Then
+            CleanupSounds(True)
             RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
             RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
             RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
