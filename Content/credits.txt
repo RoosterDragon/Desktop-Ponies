@@ -722,6 +722,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Thunderlane
 * fanofetcetera
 
+#### Trenderhoof
+* Bot-chan
+
 #### Trixie
 * Yamino [Sit, Stand, TrixieFireworks, Walk]
 * humle [Fireworks]
