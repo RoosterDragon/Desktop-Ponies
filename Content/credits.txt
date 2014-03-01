@@ -659,6 +659,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sir Colton Vines
 * Anonycat
 
+#### Slendermane
+* Bot-chan
+
 #### Snails
 * Anonycat
 
