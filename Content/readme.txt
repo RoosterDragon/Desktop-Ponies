@@ -68,6 +68,14 @@ Change Log
 
 Latest changes:
 
+v1.45:
+- Added Slendermane and Trenderhoof by Bot-chan.
+- Improve several aspects of how ponies behave.
+- When returning to the menu, any sounds playing will stop immediately.
+- Fix editor not being able to create a new pony since 1.44.
+- Fix pony editor being hidden when a pony is first selected since 1.44.
+- Fix a crash from 1.44 that would occur when games ended.
+
 v1.44:
 - Added Nurse Snowheart, Nurse Sweetheart, Fleetfoot, Cheese Sandwich and the Power Ponies by Bot-chan.
 - Added Ms Harshwhinny by RoboKitty.
