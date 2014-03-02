@@ -264,6 +264,7 @@ Public MustInherit Class PonyAnimator
 
     Private Sub PlaySounds()
         ' Sound must be enabled for the mode we are in.
+        If Disposed Then Return
         If Not Options.SoundEnabled Then Exit Sub
         If EvilGlobals.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
 
@@ -311,11 +312,10 @@ Public MustInherit Class PonyAnimator
         Dim soundsToRemove As LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio) = Nothing
 
         For Each sound As Microsoft.DirectX.AudioVideoPlayback.Audio In activeSounds
-            If force OrElse sound.State = Microsoft.DirectX.AudioVideoPlayback.StateFlags.Paused OrElse
-                sound.CurrentPosition >= sound.Duration Then
+            If force OrElse sound.CurrentPosition >= sound.Duration Then
                 sound.StopWhenReady()
                 sound.Dispose()
-                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)
+                If soundsToRemove Is Nothing Then soundsToRemove = New LinkedList(Of Microsoft.DirectX.AudioVideoPlayback.Audio)()
                 soundsToRemove.AddLast(sound)
             End If
         Next
@@ -361,8 +361,8 @@ Public MustInherit Class PonyAnimator
     End Sub
 
     Public Overrides Sub Finish()
-        If Not Disposed Then
-            CleanupSounds(True)
+        Dim alreadyDisposed = Disposed
+        If Not alreadyDisposed Then
             RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
             RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
             RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
@@ -373,6 +373,7 @@ Public MustInherit Class PonyAnimator
             Next
         End If
         MyBase.Finish()
+        If Not alreadyDisposed Then CleanupSounds(True)
     End Sub
 
     Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)
