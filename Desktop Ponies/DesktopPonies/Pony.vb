@@ -1864,6 +1864,7 @@ Public Class Pony
         _currentTime = startTime
         _lastUpdateTime = startTime
         SetBehaviorInternal(Nothing, True)
+        StartEffects()
         Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
         _location = currentImage.Center * Context.ScaleFactor +
             New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
