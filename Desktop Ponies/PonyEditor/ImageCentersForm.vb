@@ -31,6 +31,7 @@ Public Class ImageCentersForm
     Private base As PonyBase
     Public Sub New(ponyBase As PonyBase)
         base = Argument.EnsureNotNull(ponyBase, "ponyBase")
+        If base.Behaviors.Count = 0 Then Throw New ArgumentException("ponyBase must contain at least one behavior.", "ponyBase")
         InitializeComponent()
         Icon = My.Resources.Twilight
         Text = "Image Centering for " & base.Directory

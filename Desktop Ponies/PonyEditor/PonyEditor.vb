@@ -1476,10 +1476,15 @@ Public Class PonyEditor
         HidePony()
         ImagesContextMenu.Hide()
         If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
-            Using form = New ImageCentersForm(CurrentBase)
-                form.ShowDialog(Me)
-            End Using
-            hasSaved = False
+            If CurrentBase.Behaviors.Count = 0 Then
+                MessageBox.Show(Me, "You need to create some behaviors before you can set up image centers.",
+                                "No Behaviors", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Else
+                Using form = New ImageCentersForm(CurrentBase)
+                    form.ShowDialog(Me)
+                End Using
+                hasSaved = False
+            End If
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(
                          Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory))
