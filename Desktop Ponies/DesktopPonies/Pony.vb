@@ -451,6 +451,19 @@ Public Class PonyBase
     End Sub
 
     Private Shared Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
+        Try
+            File.OpenRead(tempFileName).Dispose()
+        Catch ex As Exception
+            Throw New ArgumentException(tempFileName & " is an invalid path or the file at that path cannot be opened for reading.",
+                                        "tempFileName", ex)
+        End Try
+        Try
+            File.OpenWrite(destinationFileName).Dispose()
+        Catch ex As Exception
+            Throw New ArgumentException(destinationFileName & " is an invalid path or the file at that path cannot be opened for writing.",
+                                        "destinationFileName", ex)
+        End Try
+
         ' File.Replace cannot be used across different partitions - we must move the temporary file to the same partition first.
         ' We can skip this step on Windows if the root drive is the same, but on Mac/Unix it's easiest to just blindly do the move.
         ' The disadvantage of making the move is that the temporary file might get left behind in our destination directory if something
