@@ -658,7 +658,7 @@ Public Class PonyEditor
                             End If
                         Next
                         behavior.Name = newValue
-                        BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = newValue
+                        BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = behavior.Name
 
                     Case colBehaviorChance.Index
                         behavior.Chance = Double.Parse(
@@ -802,7 +802,7 @@ Public Class PonyEditor
                         Next
 
                         effect.Name = newValue
-                        EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = newValue
+                        EffectsGrid.Rows(e.RowIndex).Cells(colEffectOriginalName.Index).Value = effect.Name
 
                     Case colEffectBehavior.Index
                         effect.BehaviorName = newValue
@@ -874,7 +874,7 @@ Public Class PonyEditor
                             End If
                         Next
                         speech.Name = newValue
-                        SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value = newValue
+                        SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value = speech.Name
 
                     Case colSpeechText.Index
                         speech.Text = newValue
