@@ -287,23 +287,24 @@ Public MustInherit Class PonyAnimator
                 End If
             End If
 
+            Dim audio As Microsoft.DirectX.AudioVideoPlayback.Audio = Nothing
             Try
-                ' If you get a MDA warning about loader locking - you'll just have to disable that exception message.  
-                ' Apparently it is a bug with DirectX that only occurs with Visual Studio...
-                ' We use DirectX now so that we can use MP3 instead of WAV files
-                Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(soundfulSprite.SoundPath)
+                audio = New Microsoft.DirectX.AudioVideoPlayback.Audio(soundfulSprite.SoundPath)
                 ' Volume is between -10000 and 0, with 0 being the loudest.
                 audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
                 audio.Play()
-
-                activeSounds.Add(audio)
-                If Options.SoundSingleChannelOnly Then
-                    globalSoundEnd = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
-                Else
-                    soundEndBySprite(soundfulSprite) = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
-                End If
             Catch ex As Exception
                 ' Swallow any exception here. The sound file may be missing, inaccessible, not a playable format, etc.
+                If audio IsNot Nothing Then audio.Dispose()
+            Finally
+                If audio IsNot Nothing AndAlso Not audio.Disposed Then
+                    activeSounds.Add(audio)
+                    If Options.SoundSingleChannelOnly Then
+                        globalSoundEnd = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                    Else
+                        soundEndBySprite(soundfulSprite) = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                    End If
+                End If
             End Try
         Next
     End Sub
