@@ -1865,12 +1865,10 @@ Public Class Pony
         _currentTime = startTime
         _lastUpdateTime = startTime
         SetBehaviorInternal(Nothing, True)
-        StartEffects()
         Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
         _location = currentImage.Center * Context.ScaleFactor +
             New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
-        EnsureWithinBounds(True)
-        UpdateRegion()
+        UpdateState(True, True)
     End Sub
 
     ''' <summary>
@@ -1905,7 +1903,8 @@ Public Class Pony
         SendToCustomDestination("override", DestinationOverride, _atDestinationOverride)
         HandleFollowTargetOverride()
         StartInteractionAtRandom()
-        If _behaviorDesiredDuration < _currentTime - _behaviorStartTime Then
+        Dim behaviorExpired = _behaviorDesiredDuration < _currentTime - _behaviorStartTime
+        If behaviorExpired Then
             AddUpdateRecord("Expiring behavior.")
             ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
             If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False, False)
@@ -1915,17 +1914,9 @@ Public Class Pony
                 Rng.NextDouble() < Context.RandomSpeechChance Then
                 SpeakInternal()
             End If
-            StartEffects()
         End If
         If _currentTime - _speechStartTime > _speechDuration Then _currentSpeechText = Nothing
-        If _followTarget IsNot Nothing AndAlso _followTarget._expired Then _followTarget = Nothing
-        EnsureWithinBounds(Context.TeleportationEnabled)
-        UpdateDestination()
-        UpdateMovement()
-        SetVisualOverrideBehavior()
-        UpdateLocation()
-        UpdateRegion()
-        RepeatEffects()
+        UpdateState(Context.TeleportationEnabled, behaviorExpired)
     End Sub
 
     ''' <summary>
@@ -2181,7 +2172,7 @@ Public Class Pony
         AddUpdateRecord("SetBehavior called externally")
         EndInteraction(True, False)
         SetBehaviorInternal(suggested, speak)
-        StartEffects()
+        UpdateState(Context.TeleportationEnabled, True)
     End Sub
 
     ''' <summary>
@@ -2285,6 +2276,26 @@ Public Class Pony
         Next
         Return Nothing
     End Function
+
+    ''' <summary>
+    ''' Updates key internal state after a behavior change. If the follow target has expired it will be cleared. The pony will be checked
+    ''' to ensure it is within bounds. The destination and movement will be updated. The visual override behavior will be set. The location
+    ''' will be updated and region refreshed. Effects will be started as directed and repeated as required.
+    ''' </summary>
+    ''' <param name="teleportWhenOutOfBounds">When a pony is out of bounds, indicates if a pony should be teleport back within bounds
+    ''' immediately, else it will walk back within bounds.</param>
+    ''' <param name="startEffectsNow">Indicates if any effects for the current behavior should be started now.</param>
+    Private Sub UpdateState(teleportWhenOutOfBounds As Boolean, startEffectsNow As Boolean)
+        If _followTarget IsNot Nothing AndAlso _followTarget._expired Then _followTarget = Nothing
+        EnsureWithinBounds(teleportWhenOutOfBounds)
+        UpdateDestination()
+        UpdateMovement()
+        SetVisualOverrideBehavior()
+        UpdateLocation()
+        UpdateRegion()
+        If startEffectsNow Then StartEffects()
+        RepeatEffects()
+    End Sub
 
     ''' <summary>
     ''' Sets an actual pony to follow, based on the desired target. If an interaction is running, the initiator will prefer to follow any
