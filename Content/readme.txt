@@ -68,6 +68,12 @@ Change Log
 
 Latest changes:
 
+v1.46:
+- Added Fili-Second gallop animation by Bot-chan.
+- Fixed a bug in the editor that was preventing renaming of behaviors, effects and speeches.
+- Improved how ponies react when at the screen boundary.
+- Fixed initial effect sometimes deploying in the incorrect location.
+
 v1.45:
 - Added Slendermane and Trenderhoof by Bot-chan.
 - Improve several aspects of how ponies behave.
