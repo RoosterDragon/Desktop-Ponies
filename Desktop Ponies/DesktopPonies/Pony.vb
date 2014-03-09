@@ -1374,6 +1374,10 @@ Public Class Pony
     ''' </summary>
     Private _visualOverrideBehavior As Behavior
     ''' <summary>
+    ''' Indicates if the current behavior has been changed during this step.
+    ''' </summary>
+    Private _behaviorChangedDuringStep As Boolean
+    ''' <summary>
     ''' Indicates if the pony is facing left or right.
     ''' </summary>
     Private _facingRight As Boolean
@@ -1505,15 +1509,15 @@ Public Class Pony
     ''' <summary>
     ''' A predicate that unconditionally returns true regardless of the behavior.
     ''' </summary>
-    Private Shared truthPredicate As Predicate(Of Behavior) = Function(behavior) True
+    Private Shared truthPredicate As Func(Of Behavior, Boolean) = Function(behavior) True
     ''' <summary>
     ''' A predicate that filters for behaviors that do not move.
     ''' </summary>
-    Private Shared stationaryBehaviorPredicate As Predicate(Of Behavior) = AddressOf IsStationaryBehavior
+    Private Shared stationaryBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsStationaryBehavior
     ''' <summary>
     ''' A predicate that filters for behaviors that move.
     ''' </summary>
-    Private Shared movingBehaviorPredicate As Predicate(Of Behavior) = AddressOf IsMovingBehavior
+    Private Shared movingBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsMovingBehavior
     ''' <summary>
     ''' Determines if a behavior is stationary.
     ''' </summary>
@@ -1530,22 +1534,6 @@ Public Class Pony
     Private Shared Function IsMovingBehavior(behavior As Behavior) As Boolean
         Return behavior.SpeedInPixelsPerSecond > 0
     End Function
-    ''' <summary>
-    ''' Array containing the stationary behavior predicate.
-    ''' </summary>
-    Private Shared stationaryBehaviorPredicateInArray As Predicate(Of Behavior)() = {stationaryBehaviorPredicate}
-    ''' <summary>
-    ''' Array containing the moving behavior predicate.
-    ''' </summary>
-    Private Shared movingBehaviorPredicateInArray As Predicate(Of Behavior)() = {movingBehaviorPredicate}
-    ''' <summary>
-    ''' Array containing the stationary behavior and then the truth predicate.
-    ''' </summary>
-    Private Shared stationaryBehaviorAndTruthPredicateInArray As Predicate(Of Behavior)() = {stationaryBehaviorPredicate, truthPredicate}
-    ''' <summary>
-    ''' Array containing the moving behavior and then the truth predicate.
-    ''' </summary>
-    Private Shared movingBehaviorAndTruthPredicateInArray As Predicate(Of Behavior)() = {movingBehaviorPredicate, truthPredicate}
     ''' <summary>
     ''' A predicate that filters behaviors that are in the any group or current behavior group, allowed for use at random and that have a
     ''' reachable target.
@@ -1911,6 +1899,7 @@ Public Class Pony
         _currentTime += TimeSpan.FromMilliseconds(StepSize)
 
         _destination = Nothing
+        _behaviorChangedDuringStep = False
         HandleSleep()
         HandleMouseoverAndDrag()
         SendToCustomDestination("override", DestinationOverride, _atDestinationOverride)
@@ -2026,13 +2015,13 @@ Public Class Pony
             If nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse Not atCustomDestination.Value) Then
                 AddUpdateRecord("Entering stopped behavior for custom destination ", destinationDescription)
                 EndInteraction(True, False)
-                SetBehaviorInternal(GetBehaviorMatching(stationaryBehaviorAndTruthPredicateInArray))
+                SetBehaviorInternal(GetCandidateBehavior(stationaryBehaviorPredicate))
             ElseIf Not nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse atCustomDestination.Value) Then
                 AddUpdateRecord("Entering moving behavior for custom destination ", destinationDescription)
                 EndInteraction(True, False)
                 ' TODO: Match behavior chosen to speed override, if any.
                 ' TODO: Add a field for custom speed to allow pony to move around even if it lacks the ability?
-                SetBehaviorInternal(GetBehaviorMatching(movingBehaviorAndTruthPredicateInArray))
+                SetBehaviorInternal(GetCandidateBehavior(movingBehaviorPredicate))
             End If
             atCustomDestination = nowAtCustomDestination
             _destination = customDestination
@@ -2199,7 +2188,8 @@ Public Class Pony
     ''' Activates the suggested behavior, or else a random behavior. The current behavior, behavior start time, behavior desired duration
     ''' and follow target will be set. If an interaction was running, and there is no linked behavior for the current behavior, the
     ''' interaction is ended. The current interaction and interaction cool down are set in this case. Any effects for the last behavior
-    ''' tied to its duration will end, and any repeating effects no longer repeated. The movement without destination flag will be set.
+    ''' tied to its duration will end, and any repeating effects no longer repeated. The movement without destination flag will be set. The
+    ''' behavior set this step flag will be set.
     ''' </summary>
     ''' <param name="suggested">A behavior to activate, or null to choose one at random. A random behavior is uniformly selected from the
     ''' any group, or current behavior group. If there are no such behaviors (i.e. the current group is the any group and there are no
@@ -2210,8 +2200,9 @@ Public Class Pony
         _followTarget = Nothing
         _destination = Nothing
         _movementWithoutDestinationNeeded = True
+        _behaviorChangedDuringStep = True
 
-        _currentBehavior = If(suggested, GetRandomBehavior())
+        _currentBehavior = If(suggested, GetCandidateBehavior(Nothing))
         If _currentBehavior Is Nothing Then Throw New InvalidOperationException("There are no behaviors - cannot set one at random.")
 
         If suggested Is Nothing Then
@@ -2240,17 +2231,26 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Uniformly selects a random behavior from available candidate behaviors. The set of candidate behaviors are those allowed for use at
-    ''' random in the current behavior group that have a reachable target. If none match, the reachable target restriction is lifted, then
-    ''' the group restriction, and then the use at random restriction (meaning all behaviors are then candidates).
+    ''' Uniformly selects a random behavior from available candidate behaviors, optionally filtering candidate behaviors by another
+    ''' predicate. The set of candidate behaviors are those allowed for use at random in the current behavior group that have a reachable
+    ''' target. If none match, the reachable target restriction is lifted, then the group restriction, then the use at random restriction
+    ''' and finally the specified filtering function (meaning all behaviors are then candidates).
     ''' </summary>
+    ''' <param name="behaviorFilter">An optional predicate to further filter behaviors. If null then no filter is applied.</param>
     ''' <returns>A behavior selected uniformly from available candidates, or all behaviors if there are no available candidates, or null if
     ''' there are no behaviors.</returns>
-    Private Function GetRandomBehavior() As Behavior
-        Dim candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate).ToList()
-        If candidates.Count = 0 Then candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
-        If candidates.Count = 0 Then candidates = Base.Behaviors.Where(behaviorsAllowedAtRandomPredicate).ToList()
-        If candidates.Count = 0 Then candidates = Base.Behaviors
+    Private Function GetCandidateBehavior(behaviorFilter As Func(Of Behavior, Boolean)) As Behavior
+        If behaviorFilter Is Nothing Then behaviorFilter = truthPredicate
+        Dim candidates =
+            Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate).Where(behaviorFilter).ToList()
+        If candidates.Count = 0 Then candidates =
+            Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).Where(behaviorFilter).ToList()
+        If candidates.Count = 0 Then candidates =
+            Base.Behaviors.Where(behaviorsAllowedAtRandomPredicate).Where(behaviorFilter).ToList()
+        If candidates.Count = 0 Then candidates =
+            Base.Behaviors.Where(behaviorFilter).ToList()
+        If candidates.Count = 0 Then candidates =
+            Base.Behaviors
         If candidates.Count = 0 Then
             Return Nothing
         ElseIf candidates.Count = 1 Then
@@ -2356,9 +2356,13 @@ Public Class Pony
     ''' Thus, the images to use fall back to the current behavior.
     ''' </summary>
     Private Sub SetVisualOverrideBehavior()
-        _visualOverrideBehavior = Nothing
         If _followTarget IsNot Nothing OrElse _currentBehavior.TargetMode = TargetMode.Point Then
             Dim currentSpeed = _movement.Length()
+            If _visualOverrideBehavior IsNot Nothing AndAlso
+                (_visualOverrideBehavior.SpeedInPixelsPerSecond = 0 Xor currentSpeed = 0) Then
+                ' Clear the override if the speed no longer matches.
+                _visualOverrideBehavior = Nothing
+            End If
             If Not _currentBehavior.AutoSelectImagesOnFollow Then
                 If currentSpeed = 0 Then
                     _visualOverrideBehavior = _currentBehavior.FollowStoppedBehavior
@@ -2366,25 +2370,28 @@ Public Class Pony
                     _visualOverrideBehavior = _currentBehavior.FollowMovingBehavior
                 End If
             End If
-            ' TODO: Improve visual override matching - match by speed and maybe restrict to current group?
+            ' TODO: Need to handle the case where there are only moving or only stationary behaviors.
+            ' Currently the override behavior will be changed constantly in this degenerate case.
             If _visualOverrideBehavior Is Nothing Then
                 If currentSpeed = 0 Then
-                    _visualOverrideBehavior = GetBehaviorMatching(stationaryBehaviorPredicateInArray)
+                    _visualOverrideBehavior = GetCandidateBehavior(stationaryBehaviorPredicate)
                 Else
-                    _visualOverrideBehavior = GetBehaviorMatching(movingBehaviorPredicateInArray)
+                    _visualOverrideBehavior = GetCandidateBehavior(movingBehaviorPredicate)
                 End If
             End If
+        Else
+            _visualOverrideBehavior = Nothing
         End If
     End Sub
 
     ''' <summary>
-    ''' When a pony is not busy, ensures the pony is within the allowed area. If it is not it will be teleported within bounds if this is
-    ''' allowed, otherwise it will be given a custom destination to return it to the allowed area.
+    ''' When a pony is not busy or following a target, ensures the pony is within the allowed area. If it is not it will be teleported
+    ''' within bounds if this is allowed, otherwise it will be given a custom destination to return it to the allowed area.
     ''' </summary>
     ''' <param name="teleport">Indicates whether the pony should be teleported within bounds immediately, otherwise it will move normally
     ''' back within bounds.</param>
     Private Sub EnsureWithinBounds(teleport As Boolean)
-        If IsBusy Then Return
+        If IsBusy OrElse _followTarget IsNot Nothing Then Return
         Dim inRegionDestination = GetInRegionDestination()
         If teleport Then
             If inRegionDestination IsNot Nothing Then
@@ -2455,7 +2462,7 @@ Public Class Pony
             normalizeForSpeed = True
         ElseIf _movementWithoutDestinationNeeded Then
             ' Move freely based on current behavior with no defined destination.
-            SetMovementWithoutDestination()
+            SetMovementWithoutDestination(Not _behaviorChangedDuringStep)
             _movementWithoutDestinationNeeded = False
         End If
         ' Scale movement so the magnitude matches the desired speed.
@@ -2480,12 +2487,15 @@ Public Class Pony
 
     ''' <summary>
     ''' Sets the movement vector depending on the allowed moves and speed of the current behavior. The facing state will also be set
-    ''' randomly.
+    ''' randomly unless it is indicated the existing state should be preserved.
     ''' </summary>
-    Private Sub SetMovementWithoutDestination()
-        _movement = Vector2F.Zero
+    ''' <param name="preserveCurrentDirections">Indicates if the current facing state should be preserved when setting the movement vector.
+    ''' </param>
+    Private Sub SetMovementWithoutDestination(preserveCurrentDirections As Boolean)
         Dim speed = GetSpeedInPixelsPerSecond() / StepRate
-        If speed > 0 Then
+        If speed = 0 Then
+            _movement = Vector2F.Zero
+        Else
             Dim moves = _currentBehavior.AllowedMovement And AllowedMoves.All
             If moves > 0 Then
                 Dim movesList As New List(Of AllowedMoves)()
@@ -2493,6 +2503,8 @@ Public Class Pony
                 If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
                 If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
                 Dim selectedDirection = movesList.RandomElement()
+                Dim wasMovingRight = _movement.X > 0
+                Dim wasMovingDown = _movement.Y > 0
                 Select Case selectedDirection
                     Case AllowedMoves.HorizontalOnly
                         _movement = New Vector2F(CSng(speed), 0)
@@ -2501,9 +2513,14 @@ Public Class Pony
                     Case AllowedMoves.DiagonalOnly
                         _movement = New Vector2F(CSng(speed * Math.Sin(Math.PI / 4)), CSng(speed * Math.Cos(Math.PI / 4)))
                 End Select
-                _facingRight = Rng.NextDouble() < 0.5
-                If Not _facingRight Then _movement.X = -_movement.X
-                If Rng.NextDouble() < 0.5 Then _movement.Y = -_movement.Y
+                If preserveCurrentDirections Then
+                    If wasMovingRight Xor _movement.X > 0 Then _movement.X = -_movement.X
+                    If wasMovingDown Xor _movement.Y > 0 Then _movement.Y = -_movement.Y
+                Else
+                    _facingRight = Rng.NextDouble() < 0.5
+                    If Not _facingRight Then _movement.X = -_movement.X
+                    If Rng.NextDouble() < 0.5 Then _movement.Y = -_movement.Y
+                End If
             End If
         End If
     End Sub
