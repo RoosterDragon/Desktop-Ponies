@@ -373,7 +373,7 @@ Public MustInherit Class PonyAnimator
             Next
         End If
         MyBase.Finish()
-        If Not alreadyDisposed Then CleanupSounds(True)
+        If Not alreadyDisposed AndAlso EvilGlobals.DirectXSoundAvailable Then CleanupSounds(True)
     End Sub
 
     Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)
