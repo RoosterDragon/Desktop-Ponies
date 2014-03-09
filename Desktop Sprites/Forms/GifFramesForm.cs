@@ -84,7 +84,8 @@
             }
 
             ImageInfo.Text = string.Format(CultureInfo.CurrentCulture,
-                "Iterations: {0}  Size: {1}", gifImage.Iterations, gifImage.Size);
+                "Duration: {0:0.00s} Iterations: {1}  Size: {2}",
+                TimeSpan.FromMilliseconds(gifImage.Duration).TotalSeconds, gifImage.Iterations, gifImage.Size);
 
             ImmutableArray<GifFrame<BitmapFrame>> frames = gifImage.Frames;
             for (int i = 0; i < frames.Length; i++)
