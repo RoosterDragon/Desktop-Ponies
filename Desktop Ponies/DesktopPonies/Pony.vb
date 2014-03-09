@@ -2430,7 +2430,7 @@ Public Class Pony
             Return
         End If
         Dim offsetVector = New Vector2(_currentBehavior.OriginalDestinationXCoord, _currentBehavior.OriginalDestinationYCoord)
-        If _followTarget IsNot Nothing Then
+        If _followTarget IsNot Nothing AndAlso Not Single.IsNaN(_followTarget._location.X) Then
             ' Move to follow target.
             ' Here the offset represents a custom offset from the center of the target.
             If _currentBehavior.FollowOffset = FollowOffsetType.Mirror AndAlso
