@@ -3365,7 +3365,7 @@ Public Class Effect
                                               locationProvider(),
                                               sizeProvider(),
                                               Centering,
-                                              Options.ScaleFactor)
+                                              Context.ScaleFactor)
         ElseIf BeingDragged Then
             TopLeftLocation = _context.CursorLocation - New Vector2(CurrentImageSize) / 2
         End If
@@ -3437,8 +3437,8 @@ Public Class Effect
 
     Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
         Get
-            Dim width = CInt(CurrentImageSize.Width * Options.ScaleFactor)
-            Dim height = CInt(CurrentImageSize.Height * Options.ScaleFactor)
+            Dim width = CInt(CurrentImageSize.Width * Context.ScaleFactor)
+            Dim height = CInt(CurrentImageSize.Height * Context.ScaleFactor)
             Return New Rectangle(TopLeftLocation, New Size(width, height))
         End Get
     End Property
