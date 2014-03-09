@@ -2503,35 +2503,33 @@ Public Class Pony
     ''' <param name="preserveCurrentDirections">Indicates if the current facing state should be preserved when setting the movement vector.
     ''' </param>
     Private Sub SetMovementWithoutDestination(preserveCurrentDirections As Boolean)
+        Dim moves = _currentBehavior.AllowedMovement And AllowedMoves.All
         Dim speed = GetSpeedInPixelsPerSecond() / StepRate
-        If speed = 0 Then
+        If moves = AllowedMoves.None OrElse speed = 0 Then
             _movement = Vector2F.Zero
         Else
-            Dim moves = _currentBehavior.AllowedMovement And AllowedMoves.All
-            If moves > 0 Then
-                Dim movesList As New List(Of AllowedMoves)()
-                If (moves And AllowedMoves.HorizontalOnly) > 0 Then movesList.Add(AllowedMoves.HorizontalOnly)
-                If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
-                If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
-                Dim selectedDirection = movesList.RandomElement()
-                Dim wasMovingRight = _movement.X > 0
-                Dim wasMovingDown = _movement.Y > 0
-                Select Case selectedDirection
-                    Case AllowedMoves.HorizontalOnly
-                        _movement = New Vector2F(CSng(speed), 0)
-                    Case AllowedMoves.VerticalOnly
-                        _movement = New Vector2F(0, CSng(speed))
-                    Case AllowedMoves.DiagonalOnly
-                        _movement = New Vector2F(CSng(speed * Math.Sin(Math.PI / 4)), CSng(speed * Math.Cos(Math.PI / 4)))
-                End Select
-                If preserveCurrentDirections Then
-                    If wasMovingRight Xor _movement.X > 0 Then _movement.X = -_movement.X
-                    If wasMovingDown Xor _movement.Y > 0 Then _movement.Y = -_movement.Y
-                Else
-                    _facingRight = Rng.NextDouble() < 0.5
-                    If Not _facingRight Then _movement.X = -_movement.X
-                    If Rng.NextDouble() < 0.5 Then _movement.Y = -_movement.Y
-                End If
+            Dim movesList As New List(Of AllowedMoves)()
+            If (moves And AllowedMoves.HorizontalOnly) > 0 Then movesList.Add(AllowedMoves.HorizontalOnly)
+            If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
+            If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
+            Dim selectedDirection = movesList.RandomElement()
+            Dim wasMovingRight = _movement.X > 0
+            Dim wasMovingDown = _movement.Y > 0
+            Select Case selectedDirection
+                Case AllowedMoves.HorizontalOnly
+                    _movement = New Vector2F(CSng(speed), 0)
+                Case AllowedMoves.VerticalOnly
+                    _movement = New Vector2F(0, CSng(speed))
+                Case AllowedMoves.DiagonalOnly
+                    _movement = New Vector2F(CSng(speed * Math.Sin(Math.PI / 4)), CSng(speed * Math.Cos(Math.PI / 4)))
+            End Select
+            If preserveCurrentDirections Then
+                If wasMovingRight Xor _movement.X > 0 Then _movement.X = -_movement.X
+                If wasMovingDown Xor _movement.Y > 0 Then _movement.Y = -_movement.Y
+            Else
+                _facingRight = Rng.NextDouble() < 0.5
+                If Not _facingRight Then _movement.X = -_movement.X
+                If Rng.NextDouble() < 0.5 Then _movement.Y = -_movement.Y
             End If
         End If
     End Sub
