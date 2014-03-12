@@ -44,7 +44,7 @@ Public MustInherit Class PonyAnimator
             _manualControlPlayerTwo = value
         End Set
     End Property
-    Public Property AllowManualControl As Boolean
+    Public Property AllowManualControl As Boolean = True
 
     Private ReadOnly activeSounds As New List(Of Object)()
     Private globalSoundEnd As Date
