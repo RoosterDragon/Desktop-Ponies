@@ -13,7 +13,6 @@ Friend NotInheritable Class Program
         Else
             RunGtk()
         End If
-        Environment.Exit(0)
     End Sub
 
     Private Shared Sub RunWinForms()

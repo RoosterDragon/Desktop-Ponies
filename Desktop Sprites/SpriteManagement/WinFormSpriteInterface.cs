@@ -682,7 +682,7 @@
         /// <summary>
         /// Indicates if the form has begun the process of closing (or has closed).
         /// </summary>
-        private bool closing;
+        private volatile bool closing;
         /// <summary>
         /// Stores the images for each sprite as a series of
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>, indexed by filename.
@@ -1779,11 +1779,6 @@
             if (closing)
                 return;
             ApplicationInvoke(form.Close);
-            if (opened)
-            {
-                opened = false;
-                InterfaceClosed.Raise(this);
-            }
         }
 
         /// <summary>
@@ -1806,6 +1801,11 @@
         {
             Application.ExitThread();
             Dispose();
+            if (opened)
+            {
+                opened = false;
+                InterfaceClosed.Raise(this);
+            }
         }
 
         /// <summary>

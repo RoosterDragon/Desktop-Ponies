@@ -1739,7 +1739,6 @@
         public void Close()
         {
             Dispose();
-            InterfaceClosed.Raise(this);
         }
 
         /// <summary>
@@ -1772,6 +1771,7 @@
                     foreach (AnimatedImage<GtkFrame> image in images.InitializedValues)
                         image.Dispose();
                 }
+                InterfaceClosed.Raise(this);
             }
         }
     }
