@@ -1414,6 +1414,13 @@ Public Class Pony
     ''' Indicates when the pony may resume rebounding off of low priority bounds.
     ''' </summary>
     Private _reboundCooldownEndTime As TimeSpan
+    ''' <summary>
+    ''' Indicates if the pony is currently in the process of rebounding back into the containment region. This is required for when images
+    ''' are mirrored and the region the image occupies changes. The image may now extend outside the region, but the pony did rebound and
+    ''' thus is heading back into the region. Therefore, we will let them continue moving until they are back in the region, or their
+    ''' movement vector is changed in any way.
+    ''' </summary>
+    Private _reboundingIntoContainmentRegion As Boolean
 
     ''' <summary>
     ''' Minimum duration that must elapse after a speech ends before a random speech can be activated.
@@ -2280,7 +2287,8 @@ Public Class Pony
     ''' <summary>
     ''' Updates key internal state after a behavior change. If the follow target has expired it will be cleared. The pony will be checked
     ''' to ensure it is within bounds. The destination and movement will be updated. The visual override behavior will be set. The location
-    ''' will be updated and region refreshed. Effects will be started as directed and repeated as required.
+    ''' will be updated and region refreshed. Effects will be started as directed and repeated as required. The rebounding into containment
+    ''' region flag will be unset if the movement vector has changed.
     ''' </summary>
     ''' <param name="teleportWhenOutOfBounds">When a pony is out of bounds, indicates if a pony should be teleport back within bounds
     ''' immediately, else it will walk back within bounds.</param>
@@ -2289,7 +2297,9 @@ Public Class Pony
         If _followTarget IsNot Nothing AndAlso _followTarget._expired Then _followTarget = Nothing
         EnsureWithinBounds(teleportWhenOutOfBounds)
         UpdateDestination()
+        Dim oldMovement = _movement
         UpdateMovement()
+        If _movement <> oldMovement Then _reboundingIntoContainmentRegion = False
         SetVisualOverrideBehavior()
         UpdateLocation()
         UpdateRegion()
@@ -2396,13 +2406,14 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' When a pony is not busy or following a target, ensures the pony is within the allowed area. If it is not it will be teleported
-    ''' within bounds if this is allowed, otherwise it will be given a custom destination to return it to the allowed area.
+    ''' When a pony is not busy, already rebounding into the containment region or following a target, ensures the pony is within the
+    ''' allowed area. If it is not it will be teleported within bounds if this is allowed, otherwise it will be given a custom destination
+    ''' to return it to the allowed area.
     ''' </summary>
     ''' <param name="teleport">Indicates whether the pony should be teleported within bounds immediately, otherwise it will move normally
     ''' back within bounds.</param>
     Private Sub EnsureWithinBounds(teleport As Boolean)
-        If IsBusy OrElse _followTarget IsNot Nothing Then Return
+        If IsBusy OrElse _reboundingIntoContainmentRegion OrElse _followTarget IsNot Nothing Then Return
         Dim inRegionDestination = GetInRegionDestination()
         If teleport Then
             If inRegionDestination IsNot Nothing Then
@@ -2603,7 +2614,7 @@ Public Class Pony
     ''' the movement vector will be applied. When moving according to this vector, ponies may not stray entirely outside the context
     ''' boundary and will be teleported to its outer edge if they stray too far. If the are close enough to the boundary, rebounding off
     ''' other regions is considered. The movement vector and facing will be updated when teleporting or rebounding. The last step was in
-    ''' bounds value will be set.
+    ''' bounds value will be set. The rebounding into containment region flag will be unset if the pony is now in bounds.
     ''' </summary>
     Private Sub UpdateLocation()
         If _inDragState Then
@@ -2616,6 +2627,8 @@ Public Class Pony
         Dim currentRegion = regionF
         _lastStepWasInBounds =
             CType(Context.Region, RectangleF).Contains(currentRegion) AndAlso Not currentRegion.IntersectsWith(Context.ExclusionRegion)
+        ' If the pony is back in bounds, or no longer even intersecting the allowed area, we are no longer rebounding back within the area.
+        If _lastStepWasInBounds OrElse Not currentRegion.IntersectsWith(Context.Region) Then _reboundingIntoContainmentRegion = False
     End Sub
 
     ''' <summary>
@@ -2692,7 +2705,8 @@ Public Class Pony
             If rebounded Then _reboundCooldownEndTime = _currentTime + TimeSpan.FromSeconds(1)
         End If
         If _lastStepWasInBounds Then ReboundOutOfExclusionRegion(Context.ExclusionRegion, "exclusion region", True)
-        ReboundIntoContainmentRegion(Context.Region, "containment region")
+        Dim rebounding = ReboundIntoContainmentRegion(Context.Region, "containment region", Not _reboundingIntoContainmentRegion)
+        _reboundingIntoContainmentRegion = _reboundingIntoContainmentRegion OrElse rebounding
     End Sub
 
     ''' <summary>
@@ -2702,8 +2716,11 @@ Public Class Pony
     ''' </summary>
     ''' <param name="containmentRegion">The region the pony should be contained within.</param>
     ''' <param name="regionName">The name of the region the pony should be excluded from, for record purposes.</param>
+    ''' <param name="checkVerticalBoundaries">Indicates if rebounding off vertical boundaries should be considered. (Rebounding off
+    ''' horizontal boundaries is always considered).</param>
     ''' <returns>Return true if the pony rebounded off a boundary edge, otherwise; false.</returns>
-    Private Function ReboundIntoContainmentRegion(containmentRegion As Rectangle, regionName As String) As Boolean
+    Private Function ReboundIntoContainmentRegion(containmentRegion As Rectangle, regionName As String,
+                                                  Optional checkVerticalBoundaries As Boolean = True) As Boolean
         If Not _lastStepWasInBounds Then Return False
         Dim currentRegion = regionF
         Dim initialLocation = _location
@@ -2714,14 +2731,16 @@ Public Class Pony
             _location.Y -= 2 * (currentRegion.Bottom - containmentRegion.Bottom)
             If _movement.Y > 0 Then _movement.Y = -_movement.Y
         End If
-        If containmentRegion.Left > currentRegion.Left Then
-            _location.X += 2 * (containmentRegion.Left - currentRegion.Left)
-            If _movement.X < 0 Then _movement.X = -_movement.X
-        ElseIf currentRegion.Right > containmentRegion.Right Then
-            _location.X -= 2 * (currentRegion.Right - containmentRegion.Right)
-            If _movement.X > 0 Then _movement.X = -_movement.X
+        If checkVerticalBoundaries Then
+            If containmentRegion.Left > currentRegion.Left Then
+                _location.X += 2 * (containmentRegion.Left - currentRegion.Left)
+                If _movement.X < 0 Then _movement.X = -_movement.X
+            ElseIf currentRegion.Right > containmentRegion.Right Then
+                _location.X -= 2 * (currentRegion.Right - containmentRegion.Right)
+                If _movement.X > 0 Then _movement.X = -_movement.X
+            End If
+            If _movement.X <> 0 Then _facingRight = _movement.X > 0
         End If
-        If _movement.X <> 0 Then _facingRight = _movement.X > 0
         Dim rebounded = initialLocation <> _location
         If rebounded Then AddUpdateRecord("Rebounded back into ", regionName)
         Return rebounded
