@@ -2238,17 +2238,12 @@ Public Class Pony
     ''' <returns>A behavior selected uniformly from available candidates, or all behaviors if there are no available candidates, or null if
     ''' there are no behaviors.</returns>
     Private Function GetCandidateBehavior(behaviorFilter As Func(Of Behavior, Boolean)) As Behavior
-        If behaviorFilter Is Nothing Then behaviorFilter = truthPredicate
-        Dim candidates =
-            Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate).Where(behaviorFilter).ToList()
-        If candidates.Count = 0 Then candidates =
-            Base.Behaviors.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).Where(behaviorFilter).ToList()
-        If candidates.Count = 0 Then candidates =
-            Base.Behaviors.Where(behaviorsAllowedAtRandomPredicate).Where(behaviorFilter).ToList()
-        If candidates.Count = 0 Then candidates =
-            Base.Behaviors.Where(behaviorFilter).ToList()
-        If candidates.Count = 0 Then candidates =
-            Base.Behaviors
+        Dim source = If(behaviorFilter Is Nothing, Base.Behaviors, Base.Behaviors.Where(behaviorFilter).ToList())
+        Dim candidates = source.Where(behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate).ToList()
+        If candidates.Count = 0 Then candidates = source.Where(behaviorsAllowedAtRandomByCurrentGroupPredicate).ToList()
+        If candidates.Count = 0 Then candidates = source.Where(behaviorsAllowedAtRandomPredicate).ToList()
+        If candidates.Count = 0 Then candidates = source
+        If candidates.Count = 0 Then candidates = Base.Behaviors
         If candidates.Count = 0 Then
             Return Nothing
         ElseIf candidates.Count = 1 Then
