@@ -1046,14 +1046,17 @@
         /// <summary>
         /// Gets or sets the text to use in the title frame of each window.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public string WindowTitle
         {
             get
             {
+                EnsureNotDisposed();
                 return windowTitle;
             }
             set
             {
+                EnsureNotDisposed();
                 windowTitle = value;
                 ApplicationInvoke(() =>
                 {
@@ -1065,45 +1068,46 @@
         /// <summary>
         /// Gets or sets the icon used for each window to the icon at the given path.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public string WindowIconFilePath
         {
             get
             {
+                EnsureNotDisposed();
                 return windowIconFilePath;
             }
             set
             {
-                Argument.EnsureNotNull(value, "value");
-
-                if (windowIconFilePath != value)
+                EnsureNotDisposed();
+                windowIconFilePath = value;
+                ApplicationInvoke(() =>
                 {
-                    windowIconFilePath = value;
-                    ApplicationInvoke(() =>
-                    {
-                        if (windowIcon != null)
-                            windowIcon.Dispose();
-                        if (windowIconFilePath == null)
-                            windowIcon = null;
-                        else
-                            windowIcon = new Pixbuf(windowIconFilePath);
+                    if (windowIcon != null)
+                        windowIcon.Dispose();
+                    if (windowIconFilePath == null)
+                        windowIcon = null;
+                    else
+                        windowIcon = new Pixbuf(windowIconFilePath);
 
-                        foreach (GraphicsWindow window in spriteWindows.Values)
-                            window.Icon = windowIcon;
-                    });
-                }
+                    foreach (GraphicsWindow window in spriteWindows.Values)
+                        window.Icon = windowIcon;
+                });
             }
         }
         /// <summary>
         /// Gets or sets a value indicating whether windows will display as topmost windows.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool Topmost
         {
             get
             {
+                EnsureNotDisposed();
                 return windowTopmost;
             }
             set
             {
+                EnsureNotDisposed();
                 windowTopmost = value;
                 ApplicationInvoke(() =>
                 {
@@ -1115,18 +1119,28 @@
         /// <summary>
         /// Gets or sets a value indicating whether a window should appear in the taskbar.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool ShowInTaskbar
         {
-            get { return false; }
-            set { }
+            get
+            {
+                EnsureNotDisposed();
+                return false;
+            }
+            set
+            {
+                EnsureNotDisposed();
+            }
         }
         /// <summary>
         /// Gets the current location of the cursor.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public SD.Point CursorPosition
         {
             get
             {
+                EnsureNotDisposed();
                 int x, y;
                 ModifierType mod;
                 GetPointer(out x, out y, out mod);
@@ -1136,10 +1150,12 @@
         /// <summary>
         /// Gets the mouse buttons which are currently held down.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public SimpleMouseButtons MouseButtonsDown
         {
             get
             {
+                EnsureNotDisposed();
                 int x, y;
                 ModifierType mod;
                 GetPointer(out x, out y, out mod);
@@ -1174,10 +1190,12 @@
         /// <summary>
         /// Gets a value indicating whether the interface has input focus.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool HasFocus
         {
             get
             {
+                EnsureNotDisposed();
                 bool hasFocus = false;
                 ApplicationInvoke(() =>
                 {
@@ -1533,8 +1551,10 @@
         /// <summary>
         /// Opens the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Open()
         {
+            EnsureNotDisposed();
         }
 
         /// <summary>
@@ -1544,7 +1564,6 @@
         public void Hide()
         {
             EnsureNotDisposed();
-
             ApplicationInvoke(() =>
             {
                 foreach (GraphicsWindow window in spriteWindows.Values)
@@ -1559,7 +1578,6 @@
         public void Show()
         {
             EnsureNotDisposed();
-
             ApplicationInvoke(() =>
             {
                 foreach (GraphicsWindow window in spriteWindows.Values)
@@ -1570,14 +1588,17 @@
         /// <summary>
         /// Freezes the display of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Pause()
         {
+            EnsureNotDisposed();
             paused = true;
         }
 
         /// <summary>
         /// Resumes display of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> from a paused state.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Resume()
         {
             Show();
@@ -1621,7 +1642,6 @@
         public void Draw(ICollection<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
-
             EnsureNotDisposed();
 
             if (paused)

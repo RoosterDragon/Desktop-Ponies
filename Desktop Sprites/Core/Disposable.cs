@@ -6,6 +6,8 @@
     /// <summary>
     /// A class capable of releasing allocated resources.
     /// </summary>
+    /// <remarks>This class does not implement a finalizer. Derived classes requiring a finalizer are required to implement one following
+    /// the standard pattern themselves.</remarks>
     public abstract class Disposable : IDisposable
     {
         /// <summary>

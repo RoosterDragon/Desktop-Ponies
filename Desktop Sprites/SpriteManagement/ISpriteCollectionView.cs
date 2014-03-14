@@ -33,33 +33,40 @@
         /// use the <see cref="P:ISimpleContextMenu.Items"/> property to effect changes.</param>
         /// <returns>An interface specific context menu.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItems"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         ISimpleContextMenu CreateContextMenu(IEnumerable<ISimpleContextMenuItem> menuItems);
 
         /// <summary>
         /// Opens the interface.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Open();
         /// <summary>
         /// Hides the interface.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Hide();
         /// <summary>
         /// Shows the interface.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Show();
         /// <summary>
         /// Freezes the display of the interface.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Pause();
         /// <summary>
         /// Resumes display of the interface from a paused state.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Resume();
         /// <summary>
         /// Draws the given collection of sprites.
         /// </summary>
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         void Draw(ICollection<ISprite> sprites);
         /// <summary>
         /// Closes the interface.
@@ -69,30 +76,37 @@
         /// <summary>
         /// Gets or sets the text to use in the title frame of any interface windows.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         string WindowTitle { get; set; }
         /// <summary>
         /// Gets or sets the file path which points to a file that should be used as the icon image of any interface windows.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         string WindowIconFilePath { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether the interface will keep above other windows.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         bool Topmost { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether a window should appear in the taskbar.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         bool ShowInTaskbar { get; set; }
         /// <summary>
         /// Gets the current location of the cursor.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         Point CursorPosition { get; }
         /// <summary>
         /// Gets the mouse buttons which are currently held down.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         SimpleMouseButtons MouseButtonsDown { get; }
         /// <summary>
         /// Gets a value indicating whether the interface has input focus.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         bool HasFocus { get; }
         /// <summary>
         /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.

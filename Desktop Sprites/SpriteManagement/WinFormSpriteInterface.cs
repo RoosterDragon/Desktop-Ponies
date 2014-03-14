@@ -781,22 +781,34 @@
         /// <summary>
         /// Gets or sets the text associated with the form.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public string WindowTitle
         {
-            get { return form.Text; }
-            set { ApplicationInvoke(() => form.Text = value); }
+            get
+            {
+                EnsureNotDisposed();
+                return form.Text;
+            }
+            set
+            {
+                EnsureNotDisposed();
+                ApplicationInvoke(() => form.Text = value);
+            }
         }
         /// <summary>
         /// Gets or sets the icon for the form.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public string WindowIconFilePath
         {
             get
             {
+                EnsureNotDisposed();
                 return windowIconFilePath;
             }
             set
             {
+                EnsureNotDisposed();
                 windowIconFilePath = value;
                 ApplicationInvoke(() =>
                 {
@@ -814,14 +826,17 @@
         /// stutter if the form has already been opened and alpha blending is disabled. If the form is not paused, this will not take
         /// effect until Draw is called.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool Topmost
         {
             get
             {
+                EnsureNotDisposed();
                 return form.TopMost;
             }
             set
             {
+                EnsureNotDisposed();
                 if (form.TopMost != value)
                     ApplicationInvoke(() => form.TopMost = value);
             }
@@ -829,14 +844,17 @@
         /// <summary>
         /// Gets or sets a value indicating whether the form is displayed in the taskbar.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool ShowInTaskbar
         {
             get
             {
+                EnsureNotDisposed();
                 return form.ShowInTaskbar;
             }
             set
             {
+                EnsureNotDisposed();
                 if (form.ShowInTaskbar != value)
                     ApplicationInvoke(() => form.ShowInTaskbar = value);
             }
@@ -844,14 +862,17 @@
         /// <summary>
         /// Gets or sets the display boundary of the form. When setting, the form will be cleared of any drawn sprites.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public Rectangle DisplayBounds
         {
             get
             {
+                EnsureNotDisposed();
                 return form.DesktopBounds;
             }
             set
             {
+                EnsureNotDisposed();
                 if (form.DesktopBounds != value)
                     ApplicationInvoke(() => form.DesktopBounds = value);
             }
@@ -859,23 +880,38 @@
         /// <summary>
         /// Gets the current location of the cursor.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public Point CursorPosition
         {
-            get { return Control.MousePosition; }
+            get
+            {
+                EnsureNotDisposed();
+                return Control.MousePosition;
+            }
         }
         /// <summary>
         /// Gets the mouse buttons which are currently held down.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public SimpleMouseButtons MouseButtonsDown
         {
-            get { return GetButtonsFromNative(Control.MouseButtons); }
+            get
+            {
+                EnsureNotDisposed();
+                return GetButtonsFromNative(Control.MouseButtons);
+            }
         }
         /// <summary>
         /// Gets a value indicating whether the interface has input focus.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public bool HasFocus
         {
-            get { return Form.ActiveForm == form; }
+            get
+            {
+                EnsureNotDisposed();
+                return Form.ActiveForm == form;
+            }
         }
         /// <summary>
         /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.
@@ -1160,9 +1196,11 @@
         /// </summary>
         /// <param name="menuItems">The collections of items to be displayed in the menu.</param>
         /// <returns>An <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/> specific context menu.</returns>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItems"/> is null.</exception>
         public ISimpleContextMenu CreateContextMenu(IEnumerable<ISimpleContextMenuItem> menuItems)
         {
+            EnsureNotDisposed();
             WinFormContextMenu menu = null;
             ApplicationInvoke(() => menu = new WinFormContextMenu(this, menuItems));
             contextMenus.AddLast(menu);
@@ -1172,6 +1210,7 @@
         /// <summary>
         /// Opens the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Open()
         {
             Show();
@@ -1181,14 +1220,17 @@
         /// <summary>
         /// Hides the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Hide()
         {
+            EnsureNotDisposed();
             ApplicationInvoke(form.Hide);
         }
 
         /// <summary>
         /// Shows the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Show()
         {
             ApplicationInvoke(() =>
@@ -1204,18 +1246,21 @@
         /// <summary>
         /// Freezes the display of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/>.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Pause()
         {
+            EnsureNotDisposed();
             paused = true;
         }
 
         /// <summary>
         /// Resumes display of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/> from a paused state.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Resume()
         {
-            paused = false;
             Show();
+            paused = false;
         }
 
         /// <summary>
@@ -1223,9 +1268,11 @@
         /// </summary>
         /// <param name="sprites">The collection of sprites to draw.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Draw(ICollection<ISprite> sprites)
         {
             Argument.EnsureNotNull(sprites, "sprites");
+            EnsureNotDisposed();
 
             if (paused)
                 return;

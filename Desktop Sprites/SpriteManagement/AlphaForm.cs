@@ -67,6 +67,7 @@
         /// array is of length Width * Height. Each element is a packed 32-bit ARGB value. This buffer is recreated whenever the form is
         /// resized.
         /// </summary>
+        /// <returns>A lazily initialized pointer to the array of raw pixels for the background graphics buffer.</returns>
         public unsafe int* GetBackgroundData()
         {
             InitializeBuffer();
