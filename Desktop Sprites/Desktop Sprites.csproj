@@ -114,6 +114,7 @@
     <Compile Include="Core\Forms.cs" />
     <Compile Include="Core\Hash.cs" />
     <Compile Include="Core\Linq.cs" />
+    <Compile Include="Core\PathEquality.cs" />
     <Compile Include="Core\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Core\Runtime.cs" />
     <Compile Include="Core\IOExtensions.cs" />
@@ -132,6 +133,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SpriteManagement\AnimationLoopBase.cs" />
+    <Compile Include="SpriteManagement\Animation.cs" />
+    <Compile Include="SpriteManagement\AnimationPair.cs" />
     <Compile Include="SpriteManagement\BitDepths.cs" />
     <Compile Include="Core\BitmapExtensions.cs" />
     <Compile Include="SpriteManagement\BitmapFrame.cs" />
@@ -179,11 +182,11 @@
     <Compile Include="SpriteManagement\ArgbColor.cs" />
     <Compile Include="Interop\MacOSX.cs" />
     <Compile Include="SpriteManagement\RgbColor.cs" />
-    <Compile Include="SpriteManagement\SpriteFrame.cs" />
     <Compile Include="Interop\Unix.cs" />
     <Compile Include="Core\Vector2.cs" />
     <Compile Include="Core\StringExtensions.cs" />
     <Compile Include="Interop\Win32.cs" />
+    <Compile Include="SpriteManagement\SpriteImagePaths.cs" />
     <Compile Include="SpriteManagement\WinFormSpriteInterface.cs" />
     <Compile Include="Core\Vector2F.cs" />
     <EmbeddedResource Include="Core\ExceptionDialog.resx">

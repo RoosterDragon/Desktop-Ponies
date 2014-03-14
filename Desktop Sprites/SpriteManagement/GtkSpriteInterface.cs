@@ -515,10 +515,10 @@
 
         #region GtkFrame class
         /// <summary>
-        /// Defines a <see cref="T:DesktopSprites.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
+        /// Defines a <see cref="T:DesktopSprites.SpriteManagement.Frame`1"/> whose underlying image is a
         /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.
         /// </summary>
-        private class GtkFrame : SpriteFrame<ClippedImage>, IDisposable
+        private class GtkFrame : Frame<ClippedImage>, IDisposable
         {
             /// <summary>
             /// Gets the method for creating a <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> frame from a
@@ -612,10 +612,6 @@
             }
 
             /// <summary>
-            /// Contains the image that is the horizontal mirror the of base image.
-            /// </summary>
-            private ClippedImage flippedImage;
-            /// <summary>
             /// The hash code of the frame.
             /// </summary>
             private int hashCode;
@@ -653,44 +649,6 @@
             }
 
             /// <summary>
-            /// Ensures the frame is facing the desired direction by possibly flipping it horizontally.
-            /// </summary>
-            /// <param name="flipFromOriginal">Pass true to ensure the frame is facing the opposing direction as when it was loaded. Pass
-            /// false to ensure the frame is facing the same direction as when it was loaded.</param>
-            public override void Flip(bool flipFromOriginal)
-            {
-                if (Flipped != flipFromOriginal)
-                {
-                    Flipped = !Flipped;
-
-                    // Create the mirrored frame, if we have yet to do so.
-                    if (flippedImage == null)
-                    {
-                        flippedImage = new ClippedImage();
-
-                        // Flip the frame image horizontally.
-                        flippedImage.Image = base.Image.Image.Flip(true);
-
-                        // Determine the new clipping mask.
-                        Pixmap map;
-                        Pixmap mask;
-                        flippedImage.Image.RenderPixmapAndMask(out map, out mask, 255);
-                        flippedImage.Clip = mask;
-                        map.Dispose();
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Gets the image that represents this frame.
-            /// </summary>
-            public new ClippedImage Image
-            {
-                // Hide the base definition, so we can return either our flipped image, or the base.
-                get { return Flipped ? flippedImage : base.Image; }
-            }
-
-            /// <summary>
             /// Gets the hash code of the frame.
             /// </summary>
             /// <returns>A hash code for this frame.</returns>
@@ -705,8 +663,6 @@
             public void Dispose()
             {
                 Image.Dispose();
-                if (flippedImage != null)
-                    flippedImage.Dispose();
             }
         }
         #endregion
@@ -979,7 +935,21 @@
         /// Stores the images for each sprite as a series of <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/>,
         /// indexed by filename.
         /// </summary>
-        private LazyDictionary<string, AnimatedImage<GtkFrame>> images;
+        private readonly Dictionary<string, AnimatedImage<GtkFrame>> images =
+            new Dictionary<string, AnimatedImage<GtkFrame>>(SpriteImagePaths.Comparer);
+        /// <summary>
+        /// Stores the animation pairs to use when drawing sprites, indexed by their path pairs.
+        /// </summary>
+        private readonly Dictionary<SpriteImagePaths, AnimationPair<GtkFrame>> animationPairsByPaths =
+            new Dictionary<SpriteImagePaths, AnimationPair<GtkFrame>>();
+        /// <summary>
+        /// Delegate to the CreatePair function.
+        /// </summary>
+        private readonly Func<SpriteImagePaths, AnimationPair<GtkFrame>> createPair;
+        /// <summary>
+        /// Delegate to the CreateAnimatedImage function.
+        /// </summary>
+        private readonly Func<string, AnimatedImage<GtkFrame>> createAnimatedImage;
         /// <summary>
         /// List of <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/> which have been created by the
         /// interface.
@@ -1367,11 +1337,8 @@
             }
 
             GtkFrame.Interface = this;
-            images = new LazyDictionary<string, AnimatedImage<GtkFrame>>(
-                fileName => new AnimatedImage<GtkFrame>(
-                    fileName, GtkFrameFromFile,
-                    (b, p, tI, s, w, h, d) => GtkFrameFromBuffer(b, p, tI, s, w, h, d, fileName),
-                    GtkFrame.AllowableBitDepths));
+            createPair = CreatePair;
+            createAnimatedImage = CreateAnimatedImage;
 
             dedicatedAppThread = startNewThread;
             if (dedicatedAppThread)
@@ -1501,33 +1468,74 @@
         /// Loads the given collection of file paths as images in a format that this
         /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand. This method can be called asynchronously to ensure all images become loaded but
         /// without incurring the delay up front.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
-        public void LoadImages(IEnumerable<string> imageFilePaths)
+        public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths)
         {
-            LoadImages(imageFilePaths, null);
+            LoadImages(imagePaths, null);
         }
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
         /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
         /// <param name="imageLoadedHandler">An <see cref="T:System.EventHandler"/> that is raised when an image is loaded.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
-        public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
+        public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths, EventHandler imageLoadedHandler)
         {
-            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
+            Argument.EnsureNotNull(imagePaths, "imagePaths");
             EnsureNotDisposed();
 
-            foreach (string imageFilePath in imageFilePaths)
-                images.Add(imageFilePath);
-            images.InitializeAll(false, (sender, e) => imageLoadedHandler.Raise(this));
+            foreach (var paths in imagePaths)
+                LoadPaths(paths, imageLoadedHandler);
+        }
+
+        /// <summary>
+        /// Ensures an animation pair exists for the given paths.
+        /// </summary>
+        /// <param name="paths">A pair of paths for which an animation pair should be created, if one does not yet exists.</param>
+        /// <param name="imageLoadedHandler">An event handler to raise unconditionally at the end of the method.</param>
+        private void LoadPaths(SpriteImagePaths paths, EventHandler imageLoadedHandler)
+        {
+            if (!animationPairsByPaths.ContainsKey(paths))
+                animationPairsByPaths.Add(paths, CreatePair(paths));
+            imageLoadedHandler.Raise(this);
+        }
+
+        /// <summary>
+        /// Creates an animation pair for a specified pair of paths.
+        /// </summary>
+        /// <param name="paths">The paths for which an animation pair should be generated.</param>
+        /// <returns>An animation pair for displaying the specified paths.</returns>
+        private AnimationPair<GtkFrame> CreatePair(SpriteImagePaths paths)
+        {
+            var leftImage = images.GetOrAdd(paths.Left, createAnimatedImage);
+            var leftAnimation = new Animation<GtkFrame>(leftImage);
+
+            if (SpriteImagePaths.Comparer.Equals(paths.Left, paths.Right))
+                return new AnimationPair<GtkFrame>(leftAnimation, leftAnimation);
+
+            var rightImage = images.GetOrAdd(paths.Right, createAnimatedImage);
+            var rightAnimation = new Animation<GtkFrame>(rightImage);
+
+            return new AnimationPair<GtkFrame>(leftAnimation, rightAnimation);
+        }
+
+        /// <summary>
+        /// Creates an animated image by loading it from file.
+        /// </summary>
+        /// <param name="path">The path to the file that should be loaded.</param>
+        /// <returns>A new animated image created from the specified file.</returns>
+        private AnimatedImage<GtkFrame> CreateAnimatedImage(string path)
+        {
+            return new AnimatedImage<GtkFrame>(path, GtkFrameFromFile,
+                (b, p, tI, s, w, h, d) => GtkFrameFromBuffer(b, p, tI, s, w, h, d, path), GtkFrame.AllowableBitDepths);
         }
 
         /// <summary>
@@ -1704,25 +1712,23 @@
                     GraphicsWindow window = loopWindow;
 
                     ISprite sprite = window.Sprite;
-                    GtkFrame frame = null;
-                    if (sprite.ImagePath != null)
-                        frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
-
+                    
                     // Gtk# operations need to be invoked on the main thread. Although they will usually succeed, eventually an invalid
                     // unmanaged memory access is likely to result.
                     // By invoking within the loop, the actions are chunked up so that the message pump doesn't become tied down for too
                     // long, which allows it to continue to respond to other messages in a timely manner.
                     ApplicationInvoke(() =>
                     {
-                        // Flip the image, and set it on the window, as later operations rely on it.
-                        if (frame != null)
+                        var imagePath = sprite.FacingRight ? sprite.ImagePaths.Right : sprite.ImagePaths.Left;
+                        if (imagePath != null)
                         {
-                            frame.Flip(sprite.FlipImage);
-                            window.CurrentImage = frame.Image;
-                        }
-                        else
-                        {
-                            window.CurrentImage = null;
+                            var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, createPair);
+                            var animation = sprite.FacingRight ? pair.Right : pair.Left;
+                            var frame = animation.Image[sprite.ImageTimeIndex];
+                            if (frame != null)
+                                window.CurrentImage = frame.Image;
+                            else
+                                window.CurrentImage = null;
                         }
 
                         // The window takes on the location and size of the sprite to draw.
@@ -1788,7 +1794,7 @@
                     if (windowIcon != null)
                         windowIcon.Dispose();
 
-                    foreach (AnimatedImage<GtkFrame> image in images.InitializedValues)
+                    foreach (AnimatedImage<GtkFrame> image in images.Values)
                         image.Dispose();
                 }
                 InterfaceClosed.Raise(this);

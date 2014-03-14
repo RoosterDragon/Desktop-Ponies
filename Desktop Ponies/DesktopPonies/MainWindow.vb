@@ -1,5 +1,6 @@
 ﻿Imports Gdk
 Imports Gtk
+Imports DesktopSprites.SpriteManagement
 
 Friend Class MainWindow
     Inherits Gtk.Window
@@ -151,21 +152,15 @@ Friend Class MainWindow
                 viewer.Topmost = Options.AlwaysOnTop
                 viewer.ShowInTaskbar = Options.ShowInTaskbar
 
-                Dim images As New HashSet(Of String)(PathEquality.Comparer)
-                For Each pony In startupPonies
-                    For Each behavior In pony.Base.Behaviors
-                        images.Add(behavior.LeftImage.Path)
-                        images.Add(behavior.RightImage.Path)
-                        For Each effect In behavior.Effects
-                            images.Add(effect.LeftImage.Path)
-                            images.Add(effect.RightImage.Path)
-                        Next
-                    Next
-                Next
+                ' Get a collection of all images to be loaded.
+                Dim images = startupPonies.SelectMany(Function(p) p.Base.Behaviors).Select(
+                    Function(b) New SpriteImagePaths(b.LeftImage.Path, b.RightImage.Path)).Concat(
+                    startupPonies.SelectMany(Function(p) p.Base.Effects).Select(
+                        Function(eb) New SpriteImagePaths(eb.LeftImage.Path, eb.RightImage.Path))).Distinct().ToArray()
                 Dim imagesLoadedCount = 0
                 viewer.LoadImages(images, Sub()
                                               imagesLoadedCount += 1
-                                              Invoke(Sub() progressBar.Fraction = imagesLoadedCount / images.Count)
+                                              Invoke(Sub() progressBar.Fraction = imagesLoadedCount / images.Length)
                                           End Sub)
 
                 Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies, context)

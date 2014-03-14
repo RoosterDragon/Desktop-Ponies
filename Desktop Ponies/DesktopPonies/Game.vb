@@ -646,18 +646,6 @@ Public Class Game
                 End Get
             End Property
 
-            Public ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
-                Get
-                    Return False
-                End Get
-            End Property
-
-            Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
-                Get
-                    Return parent.HostEffect.CurrentImagePath
-                End Get
-            End Property
-
             Public ReadOnly Property Region As Rectangle Implements ISprite.Region
                 Get
                     Return New Rectangle(Vector2.Round(New Vector2(parent.HostEffect.TopLeftLocation) +
@@ -672,6 +660,18 @@ Public Class Game
             Public Sub Update(updateTime As TimeSpan) Implements ISprite.Update
 
             End Sub
+
+            Public ReadOnly Property FacingRight As Boolean Implements ISprite.FacingRight
+                Get
+                    Return True
+                End Get
+            End Property
+
+            Public ReadOnly Property ImagePaths As SpriteImagePaths Implements ISprite.ImagePaths
+                Get
+                    Return parent.HostEffect.ImagePaths
+                End Get
+            End Property
         End Class
     End Class
 

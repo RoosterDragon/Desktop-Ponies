@@ -272,7 +272,7 @@ Public Class MainForm
     End Sub
 
     Private Sub AddToMenu(ponyBase As PonyBase)
-        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path, False)
+        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path)
         AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
         If ponyBase.Directory = ponyBase.RandomDirectory Then
             ponySelection.NoDuplicates.Visible = True
@@ -774,21 +774,13 @@ Public Class MainForm
         End If
 
         ' Get a collection of all images to be loaded.
-        Dim images As New HashSet(Of String)(PathEquality.Comparer)
-        For Each pony In startupPonies
-            For Each behavior In pony.Base.Behaviors
-                images.Add(behavior.LeftImage.Path)
-                images.Add(behavior.RightImage.Path)
-                For Each effect In behavior.Effects
-                    images.Add(effect.LeftImage.Path)
-                    images.Add(effect.RightImage.Path)
-                Next
-            Next
-        Next
-
+        Dim images = startupPonies.SelectMany(Function(p) p.Base.Behaviors).Select(
+            Function(b) New SpriteImagePaths(b.LeftImage.Path, b.RightImage.Path)).Concat(
+            startupPonies.SelectMany(Function(p) p.Base.Effects).Select(
+                Function(e) New SpriteImagePaths(e.LeftImage.Path, e.RightImage.Path))).Distinct().ToArray()
         worker.QueueTask(Sub()
                              LoadingProgressBar.Value = 0
-                             LoadingProgressBar.Maximum = images.Count
+                             LoadingProgressBar.Maximum = images.Length
                          End Sub)
         ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
 

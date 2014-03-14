@@ -531,10 +531,10 @@
         }
 
         /// <summary>
-        /// Defines a <see cref="T:DesktopSprites.SpriteManagement.SpriteFrame`1"/> whose underlying image is an
+        /// Defines a <see cref="T:DesktopSprites.SpriteManagement.Frame`1"/> whose underlying image is an
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> instance.
         /// </summary>
-        private sealed class ImageFrame : SpriteFrame<ImageData>, IDisposable
+        private sealed class ImageFrame : Frame<ImageData>, IDisposable
         {
             /// <summary>
             /// Represents the allowable set of depths that can be used when generating a
@@ -566,24 +566,6 @@
             public ImageFrame(string path)
                 : base(new ImageData(path))
             {
-            }
-
-            /// <summary>
-            /// Ensures the image is facing the desired direction by possibly flipping it horizontally.
-            /// </summary>
-            /// <param name="flipFromOriginal">Pass true to ensure the frame is facing the opposing direction as when it was loaded. Pass
-            /// false  to ensure the frame is facing the same direction as when it was loaded.</param>
-            public override void Flip(bool flipFromOriginal)
-            {
-                if (Flipped != flipFromOriginal)
-                {
-                    Flipped = !Flipped;
-                    // TODO: Support drawing the raw buffer in a mirrored mode if required.
-                    if (Image.Bitmap != null)
-                        Image.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    else
-                        throw new NotImplementedException();
-                }
             }
 
             /// <summary>
@@ -687,7 +669,21 @@
         /// Stores the images for each sprite as a series of
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>, indexed by filename.
         /// </summary>
-        private LazyDictionary<string, AnimatedImage<ImageFrame>> images;
+        private readonly Dictionary<string, AnimatedImage<ImageFrame>> images =
+            new Dictionary<string, AnimatedImage<ImageFrame>>(SpriteImagePaths.Comparer);
+        /// <summary>
+        /// Stores the animation pairs to use when drawing sprites, indexed by their path pairs.
+        /// </summary>
+        private readonly Dictionary<SpriteImagePaths, AnimationPair<ImageFrame>> animationPairsByPaths =
+            new Dictionary<SpriteImagePaths, AnimationPair<ImageFrame>>();
+        /// <summary>
+        /// Delegate to the CreatePair function.
+        /// </summary>
+        private readonly Func<SpriteImagePaths, AnimationPair<ImageFrame>> createPair;
+        /// <summary>
+        /// Delegate to the CreateAnimatedImage function.
+        /// </summary>
+        private readonly Func<string, AnimatedImage<ImageFrame>> createAnimatedImage;
         /// <summary>
         /// Cache of color palettes so that memory can be shared.
         /// </summary>
@@ -734,6 +730,10 @@
         /// The current area to be blended in parallel.
         /// </summary>
         private Rectangle parallelBlendArea;
+        /// <summary>
+        /// Indicates if the current image to be blended in parallel should be mirrored horizontally.
+        /// </summary>
+        private bool parallelBlendMirror;
         /// <summary>
         /// The current number of blending sections.
         /// </summary>
@@ -1027,12 +1027,9 @@
                 appThread.Start(Tuple.Create(appInitiated, displayBounds));
 
                 // Do other initialization in parallel whilst the UI thread is spinning up.
-                images = new LazyDictionary<string, AnimatedImage<ImageFrame>>(
-                    fileName => new AnimatedImage<ImageFrame>(
-                        fileName, ImageFrameFromFile,
-                        (b, p, tI, s, w, h, d) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, fileName),
-                        ImageFrame.AllowableBitDepths));
-                render = new MethodInvoker(Render);
+                createPair = CreatePair;
+                createAnimatedImage = CreateAnimatedImage;
+                render = Render;
                 using (var family = FontFamily.GenericSansSerif)
                     font = new Font(family, 12, GraphicsUnit.Pixel);
                 postUpdateInvalidRegion.MakeEmpty();
@@ -1168,7 +1165,8 @@
         /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
-        public void LoadImages(IEnumerable<string> imageFilePaths)
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
+        public void LoadImages(IEnumerable<SpriteImagePaths> imageFilePaths)
         {
             LoadImages(imageFilePaths, null);
         }
@@ -1181,13 +1179,184 @@
         /// loaded by this method will be loaded on demand.</param>
         /// <param name="imageLoadedHandler">An <see cref="T:System.EventHandler"/> that is raised when an image is loaded.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
-        public void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler)
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
+        public void LoadImages(IEnumerable<SpriteImagePaths> imageFilePaths, EventHandler imageLoadedHandler)
         {
             Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
+            EnsureNotDisposed();
 
-            foreach (string imageFilePath in imageFilePaths)
-                images.Add(imageFilePath);
-            images.InitializeAll(true, (sender, e) => imageLoadedHandler.Raise(this));
+            object syncObject = new object();
+            int remaining = 0;
+            EventHandler imageLoaded = (sender, e) =>
+                {
+                    if (--remaining == 0)
+                        lock (syncObject)
+                            Monitor.Pulse(syncObject);
+                };
+            imageLoadedHandler += imageLoaded;
+
+            lock (syncObject)
+            {
+                lock (imageLoadedHandler)
+                    foreach (var paths in imageFilePaths)
+                    {
+                        remaining++;
+                        ThreadPool.QueueUserWorkItem(o => LoadPaths(paths, imageLoadedHandler));
+                    }
+                Monitor.Wait(syncObject);
+            }
+            imageLoadedHandler -= imageLoaded;
+        }
+
+        /// <summary>
+        /// Ensures an animation pair exists for the given paths.
+        /// </summary>
+        /// <param name="paths">A pair of paths for which an animation pair should be created, if one does not yet exists.</param>
+        /// <param name="imageLoadedHandler">An event handler to raise unconditionally at the end of the method.</param>
+        private void LoadPaths(SpriteImagePaths paths, EventHandler imageLoadedHandler)
+        {
+            bool needPair = true;
+            lock (animationPairsByPaths)
+                if (animationPairsByPaths.ContainsKey(paths))
+                    needPair = false;
+                else
+                    animationPairsByPaths.Add(paths, new AnimationPair<ImageFrame>());
+            if (needPair)
+            {
+                var pair = CreatePair(paths);
+                lock (animationPairsByPaths)
+                    animationPairsByPaths[paths] = pair;
+            }
+            lock (imageLoadedHandler)
+                imageLoadedHandler.Raise(this);
+        }
+
+        /// <summary>
+        /// Creates an animation pair for a specified pair of paths.
+        /// </summary>
+        /// <param name="paths">The paths for which an animation pair should be generated. Where possible, the animations within a pair
+        /// will reuse images for efficiency.</param>
+        /// <returns>An animation pair for displaying the specified paths.</returns>
+        private AnimationPair<ImageFrame> CreatePair(SpriteImagePaths paths)
+        {
+            AnimatedImage<ImageFrame> leftImage;
+            lock (images)
+                leftImage = images.GetOrAdd(paths.Left, createAnimatedImage);
+            var leftAnimation = new Animation<ImageFrame>(leftImage);
+
+            if (SpriteImagePaths.Comparer.Equals(paths.Left, paths.Right))
+                return new AnimationPair<ImageFrame>(leftAnimation, leftAnimation);
+
+            AnimatedImage<ImageFrame> rightImage;
+            bool mirrored = false;
+            bool found;
+            lock (images)
+                found = images.TryGetValue(paths.Right, out rightImage);
+            if (!found)
+            {
+                rightImage = CreateAnimatedImage(paths.Right);
+                mirrored = AnimationsAreHorizontallyMirrored(leftImage, rightImage);
+                if (!mirrored)
+                    lock (images)
+                        rightImage = images.GetOrAdd(paths.Right, rightImage);
+            }
+            var rightAnimation = new Animation<ImageFrame>(mirrored ? leftImage : rightImage, mirrored);
+            return new AnimationPair<ImageFrame>(leftAnimation, rightAnimation);
+        }
+
+        /// <summary>
+        /// Creates an animated image by loading it from file.
+        /// </summary>
+        /// <param name="path">The path to the file that should be loaded.</param>
+        /// <returns>A new animated image created from the specified file.</returns>
+        private AnimatedImage<ImageFrame> CreateAnimatedImage(string path)
+        {
+            return new AnimatedImage<ImageFrame>(path, ImageFrameFromFile,
+                (b, p, tI, s, w, h, d) => ImageFrameFromBuffer(b, p, tI, s, w, h, d, path), ImageFrame.AllowableBitDepths);
+        }
+
+        /// <summary>
+        /// Checks whether two animated images are horizontally mirrored.
+        /// </summary>
+        /// <param name="left">The first image to check.</param>
+        /// <param name="right">The second image to check.</param>
+        /// <returns>Returns true if the animated images are the horizontal mirror of each other.</returns>
+        private static bool AnimationsAreHorizontallyMirrored(AnimatedImage<ImageFrame> left, AnimatedImage<ImageFrame> right)
+        {
+            if (!left.IsAnimated || !right.IsAnimated ||
+                left.Size != right.Size || left.LoopCount != right.LoopCount ||
+                left.ImageDuration != right.ImageDuration || left.FrameCount != right.FrameCount)
+                return false;
+
+            for (int frameIndex = 0; frameIndex < left.FrameCount; frameIndex++)
+            {
+                if (left.GetDuration(frameIndex) != right.GetDuration(frameIndex))
+                    return false;
+                var leftFrame = left[frameIndex].Image;
+                var rightFrame = right[frameIndex].Image;
+                // If as a result of the 2x downscaling the images no longer match in size, they cannot be mirror candidates.
+                if (leftFrame.Depth != rightFrame.Depth || leftFrame.Width != rightFrame.Width || leftFrame.Height != rightFrame.Height)
+                    return false;
+                // Check for an exact horizontal mirror match by comparing pixels in each image.
+                byte[] leftData = leftFrame.Data;
+                byte[] rightData = rightFrame.Data;
+                int[] leftPalette = leftFrame.ArgbPalette;
+                int[] rightPalette = rightFrame.ArgbPalette;
+                int rightMax = rightFrame.Stride - 1;
+                if (leftFrame.Depth == 8)
+                {
+                    // If the images share a palette, we can check faster by eliding the deference of the palette and just compare indexes.
+                    if (leftPalette == rightPalette)
+                    {
+                        for (int y = 0; y < leftFrame.Height; y++)
+                        {
+                            int leftRow = y * leftFrame.Stride;
+                            int rightRow = y * rightFrame.Stride;
+                            for (int x = 0; x < leftFrame.Width; x++)
+                                if (leftData[leftRow + x] != rightData[rightRow + rightMax - x])
+                                    return false;
+                        }
+                    }
+                    else
+                    {
+                        for (int y = 0; y < leftFrame.Height; y++)
+                        {
+                            int leftRow = y * leftFrame.Stride;
+                            int rightRow = y * rightFrame.Stride;
+                            for (int x = 0; x < leftFrame.Width; x++)
+                                if (leftPalette[leftData[leftRow + x]] != rightPalette[rightData[rightRow + rightMax - x]])
+                                    return false;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int y = 0; y < leftFrame.Height; y++)
+                    {
+                        int leftRow = y * leftFrame.Stride;
+                        int rightRow = y * rightFrame.Stride;
+                        for (int x = 0; x < leftFrame.Width; x++)
+                        {
+                            int halfX = x / 2;
+                            var leftIndex = leftData[leftRow + halfX];
+                            var rightIndex = rightData[rightRow + rightMax - halfX];
+                            if (x % 2 == 0)
+                            {
+                                leftIndex >>= 4;
+                                rightIndex &= 0xF;
+                            }
+                            else
+                            {
+                                leftIndex &= 0xF;
+                                rightIndex >>= 4;
+                            }
+                            if (leftPalette != rightPalette && leftPalette[leftIndex] != rightPalette[rightIndex])
+                                return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -1383,11 +1552,13 @@
                 foreach (ISprite sprite in sprites)
                 {
                     // Draw the sprite image.
-                    if (sprite.ImagePath != null)
+                    var imagePath = sprite.FacingRight ? sprite.ImagePaths.Right : sprite.ImagePaths.Left;
+                    if (imagePath != null)
                     {
                         var area = OffsetRectangle(sprite.Region, translate);
-                        ImageFrame frame = images[sprite.ImagePath][sprite.ImageTimeIndex];
-                        frame.Flip(sprite.FlipImage);
+                        var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, createPair);
+                        var animation = sprite.FacingRight ? pair.Right : pair.Left;
+                        var frame = animation.Image[sprite.ImageTimeIndex];
                         unsafe
                         {
                             backgroundData = form.GetBackgroundData();
@@ -1395,9 +1566,9 @@
                         if (frame.Image.Bitmap != null)
                             form.BackgroundGraphics.DrawImage(frame.Image.Bitmap, area);
                         else if (sprites.Count <= ParallelBlendingThreshold)
-                            AlphaBlend(frame.Image, area);
+                            AlphaBlend(frame.Image, area, animation.Mirror);
                         else
-                            AlphaBlendParallel(frame.Image, area);
+                            AlphaBlendParallel(frame.Image, area, animation.Mirror);
                     }
 
                     // Draw a speech bubble for a speaking sprite.
@@ -1436,17 +1607,19 @@
         /// </summary>
         /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlendParallel(ImageData image, Rectangle area)
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
+        private unsafe void AlphaBlendParallel(ImageData image, Rectangle area, bool mirror)
         {
             // Publish current image details.
             parallelBlendImage = image;
             parallelBlendArea = area;
+            parallelBlendMirror = mirror;
             parallelBlendSections = Math.Min(ParallelBlendTotalSections, area.Height);
             Thread.MemoryBarrier();
             // Start work.
             parallelBlend.SignalAndWait();
             // The main thread is responsible for blending the last section.
-            AlphaBlend(parallelBlendImage, parallelBlendArea, parallelBlendSections - 1, parallelBlendSections);
+            AlphaBlend(parallelBlendImage, parallelBlendArea, mirror, parallelBlendSections - 1, parallelBlendSections);
             // Wait for work to finish.
             parallelBlend.SignalAndWait();
         }
@@ -1469,7 +1642,7 @@
                 // Update cache of current work and do it.
                 Thread.MemoryBarrier();
                 if (section < parallelBlendSections - 1)
-                    AlphaBlend(parallelBlendImage, parallelBlendArea, section, parallelBlendSections);
+                    AlphaBlend(parallelBlendImage, parallelBlendArea, parallelBlendMirror, section, parallelBlendSections);
                 // Signal work is complete.
                 parallelBlend.SignalAndWait();
             }
@@ -1481,9 +1654,10 @@
         /// </summary>
         /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
-        private unsafe void AlphaBlend(ImageData image, Rectangle area)
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
+        private unsafe void AlphaBlend(ImageData image, Rectangle area, bool mirror)
         {
-            AlphaBlend(image, area, 0, 1);
+            AlphaBlend(image, area, mirror, 0, 1);
         }
 
         /// <summary>
@@ -1492,9 +1666,10 @@
         /// </summary>
         /// <param name="image">An image specified by a byte array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
-        private unsafe void AlphaBlend(ImageData image, Rectangle area, int section, int sectionCount)
+        private unsafe void AlphaBlend(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
             if (area.Width <= 0 || area.Height <= 0)
                 return;
@@ -1505,16 +1680,16 @@
             if (image.Width == area.Width && image.Height == area.Height)
             {
                 if (image.Depth == 8)
-                    AlphaBlend8bbpUnscaled(image, area.Location, section, sectionCount);
+                    AlphaBlend8bbpUnscaled(image, area.Location, mirror, section, sectionCount);
                 else
-                    AlphaBlend4bbpUnscaled(image, area.Location, section, sectionCount);
+                    AlphaBlend4bbpUnscaled(image, area.Location, mirror, section, sectionCount);
             }
             else
             {
                 if (image.Depth == 8)
-                    AlphaBlend8bbp(image, area, section, sectionCount);
+                    AlphaBlend8bbp(image, area, mirror, section, sectionCount);
                 else
-                    AlphaBlend4bbp(image, area, section, sectionCount);
+                    AlphaBlend4bbp(image, area, mirror, section, sectionCount);
             }
         }
 
@@ -1523,6 +1698,7 @@
         /// </summary>
         /// <param name="location">The desired location of the image to draw.</param>
         /// <param name="size">The desired size of the image to draw.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
         /// <param name="xMin">When this methods returns, contains the minimum x-coordinate in scaled image space.</param>
@@ -1531,14 +1707,17 @@
         /// <param name="yMax">When this methods returns, contains the maximum y-coordinate in scaled image space.</param>
         /// <param name="backgroundIndex">When this methods returns, contains the initial index into the form background data buffer.
         /// </param>
+        /// <param name="backgroundIndexChange">When this methods returns, contains the value to add to the backgroundIndex as a scanline
+        /// is iterated.</param>
         /// <param name="backgroundIndexRowChange">When this methods returns, contains the value to add to the backgroundIndex after each
         /// image scanline is iterated.</param>
-        private void AlphaBlendInitialize(Point location, Size size, int section, int sectionCount,
-            out int xMin, out int xMax, out int yMin, out int yMax, out int backgroundIndex, out int backgroundIndexRowChange)
+        private void AlphaBlendInitialize(Point location, Size size, bool mirror, int section, int sectionCount,
+            out int xMin, out int xMax, out int yMin, out int yMax,
+            out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange)
         {
             xMin = Math.Max(0, -location.X);
-            yMin = Math.Max(0, -location.Y);
             xMax = Math.Min(size.Width, form.Width - location.X);
+            yMin = Math.Max(0, -location.Y);
             yMax = Math.Min(size.Height, form.Height - location.Y);
 
             int sectionSize = (yMax - yMin) / sectionCount;
@@ -1546,8 +1725,24 @@
             if (section + 1 != sectionCount)
                 yMax = yMin + sectionSize;
 
-            backgroundIndex = (location.Y + yMin) * form.Width + location.X + xMin;
-            backgroundIndexRowChange = form.Width - xMax + xMin;
+            backgroundIndex = (location.Y + yMin) * form.Width + location.X + (mirror ? (xMax - 1) : xMin);
+            backgroundIndexChange = mirror ? -1 : 1;
+            backgroundIndexRowChange = mirror ? form.Width + xMax - xMin : form.Width - xMax + xMin;
+
+            if (mirror)
+            {
+                if (location.X < 0)
+                {
+                    xMin += location.X;
+                    xMax += location.X;
+                }
+                var rightAdjustment = size.Width - (form.Width - location.X);
+                if (rightAdjustment > 0)
+                {
+                    xMin += rightAdjustment;
+                    xMax += rightAdjustment;
+                }
+            }
         }
 
         /// <summary>
@@ -1589,13 +1784,14 @@
         /// </summary>
         /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
-        private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location, int section, int sectionCount)
+        private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(location, new Size(image.Width, image.Height), section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -1613,7 +1809,7 @@
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
                         AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
-                    backgroundIndex++;
+                    backgroundIndex += backgroundIndexChange;
                 }
                 backgroundIndex += backgroundIndexRowChange;
                 dataIndex += dataIndexRowChange;
@@ -1625,13 +1821,14 @@
         /// </summary>
         /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="location">The location on the form onto which the image should be drawn.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
-        private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location, int section, int sectionCount)
+        private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(location, new Size(image.Width, image.Height), section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
+            AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -1654,7 +1851,7 @@
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
                         AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
-                    backgroundIndex++;
+                    backgroundIndex += backgroundIndexChange;
                 }
                 backgroundIndex += backgroundIndexRowChange;
                 dataIndex += dataIndexRowChange;
@@ -1667,13 +1864,14 @@
         /// </summary>
         /// <param name="image">An image specified by an 8bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
-        private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area, int section, int sectionCount)
+        private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(area.Location, area.Size, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
+            AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
 
             int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
@@ -1698,7 +1896,7 @@
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
                         AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
-                    backgroundIndex++;
+                    backgroundIndex += backgroundIndexChange;
                 }
                 backgroundIndex += backgroundIndexRowChange;
                 dataRowIndexFixedPoint += yScaleFixedPoint;
@@ -1711,13 +1909,14 @@
         /// </summary>
         /// <param name="image">An image specified by an 4bbp array and color palette to be alpha blended onto the form surface.</param>
         /// <param name="area">The area on the form onto which the image should be drawn.</param>
+        /// <param name="mirror">Indicates if the image should be horizontally mirrored when drawing.</param>
         /// <param name="section">The scanline section to render. Only this portion will be rendered.</param>
         /// <param name="sectionCount">The number of scanline sections.</param>
-        private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area, int section, int sectionCount)
+        private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexRowChange;
-            AlphaBlendInitialize(area.Location, area.Size, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexRowChange);
+            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
+            AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
+                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
 
             int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
@@ -1748,7 +1947,7 @@
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
                         AlphaBlendPixel(backgroundIndex, srcColor, srcAlpha);
-                    backgroundIndex++;
+                    backgroundIndex += backgroundIndexChange;
                 }
                 backgroundIndex += backgroundIndexRowChange;
                 dataRowIndexFixedPoint += yScaleFixedPoint;
@@ -1873,7 +2072,7 @@
                 if (form != null)
                     form.Dispose();
 
-                foreach (var image in images.InitializedValues)
+                foreach (var image in images.Values)
                     image.Dispose();
 
                 if (windowIcon != null)

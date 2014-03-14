@@ -5,10 +5,10 @@
     using DesktopSprites.Core;
 
     /// <summary>
-    /// Defines a <see cref="T:DesktopSprites.SpriteManagement.SpriteFrame`1"/> whose underlying image is a
+    /// Defines a <see cref="T:DesktopSprites.SpriteManagement.Frame`1"/> whose underlying image is a
     /// <see cref="T:System.Drawing.Bitmap"/>.
     /// </summary>
-    public sealed class BitmapFrame : SpriteFrame<Bitmap>, IDisposable
+    public sealed class BitmapFrame : Frame<Bitmap>, IDisposable
     {
         /// <summary>
         /// Creates an <see cref="T:DesktopSprites.SpriteManagement.AnimatedImage`1"/> of
@@ -78,20 +78,6 @@
         public BitmapFrame(string fileName)
             : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, "fileName").GetHashCode())
         {
-        }
-
-        /// <summary>
-        /// Ensures the frame is facing the desired direction by possibly flipping it horizontally.
-        /// </summary>
-        /// <param name="flipFromOriginal">Pass true to ensure the frame is facing the opposing direction as when it was loaded. Pass false
-        /// to ensure the frame is facing the same direction as when it was loaded.</param>
-        public override void Flip(bool flipFromOriginal)
-        {
-            if (Flipped != flipFromOriginal)
-            {
-                Flipped = !Flipped;
-                Image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            }
         }
 
         /// <summary>

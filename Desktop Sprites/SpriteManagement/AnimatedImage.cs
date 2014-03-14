@@ -203,14 +203,15 @@
         }
 
         /// <summary>
-        /// Gets the frame for the given time index in the animation.
+        /// Gets the frame at the given index in the animation.
         /// </summary>
-        /// <param name="milliseconds">The number of milliseconds into the animation from which to retrieve a frame. The number of loops in
-        /// the animation is respected when seeking frames.</param>
+        /// <param name="index">The index of the animation from which to retrieve a frame.</param>
         /// <returns>The frame that should be displayed for the given time index in the animation.</returns>
-        public T this[double milliseconds]
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is negative or greater than or equal to
+        /// FrameCount.</exception>
+        public T this[int index]
         {
-            get { return FrameFromTime(TimeSpan.FromMilliseconds(milliseconds)); }
+            get { return frames[FrameIndexFromLogicalIndex(index)]; }
         }
 
         /// <summary>
@@ -221,18 +222,22 @@
         /// <returns>The frame that should be displayed for the given time index in the animation.</returns>
         public T this[TimeSpan time]
         {
-            get { return FrameFromTime(time); }
+            get { return frames[FrameIndexFromTimeIndex(time)]; }
         }
 
         /// <summary>
-        /// Gets the frame for the given time index in the animation.
+        /// Gets the duration the specified frame in milliseconds.
         /// </summary>
-        /// <param name="time">The time index of the animation from which to retrieve a frame. The number of loops in the animation is
-        /// respected when seeking frames.</param>
-        /// <returns>The frame that should be displayed for the given time index in the animation.</returns>
-        public T FrameFromTime(TimeSpan time)
+        /// <param name="frameIndex">The index of the animation from which to retrieve a frame duration.</param>
+        /// <returns>The duration the specified frame in milliseconds.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="frameIndex"/> is negative or greater than or equal to
+        /// FrameCount.</exception>
+        public int GetDuration(int frameIndex)
         {
-            return frames[FrameIndexFromTime(time)];
+            Argument.EnsureNonnegative(frameIndex, "frameIndex");
+            if (frameIndex >= FrameCount)
+                throw new ArgumentOutOfRangeException("frameIndex", frameIndex, "frameIndex must be less than FrameCount.");
+            return commonFrameDuration != -1 ? commonFrameDuration : durations[frameIndex];
         }
 
         /// <summary>
@@ -241,7 +246,8 @@
         /// <param name="time">The time index of the animation from which to retrieve a frame index. The number of loops in the animation
         /// is respected when seeking frames.</param>
         /// <returns>The frame index that should be displayed for the given time index in the animation.</returns>
-        private int FrameIndexFromTime(TimeSpan time)
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="time"/> is negative.</exception>
+        private int FrameIndexFromTimeIndex(TimeSpan time)
         {
             if (time < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException("time", time, "time must be non-negative.");
@@ -277,10 +283,25 @@
             }
 
             // Return the frame required.
+            return FrameIndexFromLogicalIndex(frame);
+        }
+
+        /// <summary>
+        /// Gets the frame index for the given logical index in the animation.
+        /// </summary>
+        /// <param name="index">The logical index of the animation from which to retrieve a frame index.</param>
+        /// <returns>The frame index that should be displayed for the given time index in the animation.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is negative or greater than or equal to
+        /// FrameCount.</exception>
+        private int FrameIndexFromLogicalIndex(int index)
+        {
+            Argument.EnsureNonnegative(index, "index");
+            if (index >= FrameCount)
+                throw new ArgumentOutOfRangeException("index", index, "index must be less than FrameCount.");
             if (frameIndexes != null)
-                return frameIndexes[frame];
+                return frameIndexes[index];
             else
-                return frame;
+                return index;
         }
 
         /// <summary>

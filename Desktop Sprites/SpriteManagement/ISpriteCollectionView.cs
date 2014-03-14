@@ -14,18 +14,20 @@
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this interface can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
-        void LoadImages(IEnumerable<string> imageFilePaths);
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
+        void LoadImages(IEnumerable<SpriteImagePaths> imagePaths);
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this interface can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
         /// <param name="imageLoadedHandler">An <see cref="T:System.EventHandler"/> that is raised when an image is loaded.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
-        void LoadImages(IEnumerable<string> imageFilePaths, EventHandler imageLoadedHandler);
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
+        /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
+        void LoadImages(IEnumerable<SpriteImagePaths> imagePaths, EventHandler imageLoadedHandler);
         /// <summary>
         /// Creates an interface specific context menu for the given set of menu items.
         /// </summary>

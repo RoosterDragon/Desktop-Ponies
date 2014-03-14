@@ -1750,30 +1750,39 @@ Public Class Pony
     End Function
 
     ''' <summary>
+    ''' Gets the behavior that provides the current image (based on the visual override behavior and current behavior).
+    ''' </summary>
+    Private ReadOnly Property currentImageBehavior As Behavior
+        Get
+            Return If(If(_visualOverrideBehavior, _currentBehavior), Base.Behaviors(0))
+        End Get
+    End Property
+
+    ''' <summary>
     ''' Gets the current image (based on the visual override behavior, current behavior and facing).
     ''' </summary>
     Private ReadOnly Property currentImage As CenterableSpriteImage
         Get
-            Dim behavior = If(If(_visualOverrideBehavior, _currentBehavior), Base.Behaviors(0))
+            Dim behavior = currentImageBehavior
             Return If(_facingRight, behavior.RightImage, behavior.LeftImage)
         End Get
     End Property
 
     ''' <summary>
-    ''' Gets the path to the image file that should be used to display the sprite.
+    ''' Gets a value indicating whether the sprite is currently facing to the right.
     ''' </summary>
-    Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
+    Public ReadOnly Property FacingRight As Boolean Implements ISprite.FacingRight
         Get
-            Return currentImage.Path
+            Return _facingRight
         End Get
     End Property
 
     ''' <summary>
-    ''' Gets a value indicating whether the image should be flipped horizontally from its original orientation.
+    ''' Gets the image paths to be used to display the sprite.
     ''' </summary>
-    Private ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
+    Public ReadOnly Property ImagePaths As SpriteImagePaths Implements ISprite.ImagePaths
         Get
-            Return False
+            Return New SpriteImagePaths(currentImageBehavior.LeftImage.Path, currentImageBehavior.RightImage.Path)
         End Get
     End Property
 
@@ -3351,9 +3360,15 @@ Public Class Effect
                          CInt(Me.TopLeftLocation.Y + (CurrentImageSize.Height / 2)))
     End Function
 
-    Public ReadOnly Property CurrentImagePath() As String
+    Public ReadOnly Property FacingRight As Boolean Implements ISprite.FacingRight
         Get
-            Return If(FacingLeft, Base.LeftImage.Path, Base.RightImage.Path)
+            Return Not FacingLeft
+        End Get
+    End Property
+
+    Public ReadOnly Property ImagePaths As SpriteImagePaths Implements ISprite.ImagePaths
+        Get
+            Return New SpriteImagePaths(Base.LeftImage.Path, Base.RightImage.Path)
         End Get
     End Property
 
@@ -3443,18 +3458,6 @@ Public Class Effect
     Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
             Return _currentTime - _internalStartTime
-        End Get
-    End Property
-
-    Public ReadOnly Property FlipImage As Boolean Implements ISprite.FlipImage
-        Get
-            Return False
-        End Get
-    End Property
-
-    Public ReadOnly Property ImagePath As String Implements ISprite.ImagePath
-        Get
-            Return CurrentImagePath()
         End Get
     End Property
 

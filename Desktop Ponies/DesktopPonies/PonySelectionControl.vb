@@ -31,7 +31,6 @@ Public Class PonySelectionControl
     Private originalImageSize As Size
     Private imageSize As Size
     Private timeIndex As TimeSpan
-    Private flip As Boolean
     Private ReadOnly Property ponyImageArea As Rectangle
         Get
             Return New Rectangle(ImageMargin,
@@ -41,7 +40,7 @@ Public Class PonySelectionControl
         End Get
     End Property
 
-    Public Sub New(ponyTemplate As PonyBase, imagePath As String, flipImage As Boolean)
+    Public Sub New(ponyTemplate As PonyBase, imagePath As String)
         Argument.EnsureNotNull(ponyTemplate, "ponyTemplate")
         Argument.EnsureNotNull(imagePath, "imagePath")
         InitializeComponent()
@@ -53,7 +52,6 @@ Public Class PonySelectionControl
             ' Leave size empty if it cannot be determined.
         End Try
         imageSize = New Size(CInt(originalImageSize.Width * Options.ScaleFactor), CInt(originalImageSize.Height * Options.ScaleFactor))
-        flip = flipImage
 
         Threading.ThreadPool.QueueUserWorkItem(AddressOf LoadImage, imagePath)
 
@@ -126,7 +124,6 @@ Public Class PonySelectionControl
             If image Is Nothing Then Return
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
             e.Graphics.PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
-            image(timeIndex).Flip(flip)
             Dim bitmap = image(timeIndex).Image
             e.Graphics.DrawImage(bitmap, ponyImageArea)
         End If

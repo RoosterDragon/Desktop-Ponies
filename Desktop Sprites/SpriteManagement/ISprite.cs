@@ -9,13 +9,13 @@
     public interface ISprite
     {
         /// <summary>
-        /// Gets the path to the image file that should be used to display the sprite.
+        /// Gets the image paths to be used to display the sprite.
         /// </summary>
-        string ImagePath { get; }
+        SpriteImagePaths ImagePaths { get; }
         /// <summary>
-        /// Gets a value indicating whether the image should be flipped horizontally from its original orientation.
+        /// Gets a value indicating whether the sprite is currently facing to the right.
         /// </summary>
-        bool FlipImage { get; }
+        bool FacingRight { get; }
         /// <summary>
         /// Gets the region the sprite currently occupies.
         /// </summary>
