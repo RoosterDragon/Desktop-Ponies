@@ -281,11 +281,14 @@ Public Class Game
                 Next
                 Status = GameStatus.SetupWaitForPositions
             Case GameStatus.SetupWaitForPositions
+                Dim ready = True
                 For Each team In Teams
                     For Each position In team.Positions
-                        If Not position.Player.AtDestination Then Exit Select
+                        position.SetDestinationToStartLocation()
+                        If Not position.Player.AtDestination Then ready = False
                     Next
                 Next
+                If Not ready Then Exit Select
                 Status = GameStatus.SetupAddBalls
             Case GameStatus.SetupAddBalls
                 For Each position In allPlayers
