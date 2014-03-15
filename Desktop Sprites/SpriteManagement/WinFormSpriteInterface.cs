@@ -1203,7 +1203,8 @@
                         remaining++;
                         ThreadPool.QueueUserWorkItem(o => LoadPaths(paths, imageLoadedHandler));
                     }
-                Monitor.Wait(syncObject);
+                if (remaining > 0)
+                    Monitor.Wait(syncObject);
             }
             imageLoadedHandler -= imageLoaded;
         }
