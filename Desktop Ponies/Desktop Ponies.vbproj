@@ -172,7 +172,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="DesktopPonies\Options.vb" />
-    <Compile Include="Core\PathEquality.vb" />
     <Compile Include="PonyEditor2\AnimatedImageViewer.Designer.vb">
       <DependentUpon>AnimatedImageViewer.vb</DependentUpon>
     </Compile>

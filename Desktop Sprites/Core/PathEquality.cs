@@ -1,6 +1,7 @@
 ﻿namespace DesktopSprites.Core
 {
     using System;
+
     /// <summary>
     /// Provides equality information for file-system paths of the current operating system.
     /// </summary>

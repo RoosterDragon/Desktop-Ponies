@@ -71,9 +71,9 @@
                     var behavior = ponyBase.Behaviors.Single(b => b.Name == e.BehaviorName);
                     return new string[] { e.LeftImage.Path, e.RightImage.Path, behavior.LeftImage.Path, behavior.RightImage.Path };
                 }).SelectMany(images => images).ToArray();
-                var imageFilePathsToUse = new HashSet<string>(imageFilePaths, DesktopPonies.PathEquality.Comparer);
+                var imageFilePathsToUse = new HashSet<string>(imageFilePaths, PathEquality.Comparer);
                 imageFilePathsToUse.ExceptWith(imagesToIgnore);
-                var imageCropInfo = new Dictionary<string, Point>(DesktopPonies.PathEquality.Comparer);
+                var imageCropInfo = new Dictionary<string, Point>(PathEquality.Comparer);
                 foreach (var imageFilePath in imageFilePathsToUse)
                 {
                     Rectangle? maybeCropped = GetCroppedRegion(contentDirectory, imageFilePath);
