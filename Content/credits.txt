@@ -35,7 +35,6 @@ You may also be interested in the [deviantART group for Desktop Ponies](http://d
 * [asluc96](http://asluc96.deviantart.com/)
 * [Asparagus](http://asparagusunited.deviantart.com/)
 * Azure Fang
-* [BaldDumboRat](http://balddumborat.deviantart.com/)
 * [Blackfeathr](http://blackfeathr.deviantart.com/)
 * [Bot-chan](http://botchan-mlp.deviantart.com/)
 * [CANDYBAG](http://auraion.deviantart.com/)
@@ -255,10 +254,9 @@ Contributors are broken down by character. If there was more than one contributo
 * StarStep
 
 #### Doctor Whooves
-* Asparagus [Stand, Idle, Walk]
-* RJP! [Stand, Idle, Walk]
-* BaldDumboRat [Hourglass]
-* Anonycat [Tardis]
+* Asparagus [Stand, Trot]
+* RJP! [Stand, Trot]
+* Anonycat [Stand, Trot, CloneStand, CloneTrot, Hourglass, Tardis]
 * Bot-chan [Tardis]
 
 #### Doctor Whooves (Fan Character)
