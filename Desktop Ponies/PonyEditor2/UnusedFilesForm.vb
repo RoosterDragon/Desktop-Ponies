@@ -1,7 +1,7 @@
 ﻿Imports System.IO
 
 Public Class UnusedFilesForm
-    Private ponies As PonyCollection
+    Private ReadOnly ponies As PonyCollection
 
     Public Sub New(ponyCollection As PonyCollection)
         ponies = Argument.EnsureNotNull(ponyCollection, "ponyCollection")

@@ -839,6 +839,15 @@ Public Class PonyEditorForm2
             End Function)
     End Sub
 
+    Private Sub UnscalableImagesButton_Click(sender As Object, e As EventArgs) Handles UnscalableImagesButton.Click
+        preview.ShowDialogOverPreview(
+            Function()
+                Using form As New UnscalableImagesForm(ponies)
+                    Return form.ShowDialog(Me)
+                End Using
+            End Function)
+    End Sub
+
     Private Sub ReloadButton_Click(sender As Object, e As EventArgs) Handles ReloadButton.Click
         If Documents.TabCount > 0 Then
             If preview.ShowDialogOverPreview(

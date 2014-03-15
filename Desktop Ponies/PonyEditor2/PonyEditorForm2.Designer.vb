@@ -70,6 +70,7 @@ Partial Class PonyEditorForm2
         Me.ItemCollectionOrItemNodeContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.OpenContextMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ActiveFormPollingTimer = New System.Windows.Forms.Timer(Me.components)
+        Me.UnscalableImagesButton = New System.Windows.Forms.ToolStripButton()
         Me.EditingArea.Panel1.SuspendLayout()
         Me.EditingArea.Panel2.SuspendLayout()
         Me.EditingArea.SuspendLayout()
@@ -125,7 +126,7 @@ Partial Class PonyEditorForm2
         'EditorToolStrip
         '
         Me.EditorToolStrip.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.UnusedFilesButton, Me.ReloadButton, Me.PreviewRestartButton})
+        Me.EditorToolStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.NewPonyButton, Me.PreviewButton, Me.NewItemButton, Me.ItemsButton, Me.PonyItemSeparator, Me.SaveItemButton, Me.CloseTabButton, Me.CloseAllTabsButton, Me.ItemPreviewSeperator, Me.UnusedFilesButton, Me.UnscalableImagesButton, Me.ReloadButton, Me.PreviewRestartButton})
         Me.EditorToolStrip.Location = New System.Drawing.Point(0, 0)
         Me.EditorToolStrip.Name = "EditorToolStrip"
         Me.EditorToolStrip.Size = New System.Drawing.Size(984, 25)
@@ -491,6 +492,14 @@ Partial Class PonyEditorForm2
         'ActiveFormPollingTimer
         '
         '
+        'UnscalableImagesButton
+        '
+        Me.UnscalableImagesButton.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.UnscalableImagesButton.Name = "UnscalableImagesButton"
+        Me.UnscalableImagesButton.Size = New System.Drawing.Size(109, 22)
+        Me.UnscalableImagesButton.Text = "Unscalable Images"
+        Me.UnscalableImagesButton.ToolTipText = "Find images that do not fit the 2x scale art style used by Desktop Ponies."
+        '
         'PonyEditorForm2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -567,4 +576,5 @@ Partial Class PonyEditorForm2
     Friend WithEvents colSource As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents ActiveFormPollingTimer As System.Windows.Forms.Timer
     Friend WithEvents UnusedFilesButton As System.Windows.Forms.ToolStripButton
+    Friend WithEvents UnscalableImagesButton As System.Windows.Forms.ToolStripButton
 End Class
