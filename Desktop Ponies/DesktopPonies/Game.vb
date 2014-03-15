@@ -255,12 +255,6 @@ Public Class Game
         For Each ball In Balls
             ball.Initialize(GameScreen)
         Next
-
-        If Options.ScaleFactor <> 1 Then
-            MessageBox.Show(String.Format(CultureInfo.CurrentCulture,
-                                          "Note: Games may not work properly if you use a scale factor other than 1." &
-                                          " You are currently using a scale factor of {0:0.00}x.", Options.ScaleFactor))
-        End If
     End Sub
 
     Public Sub Update(manualControlPlayerOne As Pony, manualControlPlayerTwo As Pony)

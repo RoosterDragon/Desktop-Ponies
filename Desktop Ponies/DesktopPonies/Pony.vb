@@ -1107,7 +1107,18 @@ Public Class PonyContext
     Public Property SpeechEnabled As Boolean
     Public Property InteractionsEnabled As Boolean
 
+    Private _randomSpeechChance As Double
     Public Property RandomSpeechChance As Double
+        Get
+            Return _randomSpeechChance
+        End Get
+        Set(value As Double)
+            If value < 0 OrElse value > 1 Then
+                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0 and 1 inclusive.")
+            End If
+            _randomSpeechChance = value
+        End Set
+    End Property
 
     Public Property CursorAvoidanceEnabled As Boolean
     Private _cursorAvoidanceRadius As Single

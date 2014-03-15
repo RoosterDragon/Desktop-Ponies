@@ -308,7 +308,7 @@ Partial Class OptionsForm
         '
         Me.SizeScale.LargeChange = 25
         Me.SizeScale.Location = New System.Drawing.Point(6, 195)
-        Me.SizeScale.Maximum = 100
+        Me.SizeScale.Maximum = 80
         Me.SizeScale.Minimum = 5
         Me.SizeScale.Name = "SizeScale"
         Me.SizeScale.Size = New System.Drawing.Size(244, 45)
