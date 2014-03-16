@@ -16,9 +16,8 @@
             Justification = "This method provides event related functionality, but is not an event.")]
         public static void Raise(this EventHandler eventHandler, object sender)
         {
-            EventHandler handler = eventHandler;
-            if (handler != null)
-                handler(sender, EventArgs.Empty);
+            if (eventHandler != null)
+                eventHandler(sender, EventArgs.Empty);
         }
 
         /// <summary>
@@ -33,9 +32,8 @@
         public static void Raise<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, TEventArgs e)
             where TEventArgs : EventArgs
         {
-            EventHandler<TEventArgs> handler = eventHandler;
-            if (handler != null)
-                handler(sender, e);
+            if (eventHandler != null)
+                eventHandler(sender, e);
         }
 
         /// <summary>
@@ -52,10 +50,8 @@
             where TEventArgs : EventArgs
         {
             Argument.EnsureNotNull(argsFactory, "argsFactory");
-
-            EventHandler<TEventArgs> handler = eventHandler;
-            if (handler != null)
-                handler(sender, argsFactory());
+            if (eventHandler != null)
+                eventHandler(sender, argsFactory());
         }
     }
 }
