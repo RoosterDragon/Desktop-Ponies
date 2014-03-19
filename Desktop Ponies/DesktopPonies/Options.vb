@@ -63,7 +63,7 @@ Public NotInheritable Class Options
 
     Public Shared ReadOnly Property ProfileDirectory As String
         Get
-            Return Path.Combine(EvilGlobals.InstallLocation, "Profiles")
+            Return "Profiles"
         End Get
     End Property
 

@@ -7,6 +7,8 @@ Imports DesktopSprites.SpriteManagement
 ''' </summary>
 Public Class MainForm
 #Region "Fields and Properties"
+    Private Const Screensaver = "screensaver"
+    Private Const Autostart = "autostart"
     Private initialized As Boolean
     Private loading As Boolean
     Private ReadOnly loadWatch As New Diagnostics.Stopwatch()
@@ -60,133 +62,105 @@ Public Class MainForm
 
         Update()
 
-        If ProcessCommandLine() Then Return
-
-        ' Load the profile that was last in use by this user.
         Dim profile = Options.DefaultProfileName
-        Dim profileFile As StreamReader = Nothing
-        Try
-            profileFile = New StreamReader(Path.Combine(Options.ProfileDirectory, "current.txt"), System.Text.Encoding.UTF8)
-            profile = profileFile.ReadLine()
-        Catch ex As FileNotFoundException
-            ' We don't mind if no preferred profile is saved.
-        Catch ex As DirectoryNotFoundException
-            ' In screensaver mode, the user might set a bad path. We'll ignore it for now.
-        Finally
-            If profileFile IsNot Nothing Then profileFile.Close()
-        End Try
-        GetProfiles(profile)
-
-        Dim startedAsScr = Environment.GetCommandLineArgs()(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase)
-        If startedAsScr Then
-            Dim screensaverPath = EvilGlobals.TryGetScreensaverPath()
-            If screensaverPath Is Nothing Then
-                MessageBox.Show(
-                    Me, "The screensaver has not yet been configured, or the previous configuration is invalid. Please reconfigure now.",
-                    "Configuration Missing", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                Dim result = EvilGlobals.SetScreensaverPath()
-                If Not result Then
-                    MessageBox.Show(Me, "You will be unable to run Desktop Ponies as a screensaver until it is configured.",
-                                    "Configuration Aborted", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                Else
-                    MessageBox.Show(Me, "Restart Desktop Ponies for the new settings to take effect.",
-                                    "Configuration Successful", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                End If
-                Close()
-                Return
+        ProcessCommandLine()
+        If EvilGlobals.IsScreensaverExecutable() Then
+            profile = Screensaver
+            If EvilGlobals.InScreensaverMode Then
+                ' We are starting in screensaver mode. Hide the program during loading.
+                autoStarted = True
+                ShowInTaskbar = False
+                WindowState = FormWindowState.Minimized
             End If
-            ' Start in a minimized state to load, and attempt to open the screensaver profile.
-            ShowInTaskbar = False
-            WindowState = FormWindowState.Minimized
+        Else
+            ' Load the profile that was last in use by this user.
+            Dim profileFile As StreamReader = Nothing
             Try
-                Options.LoadProfile("screensaver", False)
-            Catch
-                Options.LoadDefaultProfile()
+                profileFile = New StreamReader(Path.Combine(Options.ProfileDirectory, "current.txt"), System.Text.Encoding.UTF8)
+                profile = profileFile.ReadLine()
+            Catch ex As FileNotFoundException
+                ' We don't mind if no preferred profile is saved.
+            Finally
+                If profileFile IsNot Nothing Then profileFile.Close()
             End Try
+        End If
+        ' Get the profile listing.
+        GetProfiles(profile)
+        ' If we wanted to load the screensaver profile, but it didn't exist, then set that to be in use anyway.
+        If profile = Screensaver AndAlso ProfileComboBox.Text <> Screensaver Then
+            ProfileComboBox.Text = Screensaver
         End If
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
     End Sub
 
-    Private Function ProcessCommandLine() As Boolean
+    Private Sub ProcessCommandLine()
         Try
             Dim args = Environment.GetCommandLineArgs()
 
-            If args.Length = 1 AndAlso args(0).EndsWith(".scr", StringComparison.OrdinalIgnoreCase) Then
-                'for some versions of windows, starting with no parameters is the same as /c (configure)
-                EvilGlobals.SetScreensaverPath()
-                Me.Close()
-                Return True
+            ' On some versions of Windows, starting a screensaver with no arguments indicates the screensaver should be configured.
+            If EvilGlobals.IsScreensaverExecutable() AndAlso args.Length = 1 Then
+                ConfigureScreensaver()
+                Return
             End If
 
-            ' Process command line arguments (used for the screensaver mode).
-            If My.Application.CommandLineArgs.Count >= 1 Then
+            ' Process command line arguments.
+            If args.Length >= 2 Then
                 Select Case Split(args(1).Trim(), ":")(0).ToLowerInvariant()
-                    Case "autostart"
+                    Case Autostart
+                        ' Immediately start the ponies, using the autostart profile if available.
                         autoStarted = True
                         ShowInTaskbar = False
 
                         Try
-                            Options.LoadProfile("autostart", False)
+                            Options.LoadProfile(Autostart, False)
                         Catch
                             Options.LoadDefaultProfile()
                         End Try
-
-                        'windows is telling us "start as a screensaver"
                     Case "/s"
-                        Dim path = EvilGlobals.TryGetScreensaverPath()
-                        If path Is Nothing Then
-                            MessageBox.Show(Me, "The screensaver path has not been configured correctly." &
-                                            " Until it has been set, the screensaver mode cannot be used.",
-                                            "Screensaver Not Configured", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                            Close()
-                            Return True
-                        End If
-
-                        EvilGlobals.InstallLocation = path
+                        ' Screensaver option for starting the screensaver.
                         EvilGlobals.InScreensaverMode = True
-                        autoStarted = True
-                        ShowInTaskbar = False
-                        WindowState = FormWindowState.Minimized
-
-                        Try
-                            Options.LoadProfile("screensaver", False)
-                        Catch
-                            Options.LoadDefaultProfile()
-                        End Try
-
-                        'windows says: "preview screensaver".  This isn't implemented so just quit
-                    Case "/p"
-                        Me.Close()
-                        Return True
-                        'windows says:  "configure screensaver"
                     Case "/c"
-                        EvilGlobals.SetScreensaverPath()
-                        Me.Close()
-                        Return True
+                        ' Screensaver option for configuring the screensaver.
+                        ConfigureScreensaver()
+                    Case "/p"
+                        ' Screensaver option for previewing the screensaver. There is no preview mode.
+                        Environment.Exit(0)
                     Case Else
+                        Dim executable = """" & Path.GetFileName(Reflection.Assembly.GetEntryAssembly().Location) & """"
                         MessageBox.Show(
                             Me,
-                            "Invalid command line argument. Usage: " & ControlChars.NewLine &
-                            "desktop ponies.exe autostart - " &
-                            "Automatically start with saved settings (or defaults if no settings are saved)" & ControlChars.NewLine &
-                            "desktop ponies.exe /s - " &
-                            "Start in screensaver mode (you need to run /c first to configure the path to the pony files)" &
-                            ControlChars.NewLine &
-                            "desktop ponies.exe /c - " &
-                            "Configure the path to pony files, only used for Screensaver mode." & ControlChars.NewLine &
-                            "desktop ponies.exe /p - " &
-                            "Screensaver preview use only.Not implemented.",
+                            "Invalid command line arguments. They will be ignored. Usage: " & vbNewLine & vbNewLine &
+                            executable & vbNewLine &
+                            "Starts Desktop Ponies normally." & vbNewLine & vbNewLine &
+                            executable & " " & Autostart & vbNewLine &
+                            "Start and show ponies straight away, using the '" & Autostart & "' profile." & vbNewLine & vbNewLine &
+                            executable & " /s" & vbNewLine &
+                            "Start in screensaver mode. This uses the '" & Screensaver & "' profile." & vbNewLine & vbNewLine &
+                            executable & " /c" & vbNewLine &
+                            "Configure screensaver mode." & vbNewLine & vbNewLine &
+                            executable & " /p" & vbNewLine &
+                            "Preview screensaver mode. This does nothing.",
                             "Invalid Arguments", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                        Me.Close()
-                        Return True
                 End Select
             End If
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
         End Try
-        Return False
-    End Function
+    End Sub
+
+    Private Sub ConfigureScreensaver()
+        MessageBox.Show(
+            Me,
+            "The 'screensaver' profile will been loaded. Make changes to this profile to configure the screensaver." & vbNewLine &
+            vbNewLine &
+            " - Set the number of ponies you want to appear by entering a value for each pony." & vbNewLine &
+            " - Open the options menu and change any settings you wish to be used when the screensaver is active." & vbNewLine &
+            vbNewLine &
+            "Then save the profile using the save button on the main menu or the options menu. You can then close the program. " &
+            "When the screensaver starts it will use these settings.",
+            "Screensaver Help", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
 
     Private Sub LoadTemplates()
         ' Load ponies.
@@ -317,6 +291,12 @@ Public Class MainForm
         Next
     End Sub
 
+    Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
+        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
+            ponyPanel.Count = 1
+        Next
+    End Sub
+
     Private Sub SaveProfileButton_Click(sender As Object, e As EventArgs) Handles SaveProfileButton.Click
         Dim profileToSave = ProfileComboBox.Text
 
@@ -345,14 +325,8 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
-        Options.LoadProfile(ProfileComboBox.Text, True)
+        Options.LoadProfile(ProfileComboBox.Text, Not EvilGlobals.IsScreensaverExecutable())
         ReloadFilterCategories()
-    End Sub
-
-    Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            ponyPanel.Count = 1
-        Next
     End Sub
 
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
@@ -468,7 +442,7 @@ Public Class MainForm
 
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not preventLoadProfile Then
-            Options.LoadProfile(ProfileComboBox.Text, True)
+            Options.LoadProfile(ProfileComboBox.Text, Not EvilGlobals.IsScreensaverExecutable())
             ReloadFilterCategories()
         End If
     End Sub

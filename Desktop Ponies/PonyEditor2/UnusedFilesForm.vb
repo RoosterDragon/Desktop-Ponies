@@ -17,10 +17,9 @@ Public Class UnusedFilesForm
         Dim worker As IdleWorker = DirectCast(workerObject, IdleWorker)
         Dim files As New HashSet(Of String)(PathEquality.Comparer)
         Dim unusedFiles As New List(Of String)()
-        Dim baseRootDirectory = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory)
         For Each base In ponies.Bases
             unusedFiles.Clear()
-            Dim basePath = Path.Combine(baseRootDirectory, base.Directory)
+            Dim basePath = Path.Combine(PonyBase.RootDirectory, base.Directory)
             files.UnionWith(Directory.GetFiles(basePath, "*.gif"))
             files.UnionWith(Directory.GetFiles(basePath, "*.png"))
             files.UnionWith(Directory.GetFiles(basePath, "*.mp3"))
@@ -41,7 +40,7 @@ Public Class UnusedFilesForm
         worker.QueueTask(Sub()
                              UnusedFilesTextBox.SuspendLayout()
                              For Each unusedFile In unusedFiles
-                                 UnusedFilesTextBox.AppendText(unusedFile.Replace(baseRootDirectory, "") & vbNewLine)
+                                 UnusedFilesTextBox.AppendText(unusedFile.Replace(PonyBase.RootDirectory, "") & vbNewLine)
                              Next
                              UnusedFilesTextBox.ResumeLayout()
                              StatusLabel.Text = "Found " & unusedFiles.Count & " unused files."

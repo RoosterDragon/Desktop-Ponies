@@ -239,8 +239,8 @@ Public Class PonyBase
             If newDirectory.Contains("""") Then
                 Throw New ArgumentException("newDirectory may not contain any quote characters.", "newDirectory")
             End If
-            Dim currentPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory)
-            Dim newPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, newDirectory)
+            Dim currentPath = Path.Combine(PonyBase.RootDirectory, Directory)
+            Dim newPath = Path.Combine(PonyBase.RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
         Catch ex As Exception
             Return False
@@ -268,7 +268,7 @@ Public Class PonyBase
     Public Shared Function Create(directory As String) As Boolean
         Try
             If directory.Contains("""") Then Throw New ArgumentException("directory may not contain any quote characters.", "directory")
-            Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
+            Dim fullPath = Path.Combine(PonyBase.RootDirectory, directory)
             If IO.Directory.Exists(fullPath) Then Return False
             IO.Directory.CreateDirectory(fullPath)
             Return True
@@ -280,7 +280,7 @@ Public Class PonyBase
     Public Shared Function Load(collection As PonyCollection, directory As String, removeInvalidItems As Boolean) As PonyBase
         Dim pony As PonyBase = Nothing
         Try
-            Dim fullPath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, directory)
+            Dim fullPath = Path.Combine(PonyBase.RootDirectory, directory)
             Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
                 pony = New PonyBase(collection)
@@ -393,7 +393,7 @@ Public Class PonyBase
 
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
-        Dim configFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
+        Dim configFilePath = IO.Path.Combine(PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
 
         Dim tempFileName = Path.GetTempFileName()
         Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
@@ -426,7 +426,7 @@ Public Class PonyBase
         End Using
         MoveOrReplace(tempFileName, configFilePath)
 
-        Dim interactionsFilePath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)
+        Dim interactionsFilePath = Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
         Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
@@ -3581,7 +3581,7 @@ Public Class HouseBase
     End Sub
 
     Private Sub LoadFromIni()
-        Dim fullDirectory = Path.Combine(EvilGlobals.InstallLocation, RootDirectory, Directory)
+        Dim fullDirectory = Path.Combine(RootDirectory, Directory)
         Dim imageFilename As String = Nothing
         Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
             Do Until configFile.EndOfStream
@@ -3983,7 +3983,7 @@ End Enum
 ''' <summary>
 ''' Specifies how the offset vector is to be treated for follow targets.
 ''' </summary>
-Public Enum FollowOffsetType
+Public Enum FollowOffsetType As Byte
     ''' <summary>
     ''' The offset vector is fixed and does not change.
     ''' </summary>

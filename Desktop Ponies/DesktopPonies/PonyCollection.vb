@@ -29,9 +29,9 @@ Public Class PonyCollection
     Public Sub New(removeInvalidItems As Boolean,
                    ponyCountCallback As Action(Of Integer), ponyLoadCallback As Action(Of PonyBase),
                    houseCountCallback As Action(Of Integer), houseLoadCallback As Action(Of HouseBase))
-        Dim ponyBaseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory))
+        Dim ponyBaseDirectories = Directory.GetDirectories(PonyBase.RootDirectory)
         If ponyCountCallback IsNot Nothing Then ponyCountCallback(ponyBaseDirectories.Length)
-        Dim houseDirectories = Directory.GetDirectories(Path.Combine(EvilGlobals.InstallLocation, HouseBase.RootDirectory))
+        Dim houseDirectories = Directory.GetDirectories(HouseBase.RootDirectory)
         If houseCountCallback IsNot Nothing Then houseCountCallback(houseDirectories.Length)
         Threading.Tasks.Parallel.Invoke(
             Sub() LoadPonyBases(removeInvalidItems, ponyBaseDirectories, ponyLoadCallback),
@@ -76,12 +76,12 @@ Public Class PonyCollection
     End Sub
 
     Private Sub LoadInteractions()
-        If Not File.Exists(Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
+        If Not File.Exists(Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
             Exit Sub
         End If
         Dim newListFactory = Function(s As String) New List(Of InteractionBase)()
         Using reader As New StreamReader(
-            Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, InteractionBase.ConfigFilename))
+            Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename))
             Do Until reader.EndOfStream
                 Dim line = reader.ReadLine()
 

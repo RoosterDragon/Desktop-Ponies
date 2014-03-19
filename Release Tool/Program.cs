@@ -19,20 +19,20 @@
         {
             string dpVersion = FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(typeof(DesktopPonies.Direction)).Location).FileVersion;
             Console.WriteLine("Current version of Desktop Ponies is " + dpVersion);
-            
-            string currentDirectory = Environment.CurrentDirectory;
-            string solutionDirectory = currentDirectory.Remove(currentDirectory.IndexOf("Release Tool"));
+
+            string toolDirectory = Environment.CurrentDirectory;
+            string solutionDirectory = toolDirectory.Remove(toolDirectory.IndexOf("Release Tool"));
             string contentDirectory = Path.Combine(solutionDirectory, "Content");
             string releaseDirectory = Path.Combine(solutionDirectory, "Desktop Ponies", "bin", "Release");
 
-            DesktopPonies.EvilGlobals.InstallLocation = contentDirectory;
+            Environment.CurrentDirectory = contentDirectory;
 
             bool contentChanged = false;
             if (ConsoleReadYesNoQuit("Run image optimizers?"))
             {
-                CropImages(contentDirectory);
-                contentChanged = CompressGifs(contentDirectory) > 0 || contentChanged;
-                CompressPngs(contentDirectory);
+                CropImages(toolDirectory, contentDirectory);
+                contentChanged = CompressGifs(toolDirectory, contentDirectory) > 0 || contentChanged;
+                CompressPngs(toolDirectory, contentDirectory);
                 Console.WriteLine("Optimizing finished.");
                 Console.WriteLine();
             }
@@ -50,7 +50,7 @@
             Console.Read();
         }
 
-        private static void CropImages(string contentDirectory)
+        private static void CropImages(string toolDirectory, string contentDirectory)
         {
             Console.WriteLine("Loading bases pending cropping of transparent borders.");
             var ponies = new DesktopPonies.PonyCollection(true);
@@ -64,7 +64,8 @@
                     Console.WriteLine("Checking images for " + ponyBase.Directory);
                 currentLine = Console.CursorTop;
                 var ponyDirectory = Path.Combine(poniesDirectory, ponyBase.Directory);
-                var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png"));
+                var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png")).
+                    Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
                 // Ignore any images involved in effects, as the transparent borders may be used for alignment.
                 var imagesToIgnore = ponyBase.Effects.Select(e =>
                 {
@@ -82,9 +83,9 @@
                         if (Path.GetExtension(imageFilePath) == ".gif")
                         {
                             if (maybeCropped.Value == Rectangle.Empty)
-                                CropGifImage(contentDirectory, imageFilePath, new Rectangle(0, 0, 1, 1));
+                                CropGifImage(toolDirectory, contentDirectory, imageFilePath, new Rectangle(0, 0, 1, 1));
                             else
-                                CropGifImage(contentDirectory, imageFilePath, maybeCropped.Value);
+                                CropGifImage(toolDirectory, contentDirectory, imageFilePath, maybeCropped.Value);
                         }
                         else
                         {
@@ -250,7 +251,7 @@
             return null;
         }
 
-        private static void CropGifImage(string contentDirectory, string filePath, Rectangle cropArea)
+        private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath, Rectangle cropArea)
         {
             string tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
@@ -259,7 +260,7 @@
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
 
-                process.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "gifsicle.exe");
+                process.StartInfo.FileName = Path.Combine(toolDirectory, "gifsicle.exe");
                 if (!File.Exists(process.StartInfo.FileName))
                 {
                     Console.WriteLine("Missing gifsicle.exe in current directory.");
@@ -298,7 +299,7 @@
             }
         }
 
-        private static int CompressGifs(string sourceDirectory)
+        private static int CompressGifs(string toolDirectory, string sourceDirectory)
         {
             string tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
@@ -308,7 +309,7 @@
                 process.StartInfo.UseShellExecute = false;
 
                 int gifsOptimized = 0;
-                process.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "gifsicle.exe");
+                process.StartInfo.FileName = Path.Combine(toolDirectory, "gifsicle.exe");
                 if (!File.Exists(process.StartInfo.FileName))
                 {
                     Console.WriteLine("Missing gifsicle.exe in current directory.");
@@ -361,14 +362,14 @@
             }
         }
 
-        private static void CompressPngs(string sourceDirectory)
+        private static void CompressPngs(string toolDirectory, string sourceDirectory)
         {
             using (var process = new Process())
             {
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
 
-                process.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "pngout.exe");
+                process.StartInfo.FileName = Path.Combine(toolDirectory, "pngout.exe");
                 if (!File.Exists(process.StartInfo.FileName))
                 {
                     Console.WriteLine("Missing pngout.exe in current directory.");

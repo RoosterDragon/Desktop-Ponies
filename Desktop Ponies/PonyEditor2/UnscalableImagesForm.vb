@@ -20,7 +20,7 @@ Public Class UnscalableImagesForm
     Private Sub LoadInternal()
         ThreadPool.QueueUserWorkItem(
             Sub()
-                Dim basePath = Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory) & Path.DirectorySeparatorChar
+                Dim basePath = PonyBase.RootDirectory & Path.DirectorySeparatorChar
                 Dim imagePaths = New HashSet(Of String)(
                         ponies.Bases.SelectMany(
                             Function(pb) pb.Behaviors).SelectMany(

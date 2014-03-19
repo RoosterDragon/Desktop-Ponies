@@ -415,12 +415,6 @@
     <Compile Include="PonyEditor\PonyEditor.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PonyEditor\SelectFilesPathDialog.Designer.vb">
-      <DependentUpon>SelectFilesPathDialog.vb</DependentUpon>
-    </Compile>
-    <Compile Include="PonyEditor\SelectFilesPathDialog.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="PonyEditor\TagsDialog.Designer.vb">
       <DependentUpon>TagsDialog.vb</DependentUpon>
     </Compile>
@@ -550,9 +544,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor\PonyEditor.resx">
       <DependentUpon>PonyEditor.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PonyEditor\SelectFilesPathDialog.resx">
-      <DependentUpon>SelectFilesPathDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor\TagsDialog.resx">
       <DependentUpon>TagsDialog.vb</DependentUpon>

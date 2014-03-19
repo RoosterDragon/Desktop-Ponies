@@ -105,14 +105,14 @@
             End Using
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(
-                         IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Base.Directory))
+                         IO.Path.Combine(PonyBase.RootDirectory, Base.Directory))
                 form.Icon = ParentForm.Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
             Using form = New DesktopSprites.Forms.GifFramesForm(
-                         IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, Base.Directory))
+                         IO.Path.Combine(PonyBase.RootDirectory, Base.Directory))
                 form.Icon = ParentForm.Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)

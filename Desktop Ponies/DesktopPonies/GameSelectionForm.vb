@@ -31,7 +31,7 @@ Public Class GameSelectionForm
     Private Sub LoadInternal()
         EnableWaitCursor(True)
 
-        Dim gameDirectories = IO.Directory.GetDirectories(IO.Path.Combine(EvilGlobals.InstallLocation, Game.RootDirectory))
+        Dim gameDirectories = IO.Directory.GetDirectories(Game.RootDirectory)
         games = New List(Of Game)(gameDirectories.Length)
         For Each gameDirectory In gameDirectories
             Try

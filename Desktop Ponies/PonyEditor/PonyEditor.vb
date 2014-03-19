@@ -1143,8 +1143,7 @@ Public Class PonyEditor
             OpenPictureDialog.Filter =
                 "GIF Files (*.gif)|*.gif|PNG Files (*.png)|*.png|JPG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|All Files (*.*)|*.*"
             OpenPictureDialog.FilterIndex = 4
-            OpenPictureDialog.InitialDirectory = Path.Combine(
-                EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory)
+            OpenPictureDialog.InitialDirectory = Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory)
 
             If text Is Nothing Then
                 OpenPictureDialog.Title = "Select picture..."
@@ -1163,8 +1162,7 @@ Public Class PonyEditor
             ' Try to load this image.
             Image.FromFile(imagePath)
 
-            Dim desiredPath = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
-                                           CurrentBase.Directory, GetFilename(imagePath))
+            Dim desiredPath = IO.Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory, GetFilename(imagePath))
 
             If desiredPath <> imagePath Then
                 Try
@@ -1195,8 +1193,7 @@ Public Class PonyEditor
 
         Using dialog = New NewSpeechDialog(Me)
             dialog.OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-            dialog.OpenSoundDialog.InitialDirectory = Path.Combine(
-                EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory)
+            dialog.OpenSoundDialog.InitialDirectory = Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory)
             If dialog.OpenSoundDialog.ShowDialog() = DialogResult.OK Then
                 sound_path = dialog.OpenSoundDialog.FileName
             End If
@@ -1206,8 +1203,7 @@ Public Class PonyEditor
             Return ""
         End If
 
-        Dim new_path = IO.Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory,
-                                       CurrentBase.Directory, GetFilename(sound_path))
+        Dim new_path = IO.Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory, GetFilename(sound_path))
 
         If new_path <> sound_path Then
             If Not File.Exists(new_path) Then
@@ -1486,15 +1482,13 @@ Public Class PonyEditor
                 hasSaved = False
             End If
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
-            Using form = New DesktopSprites.Forms.GifAlphaForm(
-                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory))
+            Using form = New DesktopSprites.Forms.GifAlphaForm(Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
         ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
-            Using form = New DesktopSprites.Forms.GifFramesForm(
-                         Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, CurrentBase.Directory))
+            Using form = New DesktopSprites.Forms.GifFramesForm(Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)

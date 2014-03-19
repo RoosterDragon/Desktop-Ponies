@@ -150,7 +150,7 @@ Public Class OptionsForm
                 profile = EvilGlobals.Main.ProfileComboBox.Text.Trim()
             End If
 
-            Options.LoadProfile(profile, True)
+            Options.LoadProfile(profile, Not EvilGlobals.IsScreensaverExecutable())
             RefreshOptions()
         Catch ex As IO.IOException
             Program.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")

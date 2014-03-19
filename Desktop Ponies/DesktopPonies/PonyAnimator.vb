@@ -82,7 +82,7 @@ Public MustInherit Class PonyAnimator
 
         MaximumFramesPerSecond = 25
         Viewer.WindowTitle = "Desktop Ponies"
-        Viewer.WindowIconFilePath = IO.Path.Combine(EvilGlobals.InstallLocation, "Twilight.ico")
+        Viewer.WindowIconFilePath = "Twilight.ico"
 
         AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
 

@@ -8,6 +8,7 @@ Friend NotInheritable Class Program
     Public Shared Sub Main()
         AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
         AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
+        IO.Directory.SetCurrentDirectory(IO.Path.GetDirectoryName(Reflection.Assembly.GetEntryAssembly().Location))
         If Not OperatingSystemInfo.IsMacOSX Then
             RunWinForms()
         Else
@@ -90,7 +91,7 @@ Friend NotInheritable Class Program
     End Sub
 
     Private Shared Sub LogErrorToDisk(ex As Exception)
-        Dim path = IO.Path.Combine(EvilGlobals.InstallLocation, "error.txt")
+        Const path = "error.txt"
         Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
             errorFile.WriteLine(
                 "Unhandled error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() &

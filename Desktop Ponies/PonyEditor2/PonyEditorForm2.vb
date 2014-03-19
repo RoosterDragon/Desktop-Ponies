@@ -300,7 +300,7 @@ Public Class PonyEditorForm2
                                    Dim b As Behavior = Nothing
                                    Return behavior.TryLoad(
                                        behavior.SourceIni,
-                                       Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                       Path.Combine(PonyBase.RootDirectory, base.Directory),
                                        base, b, Nothing).Combine(
                                        If(b.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                End Function
@@ -309,7 +309,7 @@ Public Class PonyEditorForm2
                                  Dim e As EffectBase = Nothing
                                  Return EffectBase.TryLoad(
                                      effect.SourceIni,
-                                     Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                     Path.Combine(PonyBase.RootDirectory, base.Directory),
                                      base, e, Nothing).Combine(
                                      If(e.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                              End Function
@@ -317,7 +317,7 @@ Public Class PonyEditorForm2
         Dim validateSpeech = Function(speech As Speech)
                                  Return speech.TryLoad(
                                      speech.SourceIni,
-                                     Path.Combine(EvilGlobals.InstallLocation, PonyBase.RootDirectory, base.Directory),
+                                     Path.Combine(PonyBase.RootDirectory, base.Directory),
                                      Nothing, Nothing)
                              End Function
         Dim speechesValid = ValidateItems(base, base.Speeches, validateSpeech, PageContent.Speeches, PageContent.Speech)
