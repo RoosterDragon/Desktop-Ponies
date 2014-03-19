@@ -1279,7 +1279,7 @@
             lock (images)
             {
                 while ((leftFound = images.TryGetValue(paths.Left, out leftImage)) && leftImage == null &&
-                    (badPaths == null || !(badPath = badPaths.Contains(paths.Left))))
+                    (badPaths != null && !(badPath = badPaths.Contains(paths.Left))))
                     Monitor.Wait(images);
                 if (!leftFound && !badPath)
                     images.Add(paths.Left, null);
@@ -1292,7 +1292,7 @@
                 {
                     leftImage = CreateAnimatedImage(paths.Left);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     badPath = true;
                     if (badPaths != null)
@@ -1321,7 +1321,11 @@
             bool mirrored = false;
             bool rightFound;
             lock (images)
-                rightFound = images.TryGetValue(paths.Right, out rightImage);
+                while ((rightFound = images.TryGetValue(paths.Right, out rightImage)) && rightImage == null &&
+                    (badPaths != null && !(badPath = badPaths.Contains(paths.Right))))
+                    Monitor.Wait(images);
+            if (badPath)
+                return new AnimationPair<ImageFrame>();
             if (!rightFound)
             {
                 try
@@ -1338,7 +1342,14 @@
                 mirrored = AnimationsAreHorizontallyMirrored(leftImage, rightImage);
                 if (!mirrored)
                     lock (images)
-                        rightImage = images.GetOrAdd(paths.Right, rightImage);
+                    {
+                        var originalRightImage = rightImage;
+                        while ((rightFound = images.TryGetValue(paths.Right, out rightImage)) && rightImage == null &&
+                            (badPaths != null && !(badPath = badPaths.Contains(paths.Right))))
+                            Monitor.Wait(images);
+                        if (!rightFound && !badPath)
+                            images.Add(paths.Right, rightImage = originalRightImage);
+                    }
             }
             var rightAnimation = new Animation<ImageFrame>(mirrored ? leftImage : rightImage, mirrored);
             return new AnimationPair<ImageFrame>(leftAnimation, rightAnimation);
