@@ -677,13 +677,9 @@
         private readonly Dictionary<SpriteImagePaths, AnimationPair<ImageFrame>> animationPairsByPaths =
             new Dictionary<SpriteImagePaths, AnimationPair<ImageFrame>>();
         /// <summary>
-        /// Delegate to the CreatePair function.
+        /// Delegate to the CreatePair function for use in single-threaded calls only.
         /// </summary>
-        private readonly Func<SpriteImagePaths, AnimationPair<ImageFrame>> createPair;
-        /// <summary>
-        /// Delegate to the CreateAnimatedImage function.
-        /// </summary>
-        private readonly Func<string, AnimatedImage<ImageFrame>> createAnimatedImage;
+        private readonly Func<SpriteImagePaths, AnimationPair<ImageFrame>> generatePair;
         /// <summary>
         /// Cache of color palettes so that memory can be shared.
         /// </summary>
@@ -1027,8 +1023,7 @@
                 appThread.Start(Tuple.Create(appInitiated, displayBounds));
 
                 // Do other initialization in parallel whilst the UI thread is spinning up.
-                createPair = CreatePair;
-                createAnimatedImage = CreateAnimatedImage;
+                generatePair = paths => CreatePair(paths, null);
                 render = Render;
                 using (var family = FontFamily.GenericSansSerif)
                     font = new Font(family, 12, GraphicsUnit.Pixel);
@@ -1180,6 +1175,7 @@
         /// <param name="imageLoadedHandler">An <see cref="T:System.EventHandler"/> that is raised when an image is loaded.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
+        /// <exception cref="T:System.AggregateException">One or more images failed to load.</exception>
         public void LoadImages(IEnumerable<SpriteImagePaths> imageFilePaths, EventHandler imageLoadedHandler)
         {
             Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
@@ -1187,26 +1183,43 @@
 
             object syncObject = new object();
             int remaining = 0;
-            EventHandler imageLoaded = (sender, e) =>
+            imageLoadedHandler += (sender, e) =>
                 {
                     if (--remaining == 0)
                         lock (syncObject)
                             Monitor.Pulse(syncObject);
                 };
-            imageLoadedHandler += imageLoaded;
 
+            var badPaths = new HashSet<string>(PathEquality.Comparer);
+            List<Exception> exceptions = null;
             lock (syncObject)
             {
                 lock (imageLoadedHandler)
                     foreach (var paths in imageFilePaths)
                     {
                         remaining++;
-                        ThreadPool.QueueUserWorkItem(o => LoadPaths(paths, imageLoadedHandler));
+                        ThreadPool.QueueUserWorkItem(o =>
+                        {
+                            try
+                            {
+                                LoadPaths(paths, imageLoadedHandler, badPaths);
+                            }
+                            catch (Exception ex)
+                            {
+                                lock (badPaths)
+                                {
+                                    if (exceptions == null)
+                                        exceptions = new List<Exception>();
+                                    exceptions.Add(ex);
+                                }
+                            }
+                        });
                     }
                 if (remaining > 0)
                     Monitor.Wait(syncObject);
             }
-            imageLoadedHandler -= imageLoaded;
+            if (exceptions != null)
+                throw new AggregateException("One or more images did not load successfully.", exceptions);
         }
 
         /// <summary>
@@ -1214,7 +1227,11 @@
         /// </summary>
         /// <param name="paths">A pair of paths for which an animation pair should be created, if one does not yet exists.</param>
         /// <param name="imageLoadedHandler">An event handler to raise unconditionally at the end of the method.</param>
-        private void LoadPaths(SpriteImagePaths paths, EventHandler imageLoadedHandler)
+        /// <param name="badPaths">When this method is being called from multiple threads, this should be an initially empty collection
+        /// which compares based on the path equality of the file system that the caller provides between all intended callees. If
+        /// provided, this method will maintain the collection, the caller need not do anything. If null, this collection is ignored and
+        /// the method must be called from a single thread.</param>
+        private void LoadPaths(SpriteImagePaths paths, EventHandler imageLoadedHandler, HashSet<string> badPaths)
         {
             bool needPair = true;
             lock (animationPairsByPaths)
@@ -1222,14 +1239,25 @@
                     needPair = false;
                 else
                     animationPairsByPaths.Add(paths, new AnimationPair<ImageFrame>());
-            if (needPair)
+            try
             {
-                var pair = CreatePair(paths);
-                lock (animationPairsByPaths)
-                    animationPairsByPaths[paths] = pair;
+                if (needPair)
+                {
+                    var pair = CreatePair(paths, badPaths);
+                    lock (animationPairsByPaths)
+                        animationPairsByPaths[paths] = pair;
+                }
             }
-            lock (imageLoadedHandler)
-                imageLoadedHandler.Raise(this);
+            catch (Exception)
+            {
+                animationPairsByPaths.Remove(paths);
+                throw;
+            }
+            finally
+            {
+                lock (imageLoadedHandler)
+                    imageLoadedHandler.Raise(this);
+            }
         }
 
         /// <summary>
@@ -1237,12 +1265,53 @@
         /// </summary>
         /// <param name="paths">The paths for which an animation pair should be generated. Where possible, the animations within a pair
         /// will reuse images for efficiency.</param>
-        /// <returns>An animation pair for displaying the specified paths.</returns>
-        private AnimationPair<ImageFrame> CreatePair(SpriteImagePaths paths)
+        /// <param name="badPaths">When this method is being called from multiple threads, this should be an initially empty collection
+        /// which compares based on the path equality of the file system that the caller provides between all intended callees. If
+        /// provided, this method will maintain the collection, the caller need not do anything. If null, this collection is ignored and
+        /// the method must be called from a single thread.</param>
+        /// <returns>An animation pair for displaying the specified paths if loading succeeded. If loading was aborted due to an error this
+        /// method returns a default pair instance.</returns>
+        private AnimationPair<ImageFrame> CreatePair(SpriteImagePaths paths, HashSet<string> badPaths)
         {
             AnimatedImage<ImageFrame> leftImage;
+            bool leftFound;
+            bool badPath = false;
             lock (images)
-                leftImage = images.GetOrAdd(paths.Left, createAnimatedImage);
+            {
+                while ((leftFound = images.TryGetValue(paths.Left, out leftImage)) && leftImage == null &&
+                    (badPaths == null || !(badPath = badPaths.Contains(paths.Left))))
+                    Monitor.Wait(images);
+                if (!leftFound && !badPath)
+                    images.Add(paths.Left, null);
+            }
+            if (badPath)
+                return new AnimationPair<ImageFrame>();
+            if (!leftFound)
+            {
+                try
+                {
+                    leftImage = CreateAnimatedImage(paths.Left);
+                }
+                catch(Exception)
+                {
+                    badPath = true;
+                    if (badPaths != null)
+                        lock (images)
+                            badPaths.Add(paths.Left);
+                    throw;
+                }
+                finally
+                {
+                    lock (images)
+                    {
+                        if (badPath)
+                            images.Remove(paths.Left);
+                        else
+                            images[paths.Left] = leftImage;
+                        Monitor.PulseAll(images);
+                    }
+                }
+            }
             var leftAnimation = new Animation<ImageFrame>(leftImage);
 
             if (SpriteImagePaths.Comparer.Equals(paths.Left, paths.Right))
@@ -1250,12 +1319,22 @@
 
             AnimatedImage<ImageFrame> rightImage;
             bool mirrored = false;
-            bool found;
+            bool rightFound;
             lock (images)
-                found = images.TryGetValue(paths.Right, out rightImage);
-            if (!found)
+                rightFound = images.TryGetValue(paths.Right, out rightImage);
+            if (!rightFound)
             {
-                rightImage = CreateAnimatedImage(paths.Right);
+                try
+                {
+                    rightImage = CreateAnimatedImage(paths.Right);
+                }
+                catch (Exception)
+                {
+                    if (badPaths != null)
+                        lock (images)
+                            badPaths.Add(paths.Right);
+                    throw;
+                }
                 mirrored = AnimationsAreHorizontallyMirrored(leftImage, rightImage);
                 if (!mirrored)
                     lock (images)
@@ -1557,7 +1636,7 @@
                     if (imagePath != null)
                     {
                         var area = OffsetRectangle(sprite.Region, translate);
-                        var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, createPair);
+                        var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, generatePair);
                         var animation = sprite.FacingRight ? pair.Right : pair.Left;
                         var frame = animation.Image[sprite.ImageTimeIndex];
                         unsafe
