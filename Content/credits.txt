@@ -629,6 +629,9 @@ Contributors are broken down by character. If there was more than one contributo
 * vulcan539 [Sit]
 * Anonymous [Sit]
 
+#### Seabreeze
+* Bot-chan
+
 #### Shadowbolt
 * Pony Noia [Stand, Run, Fly]
 * Glamador [Stand, Run, Fly]
