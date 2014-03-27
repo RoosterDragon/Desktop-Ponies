@@ -824,6 +824,7 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadPoniesAsyncEnd(cancelled As Boolean, Optional uiAction As Action = Nothing)
+        If (Disposing OrElse IsDisposed) AndAlso animator IsNot Nothing Then animator.Dispose()
         worker.QueueTask(
             Sub()
                 Dim totalImages = LoadingProgressBar.Maximum
