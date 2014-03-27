@@ -406,7 +406,8 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Mrs Sparkle
-* supersaiyanmikito
+* supersaiyanmikito [Idle, Trot]
+* Bot-chan [Idle]
 
 #### Ms Harshwhinny
 * RoboKitty
