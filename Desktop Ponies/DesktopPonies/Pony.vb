@@ -2506,10 +2506,10 @@ Public Class Pony
         If normalizeForSpeed Then
             Dim magnitude = _movement.Length()
             If magnitude > Epsilon Then
+                _facingRight = _movement.X > 0
                 Dim speed = CSng(GetSpeedInPixelsPerSecond() / StepRate)
                 ' When seeking a destination, just cap movement to speed, but if applying a movement override, set our speed outright.
                 If magnitude > speed OrElse scaleSpeedUp Then _movement = _movement / magnitude * speed
-                _facingRight = _movement.X > 0
             End If
         End If
     End Sub
