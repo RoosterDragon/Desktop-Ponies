@@ -1504,15 +1504,23 @@ Public Class Pony
     ''' <summary>
     ''' The behavior to use during dragging for each behavior group.
     ''' </summary>
-    Private _dragBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
+    Private ReadOnly _dragBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
     ''' <summary>
     ''' The behavior to use during mouseover for each behavior group.
     ''' </summary>
-    Private _mouseoverBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
+    Private ReadOnly _mouseoverBehaviorsByGroup As ReadOnlyDictionary(Of Integer, Behavior)
     ''' <summary>
     ''' The behavior to use when asleep.
     ''' </summary>
-    Private _sleepBehavior As Behavior
+    Private ReadOnly _sleepBehavior As Behavior
+    ''' <summary>
+    ''' Indicates if the base contains any stationary behaviors.
+    ''' </summary>
+    Private ReadOnly _hasStationaryBehaviors As Boolean
+    ''' <summary>
+    ''' Indicates if the base contains any moving behaviors.
+    ''' </summary>
+    Private ReadOnly _hasMovingBehaviors As Boolean
     ''' <summary>
     ''' Indicates if the pony is at the destination override location (or if this has not been evaluated since the override was set).
     ''' </summary>
@@ -1524,10 +1532,6 @@ Public Class Pony
     Private _inRegion As Boolean?
 
 #Region "Cached Delegates"
-    ''' <summary>
-    ''' A predicate that unconditionally returns true regardless of the behavior.
-    ''' </summary>
-    Private Shared truthPredicate As Func(Of Behavior, Boolean) = Function(behavior) True
     ''' <summary>
     ''' A predicate that filters for behaviors that do not move.
     ''' </summary>
@@ -1731,6 +1735,9 @@ Public Class Pony
                               If(flaggedSleepBehavior, mouseoverBehavior))
             dragBehaviorsByGroup.Add(group, dragBehavior)
         Next
+
+        _hasStationaryBehaviors = base.Behaviors.Any(stationaryBehaviorPredicate)
+        _hasMovingBehaviors = base.Behaviors.Any(movingBehaviorPredicate)
 
         If Options.EnablePonyLogs Then UpdateRecord = New List(Of Record)()
     End Sub
@@ -2037,9 +2044,14 @@ Public Class Pony
             ElseIf Not nowAtCustomDestination AndAlso (Not atCustomDestination.HasValue OrElse atCustomDestination.Value) Then
                 AddUpdateRecord("Entering moving behavior for custom destination ", destinationDescription)
                 EndInteraction(True, False)
-                ' TODO: Match behavior chosen to speed override, if any.
-                ' TODO: Add a field for custom speed to allow pony to move around even if it lacks the ability?
-                SetBehaviorInternal(GetCandidateBehavior(movingBehaviorPredicate))
+                If _hasMovingBehaviors OrElse SpeedOverride IsNot Nothing Then
+                    ' TODO: Match behavior chosen to speed override, if any.
+                    SetBehaviorInternal(GetCandidateBehavior(movingBehaviorPredicate))
+                Else
+                    ' If the pony lacks any behaviors for moving, just teleport them to their destination.
+                    _location = customDestination.Value
+                    nowAtCustomDestination = True
+                End If
             End If
             atCustomDestination = nowAtCustomDestination
             _destination = customDestination
@@ -2393,6 +2405,7 @@ Public Class Pony
     ''' </summary>
     Private Sub SetVisualOverrideBehavior()
         If _followTarget IsNot Nothing OrElse _currentBehavior.TargetMode = TargetMode.Point Then
+            Dim previousVisualOverrideBehavior = _visualOverrideBehavior
             Dim currentSpeed = _movement.Length()
             If _visualOverrideBehavior IsNot Nothing AndAlso
                 (_visualOverrideBehavior.SpeedInPixelsPerSecond = 0 Xor currentSpeed = 0) Then
@@ -2406,13 +2419,15 @@ Public Class Pony
                     _visualOverrideBehavior = _currentBehavior.FollowMovingBehavior
                 End If
             End If
-            ' TODO: Need to handle the case where there are only moving or only stationary behaviors.
-            ' Currently the override behavior will be changed constantly in this degenerate case.
             If _visualOverrideBehavior Is Nothing Then
+                ' Choose a new behavior to use for visual overrides. If the pony lacks suitable override behaviors, just keep using the old
+                ' override instead.
                 If currentSpeed = 0 Then
-                    _visualOverrideBehavior = GetCandidateBehavior(stationaryBehaviorPredicate)
+                    If Not _hasStationaryBehaviors Then _visualOverrideBehavior = previousVisualOverrideBehavior
+                    If _visualOverrideBehavior Is Nothing Then _visualOverrideBehavior = GetCandidateBehavior(stationaryBehaviorPredicate)
                 Else
-                    _visualOverrideBehavior = GetCandidateBehavior(movingBehaviorPredicate)
+                    If Not _hasMovingBehaviors Then _visualOverrideBehavior = previousVisualOverrideBehavior
+                    If _visualOverrideBehavior Is Nothing Then _visualOverrideBehavior = GetCandidateBehavior(movingBehaviorPredicate)
                 End If
             End If
         Else
@@ -2507,7 +2522,7 @@ Public Class Pony
             Dim magnitude = _movement.Length()
             If magnitude > Epsilon Then
                 _facingRight = _movement.X > 0
-                Dim speed = CSng(GetSpeedInPixelsPerSecond() / StepRate)
+                Dim speed = CSng(GetSpeedInPixelsPerStep())
                 ' When seeking a destination, just cap movement to speed, but if applying a movement override, set our speed outright.
                 If magnitude > speed OrElse scaleSpeedUp Then _movement = _movement / magnitude * speed
             End If
@@ -2515,11 +2530,11 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Gets the desired speed of the pony in pixels per second.
+    ''' Gets the desired speed of the pony in pixels per step.
     ''' </summary>
     ''' <returns>The speed override value if set, otherwise; the speed desired by the current behavior.</returns>
-    Private Function GetSpeedInPixelsPerSecond() As Double
-        Return If(SpeedOverride, _currentBehavior.SpeedInPixelsPerSecond)
+    Private Function GetSpeedInPixelsPerStep() As Double
+        Return If(SpeedOverride, _currentBehavior.SpeedInPixelsPerSecond) / StepRate
     End Function
 
     ''' <summary>
@@ -2530,7 +2545,7 @@ Public Class Pony
     ''' </param>
     Private Sub SetMovementWithoutDestination(preserveCurrentDirections As Boolean)
         Dim moves = _currentBehavior.AllowedMovement And AllowedMoves.All
-        Dim speed = GetSpeedInPixelsPerSecond() / StepRate
+        Dim speed = GetSpeedInPixelsPerStep()
         If moves = AllowedMoves.None OrElse speed = 0 Then
             _movement = Vector2F.Zero
         Else
