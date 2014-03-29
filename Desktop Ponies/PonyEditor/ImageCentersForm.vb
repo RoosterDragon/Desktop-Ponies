@@ -59,6 +59,8 @@ Public Class ImageCentersForm
 
         Dim behavior = base.Behaviors(behaviorIndex)
 
+        If leftImage IsNot Nothing Then leftImage.Dispose()
+        If rightImage IsNot Nothing Then rightImage.Dispose()
         leftImage = Image.FromFile(behavior.LeftImage.Path)
         rightImage = Image.FromFile(behavior.RightImage.Path)
 
@@ -240,5 +242,14 @@ Public Class ImageCentersForm
 
     Private Sub OKButton_Click(sender As Object, e As EventArgs) Handles OKButton.Click
         Close()
+    End Sub
+
+    Private Sub ImageCentersForm_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+        If leftImage IsNot Nothing Then leftImage.Dispose()
+        If rightImage IsNot Nothing Then rightImage.Dispose()
+        If leftGraphics IsNot Nothing Then leftGraphics.Dispose()
+        If rightGraphics IsNot Nothing Then rightGraphics.Dispose()
+        If LeftImageBox.Image IsNot Nothing Then LeftImageBox.Image.Dispose()
+        If RightImageBox.Image IsNot Nothing Then RightImageBox.Image.Dispose()
     End Sub
 End Class

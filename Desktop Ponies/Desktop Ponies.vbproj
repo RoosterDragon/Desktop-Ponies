@@ -140,6 +140,7 @@
     <Compile Include="PonyEditor2\UnscalableImagesForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="PonyEditor\EditorCommon.vb" />
     <Compile Include="Program.vb" />
     <Compile Include="Core\BufferedCheckedListBox.vb">
       <SubType>Component</SubType>
@@ -361,12 +362,6 @@
     <Compile Include="DesktopPonies\OptionsForm.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PonyEditor\GifRuntimeDialog.Designer.vb">
-      <DependentUpon>GifRuntimeDialog.vb</DependentUpon>
-    </Compile>
-    <Compile Include="PonyEditor\GifRuntimeDialog.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="PonyEditor\ImageCentersForm.Designer.vb">
       <DependentUpon>ImageCentersForm.vb</DependentUpon>
     </Compile>
@@ -516,9 +511,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor2\UnusedFilesForm.resx">
       <DependentUpon>UnusedFilesForm.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PonyEditor\GifRuntimeDialog.resx">
-      <DependentUpon>GifRuntimeDialog.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PonyEditor\ImageCentersForm.resx">
       <DependentUpon>ImageCentersForm.vb</DependentUpon>

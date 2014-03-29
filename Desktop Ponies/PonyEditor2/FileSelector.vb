@@ -84,7 +84,7 @@ Public Class FileSelector
 
     Private Sub FilePathChooseButton_Click(sender As Object, e As EventArgs) Handles FilePathChooseButton.Click
         Using dialog As New OpenFileDialog()
-            dialog.InitialDirectory = _baseDirectory
+            dialog.InitialDirectory = IO.Path.GetFullPath(_baseDirectory)
             Dim filterBuilder As New System.Text.StringBuilder()
             Dim first = True
             For Each pattern In SearchPatterns

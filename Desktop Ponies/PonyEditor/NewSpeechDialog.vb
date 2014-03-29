@@ -1,79 +1,48 @@
-﻿Imports System.Windows.Forms
+﻿Public Class NewSpeechDialog
 
-Public Class NewSpeechDialog
+    Private ReadOnly editor As PonyEditor
 
-    Private _editor As PonyEditor
     Public Sub New(editor As PonyEditor)
+        Me.editor = Argument.EnsureNotNull(editor, "editor")
         InitializeComponent()
-        _editor = editor
+        Icon = My.Resources.Twilight
+    End Sub
+
+    Private Sub SoundSelectButton_Click(sender As Object, e As EventArgs) Handles SoundSelectButton.Click
+        Dim path = EditorCommon.PromptUserForSoundPath(Me, editor.CurrentBase)
+        If path Is Nothing Then Return
+        SoundTextBox.Text = IO.Path.GetFileName(path)
+        SoundClearButton.Enabled = True
+    End Sub
+
+    Private Sub SoundClearButton_Click(sender As Object, e As EventArgs) Handles SoundClearButton.Click
+        SoundTextBox.Text = Nothing
+        SoundClearButton.Enabled = False
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
+        Dim newName = NameTextBox.Text.Trim()
+        If Not EditorCommon.ValidateName(Me, "speech", newName, editor.CurrentBase.Speeches) Then Return
 
-        If Trim(Name_Textbox.Text) = "" Then
-            MsgBox("You must enter a name for the new speech.")
-            Exit Sub
+        If String.IsNullOrEmpty(LineTextBox.Text) Then
+            MessageBox.Show(Me, "You need to enter something for the pony to say.",
+                            "No Text Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
         End If
 
-        If Trim(Text_TextBox.Text) = "" Then
-            MsgBox("You need to enter some sort of text for the pony to say.")
-            Exit Sub
+        Dim newSpeech = New Speech() With {.Name = newName,
+                                           .Text = LineTextBox.Text,
+                                           .Skip = Not UseRandomlyCheckBox.Checked,
+                                           .Group = CInt(GroupNumber.Value),
+                                           .SoundFile = If(String.IsNullOrEmpty(SoundTextBox.Text), Nothing, SoundTextBox.Text)}
+        editor.CurrentBase.Speeches.Add(newSpeech)
 
-        End If
-
-        Dim filename = PonyEditor.GetFilename(Sound_Textbox.Text)
-
-        Dim new_speech = New Speech() With {.Name = Name_Textbox.Text,
-                                                           .Text = Text_TextBox.Text,
-                                                           .Skip = Not Random_Checkbox.Checked,
-                                                           .Group = CInt(Group_NumberBox.Value),
-                                                           .SoundFile = Replace(Sound_Textbox.Text, filename, "") & filename}
-
-        _editor.CurrentBase.Speeches.Add(new_speech)
-
-        Me.Close()
+        DialogResult = DialogResult.OK
+        Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-
-        Me.Close()
+        DialogResult = DialogResult.Cancel
+        Close()
     End Sub
-
-    Private Sub NewSpeechDialog_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        Text_TextBox.Text = ""
-        Name_Textbox.Text = ""
-
-    End Sub
-
-
-    Private Sub SetSound_Button_Click(sender As Object, e As EventArgs) Handles SetSound_Button.Click
-
-        OpenSoundDialog.Filter = "MP3 Files (*.mp3)|*.mp3"
-        OpenSoundDialog.InitialDirectory = IO.Path.Combine(PonyBase.RootDirectory, _editor.CurrentBase.Directory)
-
-        Dim sound_path As String = Nothing
-
-        If OpenSoundDialog.ShowDialog() = DialogResult.OK Then
-            sound_path = OpenSoundDialog.FileName
-        End If
-
-        If IsNothing(sound_path) Then
-            Exit Sub
-        End If
-
-        Dim new_path = IO.Path.Combine(PonyBase.RootDirectory, _editor.CurrentBase.Directory, PonyEditor.GetFilename(sound_path))
-
-        If new_path <> sound_path Then
-            If Not IO.File.Exists(new_path) Then
-                IO.File.Create(new_path).Close()
-            End If
-            IO.File.Copy(sound_path, new_path, True)
-        End If
-
-        Sound_Textbox.Text = sound_path
-
-    End Sub
-
-
 End Class

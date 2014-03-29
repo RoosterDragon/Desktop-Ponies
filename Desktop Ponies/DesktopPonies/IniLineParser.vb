@@ -55,40 +55,6 @@
         Return "{" & text & "}"
     End Function
 
-    Public Function Space_To_Under(text As String) As String
-        Return Replace(Replace(text, " ", "_"), "/", "_")
-    End Function
-
-    Public Function Location_ToString(location As Direction) As String
-        Argument.EnsureEnumIsValid(location, "location")
-        Select Case location
-            Case Direction.TopLeft
-                Return "Top Left"
-            Case Direction.TopCenter
-                Return "Top"
-            Case Direction.TopRight
-                Return "Top Right"
-            Case Direction.MiddleLeft
-                Return "Left"
-            Case Direction.MiddleCenter
-                Return "Center"
-            Case Direction.MiddleRight
-                Return "Right"
-            Case Direction.BottomLeft
-                Return "Bottom Left"
-            Case Direction.BottomCenter
-                Return "Bottom"
-            Case Direction.BottomRight
-                Return "Bottom Right"
-            Case Direction.Random
-                Return "Any"
-            Case Direction.RandomNotCenter
-                Return "Any-Not Center"
-            Case Else
-                Return Nothing
-        End Select
-    End Function
-
     Private ReadOnly _directionFromIni As ReadOnlyDictionary(Of String, Direction) =
         New Dictionary(Of String, Direction)(StringComparer.OrdinalIgnoreCase) From
         {

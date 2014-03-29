@@ -22,52 +22,54 @@ Partial Class NewEffectDialog
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
+        Me.CommandTable = New System.Windows.Forms.TableLayoutPanel()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.OK_Button = New System.Windows.Forms.Button()
-        Me.Left_ImageBox = New System.Windows.Forms.PictureBox()
-        Me.Right_ImageBox = New System.Windows.Forms.PictureBox()
-        Me.Name_Textbox = New System.Windows.Forms.TextBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Left_Image_Set_Button = New System.Windows.Forms.Button()
-        Me.Right_Image_Set_Button = New System.Windows.Forms.Button()
-        Me.Duration_Box = New System.Windows.Forms.TextBox()
-        Me.Behavior_Box = New System.Windows.Forms.ComboBox()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.repeat_box = New System.Windows.Forms.TextBox()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.follow_checkbox = New System.Windows.Forms.CheckBox()
-        Me.Label8 = New System.Windows.Forms.Label()
-        Me.R_Placement_Box = New System.Windows.Forms.ComboBox()
-        Me.L_Placement_Box = New System.Windows.Forms.ComboBox()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.R_Centering_Box = New System.Windows.Forms.ComboBox()
-        Me.Label12 = New System.Windows.Forms.Label()
-        Me.L_Centering_Box = New System.Windows.Forms.ComboBox()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.DontRepeat_CheckBox = New System.Windows.Forms.CheckBox()
-        Me.TableLayoutPanel1.SuspendLayout()
+        Me.LeftImageBox = New System.Windows.Forms.PictureBox()
+        Me.RightImageBox = New System.Windows.Forms.PictureBox()
+        Me.NameTextBox = New System.Windows.Forms.TextBox()
+        Me.NameLabel = New System.Windows.Forms.Label()
+        Me.LeftImageLabel = New System.Windows.Forms.Label()
+        Me.RightImageLabel = New System.Windows.Forms.Label()
+        Me.LeftImageSelectButton = New System.Windows.Forms.Button()
+        Me.RightImageSelectButton = New System.Windows.Forms.Button()
+        Me.BehaviorCombo = New System.Windows.Forms.ComboBox()
+        Me.DurationLabel = New System.Windows.Forms.Label()
+        Me.BehaviorLabel = New System.Windows.Forms.Label()
+        Me.DurationZeroLabel = New System.Windows.Forms.Label()
+        Me.RepeatDelayLabel = New System.Windows.Forms.Label()
+        Me.RepeatDelayZeroLabel = New System.Windows.Forms.Label()
+        Me.FollowCheckBox = New System.Windows.Forms.CheckBox()
+        Me.RightPlacementLabel = New System.Windows.Forms.Label()
+        Me.RightPlacementCombo = New System.Windows.Forms.ComboBox()
+        Me.LeftPlacementCombo = New System.Windows.Forms.ComboBox()
+        Me.RightCenteringLabel = New System.Windows.Forms.Label()
+        Me.RightCenteringCombo = New System.Windows.Forms.ComboBox()
+        Me.LeftCenteringLabel = New System.Windows.Forms.Label()
+        Me.LeftCenteringCombo = New System.Windows.Forms.ComboBox()
+        Me.LeftPlacementLabel = New System.Windows.Forms.Label()
+        Me.DoNotRepeatAnimationsCheckBox = New System.Windows.Forms.CheckBox()
+        Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.DurationNumber = New System.Windows.Forms.NumericUpDown()
+        Me.RepeatDelayNumber = New System.Windows.Forms.NumericUpDown()
+        Me.CommandTable.SuspendLayout()
+        Me.LayoutTable.SuspendLayout()
         Me.SuspendLayout()
         '
-        'TableLayoutPanel1
+        'CommandTable
         '
-        Me.TableLayoutPanel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(323, 579)
-        Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
-        Me.TableLayoutPanel1.RowCount = 1
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(320, 29)
-        Me.TableLayoutPanel1.TabIndex = 24
+        Me.CommandTable.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.CommandTable.ColumnCount = 2
+        Me.CommandTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.Controls.Add(Me.Cancel_Button, 1, 0)
+        Me.CommandTable.Controls.Add(Me.OK_Button, 0, 0)
+        Me.CommandTable.Location = New System.Drawing.Point(227, 521)
+        Me.CommandTable.Name = "CommandTable"
+        Me.CommandTable.RowCount = 1
+        Me.CommandTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.Size = New System.Drawing.Size(320, 29)
+        Me.CommandTable.TabIndex = 1
         '
         'Cancel_Button
         '
@@ -92,235 +94,336 @@ Partial Class NewEffectDialog
         Me.OK_Button.Text = "OK"
         Me.OK_Button.UseVisualStyleBackColor = False
         '
-        'Left_ImageBox
+        'LeftImageBox
         '
-        Me.Left_ImageBox.Location = New System.Drawing.Point(109, 127)
-        Me.Left_ImageBox.Name = "Left_ImageBox"
-        Me.Left_ImageBox.Size = New System.Drawing.Size(150, 150)
-        Me.Left_ImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
-        Me.Left_ImageBox.TabIndex = 1
-        Me.Left_ImageBox.TabStop = False
+        Me.LeftImageBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.LeftImageBox.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LeftImageBox.ErrorImage = Nothing
+        Me.LeftImageBox.InitialImage = Nothing
+        Me.LeftImageBox.Location = New System.Drawing.Point(3, 55)
+        Me.LeftImageBox.Name = "LeftImageBox"
+        Me.LeftImageBox.Size = New System.Drawing.Size(261, 109)
+        Me.LeftImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
+        Me.LeftImageBox.TabIndex = 1
+        Me.LeftImageBox.TabStop = False
         '
-        'Right_ImageBox
+        'RightImageBox
         '
-        Me.Right_ImageBox.Location = New System.Drawing.Point(389, 127)
-        Me.Right_ImageBox.Name = "Right_ImageBox"
-        Me.Right_ImageBox.Size = New System.Drawing.Size(150, 150)
-        Me.Right_ImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
-        Me.Right_ImageBox.TabIndex = 2
-        Me.Right_ImageBox.TabStop = False
+        Me.RightImageBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.RightImageBox.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.RightImageBox.ErrorImage = Nothing
+        Me.RightImageBox.InitialImage = Nothing
+        Me.RightImageBox.Location = New System.Drawing.Point(270, 55)
+        Me.RightImageBox.Name = "RightImageBox"
+        Me.RightImageBox.Size = New System.Drawing.Size(262, 109)
+        Me.RightImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
+        Me.RightImageBox.TabIndex = 2
+        Me.RightImageBox.TabStop = False
         '
-        'Name_Textbox
+        'NameTextBox
         '
-        Me.Name_Textbox.Location = New System.Drawing.Point(87, 60)
-        Me.Name_Textbox.Name = "Name_Textbox"
-        Me.Name_Textbox.Size = New System.Drawing.Size(100, 20)
-        Me.Name_Textbox.TabIndex = 1
+        Me.NameTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.NameTextBox.Location = New System.Drawing.Point(73, 16)
+        Me.NameTextBox.Name = "NameTextBox"
+        Me.NameTextBox.Size = New System.Drawing.Size(120, 20)
+        Me.NameTextBox.TabIndex = 1
         '
-        'Label1
+        'NameLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(58, 44)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(69, 13)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Effect Name:"
+        Me.NameLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.NameLabel.AutoSize = True
+        Me.NameLabel.Location = New System.Drawing.Point(3, 0)
+        Me.NameLabel.Name = "NameLabel"
+        Me.NameLabel.Size = New System.Drawing.Size(69, 13)
+        Me.NameLabel.TabIndex = 0
+        Me.NameLabel.Text = "Effect Name:"
         '
-        'Label2
+        'LeftImageLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(81, 109)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(60, 13)
-        Me.Label2.TabIndex = 3
-        Me.Label2.Text = "Left Image:"
+        Me.LeftImageLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.LeftImageLabel.AutoSize = True
+        Me.LeftImageLabel.Location = New System.Drawing.Point(3, 39)
+        Me.LeftImageLabel.Name = "LeftImageLabel"
+        Me.LeftImageLabel.Size = New System.Drawing.Size(60, 13)
+        Me.LeftImageLabel.TabIndex = 2
+        Me.LeftImageLabel.Text = "Left Image:"
         '
-        'Label3
+        'RightImageLabel
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(366, 109)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(67, 13)
-        Me.Label3.TabIndex = 5
-        Me.Label3.Text = "Right Image:"
+        Me.RightImageLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.RightImageLabel.AutoSize = True
+        Me.RightImageLabel.Location = New System.Drawing.Point(270, 39)
+        Me.RightImageLabel.Name = "RightImageLabel"
+        Me.RightImageLabel.Size = New System.Drawing.Size(67, 13)
+        Me.RightImageLabel.TabIndex = 4
+        Me.RightImageLabel.Text = "Right Image:"
         '
-        'Left_Image_Set_Button
+        'LeftImageSelectButton
         '
-        Me.Left_Image_Set_Button.Location = New System.Drawing.Point(146, 283)
-        Me.Left_Image_Set_Button.Name = "Left_Image_Set_Button"
-        Me.Left_Image_Set_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Left_Image_Set_Button.TabIndex = 4
-        Me.Left_Image_Set_Button.Text = "Select..."
-        Me.Left_Image_Set_Button.UseVisualStyleBackColor = True
+        Me.LeftImageSelectButton.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.LeftImageSelectButton.Location = New System.Drawing.Point(83, 170)
+        Me.LeftImageSelectButton.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.LeftImageSelectButton.Name = "LeftImageSelectButton"
+        Me.LeftImageSelectButton.Size = New System.Drawing.Size(100, 23)
+        Me.LeftImageSelectButton.TabIndex = 3
+        Me.LeftImageSelectButton.Text = "Select..."
+        Me.LeftImageSelectButton.UseVisualStyleBackColor = True
         '
-        'Right_Image_Set_Button
+        'RightImageSelectButton
         '
-        Me.Right_Image_Set_Button.Location = New System.Drawing.Point(427, 283)
-        Me.Right_Image_Set_Button.Name = "Right_Image_Set_Button"
-        Me.Right_Image_Set_Button.Size = New System.Drawing.Size(75, 23)
-        Me.Right_Image_Set_Button.TabIndex = 6
-        Me.Right_Image_Set_Button.Text = "Select..."
-        Me.Right_Image_Set_Button.UseVisualStyleBackColor = True
+        Me.RightImageSelectButton.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RightImageSelectButton.Location = New System.Drawing.Point(351, 170)
+        Me.RightImageSelectButton.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.RightImageSelectButton.Name = "RightImageSelectButton"
+        Me.RightImageSelectButton.Size = New System.Drawing.Size(100, 23)
+        Me.RightImageSelectButton.TabIndex = 5
+        Me.RightImageSelectButton.Text = "Select..."
+        Me.RightImageSelectButton.UseVisualStyleBackColor = True
         '
-        'Duration_Box
+        'BehaviorCombo
         '
-        Me.Duration_Box.Location = New System.Drawing.Point(439, 363)
-        Me.Duration_Box.Name = "Duration_Box"
-        Me.Duration_Box.Size = New System.Drawing.Size(100, 20)
-        Me.Duration_Box.TabIndex = 18
+        Me.BehaviorCombo.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.BehaviorCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.BehaviorCombo.FormattingEnabled = True
+        Me.BehaviorCombo.Location = New System.Drawing.Point(73, 259)
+        Me.BehaviorCombo.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.BehaviorCombo.Name = "BehaviorCombo"
+        Me.BehaviorCombo.Size = New System.Drawing.Size(120, 21)
+        Me.BehaviorCombo.TabIndex = 8
         '
-        'Behavior_Box
+        'DurationLabel
         '
-        Me.Behavior_Box.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.Behavior_Box.FormattingEnabled = True
-        Me.Behavior_Box.Location = New System.Drawing.Point(100, 363)
-        Me.Behavior_Box.Name = "Behavior_Box"
-        Me.Behavior_Box.Size = New System.Drawing.Size(121, 21)
-        Me.Behavior_Box.TabIndex = 8
+        Me.DurationLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.DurationLabel.AutoSize = True
+        Me.DurationLabel.Location = New System.Drawing.Point(270, 243)
+        Me.DurationLabel.Name = "DurationLabel"
+        Me.DurationLabel.Size = New System.Drawing.Size(104, 13)
+        Me.DurationLabel.TabIndex = 17
+        Me.DurationLabel.Text = "Duration in seconds:"
         '
-        'Label6
+        'BehaviorLabel
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(375, 347)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(104, 13)
-        Me.Label6.TabIndex = 17
-        Me.Label6.Text = "Duration in seconds:"
+        Me.BehaviorLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.BehaviorLabel.AutoSize = True
+        Me.BehaviorLabel.Location = New System.Drawing.Point(3, 243)
+        Me.BehaviorLabel.Name = "BehaviorLabel"
+        Me.BehaviorLabel.Size = New System.Drawing.Size(110, 13)
+        Me.BehaviorLabel.TabIndex = 7
+        Me.BehaviorLabel.Text = "Behavior that triggers:"
         '
-        'Label11
+        'DurationZeroLabel
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(81, 347)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(110, 13)
-        Me.Label11.TabIndex = 7
-        Me.Label11.Text = "Behavior that triggers:"
+        Me.DurationZeroLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.DurationZeroLabel.AutoSize = True
+        Me.DurationZeroLabel.Location = New System.Drawing.Point(286, 295)
+        Me.DurationZeroLabel.Name = "DurationZeroLabel"
+        Me.DurationZeroLabel.Size = New System.Drawing.Size(229, 13)
+        Me.DurationZeroLabel.TabIndex = 19
+        Me.DurationZeroLabel.Text = "(Set to 0 if it should last until the behavior ends)"
         '
-        'Label4
+        'RepeatDelayLabel
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(375, 386)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(229, 13)
-        Me.Label4.TabIndex = 19
-        Me.Label4.Text = "(Set to 0 if it should last until the behavior ends)"
+        Me.RepeatDelayLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.RepeatDelayLabel.AutoSize = True
+        Me.RepeatDelayLabel.Location = New System.Drawing.Point(270, 347)
+        Me.RepeatDelayLabel.Name = "RepeatDelayLabel"
+        Me.RepeatDelayLabel.Size = New System.Drawing.Size(129, 13)
+        Me.RepeatDelayLabel.TabIndex = 20
+        Me.RepeatDelayLabel.Text = "Repeat Delay in seconds:"
         '
-        'Label5
+        'RepeatDelayZeroLabel
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(375, 426)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(129, 13)
-        Me.Label5.TabIndex = 20
-        Me.Label5.Text = "Repeat Delay in seconds:"
+        Me.RepeatDelayZeroLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RepeatDelayZeroLabel.AutoSize = True
+        Me.RepeatDelayZeroLabel.Location = New System.Drawing.Point(334, 399)
+        Me.RepeatDelayZeroLabel.Name = "RepeatDelayZeroLabel"
+        Me.RepeatDelayZeroLabel.Size = New System.Drawing.Size(133, 13)
+        Me.RepeatDelayZeroLabel.TabIndex = 22
+        Me.RepeatDelayZeroLabel.Text = "(Set to 0 to play only once)"
         '
-        'repeat_box
+        'FollowCheckBox
         '
-        Me.repeat_box.Location = New System.Drawing.Point(439, 442)
-        Me.repeat_box.Name = "repeat_box"
-        Me.repeat_box.Size = New System.Drawing.Size(100, 20)
-        Me.repeat_box.TabIndex = 21
+        Me.FollowCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.FollowCheckBox.AutoSize = True
+        Me.FollowCheckBox.Location = New System.Drawing.Point(324, 467)
+        Me.FollowCheckBox.Name = "FollowCheckBox"
+        Me.FollowCheckBox.Size = New System.Drawing.Size(153, 17)
+        Me.FollowCheckBox.TabIndex = 23
+        Me.FollowCheckBox.Text = "Effect graphic follows pony"
+        Me.FollowCheckBox.UseVisualStyleBackColor = True
         '
-        'Label7
+        'RightPlacementLabel
         '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(375, 465)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(133, 13)
-        Me.Label7.TabIndex = 22
-        Me.Label7.Text = "(Set to 0 to play only once)"
+        Me.RightPlacementLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.RightPlacementLabel.AutoSize = True
+        Me.RightPlacementLabel.Location = New System.Drawing.Point(3, 295)
+        Me.RightPlacementLabel.Name = "RightPlacementLabel"
+        Me.RightPlacementLabel.Size = New System.Drawing.Size(223, 13)
+        Me.RightPlacementLabel.TabIndex = 9
+        Me.RightPlacementLabel.Text = "Image placement, when pony is heading right:"
         '
-        'follow_checkbox
+        'RightPlacementCombo
         '
-        Me.follow_checkbox.AutoSize = True
-        Me.follow_checkbox.Location = New System.Drawing.Point(389, 62)
-        Me.follow_checkbox.Name = "follow_checkbox"
-        Me.follow_checkbox.Size = New System.Drawing.Size(153, 17)
-        Me.follow_checkbox.TabIndex = 2
-        Me.follow_checkbox.Text = "Effect graphic follows pony"
-        Me.follow_checkbox.UseVisualStyleBackColor = True
+        Me.RightPlacementCombo.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RightPlacementCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.RightPlacementCombo.FormattingEnabled = True
+        Me.RightPlacementCombo.Location = New System.Drawing.Point(73, 311)
+        Me.RightPlacementCombo.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.RightPlacementCombo.Name = "RightPlacementCombo"
+        Me.RightPlacementCombo.Size = New System.Drawing.Size(120, 21)
+        Me.RightPlacementCombo.TabIndex = 10
         '
-        'Label8
+        'LeftPlacementCombo
         '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(31, 402)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(228, 13)
-        Me.Label8.TabIndex = 9
-        Me.Label8.Text = "Image placement, when pony is heading Right:"
+        Me.LeftPlacementCombo.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.LeftPlacementCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.LeftPlacementCombo.FormattingEnabled = True
+        Me.LeftPlacementCombo.Location = New System.Drawing.Point(73, 363)
+        Me.LeftPlacementCombo.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.LeftPlacementCombo.Name = "LeftPlacementCombo"
+        Me.LeftPlacementCombo.Size = New System.Drawing.Size(120, 21)
+        Me.LeftPlacementCombo.TabIndex = 12
         '
-        'R_Placement_Box
+        'RightCenteringLabel
         '
-        Me.R_Placement_Box.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.R_Placement_Box.FormattingEnabled = True
-        Me.R_Placement_Box.Location = New System.Drawing.Point(100, 418)
-        Me.R_Placement_Box.Name = "R_Placement_Box"
-        Me.R_Placement_Box.Size = New System.Drawing.Size(121, 21)
-        Me.R_Placement_Box.TabIndex = 10
+        Me.RightCenteringLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.RightCenteringLabel.AutoSize = True
+        Me.RightCenteringLabel.Location = New System.Drawing.Point(3, 399)
+        Me.RightCenteringLabel.Name = "RightCenteringLabel"
+        Me.RightCenteringLabel.Size = New System.Drawing.Size(257, 13)
+        Me.RightCenteringLabel.TabIndex = 13
+        Me.RightCenteringLabel.Text = "Image centering relative to pony, when heading right:"
         '
-        'L_Placement_Box
+        'RightCenteringCombo
         '
-        Me.L_Placement_Box.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.L_Placement_Box.FormattingEnabled = True
-        Me.L_Placement_Box.Location = New System.Drawing.Point(100, 475)
-        Me.L_Placement_Box.Name = "L_Placement_Box"
-        Me.L_Placement_Box.Size = New System.Drawing.Size(121, 21)
-        Me.L_Placement_Box.TabIndex = 12
+        Me.RightCenteringCombo.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RightCenteringCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.RightCenteringCombo.FormattingEnabled = True
+        Me.RightCenteringCombo.Location = New System.Drawing.Point(73, 415)
+        Me.RightCenteringCombo.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.RightCenteringCombo.Name = "RightCenteringCombo"
+        Me.RightCenteringCombo.Size = New System.Drawing.Size(120, 21)
+        Me.RightCenteringCombo.TabIndex = 14
         '
-        'Label10
+        'LeftCenteringLabel
         '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(12, 512)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(262, 13)
-        Me.Label10.TabIndex = 13
-        Me.Label10.Text = "Image centering relative to pony, when heading Right:"
+        Me.LeftCenteringLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.LeftCenteringLabel.AutoSize = True
+        Me.LeftCenteringLabel.Location = New System.Drawing.Point(3, 451)
+        Me.LeftCenteringLabel.Name = "LeftCenteringLabel"
+        Me.LeftCenteringLabel.Size = New System.Drawing.Size(251, 13)
+        Me.LeftCenteringLabel.TabIndex = 15
+        Me.LeftCenteringLabel.Text = "Image centering relative to pony, when heading left:"
         '
-        'R_Centering_Box
+        'LeftCenteringCombo
         '
-        Me.R_Centering_Box.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.R_Centering_Box.FormattingEnabled = True
-        Me.R_Centering_Box.Location = New System.Drawing.Point(100, 528)
-        Me.R_Centering_Box.Name = "R_Centering_Box"
-        Me.R_Centering_Box.Size = New System.Drawing.Size(121, 21)
-        Me.R_Centering_Box.TabIndex = 14
+        Me.LeftCenteringCombo.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.LeftCenteringCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.LeftCenteringCombo.FormattingEnabled = True
+        Me.LeftCenteringCombo.Location = New System.Drawing.Point(73, 467)
+        Me.LeftCenteringCombo.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.LeftCenteringCombo.Name = "LeftCenteringCombo"
+        Me.LeftCenteringCombo.Size = New System.Drawing.Size(120, 21)
+        Me.LeftCenteringCombo.TabIndex = 16
         '
-        'Label12
+        'LeftPlacementLabel
         '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(12, 563)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(255, 13)
-        Me.Label12.TabIndex = 15
-        Me.Label12.Text = "Image centering relative to pony, when heading Left:"
+        Me.LeftPlacementLabel.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.LeftPlacementLabel.AutoSize = True
+        Me.LeftPlacementLabel.Location = New System.Drawing.Point(3, 347)
+        Me.LeftPlacementLabel.Name = "LeftPlacementLabel"
+        Me.LeftPlacementLabel.Size = New System.Drawing.Size(217, 13)
+        Me.LeftPlacementLabel.TabIndex = 11
+        Me.LeftPlacementLabel.Text = "Image placement, when pony is heading left:"
         '
-        'L_Centering_Box
+        'DoNotRepeatAnimationsCheckBox
         '
-        Me.L_Centering_Box.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.L_Centering_Box.FormattingEnabled = True
-        Me.L_Centering_Box.Location = New System.Drawing.Point(100, 579)
-        Me.L_Centering_Box.Name = "L_Centering_Box"
-        Me.L_Centering_Box.Size = New System.Drawing.Size(121, 21)
-        Me.L_Centering_Box.TabIndex = 16
+        Me.DoNotRepeatAnimationsCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.DoNotRepeatAnimationsCheckBox.AutoSize = True
+        Me.LayoutTable.SetColumnSpan(Me.DoNotRepeatAnimationsCheckBox, 2)
+        Me.DoNotRepeatAnimationsCheckBox.Location = New System.Drawing.Point(199, 211)
+        Me.DoNotRepeatAnimationsCheckBox.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.DoNotRepeatAnimationsCheckBox.Name = "DoNotRepeatAnimationsCheckBox"
+        Me.DoNotRepeatAnimationsCheckBox.Size = New System.Drawing.Size(137, 17)
+        Me.DoNotRepeatAnimationsCheckBox.TabIndex = 6
+        Me.DoNotRepeatAnimationsCheckBox.Text = "Don't repeat animations"
+        Me.DoNotRepeatAnimationsCheckBox.UseVisualStyleBackColor = True
         '
-        'Label9
+        'LayoutTable
         '
-        Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(31, 459)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(221, 13)
-        Me.Label9.TabIndex = 11
-        Me.Label9.Text = "Image placement, when pony is heading Left:"
+        Me.LayoutTable.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LayoutTable.ColumnCount = 2
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.LayoutTable.Controls.Add(Me.NameLabel, 0, 0)
+        Me.LayoutTable.Controls.Add(Me.LeftCenteringCombo, 0, 15)
+        Me.LayoutTable.Controls.Add(Me.LeftCenteringLabel, 0, 14)
+        Me.LayoutTable.Controls.Add(Me.LeftPlacementLabel, 0, 10)
+        Me.LayoutTable.Controls.Add(Me.RightCenteringCombo, 0, 13)
+        Me.LayoutTable.Controls.Add(Me.RightCenteringLabel, 0, 12)
+        Me.LayoutTable.Controls.Add(Me.NameTextBox, 0, 1)
+        Me.LayoutTable.Controls.Add(Me.RepeatDelayZeroLabel, 1, 12)
+        Me.LayoutTable.Controls.Add(Me.LeftPlacementCombo, 0, 11)
+        Me.LayoutTable.Controls.Add(Me.RepeatDelayLabel, 1, 10)
+        Me.LayoutTable.Controls.Add(Me.DurationZeroLabel, 1, 8)
+        Me.LayoutTable.Controls.Add(Me.LeftImageLabel, 0, 2)
+        Me.LayoutTable.Controls.Add(Me.RightImageLabel, 1, 2)
+        Me.LayoutTable.Controls.Add(Me.LeftImageBox, 0, 3)
+        Me.LayoutTable.Controls.Add(Me.RightPlacementCombo, 0, 9)
+        Me.LayoutTable.Controls.Add(Me.RightPlacementLabel, 0, 8)
+        Me.LayoutTable.Controls.Add(Me.RightImageBox, 1, 3)
+        Me.LayoutTable.Controls.Add(Me.LeftImageSelectButton, 0, 4)
+        Me.LayoutTable.Controls.Add(Me.RightImageSelectButton, 1, 4)
+        Me.LayoutTable.Controls.Add(Me.BehaviorLabel, 0, 6)
+        Me.LayoutTable.Controls.Add(Me.BehaviorCombo, 0, 7)
+        Me.LayoutTable.Controls.Add(Me.DurationLabel, 1, 6)
+        Me.LayoutTable.Controls.Add(Me.DurationNumber, 1, 7)
+        Me.LayoutTable.Controls.Add(Me.RepeatDelayNumber, 1, 11)
+        Me.LayoutTable.Controls.Add(Me.FollowCheckBox, 1, 15)
+        Me.LayoutTable.Controls.Add(Me.DoNotRepeatAnimationsCheckBox, 0, 5)
+        Me.LayoutTable.Location = New System.Drawing.Point(12, 12)
+        Me.LayoutTable.Name = "LayoutTable"
+        Me.LayoutTable.RowCount = 16
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.Size = New System.Drawing.Size(535, 503)
+        Me.LayoutTable.TabIndex = 0
         '
-        'DontRepeat_CheckBox
+        'DurationNumber
         '
-        Me.DontRepeat_CheckBox.AutoSize = True
-        Me.DontRepeat_CheckBox.Location = New System.Drawing.Point(389, 512)
-        Me.DontRepeat_CheckBox.Name = "DontRepeat_CheckBox"
-        Me.DontRepeat_CheckBox.Size = New System.Drawing.Size(137, 17)
-        Me.DontRepeat_CheckBox.TabIndex = 23
-        Me.DontRepeat_CheckBox.Text = "Don't repeat animations"
-        Me.DontRepeat_CheckBox.UseVisualStyleBackColor = True
+        Me.DurationNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.DurationNumber.DecimalPlaces = 2
+        Me.DurationNumber.Location = New System.Drawing.Point(341, 259)
+        Me.DurationNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
+        Me.DurationNumber.Name = "DurationNumber"
+        Me.DurationNumber.Size = New System.Drawing.Size(120, 20)
+        Me.DurationNumber.TabIndex = 18
+        '
+        'RepeatDelayNumber
+        '
+        Me.RepeatDelayNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.RepeatDelayNumber.DecimalPlaces = 2
+        Me.RepeatDelayNumber.Location = New System.Drawing.Point(341, 363)
+        Me.RepeatDelayNumber.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
+        Me.RepeatDelayNumber.Name = "RepeatDelayNumber"
+        Me.RepeatDelayNumber.Size = New System.Drawing.Size(120, 20)
+        Me.RepeatDelayNumber.TabIndex = 21
         '
         'NewEffectDialog
         '
@@ -329,74 +432,50 @@ Partial Class NewEffectDialog
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(655, 620)
-        Me.Controls.Add(Me.DontRepeat_CheckBox)
-        Me.Controls.Add(Me.Label9)
-        Me.Controls.Add(Me.Label12)
-        Me.Controls.Add(Me.L_Centering_Box)
-        Me.Controls.Add(Me.Label10)
-        Me.Controls.Add(Me.R_Centering_Box)
-        Me.Controls.Add(Me.L_Placement_Box)
-        Me.Controls.Add(Me.Label8)
-        Me.Controls.Add(Me.R_Placement_Box)
-        Me.Controls.Add(Me.follow_checkbox)
-        Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.repeat_box)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.Label11)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.Behavior_Box)
-        Me.Controls.Add(Me.Duration_Box)
-        Me.Controls.Add(Me.Right_Image_Set_Button)
-        Me.Controls.Add(Me.Left_Image_Set_Button)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Name_Textbox)
-        Me.Controls.Add(Me.Right_ImageBox)
-        Me.Controls.Add(Me.Left_ImageBox)
-        Me.Controls.Add(Me.TableLayoutPanel1)
-        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
-        Me.MaximizeBox = False
+        Me.ClientSize = New System.Drawing.Size(559, 562)
+        Me.Controls.Add(Me.CommandTable)
+        Me.Controls.Add(Me.LayoutTable)
         Me.MinimizeBox = False
+        Me.MinimumSize = New System.Drawing.Size(400, 550)
         Me.Name = "NewEffectDialog"
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Create New Effect..."
-        Me.TableLayoutPanel1.ResumeLayout(False)
+        Me.CommandTable.ResumeLayout(False)
+        Me.LayoutTable.ResumeLayout(False)
+        Me.LayoutTable.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
-    Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents CommandTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
-    Friend WithEvents Left_ImageBox As System.Windows.Forms.PictureBox
-    Friend WithEvents Right_ImageBox As System.Windows.Forms.PictureBox
-    Friend WithEvents Name_Textbox As System.Windows.Forms.TextBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents Left_Image_Set_Button As System.Windows.Forms.Button
-    Friend WithEvents Right_Image_Set_Button As System.Windows.Forms.Button
-    Friend WithEvents Duration_Box As System.Windows.Forms.TextBox
-    Friend WithEvents Behavior_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents Label11 As System.Windows.Forms.Label
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents repeat_box As System.Windows.Forms.TextBox
-    Friend WithEvents Label7 As System.Windows.Forms.Label
-    Friend WithEvents follow_checkbox As System.Windows.Forms.CheckBox
-    Friend WithEvents Label8 As System.Windows.Forms.Label
-    Friend WithEvents R_Placement_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents L_Placement_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents Label10 As System.Windows.Forms.Label
-    Friend WithEvents R_Centering_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents Label12 As System.Windows.Forms.Label
-    Friend WithEvents L_Centering_Box As System.Windows.Forms.ComboBox
-    Friend WithEvents Label9 As System.Windows.Forms.Label
-    Friend WithEvents DontRepeat_CheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents LeftImageBox As System.Windows.Forms.PictureBox
+    Friend WithEvents RightImageBox As System.Windows.Forms.PictureBox
+    Friend WithEvents NameTextBox As System.Windows.Forms.TextBox
+    Friend WithEvents NameLabel As System.Windows.Forms.Label
+    Friend WithEvents LeftImageLabel As System.Windows.Forms.Label
+    Friend WithEvents RightImageLabel As System.Windows.Forms.Label
+    Friend WithEvents LeftImageSelectButton As System.Windows.Forms.Button
+    Friend WithEvents RightImageSelectButton As System.Windows.Forms.Button
+    Friend WithEvents BehaviorCombo As System.Windows.Forms.ComboBox
+    Friend WithEvents DurationLabel As System.Windows.Forms.Label
+    Friend WithEvents BehaviorLabel As System.Windows.Forms.Label
+    Friend WithEvents DurationZeroLabel As System.Windows.Forms.Label
+    Friend WithEvents RepeatDelayLabel As System.Windows.Forms.Label
+    Friend WithEvents RepeatDelayZeroLabel As System.Windows.Forms.Label
+    Friend WithEvents FollowCheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents RightPlacementLabel As System.Windows.Forms.Label
+    Friend WithEvents RightPlacementCombo As System.Windows.Forms.ComboBox
+    Friend WithEvents LeftPlacementCombo As System.Windows.Forms.ComboBox
+    Friend WithEvents RightCenteringLabel As System.Windows.Forms.Label
+    Friend WithEvents RightCenteringCombo As System.Windows.Forms.ComboBox
+    Friend WithEvents LeftCenteringLabel As System.Windows.Forms.Label
+    Friend WithEvents LeftCenteringCombo As System.Windows.Forms.ComboBox
+    Friend WithEvents LeftPlacementLabel As System.Windows.Forms.Label
+    Friend WithEvents DoNotRepeatAnimationsCheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents DurationNumber As System.Windows.Forms.NumericUpDown
+    Friend WithEvents RepeatDelayNumber As System.Windows.Forms.NumericUpDown
 
 End Class

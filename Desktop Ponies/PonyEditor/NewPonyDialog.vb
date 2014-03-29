@@ -1,9 +1,14 @@
-﻿Imports System.Windows.Forms
-Imports System.IO
-
-Public Class NewPonyDialog
+﻿Public Class NewPonyDialog
     Private ReadOnly _ponies As PonyCollection
     Private ReadOnly _newBase As PonyBase
+
+    Private _base As PonyBase
+    Public ReadOnly Property Base As PonyBase
+        Get
+            Return _base
+        End Get
+    End Property
+
     Public Sub New(ponies As PonyCollection)
         InitializeComponent()
         _ponies = ponies
@@ -12,7 +17,7 @@ Public Class NewPonyDialog
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If Not ValidateName() Then Return
+        If Not ValidateAndCreate() Then Return
         Me.DialogResult = DialogResult.OK
         Me.Close()
     End Sub
@@ -22,18 +27,12 @@ Public Class NewPonyDialog
         Me.Close()
     End Sub
 
-    Private Function ValidateName() As Boolean
+    Private Function ValidateAndCreate() As Boolean
         Dim newName = txtName.Text.Trim()
+        If Not EditorCommon.ValidateName(Me, "pony", newName) Then Return False
 
-        If newName = "" Then
-            MessageBox.Show(Me, "You must enter a name for the new pony first.",
-                            "No Name Entered", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Return False
-        End If
-
-        Dim badChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, "{"c, "}"c, ","c, """"c}.
-            Concat(Path.GetInvalidPathChars()).Concat(Path.GetInvalidFileNameChars()).Distinct().ToArray()
-
+        Dim badChars = {IO.Path.DirectorySeparatorChar, IO.Path.AltDirectorySeparatorChar}.
+            Concat(IO.Path.GetInvalidPathChars()).Concat(IO.Path.GetInvalidFileNameChars()).Distinct().ToArray()
         If newName.IndexOfAny(badChars) <> -1 Then
             MessageBox.Show(Me, "The pony's name cannot contain any of the following characters:" & Environment.NewLine &
                             String.Join(" ", badChars.Where(Function(c) Not Char.IsWhiteSpace(c) AndAlso Asc(c) <> 0)),
@@ -49,8 +48,15 @@ Public Class NewPonyDialog
             End If
         Next
 
-        If _newBase.ChangeDirectory(newName) Then
+        Dim changed As Boolean
+        Try
+            changed = _newBase.ChangeDirectory(newName)
+        Catch ex As Exception
+            changed = False
+        End Try
+        If changed Then
             _newBase.DisplayName = newName
+            _base = _newBase
             Return True
         Else
             MessageBox.Show(Me, "Failed to create this pony. Try again, or perhaps try another name.",

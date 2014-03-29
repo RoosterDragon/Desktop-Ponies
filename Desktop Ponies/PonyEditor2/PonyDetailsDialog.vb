@@ -54,7 +54,13 @@ Public Class PonyDetailsDialog
             End If
         End If
 
-        If Not base.ChangeDirectory(newName) Then
+        Dim changed As Boolean
+        Try
+            changed = base.ChangeDirectory(newName)
+        Catch ex As Exception
+            changed = False
+        End Try
+        If Not changed Then
             MessageBox.Show(Me, "Error attempting to rename pony. Please try again.",
                             "Rename Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return

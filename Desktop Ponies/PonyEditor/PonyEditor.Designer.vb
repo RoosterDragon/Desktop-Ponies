@@ -58,19 +58,6 @@ Partial Class PonyEditor
         Me.SpeechesLabel = New System.Windows.Forms.Label()
         Me.InteractionsLabel = New System.Windows.Forms.Label()
         Me.EffectsGrid = New System.Windows.Forms.DataGridView()
-        Me.colEffectName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectBehavior = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colEffectLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
-        Me.colEffectDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectRepeatDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colEffectLocationRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectCenteringRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectLocationLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectCenteringLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.colEffectFollowPony = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.colEffectDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.CurrentBehaviorLabel = New System.Windows.Forms.Label()
         Me.CurrentBehaviorValueLabel = New System.Windows.Forms.Label()
         Me.TimeLeftLabel = New System.Windows.Forms.Label()
@@ -85,7 +72,6 @@ Partial Class PonyEditor
         Me.InteractionsSwapButton = New System.Windows.Forms.Button()
         Me.BehaviorsSwapButton = New System.Windows.Forms.Button()
         Me.PausePonyButton = New System.Windows.Forms.Button()
-        Me.OpenPictureDialog = New System.Windows.Forms.OpenFileDialog()
         Me.SaveButton = New System.Windows.Forms.Button()
         Me.EditTagsButton = New System.Windows.Forms.Button()
         Me.RefreshButton = New System.Windows.Forms.Button()
@@ -105,6 +91,19 @@ Partial Class PonyEditor
         Me.ImageCentersMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GifAlphaMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GifViewerMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.colEffectName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectOriginalName = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectBehavior = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectRightImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colEffectLeftImage = New System.Windows.Forms.DataGridViewButtonColumn()
+        Me.colEffectDuration = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectRepeatDelay = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colEffectLocationRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectCenteringRight = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectLocationLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectCenteringLeft = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.colEffectFollowPony = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.colEffectDoNotRepeatAnimations = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.SelectPonyGroup.SuspendLayout()
         Me.PonyPreviewGroup.SuspendLayout()
         Me.GridTable.SuspendLayout()
@@ -264,7 +263,6 @@ Partial Class PonyEditor
         'colBehaviorMovement
         '
         Me.colBehaviorMovement.HeaderText = "Movement Allowed"
-        Me.colBehaviorMovement.Items.AddRange(New Object() {"None", "Horizontal Only", "Vertical Only", "Horizontal/Vertical", "Diagonal Only", "Diagonal/horizontal", "Diagonal/Vertical", "All", "MouseOver", "Sleep", "Dragged"})
         Me.colBehaviorMovement.Name = "colBehaviorMovement"
         Me.colBehaviorMovement.Width = 103
         '
@@ -480,103 +478,6 @@ Partial Class PonyEditor
         Me.EffectsGrid.Name = "EffectsGrid"
         Me.EffectsGrid.Size = New System.Drawing.Size(322, 132)
         Me.EffectsGrid.TabIndex = 1
-        '
-        'colEffectName
-        '
-        Me.colEffectName.HeaderText = "Name"
-        Me.colEffectName.Name = "colEffectName"
-        Me.colEffectName.Width = 60
-        '
-        'colEffectOriginalName
-        '
-        Me.colEffectOriginalName.HeaderText = "Original_Name"
-        Me.colEffectOriginalName.Name = "colEffectOriginalName"
-        Me.colEffectOriginalName.Visible = False
-        Me.colEffectOriginalName.Width = 101
-        '
-        'colEffectBehavior
-        '
-        Me.colEffectBehavior.HeaderText = "Behavior"
-        Me.colEffectBehavior.Name = "colEffectBehavior"
-        Me.colEffectBehavior.Width = 55
-        '
-        'colEffectRightImage
-        '
-        Me.colEffectRightImage.HeaderText = "Right Image"
-        Me.colEffectRightImage.Name = "colEffectRightImage"
-        Me.colEffectRightImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectRightImage.Width = 70
-        '
-        'colEffectLeftImage
-        '
-        Me.colEffectLeftImage.HeaderText = "Left Image"
-        Me.colEffectLeftImage.Name = "colEffectLeftImage"
-        Me.colEffectLeftImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectLeftImage.Width = 63
-        '
-        'colEffectDuration
-        '
-        Me.colEffectDuration.HeaderText = "Duration"
-        Me.colEffectDuration.Name = "colEffectDuration"
-        Me.colEffectDuration.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.colEffectDuration.Width = 53
-        '
-        'colEffectRepeatDelay
-        '
-        Me.colEffectRepeatDelay.HeaderText = "Repeat Delay"
-        Me.colEffectRepeatDelay.Name = "colEffectRepeatDelay"
-        Me.colEffectRepeatDelay.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectRepeatDelay.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.colEffectRepeatDelay.Width = 78
-        '
-        'colEffectLocationRight
-        '
-        Me.colEffectLocationRight.HeaderText = "Location Heading Right"
-        Me.colEffectLocationRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectLocationRight.Name = "colEffectLocationRight"
-        Me.colEffectLocationRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectLocationRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectLocationRight.Width = 144
-        '
-        'colEffectCenteringRight
-        '
-        Me.colEffectCenteringRight.HeaderText = "Centering Right"
-        Me.colEffectCenteringRight.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectCenteringRight.Name = "colEffectCenteringRight"
-        Me.colEffectCenteringRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectCenteringRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectCenteringRight.Width = 105
-        '
-        'colEffectLocationLeft
-        '
-        Me.colEffectLocationLeft.HeaderText = "Location Heading Left"
-        Me.colEffectLocationLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectLocationLeft.Name = "colEffectLocationLeft"
-        Me.colEffectLocationLeft.Width = 118
-        '
-        'colEffectCenteringLeft
-        '
-        Me.colEffectCenteringLeft.HeaderText = "Centering Left"
-        Me.colEffectCenteringLeft.Items.AddRange(New Object() {"Top", "Bottom", "Left", "Right", "Bottom Right", "Bottom Left", "Top Right", "Top Left", "Center", "Any", "Any-Not Center"})
-        Me.colEffectCenteringLeft.Name = "colEffectCenteringLeft"
-        Me.colEffectCenteringLeft.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectCenteringLeft.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectCenteringLeft.Width = 98
-        '
-        'colEffectFollowPony
-        '
-        Me.colEffectFollowPony.HeaderText = "Follow Pony?"
-        Me.colEffectFollowPony.Name = "colEffectFollowPony"
-        Me.colEffectFollowPony.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectFollowPony.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.colEffectFollowPony.Width = 95
-        '
-        'colEffectDoNotRepeatAnimations
-        '
-        Me.colEffectDoNotRepeatAnimations.HeaderText = "Don't Repeat Animations"
-        Me.colEffectDoNotRepeatAnimations.Name = "colEffectDoNotRepeatAnimations"
-        Me.colEffectDoNotRepeatAnimations.Width = 130
         '
         'CurrentBehaviorLabel
         '
@@ -942,6 +843,99 @@ Partial Class PonyEditor
         Me.GifViewerMenuItem.Size = New System.Drawing.Size(198, 22)
         Me.GifViewerMenuItem.Text = "View GIF Frames"
         '
+        'colEffectName
+        '
+        Me.colEffectName.HeaderText = "Name"
+        Me.colEffectName.Name = "colEffectName"
+        Me.colEffectName.Width = 60
+        '
+        'colEffectOriginalName
+        '
+        Me.colEffectOriginalName.HeaderText = "Original_Name"
+        Me.colEffectOriginalName.Name = "colEffectOriginalName"
+        Me.colEffectOriginalName.Visible = False
+        Me.colEffectOriginalName.Width = 101
+        '
+        'colEffectBehavior
+        '
+        Me.colEffectBehavior.HeaderText = "Behavior"
+        Me.colEffectBehavior.Name = "colEffectBehavior"
+        Me.colEffectBehavior.Width = 55
+        '
+        'colEffectRightImage
+        '
+        Me.colEffectRightImage.HeaderText = "Right Image"
+        Me.colEffectRightImage.Name = "colEffectRightImage"
+        Me.colEffectRightImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectRightImage.Width = 70
+        '
+        'colEffectLeftImage
+        '
+        Me.colEffectLeftImage.HeaderText = "Left Image"
+        Me.colEffectLeftImage.Name = "colEffectLeftImage"
+        Me.colEffectLeftImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectLeftImage.Width = 63
+        '
+        'colEffectDuration
+        '
+        Me.colEffectDuration.HeaderText = "Duration"
+        Me.colEffectDuration.Name = "colEffectDuration"
+        Me.colEffectDuration.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.colEffectDuration.Width = 53
+        '
+        'colEffectRepeatDelay
+        '
+        Me.colEffectRepeatDelay.HeaderText = "Repeat Delay"
+        Me.colEffectRepeatDelay.Name = "colEffectRepeatDelay"
+        Me.colEffectRepeatDelay.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectRepeatDelay.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.colEffectRepeatDelay.Width = 78
+        '
+        'colEffectLocationRight
+        '
+        Me.colEffectLocationRight.HeaderText = "Location Heading Right"
+        Me.colEffectLocationRight.Name = "colEffectLocationRight"
+        Me.colEffectLocationRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectLocationRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectLocationRight.Width = 144
+        '
+        'colEffectCenteringRight
+        '
+        Me.colEffectCenteringRight.HeaderText = "Centering Right"
+        Me.colEffectCenteringRight.Name = "colEffectCenteringRight"
+        Me.colEffectCenteringRight.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectCenteringRight.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectCenteringRight.Width = 105
+        '
+        'colEffectLocationLeft
+        '
+        Me.colEffectLocationLeft.HeaderText = "Location Heading Left"
+        Me.colEffectLocationLeft.Name = "colEffectLocationLeft"
+        Me.colEffectLocationLeft.Width = 118
+        '
+        'colEffectCenteringLeft
+        '
+        Me.colEffectCenteringLeft.HeaderText = "Centering Left"
+        Me.colEffectCenteringLeft.Name = "colEffectCenteringLeft"
+        Me.colEffectCenteringLeft.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectCenteringLeft.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectCenteringLeft.Width = 98
+        '
+        'colEffectFollowPony
+        '
+        Me.colEffectFollowPony.HeaderText = "Follow Pony?"
+        Me.colEffectFollowPony.Name = "colEffectFollowPony"
+        Me.colEffectFollowPony.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.colEffectFollowPony.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.colEffectFollowPony.Width = 95
+        '
+        'colEffectDoNotRepeatAnimations
+        '
+        Me.colEffectDoNotRepeatAnimations.HeaderText = "Don't Repeat Animations"
+        Me.colEffectDoNotRepeatAnimations.Name = "colEffectDoNotRepeatAnimations"
+        Me.colEffectDoNotRepeatAnimations.Width = 130
+        '
         'PonyEditor
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -997,7 +991,6 @@ Partial Class PonyEditor
     Friend WithEvents InteractionsSwapButton As System.Windows.Forms.Button
     Friend WithEvents BehaviorsSwapButton As System.Windows.Forms.Button
     Friend WithEvents PausePonyButton As System.Windows.Forms.Button
-    Friend WithEvents OpenPictureDialog As System.Windows.Forms.OpenFileDialog
     Friend WithEvents SaveButton As System.Windows.Forms.Button
     Friend WithEvents EditTagsButton As System.Windows.Forms.Button
     Friend WithEvents RefreshButton As System.Windows.Forms.Button
@@ -1020,19 +1013,6 @@ Partial Class PonyEditor
     Friend WithEvents colInteractionInteractWith As System.Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents colInteractionBehaviors As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colInteractionReactivationDelay As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colEffectName As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colEffectOriginalName As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colEffectBehavior As System.Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents colEffectRightImage As System.Windows.Forms.DataGridViewButtonColumn
-    Friend WithEvents colEffectLeftImage As System.Windows.Forms.DataGridViewButtonColumn
-    Friend WithEvents colEffectDuration As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colEffectRepeatDelay As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents colEffectLocationRight As System.Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents colEffectCenteringRight As System.Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents colEffectLocationLeft As System.Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents colEffectCenteringLeft As System.Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents colEffectFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
-    Friend WithEvents colEffectDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colPony As System.Windows.Forms.ColumnHeader
     Friend WithEvents GridTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents SpeechesPanel As System.Windows.Forms.Panel
@@ -1041,6 +1021,11 @@ Partial Class PonyEditor
     Friend WithEvents InteractionsPanel As System.Windows.Forms.Panel
     Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents PonyPanel As System.Windows.Forms.Panel
+    Friend WithEvents ImagesButton As System.Windows.Forms.Button
+    Friend WithEvents ImagesContextMenu As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents ImageCentersMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents GifAlphaMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents GifViewerMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents colBehaviorActivate As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colBehaviorName As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colBehaviorOriginalName As System.Windows.Forms.DataGridViewTextBoxColumn
@@ -1060,9 +1045,17 @@ Partial Class PonyEditor
     Friend WithEvents colBehaviorLinkOrder As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colBehaviorDoNotRunRandomly As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colBehaviorDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
-    Friend WithEvents ImagesButton As System.Windows.Forms.Button
-    Friend WithEvents ImagesContextMenu As System.Windows.Forms.ContextMenuStrip
-    Friend WithEvents ImageCentersMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents GifAlphaMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents GifViewerMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents colEffectName As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colEffectOriginalName As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colEffectBehavior As System.Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents colEffectRightImage As System.Windows.Forms.DataGridViewButtonColumn
+    Friend WithEvents colEffectLeftImage As System.Windows.Forms.DataGridViewButtonColumn
+    Friend WithEvents colEffectDuration As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colEffectRepeatDelay As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents colEffectLocationRight As System.Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents colEffectCenteringRight As System.Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents colEffectLocationLeft As System.Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents colEffectCenteringLeft As System.Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents colEffectFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents colEffectDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
 End Class

@@ -232,9 +232,15 @@ Public Class PonyBase
     End Sub
 
     Public Function ChangeDirectory(newDirectory As String) As Boolean
-        If newDirectory = RandomDirectory Then Throw New ArgumentException("Cannot change directory to the random pony directory.")
-        If Directory Is Nothing Then Return Create(newDirectory)
-        If String.Equals(Directory, newDirectory, PathEquality.Comparison) Then Return True
+        If PathEquality.Equals(newDirectory, RandomDirectory) Then
+            Throw New ArgumentException("Cannot change directory to the random pony directory.")
+        End If
+        If Directory Is Nothing Then
+            Dim created = Create(newDirectory)
+            If created Then _directory = newDirectory
+            Return created
+        End If
+        If PathEquality.Equals(Directory, newDirectory) Then Return True
         Try
             If newDirectory.Contains("""") Then
                 Throw New ArgumentException("newDirectory may not contain any quote characters.", "newDirectory")
@@ -530,7 +536,7 @@ Public Class InteractionBase
         i.Chance = p.ParseDouble(0, 0, 1)
         i.Proximity = p.ParseDouble(125, 0, 10000)
         i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)))
-        i.Activation = p.Project(AddressOf TargetActivationFromString, TargetActivation.One)
+        i.Activation = p.Project(AddressOf TargetActivationFromIniString, TargetActivation.One)
         i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)).
                                   Select(Function(s) New CaseInsensitiveString(s)))
         i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
@@ -897,26 +903,6 @@ Public Class Behavior
         Return p.Result
     End Function
 
-    Public Sub AddEffect(effectname As String, right_path As String, left_path As String, duration As Double, repeat_delay As Double,
-                         direction_right As Direction, centering_right As Direction,
-                         direction_left As Direction, centering_left As Direction,
-                         follow As Boolean, _dont_repeat_image_animations As Boolean, owner As PonyBase)
-
-        Dim newEffect As New EffectBase(effectname, left_path, right_path) With {
-            .BehaviorName = Name,
-            .Duration = duration,
-            .RepeatDelay = repeat_delay,
-            .PlacementDirectionLeft = direction_left,
-            .CenteringLeft = centering_left,
-            .PlacementDirectionRight = direction_right,
-            .CenteringRight = centering_right,
-            .Follow = follow,
-            .DoNotRepeatImageAnimations = _dont_repeat_image_animations,
-            .ParentPonyBase = owner
-        }
-        pony.Effects.Add(newEffect)
-    End Sub
-
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
         Dim rightCenter = If(RightImage.CustomCenter, Vector2.Zero)
         Dim leftCenter = If(LeftImage.CustomCenter, Vector2.Zero)
@@ -929,7 +915,7 @@ Public Class Behavior
             Speed.ToString(CultureInfo.InvariantCulture),
             Quoted(Path.GetFileName(RightImage.Path)),
             Quoted(Path.GetFileName(LeftImage.Path)),
-            Space_To_Under(AllowedMovesToString(AllowedMovement)),
+            AllowedMovement.ToIniString(),
             Quoted(LinkedBehaviorName),
             Quoted(StartLineName),
             Quoted(EndLineName),
@@ -3268,10 +3254,10 @@ Public Class EffectBase
             Quoted(Path.GetFileName(LeftImage.Path)),
             Duration.ToString(CultureInfo.InvariantCulture),
             RepeatDelay.ToString(CultureInfo.InvariantCulture),
-            Space_To_Under(Location_ToString(PlacementDirectionRight)),
-            Space_To_Under(Location_ToString(CenteringRight)),
-            Space_To_Under(Location_ToString(PlacementDirectionLeft)),
-            Space_To_Under(Location_ToString(CenteringLeft)),
+            PlacementDirectionRight.ToIniString(),
+            CenteringRight.ToIniString(),
+            PlacementDirectionLeft.ToIniString(),
+            CenteringLeft.ToIniString(),
             Follow,
             DoNotRepeatImageAnimations)
     End Function
@@ -3937,6 +3923,68 @@ Public Enum Direction
     RandomNotCenter = 11
 End Enum
 
+Public Module DirectionExtensions
+    <System.Runtime.CompilerServices.Extension()>
+    Public Function ToDisplayString(location As Direction) As String
+        Select Case location
+            Case Direction.TopLeft
+                Return "Top Left"
+            Case Direction.TopCenter
+                Return "Top"
+            Case Direction.TopRight
+                Return "Top Right"
+            Case Direction.MiddleLeft
+                Return "Left"
+            Case Direction.MiddleCenter
+                Return "Center"
+            Case Direction.MiddleRight
+                Return "Right"
+            Case Direction.BottomLeft
+                Return "Bottom Left"
+            Case Direction.BottomCenter
+                Return "Bottom"
+            Case Direction.BottomRight
+                Return "Bottom Right"
+            Case Direction.Random
+                Return "Any"
+            Case Direction.RandomNotCenter
+                Return "Any Except Center"
+            Case Else
+                Throw New System.ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
+        End Select
+    End Function
+
+    <System.Runtime.CompilerServices.Extension()>
+    Public Function ToIniString(location As Direction) As String
+        Select Case location
+            Case Direction.TopLeft
+                Return "Top_Left"
+            Case Direction.TopCenter
+                Return "Top"
+            Case Direction.TopRight
+                Return "Top_Right"
+            Case Direction.MiddleLeft
+                Return "Left"
+            Case Direction.MiddleCenter
+                Return "Center"
+            Case Direction.MiddleRight
+                Return "Right"
+            Case Direction.BottomLeft
+                Return "Bottom_Left"
+            Case Direction.BottomCenter
+                Return "Bottom"
+            Case Direction.BottomRight
+                Return "Bottom_Right"
+            Case Direction.Random
+                Return "Any"
+            Case Direction.RandomNotCenter
+                Return "Any-Not_Center"
+            Case Else
+                Throw New System.ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
+        End Select
+    End Function
+End Module
+
 <Flags()>
 Public Enum AllowedMoves As Byte
     None = 0
@@ -3952,30 +4000,67 @@ Public Enum AllowedMoves As Byte
     Dragged = 32
 End Enum
 
-Public Enum BehaviorOption
-    Name = 1
-    Probability = 2
-    MaxDuration = 3
-    MinDuration = 4
-    Speed = 5 'specified in pixels per tick of the timer
-    RightImagePath = 6
-    LeftImagePath = 7
-    MovementType = 8
-    LinkedBehavior = 9
-    SpeakingStart = 10
-    SpeakingEnd = 11
-    Skip = 12 'Should we skip this behavior when considering ones to randomly choose (part of an interaction/chain?)
-    XCoord = 13  'used when following/moving to a point on the screen.
-    YCoord = 14
-    ObjectToFollow = 15
-    AutoSelectImages = 16
-    FollowStoppedBehavior = 17
-    FollowMovingBehavior = 18
-    RightImageCenter = 19
-    LeftImageCenter = 20
-    DoNotRepeatImageAnimations = 21
-    Group = 22
-End Enum
+Public Module AllowedMovesExtensions
+    <System.Runtime.CompilerServices.Extension()>
+    Public Function ToDisplayString(movement As AllowedMoves) As String
+        Select Case movement
+            Case AllowedMoves.None
+                Return "None"
+            Case AllowedMoves.HorizontalOnly
+                Return "Horizontal Only"
+            Case AllowedMoves.VerticalOnly
+                Return "Vertical Only"
+            Case AllowedMoves.HorizontalVertical
+                Return "Horizontal/Vertical"
+            Case AllowedMoves.DiagonalOnly
+                Return "Diagonal Only"
+            Case AllowedMoves.DiagonalHorizontal
+                Return "Diagonal/Horizontal"
+            Case AllowedMoves.DiagonalVertical
+                Return "Diagonal/Vertical"
+            Case AllowedMoves.All
+                Return "All"
+            Case AllowedMoves.MouseOver
+                Return "Mouseover"
+            Case AllowedMoves.Sleep
+                Return "Sleep"
+            Case AllowedMoves.Dragged
+                Return "Dragged"
+            Case Else
+                Throw New System.ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
+        End Select
+    End Function
+
+    <System.Runtime.CompilerServices.Extension()>
+    Public Function ToIniString(movement As AllowedMoves) As String
+        Select Case movement
+            Case AllowedMoves.None
+                Return "None"
+            Case AllowedMoves.HorizontalOnly
+                Return "Horizontal_Only"
+            Case AllowedMoves.VerticalOnly
+                Return "Vertical_Only"
+            Case AllowedMoves.HorizontalVertical
+                Return "Horizontal_Vertical"
+            Case AllowedMoves.DiagonalOnly
+                Return "Diagonal_Only"
+            Case AllowedMoves.DiagonalHorizontal
+                Return "Diagonal_horizontal"
+            Case AllowedMoves.DiagonalVertical
+                Return "Diagonal_Vertical"
+            Case AllowedMoves.All
+                Return "All"
+            Case AllowedMoves.MouseOver
+                Return "MouseOver"
+            Case AllowedMoves.Sleep
+                Return "Sleep"
+            Case AllowedMoves.Dragged
+                Return "Dragged"
+            Case Else
+                Throw New System.ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
+        End Select
+    End Function
+End Module
 
 ''' <summary>
 ''' Specifies how the interaction is activated when dealing with multiple targets.
@@ -4010,36 +4095,7 @@ Public Enum FollowOffsetType As Byte
 End Enum
 
 Public Module EnumConversions
-    Public Function AllowedMovesFromString(movement As String) As AllowedMoves
-        Select Case movement
-            Case "None"
-                Return AllowedMoves.None
-            Case "Horizontal Only"
-                Return AllowedMoves.HorizontalOnly
-            Case "Vertical Only"
-                Return AllowedMoves.VerticalOnly
-            Case "Horizontal/Vertical"
-                Return AllowedMoves.HorizontalVertical
-            Case "Diagonal Only"
-                Return AllowedMoves.DiagonalOnly
-            Case "Diagonal/horizontal"
-                Return AllowedMoves.DiagonalHorizontal
-            Case "Diagonal/Vertical"
-                Return AllowedMoves.DiagonalVertical
-            Case "All"
-                Return AllowedMoves.All
-            Case "MouseOver"
-                Return AllowedMoves.MouseOver
-            Case "Sleep"
-                Return AllowedMoves.Sleep
-            Case "Dragged"
-                Return AllowedMoves.Dragged
-            Case Else
-                Throw New ArgumentException("Invalid movement string:" & movement, "movement")
-        End Select
-    End Function
-
-    Public Function DirectionFromString(location As String) As Direction
+    Public Function DirectionFromDisplayString(location As String) As Direction
         Select Case location
             Case "Top"
                 Return Direction.TopCenter
@@ -4061,43 +4117,43 @@ Public Module EnumConversions
                 Return Direction.MiddleCenter
             Case "Any"
                 Return Direction.Random
-            Case "Any-Not Center"
+            Case "Any Except Center"
                 Return Direction.RandomNotCenter
             Case Else
-                Throw New ArgumentException("Invalid Location/Direction option: " & location, "location")
+                Throw New ArgumentException("Invalid direction string: " & location, "location")
         End Select
     End Function
 
-    Public Function AllowedMovesToString(movement As AllowedMoves) As String
+    Public Function AllowedMovesFromDisplayString(movement As String) As AllowedMoves
         Select Case movement
-            Case AllowedMoves.None
-                Return "None"
-            Case AllowedMoves.HorizontalOnly
-                Return "Horizontal Only"
-            Case AllowedMoves.VerticalOnly
-                Return "Vertical Only"
-            Case AllowedMoves.HorizontalVertical
-                Return "Horizontal/Vertical"
-            Case AllowedMoves.DiagonalOnly
-                Return "Diagonal Only"
-            Case AllowedMoves.DiagonalHorizontal
-                Return "Diagonal/horizontal"
-            Case AllowedMoves.DiagonalVertical
-                Return "Diagonal/Vertical"
-            Case AllowedMoves.All
-                Return "All"
-            Case AllowedMoves.MouseOver
-                Return "MouseOver"
-            Case AllowedMoves.Sleep
-                Return "Sleep"
-            Case AllowedMoves.Dragged
-                Return "Dragged"
+            Case "None"
+                Return AllowedMoves.None
+            Case "Horizontal Only"
+                Return AllowedMoves.HorizontalOnly
+            Case "Vertical Only"
+                Return AllowedMoves.VerticalOnly
+            Case "Horizontal/Vertical"
+                Return AllowedMoves.HorizontalVertical
+            Case "Diagonal Only"
+                Return AllowedMoves.DiagonalOnly
+            Case "Diagonal/Horizontal"
+                Return AllowedMoves.DiagonalHorizontal
+            Case "Diagonal/Vertical"
+                Return AllowedMoves.DiagonalVertical
+            Case "All"
+                Return AllowedMoves.All
+            Case "Mouseover"
+                Return AllowedMoves.MouseOver
+            Case "Sleep"
+                Return AllowedMoves.Sleep
+            Case "Dragged"
+                Return AllowedMoves.Dragged
             Case Else
-                Throw New ArgumentException("Invalid movement option: " & movement, "movement")
+                Throw New ArgumentException("Invalid allowed moves string:" & movement, "movement")
         End Select
     End Function
 
-    Public Function TargetActivationFromString(activation As String) As TargetActivation
+    Public Function TargetActivationFromIniString(activation As String) As TargetActivation
         Dim targetsOut As TargetActivation
         If Not [Enum].TryParse(activation, targetsOut) Then
             ' If direct parsing failed, assume we've got some old definitions instead.

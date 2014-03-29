@@ -22,37 +22,41 @@ Partial Class NewSpeechDialog
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
+        Me.CommandTable = New System.Windows.Forms.TableLayoutPanel()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.OK_Button = New System.Windows.Forms.Button()
-        Me.Name_Textbox = New System.Windows.Forms.TextBox()
+        Me.NameTextBox = New System.Windows.Forms.TextBox()
         Me.NameLabel = New System.Windows.Forms.Label()
-        Me.Text_TextBox = New System.Windows.Forms.TextBox()
+        Me.LineTextBox = New System.Windows.Forms.TextBox()
         Me.LineLabel = New System.Windows.Forms.Label()
-        Me.Sound_Textbox = New System.Windows.Forms.TextBox()
+        Me.SoundTextBox = New System.Windows.Forms.TextBox()
         Me.SoundLabel = New System.Windows.Forms.Label()
-        Me.SetSound_Button = New System.Windows.Forms.Button()
-        Me.Random_Checkbox = New System.Windows.Forms.CheckBox()
-        Me.OpenSoundDialog = New System.Windows.Forms.OpenFileDialog()
-        Me.Group_NumberBox = New System.Windows.Forms.NumericUpDown()
+        Me.SoundSelectButton = New System.Windows.Forms.Button()
+        Me.UseRandomlyCheckBox = New System.Windows.Forms.CheckBox()
+        Me.GroupNumber = New System.Windows.Forms.NumericUpDown()
         Me.GroupLabel = New System.Windows.Forms.Label()
-        Me.TableLayoutPanel1.SuspendLayout()
+        Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
+        Me.SoundClearButton = New System.Windows.Forms.Button()
+        Me.SoundPanel = New System.Windows.Forms.Panel()
+        Me.CommandTable.SuspendLayout()
+        Me.LayoutTable.SuspendLayout()
+        Me.SoundPanel.SuspendLayout()
         Me.SuspendLayout()
         '
-        'TableLayoutPanel1
+        'CommandTable
         '
-        Me.TableLayoutPanel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(182, 329)
-        Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
-        Me.TableLayoutPanel1.RowCount = 1
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(320, 29)
-        Me.TableLayoutPanel1.TabIndex = 11
+        Me.CommandTable.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.CommandTable.ColumnCount = 2
+        Me.CommandTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.Controls.Add(Me.Cancel_Button, 1, 0)
+        Me.CommandTable.Controls.Add(Me.OK_Button, 0, 0)
+        Me.CommandTable.Location = New System.Drawing.Point(152, 246)
+        Me.CommandTable.Name = "CommandTable"
+        Me.CommandTable.RowCount = 1
+        Me.CommandTable.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.CommandTable.Size = New System.Drawing.Size(320, 29)
+        Me.CommandTable.TabIndex = 1
         '
         'Cancel_Button
         '
@@ -77,94 +81,165 @@ Partial Class NewSpeechDialog
         Me.OK_Button.Text = "OK"
         Me.OK_Button.UseVisualStyleBackColor = False
         '
-        'Name_Textbox
+        'NameTextBox
         '
-        Me.Name_Textbox.Location = New System.Drawing.Point(78, 60)
-        Me.Name_Textbox.Name = "Name_Textbox"
-        Me.Name_Textbox.Size = New System.Drawing.Size(100, 20)
-        Me.Name_Textbox.TabIndex = 1
+        Me.NameTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.NameTextBox.Location = New System.Drawing.Point(55, 16)
+        Me.NameTextBox.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.NameTextBox.Name = "NameTextBox"
+        Me.NameTextBox.Size = New System.Drawing.Size(120, 20)
+        Me.NameTextBox.TabIndex = 1
         '
         'NameLabel
         '
         Me.NameLabel.AutoSize = True
-        Me.NameLabel.Location = New System.Drawing.Point(58, 44)
+        Me.NameLabel.Location = New System.Drawing.Point(3, 0)
         Me.NameLabel.Name = "NameLabel"
         Me.NameLabel.Size = New System.Drawing.Size(78, 13)
         Me.NameLabel.TabIndex = 0
         Me.NameLabel.Text = "Speech Name:"
         '
-        'Text_TextBox
+        'LineTextBox
         '
-        Me.Text_TextBox.Location = New System.Drawing.Point(78, 132)
-        Me.Text_TextBox.MaxLength = 254
-        Me.Text_TextBox.Name = "Text_TextBox"
-        Me.Text_TextBox.Size = New System.Drawing.Size(333, 20)
-        Me.Text_TextBox.TabIndex = 5
+        Me.LineTextBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LayoutTable.SetColumnSpan(Me.LineTextBox, 2)
+        Me.LineTextBox.Location = New System.Drawing.Point(15, 67)
+        Me.LineTextBox.Margin = New System.Windows.Forms.Padding(15, 3, 15, 15)
+        Me.LineTextBox.MaxLength = 254
+        Me.LineTextBox.Name = "LineTextBox"
+        Me.LineTextBox.Size = New System.Drawing.Size(430, 20)
+        Me.LineTextBox.TabIndex = 5
         '
         'LineLabel
         '
         Me.LineLabel.AutoSize = True
-        Me.LineLabel.Location = New System.Drawing.Point(58, 116)
+        Me.LineLabel.Location = New System.Drawing.Point(3, 51)
         Me.LineLabel.Name = "LineLabel"
         Me.LineLabel.Size = New System.Drawing.Size(78, 13)
         Me.LineLabel.TabIndex = 4
         Me.LineLabel.Text = "Text to display:"
         '
-        'Sound_Textbox
+        'SoundTextBox
         '
-        Me.Sound_Textbox.Location = New System.Drawing.Point(78, 200)
-        Me.Sound_Textbox.MaxLength = 254
-        Me.Sound_Textbox.Name = "Sound_Textbox"
-        Me.Sound_Textbox.ReadOnly = True
-        Me.Sound_Textbox.Size = New System.Drawing.Size(333, 20)
-        Me.Sound_Textbox.TabIndex = 7
+        Me.SoundTextBox.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LayoutTable.SetColumnSpan(Me.SoundTextBox, 2)
+        Me.SoundTextBox.Location = New System.Drawing.Point(15, 118)
+        Me.SoundTextBox.Margin = New System.Windows.Forms.Padding(15, 3, 15, 3)
+        Me.SoundTextBox.MaxLength = 254
+        Me.SoundTextBox.Name = "SoundTextBox"
+        Me.SoundTextBox.ReadOnly = True
+        Me.SoundTextBox.Size = New System.Drawing.Size(430, 20)
+        Me.SoundTextBox.TabIndex = 7
         '
         'SoundLabel
         '
         Me.SoundLabel.AutoSize = True
-        Me.SoundLabel.Location = New System.Drawing.Point(58, 184)
+        Me.SoundLabel.Location = New System.Drawing.Point(3, 102)
         Me.SoundLabel.Name = "SoundLabel"
         Me.SoundLabel.Size = New System.Drawing.Size(103, 13)
         Me.SoundLabel.TabIndex = 6
         Me.SoundLabel.Text = "Sound file (optional):"
         '
-        'SetSound_Button
+        'SoundSelectButton
         '
-        Me.SetSound_Button.Location = New System.Drawing.Point(103, 226)
-        Me.SetSound_Button.Name = "SetSound_Button"
-        Me.SetSound_Button.Size = New System.Drawing.Size(75, 23)
-        Me.SetSound_Button.TabIndex = 8
-        Me.SetSound_Button.Text = "Set Sound"
-        Me.SetSound_Button.UseVisualStyleBackColor = True
+        Me.SoundSelectButton.Location = New System.Drawing.Point(15, 3)
+        Me.SoundSelectButton.Margin = New System.Windows.Forms.Padding(15, 3, 3, 15)
+        Me.SoundSelectButton.Name = "SoundSelectButton"
+        Me.SoundSelectButton.Size = New System.Drawing.Size(100, 23)
+        Me.SoundSelectButton.TabIndex = 0
+        Me.SoundSelectButton.Text = "Select..."
+        Me.SoundSelectButton.UseVisualStyleBackColor = True
         '
-        'Random_Checkbox
+        'UseRandomlyCheckBox
         '
-        Me.Random_Checkbox.AutoSize = True
-        Me.Random_Checkbox.Checked = True
-        Me.Random_Checkbox.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.Random_Checkbox.Location = New System.Drawing.Point(78, 279)
-        Me.Random_Checkbox.Name = "Random_Checkbox"
-        Me.Random_Checkbox.Size = New System.Drawing.Size(355, 30)
-        Me.Random_Checkbox.TabIndex = 9
-        Me.Random_Checkbox.Text = "Use Randomly? (uncheck if you want this to be used for one behavior" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "only, which " & _
+        Me.UseRandomlyCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.UseRandomlyCheckBox.AutoSize = True
+        Me.UseRandomlyCheckBox.Checked = True
+        Me.UseRandomlyCheckBox.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.LayoutTable.SetColumnSpan(Me.UseRandomlyCheckBox, 2)
+        Me.UseRandomlyCheckBox.Location = New System.Drawing.Point(52, 185)
+        Me.UseRandomlyCheckBox.Name = "UseRandomlyCheckBox"
+        Me.UseRandomlyCheckBox.Size = New System.Drawing.Size(355, 30)
+        Me.UseRandomlyCheckBox.TabIndex = 9
+        Me.UseRandomlyCheckBox.Text = "Use Randomly? (uncheck if you want this to be used for one behavior" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "only, which " & _
     "you will specify on the behavior edit screen)" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
-        Me.Random_Checkbox.UseVisualStyleBackColor = True
+        Me.UseRandomlyCheckBox.UseVisualStyleBackColor = True
         '
-        'Group_NumberBox
+        'GroupNumber
         '
-        Me.Group_NumberBox.Location = New System.Drawing.Point(268, 60)
-        Me.Group_NumberBox.Name = "Group_NumberBox"
-        Me.Group_NumberBox.Size = New System.Drawing.Size(120, 20)
-        Me.Group_NumberBox.TabIndex = 3
+        Me.GroupNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.GroupNumber.Location = New System.Drawing.Point(285, 16)
+        Me.GroupNumber.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.GroupNumber.Name = "GroupNumber"
+        Me.GroupNumber.Size = New System.Drawing.Size(120, 20)
+        Me.GroupNumber.TabIndex = 3
         '
         'GroupLabel
         '
         Me.GroupLabel.AutoSize = True
-        Me.GroupLabel.Location = New System.Drawing.Point(250, 44)
+        Me.GroupLabel.Location = New System.Drawing.Point(233, 0)
         Me.GroupLabel.Name = "GroupLabel"
-        Me.GroupLabel.Size = New System.Drawing.Size(92, 13)
+        Me.GroupLabel.Size = New System.Drawing.Size(84, 13)
         Me.GroupLabel.TabIndex = 2
-        Me.GroupLabel.Text = "Behavior group #:"
+        Me.GroupLabel.Text = "Behavior Group:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
+        '
+        'LayoutTable
+        '
+        Me.LayoutTable.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LayoutTable.ColumnCount = 2
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.LayoutTable.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.LayoutTable.Controls.Add(Me.NameLabel, 0, 0)
+        Me.LayoutTable.Controls.Add(Me.UseRandomlyCheckBox, 0, 7)
+        Me.LayoutTable.Controls.Add(Me.GroupNumber, 1, 1)
+        Me.LayoutTable.Controls.Add(Me.GroupLabel, 1, 0)
+        Me.LayoutTable.Controls.Add(Me.SoundTextBox, 0, 5)
+        Me.LayoutTable.Controls.Add(Me.SoundLabel, 0, 4)
+        Me.LayoutTable.Controls.Add(Me.NameTextBox, 0, 1)
+        Me.LayoutTable.Controls.Add(Me.LineLabel, 0, 2)
+        Me.LayoutTable.Controls.Add(Me.LineTextBox, 0, 3)
+        Me.LayoutTable.Controls.Add(Me.SoundPanel, 0, 6)
+        Me.LayoutTable.Location = New System.Drawing.Point(12, 12)
+        Me.LayoutTable.Name = "LayoutTable"
+        Me.LayoutTable.RowCount = 8
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutTable.Size = New System.Drawing.Size(460, 228)
+        Me.LayoutTable.TabIndex = 0
+        '
+        'SoundClearButton
+        '
+        Me.SoundClearButton.Enabled = False
+        Me.SoundClearButton.Location = New System.Drawing.Point(121, 3)
+        Me.SoundClearButton.Name = "SoundClearButton"
+        Me.SoundClearButton.Size = New System.Drawing.Size(100, 23)
+        Me.SoundClearButton.TabIndex = 1
+        Me.SoundClearButton.Text = "Clear"
+        Me.SoundClearButton.UseVisualStyleBackColor = True
+        '
+        'SoundPanel
+        '
+        Me.SoundPanel.AutoSize = True
+        Me.SoundPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.LayoutTable.SetColumnSpan(Me.SoundPanel, 2)
+        Me.SoundPanel.Controls.Add(Me.SoundSelectButton)
+        Me.SoundPanel.Controls.Add(Me.SoundClearButton)
+        Me.SoundPanel.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.SoundPanel.Location = New System.Drawing.Point(0, 141)
+        Me.SoundPanel.Margin = New System.Windows.Forms.Padding(0)
+        Me.SoundPanel.Name = "SoundPanel"
+        Me.SoundPanel.Size = New System.Drawing.Size(460, 41)
+        Me.SoundPanel.TabIndex = 8
         '
         'NewSpeechDialog
         '
@@ -173,18 +248,9 @@ Partial Class NewSpeechDialog
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.AppWorkspace
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(514, 370)
-        Me.Controls.Add(Me.GroupLabel)
-        Me.Controls.Add(Me.Group_NumberBox)
-        Me.Controls.Add(Me.Random_Checkbox)
-        Me.Controls.Add(Me.SetSound_Button)
-        Me.Controls.Add(Me.SoundLabel)
-        Me.Controls.Add(Me.Sound_Textbox)
-        Me.Controls.Add(Me.LineLabel)
-        Me.Controls.Add(Me.Text_TextBox)
-        Me.Controls.Add(Me.NameLabel)
-        Me.Controls.Add(Me.Name_Textbox)
-        Me.Controls.Add(Me.TableLayoutPanel1)
+        Me.ClientSize = New System.Drawing.Size(484, 287)
+        Me.Controls.Add(Me.LayoutTable)
+        Me.Controls.Add(Me.CommandTable)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -192,24 +258,28 @@ Partial Class NewSpeechDialog
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Create New Speech..."
-        Me.TableLayoutPanel1.ResumeLayout(False)
+        Me.CommandTable.ResumeLayout(False)
+        Me.LayoutTable.ResumeLayout(False)
+        Me.LayoutTable.PerformLayout()
+        Me.SoundPanel.ResumeLayout(False)
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
-    Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents CommandTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
-    Friend WithEvents Name_Textbox As System.Windows.Forms.TextBox
+    Friend WithEvents NameTextBox As System.Windows.Forms.TextBox
     Friend WithEvents NameLabel As System.Windows.Forms.Label
-    Friend WithEvents Text_TextBox As System.Windows.Forms.TextBox
+    Friend WithEvents LineTextBox As System.Windows.Forms.TextBox
     Friend WithEvents LineLabel As System.Windows.Forms.Label
-    Friend WithEvents Sound_Textbox As System.Windows.Forms.TextBox
+    Friend WithEvents SoundTextBox As System.Windows.Forms.TextBox
     Friend WithEvents SoundLabel As System.Windows.Forms.Label
-    Friend WithEvents SetSound_Button As System.Windows.Forms.Button
-    Friend WithEvents Random_Checkbox As System.Windows.Forms.CheckBox
-    Friend WithEvents OpenSoundDialog As System.Windows.Forms.OpenFileDialog
-    Friend WithEvents Group_NumberBox As System.Windows.Forms.NumericUpDown
+    Friend WithEvents SoundSelectButton As System.Windows.Forms.Button
+    Friend WithEvents UseRandomlyCheckBox As System.Windows.Forms.CheckBox
+    Friend WithEvents GroupNumber As System.Windows.Forms.NumericUpDown
     Friend WithEvents GroupLabel As System.Windows.Forms.Label
+    Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
+    Friend WithEvents SoundPanel As System.Windows.Forms.Panel
+    Friend WithEvents SoundClearButton As System.Windows.Forms.Button
 
 End Class
