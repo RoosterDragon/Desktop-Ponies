@@ -56,17 +56,25 @@ Screensaver (Windows Only)
     To install it as a Windows screensaver, right-click and choose "Install" from the context menu.
     If you create a profile named "screensaver", these characters will appear when the screensaver starts, otherwise you will get a random pony.
 
-  Install
-    When you install or preview the screensaver, you will be asked to supply the location of the files.
-    This is the path to 'Desktop Ponies.exe', but excluding the file itself.
-    For example, if the program can be found in "C:\Users\Derpy\Documents\Desktop Ponies\Desktop Ponies.exe",
-    you should navigate to "C:\Users\Derpy\Documents\Desktop Ponies" by using the browse button.
-
 ---------------------------------------
 
 Change Log
 
 Latest changes:
+
+v1.47:
+- Added new and updated Doctor Whooves animations by Anonycat.
+- Added Seabreeze by Bot-chan.
+- Added new animations for Fleetfoot, Soarin', Spitfire and Surprise by Bot-chan.
+- Updated animations for Granny Smith by Bot-chan.
+- Added Lily panic animations and an updated Mrs Sparkle idle animation by Bot-chan.
+- Setting up the screensaver has been made easier.
+- Creating a new pony in the editor has been streamlined. The new pony will appear without having to reopen the editor.
+- The dialogs for creating new behaviors, effects, speeches and interactions in the editor have been improved.
+- Improved how ponies with custom image centers react when at the screen boundary.
+- Fixed not being able to take control outside of games.
+- Fixed a bug where closing the Desktop Ponies window would not return you to the main menu.
+- Reduced memory usage on Windows.
 
 v1.46:
 - Added Fili-Second gallop animation by Bot-chan.
