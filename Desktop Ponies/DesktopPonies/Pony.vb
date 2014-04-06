@@ -1406,7 +1406,7 @@ Public Class Pony
     ''' <summary>
     ''' Indicates if the pony ended the last step within the bounds of the context region.
     ''' </summary>
-    Private _lastStepWasInBounds As Boolean
+    Private _lastStepWasInBounds As Boolean = True
     ''' <summary>
     ''' Indicates when the pony may resume rebounding off of low priority bounds.
     ''' </summary>
@@ -1418,6 +1418,11 @@ Public Class Pony
     ''' movement vector is changed in any way.
     ''' </summary>
     Private _reboundingIntoContainmentRegion As Boolean
+    ''' <summary>
+    ''' Indicates if the pony is being permitted to attempt to return to the zone naturally whilst this behavior is running, as it was
+    ''' detected as being partially out of zone when the behavior started.
+    ''' </summary>
+    Private _allowingNaturalReturnToZone As Boolean
 
     ''' <summary>
     ''' Minimum duration that must elapse after a speech ends before a random speech can be activated.
@@ -2182,11 +2187,10 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Activates the suggested behavior, or else a random behavior. The current behavior, behavior start time, behavior desired duration
-    ''' and follow target will be set. If an interaction was running, and there is no linked behavior for the current behavior, the
-    ''' interaction is ended. The current interaction and interaction cool down are set in this case. Any effects for the last behavior
-    ''' tied to its duration will end, and any repeating effects no longer repeated. The movement without destination flag will be set.
-    ''' If the context allows effects, starts any effects for the behavior immediately, and sets up repeating effects if required.
+    ''' Activates the suggested behavior, or else a random behavior. If an interaction was running, and there is no linked behavior for the
+    ''' current behavior, the interaction is ended. Any effects for the last behavior tied to its duration will end, and any repeating
+    ''' effects no longer repeated. If the context allows effects, starts any effects for the behavior immediately, and sets up repeating
+    ''' effects if required.
     ''' </summary>
     ''' <param name="suggested">A behavior to activate, or null to choose one at random. A random behavior is uniformly selected from the
     ''' any group, or current behavior group. If there are no such behaviors (i.e. the current group is the any group and there are no
@@ -2308,6 +2312,7 @@ Public Class Pony
     ''' <param name="startEffectsNow">Indicates if any effects for the current behavior should be started now.</param>
     Private Sub UpdateState(teleportWhenOutOfBounds As Boolean, startEffectsNow As Boolean)
         If _followTarget IsNot Nothing AndAlso _followTarget._expired Then _followTarget = Nothing
+        UpdateNaturalReturnToZone()
         EnsureWithinBounds(teleportWhenOutOfBounds)
         UpdateDestination()
         Dim oldMovement = _movement
@@ -2315,7 +2320,6 @@ Public Class Pony
         If _movement <> oldMovement Then _reboundingIntoContainmentRegion = False
         SetVisualOverrideBehavior()
         UpdateLocation()
-        UpdateRegion()
         If startEffectsNow Then StartEffects()
         RepeatEffects()
     End Sub
@@ -2422,14 +2426,40 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' When a pony is not busy, already rebounding into the containment region or following a target, ensures the pony is within the
-    ''' allowed area. If it is not it will be teleported within bounds if this is allowed, otherwise it will be given a custom destination
-    ''' to return it to the allowed area.
+    ''' Maintains the allowing natural return to zone flag. If a behavior changed during the step we will set this flag if we now are
+    ''' partially in and partially out of the allowed area (i.e. due to a change in our region). This is to permit an attempt to return to
+    ''' the zone naturally before stepping it and forcing a destination. If the flag was already set then it will be unset on the
+    ''' assumption our attempt to return to the zone naturally has proven ineffective during this behavior. We will force a return to the
+    ''' zone instead by allowing the usual bounds checks to resume.
+    ''' </summary>
+    Private Sub UpdateNaturalReturnToZone()
+        If Not _behaviorChangedDuringStep Then Return
+        If _allowingNaturalReturnToZone Then
+            _allowingNaturalReturnToZone = False
+        Else
+            UpdateRegion()
+            Dim currentRegion = regionF
+            Dim isOnEdgeOfBounds =
+                RectangleF.Intersect(Context.Region, currentRegion) <> currentRegion OrElse
+                (Context.ExclusionRegion <> RectangleF.Empty AndAlso
+                 RectangleF.Intersect(Context.ExclusionRegion, currentRegion) <> currentRegion)
+            If isOnEdgeOfBounds Then
+                _allowingNaturalReturnToZone = True
+                AddUpdateRecord("Allowing a natural return to zone until the next behavior.")
+            End If
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' When a pony is not busy, already rebounding into the containment region, being permitted to attempt to return to the zone naturally
+    ''' or following a target, ensures the pony is within the allowed area. If it is not it will be teleported within bounds if this is
+    ''' allowed, otherwise it will be given a custom destination to return it to the allowed area.
     ''' </summary>
     ''' <param name="teleport">Indicates whether the pony should be teleported within bounds immediately, otherwise it will move normally
     ''' back within bounds.</param>
     Private Sub EnsureWithinBounds(teleport As Boolean)
-        If IsBusy OrElse _reboundingIntoContainmentRegion OrElse _followTarget IsNot Nothing Then Return
+        If IsBusy OrElse _reboundingIntoContainmentRegion OrElse
+            _allowingNaturalReturnToZone OrElse _followTarget IsNot Nothing Then Return
         Dim inRegionDestination = GetInRegionDestination()
         If teleport Then
             If inRegionDestination IsNot Nothing Then
@@ -2524,8 +2554,8 @@ Public Class Pony
     End Function
 
     ''' <summary>
-    ''' Sets the movement vector depending on the allowed moves and speed of the current behavior. The facing state will also be set
-    ''' randomly unless it is indicated the existing state should be preserved.
+    ''' Sets the movement vector depending on the allowed moves and speed of the current behavior. The facing state will be preserved if
+    ''' indicated, it is then set to allow a natural return to the zone if required, otherwise the state is updated randomly.
     ''' </summary>
     ''' <param name="preserveCurrentDirections">Indicates if the current facing state should be preserved when setting the movement vector.
     ''' </param>
@@ -2553,6 +2583,13 @@ Public Class Pony
             If preserveCurrentDirections Then
                 If wasMovingRight Xor _movement.X > 0 Then _movement.X = -_movement.X
                 If wasMovingDown Xor _movement.Y > 0 Then _movement.Y = -_movement.Y
+            ElseIf _allowingNaturalReturnToZone Then
+                Dim inRegionDestination = GetInRegionDestination()
+                If inRegionDestination IsNot Nothing Then
+                    If inRegionDestination.Value.X > _location.X Xor _movement.X > 0 Then _movement.X = -_movement.X
+                    If inRegionDestination.Value.Y > _location.Y Xor _movement.Y > 0 Then _movement.Y = -_movement.Y
+                End If
+                _facingRight = _movement.X > 0
             Else
                 _facingRight = Rng.NextDouble() < 0.5
                 If Not _facingRight Then _movement.X = -_movement.X
@@ -2630,7 +2667,8 @@ Public Class Pony
     ''' the movement vector will be applied. When moving according to this vector, ponies may not stray entirely outside the context
     ''' boundary and will be teleported to its outer edge if they stray too far. If the are close enough to the boundary, rebounding off
     ''' other regions is considered. The movement vector and facing will be updated when teleporting or rebounding. The last step was in
-    ''' bounds value will be set. The rebounding into containment region flag will be unset if the pony is now in bounds.
+    ''' bounds value will be set. The rebounding into containment region and allowing natural return to zone flags will be unset if the
+    ''' pony is now in bounds or leaves the bounds entirely.
     ''' </summary>
     Private Sub UpdateLocation()
         If _inDragState Then
@@ -2638,13 +2676,18 @@ Public Class Pony
         Else
             _location += _movement
             UpdateRegion()
-            If _destination Is Nothing AndAlso Not TeleportToBoundaryIfOutside() Then ReboundOffRegions()
+            If _destination Is Nothing AndAlso (_lastStepWasInBounds OrElse Not TeleportToBoundaryIfOutside()) Then ReboundOffRegions()
         End If
         Dim currentRegion = regionF
         _lastStepWasInBounds =
             CType(Context.Region, RectangleF).Contains(currentRegion) AndAlso Not currentRegion.IntersectsWith(Context.ExclusionRegion)
-        ' If the pony is back in bounds, or no longer even intersecting the allowed area, we are no longer rebounding back within the area.
-        If _lastStepWasInBounds OrElse Not currentRegion.IntersectsWith(Context.Region) Then _reboundingIntoContainmentRegion = False
+        ' Check if the pony is back in bounds, or no longer even intersecting the allowed area at all.
+        If _lastStepWasInBounds OrElse Not currentRegion.IntersectsWith(Context.Region) Then
+            ' In this case, we can unset flags dealing with zone return.
+            _reboundingIntoContainmentRegion = False
+            _allowingNaturalReturnToZone = False
+        End If
+        UpdateRegion()
     End Sub
 
     ''' <summary>
@@ -2720,9 +2763,11 @@ Public Class Pony
             ' than constantly switching direction and causing visual nastiness.
             If rebounded Then _reboundCooldownEndTime = _currentTime + TimeSpan.FromSeconds(1)
         End If
-        If _lastStepWasInBounds Then ReboundOutOfExclusionRegion(Context.ExclusionRegion, "exclusion region", True)
-        Dim rebounding = ReboundIntoContainmentRegion(Context.Region, "containment region", Not _reboundingIntoContainmentRegion)
-        _reboundingIntoContainmentRegion = _reboundingIntoContainmentRegion OrElse rebounding
+        If Not _allowingNaturalReturnToZone Then
+            If _lastStepWasInBounds Then ReboundOutOfExclusionRegion(Context.ExclusionRegion, "exclusion region", True)
+            Dim rebounding = ReboundIntoContainmentRegion(Context.Region, "containment region", Not _reboundingIntoContainmentRegion)
+            _reboundingIntoContainmentRegion = _reboundingIntoContainmentRegion OrElse rebounding
+        End If
     End Sub
 
     ''' <summary>
