@@ -1422,26 +1422,35 @@
                 }
                 else
                 {
+                    bool hasPadding = rightFrame.Width % 2 != 0;
                     for (int y = 0; y < leftFrame.Height; y++)
                     {
                         int leftRow = y * leftFrame.Stride;
                         int rightRow = y * rightFrame.Stride;
                         for (int x = 0; x < leftFrame.Width; x++)
                         {
+                            bool xIsEven = x % 2 == 0;
                             int halfX = x / 2;
+                            int rightOffset = hasPadding && !xIsEven ? 1 : 0;
                             var leftIndex = leftData[leftRow + halfX];
-                            var rightIndex = rightData[rightRow + rightMax - halfX];
-                            if (x % 2 == 0)
+                            var rightIndex = rightData[rightRow + rightMax - halfX - rightOffset];
+                            if (xIsEven)
                             {
                                 leftIndex >>= 4;
-                                rightIndex &= 0xF;
+                                if (hasPadding)
+                                    rightIndex >>= 4;
+                                else
+                                    rightIndex &= 0xF;
                             }
                             else
                             {
                                 leftIndex &= 0xF;
-                                rightIndex >>= 4;
+                                if (hasPadding)
+                                    rightIndex &= 0xF;
+                                else
+                                    rightIndex >>= 4;
                             }
-                            if (leftPalette != rightPalette && leftPalette[leftIndex] != rightPalette[rightIndex])
+                            if (leftPalette[leftIndex] != rightPalette[rightIndex])
                                 return false;
                         }
                     }
