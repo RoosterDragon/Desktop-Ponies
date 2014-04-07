@@ -20,7 +20,7 @@ Public Class Editor2PonyAnimator
 
     Public Sub AddPonyNotify(pony As Pony, callback As Action(Of Pony))
         pendingAddedNotifications.Add(pony, callback)
-        AddPony(pony)
+        PonyContext.PendingSprites.Add(pony)
     End Sub
 
     Private Sub NotifySpriteAdded(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))

@@ -45,6 +45,7 @@ Public MustInherit Class PonyAnimator
         End Set
     End Property
     Public Property AllowManualControl As Boolean = True
+    Protected Property ManualControlSpeed As Single = 100
 
     Private ReadOnly activeSounds As New List(Of Object)()
     Private globalSoundEnd As Date
@@ -145,9 +146,8 @@ Public MustInherit Class PonyAnimator
     End Sub
 
     Private Sub InitializeInteractions()
-        Dim currentPonies = Ponies()
-        For Each pony In currentPonies
-            pony.InitializeInteractions(currentPonies)
+        For Each pony In Ponies
+            pony.InitializeInteractions(Ponies)
         Next
     End Sub
 
@@ -174,7 +174,7 @@ Public MustInherit Class PonyAnimator
         If Disposed Then Return
 
         ' When the cursor moves, or a mouse button is pressed, end the screensaver.
-        If EvilGlobals.InScreensaverMode Then
+        If Globals.InScreensaverMode Then
             If initialCursorPosition Is Nothing Then
                 initialCursorPosition = Viewer.CursorPosition
             ElseIf initialCursorPosition.Value <> Viewer.CursorPosition OrElse Viewer.MouseButtonsDown <> SimpleMouseButtons.None Then
@@ -229,7 +229,7 @@ Public MustInherit Class PonyAnimator
             Return
         End If
         Sort(ZOrderer)
-        If EvilGlobals.DirectXSoundAvailable Then
+        If Globals.DirectXSoundAvailable Then
             PlaySounds()
             CleanupSounds(False)
         End If
@@ -251,8 +251,7 @@ Public MustInherit Class PonyAnimator
         Dim length = movement.Length()
         If length > 0 Then
             movement /= length
-            Dim baseSpeed = If(EvilGlobals.CurrentGame IsNot Nothing, If(EvilGlobals.CurrentGame.Name = "Ping Pong Pony", 267, 167), 100)
-            Dim speed = If(speedBoost, baseSpeed * 2, baseSpeed)
+            Dim speed = If(speedBoost, ManualControlSpeed * 2, ManualControlSpeed)
             movement *= speed
             pony.SpeedOverride = speed
             pony.DestinationOverride = pony.Location + movement
@@ -265,8 +264,11 @@ Public MustInherit Class PonyAnimator
     Private Sub PlaySounds()
         ' Sound must be enabled for the mode we are in.
         If Disposed Then Return
-        If Not Options.SoundEnabled Then Exit Sub
-        If EvilGlobals.InScreensaverMode AndAlso Not Options.ScreensaverSoundEnabled Then Exit Sub
+        If Globals.InScreensaverMode Then
+            If Not Options.ScreensaverSoundEnabled Then Return
+        Else
+            If Not Options.SoundEnabled Then Exit Sub
+        End If
 
         ' If only one sound at a time is allowed, wait for it to finish.
         If Options.SoundSingleChannelOnly AndAlso globalSoundEnd > Date.UtcNow Then Return
@@ -328,18 +330,6 @@ Public MustInherit Class PonyAnimator
         End If
     End Sub
 
-    Protected Friend Sub AddSprites(_sprites As IEnumerable(Of ISprite))
-        QueueAddRangeAndStart(_sprites)
-    End Sub
-
-    Protected Friend Sub AddPony(pony As Pony)
-        QueueAddAndStart(pony)
-    End Sub
-
-    Protected Friend Sub AddEffect(effect As Effect)
-        QueueAddAndStart(effect)
-    End Sub
-
     Protected Friend Sub RemoveSprite(sprite As ISprite)
         QueueRemove(sprite)
     End Sub
@@ -348,13 +338,11 @@ Public MustInherit Class PonyAnimator
         QueueClear()
     End Sub
 
-    Public Function Ponies() As IEnumerable(Of Pony)
-        Return Sprites.OfType(Of Pony)()
-    End Function
-
-    Public Function Effects() As IEnumerable(Of Effect)
-        Return Sprites.OfType(Of Effect)()
-    End Function
+    Protected ReadOnly Property Ponies As IEnumerable(Of Pony)
+        Get
+            Return Sprites.OfType(Of Pony)()
+        End Get
+    End Property
 
     Public Overloads Sub Finish(exitMethod As ExitRequest)
         _exitRequested = exitMethod
@@ -374,7 +362,7 @@ Public MustInherit Class PonyAnimator
             Next
         End If
         MyBase.Finish()
-        If Not alreadyDisposed AndAlso EvilGlobals.DirectXSoundAvailable Then CleanupSounds(True)
+        If Not alreadyDisposed AndAlso Globals.DirectXSoundAvailable Then CleanupSounds(True)
     End Sub
 
     Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)

@@ -170,7 +170,7 @@
     <Compile Include="DesktopPonies\PonyAnimator.vb" />
     <Compile Include="DesktopPonies\PonyCollection.vb" />
     <Compile Include="DesktopPonies\StringCollectionParser.vb" />
-    <Compile Include="DesktopPonies\EvilGlobals.vb" />
+    <Compile Include="DesktopPonies\Globals.vb" />
     <Compile Include="Core\IdleWorker.vb" />
     <Compile Include="DesktopPonies\LinqSpecialized.vb" />
     <Compile Include="My Project\Settings.Designer.vb">

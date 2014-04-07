@@ -92,7 +92,11 @@ Public Class Game
     Private manualControlPlayerOne As Pony
     Private manualControlPlayerTwo As Pony
 
+    Private context As PonyContext
+
     Public Sub New(ponyCollection As PonyCollection, ponyContext As PonyContext, directory As String)
+        context = Argument.EnsureNotNull(ponyContext, "ponyContext")
+
         Dim gameData As String = Nothing
         Dim descriptionData As String = Nothing
         Dim positionData As New List(Of String)()
@@ -221,27 +225,22 @@ Public Class Game
     End Sub
 
     Public Sub Setup()
-        If Options.WindowAvoidanceEnabled OrElse Options.CursorAvoidanceEnabled Then
-            Options.WindowAvoidanceEnabled = False
-            Options.CursorAvoidanceEnabled = False
-        End If
-
         For Each goal In goals
             goal.Initialize(GameScreen)
-            EvilGlobals.CurrentAnimator.AddEffect(goal.HostEffect)
+            context.PendingSprites.Add(goal.HostEffect)
         Next
 
         scoreboard.Initialize(GameScreen)
         scoreboard.SetScores(Teams(0), Teams(1))
-        EvilGlobals.CurrentAnimator.AddEffect(scoreboard.HostEffect)
-        EvilGlobals.CurrentAnimator.AddSprites(scoreboard.ScoreDisplays)
+        context.PendingSprites.Add(scoreboard.HostEffect)
+        context.PendingSprites.AddRange(scoreboard.ScoreDisplays)
 
         For Each team In Teams
             Dim positionsToRemove As New List(Of Position)
             For Each position In team.Positions
                 If position.Player IsNot Nothing Then
                     position.Initialize(GameScreen)
-                    EvilGlobals.CurrentAnimator.AddPony(position.Player)
+                    context.PendingSprites.Add(position.Player)
                     allPlayers.Add(position)
                 Else
                     positionsToRemove.Add(position)
@@ -257,7 +256,7 @@ Public Class Game
         Next
     End Sub
 
-    Public Sub Update(manualControlPlayerOne As Pony, manualControlPlayerTwo As Pony)
+    Public Sub Update(animator As GameAnimator, manualControlPlayerOne As Pony, manualControlPlayerTwo As Pony)
         Me.manualControlPlayerOne = manualControlPlayerOne
         Me.manualControlPlayerTwo = manualControlPlayerTwo
         Select Case Status
@@ -267,7 +266,7 @@ Public Class Game
                 Next
                 For Each team In Teams
                     For Each position In team.Positions
-                        EvilGlobals.CurrentAnimator.AllowManualControl = False
+                        animator.AllowManualControl = False
                         position.SetDestinationToStartLocation()
                         position.CurrentAction = PlayerActionType.ReturnToStart
                         position.CurrentActionGroup = Nothing
@@ -290,11 +289,11 @@ Public Class Game
                 Next
                 For Each ball In Balls
                     activeBalls.Add(ball)
-                    EvilGlobals.CurrentAnimator.AddPony(ball.Handler)
+                    context.PendingSprites.Add(ball.Handler)
                 Next
                 Status = GameStatus.SetupReadyBalls
             Case GameStatus.SetupReadyBalls
-                EvilGlobals.CurrentAnimator.AllowManualControl = True
+                animator.AllowManualControl = True
                 For Each ball In Balls
                     ball.Handler.SpeedOverride = Nothing
                     ball.Handler.SetBehavior(ball.Handler.Base.Behaviors(0))
@@ -319,14 +318,14 @@ Public Class Game
                 If CheckForScore() Then
                     For Each ball In Balls
                         activeBalls.Remove(ball)
-                        EvilGlobals.CurrentAnimator.RemoveSprite(ball.Handler)
+                        animator.RemoveSprite(ball.Handler)
                     Next
                     For Each team In Teams
                         If team.Score >= maxScore Then
                             Status = GameStatus.Completed
-                            EvilGlobals.CurrentAnimator.Pause(False)
+                            animator.Pause(False)
                             MessageBox.Show(team.Name & " won!", "Winner", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                            EvilGlobals.CurrentAnimator.Finish(ExitRequest.ReturnToMenu)
+                            animator.Finish(ExitRequest.ReturnToMenu)
                             Exit Sub
                         End If
                     Next
@@ -391,8 +390,6 @@ Public Class Game
         For Each Ball In Balls
             activeBalls.Remove(Ball)
         Next
-
-        EvilGlobals.CurrentAnimator.Clear()
 
         Teams(0).Score = 0
         Teams(1).Score = 0
@@ -894,7 +891,6 @@ Public Class Game
                     Console.WriteLine(Player.Base.Directory & " Calling SetBehavior from Idle action " & DateTime.UtcNow)
                     Player.SetBehavior(Nothing, False)
                 Case Else
-                    EvilGlobals.CurrentAnimator.Pause(False)
                     Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selectedAction)
             End Select
 
@@ -1160,9 +1156,10 @@ Public Class Game
         Inherits DesktopPonyAnimator
         Private ReadOnly game As Game
         Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
-                       ponyCollection As PonyCollection, ponyContext As PonyContext, game As Game)
-            MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
+                       ponyCollection As PonyCollection, ponyContext As PonyContext, game As Game, owner As Control)
+            MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext, False, owner)
             Me.game = Argument.EnsureNotNull(game, "game")
+            ManualControlSpeed = If(game.Name = "Ping Pong Pony", 267, 167)
         End Sub
         Private ReadOnly _zOrderer As Comparison(Of ISprite) = Function(a, b)
                                                                    Dim aIsDisplay = TypeOf a Is GameScoreboard.ScoreDisplay
@@ -1178,7 +1175,12 @@ Public Class Game
         Protected Overrides Sub SynchronizeContext()
             PonyContext.SynchronizeWithGlobalOptionsWithAvoidanceOverrides()
             PonyContext.Region = game.GameScreen.WorkingArea
-            game.Update(ManualControlPlayerOne, ManualControlPlayerTwo)
+            PonyContext.CursorAvoidanceEnabled = False
+            game.Update(Me, ManualControlPlayerOne, ManualControlPlayerTwo)
+        End Sub
+        Public Overrides Sub Finish()
+            MyBase.Finish()
+            game.CleanUp()
         End Sub
     End Class
 End Class

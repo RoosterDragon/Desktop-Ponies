@@ -27,7 +27,6 @@ Public Class PonyPreview
         AddHandler Disposed, Sub()
                                  Threading.Interlocked.Exchange(disposedFlag, 1)
                                  If editorAnimator IsNot Nothing Then editorAnimator.Finish()
-                                 EvilGlobals.CurrentAnimator = Nothing
                              End Sub
     End Sub
 
@@ -72,7 +71,6 @@ Public Class PonyPreview
         AddHandler editorInterface.Unfocused, Sub() RaiseEvent PreviewUnfocused(Me, EventArgs.Empty)
         DetermineParentsAndScreenLocation(Me, EventArgs.Empty)
         editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, context, Me)
-        EvilGlobals.CurrentAnimator = editorAnimator
         editorAnimator.Start()
         loaded = True
     End Sub

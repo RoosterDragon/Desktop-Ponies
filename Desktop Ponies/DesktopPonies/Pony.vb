@@ -3703,9 +3703,15 @@ Public Class House
         _houseBase = houseBase
     End Sub
 
+    Private ReadOnly Property Ponies As IEnumerable(Of Pony)
+        Get
+            Return Context.Sprites.OfType(Of Pony)()
+        End Get
+    End Property
+
     Public Sub InitializeVisitorList()
         deployedPonies.Clear()
-        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+        For Each pony In Ponies
             SyncLock HouseBase.Visitors
                 For Each guest In HouseBase.Visitors
                     If pony.Base.Directory = guest Then
@@ -3743,15 +3749,13 @@ Public Class House
             End If
 
             If Rng.NextDouble() < HouseBase.Bias Then
-                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso
-                    EvilGlobals.CurrentAnimator.Ponies().Count() < Options.MaxPonyCount Then
+                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Ponies.Count() < Options.MaxPonyCount Then
                     DeployPony(Me, ponyBases)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
                 End If
             Else
-                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso
-                    EvilGlobals.CurrentAnimator.Ponies().Count() > 1 Then
+                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Ponies.Count() > 1 Then
                     RecallPony(Me)
                 Else
                     Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
@@ -3785,7 +3789,7 @@ Public Class House
             End If
         End SyncLock
 
-        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+        For Each pony In Ponies
             choices.Remove(pony.Base.Directory)
         Next
 
@@ -3802,7 +3806,7 @@ Public Class House
 
                 deployed_pony.Location = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))
 
-                EvilGlobals.CurrentAnimator.AddPony(deployed_pony)
+                Context.PendingSprites.Add(deployed_pony)
                 deployedPonies.Add(deployed_pony)
 
                 Console.WriteLine(Me.Base.Name & " - Deployed " & ponyBase.Directory)
@@ -3821,7 +3825,7 @@ Public Class House
         SyncLock HouseBase.Visitors
             For Each visitor In HouseBase.Visitors
                 If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                    For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+                    For Each pony In Ponies
                         choices.Add(pony.Base.Directory)
                     Next
                     all = True
@@ -3830,7 +3834,7 @@ Public Class House
             Next
 
             If all = False Then
-                For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+                For Each pony In Ponies
                     For Each otherpony In HouseBase.Visitors
                         If pony.Base.Directory = otherpony Then
                             choices.Add(pony.Base.Directory)
@@ -3845,7 +3849,7 @@ Public Class House
 
         Dim selected_name = choices.RandomElement()
 
-        For Each pony In EvilGlobals.CurrentAnimator.Ponies()
+        For Each pony In Ponies
             If pony.Base.Directory = selected_name Then
                 If pony.IsBusy Then Continue For
                 pony.DestinationOverride = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))

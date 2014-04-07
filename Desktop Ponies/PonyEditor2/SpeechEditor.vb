@@ -50,7 +50,7 @@ Friend Class SpeechEditor
 
     Private Sub SoundFileSelector_FilePathSelected(sender As Object, e As EventArgs) Handles SoundFileSelector.FilePathSelected
         StopSound()
-        SoundPreviewPanel.Enabled = SoundFileSelector.FilePath IsNot Nothing AndAlso EvilGlobals.DirectXSoundAvailable
+        SoundPreviewPanel.Enabled = SoundFileSelector.FilePath IsNot Nothing AndAlso Globals.DirectXSoundAvailable
         UpdateSoundLabel(0, 0)
     End Sub
 

@@ -8,9 +8,12 @@ Public Class DesktopPonyAnimator
     Protected selectedHouse As House
     Protected selectedPony As Pony
 
+    Private ownerControl As Control
     Private optionsForm As OptionsForm
     Private spriteDebugForm As SpriteDebugForm
     Private countSinceLastDebug As Integer
+
+    Private ReadOnly allowAddingAndRemovingSprites As Boolean
 
     Private ReadOnly _zOrderer As Comparison(Of ISprite) = Function(a, b)
                                                                Dim aIsHouse = TypeOf a Is House
@@ -20,14 +23,17 @@ Public Class DesktopPonyAnimator
                                                            End Function
 
     Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
-                   ponyCollection As PonyCollection, ponyContext As PonyContext)
+                   ponyCollection As PonyCollection, ponyContext As PonyContext,
+                   allowAddingAndRemovingPonies As Boolean, owner As Control)
         MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
+        Me.allowAddingAndRemovingSprites = allowAddingAndRemovingPonies
+        ownerControl = owner
 
-        If Options.EnablePonyLogs AndAlso Not OperatingSystemInfo.IsMacOSX Then
-            EvilGlobals.Main.SmartInvoke(Sub()
-                                             spriteDebugForm = New SpriteDebugForm()
-                                             spriteDebugForm.Show()
-                                         End Sub)
+        If ownerControl IsNot Nothing AndAlso Options.EnablePonyLogs AndAlso Not OperatingSystemInfo.IsMacOSX Then
+            ownerControl.SmartInvoke(Sub()
+                                         spriteDebugForm = New SpriteDebugForm()
+                                         spriteDebugForm.Show(ownerControl)
+                                     End Sub)
             AddHandler spriteDebugForm.Disposed, Sub() spriteDebugForm = Nothing
         End If
 
@@ -62,24 +68,26 @@ Public Class DesktopPonyAnimator
         Dim manualControlP2 = Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony)
 
         Dim i = 0
-        ponyMenu.Items(i).Text = "Remove " & directory
-        i += 1
-        ponyMenu.Items(i).Text = "Remove Every " & directory
-        i += 1
-        ' Separator.
-        i += 1
-        ponyMenu.Items(i).Text = If(shouldBeSleeping, "Wake up/Resume", "Sleep/Pause")
-        i += 1
-        ponyMenu.Items(i).Text = If(Not Paused, "Wake up/Resume All", "Sleep/Pause All")
-        i += 1
-        ' Separator.
-        i += 1
-        ' Add Pony.
-        i += 1
-        ' Add House.
-        i += 1
-        ' Separator.
-        i += 1
+        If allowAddingAndRemovingSprites Then
+            ponyMenu.Items(i).Text = "Remove " & directory
+            i += 1
+            ponyMenu.Items(i).Text = "Remove Every " & directory
+            i += 1
+            ' Separator.
+            i += 1
+            ponyMenu.Items(i).Text = If(shouldBeSleeping, "Wake up/Resume", "Sleep/Pause")
+            i += 1
+            ponyMenu.Items(i).Text = If(Not Paused, "Wake up/Resume All", "Sleep/Pause All")
+            i += 1
+            ' Separator.
+            i += 1
+            ' Add Pony.
+            i += 1
+            ' Add House.
+            i += 1
+            ' Separator.
+            i += 1
+        End If
 
         If OperatingSystemInfo.IsWindows Then
             ponyMenu.Items(i).Text = If(Not manualControlP1, "Take Control - Player 1", "Release Control - Player 1")
@@ -95,7 +103,7 @@ Public Class DesktopPonyAnimator
 
     Private Sub DisplayHouseMenu(location As Point)
         Dim i = 0
-        If Not OperatingSystemInfo.IsMacOSX Then
+        If ownerControl IsNot Nothing AndAlso Not OperatingSystemInfo.IsMacOSX Then
             houseMenu.Items(i).Text = "Edit " & selectedHouse.HouseBase.Name
             i += 1
         End If
@@ -106,49 +114,37 @@ Public Class DesktopPonyAnimator
 
     Private Sub CreatePonyMenu()
         Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
-        menuItems.AddLast(
-            New SimpleContextMenuItem(
-                Nothing,
-                Sub()
-                    If EvilGlobals.CurrentGame IsNot Nothing Then
-                        MessageBox.Show("Cannot remove ponies during a game.",
-                                        "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                        Return
-                    End If
-                    QueueRemove(Function(sprite) Object.ReferenceEquals(sprite, selectedPony))
-                End Sub))
-        menuItems.AddLast(
-            New SimpleContextMenuItem(
-                Nothing,
-                Sub()
-                    If EvilGlobals.CurrentGame IsNot Nothing Then
-                        MessageBox.Show("Cannot remove ponies during a game.",
-                                        "Cannot Remove", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                        Return
-                    End If
-                    QueueRemove(Function(sprite)
-                                    Dim pony = TryCast(sprite, Pony)
-                                    Return pony IsNot Nothing AndAlso pony.Base.Directory = selectedPony.Base.Directory
-                                End Function)
-                End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem())
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 If EvilGlobals.CurrentGame IsNot Nothing OrElse
-                                                                     selectedPony Is Nothing Then Return
-                                                                 selectedPony.Sleep = Not selectedPony.Sleep
-                                                             End Sub))
-        Dim allSleeping = False
-        menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
-                                                                 If EvilGlobals.CurrentGame IsNot Nothing Then Return
-                                                                 allSleeping = Not allSleeping
-                                                                 For Each pony In Me.Ponies()
-                                                                     pony.Sleep = allSleeping
-                                                                 Next
-                                                             End Sub))
-        menuItems.AddLast(New SimpleContextMenuItem())
-        menuItems.AddLast(New SimpleContextMenuItem("Add Pony", PonySelectionList()))
-        menuItems.AddLast(New SimpleContextMenuItem("Add House", HouseSelectionList()))
-        menuItems.AddLast(New SimpleContextMenuItem())
+        If allowAddingAndRemovingSprites Then
+            menuItems.AddLast(
+                New SimpleContextMenuItem(
+                    Nothing,
+                    Sub() QueueRemove(Function(sprite) Object.ReferenceEquals(sprite, selectedPony))))
+            menuItems.AddLast(
+                New SimpleContextMenuItem(
+                    Nothing,
+                    Sub()
+                        QueueRemove(Function(sprite)
+                                        Dim pony = TryCast(sprite, Pony)
+                                        Return pony IsNot Nothing AndAlso pony.Base.Directory = selectedPony.Base.Directory
+                                    End Function)
+                    End Sub))
+            menuItems.AddLast(New SimpleContextMenuItem())
+            menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
+                                                                     If selectedPony Is Nothing Then Return
+                                                                     selectedPony.Sleep = Not selectedPony.Sleep
+                                                                 End Sub))
+            Dim allSleeping = False
+            menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
+                                                                     allSleeping = Not allSleeping
+                                                                     For Each pony In Ponies
+                                                                         pony.Sleep = allSleeping
+                                                                     Next
+                                                                 End Sub))
+            menuItems.AddLast(New SimpleContextMenuItem())
+            menuItems.AddLast(New SimpleContextMenuItem("Add Pony", PonySelectionList()))
+            menuItems.AddLast(New SimpleContextMenuItem("Add House", HouseSelectionList()))
+            menuItems.AddLast(New SimpleContextMenuItem())
+        End If
 
         If OperatingSystemInfo.IsWindows Then
             menuItems.AddLast(
@@ -169,24 +165,17 @@ Public Class DesktopPonyAnimator
                     End Sub))
             menuItems.AddLast(New SimpleContextMenuItem())
         End If
-        If Not OperatingSystemInfo.IsMacOSX Then
+        If ownerControl IsNot Nothing AndAlso Not OperatingSystemInfo.IsMacOSX Then
             menuItems.AddLast(New SimpleContextMenuItem(
                               "Show Options",
                               Sub()
-                                  If EvilGlobals.Main Is Nothing Then Return
-                                  EvilGlobals.Main.SmartInvoke(
+                                  ownerControl.SmartInvoke(
                                       Sub()
                                           If optionsForm Is Nothing Then
                                               Dim currentScale = Options.ScaleFactor
                                               optionsForm = New OptionsForm()
-                                              AddHandler optionsForm.FormClosed, Sub()
-                                                                                     optionsForm = Nothing
-                                                                                     EvilGlobals.Main.ReloadFilterCategories()
-                                                                                     If currentScale <> Options.ScaleFactor Then
-                                                                                         EvilGlobals.Main.ResizePreviewImages()
-                                                                                     End If
-                                                                                 End Sub
-                                              optionsForm.Show()
+                                              AddHandler optionsForm.FormClosed, Sub() optionsForm = Nothing
+                                              optionsForm.Show(ownerControl)
                                           End If
                                           optionsForm.BringToFront()
                                       End Sub)
@@ -200,21 +189,19 @@ Public Class DesktopPonyAnimator
 
     Private Sub CreateHouseMenu()
         Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
-        If Not OperatingSystemInfo.IsMacOSX Then
+        If ownerControl IsNot Nothing AndAlso Not OperatingSystemInfo.IsMacOSX Then
             menuItems.AddLast(
                 New SimpleContextMenuItem(
                     Nothing,
                     Sub()
-                        If EvilGlobals.Main Is Nothing Then Return
-                        EvilGlobals.Main.SmartInvoke(
+                        ownerControl.SmartInvoke(
                             Sub()
                                 If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
                                     selectedHouse.HouseBase.OptionsForm.BringToFront()
                                 Else
                                     Using houseForm As New HouseOptionsForm(selectedHouse, PonyCollection.Bases)
                                         selectedHouse.HouseBase.OptionsForm = houseForm
-                                        houseForm.ShowDialog()
-                                        houseForm.BringToFront()
+                                        houseForm.ShowDialog(ownerControl)
                                     End Using
                                     selectedHouse.HouseBase.OptionsForm = Nothing
                                 End If
@@ -305,28 +292,18 @@ Public Class DesktopPonyAnimator
     End Function
 
     Private Sub AddPonySelection(ponyName As String)
-        If EvilGlobals.CurrentGame IsNot Nothing Then
-            MessageBox.Show("Cannot add ponies during a game.",
-                            "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Return
-        End If
         If ponyName = PonyBase.RandomDirectory Then
             ponyName = PonyCollection.Bases.RandomElement().Directory
         End If
         For Each ponyBase In PonyCollection.Bases
             If ponyBase.Directory = ponyName Then
                 Dim newPony = New Pony(PonyContext, ponyBase)
-                AddPony(newPony)
+                PonyContext.PendingSprites.Add(newPony)
             End If
         Next
     End Sub
 
     Private Sub AddHouseSelection(houseBase As HouseBase)
-        If EvilGlobals.CurrentGame IsNot Nothing Then
-            MessageBox.Show("Cannot add houses during a game.",
-                            "Cannot Add", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Return
-        End If
         Dim newHouse = New House(PonyContext, houseBase)
         newHouse.InitializeVisitorList()
         newHouse.Teleport()
@@ -336,8 +313,8 @@ Public Class DesktopPonyAnimator
     Protected Overrides Sub Dispose(disposing As Boolean)
         MyBase.Dispose(disposing)
         If disposing Then
-            If optionsForm IsNot Nothing Then EvilGlobals.Main.SmartInvoke(AddressOf optionsForm.Dispose)
-            If spriteDebugForm IsNot Nothing Then EvilGlobals.Main.SmartInvoke(AddressOf spriteDebugForm.Dispose)
+            If optionsForm IsNot Nothing Then ownerControl.SmartInvoke(AddressOf optionsForm.Dispose)
+            If spriteDebugForm IsNot Nothing Then ownerControl.SmartInvoke(AddressOf spriteDebugForm.Dispose)
         End If
     End Sub
 End Class

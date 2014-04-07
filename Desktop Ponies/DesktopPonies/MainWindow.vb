@@ -163,12 +163,10 @@ Friend Class MainWindow
                                               Invoke(Sub() progressBar.Fraction = imagesLoadedCount / images.Length)
                                           End Sub)
 
-                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies, context)
+                Dim animator = New DesktopPonyAnimator(viewer, startupPonies, ponies, context, True, Nothing)
                 AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
                                                            Sub() Invoke(
                                                                Sub()
-                                                                   EvilGlobals.CurrentViewer = Nothing
-                                                                   EvilGlobals.CurrentAnimator = Nothing
                                                                    If animator.ExitRequested = ExitRequest.ExitApplication Then
                                                                        Gtk.Application.Quit()
                                                                    Else
@@ -177,9 +175,6 @@ Friend Class MainWindow
                                                                        General.FullCollect()
                                                                    End If
                                                                End Sub))
-
-                EvilGlobals.CurrentViewer = viewer
-                EvilGlobals.CurrentAnimator = animator
 
                 Invoke(
                     Sub()

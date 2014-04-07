@@ -202,8 +202,6 @@ Public Class PonyEditor
         worker.QueueTask(Sub()
                              EnableWaitCursor(True)
 
-                             EvilGlobals.CurrentViewer = editorInterface
-                             EvilGlobals.CurrentAnimator = editorAnimator
                              If Not editorAnimator.Started Then
                                  editorAnimator.Start()
                                  PausePonyButton.Enabled = True
@@ -240,7 +238,7 @@ Public Class PonyEditor
             _previewPony = Nothing
             If CurrentBase.Behaviors.Any() Then
                 _previewPony = New Pony(context, CurrentBase)
-                editorAnimator.AddPony(PreviewPony)
+                context.PendingSprites.Add(PreviewPony)
             End If
 
             alreadyUpdating = True
@@ -469,7 +467,8 @@ Public Class PonyEditor
 
     Public Sub RunBehavior(behavior As Behavior)
         Argument.EnsureNotNull(behavior, "behavior")
-        Dim poniesToRemove = editorAnimator.Ponies().Where(Function(p) Not Object.ReferenceEquals(p, PreviewPony))
+
+        Dim poniesToRemove = context.OtherPonies(PreviewPony)
         For Each pony In poniesToRemove
             pony.Expire()
         Next
@@ -481,7 +480,7 @@ Public Class PonyEditor
                 Dim targetBase = ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.OriginalFollowTargetName)
                 If targetBase IsNot Nothing Then
                     followTarget = New Pony(context, targetBase)
-                    editorAnimator.AddPony(followTarget)
+                    context.PendingSprites.Add(followTarget)
                 End If
 
                 If followTarget IsNot Nothing Then
@@ -970,7 +969,7 @@ Public Class PonyEditor
         If RunMutatingDialog(Function() New NewBehaviorDialog(Me)) Then
             If CurrentBase.Behaviors.Count = 1 Then
                 _previewPony = New Pony(context, CurrentBase)
-                editorAnimator.AddPony(PreviewPony)
+                context.PendingSprites.Add(PreviewPony)
                 UpdatePreviewListImage()
             End If
             PreviewPony.SetBehavior(CurrentBase.Behaviors(0))
@@ -1270,9 +1269,6 @@ Public Class PonyEditor
                 If editorAnimator IsNot Nothing AndAlso Not editorAnimator.Disposed Then
                     editorAnimator.Finish()
                     editorAnimator.Dispose()
-                    If Object.ReferenceEquals(editorAnimator, EvilGlobals.CurrentAnimator) Then
-                        EvilGlobals.CurrentAnimator = Nothing
-                    End If
                 End If
                 If ponyImageList IsNot Nothing Then ponyImageList.Dispose()
             End If

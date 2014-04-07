@@ -324,7 +324,6 @@ Public Class GameSelectionForm
         context.Region = _game.GameScreen.WorkingArea
 
         Me.DialogResult = DialogResult.OK
-        EvilGlobals.CurrentGame = _game
     End Sub
 
     Private Sub SetStage(stage As Byte)

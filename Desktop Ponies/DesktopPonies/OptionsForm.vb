@@ -19,7 +19,7 @@ Public Class OptionsForm
     Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         MonitorsSelection.Items.AddRange(Screen.AllScreens)
 
-        SoundGroup.Visible = EvilGlobals.DirectXSoundAvailable
+        SoundGroup.Visible = Globals.DirectXSoundAvailable
 
         If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
             ShowViewerInTaskbar.Visible = False
@@ -127,10 +127,6 @@ Public Class OptionsForm
 
     Private Sub ResetButton_Click(sender As Object, e As EventArgs) Handles ResetButton.Click
         Options.PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
-
-        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            ponyPanel.PonyCount.Text = "0"
-        Next
     End Sub
 
     Private Sub CustomFiltersButton_Click(sender As Object, e As EventArgs) Handles CustomFiltersButton.Click
@@ -144,16 +140,11 @@ Public Class OptionsForm
     End Sub
 
     Private Sub LoadProfile()
-        Dim profile As String = Options.DefaultProfileName
         Try
-            If Not String.IsNullOrWhiteSpace(EvilGlobals.Main.ProfileComboBox.Text) Then
-                profile = EvilGlobals.Main.ProfileComboBox.Text.Trim()
-            End If
-
-            Options.LoadProfile(profile, Not EvilGlobals.IsScreensaverExecutable())
+            Options.LoadProfile(Options.ProfileName, Not Globals.IsScreensaverExecutable())
             RefreshOptions()
         Catch ex As IO.IOException
-            Program.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & profile & "'")
+            Program.NotifyUserOfNonFatalException(ex, "Failed to load profile '" & Options.ProfileName & "'")
         End Try
     End Sub
 
@@ -164,23 +155,16 @@ Public Class OptionsForm
             Exit Sub
         End If
 
-        Dim profile As String = Options.DefaultProfileName
-
-        If Not IsNothing(sender) Then
-            If Trim(EvilGlobals.Main.ProfileComboBox.Text) <> "" Then
-                profile = Trim(EvilGlobals.Main.ProfileComboBox.Text)
-            End If
-        End If
-
-        If profile = Options.DefaultProfileName Then
+        If Options.ProfileName = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. Create a new profile first.",
                             "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 
         Try
-            Options.SaveProfile(profile)
-            MessageBox.Show(Me, "Profile '" & profile & "' saved.", "Profile Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Options.SaveProfile(Options.ProfileName)
+            MessageBox.Show(Me, "Profile '" & Options.ProfileName & "' saved.",
+                            "Profile Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to save this profile.")
         End Try

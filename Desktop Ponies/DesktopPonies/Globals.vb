@@ -1,27 +1,14 @@
-﻿Imports System.IO
-Imports DesktopSprites.SpriteManagement
-
-''' <summary>
+﻿''' <summary>
 ''' Application global properties.
 ''' </summary>
-''' <remarks>
-''' TODO: Remove or relocate these globals as it becomes possible.
-''' Also evil: Most everything in Options.
-''' </remarks>
-Public NotInheritable Class EvilGlobals
+Public NotInheritable Class Globals
     Private Sub New()
     End Sub
-    Friend Shared Property Main As MainForm
-
-    Public Shared Property CurrentAnimator As PonyAnimator
-    Public Shared Property CurrentViewer As ISpriteCollectionView
-    Public Shared Property CurrentGame As Game
-
-    ''' <summary>
-    ''' Are ponies currently walking around the desktop?
-    ''' </summary>
-    Public Shared Property PoniesHaveLaunched As Boolean
     Public Shared Property InScreensaverMode As Boolean
+
+    Public Shared Function IsScreensaverExecutable() As Boolean
+        Return Environment.GetCommandLineArgs()(0).EndsWith(".scr", PathEquality.Comparison)
+    End Function
 
     Private Shared ReadOnly directXSoundAvailableSync As New Object()
     Private Shared _directXSoundAvailable As Boolean?
@@ -48,9 +35,5 @@ Public NotInheritable Class EvilGlobals
             ' If we can't load the assembly, just don't enable sound.
         End Try
         Return False
-    End Function
-
-    Public Shared Function IsScreensaverExecutable() As Boolean
-        Return Environment.GetCommandLineArgs()(0).EndsWith(".scr", PathEquality.Comparison)
     End Function
 End Class

@@ -40,7 +40,6 @@ Public Class MainForm
         Icon = My.Resources.Twilight
         Text = "Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString()
         initialized = True
-        EvilGlobals.Main = Me
     End Sub
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -64,9 +63,9 @@ Public Class MainForm
 
         Dim profile = Options.DefaultProfileName
         ProcessCommandLine()
-        If EvilGlobals.IsScreensaverExecutable() Then
+        If Globals.IsScreensaverExecutable() Then
             profile = Screensaver
-            If EvilGlobals.InScreensaverMode Then
+            If Globals.InScreensaverMode Then
                 ' We are starting in screensaver mode. Hide the program during loading.
                 autoStarted = True
                 ShowInTaskbar = False
@@ -99,7 +98,7 @@ Public Class MainForm
             Dim args = Environment.GetCommandLineArgs()
 
             ' On some versions of Windows, starting a screensaver with no arguments indicates the screensaver should be configured.
-            If EvilGlobals.IsScreensaverExecutable() AndAlso args.Length = 1 Then
+            If Globals.IsScreensaverExecutable() AndAlso args.Length = 1 Then
                 ConfigureScreensaver()
                 Return
             End If
@@ -117,9 +116,10 @@ Public Class MainForm
                         Catch
                             Options.LoadDefaultProfile()
                         End Try
+                        LoadPonyCounts()
                     Case "/s"
                         ' Screensaver option for starting the screensaver.
-                        EvilGlobals.InScreensaverMode = True
+                        Globals.InScreensaverMode = True
                     Case "/c"
                         ' Screensaver option for configuring the screensaver.
                         ConfigureScreensaver()
@@ -201,7 +201,7 @@ Public Class MainForm
         End If
 
         ' Load pony counts.
-        worker.QueueTask(AddressOf Options.LoadPonyCounts)
+        worker.QueueTask(AddressOf LoadPonyCounts)
 
         ' Show images in unison (although images still loading will appear as they become available).
         worker.QueueTask(Sub()
@@ -247,7 +247,7 @@ Public Class MainForm
 
     Private Sub AddToMenu(ponyBase As PonyBase)
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path)
-        AddHandler ponySelection.PonyCount.TextChanged, AddressOf HandleCountChange
+        AddHandler ponySelection.PonyCount.TextChanged, Sub() HandleCountChange(ponySelection.PonyBase, ponySelection.Count)
         If ponyBase.Directory = ponyBase.RandomDirectory Then
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
@@ -258,12 +258,29 @@ Public Class MainForm
         PonySelectionPanel.Controls.Add(ponySelection)
     End Sub
 
-    Private Sub HandleCountChange(sender As Object, e As EventArgs)
+    Private Sub HandleCountChange(base As PonyBase, newCount As Integer)
+        Dim newCounts = New Dictionary(Of String, Integer)(Options.PonyCounts)
+        If newCount = 0 Then
+            newCounts.Remove(base.Directory)
+        Else
+            newCounts(base.Directory) = newCount
+        End If
+        Options.PonyCounts = newCounts.AsReadOnly()
         CountSelectedPonies()
     End Sub
 
+    Public Sub LoadPonyCounts()
+        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
+            If Options.PonyCounts.ContainsKey(ponyPanel.PonyBase.Directory) Then
+                ponyPanel.Count = Options.PonyCounts(ponyPanel.PonyBase.Directory)
+            Else
+                ponyPanel.Count = 0
+            End If
+        Next
+    End Sub
+
     Private Sub CountSelectedPonies()
-        Dim totalPonies = PonySelectionPanel.Controls.Cast(Of PonySelectionControl).Sum(Function(psc) psc.Count)
+        Dim totalPonies = Options.PonyCounts.Values.Sum()
         PonyCountValueLabel.Text = totalPonies.ToString(CultureInfo.CurrentCulture)
     End Sub
 
@@ -325,7 +342,8 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
-        Options.LoadProfile(ProfileComboBox.Text, Not EvilGlobals.IsScreensaverExecutable())
+        Options.LoadProfile(ProfileComboBox.Text, Not Globals.IsScreensaverExecutable())
+        LoadPonyCounts()
         ReloadFilterCategories()
     End Sub
 
@@ -333,6 +351,7 @@ Public Class MainForm
         Using form = New OptionsForm()
             Dim currentScale = Options.ScaleFactor
             form.ShowDialog(Me)
+            LoadPonyCounts()
             ReloadFilterCategories()
             If currentScale <> Options.ScaleFactor Then
                 ResizePreviewImages()
@@ -367,7 +386,7 @@ Public Class MainForm
             Me.Visible = False
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
-                    PonyStartup(Function() New Game.GameAnimator(ponyViewer, {}, ponies, gameForm.PonyContext, gameForm.Game), {})
+                    PonyStartup(Function() New Game.GameAnimator(ponyViewer, {}, ponies, gameForm.PonyContext, gameForm.Game, Me), {})
                     gameForm.Game.Setup()
                     animator.Start()
                 Else
@@ -442,7 +461,8 @@ Public Class MainForm
 
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
         If Not preventLoadProfile Then
-            Options.LoadProfile(ProfileComboBox.Text, Not EvilGlobals.IsScreensaverExecutable())
+            Options.LoadProfile(ProfileComboBox.Text, Not Globals.IsScreensaverExecutable())
+            LoadPonyCounts()
             ReloadFilterCategories()
         End If
     End Sub
@@ -667,7 +687,7 @@ Public Class MainForm
             Next
 
             If totalPonies = 0 Then
-                If EvilGlobals.InScreensaverMode Then
+                If Globals.InScreensaverMode Then
                     ponyBasesWanted.Add(Tuple.Create(PonyBase.RandomDirectory, 1))
                     totalPonies = 1
                 Else
@@ -726,7 +746,7 @@ Public Class MainForm
                 Next
             End If
 
-            PonyStartup(Function() New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context), startupPonies)
+            PonyStartup(Function() New DesktopPonyAnimator(ponyViewer, startupPonies, ponies, context, True, Me), startupPonies)
             LoadPoniesAsyncEnd(False)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to launch ponies.")
@@ -738,7 +758,7 @@ Public Class MainForm
     End Sub
 
     Private Sub PonyStartup(createAnimator As Func(Of DesktopPonyAnimator), startupPonies As IEnumerable(Of Pony))
-        If EvilGlobals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
+        If Globals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
 
         AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
         ponyViewer = Options.GetInterface()
@@ -771,9 +791,6 @@ Public Class MainForm
                                                                General.FullCollect()
                                                            End If
                                                        End Sub))
-
-        EvilGlobals.CurrentViewer = ponyViewer
-        EvilGlobals.CurrentAnimator = animator
     End Sub
 
     Private Sub CreateScreensaverForms()
@@ -838,8 +855,6 @@ Public Class MainForm
 
                 loading = False
                 If Not cancelled Then
-                    EvilGlobals.PoniesHaveLaunched = True
-                    TempSaveCounts()
                     Visible = False
                     animator.Start()
                     loadWatch.Stop()
@@ -866,13 +881,7 @@ Public Class MainForm
         RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
 
         If animator IsNot Nothing Then animator.Finish()
-        EvilGlobals.PoniesHaveLaunched = False
         If animator IsNot Nothing Then animator.Clear()
-
-        If EvilGlobals.CurrentGame IsNot Nothing Then
-            EvilGlobals.CurrentGame.CleanUp()
-            EvilGlobals.CurrentGame = Nothing
-        End If
 
         If screensaverForms IsNot Nothing Then
             For Each screensaverForm In screensaverForms
@@ -881,33 +890,15 @@ Public Class MainForm
             screensaverForms = Nothing
         End If
 
-        If Object.ReferenceEquals(animator, EvilGlobals.CurrentAnimator) Then
-            EvilGlobals.CurrentAnimator = Nothing
-        End If
         animator = Nothing
 
         If ponyViewer IsNot Nothing Then
             ponyViewer.Close()
-            If Object.ReferenceEquals(ponyViewer, EvilGlobals.CurrentViewer) Then
-                EvilGlobals.CurrentViewer = Nothing
-            End If
             ponyViewer = Nothing
         End If
-    End Sub
 
-    ''' <summary>
-    ''' Save pony counts so they are preserved through clicking on and off filters.
-    ''' </summary>
-    Private Sub TempSaveCounts()
-        If PonySelectionPanel.Controls.Count = 0 Then Exit Sub
-
-        Dim newCounts = New Dictionary(Of String, Integer)()
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
-            Dim count As Integer
-            Integer.TryParse(ponyPanel.PonyCount.Text, count)
-            newCounts.Add(ponyPanel.PonyBase.Directory, count)
-        Next
-        Options.PonyCounts = newCounts.AsReadOnly()
+        ReloadFilterCategories()
+        ResizePreviewImages()
     End Sub
 
     ''' <summary>

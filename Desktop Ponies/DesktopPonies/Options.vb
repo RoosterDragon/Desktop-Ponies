@@ -175,7 +175,8 @@ Public NotInheritable Class Options
                         Case "count"
                             If columns.Length <> 3 Then Exit Select
                             Dim count As Integer
-                            If Integer.TryParse(columns(2), NumberStyles.Integer, CultureInfo.InvariantCulture, count) Then
+                            If Integer.TryParse(columns(2), NumberStyles.Integer, CultureInfo.InvariantCulture, count) AndAlso
+                                count > 0 Then
                                 newCounts.Add(columns(1), count)
                             End If
                         Case "tag"
@@ -189,8 +190,6 @@ Public NotInheritable Class Options
                 CustomTags = newTags.ToImmutableArray()
             End Using
         End If
-
-        LoadPonyCounts()
 
         If setAsCurrent Then
             Try
@@ -246,18 +245,6 @@ Public NotInheritable Class Options
         ShowPerformanceGraph = False
     End Sub
 
-    Public Shared Sub LoadPonyCounts()
-        If EvilGlobals.PoniesHaveLaunched Then Exit Sub
-
-        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            If PonyCounts.ContainsKey(ponyPanel.PonyName.Text) Then
-                ponyPanel.Count = PonyCounts(ponyPanel.PonyBase.Directory)
-            Else
-                ponyPanel.Count = 0
-            End If
-        Next
-    End Sub
-
     Public Shared Sub SaveProfile(profile As String)
         ValidateProfileName(profile)
 
@@ -301,13 +288,11 @@ Public NotInheritable Class Options
                                      region.Height.ToString(CultureInfo.InvariantCulture))
             file.WriteLine(optionsLine)
 
-            GetPonyCounts()
-
             For Each screen In Screens
                 file.WriteLine(String.Join(",", "monitor", Quoted(screen.DeviceName)))
             Next
 
-            For Each entry In PonyCounts
+            For Each entry In PonyCounts.Where(Function(kvp) kvp.Value > 0)
                 file.WriteLine(String.Join(",", "count", Quoted(entry.Key), entry.Value.ToString(CultureInfo.InvariantCulture)))
             Next
 
@@ -326,14 +311,6 @@ Public NotInheritable Class Options
             Return False
         End Try
     End Function
-
-    Private Shared Sub GetPonyCounts()
-        Dim newCounts = New Dictionary(Of String, Integer)()
-        For Each ponyPanel As PonySelectionControl In EvilGlobals.Main.PonySelectionPanel.Controls
-            newCounts.Add(ponyPanel.PonyBase.Directory, ponyPanel.Count)
-        Next
-        PonyCounts = newCounts.AsReadOnly()
-    End Sub
 
     Public Shared Function GetAllowedArea() As Rectangle
         If AllowedRegion Is Nothing Then
