@@ -217,9 +217,16 @@ Public Class DesktopPonyAnimator
         For Each sprite In Sprites
             Dim house = TryCast(sprite, House)
             If house Is Nothing Then Continue For
-            house.Cycle(ElapsedTime, PonyCollection.Bases)
+            house.CycleVisitors(ElapsedTime, PonyCollection.Bases, ManuallyControlledPonies)
         Next
     End Sub
+
+    Private ReadOnly Iterator Property ManuallyControlledPonies As IEnumerable(Of Pony)
+        Get
+            If ManualControlPlayerOne IsNot Nothing Then Yield ManualControlPlayerOne
+            If ManualControlPlayerTwo IsNot Nothing Then Yield ManualControlPlayerTwo
+        End Get
+    End Property
 
     Protected Overrides Sub SynchronizeViewer()
         Viewer.ShowInTaskbar = Options.ShowInTaskbar

@@ -1890,9 +1890,11 @@ Public Class Pony
         _currentTime = startTime
         _lastUpdateTime = startTime
         SetBehaviorInternal(Nothing, True)
-        Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
-        _location = currentImage.Center * Context.ScaleFactor +
-            New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
+        If Single.IsNaN(_location.X) OrElse Single.IsNaN(_location.Y) Then
+            Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
+            _location = currentImage.Center * Context.ScaleFactor +
+                New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
+        End If
         UpdateState(True, True)
     End Sub
 
@@ -3687,20 +3689,31 @@ End Class
 #Region "House class"
 Public Class House
     Inherits Effect
-    Private ReadOnly deployedPonies As New List(Of Pony)()
+    Private Shared ReadOnly RecallExpireDelay As TimeSpan = TimeSpan.FromSeconds(3)
 
-    Private lastCycleTime As TimeSpan
+    Private ReadOnly deployedPonies As New HashSet(Of Pony)()
+    Private ReadOnly recallingPonies As New HashSet(Of Pony)()
+    Private ReadOnly recallExpiringPonies As New Dictionary(Of Pony, TimeSpan)()
 
-    Private _houseBase As HouseBase
-    Public ReadOnly Property HouseBase() As HouseBase
+    Private ReadOnly _houseBase As HouseBase
+    Public ReadOnly Property HouseBase As HouseBase
         Get
             Return _houseBase
         End Get
     End Property
 
+    Private lastCycleTime As TimeSpan
+
     Public Sub New(ponyContext As PonyContext, houseBase As HouseBase)
         MyBase.New(houseBase, ponyContext)
         _houseBase = houseBase
+        AddHandler Expired, Sub()
+                                Dim trackedPonies = deployedPonies.Concat(recallingPonies).Concat(recallExpiringPonies.Keys).ToArray()
+                                For Each pony In trackedPonies
+                                    pony.DestinationOverride = Nothing
+                                    StopTrackingPony(pony)
+                                Next
+                            End Sub
     End Sub
 
     Private ReadOnly Property Ponies As IEnumerable(Of Pony)
@@ -3709,17 +3722,19 @@ Public Class House
         End Get
     End Property
 
+    Private Function GetVisitors() As HashSet(Of String)
+        Dim visitors As HashSet(Of String)
+        SyncLock HouseBase.Visitors
+            visitors = New HashSet(Of String)(HouseBase.Visitors)
+        End SyncLock
+        Return visitors
+    End Function
+
     Public Sub InitializeVisitorList()
         deployedPonies.Clear()
+        Dim visitors = GetVisitors()
         For Each pony In Ponies
-            SyncLock HouseBase.Visitors
-                For Each guest In HouseBase.Visitors
-                    If pony.Base.Directory = guest Then
-                        deployedPonies.Add(pony)
-                        Exit For
-                    End If
-                Next
-            End SyncLock
+            If visitors.Contains(pony.Base.Directory) Then deployedPonies.Add(pony)
         Next
     End Sub
 
@@ -3731,134 +3746,117 @@ Public Class House
             CInt(region.Y + Rng.NextDouble() * (region.Height - CurrentImageSize.Height)))
     End Sub
 
-    ''' <summary>
-    ''' Checks to see if it is time to deploy/recall a pony and does so. 
-    ''' </summary>
-    ''' <param name="currentTime">The current time.</param>
-    Public Sub Cycle(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase))
+    Public Sub CycleVisitors(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase), cancelRecalls As IEnumerable(Of Pony))
+        Cycle(currentTime, ponyBases, cancelRecalls)
+        ExpireRecalledPonies(currentTime, cancelRecalls)
+    End Sub
 
-        If currentTime - lastCycleTime > HouseBase.CycleInterval Then
-            lastCycleTime = currentTime
+    Private Sub Cycle(currentTime As TimeSpan, ponyBases As IEnumerable(Of PonyBase), cancelRecalls As IEnumerable(Of Pony))
+        If currentTime - lastCycleTime <= HouseBase.CycleInterval Then Return
+        lastCycleTime = currentTime
 
-            Console.WriteLine(Me.Base.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
+        Console.WriteLine(Me.Base.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
 
-            If Rng.NextDouble() < 0.5 Then
-                'skip this round
-                Console.WriteLine(Me.Base.Name & " - Decided to skip this round of cycling.")
-                Exit Sub
-            End If
-
-            If Rng.NextDouble() < HouseBase.Bias Then
-                If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Ponies.Count() < Options.MaxPonyCount Then
-                    DeployPony(Me, ponyBases)
-                Else
-                    Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
-                End If
-            Else
-                If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Ponies.Count() > 1 Then
-                    RecallPony(Me)
-                Else
-                    Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
-                End If
-            End If
-
+        If Rng.NextDouble() < 0.5 Then
+            'skip this round
+            Console.WriteLine(Me.Base.Name & " - Decided to skip this round of cycling.")
+            Exit Sub
         End If
 
+        If Rng.NextDouble() < HouseBase.Bias Then
+            If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Ponies.Count() < Options.MaxPonyCount Then
+                DeployPony(ponyBases)
+            Else
+                Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
+            End If
+        Else
+            If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Ponies.Count() > 1 Then
+                RecallPony(cancelRecalls)
+            Else
+                Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
+            End If
+        End If
     End Sub
 
-    Private Sub DeployPony(instance As Effect, ponyBases As IEnumerable(Of PonyBase))
-
-        Dim choices As New List(Of String)
-
-        Dim all As Boolean = False
-        SyncLock HouseBase.Visitors
-            For Each visitor In HouseBase.Visitors
-                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                    For Each ponyBase In ponyBases
-                        choices.Add(ponyBase.Directory)
-                    Next
-                    all = True
-                    Exit For
+    Private Sub ExpireRecalledPonies(currentTime As TimeSpan, cancelRecalls As IEnumerable(Of Pony))
+        For Each pony In cancelRecalls
+            ' Note: This will currently leave the expired handler attached to the pony. If a recall on a pony is canceled many times this
+            ' means several redundant handlers will be attached. The handler is safe to call many times so that is not problematic, but the
+            ' redundant handlers do mean some memory and time could be wasted in this unlikely scenario.
+            recallingPonies.Remove(pony)
+            recallExpiringPonies.Remove(pony)
+        Next
+        If recallingPonies.Count > 0 Then
+            Dim destination = New Vector2(TopLeftLocation + New Size(HouseBase.DoorPosition))
+            For Each pony In recallingPonies
+                pony.DestinationOverride = destination
+                If pony.AtDestination Then recallExpiringPonies.Add(pony, currentTime)
+            Next
+            recallingPonies.RemoveWhere(Function(pony) recallExpiringPonies.ContainsKey(pony))
+        End If
+        If recallExpiringPonies.Count > 0 Then
+            Dim toExpire As List(Of Pony) = Nothing
+            For Each kvp In recallExpiringPonies
+                If kvp.Value + RecallExpireDelay < currentTime Then
+                    If toExpire Is Nothing Then toExpire = New List(Of Pony)()
+                    toExpire.Add(kvp.Key)
                 End If
             Next
-
-            If all = False Then
-                For Each ponyName In HouseBase.Visitors
-                    choices.Add(ponyName)
+            If toExpire IsNot Nothing Then
+                For Each pony In toExpire
+                    pony.Expire()
                 Next
             End If
-        End SyncLock
-
-        For Each pony In Ponies
-            choices.Remove(pony.Base.Directory)
-        Next
-
-        choices.Remove(PonyBase.RandomDirectory)
-
-        If choices.Count = 0 Then Exit Sub
-
-        Dim selected_name = choices.RandomElement()
-
-        For Each ponyBase In ponyBases
-            If ponyBase.Directory = selected_name Then
-
-                Dim deployed_pony = New Pony(Context, ponyBase)
-
-                deployed_pony.Location = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))
-
-                Context.PendingSprites.Add(deployed_pony)
-                deployedPonies.Add(deployed_pony)
-
-                Console.WriteLine(Me.Base.Name & " - Deployed " & ponyBase.Directory)
-
-                Exit Sub
-            End If
-        Next
-
+        End If
     End Sub
 
-    Private Sub RecallPony(instance As Effect)
+    Private Sub DeployPony(ponyBases As IEnumerable(Of PonyBase))
+        Argument.EnsureNotNull(ponyBases, "ponyBases")
+        If Not ponyBases.Any() Then Return
 
-        Dim choices As New List(Of String)
+        Dim baseToDeploy As PonyBase
+        Dim visitors = GetVisitors()
+        If visitors.Contains("all", StringComparer.OrdinalIgnoreCase) Then
+            baseToDeploy = ponyBases.RandomElement()
+        Else
+            Dim candidates = ponyBases.Where(Function(base) visitors.Contains(base.Directory)).
+                Except(Ponies.Select(Function(pony) pony.Base)).ToArray()
+            If candidates.Length = 0 Then Return
+            baseToDeploy = candidates.RandomElement()
+        End If
 
-        Dim all As Boolean = False
-        SyncLock HouseBase.Visitors
-            For Each visitor In HouseBase.Visitors
-                If String.Equals("all", visitor, StringComparison.OrdinalIgnoreCase) Then
-                    For Each pony In Ponies
-                        choices.Add(pony.Base.Directory)
-                    Next
-                    all = True
-                    Exit For
-                End If
-            Next
+        Dim ponyToDeploy = New Pony(Context, baseToDeploy)
+        ponyToDeploy.Location = New Vector2(TopLeftLocation + New Size(HouseBase.DoorPosition))
+        AddHandler ponyToDeploy.Expired, Sub() StopTrackingPony(ponyToDeploy)
 
-            If all = False Then
-                For Each pony In Ponies
-                    For Each otherpony In HouseBase.Visitors
-                        If pony.Base.Directory = otherpony Then
-                            choices.Add(pony.Base.Directory)
-                            Exit For
-                        End If
-                    Next
-                Next
-            End If
-        End SyncLock
+        Context.PendingSprites.Add(ponyToDeploy)
+        deployedPonies.Add(ponyToDeploy)
 
-        If choices.Count = 0 Then Exit Sub
+        Console.WriteLine(Me.Base.Name & " - Deployed " & baseToDeploy.Directory)
+    End Sub
 
-        Dim selected_name = choices.RandomElement()
+    Private Sub RecallPony(cancelRecalls As IEnumerable(Of Pony))
+        Dim ponyToRecall As Pony
+        Dim allCandidates = Ponies.Where(Function(pony) Not pony.IsBusy AndAlso Not cancelRecalls.Contains(pony)).ToArray()
+        If allCandidates.Length = 0 Then Return
+        Dim visitors = GetVisitors()
+        If visitors.Contains("all", StringComparer.OrdinalIgnoreCase) Then
+            ponyToRecall = allCandidates.RandomElement()
+        Else
+            Dim candidates = allCandidates.Where(Function(pony) visitors.Contains(pony.Base.Directory)).ToArray()
+            If candidates.Length = 0 Then Return
+            ponyToRecall = candidates.RandomElement()
+        End If
 
-        For Each pony In Ponies
-            If pony.Base.Directory = selected_name Then
-                If pony.IsBusy Then Continue For
-                pony.DestinationOverride = New Vector2(instance.TopLeftLocation + New Size(HouseBase.DoorPosition))
-                deployedPonies.Remove(pony)
-                Console.WriteLine(Me.Base.Name & " - Recalled " & pony.Base.Directory)
-                Exit Sub
-            End If
-        Next
+        If Not deployedPonies.Remove(ponyToRecall) Then AddHandler ponyToRecall.Expired, Sub() StopTrackingPony(ponyToRecall)
+        recallingPonies.Add(ponyToRecall)
+        Console.WriteLine(Me.Base.Name & " - Recalled " & ponyToRecall.Base.Directory)
+    End Sub
 
+    Private Sub StopTrackingPony(pony As Pony)
+        deployedPonies.Remove(pony)
+        recallingPonies.Remove(pony)
+        recallExpiringPonies.Remove(pony)
     End Sub
 
     Public Overrides Function ToString() As String
