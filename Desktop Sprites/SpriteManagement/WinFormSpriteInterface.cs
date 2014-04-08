@@ -834,8 +834,16 @@
             {
                 EnsureNotDisposed();
                 if (form.TopMost != value)
-                    ApplicationInvoke(() => form.TopMost = value);
+                    SetTopmost(value);
             }
+        }
+        /// <summary>
+        /// Sets a value indicating whether the form should be displayed as a topmost form.
+        /// </summary>
+        /// <param name="topmost">A value indicating whether the form should be displayed as a topmost form.</param>
+        private void SetTopmost(bool topmost)
+        {
+            ApplicationInvoke(() => form.TopMost = topmost);
         }
         /// <summary>
         /// Gets or sets a value indicating whether the form is displayed in the taskbar.
@@ -852,8 +860,16 @@
             {
                 EnsureNotDisposed();
                 if (form.ShowInTaskbar != value)
-                    ApplicationInvoke(() => form.ShowInTaskbar = value);
+                    SetShowInTaskbar(value);
             }
+        }
+        /// <summary>
+        /// Sets a value indicating whether the form is displayed in the taskbar.
+        /// </summary>
+        /// <param name="showInTaskbar">A value indicating whether the form should be displayed in the taskbar.</param>
+        private void SetShowInTaskbar(bool showInTaskbar)
+        {
+            ApplicationInvoke(() => form.ShowInTaskbar = showInTaskbar);
         }
         /// <summary>
         /// Gets or sets the display boundary of the form. When setting, the form will be cleared of any drawn sprites.
@@ -870,8 +886,16 @@
             {
                 EnsureNotDisposed();
                 if (form.DesktopBounds != value)
-                    ApplicationInvoke(() => form.DesktopBounds = value);
+                    SetDisplayBounds(value);
             }
+        }
+        /// <summary>
+        /// Sets the display boundary of the form.
+        /// </summary>
+        /// <param name="displayBounds">The display boundary to use.</param>
+        private void SetDisplayBounds(Rectangle displayBounds)
+        {
+            ApplicationInvoke(() => form.DesktopBounds = displayBounds);
         }
         /// <summary>
         /// Gets the current location of the cursor.

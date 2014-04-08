@@ -243,9 +243,13 @@ Public Class DesktopPonyAnimator
         countSinceLastDebug += 1
         Dim form = spriteDebugForm
         If form IsNot Nothing AndAlso countSinceLastDebug = 5 Then
-            form.SmartInvoke(Sub() form.UpdateSprites(Sprites))
+            UpdateDebugForm(form)
             countSinceLastDebug = 0
         End If
+    End Sub
+
+    Private Sub UpdateDebugForm(form As SpriteDebugForm)
+        form.SmartInvoke(Sub() form.UpdateSprites(Sprites))
     End Sub
 
     Public Overrides Sub Finish()
