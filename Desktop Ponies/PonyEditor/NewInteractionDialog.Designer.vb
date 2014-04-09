@@ -39,9 +39,9 @@ Partial Class NewInteractionDialog
         Me.AnyRadioButton = New System.Windows.Forms.RadioButton()
         Me.OneRadioButton = New System.Windows.Forms.RadioButton()
         Me.LayoutPanel = New System.Windows.Forms.TableLayoutPanel()
-        Me.ChanceNumber = New System.Windows.Forms.NumericUpDown()
-        Me.ProximityNumber = New System.Windows.Forms.NumericUpDown()
         Me.DelayNumber = New System.Windows.Forms.NumericUpDown()
+        Me.ProximityNumber = New System.Windows.Forms.NumericUpDown()
+        Me.ChanceNumber = New System.Windows.Forms.NumericUpDown()
         Me.CommandTable.SuspendLayout()
         Me.InteractsWithGroupBox.SuspendLayout()
         Me.LayoutPanel.SuspendLayout()
@@ -130,7 +130,7 @@ Partial Class NewInteractionDialog
         Me.TargetsList.FormattingEnabled = True
         Me.TargetsList.Location = New System.Drawing.Point(199, 16)
         Me.TargetsList.Name = "TargetsList"
-        Me.LayoutPanel.SetRowSpan(Me.TargetsList, 9)
+        Me.LayoutPanel.SetRowSpan(Me.TargetsList, 8)
         Me.TargetsList.Size = New System.Drawing.Size(225, 284)
         Me.TargetsList.TabIndex = 10
         '
@@ -160,7 +160,7 @@ Partial Class NewInteractionDialog
         Me.BehaviorsList.FormattingEnabled = True
         Me.BehaviorsList.Location = New System.Drawing.Point(430, 16)
         Me.BehaviorsList.Name = "BehaviorsList"
-        Me.LayoutPanel.SetRowSpan(Me.BehaviorsList, 9)
+        Me.LayoutPanel.SetRowSpan(Me.BehaviorsList, 8)
         Me.BehaviorsList.Size = New System.Drawing.Size(227, 284)
         Me.BehaviorsList.TabIndex = 12
         '
@@ -225,25 +225,24 @@ Partial Class NewInteractionDialog
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.LayoutPanel.ColumnCount = 3
         Me.LayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.LayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 49.99999!))
         Me.LayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        Me.LayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.00001!))
-        Me.LayoutPanel.Controls.Add(Me.DelayNumber, 0, 8)
+        Me.LayoutPanel.Controls.Add(Me.DelayNumber, 0, 7)
         Me.LayoutPanel.Controls.Add(Me.ProximityNumber, 0, 5)
-        Me.LayoutPanel.Controls.Add(Me.ChanceNumber, 0, 4)
+        Me.LayoutPanel.Controls.Add(Me.ChanceNumber, 0, 3)
         Me.LayoutPanel.Controls.Add(Me.NameLabel, 0, 0)
         Me.LayoutPanel.Controls.Add(Me.NameTextBox, 0, 1)
-        Me.LayoutPanel.Controls.Add(Me.ReactivationDelayLabel, 0, 7)
+        Me.LayoutPanel.Controls.Add(Me.ReactivationDelayLabel, 0, 6)
         Me.LayoutPanel.Controls.Add(Me.ChanceLabel, 0, 2)
         Me.LayoutPanel.Controls.Add(Me.ProximityLabel, 0, 4)
-        Me.LayoutPanel.Controls.Add(Me.InteractsWithGroupBox, 0, 9)
+        Me.LayoutPanel.Controls.Add(Me.InteractsWithGroupBox, 0, 8)
         Me.LayoutPanel.Controls.Add(Me.BehaviorsList, 2, 1)
         Me.LayoutPanel.Controls.Add(Me.BehaviorsLabel, 2, 0)
         Me.LayoutPanel.Controls.Add(Me.TargetsLabel, 1, 0)
         Me.LayoutPanel.Controls.Add(Me.TargetsList, 1, 1)
         Me.LayoutPanel.Location = New System.Drawing.Point(12, 12)
         Me.LayoutPanel.Name = "LayoutPanel"
-        Me.LayoutPanel.RowCount = 10
-        Me.LayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.LayoutPanel.RowCount = 9
         Me.LayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.LayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle())
@@ -257,16 +256,17 @@ Partial Class NewInteractionDialog
         Me.LayoutPanel.Size = New System.Drawing.Size(660, 303)
         Me.LayoutPanel.TabIndex = 0
         '
-        'ChanceNumber
+        'DelayNumber
         '
-        Me.ChanceNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.ChanceNumber.DecimalPlaces = 2
-        Me.ChanceNumber.Location = New System.Drawing.Point(38, 67)
-        Me.ChanceNumber.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
-        Me.ChanceNumber.Name = "ChanceNumber"
-        Me.ChanceNumber.Size = New System.Drawing.Size(120, 20)
-        Me.ChanceNumber.TabIndex = 3
-        Me.ChanceNumber.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.DelayNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.DelayNumber.DecimalPlaces = 2
+        Me.DelayNumber.Location = New System.Drawing.Point(38, 169)
+        Me.DelayNumber.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.DelayNumber.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
+        Me.DelayNumber.Name = "DelayNumber"
+        Me.DelayNumber.Size = New System.Drawing.Size(120, 20)
+        Me.DelayNumber.TabIndex = 7
+        Me.DelayNumber.Value = New Decimal(New Integer() {60, 0, 0, 0})
         '
         'ProximityNumber
         '
@@ -279,17 +279,16 @@ Partial Class NewInteractionDialog
         Me.ProximityNumber.TabIndex = 5
         Me.ProximityNumber.Value = New Decimal(New Integer() {300, 0, 0, 0})
         '
-        'DelayNumber
+        'ChanceNumber
         '
-        Me.DelayNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.DelayNumber.DecimalPlaces = 2
-        Me.DelayNumber.Location = New System.Drawing.Point(38, 169)
-        Me.DelayNumber.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
-        Me.DelayNumber.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
-        Me.DelayNumber.Name = "DelayNumber"
-        Me.DelayNumber.Size = New System.Drawing.Size(120, 20)
-        Me.DelayNumber.TabIndex = 7
-        Me.DelayNumber.Value = New Decimal(New Integer() {60, 0, 0, 0})
+        Me.ChanceNumber.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.ChanceNumber.DecimalPlaces = 2
+        Me.ChanceNumber.Location = New System.Drawing.Point(38, 67)
+        Me.ChanceNumber.Margin = New System.Windows.Forms.Padding(3, 3, 3, 15)
+        Me.ChanceNumber.Name = "ChanceNumber"
+        Me.ChanceNumber.Size = New System.Drawing.Size(120, 20)
+        Me.ChanceNumber.TabIndex = 3
+        Me.ChanceNumber.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
         'NewInteractionDialog
         '
