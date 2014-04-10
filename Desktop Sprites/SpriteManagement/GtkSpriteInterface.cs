@@ -998,6 +998,18 @@
         private readonly object invokeSync = new object();
 
         /// <summary>
+        /// Gets a value indicating whether the object is being, or has been, disposed.
+        /// </summary>
+        public bool Disposed
+        {
+            get { return disposed; }
+        }
+        /// <summary>
+        /// Gets or sets a value indicating whether the interface will be allowed to close itself. If the interface needs to close itself,
+        /// it will attempt to do so as soon as this property is set to true.
+        /// </summary>
+        public bool PreventSelfClose { get; set; }
+        /// <summary>
         /// Gets or sets the text to use in the title frame of each window.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>

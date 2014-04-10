@@ -662,9 +662,13 @@
         /// </summary>
         private bool paused;
         /// <summary>
-        /// Indicates if the form has begun the process of closing (or has closed).
+        /// Indicates if the form has been requested to close.
         /// </summary>
-        private volatile bool closing;
+        private volatile bool closePending;
+        /// <summary>
+        /// Indicates if the form should be prevented from closing itself for the moment.
+        /// </summary>
+        private volatile bool preventSelfClose;
         /// <summary>
         /// Stores the images for each sprite as a series of
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageFrame"/>, indexed by filename.
@@ -773,7 +777,46 @@
         /// Custom icon for the form.
         /// </summary>
         private Icon windowIcon = null;
+        /// <summary>
+        /// Sets the preventSelfClose variable to true.
+        /// </summary>
+        private readonly MethodInvoker setPreventSelfCloseTrue;
+        /// <summary>
+        /// Sets the preventSelfClose variable to false, and if a close is pending closes the form.
+        /// </summary>
+        private readonly MethodInvoker setPreventSelfCloseFalse;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the interface will be allowed to close itself. If the interface needs to close itself,
+        /// it will attempt to do so as soon as this property is set to true.
+        /// </summary>
+        public bool PreventSelfClose
+        {
+            get
+            {
+                return preventSelfClose;
+            }
+            set
+            {
+                if (preventSelfClose != value)
+                    if (value)
+                        ApplicationInvoke(setPreventSelfCloseTrue);
+                    else
+                        ApplicationInvoke(setPreventSelfCloseFalse);
+            }
+        }
+        /// <summary>
+        /// Sets a value indicating whether the interface will be allowed to close itself.
+        /// </summary>
+        /// <param name="preventSelfClose">A value indicating whether the interface will be allowed to close itself.</param>
+        private void SetPreventSelfClose(bool preventSelfClose)
+        {
+            ApplicationInvoke(() =>
+            {
+                if (!(this.preventSelfClose = preventSelfClose) && closePending)
+                    Close();
+            });
+        }
         /// <summary>
         /// Gets or sets the text associated with the form.
         /// </summary>
@@ -1049,6 +1092,13 @@
                 // Do other initialization in parallel whilst the UI thread is spinning up.
                 generatePair = paths => CreatePair(paths, null);
                 render = Render;
+                setPreventSelfCloseTrue = () => preventSelfClose = true;
+                setPreventSelfCloseFalse = () =>
+                {
+                    preventSelfClose = false;
+                    if (closePending)
+                        Close();
+                };
                 using (var family = FontFamily.GenericSansSerif)
                     font = new Font(family, 12, GraphicsUnit.Pixel);
                 postUpdateInvalidRegion.MakeEmpty();
@@ -1092,21 +1142,7 @@
         /// <param name="method">The method to invoke. The method should take no parameters and return void.</param>
         private void ApplicationInvoke(MethodInvoker method)
         {
-            // Check disposal has not begun, as we don't want to process any more actions if the interface is being closed.
-            // The is a race condition since disposal might begin after this check, hence the try-catch block.
-            if (closing)
-                return;
-            try
-            {
-                form.SmartInvoke(method);
-            }
-            catch (ObjectDisposedException ex)
-            {
-                // Handle the race condition where the form was disposed just after we checked.
-                // If some other object was disposed, then we still need to let that exception get passed upwards.
-                if (ex.ObjectName != form.GetType().Name)
-                    throw;
-            }
+            form.SmartInvoke(method);
         }
 
         /// <summary>
@@ -2146,8 +2182,11 @@
         /// </summary>
         public void Close()
         {
-            if (closing)
+            if (Disposed)
                 return;
+            // Remove the handler that cancels closing since this is an external call to close so we want to proceed regardless of the
+            // self-close flag.
+            form.FormClosing -= GraphicsForm_FormClosing;
             ApplicationInvoke(form.Close);
         }
 
@@ -2158,7 +2197,8 @@
         /// <param name="e">The event data.</param>
         private void GraphicsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            closing = true;
+            closePending = true;
+            e.Cancel = preventSelfClose;
         }
 
         /// <summary>
@@ -2192,9 +2232,8 @@
                     ApplicationInvoke(() => Dispose(disposing));
                     return;
                 }
-
-                if (form != null)
-                    form.Dispose();
+                
+                form.Dispose();
 
                 foreach (var image in images.Values)
                     image.Dispose();

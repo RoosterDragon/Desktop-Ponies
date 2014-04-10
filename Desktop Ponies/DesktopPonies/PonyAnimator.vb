@@ -85,7 +85,7 @@ Public MustInherit Class PonyAnimator
         Viewer.WindowTitle = "Desktop Ponies"
         Viewer.WindowIconFilePath = "Twilight.ico"
 
-        AddHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
+        AddHandler Viewer.InterfaceClosed, Sub() _exitRequested = ExitRequest.ReturnToMenu
 
         If spriteCollection IsNot Nothing Then
             AttachExpiredHandlers(spriteCollection.OfType(Of IExpireableSprite)())
@@ -352,7 +352,6 @@ Public MustInherit Class PonyAnimator
     Public Overrides Sub Finish()
         Dim alreadyDisposed = Disposed
         If Not alreadyDisposed Then
-            RemoveHandler Viewer.InterfaceClosed, AddressOf HandleReturnToMenu
             RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
             RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
             RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
@@ -363,10 +362,6 @@ Public MustInherit Class PonyAnimator
         End If
         MyBase.Finish()
         If Not alreadyDisposed AndAlso Globals.DirectXSoundAvailable Then CleanupSounds(True)
-    End Sub
-
-    Private Sub HandleReturnToMenu(sender As Object, e As EventArgs)
-        Finish(ExitRequest.ReturnToMenu)
     End Sub
 
     Protected Function GetClosestUnderPoint(Of T)(location As Point) As T

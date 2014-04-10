@@ -898,9 +898,12 @@
         /// <param name="spriteCollection">The initial collection of <see cref="T:DesktopSprites.SpriteManagement.ISprite"/> to be
         /// displayed by the animator, which may be null.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="spriteViewer"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="spriteViewer"/> is disposed.</exception>
         protected AnimationLoopBase(ISpriteCollectionView spriteViewer, IEnumerable<ISprite> spriteCollection)
         {
             Argument.EnsureNotNull(spriteViewer, "spriteViewer");
+            if (spriteViewer.Disposed)
+                throw new ArgumentException("spriteViewer must not be disposed.", "spriteViewer");
 
             Viewer = spriteViewer;
 
@@ -915,9 +918,6 @@
             else
                 sprites = new LinkedList<ISprite>(spriteCollection);
             Sprites = new ConcurrentReadOnlySpriteCollection(this);
-
-            // Stop the animator when the viewer is closed.
-            Viewer.InterfaceClosed += (sender, e) => Finish();
 
             string collectionType = "(empty collection)";
             if (spriteCollection != null)
@@ -1162,12 +1162,19 @@
             while (!Disposed && running.WaitOne() && !Stopped)
             {
                 // Run an update and draw cycle for one frame.
-                if (!Started)
-                    StartInternal(startSync);
-                else
-                    Update();
-                if (!Disposed)
-                    Draw();
+                Viewer.PreventSelfClose = true;
+                if (!Viewer.Disposed)
+                {
+                    if (!Started)
+                        StartInternal(startSync);
+                    else
+                        Update();
+                    if (!Disposed)
+                        Draw();
+                }
+                Viewer.PreventSelfClose = false;
+                if (Viewer.Disposed)
+                    Finish();
 
 #if DEBUG
                 // When debugging, assume long delays are due to hitting breakpoints.

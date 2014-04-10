@@ -76,6 +76,15 @@
         void Close();
 
         /// <summary>
+        /// Gets a value indicating whether the object is being, or has been, disposed.
+        /// </summary>
+        bool Disposed { get; }
+        /// <summary>
+        /// Gets or sets a value indicating whether the interface will be allowed to close itself. If the interface needs to close itself,
+        /// it will attempt to do so as soon as this property is set to true.
+        /// </summary>
+        bool PreventSelfClose { get; set; }
+        /// <summary>
         /// Gets or sets the text to use in the title frame of any interface windows.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
