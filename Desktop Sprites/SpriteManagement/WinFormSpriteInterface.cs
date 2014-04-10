@@ -1398,9 +1398,9 @@
         /// <returns>Returns true if the animated images are the horizontal mirror of each other.</returns>
         private static bool AnimationsAreHorizontallyMirrored(AnimatedImage<ImageFrame> left, AnimatedImage<ImageFrame> right)
         {
-            if (!left.IsAnimated || !right.IsAnimated ||
-                left.Size != right.Size || left.LoopCount != right.LoopCount ||
-                left.ImageDuration != right.ImageDuration || left.FrameCount != right.FrameCount)
+            if (left.Size != right.Size || left.LoopCount != right.LoopCount ||
+                left.ImageDuration != right.ImageDuration || left.FrameCount != right.FrameCount ||
+                left[0].Image.Bitmap != null || right[0].Image.Bitmap != null)
                 return false;
 
             for (int frameIndex = 0; frameIndex < left.FrameCount; frameIndex++)

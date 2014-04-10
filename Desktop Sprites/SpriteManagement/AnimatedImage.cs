@@ -35,13 +35,6 @@
         {
             get { return Size.Height; }
         }
-        /// <summary>
-        /// Gets a value indicating whether the image has more than one frame, and thus is animated.
-        /// </summary>
-        public bool IsAnimated
-        {
-            get { return FrameCount > 1; }
-        }
 
         /// <summary>
         /// Gets a value indicating the total running time of this animation, in milliseconds.
@@ -256,7 +249,7 @@
             int frame = 0;
 
             // Find the frame we need.
-            if (IsAnimated)
+            if (FrameCount > 1)
             {
                 // Get overall time to find in milliseconds.
                 int timeToSeek = (int)time.TotalMilliseconds;
