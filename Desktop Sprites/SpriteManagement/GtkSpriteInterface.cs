@@ -477,28 +477,22 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.ClippedImage"/> class
             /// from the given file.
             /// </summary>
+            /// <param name="gtkSpriteInterface">The interface that will own this image (resources will be created on the UI thread).
+            /// </param>
             /// <param name="fileName">The path to a static image file from which to create a new
             /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.ClippedImage"/>.</param>
-            public ClippedImage(string fileName)
+            public ClippedImage(GtkSpriteInterface gtkSpriteInterface, string fileName)
             {
-                // These operations must be invoked on the application thread to work.
-                object invokeFinished = new object();
-                lock (invokeFinished)
+                gtkSpriteInterface.ApplicationInvoke(() =>
                 {
-                    Application.Invoke((o, args) =>
-                    {
-                        // Create the image and get its clipping mask.
-                        Pixmap clipMap;
-                        Pixmap clipMask;
-                        Image = new Pixbuf(fileName);
-                        Image.RenderPixmapAndMask(out clipMap, out clipMask, 255);
-                        Clip = clipMask;
-                        clipMap.Dispose();
-                        lock (invokeFinished)
-                            Monitor.Pulse(invokeFinished);
-                    });
-                    Monitor.Wait(invokeFinished);
-                }
+                    // Create the image and get its clipping mask.
+                    Pixmap clipMap;
+                    Pixmap clipMask;
+                    Image = new Pixbuf(fileName);
+                    Image.RenderPixmapAndMask(out clipMap, out clipMask, 255);
+                    Clip = clipMask;
+                    clipMap.Dispose();
+                });
             }
 
             /// <summary>
@@ -521,22 +515,10 @@
         private class GtkFrame : Frame<ClippedImage>, IDisposable
         {
             /// <summary>
-            /// Gets the method for creating a <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> frame from a
-            /// buffer.
-            /// </summary>
-            public static BufferToImage<GtkFrame> FromBuffer
-            {
-                get { return FromBufferMethod; }
-            }
-
-            /// <summary>
-            /// Gets or sets the interface. This is a slightly dirty hack so that the image can be created on the application thread.
-            /// </summary>
-            public static GtkSpriteInterface Interface { get; set; }
-
-            /// <summary>
             /// Creates a new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> from the raw buffer.
             /// </summary>
+            /// <param name="gtkSpriteInterface">The interface that will own this image (resources will be created on the UI thread).
+            /// </param>
             /// <param name="buffer">The raw buffer.</param>
             /// <param name="palette">The color palette.</param>
             /// <param name="transparentIndex">The index of the transparent color.</param>
@@ -547,7 +529,7 @@
             /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> for the frame held in the raw
             /// buffer.</returns>
             /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="depth"/> is not 8.</exception>
-            private static GtkFrame FromBufferMethod(
+            public static GtkFrame FromBuffer(GtkSpriteInterface gtkSpriteInterface,
                 byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth)
             {
                 if (depth != 8)
@@ -587,7 +569,7 @@
                     }
 
                 // Create the clipping mask by setting all the pixels in the mask from the list of points we draw on.
-                Interface.ApplicationInvoke(() => frameImage.Clip = new Pixmap(null, width, height, 1));
+                gtkSpriteInterface.ApplicationInvoke(() => frameImage.Clip = new Pixmap(null, width, height, 1));
                 if (points.Count > 0)
                     using (Gdk.GC context = new Gdk.GC(frameImage.Clip))
                     {
@@ -641,10 +623,12 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/> class from
             /// the given file.
             /// </summary>
+            /// <param name="gtkSpriteInterface">The interface that will own this image (resources will be created on the UI thread).
+            /// </param>
             /// <param name="fileName">The path to a static image file from which to create a new
             /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkFrame"/>.</param>
-            public GtkFrame(string fileName)
-                : this(new ClippedImage(fileName), fileName.GetHashCode())
+            public GtkFrame(GtkSpriteInterface gtkSpriteInterface, string fileName)
+                : this(new ClippedImage(gtkSpriteInterface, fileName), fileName.GetHashCode())
             {
             }
 
@@ -1336,7 +1320,6 @@
                 }
             }
 
-            GtkFrame.Interface = this;
             createPair = CreatePair;
             createAnimatedImage = CreateAnimatedImage;
 
@@ -1397,7 +1380,7 @@
         /// </returns>
         private GtkFrame GtkFrameFromFile(string fileName)
         {
-            return Disposable.SetupSafely(new GtkFrame(fileName), frame => AlterPixbufForTransparency(fileName, frame.Image.Image));
+            return Disposable.SetupSafely(new GtkFrame(this, fileName), frame => AlterPixbufForTransparency(fileName, frame.Image.Image));
         }
 
         /// <summary>
@@ -1419,7 +1402,7 @@
         {
             if (BufferPreprocess != null)
                 BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
-            GtkFrame frame = GtkFrame.FromBuffer(buffer, palette, transparentIndex, stride, width, height, depth);
+            GtkFrame frame = GtkFrame.FromBuffer(this, buffer, palette, transparentIndex, stride, width, height, depth);
             AlterPixbufForTransparency(fileName, frame.Image.Image);
             return frame;
         }
