@@ -26,8 +26,11 @@ Public Class OptionsForm
             ShowPerformanceGraph.Visible = False
         End If
 
-        If Not OperatingSystemInfo.IsWindows Then
+        If Not OperatingSystemInfo.IsWindows OrElse Options.ProfileName <> Options.ScreensaverProfileName Then
             ScreensaverGroup.Visible = False
+        End If
+
+        If Not OperatingSystemInfo.IsWindows Then
             WindowAvoidance.Visible = False
             WindowContainment.Visible = False
             SizeScale.Enabled = False

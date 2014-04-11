@@ -8,8 +8,18 @@ Public NotInheritable Class Options
             Return "default"
         End Get
     End Property
+    Public Shared ReadOnly Property ScreensaverProfileName As CaseInsensitiveString
+        Get
+            Return "screensaver"
+        End Get
+    End Property
 
-    Public Shared ProfileName As String
+    Private Shared _profileName As CaseInsensitiveString
+    Public Shared ReadOnly Property ProfileName As CaseInsensitiveString
+        Get
+            Return _profileName
+        End Get
+    End Property
 
     Public Shared SuspendForFullscreenApplication As Boolean
     Public Shared ShowInTaskbar As Boolean
@@ -103,92 +113,99 @@ Public NotInheritable Class Options
     Public Shared Sub LoadProfile(profile As String, setAsCurrent As Boolean)
         Argument.EnsureNotNullOrEmpty(profile, "profile")
 
+        Dim profilePath As String
         If profile = DefaultProfileName Then
             LoadDefaultProfile()
         Else
-            Using reader As New StreamReader(Path.Combine(ProfileDirectory, profile & ".ini"), Encoding.UTF8)
-                ProfileName = profile
-                Dim newScreens As New List(Of Screen)()
-                Dim newCounts As New Dictionary(Of String, Integer)()
-                Dim newTags As New List(Of CaseInsensitiveString)()
-                While Not reader.EndOfStream
-                    Dim columns = CommaSplitQuoteQualified(reader.ReadLine())
-                    If columns.Length = 0 Then Continue While
+            profilePath = Path.Combine(ProfileDirectory, profile & ".ini")
+            If Not File.Exists(profilePath) Then
+                LoadDefaultProfile()
+                _profileName = profile
+            Else
+                Using reader As New StreamReader(profilePath, Encoding.UTF8)
+                    _profileName = profile
+                    Dim newScreens As New List(Of Screen)()
+                    Dim newCounts As New Dictionary(Of String, Integer)()
+                    Dim newTags As New List(Of CaseInsensitiveString)()
+                    While Not reader.EndOfStream
+                        Dim columns = CommaSplitQuoteQualified(reader.ReadLine())
+                        If columns.Length = 0 Then Continue While
 
-                    Select Case columns(0)
-                        Case "options"
-                            Dim p As New StringCollectionParser(
-                                columns,
-                                {"Identifier", "Speech Enabled", "Speech Chance", "Cursor Awareness Enabled", "Cursor Avoidance Radius",
-                                 "Pony Dragging Enabled", "Pony Interactions Enabled", "Display Interactions Errors",
-                                 "Exclusion Zone X", "Exclusion Zone Y", "Exclusion Zone Width", "Exclusion Zone Height",
-                                 "Scale Factor", "Max Pony Count", "Alpha Blending Enabled", "Pony Effects Enabled",
-                                 "Window Avoidance Enabled", "Ponies Avoid Ponies", "Pony Containment Enabled", "Pony Teleport Enabled",
-                                 "Time Factor", "Sound Enabled", "Sound Single Channel Only", "Sound Volume",
-                                 "Always On Top", "Suspend For Fullscreen Application",
-                                 "Screensaver Sound Enabled", "Screensaver Style",
-                                 "Screensaver Background Color", "Screensaver Background Image Path",
-                                 "No Random Duplicates", "Show In Taskbar",
-                                 "Allowed Area X", "Allowed Area Y", "Allowed Area Width", "Allowed Area Height"})
-                            p.NoParse()
-                            PonySpeechEnabled = p.ParseBoolean(True)
-                            PonySpeechChance = p.ParseSingle(0.01, 0, 1)
-                            CursorAvoidanceEnabled = p.ParseBoolean(True)
-                            CursorAvoidanceSize = p.ParseSingle(100, 0, 10000)
-                            PonyDraggingEnabled = p.ParseBoolean(True)
-                            PonyInteractionsEnabled = p.ParseBoolean(True)
-                            displayPonyInteractionsErrors = p.ParseBoolean(False)
-                            ExclusionZone.X = p.ParseSingle(0, 0, 1)
-                            ExclusionZone.Y = p.ParseSingle(0, 0, 1)
-                            ExclusionZone.Width = p.ParseSingle(0, 0, 1)
-                            ExclusionZone.Height = p.ParseSingle(0, 0, 1)
-                            ScaleFactor = p.ParseSingle(1, 0.25, 4)
-                            MaxPonyCount = p.ParseInt32(300, 0, 10000)
-                            alphaBlendingEnabled = p.ParseBoolean(True)
-                            PonyEffectsEnabled = p.ParseBoolean(True)
-                            WindowAvoidanceEnabled = p.ParseBoolean(False)
-                            PonyAvoidsPonies = p.ParseBoolean(False)
-                            WindowContainment = p.ParseBoolean(False)
-                            PonyTeleportEnabled = p.ParseBoolean(False)
-                            TimeFactor = p.ParseSingle(1, 0.1, 10)
-                            SoundEnabled = p.ParseBoolean(True)
-                            SoundSingleChannelOnly = p.ParseBoolean(False)
-                            SoundVolume = p.ParseSingle(0.75, 0, 1)
-                            AlwaysOnTop = p.ParseBoolean(True)
-                            SuspendForFullscreenApplication = p.ParseBoolean(True) ' TODO: Respect or remove this option.
-                            ScreensaverSoundEnabled = p.ParseBoolean(True)
-                            ScreensaverStyle = p.ParseEnum(ScreensaverBackgroundStyle.Transparent)
-                            ScreensaverBackgroundColor = Color.FromArgb(p.ParseInt32(0))
-                            ScreensaverBackgroundImagePath = p.NotNull("")
-                            NoRandomDuplicates = p.ParseBoolean(True)
-                            ShowInTaskbar = p.ParseBoolean(OperatingSystemInfo.IsWindows)
-                            Dim region = New Rectangle()
-                            region.X = p.ParseInt32(0)
-                            region.Y = p.ParseInt32(0)
-                            region.Width = p.ParseInt32(0, 0, Integer.MaxValue)
-                            region.Height = p.ParseInt32(0, 0, Integer.MaxValue)
-                            If region.Width > 0 AndAlso region.Height > 0 Then AllowedRegion = region
-                        Case "monitor"
-                            If columns.Length <> 2 Then Exit Select
-                            Dim monitor = Screen.AllScreens.FirstOrDefault(Function(s) s.DeviceName = columns(1))
-                            If monitor IsNot Nothing Then newScreens.Add(monitor)
-                        Case "count"
-                            If columns.Length <> 3 Then Exit Select
-                            Dim count As Integer
-                            If Integer.TryParse(columns(2), NumberStyles.Integer, CultureInfo.InvariantCulture, count) AndAlso
-                                count > 0 Then
-                                newCounts.Add(columns(1), count)
-                            End If
-                        Case "tag"
-                            If columns.Length <> 2 Then Exit Select
-                            newTags.Add(columns(1))
-                    End Select
-                End While
-                If newScreens.Count = 0 Then newScreens.Add(Screen.PrimaryScreen)
-                Screens = newScreens.ToImmutableArray()
-                PonyCounts = newCounts.AsReadOnly()
-                CustomTags = newTags.ToImmutableArray()
-            End Using
+                        Select Case columns(0)
+                            Case "options"
+                                Dim p As New StringCollectionParser(
+                                    columns,
+                                    {"Identifier", "Speech Enabled", "Speech Chance", "Cursor Awareness Enabled", "Cursor Avoidance Radius",
+                                     "Pony Dragging Enabled", "Pony Interactions Enabled", "Display Interactions Errors",
+                                     "Exclusion Zone X", "Exclusion Zone Y", "Exclusion Zone Width", "Exclusion Zone Height",
+                                     "Scale Factor", "Max Pony Count", "Alpha Blending Enabled", "Pony Effects Enabled",
+                                     "Window Avoidance Enabled", "Ponies Avoid Ponies", "Pony Containment Enabled", "Pony Teleport Enabled",
+                                     "Time Factor", "Sound Enabled", "Sound Single Channel Only", "Sound Volume",
+                                     "Always On Top", "Suspend For Fullscreen Application",
+                                     "Screensaver Sound Enabled", "Screensaver Style",
+                                     "Screensaver Background Color", "Screensaver Background Image Path",
+                                     "No Random Duplicates", "Show In Taskbar",
+                                     "Allowed Area X", "Allowed Area Y", "Allowed Area Width", "Allowed Area Height"})
+                                p.NoParse()
+                                PonySpeechEnabled = p.ParseBoolean(True)
+                                PonySpeechChance = p.ParseSingle(0.01, 0, 1)
+                                CursorAvoidanceEnabled = p.ParseBoolean(True)
+                                CursorAvoidanceSize = p.ParseSingle(100, 0, 10000)
+                                PonyDraggingEnabled = p.ParseBoolean(True)
+                                PonyInteractionsEnabled = p.ParseBoolean(True)
+                                displayPonyInteractionsErrors = p.ParseBoolean(False)
+                                ExclusionZone.X = p.ParseSingle(0, 0, 1)
+                                ExclusionZone.Y = p.ParseSingle(0, 0, 1)
+                                ExclusionZone.Width = p.ParseSingle(0, 0, 1)
+                                ExclusionZone.Height = p.ParseSingle(0, 0, 1)
+                                ScaleFactor = p.ParseSingle(1, 0.25, 4)
+                                MaxPonyCount = p.ParseInt32(300, 0, 10000)
+                                alphaBlendingEnabled = p.ParseBoolean(True)
+                                PonyEffectsEnabled = p.ParseBoolean(True)
+                                WindowAvoidanceEnabled = p.ParseBoolean(False)
+                                PonyAvoidsPonies = p.ParseBoolean(False)
+                                WindowContainment = p.ParseBoolean(False)
+                                PonyTeleportEnabled = p.ParseBoolean(False)
+                                TimeFactor = p.ParseSingle(1, 0.1, 10)
+                                SoundEnabled = p.ParseBoolean(True)
+                                SoundSingleChannelOnly = p.ParseBoolean(False)
+                                SoundVolume = p.ParseSingle(0.75, 0, 1)
+                                AlwaysOnTop = p.ParseBoolean(True)
+                                SuspendForFullscreenApplication = p.ParseBoolean(True) ' TODO: Respect or remove this option.
+                                ScreensaverSoundEnabled = p.ParseBoolean(True)
+                                ScreensaverStyle = p.ParseEnum(ScreensaverBackgroundStyle.Transparent)
+                                ScreensaverBackgroundColor = Color.FromArgb(p.ParseInt32(0))
+                                ScreensaverBackgroundImagePath = p.NotNull("")
+                                NoRandomDuplicates = p.ParseBoolean(True)
+                                ShowInTaskbar = p.ParseBoolean(OperatingSystemInfo.IsWindows)
+                                Dim region = New Rectangle()
+                                region.X = p.ParseInt32(0)
+                                region.Y = p.ParseInt32(0)
+                                region.Width = p.ParseInt32(0, 0, Integer.MaxValue)
+                                region.Height = p.ParseInt32(0, 0, Integer.MaxValue)
+                                If region.Width > 0 AndAlso region.Height > 0 Then AllowedRegion = region
+                            Case "monitor"
+                                If columns.Length <> 2 Then Exit Select
+                                Dim monitor = Screen.AllScreens.FirstOrDefault(Function(s) s.DeviceName = columns(1))
+                                If monitor IsNot Nothing Then newScreens.Add(monitor)
+                            Case "count"
+                                If columns.Length <> 3 Then Exit Select
+                                Dim count As Integer
+                                If Integer.TryParse(columns(2), NumberStyles.Integer, CultureInfo.InvariantCulture, count) AndAlso
+                                    count > 0 Then
+                                    newCounts.Add(columns(1), count)
+                                End If
+                            Case "tag"
+                                If columns.Length <> 2 Then Exit Select
+                                newTags.Add(columns(1))
+                        End Select
+                    End While
+                    If newScreens.Count = 0 Then newScreens.Add(Screen.PrimaryScreen)
+                    Screens = newScreens.ToImmutableArray()
+                    PonyCounts = newCounts.AsReadOnly()
+                    CustomTags = newTags.ToImmutableArray()
+                End Using
+            End If
         End If
 
         If setAsCurrent Then
@@ -202,7 +219,7 @@ Public NotInheritable Class Options
     End Sub
 
     Public Shared Sub LoadDefaultProfile()
-        ProfileName = DefaultProfileName
+        _profileName = DefaultProfileName
         Screens = {Screen.PrimaryScreen}.ToImmutableArray()
         AllowedRegion = Nothing
         PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()

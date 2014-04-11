@@ -7,7 +7,6 @@ Imports DesktopSprites.SpriteManagement
 ''' </summary>
 Public Class MainForm
 #Region "Fields and Properties"
-    Private Const Screensaver = "screensaver"
     Private Const Autostart = "autostart"
     Private initialized As Boolean
     Private loading As Boolean
@@ -23,8 +22,6 @@ Public Class MainForm
     Private ponyViewer As ISpriteCollectionView
     Private ponies As PonyCollection
     Private screensaverForms As List(Of ScreensaverBackgroundForm)
-
-    Private preventLoadProfile As Boolean
 
     Private notTaggedFilterIndex As Integer = -1
     Private ReadOnly selectionControlFilter As New Dictionary(Of PonySelectionControl, Boolean)()
@@ -64,7 +61,7 @@ Public Class MainForm
         Dim profile = Options.DefaultProfileName
         ProcessCommandLine()
         If Globals.IsScreensaverExecutable() Then
-            profile = Screensaver
+            profile = Options.ScreensaverProfileName
             If Globals.InScreensaverMode Then
                 ' We are starting in screensaver mode. Hide the program during loading.
                 autoStarted = True
@@ -85,9 +82,12 @@ Public Class MainForm
         End If
         ' Get the profile listing.
         GetProfiles(profile)
-        ' If we wanted to load the screensaver profile, but it didn't exist, then set that to be in use anyway.
-        If profile = Screensaver AndAlso ProfileComboBox.Text <> Screensaver Then
-            ProfileComboBox.Text = Screensaver
+        ' Force the screensaver profile to be loaded when running as the screensaver, even if it didn't exist.
+        If Globals.IsScreensaverExecutable() Then
+            Options.LoadProfile(profile, False)
+            If ProfileComboBox.Items.IndexOf(profile) = -1 Then
+                ProfileComboBox.SelectedIndex = ProfileComboBox.Items.Add(profile)
+            End If
         End If
 
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
@@ -136,7 +136,7 @@ Public Class MainForm
                             executable & " " & Autostart & vbNewLine &
                             "Start and show ponies straight away, using the '" & Autostart & "' profile." & vbNewLine & vbNewLine &
                             executable & " /s" & vbNewLine &
-                            "Start in screensaver mode. This uses the '" & Screensaver & "' profile." & vbNewLine & vbNewLine &
+                            "Start in screensaver mode. This uses the '" & Options.ScreensaverProfileName & "' profile." & vbNewLine & vbNewLine &
                             executable & " /c" & vbNewLine &
                             "Configure screensaver mode." & vbNewLine & vbNewLine &
                             executable & " /p" & vbNewLine &
@@ -342,9 +342,7 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadProfileButton_Click(sender As Object, e As EventArgs) Handles LoadProfileButton.Click
-        Options.LoadProfile(ProfileComboBox.Text, Not Globals.IsScreensaverExecutable())
-        LoadPonyCounts()
-        ReloadFilterCategories()
+        LoadProfile()
     End Sub
 
     Private Sub OptionsButton_Click(sender As Object, e As EventArgs) Handles OptionsButton.Click
@@ -417,8 +415,6 @@ Public Class MainForm
     End Sub
 
     Private Sub CopyProfileButton_Click(sender As Object, e As EventArgs) Handles CopyProfileButton.Click
-        preventLoadProfile = True
-
         Dim copiedProfileName = InputBox("Enter name of new profile to copy to:")
         copiedProfileName = Trim(copiedProfileName)
         If copiedProfileName = "" Then
@@ -435,8 +431,6 @@ Public Class MainForm
 
         Options.SaveProfile(copiedProfileName)
         GetProfiles(copiedProfileName)
-
-        preventLoadProfile = False
     End Sub
 
     Private Sub DeleteProfileButton_Click(sender As Object, e As EventArgs) Handles DeleteProfileButton.Click
@@ -446,8 +440,6 @@ Public Class MainForm
             Exit Sub
         End If
 
-        preventLoadProfile = True
-
         If Options.DeleteProfile(ProfileComboBox.Text) Then
             MessageBox.Show(Me, "Profile deleted successfully", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Else
@@ -455,16 +447,16 @@ Public Class MainForm
                             "Deletion Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
         GetProfiles(Options.DefaultProfileName)
-
-        preventLoadProfile = False
     End Sub
 
     Private Sub ProfileComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ProfileComboBox.SelectedIndexChanged
-        If Not preventLoadProfile Then
-            Options.LoadProfile(ProfileComboBox.Text, Not Globals.IsScreensaverExecutable())
-            LoadPonyCounts()
-            ReloadFilterCategories()
-        End If
+        LoadProfile()
+    End Sub
+
+    Private Sub LoadProfile()
+        Options.LoadProfile(ProfileComboBox.Text, Not Globals.IsScreensaverExecutable())
+        LoadPonyCounts()
+        ReloadFilterCategories()
     End Sub
 
     Private Sub FilterAnyRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAnyRadio.CheckedChanged
