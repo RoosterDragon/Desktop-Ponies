@@ -33,6 +33,10 @@
         /// </summary>
         private uint bitmapSizeInBytes;
         /// <summary>
+        /// Size covered by the current buffers.
+        /// </summary>
+        private Size bitmapSize;
+        /// <summary>
         /// Handle to the previous bitmap in the device context of the background buffer.
         /// </summary>
         private IntPtr hPrevBitmap;
@@ -108,7 +112,8 @@
         /// <param name="e">Data about the event.</param>
         protected override void OnResize(EventArgs e)
         {
-            ReleaseBuffers(true);
+            if (new Size(Width, Height) != bitmapSize)
+                ReleaseBuffers(true);
             base.OnResize(e);
         }
 
@@ -128,6 +133,7 @@
             hBitmap = NativeMethods.CreateDIBSection(
                 hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
             GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);
+            bitmapSize = new Size(Width, Height);
             hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
             if (hPrevBitmap == IntPtr.Zero)
                 throw new Win32Exception();
@@ -158,6 +164,7 @@
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
                 GC.RemoveMemoryPressure(bitmapSizeInBytes);
                 bitmapSizeInBytes = 0;
+                bitmapSize = Size.Empty;
                 if (!NativeMethods.DeleteObject(new HandleRef(this, hBitmap)))
                     throw new Win32Exception();
             }
