@@ -62,6 +62,11 @@ Change Log
 
 Latest changes:
 
+v1.48
+- Improved how behaviors with small images act when near the screen boundary.
+- Improved how ponies are deployed from and recalled to houses.
+- Fix an issue from 1.47 that would cause a pony to wrongly use a mirrored left image when facing right rather than the actual right image.
+
 v1.47:
 - Added new and updated Doctor Whooves animations by Anonycat.
 - Added Seabreeze by Bot-chan.
