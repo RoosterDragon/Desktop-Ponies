@@ -33,7 +33,8 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.GraphicsForm"/>
             /// class.
             /// </summary>
-            public GraphicsForm()
+            /// <param name="displayBounds">The initial display boundary of the form.</param>
+            public GraphicsForm(Rectangle displayBounds)
             {
                 // Create the form.
                 Name = GetType().Name;
@@ -41,6 +42,7 @@
                 FormBorderStyle = FormBorderStyle.None;
                 AutoScaleMode = AutoScaleMode.None;
                 Visible = false;
+                DesktopBounds = displayBounds;
 
                 // Tell the OS we'll be handling the drawing.
                 // This causes the OnPaint and OnPaintBackground events to be raised for us.
@@ -1121,15 +1123,13 @@
         {
             var parameters = (Tuple<object, Rectangle>)parameter;
 
-            form = new GraphicsForm();
+            form = new GraphicsForm(parameters.Item2);
             form.MouseClick += GraphicsForm_MouseClick;
             form.KeyPress += GraphicsForm_KeyPress;
             form.Activated += (sender, e) => Focused.Raise(this);
             form.Deactivate += (sender, e) => Unfocused.Raise(this);
             form.FormClosing += GraphicsForm_FormClosing;
             form.Disposed += GraphicsForm_Disposed;
-
-            DisplayBounds = parameters.Item2;
 
             lock (parameters.Item1)
                 Monitor.Pulse(parameters.Item1);
