@@ -419,7 +419,7 @@ Public Class ItemEditorBase
                         newImage = BitmapFrame.AnimationFromFile(Path.Combine(PonyBasePath, filePath))
                     End If
                     If behaviorImagePath IsNot Nothing Then
-                        behaviorImage = BitmapFrame.AnimationFromFile(Path.Combine(PonyBasePath, behaviorImagePath))
+                        behaviorImage = BitmapFrame.AnimationFromFile(behaviorImagePath)
                     End If
                 Catch e As Exception
                     ex = e
