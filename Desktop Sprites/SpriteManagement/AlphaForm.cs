@@ -19,11 +19,11 @@
         /// <summary>
         /// Handle to a device context for the screen.
         /// </summary>
-        private readonly IntPtr hdcScreen;
+        private IntPtr hdcScreen;
         /// <summary>
         /// Handle to a device context for the background graphics buffer.
         /// </summary>
-        private readonly IntPtr hdcBackground;
+        private IntPtr hdcBackground;
         /// <summary>
         /// Handle to a bitmap for the background buffer.
         /// </summary>
@@ -155,18 +155,23 @@
                 backgroundGraphics.Dispose();
                 backgroundGraphics = null;
             }
-            if (hBitmap != IntPtr.Zero && hPrevBitmap != IntPtr.Zero)
+            unsafe
             {
-                unsafe
-                {
-                    backgroundData = null;
-                }
+                backgroundData = null;
+            }
+            if (hPrevBitmap != IntPtr.Zero)
+            {
                 NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hPrevBitmap));
+                hPrevBitmap = IntPtr.Zero;
+            }
+            if (hBitmap != IntPtr.Zero)
+            {
                 GC.RemoveMemoryPressure(bitmapSizeInBytes);
                 bitmapSizeInBytes = 0;
                 bitmapSize = Size.Empty;
                 if (!NativeMethods.DeleteObject(new HandleRef(this, hBitmap)))
                     throw new Win32Exception();
+                hBitmap = IntPtr.Zero;
             }
         }
 
@@ -175,6 +180,7 @@
         /// <see cref="P:DesktopSprites.SpriteManagement.AlphaForm.BackgroundGraphics"/> object. Semi-transparent areas will be
         /// alpha-blended.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
         /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
         public void UpdateBackgroundGraphics()
         {
@@ -187,6 +193,7 @@
         /// alpha-blended. The transparency of the whole image is also scaled based on the <paramref name="opacity"/> value.
         /// </summary>
         /// <param name="opacity">The opacity of the image. Where 255 is opaque, and 0 is transparent.</param>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
         /// <exception cref="T:System.ComponentModel.Win32Exception">A Win32 error occurred.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation",
@@ -195,6 +202,9 @@
             Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
         public void UpdateBackgroundGraphics(byte opacity)
         {
+            if (hdcScreen == IntPtr.Zero)
+                throw new ObjectDisposedException(GetType().FullName);
+
             POINT dstPos = new POINT(Left, Top);
             SIZE dstSize = new SIZE(Width, Height);
             POINT srcPos = POINT.Empty;
@@ -218,8 +228,12 @@
                     Win32Exception cleanupEx = null;
                     if (NativeMethods.ReleaseDC(new HandleRef(this, IntPtr.Zero), new HandleRef(this, hdcScreen)) == 0)
                         cleanupEx = new Win32Exception();
+                    else
+                        hdcScreen = IntPtr.Zero;
                     if (!NativeMethods.DeleteDC(new HandleRef(this, hdcBackground)))
                         cleanupEx = new Win32Exception();
+                    else
+                        hdcBackground = IntPtr.Zero;
                     if (cleanupEx != null)
                         throw cleanupEx;
                 }
