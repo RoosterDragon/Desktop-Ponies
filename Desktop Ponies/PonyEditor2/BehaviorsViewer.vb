@@ -57,7 +57,7 @@
             Case colMaxDuration.Index
                 e.SortResult = GetBehaviorForRow(e.RowIndex1).MaxDuration.CompareTo(GetBehaviorForRow(e.RowIndex2).MaxDuration)
             Case colLeftImage.Index, colRightImage.Index
-                e.SortResult = PathEquality.Comparer.Compare(e.CellValue1, e.CellValue2)
+                e.SortResult = PathEquality.Compare(DirectCast(e.CellValue1, String), DirectCast(e.CellValue2, String))
             Case Else
                 e.Handled = False
         End Select

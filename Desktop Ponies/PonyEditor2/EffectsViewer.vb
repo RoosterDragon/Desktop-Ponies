@@ -29,7 +29,7 @@
             Case colRepeatDelay.Index
                 e.SortResult = GetEffectForRow(e.RowIndex1).RepeatDelay.CompareTo(GetEffectForRow(e.RowIndex2).RepeatDelay)
             Case colLeftImage.Index, colRightImage.Index
-                e.SortResult = PathEquality.Comparer.Compare(e.CellValue1, e.CellValue2)
+                e.SortResult = PathEquality.Compare(DirectCast(e.CellValue1, String), DirectCast(e.CellValue2, String))
             Case Else
                 e.Handled = False
         End Select

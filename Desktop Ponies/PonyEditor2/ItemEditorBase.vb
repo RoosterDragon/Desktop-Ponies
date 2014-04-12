@@ -273,8 +273,8 @@ Public Class ItemEditorBase
                 Dim behavior = Base.Behaviors.OnlyOrDefault(Function(b) b.Name = getBehaviorName())
                 Dim newBehaviorImagePath As String = Nothing
                 If behavior IsNot Nothing Then newBehaviorImagePath = If(useLeftImage, behavior.LeftImage, behavior.RightImage).Path
-                If Not PathEquality.Comparer.Equals(behaviorImagePath, newBehaviorImagePath) OrElse
-                    Not PathEquality.Comparer.Equals(effectImagePath, fileSelector.FilePath) Then
+                If Not PathEquality.Equals(behaviorImagePath, newBehaviorImagePath) OrElse
+                    Not PathEquality.Equals(effectImagePath, fileSelector.FilePath) Then
                     behaviorImagePath = newBehaviorImagePath
                     effectImagePath = fileSelector.FilePath
                     LoadNewImageForViewer(fileSelector, effectImageViewer, behaviorComboBox, behaviorImagePath)
@@ -478,7 +478,7 @@ Public Class ItemEditorBase
         typedPath = Path.GetFileName(fullPath)
         If typedPath = Base.Directory OrElse typedPath = "" Then typedPath = Nothing
         selector.FilePath = typedPath
-        typedPathMissing = Not String.Equals(selector.FilePath, typedPath, PathEquality.Comparison)
+        typedPathMissing = Not PathEquality.Equals(selector.FilePath, typedPath)
         If typedPathMissing Then
             selector.FilePathComboBox.SelectedIndex = selector.FilePathComboBox.Items.Add(typedPath)
         End If

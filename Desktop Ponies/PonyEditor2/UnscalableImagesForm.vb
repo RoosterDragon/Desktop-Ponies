@@ -28,7 +28,7 @@ Public Class UnscalableImagesForm
                             ponies.Bases.SelectMany(
                                 Function(pb) pb.Effects).SelectMany(
                                 Function(e) New String() {e.LeftImage.Path, e.RightImage.Path})).Where(
-                            Function(imagePath) PathEquality.Comparer.Equals(Path.GetExtension(imagePath), ".gif")),
+                            Function(imagePath) PathEquality.Equals(Path.GetExtension(imagePath), ".gif")),
                         PathEquality.Comparer)
                 Dim count = 0
                 For Each imagePath In imagePaths

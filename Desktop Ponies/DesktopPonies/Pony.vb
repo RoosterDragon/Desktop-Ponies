@@ -1026,7 +1026,7 @@ Public Class Speech
             Dim soundFilePaths = CommaSplitQuoteQualified(iniComponents(3))
             iniComponents(3) = Nothing
             For Each filePath In soundFilePaths
-                If String.Equals(Path.GetExtension(filePath), ".mp3", PathEquality.Comparison) Then
+                If PathEquality.Equals(Path.GetExtension(filePath), ".mp3") Then
                     iniComponents(3) = filePath
                     Exit For
                 End If
