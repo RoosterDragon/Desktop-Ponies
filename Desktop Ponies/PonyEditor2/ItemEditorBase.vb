@@ -148,36 +148,35 @@ Public Class ItemEditorBase
         End Sub
     End Structure
 
-    Private Function VerifyAndGetBindingProperty(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)),
+    Private Function VerifyAndGetBindingProperty(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of T)),
                                                        Optional writable As Boolean = True) As BindingProperty(Of T)
-        Argument.EnsureNotNull(propertyExpression, "propertyExpression")
-        Dim member = TryCast(propertyExpression.Body, Expressions.MemberExpression)
-        If member Is Nothing Then Throw New ArgumentException(
-            "propertyExpression should access a property in its body.", "propertyExpression")
-        Dim propInfo = TryCast(member.Member, Reflection.PropertyInfo)
-        If propInfo Is Nothing Then Throw New ArgumentException(
-            "propertyExpression should access a property in its body.", "propertyExpression")
-        If Not propInfo.CanRead Then Throw New ArgumentException(
-            "propertyExpression specifies a property without read access.", "propertyExpression")
-        If writable AndAlso Not propInfo.CanWrite Then Throw New ArgumentException(
-            "propertyExpression specifies a property without write access.", "propertyExpression")
-        Dim accessingMember = TryCast(member.Expression, Expressions.MemberExpression)
-        If accessingMember Is Nothing Then Throw New ArgumentException(
-            "propertyExpression must specify a property of an object instance.", "propertyExpression")
-
-        Dim getTarget = Expressions.Expression.Lambda(Of Func(Of Object))(accessingMember).Compile()
+        Dim body = TryCast(Argument.EnsureNotNull(memberAccessExpression, "memberAccessExpression").Body, Expressions.MemberExpression)
+        If body Is Nothing Then Throw New ArgumentException(
+            "The body of the expression must access a field or property.", "memberAccessExpression")
+        Dim bodyDescription = body.ToString()
 
         Dim setter As Action(Of T) = Nothing
-        If writable Then setter = Sub(value) propInfo.SetValue(getTarget(), value, Nothing)
-        Return New BindingProperty(Of T)(
-            Function() DirectCast(propInfo.GetValue(getTarget(), Nothing), T),
-            setter)
+        If writable Then
+            Dim param = Expressions.Expression.Parameter(body.Type, "value")
+            Dim assign As Expressions.BinaryExpression
+            Try
+                assign = Expressions.Expression.Assign(body, param)
+            Catch ex As Exception
+                Throw New ArgumentException("The field or property in the expression is not writable.", ex)
+            End Try
+            Dim setExpression = Expressions.Expression.Lambda(Of Action(Of T))(assign, "set_" & bodyDescription, {param})
+            setter = setExpression.Compile()
+        End If
+        Dim getExpression = Expressions.Expression.Lambda(Of Func(Of T))(
+            memberAccessExpression.Body, "get_" & bodyDescription, memberAccessExpression.TailCall, memberAccessExpression.Parameters)
+        Dim getter = getExpression.Compile()
+        Return New BindingProperty(Of T)(getter, setter)
     End Function
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of Boolean)), checkBox As CheckBox,
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of Boolean)), checkBox As CheckBox,
                        Optional inverse As Boolean = False)
         Argument.EnsureNotNull(checkBox, "checkBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         If inverse Then
             AddHandler checkBox.CheckedChanged, Sub() UpdateProperty(Sub() bindProp.Setter(Not checkBox.Checked))
             AddHandler SourceTextChanged, Sub() UpdateSource(Sub() checkBox.Checked = Not bindProp.Getter())
@@ -187,49 +186,49 @@ Public Class ItemEditorBase
         End If
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), textBox As TextBox)
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of String)), textBox As TextBox)
         Argument.EnsureNotNull(textBox, "textBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler textBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler textBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(textBox.Text))
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() textBox.Text = bindProp.Getter())
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), textBox As TextBox)
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), textBox As TextBox)
         Argument.EnsureNotNull(textBox, "textBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler textBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler textBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(textBox.Text))
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() textBox.Text = bindProp.Getter())
     End Sub
 
-    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)), numericUpDown As NumericUpDown,
+    Protected Sub Bind(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of T)), numericUpDown As NumericUpDown,
                              valueToDecimal As Func(Of T, Decimal), decimalToValue As Func(Of Decimal, T))
         Argument.EnsureNotNull(numericUpDown, "numericUpDown")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler numericUpDown.ValueChanged, Sub() UpdateProperty(Sub() bindProp.Setter(decimalToValue(numericUpDown.Value)))
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() numericUpDown.Value = valueToDecimal(bindProp.Getter()))
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), comboBox As ComboBox)
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of CaseInsensitiveString)), comboBox As ComboBox)
         Argument.EnsureNotNull(comboBox, "comboBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler comboBox.KeyPress, AddressOf IgnoreQuoteCharacter
         AddHandler comboBox.TextChanged, Sub() UpdateProperty(Sub() bindProp.Setter(comboBox.Text))
         AddHandler comboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() bindProp.Setter(comboBox.Text))
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() SelectOrOvertypeItem(comboBox, bindProp.Getter()))
     End Sub
 
-    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of T)), comboBox As ComboBox)
+    Protected Sub Bind(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of T)), comboBox As ComboBox)
         Argument.EnsureNotNull(comboBox, "comboBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler comboBox.SelectedIndexChanged, Sub() UpdateProperty(Sub() bindProp.Setter(DirectCast(comboBox.SelectedItem, T)))
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() SelectItemElseNoneOption(comboBox, bindProp.Getter()))
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector)
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector)
         Argument.EnsureNotNull(fileSelector, "fileSelector")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression)
         AddHandler fileSelector.ListRefreshed, Sub()
                                                    If loadingItem Then Return
                                                    RaiseEvent AssetFileIOPerformed(Me, EventArgs.Empty)
@@ -252,20 +251,20 @@ Public Class ItemEditorBase
                 End Sub)
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
                        animatedImageViewer As AnimatedImageViewer)
         Argument.EnsureNotNull(animatedImageViewer, "animatedImageViewer")
-        Bind(propertyExpression, fileSelector)
+        Bind(memberAccessExpression, fileSelector)
         AddHandler fileSelector.FilePathSelected, Sub() LoadNewImageForViewer(fileSelector, animatedImageViewer)
     End Sub
 
-    Protected Sub Bind(propertyExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
+    Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
                    effectImageViewer As EffectImageViewer, behaviorComboBox As ComboBox,
                    getBehaviorName As Func(Of CaseInsensitiveString), useLeftImage As Boolean)
         Argument.EnsureNotNull(effectImageViewer, "effectImageViewer")
         Argument.EnsureNotNull(behaviorComboBox, "behaviorComboBox")
         Argument.EnsureNotNull(getBehaviorName, "getBehaviorName")
-        Bind(propertyExpression, fileSelector)
+        Bind(memberAccessExpression, fileSelector)
 
         Dim behaviorImagePath As String = Nothing
         Dim effectImagePath As String = Nothing
@@ -285,9 +284,9 @@ Public Class ItemEditorBase
         AddHandler SourceTextChanged, Sub() refreshImageViewer()
     End Sub
 
-    Protected Sub Bind(Of T)(propertyExpression As Expressions.Expression(Of Func(Of HashSet(Of T))), checkedListBox As CheckedListBox)
+    Protected Sub Bind(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of HashSet(Of T))), checkedListBox As CheckedListBox)
         Argument.EnsureNotNull(checkedListBox, "checkedListBox")
-        Dim bindProp = VerifyAndGetBindingProperty(propertyExpression, False)
+        Dim bindProp = VerifyAndGetBindingProperty(memberAccessExpression, False)
         AddHandler checkedListBox.ItemCheck, Sub(sender, e) UpdateCheckedListBox(sender, e, bindProp.Getter())
         AddHandler SourceTextChanged, Sub() UpdateSource(Sub() UpdateList(checkedListBox, bindProp.Getter()))
     End Sub
