@@ -1,6 +1,19 @@
 ﻿Imports System.IO
 
 Public Class PonyCollection
+    Private NotInheritable Class CaseInsensitiveStringAsStringEqualityComparer
+        Implements IEqualityComparer(Of CaseInsensitiveString)
+        Public Shared ReadOnly Instance As New CaseInsensitiveStringAsStringEqualityComparer()
+        Private Sub New()
+        End Sub
+        Public Overloads Function Equals(x As CaseInsensitiveString, y As CaseInsensitiveString) As Boolean Implements IEqualityComparer(Of CaseInsensitiveString).Equals
+            Return String.Equals(x.ToString(), y.ToString())
+        End Function
+        Public Overloads Function GetHashCode(obj As CaseInsensitiveString) As Integer Implements IEqualityComparer(Of CaseInsensitiveString).GetHashCode
+            Return obj.ToString().GetHashCode()
+        End Function
+    End Class
+
     Private _bases As ImmutableArray(Of PonyBase)
     Public ReadOnly Property Bases As ImmutableArray(Of PonyBase)
         Get
@@ -37,6 +50,8 @@ Public Class PonyCollection
             Sub() LoadPonyBases(removeInvalidItems, ponyBaseDirectories, ponyLoadCallback),
             Sub() LoadHouses(houseDirectories, houseLoadCallback),
             AddressOf LoadInteractions)
+        ReuseStrings()
+        UpdateImageSizes()
     End Sub
 
     Private Sub LoadPonyBases(removeInvalidItems As Boolean, ponyBaseDirectories As String(), ponyLoadCallback As Action(Of PonyBase))
@@ -94,6 +109,89 @@ Public Class PonyCollection
                 End If
             Loop
         End Using
+    End Sub
+
+    Private Sub ReuseStrings()
+        Dim strings As New Dictionary(Of String, String)()
+        Dim ciStrings As New Dictionary(Of CaseInsensitiveString, CaseInsensitiveString)(
+            CaseInsensitiveStringAsStringEqualityComparer.Instance)
+        For Each tag In PonyBase.StandardTags
+            ciStrings(tag) = tag
+        Next
+        For Each base In _bases
+            strings(base.Directory) = base.Directory
+        Next
+        For Each house In Houses
+            strings(house.Directory) = house.Directory
+        Next
+        For Each base In _bases
+            base.DisplayName = strings.GetOrAdd(base.DisplayName, base.DisplayName)
+            For Each bg In base.BehaviorGroups
+                bg.Name = ciStrings.GetOrAdd(bg.Name, bg.Name)
+            Next
+            For Each b In base.Behaviors
+                b.EndLineName = ciStrings.GetOrAdd(b.EndLineName, b.EndLineName)
+                b.FollowMovingBehaviorName = ciStrings.GetOrAdd(b.FollowMovingBehaviorName, b.FollowMovingBehaviorName)
+                b.FollowStoppedBehaviorName = ciStrings.GetOrAdd(b.FollowStoppedBehaviorName, b.FollowStoppedBehaviorName)
+                b.LinkedBehaviorName = ciStrings.GetOrAdd(b.LinkedBehaviorName, b.LinkedBehaviorName)
+                b.Name = ciStrings.GetOrAdd(b.Name, b.Name)
+                b.OriginalFollowTargetName = strings.GetOrAdd(b.OriginalFollowTargetName, b.OriginalFollowTargetName)
+                b.StartLineName = ciStrings.GetOrAdd(b.StartLineName, b.StartLineName)
+                b.LeftImage.Path = strings.GetOrAdd(b.LeftImage.Path, b.LeftImage.Path)
+                b.RightImage.Path = strings.GetOrAdd(b.RightImage.Path, b.RightImage.Path)
+            Next
+            For Each e In base.Effects
+                e.BehaviorName = ciStrings.GetOrAdd(e.BehaviorName, e.BehaviorName)
+                e.Name = ciStrings.GetOrAdd(e.Name, e.Name)
+                e.LeftImage.Path = strings.GetOrAdd(e.LeftImage.Path, e.LeftImage.Path)
+                e.RightImage.Path = strings.GetOrAdd(e.RightImage.Path, e.RightImage.Path)
+            Next
+            For Each i In base.Interactions
+                i.InitiatorName = strings.GetOrAdd(i.InitiatorName, i.InitiatorName)
+                i.Name = ciStrings.GetOrAdd(i.Name, i.Name)
+                Dim behaviorNames = i.BehaviorNames.ToArray()
+                i.BehaviorNames.Clear()
+                For Each bn In behaviorNames
+                    i.BehaviorNames.Add(ciStrings.GetOrAdd(bn, bn))
+                Next
+                Dim targetsNames = i.TargetNames.ToArray()
+                i.TargetNames.Clear()
+                For Each tn In targetsNames
+                    i.TargetNames.Add(strings.GetOrAdd(tn, tn))
+                Next
+            Next
+            For Each s In base.Speeches
+                s.Name = ciStrings.GetOrAdd(s.Name, s.Name)
+                If s.SoundFile IsNot Nothing Then s.SoundFile = strings.GetOrAdd(s.SoundFile, s.SoundFile)
+            Next
+            Dim tags = base.Tags.ToArray()
+            base.Tags.Clear()
+            For Each t In tags
+                base.Tags.Add(ciStrings.GetOrAdd(t, t))
+            Next
+        Next
+        For Each house In Houses
+            house.Name = ciStrings.GetOrAdd(house.Name, house.Name)
+            house.LeftImage.Path = strings.GetOrAdd(house.LeftImage.Path, house.LeftImage.Path)
+            house.RightImage.Path = strings.GetOrAdd(house.RightImage.Path, house.RightImage.Path)
+            For i = 0 To house.Visitors.Count - 1
+                Dim visitor = house.Visitors(i)
+                house.Visitors(i) = strings.GetOrAdd(visitor, visitor)
+            Next
+        Next
+    End Sub
+
+    Private Sub UpdateImageSizes()
+        For Each base In Bases
+            For Each behavior In base.Behaviors
+                behavior.LeftImage.UpdateSize()
+                behavior.RightImage.UpdateSize()
+            Next
+            For Each effect In base.Effects
+                effect.LeftImage.UpdateSize()
+                effect.RightImage.UpdateSize()
+            Next
+        Next
     End Sub
 
     ''' <summary>

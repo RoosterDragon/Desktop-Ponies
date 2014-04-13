@@ -301,7 +301,6 @@ Public Class PonyBase
                 If removeInvalidItems AndAlso pony.Behaviors.Count = 0 Then
                     Return Nothing
                 End If
-                pony.UpdateImageSizes()
             End If
         Catch ex As Exception
             Return Nothing
@@ -370,17 +369,6 @@ Public Class PonyBase
         If parseFunc(line, directory, pony, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
             onParse(result)
         End If
-    End Sub
-
-    Private Sub UpdateImageSizes()
-        For Each behavior In Behaviors
-            behavior.LeftImage.UpdateSize()
-            behavior.RightImage.UpdateSize()
-        Next
-        For Each effect In Effects
-            effect.LeftImage.UpdateSize()
-            effect.RightImage.UpdateSize()
-        Next
     End Sub
 
     ''' <summary>
