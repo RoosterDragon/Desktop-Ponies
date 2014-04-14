@@ -446,7 +446,7 @@
             /// Gets the array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
             /// instead made up of a bitmap.
             /// </summary>
-            public int[] ArgbPalette { get; private set; }
+            public int[] ArgbPalette { get; set; }
             /// <summary>
             /// Gets the width of the image, in pixels.
             /// </summary>
@@ -493,9 +493,7 @@
             /// <param name="width">The width of the image, in pixels.</param>
             /// <param name="height">The height of the image, in pixels.</param>
             /// <param name="depth">The bit depth of the image, only 8bbp and 4bbp are supported.</param>
-            /// <param name="paletteCache">The cache of color palettes, so that the new palette can be shared among images.</param>
-            public ImageData(byte[] data, RgbColor[] palette, byte? transparentIndex,
-                int stride, int width, int height, byte depth, Dictionary<int[], int[]> paletteCache)
+            public ImageData(byte[] data, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth)
             {
                 Data = data;
                 Stride = stride;
@@ -507,8 +505,6 @@
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
                 if (transparentIndex != null)
                     ArgbPalette[transparentIndex.Value] = new ArgbColor().ToArgb();
-                lock (paletteCache)
-                    ArgbPalette = paletteCache.GetOrAdd(ArgbPalette, ArgbPalette);
                 hashCode = GifImage.GetHash(data, palette, transparentIndex, width, height);
             }
             /// <summary>
@@ -1190,16 +1186,16 @@
             if (BufferPreprocess != null)
                 BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
             return Disposable.SetupSafely(
-                new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth, paletteCache)),
+                new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth)),
                 frame =>
                 {
+                    var colorPalette = frame.Image.ArgbPalette;
                     // Check for an alpha remapping table, and apply it if one exists.
                     string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
                     if (File.Exists(mapFilePath))
                     {
                         AlphaRemappingTable map = new AlphaRemappingTable();
                         map.LoadMap(mapFilePath);
-                        var colorPalette = frame.Image.ArgbPalette;
                         for (int i = 0; i < colorPalette.Length; i++)
                         {
                             ArgbColor paletteColor = new ArgbColor(colorPalette[i]);
@@ -1210,6 +1206,9 @@
                                 colorPalette[i] = argbColor.PremultipliedAlpha().ToArgb();
                         }
                     }
+                    // Check for duplicate palettes in the cache and reuse an existing palette where possible.
+                    lock (paletteCache)
+                        frame.Image.ArgbPalette = paletteCache.GetOrAdd(colorPalette, colorPalette);
                 });
         }
 
