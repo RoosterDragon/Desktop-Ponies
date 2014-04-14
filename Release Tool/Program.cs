@@ -396,46 +396,63 @@
 
         private static void CleanPdbFiles(string sourceDirectory, string solutionDirectory)
         {
-            string solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
-            string solutionParentDirectoryLower = solutionParentDirectory.ToLowerInvariant();
-            string cleanedDirectory = new string('_', solutionParentDirectory.Length);
             var encoding = System.Text.Encoding.UTF8;
-            byte[] solutionParentDirectoryEncoded = encoding.GetBytes(solutionParentDirectory);
-            byte[] solutionParentDirectoryLowerEncoded = encoding.GetBytes(solutionParentDirectoryLower);
-            byte[] cleanedDirectoryEncoded = encoding.GetBytes(cleanedDirectory);
+
+            string solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
+            byte[] solutionParentDirectoryUpperEncoded = encoding.GetBytes(solutionParentDirectory.ToUpperInvariant());
+            byte[] solutionParentDirectoryLowerEncoded = encoding.GetBytes(solutionParentDirectory.ToLowerInvariant());
+            byte[] cleanedDirectoryEncoded = encoding.GetBytes(new string('_', solutionParentDirectory.Length));
+            if (solutionParentDirectoryUpperEncoded.Length != solutionParentDirectoryLowerEncoded.Length ||
+                solutionParentDirectoryUpperEncoded.Length != cleanedDirectoryEncoded.Length)
+                throw new Exception("Cannot clean PDB files. Directory encoding lengths do not match.");
+
+            string tempDirectory = Path.GetTempPath();
+            byte[] tempDirectoryUpperEncoded = encoding.GetBytes(tempDirectory.ToUpperInvariant());
+            byte[] tempDirectoryLowerEncoded = encoding.GetBytes(tempDirectory.ToLowerInvariant());
+            byte[] cleanedTempDirectoryEncoded = encoding.GetBytes(new string('_', tempDirectory.Length));
+            if (tempDirectoryUpperEncoded.Length != tempDirectoryLowerEncoded.Length ||
+                tempDirectoryUpperEncoded.Length != cleanedTempDirectoryEncoded.Length)
+                throw new Exception("Cannot clean PDB files. Directory encoding lengths do not match.");
+
             foreach (var fileName in Directory.EnumerateFiles(sourceDirectory, "*.pdb"))
             {
                 byte[] contents = File.ReadAllBytes(fileName);
-                contents = Replace(contents, solutionParentDirectoryEncoded, cleanedDirectoryEncoded);
-                contents = Replace(contents, solutionParentDirectoryLowerEncoded, cleanedDirectoryEncoded);
+                contents = Replace(contents,
+                    solutionParentDirectoryUpperEncoded, solutionParentDirectoryLowerEncoded, cleanedDirectoryEncoded);
+                contents = Replace(contents,
+                    tempDirectoryUpperEncoded, tempDirectoryLowerEncoded, cleanedTempDirectoryEncoded);
                 File.WriteAllBytes(fileName, contents);
             }
         }
 
-        private static byte[] Replace(byte[] source, byte[] oldValue, byte[] newValue)
+        private static byte[] Replace(byte[] source, byte[] oldValue1, byte[] oldValue2, byte[] newValue)
         {
             List<byte> destination = new List<byte>(source.Length);
             int contentsIndex = 0;
             int nextMatch;
-            while ((nextMatch = IndexOf(source, oldValue, contentsIndex)) != -1)
+            while ((nextMatch = IndexOf(source, oldValue1, oldValue2, contentsIndex)) != -1)
             {
                 destination.AddRange(source.Skip(contentsIndex).Take(nextMatch - contentsIndex));
                 destination.AddRange(newValue);
-                contentsIndex = nextMatch + oldValue.Length;
+                contentsIndex = nextMatch + oldValue1.Length;
             }
             destination.AddRange(source.Skip(contentsIndex));
             return destination.ToArray();
         }
 
-        private static int IndexOf(byte[] source, byte[] value, int startIndex)
+        private static int IndexOf(byte[] source, byte[] value1, byte[] value2, int startIndex)
         {
-            for (int sourceIndex = startIndex; sourceIndex < source.Length - value.Length; sourceIndex++)
+            for (int sourceIndex = startIndex; sourceIndex < source.Length - value1.Length; sourceIndex++)
             {
                 int src = sourceIndex;
                 int val = 0;
-                while (source[src++] == value[val++] && val < value.Length) { }
-                if (val >= value.Length)
-                    return sourceIndex;
+                while (source[src] == value1[val] || source[src] == value2[val])
+                {
+                    src++;
+                    val++;
+                    if (val >= value1.Length)
+                        return sourceIndex;
+                }
             }
             return -1;
         }
