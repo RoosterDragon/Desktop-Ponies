@@ -174,7 +174,7 @@ Public Class MainForm
                                  End Sub)
             End Sub,
             Sub(count) worker.QueueTask(Sub() LoadingProgressBar.Maximum += count),
-            Nothing)
+            Sub(house) worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
 
         ' Sort controls by name.
         worker.QueueTask(Sub()
