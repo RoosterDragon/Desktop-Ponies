@@ -782,6 +782,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 ### Houses
 
+#### Carousel Boutique
+* StarStep
+
 #### HomeStead
 * StarStep
 
@@ -792,6 +795,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Half-n-Half
 
 #### Sugarcube Corner
+* StarStep
+
+#### The Moon
 * StarStep
 
 #### Trixie's Stage
