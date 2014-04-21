@@ -303,13 +303,13 @@ Public Class MainForm
 
 #Region "Selection"
     Private Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
+        For Each ponyPanel In selectionControlsFilteredVisible
             ponyPanel.Count = 0
         Next
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
-        For Each ponyPanel As PonySelectionControl In PonySelectionPanel.Controls
+        For Each ponyPanel In selectionControlsFilteredVisible
             ponyPanel.Count = 1
         Next
     End Sub
