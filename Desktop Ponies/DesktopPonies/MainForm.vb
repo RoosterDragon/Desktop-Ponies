@@ -163,6 +163,9 @@ Public Class MainForm
     End Sub
 
     Private Sub LoadTemplates()
+        ' Don't spend time laying out whilst adding new controls.
+        worker.QueueTask(Sub() PonySelectionPanel.SuspendLayout())
+
         ' Load ponies.
         ponies = New PonyCollection(
             True,
@@ -182,10 +185,10 @@ Public Class MainForm
                              Array.Sort(selectionControls,
                                         Function(a, b) StringComparer.OrdinalIgnoreCase.Compare(
                                             a.PonyBase.Directory, b.PonyBase.Directory))
-                             PonySelectionPanel.SuspendLayout()
                              For i = 0 To selectionControls.Length - 1
                                  PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
                              Next
+                             ' Now controls are added and sorted, resume layouts.
                              PonySelectionPanel.ResumeLayout()
                          End Sub)
 
@@ -246,7 +249,8 @@ Public Class MainForm
     End Sub
 
     Private Sub AddToMenu(ponyBase As PonyBase)
-        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path)
+        Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path) With {
+            .Location = New Point(-Width, -Height)}
         AddHandler ponySelection.PonyCount.TextChanged, Sub() HandleCountChange(ponySelection.PonyBase, ponySelection.Count)
         If ponyBase.Directory = ponyBase.RandomDirectory Then
             ponySelection.NoDuplicates.Visible = True
@@ -256,6 +260,14 @@ Public Class MainForm
 
         selectionControlFilter.Add(ponySelection, True)
         PonySelectionPanel.Controls.Add(ponySelection)
+
+        ' Since we may be adding several hundred controls, delaying layouts until all are adding may freeze the UI for a period if it has
+        ' to immediately lay out all those controls in bulk. If we allow it to process the new controls in small chunks we can break up the
+        ' large delay into less disruptive chunks.
+        If PonySelectionPanel.Controls.Count Mod 32 = 0 Then
+            PonySelectionPanel.ResumeLayout(True)
+            PonySelectionPanel.SuspendLayout()
+        End If
     End Sub
 
     Private Sub HandleCountChange(base As PonyBase, newCount As Integer)
