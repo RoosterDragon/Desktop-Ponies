@@ -740,7 +740,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Twilight Sparkle
 * Jay Wright [Stand, Trot]
 * humle [Teleport]
-* Bot-chan [Rage, Owl]
+* Bot-chan [Rage, Owl, Starswirl]
 * StarStep [Conga, Discorded, Drag, Gala]
 * Anonycat [Balloon]
 * InfinityDash [Gallop]
