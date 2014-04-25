@@ -146,7 +146,7 @@
                 // Get a set of flags which are not in the enumeration.
                 ulong badFlags = ulong.MaxValue;
                 foreach (TEnum enumValue in enumValues)
-                    badFlags ^= Convert.ToUInt64(enumValue, CultureInfo.InvariantCulture);
+                    badFlags &= ~Convert.ToUInt64(enumValue, CultureInfo.InvariantCulture);
 
                 // Check none of the bad flags is set.
                 ulong checkFlag = 1;
@@ -177,7 +177,7 @@
                     "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.\nParameter name: {0}",
                     paramName, arg, enumType.Name));
             else
-                return new InvalidEnumArgumentException(paramName, (int)arg, enumType);
+                return new InvalidEnumArgumentException(paramName, Convert.ToInt32(arg), enumType);
         }
     }
 }
