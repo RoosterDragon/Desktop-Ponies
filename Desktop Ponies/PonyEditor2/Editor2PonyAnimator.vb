@@ -15,7 +15,7 @@ Public Class Editor2PonyAnimator
         Me.preview = preview
         AddHandler Viewer.InterfaceClosed, Sub() Finish()
         AddHandler Viewer.MouseClick, AddressOf Viewer_MouseClick
-        AddHandler SpriteAdded, AddressOf NotifySpriteAdded
+        AddHandler SpritesAdded, AddressOf NotifySpritesAdded
     End Sub
 
     Public Sub AddPonyNotify(pony As Pony, callback As Action(Of Pony))
@@ -23,13 +23,14 @@ Public Class Editor2PonyAnimator
         PonyContext.PendingSprites.Add(pony)
     End Sub
 
-    Private Sub NotifySpriteAdded(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
+    Private Sub NotifySpritesAdded(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         Dim callback As Action(Of Pony) = Nothing
-        Dim pony = TryCast(e.Item, Pony)
-        If pony IsNot Nothing AndAlso pendingAddedNotifications.TryGetValue(pony, callback) Then
-            pendingAddedNotifications.Remove(pony)
-            callback(pony)
-        End If
+        For Each pony In e.Items.OfType(Of Pony)()
+            If pendingAddedNotifications.TryGetValue(pony, callback) Then
+                pendingAddedNotifications.Remove(pony)
+                callback(pony)
+            End If
+        Next
     End Sub
 
     Public Sub ChangeEditorMenu(base As PonyBase)

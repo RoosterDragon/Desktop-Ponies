@@ -870,14 +870,6 @@
         /// </summary>
         public event EventHandler AnimationFinished;
         /// <summary>
-        /// Occurs when a single sprite is added to the collection.
-        /// </summary>
-        protected event EventHandler<CollectionItemChangedEventArgs<ISprite>> SpriteAdded;
-        /// <summary>
-        /// Occurs when a single sprite is successfully removed from the collection.
-        /// </summary>
-        protected event EventHandler<CollectionItemChangedEventArgs<ISprite>> SpriteRemoved;
-        /// <summary>
         /// Occurs when multiple sprites are added to the collection.
         /// </summary>
         protected event EventHandler<CollectionItemsChangedEventArgs<ISprite>> SpritesAdded;
@@ -1005,7 +997,7 @@
             queuedSpriteActions.Enqueue(() =>
             {
                 sprites.AddLast(sprite);
-                SpriteAdded.Raise(this, () => new CollectionItemChangedEventArgs<ISprite>(sprite));
+                SpritesAdded.Raise(this, () => new CollectionItemsChangedEventArgs<ISprite>(new ISprite[] { sprite }.ToImmutableArray()));
                 sprite.Start(ElapsedTime);
             });
         }
@@ -1050,7 +1042,8 @@
             queuedSpriteActions.Enqueue(() =>
             {
                 if (sprites.Remove(sprite))
-                    SpriteRemoved.Raise(this, () => new CollectionItemChangedEventArgs<ISprite>(sprite));
+                    SpritesRemoved.Raise(this,
+                        () => new CollectionItemsChangedEventArgs<ISprite>(new ISprite[] { sprite }.ToImmutableArray()));
             });
         }
 

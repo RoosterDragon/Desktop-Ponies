@@ -94,7 +94,6 @@
   <ItemGroup>
     <Compile Include="Collections\ArrayEnumerator.cs" />
     <Compile Include="Collections\ArrayExtensions.cs" />
-    <Compile Include="Collections\CollectionItemChangedEventArgs.cs" />
     <Compile Include="Collections\CollectionItemsChangedEventArgs.cs" />
     <Compile Include="Collections\Comparer.cs" />
     <Compile Include="Collections\DictionaryExtensions.cs" />

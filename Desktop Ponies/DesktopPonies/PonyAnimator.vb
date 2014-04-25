@@ -91,28 +91,15 @@ Public MustInherit Class PonyAnimator
             AttachExpiredHandlers(spriteCollection.OfType(Of IExpireableSprite)())
         End If
 
-        AddHandler SpriteAdded, AddressOf InvalidateInteractions
         AddHandler SpritesAdded, AddressOf InvalidateInteractions
-        AddHandler SpriteRemoved, AddressOf InvalidateInteractions
         AddHandler SpritesRemoved, AddressOf InvalidateInteractions
 
-        AddHandler SpriteAdded, AddressOf AddExpiredHandlers
         AddHandler SpritesAdded, AddressOf AddExpiredHandlers
-        AddHandler SpriteRemoved, AddressOf ExpireSprite
         AddHandler SpritesRemoved, AddressOf ExpireSprites
-    End Sub
-
-    Private Sub InvalidateInteractions(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
-        If TypeOf e.Item Is Pony Then interactionsNeedReinitializing = True
     End Sub
 
     Private Sub InvalidateInteractions(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
         If e.Items.Any(Function(s) TypeOf s Is Pony) Then interactionsNeedReinitializing = True
-    End Sub
-
-    Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
-        Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
-        If expireableSprite IsNot Nothing Then AddHandler expireableSprite.Expired, removeExpiredSpriteHandler
     End Sub
 
     Private Sub AddExpiredHandlers(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
@@ -127,11 +114,6 @@ Public MustInherit Class PonyAnimator
 
     Private Sub RemoveExpiredSprite(sender As Object, e As EventArgs)
         QueueRemove(DirectCast(sender, IExpireableSprite))
-    End Sub
-
-    Private Sub ExpireSprite(sender As Object, e As CollectionItemChangedEventArgs(Of ISprite))
-        Dim expireableSprite = TryCast(e.Item, IExpireableSprite)
-        If expireableSprite IsNot Nothing Then RemoveExpiredHandlerAndExpireSprite(expireableSprite)
     End Sub
 
     Private Sub ExpireSprites(sender As Object, e As CollectionItemsChangedEventArgs(Of ISprite))
@@ -352,9 +334,7 @@ Public MustInherit Class PonyAnimator
     Public Overrides Sub Finish()
         Dim alreadyDisposed = Disposed
         If Not alreadyDisposed Then
-            RemoveHandler SpriteAdded, AddressOf InvalidateInteractions
             RemoveHandler SpritesAdded, AddressOf InvalidateInteractions
-            RemoveHandler SpriteRemoved, AddressOf InvalidateInteractions
             RemoveHandler SpritesRemoved, AddressOf InvalidateInteractions
             For Each expireableSprite In Sprites.OfType(Of IExpireableSprite)()
                 RemoveExpiredHandlerAndExpireSprite(expireableSprite)
