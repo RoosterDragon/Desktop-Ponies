@@ -19,7 +19,13 @@ Partial Class BehaviorsViewer
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.BehaviorsGrid = New System.Windows.Forms.DataGridView()
+        Me.GroupNamesButton = New System.Windows.Forms.Button()
         Me.colPreview = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -37,7 +43,6 @@ Partial Class BehaviorsViewer
         Me.colTarget = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFollowStoppedBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFollowMovingBehavior = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.GroupNamesButton = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'BehaviorsGrid
@@ -55,6 +60,15 @@ Partial Class BehaviorsViewer
         Me.BehaviorsGrid.ReadOnly = True
         Me.BehaviorsGrid.Size = New System.Drawing.Size(494, 265)
         Me.BehaviorsGrid.TabIndex = 2
+        '
+        'GroupNamesButton
+        '
+        Me.GroupNamesButton.Location = New System.Drawing.Point(84, 3)
+        Me.GroupNamesButton.Name = "GroupNamesButton"
+        Me.GroupNamesButton.Size = New System.Drawing.Size(125, 23)
+        Me.GroupNamesButton.TabIndex = 1
+        Me.GroupNamesButton.Text = "Edit Group Names"
+        Me.GroupNamesButton.UseVisualStyleBackColor = True
         '
         'colPreview
         '
@@ -86,6 +100,8 @@ Partial Class BehaviorsViewer
         '
         'colGroup
         '
+        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colGroup.DefaultCellStyle = DataGridViewCellStyle1
         Me.colGroup.HeaderText = "Group"
         Me.colGroup.Name = "colGroup"
         Me.colGroup.ReadOnly = True
@@ -93,6 +109,8 @@ Partial Class BehaviorsViewer
         '
         'colChance
         '
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colChance.DefaultCellStyle = DataGridViewCellStyle2
         Me.colChance.HeaderText = "Chance"
         Me.colChance.Name = "colChance"
         Me.colChance.ReadOnly = True
@@ -100,6 +118,8 @@ Partial Class BehaviorsViewer
         '
         'colSpeed
         '
+        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colSpeed.DefaultCellStyle = DataGridViewCellStyle3
         Me.colSpeed.HeaderText = "Speed"
         Me.colSpeed.Name = "colSpeed"
         Me.colSpeed.ReadOnly = True
@@ -113,6 +133,8 @@ Partial Class BehaviorsViewer
         '
         'colMinDuration
         '
+        DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colMinDuration.DefaultCellStyle = DataGridViewCellStyle4
         Me.colMinDuration.HeaderText = "Min Duration"
         Me.colMinDuration.Name = "colMinDuration"
         Me.colMinDuration.ReadOnly = True
@@ -120,6 +142,8 @@ Partial Class BehaviorsViewer
         '
         'colMaxDuration
         '
+        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colMaxDuration.DefaultCellStyle = DataGridViewCellStyle5
         Me.colMaxDuration.HeaderText = "Max Duration"
         Me.colMaxDuration.Name = "colMaxDuration"
         Me.colMaxDuration.ReadOnly = True
@@ -179,15 +203,6 @@ Partial Class BehaviorsViewer
         Me.colFollowMovingBehavior.Name = "colFollowMovingBehavior"
         Me.colFollowMovingBehavior.ReadOnly = True
         Me.colFollowMovingBehavior.Width = 150
-        '
-        'GroupNamesButton
-        '
-        Me.GroupNamesButton.Location = New System.Drawing.Point(84, 3)
-        Me.GroupNamesButton.Name = "GroupNamesButton"
-        Me.GroupNamesButton.Size = New System.Drawing.Size(125, 23)
-        Me.GroupNamesButton.TabIndex = 1
-        Me.GroupNamesButton.Text = "Edit Group Names"
-        Me.GroupNamesButton.UseVisualStyleBackColor = True
         '
         'BehaviorsViewer
         '

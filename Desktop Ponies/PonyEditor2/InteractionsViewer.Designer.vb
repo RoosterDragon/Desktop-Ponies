@@ -19,6 +19,9 @@ Partial Class InteractionsViewer
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.InteractionsGrid = New System.Windows.Forms.DataGridView()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -66,6 +69,8 @@ Partial Class InteractionsViewer
         '
         'colChance
         '
+        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colChance.DefaultCellStyle = DataGridViewCellStyle1
         Me.colChance.HeaderText = "Chance"
         Me.colChance.Name = "colChance"
         Me.colChance.ReadOnly = True
@@ -73,6 +78,8 @@ Partial Class InteractionsViewer
         '
         'colProximity
         '
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colProximity.DefaultCellStyle = DataGridViewCellStyle2
         Me.colProximity.HeaderText = "Proximity"
         Me.colProximity.Name = "colProximity"
         Me.colProximity.ReadOnly = True
@@ -80,6 +87,8 @@ Partial Class InteractionsViewer
         '
         'colReactivationDelay
         '
+        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colReactivationDelay.DefaultCellStyle = DataGridViewCellStyle3
         Me.colReactivationDelay.HeaderText = "Reactiviation Delay"
         Me.colReactivationDelay.Name = "colReactivationDelay"
         Me.colReactivationDelay.ReadOnly = True

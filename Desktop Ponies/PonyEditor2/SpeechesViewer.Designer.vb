@@ -19,14 +19,15 @@ Partial Class SpeechesViewer
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.SpeechesGrid = New System.Windows.Forms.DataGridView()
+        Me.GroupNamesButton = New System.Windows.Forms.Button()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colName = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colGroup = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colRandom = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.colLine = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colSoundFile = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.GroupNamesButton = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'SpeechesGrid
@@ -44,6 +45,15 @@ Partial Class SpeechesViewer
         Me.SpeechesGrid.ReadOnly = True
         Me.SpeechesGrid.Size = New System.Drawing.Size(494, 265)
         Me.SpeechesGrid.TabIndex = 2
+        '
+        'GroupNamesButton
+        '
+        Me.GroupNamesButton.Location = New System.Drawing.Point(84, 3)
+        Me.GroupNamesButton.Name = "GroupNamesButton"
+        Me.GroupNamesButton.Size = New System.Drawing.Size(125, 23)
+        Me.GroupNamesButton.TabIndex = 1
+        Me.GroupNamesButton.Text = "Edit Group Names"
+        Me.GroupNamesButton.UseVisualStyleBackColor = True
         '
         'colEdit
         '
@@ -65,6 +75,8 @@ Partial Class SpeechesViewer
         '
         'colGroup
         '
+        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colGroup.DefaultCellStyle = DataGridViewCellStyle1
         Me.colGroup.HeaderText = "Group"
         Me.colGroup.Name = "colGroup"
         Me.colGroup.ReadOnly = True
@@ -91,15 +103,6 @@ Partial Class SpeechesViewer
         Me.colSoundFile.ReadOnly = True
         Me.colSoundFile.Width = 150
         '
-        'GroupNamesButton
-        '
-        Me.GroupNamesButton.Location = New System.Drawing.Point(84, 3)
-        Me.GroupNamesButton.Name = "GroupNamesButton"
-        Me.GroupNamesButton.Size = New System.Drawing.Size(125, 23)
-        Me.GroupNamesButton.TabIndex = 1
-        Me.GroupNamesButton.Text = "Edit Group Names"
-        Me.GroupNamesButton.UseVisualStyleBackColor = True
-        '
         'SpeechesViewer
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -112,12 +115,12 @@ Partial Class SpeechesViewer
 
     End Sub
     Friend WithEvents SpeechesGrid As System.Windows.Forms.DataGridView
+    Friend WithEvents GroupNamesButton As System.Windows.Forms.Button
     Friend WithEvents colEdit As System.Windows.Forms.DataGridViewButtonColumn
     Friend WithEvents colName As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colGroup As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colRandom As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colLine As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colSoundFile As System.Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents GroupNamesButton As System.Windows.Forms.Button
 
 End Class

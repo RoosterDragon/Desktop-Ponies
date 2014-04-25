@@ -19,6 +19,8 @@ Partial Class EffectsViewer
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.EffectsGrid = New System.Windows.Forms.DataGridView()
         Me.colPreview = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colEdit = New System.Windows.Forms.DataGridViewButtonColumn()
@@ -82,6 +84,8 @@ Partial Class EffectsViewer
         '
         'colDuration
         '
+        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colDuration.DefaultCellStyle = DataGridViewCellStyle1
         Me.colDuration.HeaderText = "Duration"
         Me.colDuration.Name = "colDuration"
         Me.colDuration.ReadOnly = True
@@ -89,6 +93,8 @@ Partial Class EffectsViewer
         '
         'colRepeatDelay
         '
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight
+        Me.colRepeatDelay.DefaultCellStyle = DataGridViewCellStyle2
         Me.colRepeatDelay.HeaderText = "Repeat Delay"
         Me.colRepeatDelay.Name = "colRepeatDelay"
         Me.colRepeatDelay.ReadOnly = True
