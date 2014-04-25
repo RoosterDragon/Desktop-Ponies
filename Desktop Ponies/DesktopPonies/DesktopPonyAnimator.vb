@@ -190,20 +190,21 @@ Public Class DesktopPonyAnimator
     Private Sub CreateHouseMenu()
         Dim menuItems As LinkedList(Of SimpleContextMenuItem) = New LinkedList(Of SimpleContextMenuItem)()
         If ownerControl IsNot Nothing AndAlso Not OperatingSystemInfo.IsMacOSX Then
+            Dim houseOptionsForms As New Dictionary(Of HouseBase, HouseOptionsForm)()
             menuItems.AddLast(
                 New SimpleContextMenuItem(
                     Nothing,
                     Sub()
                         ownerControl.SmartInvoke(
                             Sub()
-                                If selectedHouse.HouseBase.OptionsForm IsNot Nothing Then
-                                    selectedHouse.HouseBase.OptionsForm.BringToFront()
+                                If houseOptionsForms.ContainsKey(selectedHouse.HouseBase) Then
+                                    houseOptionsForms(selectedHouse.HouseBase).BringToFront()
                                 Else
                                     Using houseForm As New HouseOptionsForm(selectedHouse, PonyCollection.Bases)
-                                        selectedHouse.HouseBase.OptionsForm = houseForm
+                                        houseOptionsForms(selectedHouse.HouseBase) = houseForm
                                         houseForm.ShowDialog(ownerControl)
                                     End Using
-                                    selectedHouse.HouseBase.OptionsForm = Nothing
+                                    houseOptionsForms.Remove(selectedHouse.HouseBase)
                                 End If
                             End Sub)
                     End Sub))

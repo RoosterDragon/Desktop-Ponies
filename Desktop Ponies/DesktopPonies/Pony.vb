@@ -3761,9 +3761,6 @@ Public Class HouseBase
     Public Const RootDirectory = "Houses"
     Public Const ConfigFilename = "house.ini"
 
-    ' TODO: Move this options form field somewhere sensible.
-    Friend OptionsForm As HouseOptionsForm
-
     Private ReadOnly _directory As String
     Public ReadOnly Property Directory As String
         Get

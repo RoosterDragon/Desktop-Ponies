@@ -208,8 +208,4 @@ Public Class HouseOptionsForm
     Private Sub Close_Button_Click(sender As Object, e As EventArgs) Handles Close_Button.Click
         Me.Close()
     End Sub
-
-    Private Sub HouseOptionsForm_Disposed(sender As Object, e As EventArgs) Handles MyBase.Disposed
-        house.HouseBase.OptionsForm = Nothing
-    End Sub
 End Class
