@@ -243,11 +243,11 @@ Public Class StringCollectionParser
         ElseIf fallback IsNot Nothing Then
             Return Parsed.Fallback(s, fallback.Value,
                                    String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
-                                                 s, String.Join(", ", [Enum].GetValues(GetType(TEnum)))))
+                                                 s, String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
         Else
             Return Parsed.Failed(Of TEnum)(s,
                                            String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
-                                                         s, String.Join(", ", [Enum].GetValues(GetType(TEnum)))))
+                                                         s, String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
         End If
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T)) As T
