@@ -17,7 +17,8 @@
         For Each behavior In ponyBase.Behaviors
             Yield Tuple.Create(Of IPonyIniSourceable, Object())(
                 behavior, {Nothing, Nothing, behavior.Name, GetGroupName(ponyBase, behavior.Group),
-                           behavior.Chance, behavior.Speed, behavior.AllowedMovement, behavior.MinDuration, behavior.MaxDuration,
+                           behavior.Chance, behavior.Speed, behavior.AllowedMovement,
+                           behavior.MinDuration.TotalSeconds, behavior.MaxDuration.TotalSeconds,
                            GetFileNameRelaxed(behavior.LeftImage.Path), GetFileNameRelaxed(behavior.RightImage.Path),
                            behavior.StartLineName, behavior.EndLineName, behavior.LinkedBehaviorName,
                            GetTargetName(behavior), GetTargetImageBehavior(behavior, True), GetTargetImageBehavior(behavior, False)})
@@ -27,9 +28,9 @@
     Private Shared Function GetTargetName(behavior As Behavior) As String
         Select Case behavior.TargetMode
             Case TargetMode.Pony
-                Return behavior.OriginalFollowTargetName
+                Return behavior.FollowTargetName
             Case TargetMode.Point
-                Return New Vector2(behavior.OriginalDestinationXCoord, behavior.OriginalDestinationYCoord).ToString()
+                Return behavior.TargetVector.ToString()
             Case Else
                 Return Nothing
         End Select

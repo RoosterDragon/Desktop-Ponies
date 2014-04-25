@@ -30,8 +30,8 @@
         Bind(Function() Edited.Chance, ChanceNumber, Function(dbl) CDec(dbl) * 100, Function(dec) dec / 100)
         Bind(Function() Edited.Speed, SpeedNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
         Bind(Function() Edited.AllowedMovement, MovementComboBox)
-        Bind(Function() Edited.MinDuration, MinDurationNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
-        Bind(Function() Edited.MaxDuration, MaxDurationNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.MinDuration, MinDurationNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
+        Bind(Function() Edited.MaxDuration, MaxDurationNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
         Bind(Function() Edited.StartLineName, StartSpeechComboBox)
         Bind(Function() Edited.EndLineName, EndSpeechComboBox)
         Bind(Function() Edited.LinkedBehaviorName, LinkedBehaviorComboBox)
@@ -60,7 +60,8 @@
         Behavior.TryLoad(Source.Text, PonyBasePath, Base, b, parseIssues)
         Edited = b
 
-        Dim duration As TimeSpan? = TimeSpan.FromSeconds(Math.Max(Edited.MinDuration, Edited.MaxDuration))
+        Dim duration = Edited.MaxDuration
+        If Edited.MinDuration > Edited.MaxDuration Then duration = Edited.MinDuration
         LeftImageViewer.FixedAnimationDuration = duration
         RightImageViewer.FixedAnimationDuration = duration
     End Sub

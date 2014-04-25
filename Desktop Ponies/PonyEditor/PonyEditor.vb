@@ -294,9 +294,9 @@ Public Class PonyEditor
                 Dim followName As String = ""
                 Select Case behavior.TargetMode
                     Case TargetMode.Pony
-                        followName = behavior.OriginalFollowTargetName
+                        followName = behavior.FollowTargetName
                     Case TargetMode.Point
-                        followName = behavior.OriginalDestinationXCoord & " , " & behavior.OriginalDestinationYCoord
+                        followName = behavior.TargetVector.X & " , " & behavior.TargetVector.Y
                     Case TargetMode.None
                         followName = "Select..."
                 End Select
@@ -313,8 +313,8 @@ Public Class PonyEditor
                     behavior.Group,
                     CurrentBase.GetBehaviorGroupName(behavior.Group),
                     chance,
-                    behavior.MaxDuration,
-                    behavior.MinDuration,
+                    behavior.MaxDuration.TotalSeconds,
+                    behavior.MinDuration.TotalSeconds,
                     behavior.Speed,
                     Path.GetFileName(behavior.RightImage.Path),
                     Path.GetFileName(behavior.LeftImage.Path),
@@ -335,8 +335,8 @@ Public Class PonyEditor
                     effect.BehaviorName,
                     Path.GetFileName(effect.RightImage.Path),
                     Path.GetFileName(effect.LeftImage.Path),
-                    effect.Duration,
-                    effect.RepeatDelay,
+                    effect.Duration.TotalSeconds,
+                    effect.RepeatDelay.TotalSeconds,
                     effect.PlacementDirectionRight.ToDisplayString(),
                     effect.CenteringRight.ToDisplayString(),
                     effect.PlacementDirectionLeft.ToDisplayString(),
@@ -475,9 +475,9 @@ Public Class PonyEditor
 
         PreviewPony.SetBehavior(behavior)
         If Object.ReferenceEquals(PreviewPony.CurrentBehavior, behavior) Then
-            If behavior.OriginalFollowTargetName <> "" Then
+            If behavior.FollowTargetName <> "" Then
                 Dim followTarget As Pony = Nothing
-                Dim targetBase = ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.OriginalFollowTargetName)
+                Dim targetBase = ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.FollowTargetName)
                 If targetBase IsNot Nothing Then
                     followTarget = New Pony(context, targetBase)
                     context.PendingSprites.Add(followTarget)
@@ -486,7 +486,7 @@ Public Class PonyEditor
                 If followTarget IsNot Nothing Then
                     PreviewPony.FollowTarget = followTarget
                 Else
-                    MessageBox.Show(Me, "The specified pony to follow (" & behavior.OriginalFollowTargetName &
+                    MessageBox.Show(Me, "The specified pony to follow (" & behavior.FollowTargetName &
                                     ") for this behavior (" & behavior.Name &
                                     ") does not exist, or has no behaviors. Please review this setting.",
                                     "Follow Target Invalid", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -665,7 +665,7 @@ Public Class PonyEditor
                     Case colBehaviorMaxDuration.Index
                         Dim maxDuration = Double.Parse(newValue, CultureInfo.CurrentCulture)
                         If maxDuration > 0 Then
-                            behavior.MaxDuration = maxDuration
+                            behavior.MaxDuration = TimeSpan.FromSeconds(maxDuration)
                         Else
                             Throw New InvalidDataException("Maximum Duration must be greater than 0")
                         End If
@@ -673,7 +673,7 @@ Public Class PonyEditor
                     Case colBehaviorMinDuration.Index
                         Dim minDuration = Double.Parse(newValue, CultureInfo.CurrentCulture)
                         If minDuration >= 0 Then
-                            behavior.MinDuration = minDuration
+                            behavior.MinDuration = TimeSpan.FromSeconds(minDuration)
                         Else
                             Throw New InvalidDataException("Minimum Duration must be greater than or equal to 0")
                         End If
@@ -786,10 +786,10 @@ Public Class PonyEditor
                         effect.BehaviorName = newValue
 
                     Case colEffectDuration.Index
-                        effect.Duration = Double.Parse(newValue, CultureInfo.CurrentCulture)
+                        effect.Duration = TimeSpan.FromSeconds(Double.Parse(newValue, CultureInfo.CurrentCulture))
 
                     Case colEffectRepeatDelay.Index
-                        effect.RepeatDelay = Double.Parse(newValue, CultureInfo.CurrentCulture)
+                        effect.RepeatDelay = TimeSpan.FromSeconds(Double.Parse(newValue, CultureInfo.CurrentCulture))
 
                     Case colEffectLocationRight.Index
                         effect.PlacementDirectionRight = DirectionFromDisplayString(newValue)

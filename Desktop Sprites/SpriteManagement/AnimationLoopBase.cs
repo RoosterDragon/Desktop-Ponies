@@ -853,10 +853,8 @@
             }
             set
             {
-                if (value <= 0f)
-                    throw new ArgumentOutOfRangeException("value", value, "Target frame rate must be positive.");
-                if (value > 120f)
-                    throw new ArgumentOutOfRangeException("value", value, "Target frame rate should not exceed 120.");
+                Argument.EnsurePositive(value, "value");
+                Argument.EnsureLessThanOrEqualTo(value, "value", 120);
                 minimumTickInterval = 1000f / value;
             }
         }

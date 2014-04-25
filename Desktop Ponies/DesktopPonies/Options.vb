@@ -91,7 +91,7 @@ Public NotInheritable Class Options
     End Sub
 
     Private Shared Sub ValidateProfileName(profile As String)
-        If String.IsNullOrEmpty(profile) Then Throw New ArgumentException("profile must not be null or empty.", "profile")
+        Argument.EnsureNotNullOrEmpty(profile, "profile")
         If profile = DefaultProfileName Then
             Throw New ArgumentException("profile must not match the default profile name.", "profile")
         End If

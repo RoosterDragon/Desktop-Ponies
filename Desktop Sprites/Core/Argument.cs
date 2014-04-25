@@ -13,11 +13,20 @@
     /// </summary>
     public static class Argument
     {
+        private const string MustBeNonnegative = " must be non-negative.";
+        private const string MustBePositive = " must be positive.";
+        private const string MustBeGreaterThan = " must be greater than ";
+        private const string MustBeGreaterThanOrEqualTo = " must be greater than or equal to ";
+        private const string MustBeLessThan = " must be less than ";
+        private const string MustBeLessThanOrEqualTo = " must be less than or equal to ";
+        private const string InRangeInclusiveFormat = "{0} must be between {1} and {2} inclusive.";
+        private const string InRangeExclusiveFormat = "{0} must be between {1} and {2} exclusive.";
+
         #region ValidatedNotNullAttribute class
         /// <summary>
         /// Identifies a parameter as having been validated to ensure it was not null to static analysis tools.
         /// </summary>
-        [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+        [AttributeUsage(AttributeTargets.Parameter)]
         private sealed class ValidatedNotNullAttribute : Attribute
         {
         }
@@ -56,9 +65,9 @@
         }
 
         /// <summary>
-        /// Checks that a collection argument is not null or an empty collection.
+        /// Checks that a sequence argument is not null or an empty sequence.
         /// </summary>
-        /// <typeparam name="T">The type of the collection elements.</typeparam>
+        /// <typeparam name="T">The type of the sequence elements.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <returns>A reference to <paramref name="arg"/>.</returns>
@@ -83,7 +92,7 @@
         public static int EnsureNonnegative(int arg, string paramName)
         {
             if (arg < 0)
-                throw new ArgumentOutOfRangeException(paramName, arg, paramName + " must be non-negative.");
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeNonnegative);
             return arg;
         }
 
@@ -98,7 +107,763 @@
         public static int EnsurePositive(int arg, string paramName)
         {
             if (arg <= 0)
-                throw new ArgumentOutOfRangeException(paramName, arg, paramName + " must be positive.");
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBePositive);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static int EnsureGreaterThan(int arg, string paramName, int value)
+        {
+            if (arg <= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static int EnsureGreaterThanOrEqualTo(int arg, string paramName, int value)
+        {
+            if (arg < value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static int EnsureLessThan(int arg, string paramName, int value)
+        {
+            if (arg >= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static int EnsureLessThanOrEqualTo(int arg, string paramName, int value)
+        {
+            if (arg > value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static int EnsureInRangeInclusive(int arg, string paramName, int min, int max)
+        {
+            if (arg < min || arg > max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static int EnsureInRangeExclusive(int arg, string paramName, int min, int max)
+        {
+            if (arg <= min || arg >= max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
+        [DebuggerStepThrough]
+        public static long EnsureNonnegative(long arg, string paramName)
+        {
+            if (arg < 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeNonnegative);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
+        [DebuggerStepThrough]
+        public static long EnsurePositive(long arg, string paramName)
+        {
+            if (arg <= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBePositive);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static long EnsureGreaterThan(long arg, string paramName, long value)
+        {
+            if (arg <= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static long EnsureGreaterThanOrEqualTo(long arg, string paramName, long value)
+        {
+            if (arg < value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static long EnsureLessThan(long arg, string paramName, long value)
+        {
+            if (arg >= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static long EnsureLessThanOrEqualTo(long arg, string paramName, long value)
+        {
+            if (arg > value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static long EnsureInRangeInclusive(long arg, string paramName, long min, long max)
+        {
+            if (arg < min || arg > max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static long EnsureInRangeExclusive(long arg, string paramName, long min, long max)
+        {
+            if (arg <= min || arg >= max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
+        [DebuggerStepThrough]
+        public static float EnsureNonnegative(float arg, string paramName)
+        {
+            if (arg < 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeNonnegative);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
+        [DebuggerStepThrough]
+        public static float EnsurePositive(float arg, string paramName)
+        {
+            if (arg <= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBePositive);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static float EnsureGreaterThan(float arg, string paramName, float value)
+        {
+            if (arg <= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static float EnsureGreaterThanOrEqualTo(float arg, string paramName, float value)
+        {
+            if (arg < value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static float EnsureLessThan(float arg, string paramName, float value)
+        {
+            if (arg >= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static float EnsureLessThanOrEqualTo(float arg, string paramName, float value)
+        {
+            if (arg > value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static float EnsureInRangeInclusive(float arg, string paramName, float min, float max)
+        {
+            if (arg < min || arg > max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static float EnsureInRangeExclusive(float arg, string paramName, float min, float max)
+        {
+            if (arg <= min || arg >= max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
+        [DebuggerStepThrough]
+        public static double EnsureNonnegative(double arg, string paramName)
+        {
+            if (arg < 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeNonnegative);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
+        [DebuggerStepThrough]
+        public static double EnsurePositive(double arg, string paramName)
+        {
+            if (arg <= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBePositive);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static double EnsureGreaterThan(double arg, string paramName, double value)
+        {
+            if (arg <= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static double EnsureGreaterThanOrEqualTo(double arg, string paramName, double value)
+        {
+            if (arg < value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static double EnsureLessThan(double arg, string paramName, double value)
+        {
+            if (arg >= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static double EnsureLessThanOrEqualTo(double arg, string paramName, double value)
+        {
+            if (arg > value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static double EnsureInRangeInclusive(double arg, string paramName, double min, double max)
+        {
+            if (arg < min || arg > max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static double EnsureInRangeExclusive(double arg, string paramName, double min, double max)
+        {
+            if (arg <= min || arg >= max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than zero.</exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureNonnegative(TimeSpan arg, string paramName)
+        {
+            if (arg < TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeNonnegative);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than zero.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to zero.</exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsurePositive(TimeSpan arg, string paramName)
+        {
+            if (arg <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBePositive);
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureGreaterThan(TimeSpan arg, string paramName, TimeSpan value)
+        {
+            if (arg <= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureGreaterThanOrEqualTo(TimeSpan arg, string paramName, TimeSpan value)
+        {
+            if (arg < value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureLessThan(TimeSpan arg, string paramName, TimeSpan value)
+        {
+            if (arg >= value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureLessThanOrEqualTo(TimeSpan arg, string paramName, TimeSpan value)
+        {
+            if (arg > value)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureInRangeInclusive(TimeSpan arg, string paramName, TimeSpan min, TimeSpan max)
+        {
+            if (arg < min || arg > max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static TimeSpan EnsureInRangeExclusive(TimeSpan arg, string paramName, TimeSpan min, TimeSpan max)
+        {
+            if (arg <= min || arg >= max)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly greater than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static T EnsureGreaterThan<T>(T arg, string paramName, T value) where T : IComparable<T>
+        {
+            if (arg.CompareTo(value) <= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is greater than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be greater than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static T EnsureGreaterThanOrEqualTo<T>(T arg, string paramName, T value) where T : IComparable<T>
+        {
+            if (arg.CompareTo(value) < 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeGreaterThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than or equal to
+        /// <paramref name="value"/>.</exception>
+        [DebuggerStepThrough]
+        public static T EnsureLessThan<T>(T arg, string paramName, T value) where T : IComparable<T>
+        {
+            if (arg.CompareTo(value) >= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThan + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is less than or equal to a specified value.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="value">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is greater than <paramref name="value"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static T EnsureLessThanOrEqualTo<T>(T arg, string paramName, T value) where T : IComparable<T>
+        {
+            if (arg.CompareTo(value) > 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, paramName + MustBeLessThanOrEqualTo + value + ".");
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be greater than or equal to.</param>
+        /// <param name="max">The value that the argument should be less than or equal to.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than <paramref name="min"/>.-or-
+        /// <paramref name="arg"/> is greater than <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static T EnsureInRangeInclusive<T>(T arg, string paramName, T min, T max) where T : IComparable<T>
+        {
+            if (arg.CompareTo(min) < 0 || arg.CompareTo(max) > 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+            return arg;
+        }
+
+        /// <summary>
+        /// Checks that an argument is within the specified range.
+        /// </summary>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="min">The value that the argument should be strictly greater than.</param>
+        /// <param name="max">The value that the argument should be strictly less than.</param>
+        /// <returns>The value of <paramref name="arg"/>.</returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arg"/> is less than or equal to <paramref name="min"/>.
+        /// -or-<paramref name="arg"/> is greater than or equal to <paramref name="max"/>.
+        /// </exception>
+        [DebuggerStepThrough]
+        public static T EnsureInRangeExclusive<T>(T arg, string paramName, T min, T max) where T : IComparable<T>
+        {
+            if (arg.CompareTo(min) <= 0 || arg.CompareTo(max) >= 0)
+                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
             return arg;
         }
 

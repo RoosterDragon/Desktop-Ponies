@@ -434,10 +434,11 @@ Public Class Game
             handlerBase = PonyBase.CreateInMemory(ponyCollection)
             handlerBase.DisplayName = "Ball"
 
+            Dim duration = TimeSpan.FromSeconds(600)
             Dim idleBehavior = New Behavior(handlerBase) With {
                 .Name = "idle",
-                .MinDuration = 600,
-                .MaxDuration = 600,
+                .MinDuration = duration,
+                .MaxDuration = duration,
                 .Speed = 0,
                 .AllowedMovement = AllowedMoves.None}
             Dim idleImagePath = files_path & Replace(idle_image_filename, ControlChars.Quote, "")
@@ -447,8 +448,8 @@ Public Class Game
 
             Dim slowBehavior = New Behavior(handlerBase) With {
                 .Name = "slow",
-                .MinDuration = 600,
-                .MaxDuration = 600,
+                .MinDuration = duration,
+                .MaxDuration = duration,
                 .Speed = 3,
                 .AllowedMovement = AllowedMoves.All}
             slowBehavior.LeftImage.Path = files_path & Replace(slow_left_image_filename, ControlChars.Quote, "")
@@ -457,8 +458,8 @@ Public Class Game
 
             Dim fastBehavior = New Behavior(handlerBase) With {
                 .Name = "fast",
-                .MinDuration = 600,
-                .MaxDuration = 600,
+                .MinDuration = duration,
+                .MaxDuration = duration,
                 .Speed = 5,
                 .AllowedMovement = AllowedMoves.All}
             Dim fastImagePath = files_path & Replace(idle_image_filename, ControlChars.Quote, "")
@@ -539,7 +540,7 @@ Public Class Game
     Public Class GoalArea
         Public Property HostEffect As Effect
         Public Property TeamNumber As Integer ' 0 = a score any team
-        Private startPoint As Point
+        Private startPoint As Vector2
 
         Public Sub New(_teamNumber As Integer, imageFilename As String, location As String, context As PonyContext)
             If Not File.Exists(imageFilename) Then
@@ -551,7 +552,7 @@ Public Class Game
             HostEffect = New Effect(base, context)
 
             Dim locationParts = Split(location, ",")
-            startPoint = New Point(
+            startPoint = New Vector2(
                 Integer.Parse(locationParts(0), CultureInfo.InvariantCulture),
                 Integer.Parse(locationParts(1), CultureInfo.InvariantCulture))
         End Sub
@@ -559,7 +560,7 @@ Public Class Game
         Public Sub Initialize(gameScreen As Screen)
             Argument.EnsureNotNull(gameScreen, "gameScreen")
 
-            HostEffect.TopLeftLocation = New Point(
+            HostEffect.TopLeftLocation = New Vector2(
                 CInt(startPoint.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(startPoint.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
         End Sub
@@ -603,7 +604,7 @@ Public Class Game
         Public Sub Initialize(gameScreen As Screen)
             Argument.EnsureNotNull(gameScreen, "gameScreen")
 
-            HostEffect.TopLeftLocation = New Point(
+            HostEffect.TopLeftLocation = New Vector2(
                 CInt(startPoint.X * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
                 CInt(startPoint.Y * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y))
         End Sub
@@ -642,7 +643,7 @@ Public Class Game
 
             Public ReadOnly Property Region As Rectangle Implements ISprite.Region
                 Get
-                    Return New Rectangle(Vector2.Round(New Vector2(parent.HostEffect.TopLeftLocation) +
+                    Return New Rectangle(Vector2.Round(parent.HostEffect.TopLeftLocation +
                                                        LocalPosition * parent.HostEffect.Context.ScaleFactor), Size.Empty)
                 End Get
             End Property
@@ -881,9 +882,9 @@ Public Class Game
                     BounceBall(ball, 7, Me, "*Ping*!")
                     lastKickTime = DateTime.UtcNow
                 Case PlayerActionType.ApproachOwnGoal
-                    SetDestination(GetTeamGoal().HostEffect.Center())
+                    SetDestination(Vector2.Round(GetTeamGoal().HostEffect.Center()))
                 Case PlayerActionType.ApproachTargetGoal
-                    SetDestination(GetOtherTeamGoal().HostEffect.Center())
+                    SetDestination(Vector2.Round(GetOtherTeamGoal().HostEffect.Center()))
                 Case PlayerActionType.Idle
                     If CurrentAction = PlayerActionType.Idle Then Exit Sub
                     Player.FollowTargetOverride = Nothing
@@ -941,9 +942,9 @@ Public Class Game
             SetDestination(startLocation)
         End Sub
 
-        Public Sub SetDestination(destination As Point)
+        Public Sub SetDestination(destination As Vector2)
             Player.SpeedOverride = game.SpeedOverride
-            Player.DestinationOverride = New Vector2(destination)
+            Player.DestinationOverride = destination
             Player.FollowTargetOverride = Nothing
         End Sub
 

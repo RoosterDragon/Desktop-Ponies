@@ -69,8 +69,8 @@
 
         Dim newEffect As New EffectBase(newName, leftImagePath, rightImagePath) With {
             .BehaviorName = parentBehavior.Name,
-            .Duration = DurationNumber.Value,
-            .RepeatDelay = RepeatDelayNumber.Value,
+            .Duration = TimeSpan.FromSeconds(DurationNumber.Value),
+            .RepeatDelay = TimeSpan.FromSeconds(RepeatDelayNumber.Value),
             .PlacementDirectionLeft = DirectionFromDisplayString(DirectCast(LeftPlacementCombo.SelectedItem, String)),
             .CenteringLeft = DirectionFromDisplayString(DirectCast(LeftCenteringCombo.SelectedItem, String)),
             .PlacementDirectionRight = DirectionFromDisplayString(DirectCast(RightPlacementCombo.SelectedItem, String)),

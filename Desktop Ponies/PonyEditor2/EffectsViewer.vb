@@ -13,8 +13,8 @@
     Protected Overrides Iterator Function GetGridRows(ponyBase As PonyBase) As IEnumerable(Of Tuple(Of IPonyIniSourceable, Object()))
         For Each effect In ponyBase.Effects
             Yield Tuple.Create(Of IPonyIniSourceable, Object())(
-                effect, {Nothing, Nothing, effect.Name, effect.Duration, effect.RepeatDelay, effect.BehaviorName,
-                         effect.Follow, effect.DoNotRepeatImageAnimations,
+                effect, {Nothing, Nothing, effect.Name, effect.Duration.TotalSeconds, effect.RepeatDelay.TotalSeconds,
+                         effect.BehaviorName, effect.Follow, effect.DoNotRepeatImageAnimations,
                          GetFileNameRelaxed(effect.LeftImage.Path), GetFileNameRelaxed(effect.RightImage.Path),
                          effect.PlacementDirectionLeft, effect.CenteringLeft, effect.PlacementDirectionRight, effect.CenteringRight
                         })

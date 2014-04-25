@@ -3,9 +3,9 @@ Imports System.IO
 
 Public Class HouseOptionsForm
 
-    Dim house As House
-    Dim houseImage As Image
-    Dim doorLocation As Point
+    Private house As House
+    Private houseImage As Image
+    Private doorLocation As Vector2
 
     Public Sub New(_house As House, ponyBases As IEnumerable(Of PonyBase))
         InitializeComponent()
@@ -91,7 +91,7 @@ Public Class HouseOptionsForm
     End Function
 
     Private Sub House_ImageBox_MouseClick(sender As Object, e As MouseEventArgs) Handles House_ImageBox.MouseClick
-        doorLocation = Point.Subtract(e.Location, CType(GetHouseImageDrawLocation(), Size))
+        doorLocation = e.Location - CType(GetHouseImageDrawLocation(), Size)
         DoorLocation_Label.Text = doorLocation.ToString()
         House_ImageBox.Invalidate()
     End Sub
@@ -109,7 +109,7 @@ Public Class HouseOptionsForm
         g.FillRectangle(Brushes.Black, New Rectangle(drawLocation, houseImage.Size))
         g.DrawImage(houseImage, drawLocation)
 
-        Dim localDoorLocation = Point.Add(drawLocation, CType(doorLocation, Drawing.Size))
+        Dim localDoorLocation = drawLocation + CType(doorLocation, Size)
         Using pen As New Pen(Color.Red, 2)
             g.DrawLine(pen,
                        localDoorLocation.X - 5, localDoorLocation.Y - 5,

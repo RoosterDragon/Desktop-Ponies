@@ -242,8 +242,7 @@
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="time"/> is negative.</exception>
         private int FrameIndexFromTimeIndex(TimeSpan time)
         {
-            if (time < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException("time", time, "time must be non-negative.");
+            Argument.EnsureNonnegative(time, "time");
             EnsureNotDisposed();
 
             int frame = 0;

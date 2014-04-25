@@ -135,7 +135,7 @@ Public Class PonyCollection
                 b.FollowStoppedBehaviorName = ciStrings.GetOrAdd(b.FollowStoppedBehaviorName, b.FollowStoppedBehaviorName)
                 b.LinkedBehaviorName = ciStrings.GetOrAdd(b.LinkedBehaviorName, b.LinkedBehaviorName)
                 b.Name = ciStrings.GetOrAdd(b.Name, b.Name)
-                b.OriginalFollowTargetName = strings.GetOrAdd(b.OriginalFollowTargetName, b.OriginalFollowTargetName)
+                b.FollowTargetName = strings.GetOrAdd(b.FollowTargetName, b.FollowTargetName)
                 b.StartLineName = ciStrings.GetOrAdd(b.StartLineName, b.StartLineName)
                 b.LeftImage.Path = strings.GetOrAdd(b.LeftImage.Path, b.LeftImage.Path)
                 b.RightImage.Path = strings.GetOrAdd(b.RightImage.Path, b.RightImage.Path)
@@ -261,7 +261,7 @@ Public NotInheritable Class PonyIniParser
                                    New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
                                    Function(p)
                                        p.NoParse()
-                                       Dim bg As New BehaviorGroup(Nothing, 0)
+                                       Dim bg As New BehaviorGroup("", 0)
                                        bg.Number = p.ParseInt32(0, 100)
                                        bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToString())
                                        Return bg

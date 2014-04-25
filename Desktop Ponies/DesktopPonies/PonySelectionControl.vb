@@ -9,9 +9,7 @@ Public Class PonySelectionControl
             Return _count
         End Get
         Set(value As Integer)
-            Argument.EnsureNonnegative(value, "value")
-            If value > 99999 Then Throw New ArgumentOutOfRangeException("value", "value must be no more than 99999.")
-            _count = value
+            _count = Argument.EnsureInRangeInclusive(value, "value", 0, 99999)
             PonyCount.Text = _count.ToString(Globalization.CultureInfo.CurrentCulture)
         End Set
     End Property

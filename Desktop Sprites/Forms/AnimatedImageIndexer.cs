@@ -60,11 +60,7 @@
                 if (durations == null)
                     throw new InvalidOperationException("Cannot set the frame index until indexes have been defined.");
 
-                if (value < FrameSelector.Minimum || value > FrameSelector.Maximum)
-                    throw new ArgumentOutOfRangeException("value", value,
-                        string.Format(CultureInfo.CurrentCulture,
-                        "value must be between {0} and {1} inclusive.",
-                        FrameSelector.Minimum, FrameSelector.Maximum));
+                Argument.EnsureInRangeInclusive(value, "value", FrameSelector.Minimum, FrameSelector.Maximum);
 
                 updating = true;
                 FrameSelector.Value = value;
@@ -98,11 +94,7 @@
                 if (durations == null)
                     throw new InvalidOperationException("Cannot set the frame index until indexes have been defined.");
 
-                if (value < TimeSelector.Minimum || value > TimeSelector.Maximum)
-                    throw new ArgumentOutOfRangeException("value", value,
-                        string.Format(CultureInfo.CurrentCulture,
-                        "value must be between {0} and {1} inclusive.",
-                        TimeSelector.Minimum, TimeSelector.Maximum));
+                Argument.EnsureInRangeInclusive(value, "value", TimeSelector.Minimum, TimeSelector.Maximum);
 
                 updating = true;
                 TimeSelector.Value = value;

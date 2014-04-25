@@ -38,8 +38,8 @@
 
         AutoSelectImageCheckbox.Checked = behaviorToChange.AutoSelectImagesOnFollow
 
-        If behaviorToChange.OriginalFollowTargetName <> "" Then
-            FollowComboBox.SelectedItem = behaviorToChange.OriginalFollowTargetName
+        If behaviorToChange.FollowTargetName <> "" Then
+            FollowComboBox.SelectedItem = behaviorToChange.FollowTargetName
         End If
 
         If behaviorToChange.FollowMovingBehaviorName <> "" Then
@@ -60,8 +60,8 @@
                 ponyThumbnail = Nothing
         End Select
 
-        PointX.Value = behaviorToChange.OriginalDestinationXCoord
-        PointY.Value = behaviorToChange.OriginalDestinationYCoord
+        PointX.Value = behaviorToChange.TargetVector.X
+        PointY.Value = behaviorToChange.TargetVector.Y
 
         OffsetTypeFixedOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Fixed
         OffsetTypeMirrorOption.Checked = behaviorToChange.FollowOffset = FollowOffsetType.Mirror
@@ -199,17 +199,15 @@
         End If
 
         If Not NoTargetOption.Checked Then
-            behaviorToChange.OriginalDestinationXCoord = CInt(PointX.Value)
-            behaviorToChange.OriginalDestinationYCoord = CInt(PointY.Value)
+            behaviorToChange.TargetVector = New Vector2(CInt(PointX.Value), CInt(PointY.Value))
         Else
-            behaviorToChange.OriginalDestinationXCoord = 0
-            behaviorToChange.OriginalDestinationYCoord = 0
+            behaviorToChange.TargetVector = Vector2.Zero
         End If
 
         If FollowOption.Checked Then
-            behaviorToChange.OriginalFollowTargetName = DirectCast(FollowComboBox.SelectedItem, String)
+            behaviorToChange.FollowTargetName = DirectCast(FollowComboBox.SelectedItem, String)
         Else
-            behaviorToChange.OriginalFollowTargetName = ""
+            behaviorToChange.FollowTargetName = ""
         End If
 
         If AutoSelectImageCheckbox.Checked Then

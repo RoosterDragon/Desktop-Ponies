@@ -29,8 +29,8 @@
         RightPlacementComboBox.Items.AddRange(directionValues)
         RightCenterComboBox.Items.AddRange(directionValues)
         Bind(Function() Edited.Name, NameTextBox)
-        Bind(Function() Edited.Duration, DurationNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
-        Bind(Function() Edited.RepeatDelay, RepeatDelayNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.Duration, DurationNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
+        Bind(Function() Edited.RepeatDelay, RepeatDelayNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
         Bind(Function() Edited.BehaviorName, BehaviorComboBox)
         Bind(Function() Edited.Follow, FollowCheckBox)
         Bind(Function() Edited.DoNotRepeatImageAnimations, PreventLoopCheckBox)
@@ -61,7 +61,7 @@
         EffectBase.TryLoad(Source.Text, PonyBasePath, Base, e, parseIssues)
         Edited = e
 
-        Dim duration As TimeSpan? = If(Edited.Duration = 0, Nothing, TimeSpan.FromSeconds(Edited.Duration))
+        Dim duration As TimeSpan? = If(Edited.Duration = TimeSpan.Zero, Nothing, Edited.Duration)
         LeftImageViewer.Placement = Edited.PlacementDirectionLeft
         LeftImageViewer.Centering = Edited.CenteringLeft
         LeftImageViewer.FixedAnimationDuration = duration

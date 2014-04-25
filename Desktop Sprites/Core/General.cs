@@ -86,9 +86,8 @@
         /// <exception cref="T:System.IO.IOException">An I/O error occurred.</exception>
         private static void ConsoleWriteLineLong(long value, int minChars = 0)
         {
-            if (minChars < 0 || minChars > Buffer.Length)
-                throw new ArgumentOutOfRangeException("minChars", minChars,
-                    "minChars must be greater than or equal to zero and less than or equal to " + Buffer.Length);
+            Argument.EnsureInRangeInclusive(minChars, "minChars", 0, Buffer.Length);
+
             // Absolute value of value parameter.
             ulong v = value >= 0 ? (ulong)value : value != long.MinValue ? (ulong)-value : (ulong)long.MaxValue + 1;
             int bufferIndex = Buffer.Length - 1;

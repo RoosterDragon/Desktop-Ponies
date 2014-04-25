@@ -54,9 +54,9 @@
                 Dim text As String = Nothing
                 Select Case newBehavior.TargetMode
                     Case TargetMode.Pony
-                        text = newBehavior.OriginalFollowTargetName
+                        text = newBehavior.FollowTargetName
                     Case TargetMode.Point
-                        text = New Vector2(newBehavior.OriginalDestinationXCoord, newBehavior.OriginalDestinationYCoord).ToString()
+                        text = newBehavior.TargetVector.ToString()
                     Case TargetMode.None
                         text = FollowModeNoneText
                 End Select
@@ -101,8 +101,8 @@
 
         newBehavior.Name = newName
         newBehavior.Chance = ChanceNumber.Value / 100
-        newBehavior.MinDuration = minDuration
-        newBehavior.MaxDuration = maxDuration
+        newBehavior.MinDuration = TimeSpan.FromSeconds(minDuration)
+        newBehavior.MaxDuration = TimeSpan.FromSeconds(maxDuration)
         newBehavior.Speed = SpeedNumber.Value
         newBehavior.LeftImage.Path = leftImagePath
         newBehavior.RightImage.Path = rightImagePath

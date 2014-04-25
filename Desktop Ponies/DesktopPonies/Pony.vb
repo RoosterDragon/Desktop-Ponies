@@ -111,7 +111,6 @@ Public Class PonyBase
         End Get
     End Property
     Public Property DisplayName As String
-    Public Property Scale As Double
     Private ReadOnly _tags As New HashSet(Of CaseInsensitiveString)()
     Public ReadOnly Property Tags As HashSet(Of CaseInsensitiveString)
         Get
@@ -119,40 +118,40 @@ Public Class PonyBase
         End Get
     End Property
     Private ReadOnly _behaviorGroups As New List(Of BehaviorGroup)()
-    Public ReadOnly Property BehaviorGroups() As List(Of BehaviorGroup)
+    Public ReadOnly Property BehaviorGroups As List(Of BehaviorGroup)
         Get
             Return _behaviorGroups
         End Get
     End Property
     Private ReadOnly _behaviors As New List(Of Behavior)()
-    Public ReadOnly Property Behaviors() As List(Of Behavior)
+    Public ReadOnly Property Behaviors As List(Of Behavior)
         Get
             Return _behaviors
         End Get
     End Property
     Private ReadOnly _effects As New List(Of EffectBase)()
-    Public ReadOnly Property Effects() As List(Of EffectBase)
+    Public ReadOnly Property Effects As List(Of EffectBase)
         Get
             Return _effects
         End Get
     End Property
-    Public ReadOnly Property Interactions() As List(Of InteractionBase)
+    Public ReadOnly Property Interactions As List(Of InteractionBase)
         Get
             Return Collection.Interactions(Directory)
         End Get
     End Property
     Private ReadOnly _speeches As New List(Of Speech)()
-    Public ReadOnly Property Speeches() As List(Of Speech)
+    Public ReadOnly Property Speeches As List(Of Speech)
         Get
             Return _speeches
         End Get
     End Property
-    Public ReadOnly Property SpeechesRandom() As SpeechesEnumerable
+    Public ReadOnly Property SpeechesRandom As SpeechesEnumerable
         Get
             Return New SpeechesEnumerable(Me, False)
         End Get
     End Property
-    Public ReadOnly Property SpeechesSpecific() As SpeechesEnumerable
+    Public ReadOnly Property SpeechesSpecific As SpeechesEnumerable
         Get
             Return New SpeechesEnumerable(Me, True)
         End Get
@@ -329,8 +328,8 @@ Public Class PonyBase
                         TryParse(Of String)(line, folder, removeInvalidItems,
                                             AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
                     Case "scale"
-                        TryParse(Of Double)(line, folder, removeInvalidItems,
-                                            AddressOf PonyIniParser.TryParseScale, Sub(s) pony.Scale = s)
+                        ' The scale factor was previously defined in a non-useful way. Keep it for compatibility but ignore the value.
+                        pony.invalidLines.Add(line)
                     Case "behaviorgroup"
                         TryParse(Of BehaviorGroup)(line, folder, removeInvalidItems,
                                                    AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
@@ -490,24 +489,72 @@ Public Class InteractionBase
 
     Public Const ConfigFilename = "interactions.ini"
 
+    Private _name As CaseInsensitiveString = ""
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
+        Get
+            Return _name
+        End Get
+        Set(value As CaseInsensitiveString)
+            _name = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
+    Private _initiatorName As String = ""
     Public Property InitiatorName As String
+        Get
+            Return _initiatorName
+        End Get
+        Set(value As String)
+            _initiatorName = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
+    Private _chance As Double
     Public Property Chance As Double
+        Get
+            Return _chance
+        End Get
+        Set(value As Double)
+            _chance = Argument.EnsureInRangeInclusive(value, "value", 0, 1)
+        End Set
+    End Property
+    Private _proximity As Double
     Public Property Proximity As Double
+        Get
+            Return _proximity
+        End Get
+        Set(value As Double)
+            _proximity = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
     Private _targetNames As New HashSet(Of String)()
     Public ReadOnly Property TargetNames As HashSet(Of String)
         Get
             Return _targetNames
         End Get
     End Property
-    Public Property Activation As TargetActivation
     Private _behaviorNames As New HashSet(Of CaseInsensitiveString)()
     Public ReadOnly Property BehaviorNames As HashSet(Of CaseInsensitiveString)
         Get
             Return _behaviorNames
         End Get
     End Property
+    Private _activation As TargetActivation
+    Public Property Activation As TargetActivation
+        Get
+            Return _activation
+        End Get
+        Set(value As TargetActivation)
+            _activation = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
+    Private _reactivationDelay As TimeSpan
     Public Property ReactivationDelay As TimeSpan
+        Get
+            Return _reactivationDelay
+        End Get
+        Set(value As TimeSpan)
+            _reactivationDelay = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
 
     Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
@@ -630,25 +677,52 @@ Public Enum TargetMode
 End Enum
 Public Class Behavior
     Implements IPonyIniSourceable, IReferential
-    Private ReadOnly pony As PonyBase
+    Public Shared ReadOnly AnyGroup As Integer = 0
+
+    Private ReadOnly _base As PonyBase
     Public ReadOnly Property Base As PonyBase
         Get
-            Return pony
+            Return _base
         End Get
     End Property
 
-    Public Shared ReadOnly AnyGroup As Integer = 0
-
+    Private _name As CaseInsensitiveString = ""
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
-    Public Property Chance As Double
-    ''' <summary>
-    ''' Max duration in seconds.
-    ''' </summary>
-    Public Property MaxDuration As Double
-    ''' <summary>
-    ''' Min duration in seconds.
-    ''' </summary>
-    Public Property MinDuration As Double
+        Get
+            Return _name
+        End Get
+        Set(value As CaseInsensitiveString)
+            _name = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
+    Private _group As Integer = AnyGroup
+    Public Property Group As Integer
+        Get
+            Return _group
+        End Get
+        Set(value As Integer)
+            _group = Argument.EnsureInRangeInclusive(value, "value", 0, 100)
+        End Set
+    End Property
+
+    Private _minDuation As TimeSpan
+    Public Property MinDuration As TimeSpan
+        Get
+            Return _minDuation
+        End Get
+        Set(value As TimeSpan)
+            _minDuation = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
+    Private _maxDuation As TimeSpan
+    Public Property MaxDuration As TimeSpan
+        Get
+            Return _maxDuation
+        End Get
+        Set(value As TimeSpan)
+            _maxDuation = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
 
     Private _rightImage As New CenterableSpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}
     Private _leftImage As New CenterableSpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
@@ -663,16 +737,29 @@ Public Class Behavior
         End Get
     End Property
 
+    Private _speed As Double
     Public Property Speed As Double
+        Get
+            Return _speed
+        End Get
+        Set(value As Double)
+            _speed = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
     Public ReadOnly Property SpeedInPixelsPerSecond As Double
         Get
             Return Speed * (1000.0 / 30.0)
         End Get
     End Property
-
-    Public Property DoNotRepeatImageAnimations As Boolean = False
-
+    Private _allowedMovement As AllowedMoves
     Public Property AllowedMovement As AllowedMoves
+        Get
+            Return _allowedMovement
+        End Get
+        Set(value As AllowedMoves)
+            _allowedMovement = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
 
     Private _linkedBehaviorName As CaseInsensitiveString = ""
     Public Property LinkedBehaviorName As CaseInsensitiveString
@@ -686,7 +773,7 @@ Public Class Behavior
     Private ReadOnly linkedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = LinkedBehaviorName)
     Public ReadOnly Property LinkedBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(linkedBehaviorNamePredicate)
+            Return _base.Behaviors.OnlyOrDefault(linkedBehaviorNamePredicate)
         End Get
     End Property
     Private _startLineName As CaseInsensitiveString = ""
@@ -701,7 +788,7 @@ Public Class Behavior
     Private ReadOnly startLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = StartLineName)
     Public ReadOnly Property StartLine As Speech
         Get
-            Return pony.Speeches.OnlyOrDefault(startLineNamePredicate)
+            Return _base.Speeches.OnlyOrDefault(startLineNamePredicate)
         End Get
     End Property
     Private _endLineName As CaseInsensitiveString = ""
@@ -716,49 +803,80 @@ Public Class Behavior
     Private ReadOnly endLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = EndLineName)
     Public ReadOnly Property EndLine As Speech
         Get
-            Return pony.Speeches.OnlyOrDefault(endLineNamePredicate)
+            Return _base.Speeches.OnlyOrDefault(endLineNamePredicate)
         End Get
     End Property
 
-    Public Property Skip As Boolean = False
-
-    Public Property OriginalDestinationXCoord As Integer = 0
-    Public Property OriginalDestinationYCoord As Integer = 0
-    Private _originalFollowTargetName As String = ""
-    Public Property OriginalFollowTargetName As String
+    Public Property TargetVector As Vector2
+    Private _followTargetName As String = ""
+    Public Property FollowTargetName As String
         Get
-            Return _originalFollowTargetName
+            Return _followTargetName
         End Get
         Set(value As String)
-            _originalFollowTargetName = Argument.EnsureNotNull(value, "value")
+            _followTargetName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
-
     Public ReadOnly Property TargetMode As TargetMode
         Get
-            Return If(OriginalFollowTargetName <> "", TargetMode.Pony,
-                      If(OriginalDestinationXCoord <> 0 OrElse OriginalDestinationYCoord <> 0, TargetMode.Point,
+            Return If(FollowTargetName <> "", TargetMode.Pony,
+                      If(TargetVector <> Vector2.Zero, TargetMode.Point,
                          TargetMode.None))
         End Get
     End Property
+    Private _followOffset As FollowOffsetType
+    Public Property FollowOffset As FollowOffsetType
+        Get
+            Return _followOffset
+        End Get
+        Set(value As FollowOffsetType)
+            value = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
 
+    Public Property AutoSelectImagesOnFollow As Boolean = True
+    Private _followStoppedBehaviorName As CaseInsensitiveString = ""
     Public Property FollowStoppedBehaviorName As CaseInsensitiveString
+        Get
+            Return _followStoppedBehaviorName
+        End Get
+        Set(value As CaseInsensitiveString)
+            _followStoppedBehaviorName = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
     Private ReadOnly followStoppedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowStoppedBehaviorName)
     Public ReadOnly Property FollowStoppedBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(followStoppedBehaviorNamePredicate)
+            Return _base.Behaviors.OnlyOrDefault(followStoppedBehaviorNamePredicate)
         End Get
     End Property
+    Private _followMovingBehaviorName As CaseInsensitiveString = ""
     Public Property FollowMovingBehaviorName As CaseInsensitiveString
+        Get
+            Return _followMovingBehaviorName
+        End Get
+        Set(value As CaseInsensitiveString)
+            _followMovingBehaviorName = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
     Private ReadOnly followMovingBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowMovingBehaviorName)
     Public ReadOnly Property FollowMovingBehavior As Behavior
         Get
-            Return pony.Behaviors.OnlyOrDefault(followMovingBehaviorNamePredicate)
+            Return _base.Behaviors.OnlyOrDefault(followMovingBehaviorNamePredicate)
         End Get
     End Property
-    Public Property AutoSelectImagesOnFollow As Boolean = True
-    Public Property Group As Integer = AnyGroup
-    Public Property FollowOffset As FollowOffsetType
+
+    Private _chance As Double
+    Public Property Chance As Double
+        Get
+            Return _chance
+        End Get
+        Set(value As Double)
+            _chance = Argument.EnsureInRangeInclusive(value, "value", 0, 1)
+        End Set
+    End Property
+    Public Property Skip As Boolean
+    Public Property DoNotRepeatImageAnimations As Boolean
 
     Public ReadOnly Property Effects As EffectsEnumerable
         Get
@@ -799,7 +917,7 @@ Public Class Behavior
         Public Sub New(behavior As Behavior)
             Argument.EnsureNotNull(behavior, "behavior")
             Me.behaviorName = behavior.Name
-            Me.effects = behavior.pony.Effects
+            Me.effects = behavior._base.Effects
             Me.index = -1
         End Sub
 
@@ -831,8 +949,8 @@ Public Class Behavior
     End Structure
 #End Region
 
-    Public Sub New(pony As PonyBase)
-        Me.pony = Argument.EnsureNotNull(pony, "pony")
+    Public Sub New(base As PonyBase)
+        Me._base = Argument.EnsureNotNull(base, "base")
     End Sub
 
     Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
@@ -845,7 +963,7 @@ Public Class Behavior
                                             {"Identifier", "Name", "Chance",
                                              "Max Duration", "Min Duration", "Speed",
                                              "Right Image", "Left Image", "Movement", "Linked Behavior",
-                                             "Start Speech", "End Speech", "Skip", "Destination X", "Destination Y",
+                                             "Start Speech", "End Speech", "Skip", "Target X", "Target Y",
                                              "Follow Target", "Auto Select Follow Images",
                                              "Follow Stopped Behavior", "Follow Moving Behavior",
                                              "Right Image Center", "Left Image Center",
@@ -853,10 +971,10 @@ Public Class Behavior
         p.NoParse()
         b.Name = If(p.NotNullOrWhiteSpace(), "")
         b.Chance = p.ParseDouble(0, 0, 1)
-        b.MaxDuration = p.ParseDouble(15, 0, 300)
-        b.MinDuration = p.ParseDouble(5, 0, 300)
+        b.MaxDuration = TimeSpan.FromSeconds(p.ParseDouble(15, 0, 300))
+        b.MinDuration = TimeSpan.FromSeconds(p.ParseDouble(5, 0, 300))
         p.Assert("", b.MaxDuration >= b.MinDuration, "The min duration exceeds the max duration.", "Values will be swapped.")
-        b.Speed = p.ParseDouble(3, 0, 25)
+        b.Speed = p.ParseDouble(3, 0, 30)
         b.RightImage.Path = p.NoParse()
         If p.Assert(b.RightImage.Path, Not String.IsNullOrEmpty(b.RightImage.Path), "An image path has not been set.", Nothing) Then
             b.RightImage.Path = p.SpecifiedCombinePath(imageDirectory, b.RightImage.Path, "Image will not be loaded.")
@@ -872,9 +990,8 @@ Public Class Behavior
         b.StartLineName = p.NotNull("").Trim()
         b.EndLineName = p.NotNull("").Trim()
         b.Skip = p.ParseBoolean(False)
-        b.OriginalDestinationXCoord = p.ParseInt32(0)
-        b.OriginalDestinationYCoord = p.ParseInt32(0)
-        b.OriginalFollowTargetName = p.NotNull("").Trim()
+        b.TargetVector = New Vector2(p.ParseInt32(0), p.ParseInt32(0))
+        b.FollowTargetName = p.NotNull("").Trim()
         b.AutoSelectImagesOnFollow = p.ParseBoolean(True)
         b.FollowStoppedBehaviorName = p.NotNull("").Trim()
         b.FollowMovingBehaviorName = p.NotNull("").Trim()
@@ -898,8 +1015,8 @@ Public Class Behavior
             ",", "Behavior",
             Quoted(Name),
             Chance.ToString(CultureInfo.InvariantCulture),
-            MaxDuration.ToString(CultureInfo.InvariantCulture),
-            MinDuration.ToString(CultureInfo.InvariantCulture),
+            MaxDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
+            MinDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
             Speed.ToString(CultureInfo.InvariantCulture),
             Quoted(Path.GetFileName(RightImage.Path)),
             Quoted(Path.GetFileName(LeftImage.Path)),
@@ -908,9 +1025,9 @@ Public Class Behavior
             Quoted(StartLineName),
             Quoted(EndLineName),
             Skip,
-            OriginalDestinationXCoord.ToString(CultureInfo.InvariantCulture),
-            OriginalDestinationYCoord.ToString(CultureInfo.InvariantCulture),
-            Quoted(OriginalFollowTargetName),
+            TargetVector.X.ToString(CultureInfo.InvariantCulture),
+            TargetVector.Y.ToString(CultureInfo.InvariantCulture),
+            Quoted(FollowTargetName),
             AutoSelectImagesOnFollow,
             FollowStoppedBehaviorName,
             FollowMovingBehaviorName,
@@ -937,14 +1054,14 @@ Public Class Behavior
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
-        Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
+        Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
                 Referential.CheckNotCircular("Linked Behavior", Name, LinkedBehavior,
                                              Function(b) b.LinkedBehavior, Function(b) b.Name),
-                Referential.CheckUnique("Start Speech", StartLineName, pony.Speeches.Select(Function(s) s.Name)),
-                Referential.CheckUnique("End Speech", EndLineName, pony.Speeches.Select(Function(s) s.Name)),
-                Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.CheckUnique("Follow Moving Behavior", FollowMovingBehaviorName, pony.Behaviors.Select(Function(b) b.Name)),
-                Referential.CheckUnique("Follow Target", OriginalFollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory)),
+                Referential.CheckUnique("Start Speech", StartLineName, _base.Speeches.Select(Function(s) s.Name)),
+                Referential.CheckUnique("End Speech", EndLineName, _base.Speeches.Select(Function(s) s.Name)),
+                Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
+                Referential.CheckUnique("Follow Moving Behavior", FollowMovingBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
+                Referential.CheckUnique("Follow Target", FollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory)),
                 If(TargetMode <> DesktopPonies.TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
                    String.IsNullOrEmpty(FollowStoppedBehaviorName),
                    New ParseIssue("Follow Stopped Behavior", FollowStoppedBehaviorName,
@@ -968,8 +1085,24 @@ End Class
 Public Class BehaviorGroup
     Implements IPonyIniSerializable
 
+    Private _name As CaseInsensitiveString = ""
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
+        Get
+            Return _name
+        End Get
+        Set(value As CaseInsensitiveString)
+            _name = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
+    Private _number As Integer
     Public Property Number As Integer
+        Get
+            Return _number
+        End Get
+        Set(value As Integer)
+            _number = Argument.EnsureInRangeInclusive(value, "value", 0, 100)
+        End Set
+    End Property
 
     Public Sub New(_name As CaseInsensitiveString, _number As Integer)
         Name = _name
@@ -994,8 +1127,8 @@ Public Class Speech
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
     Public Property Text As String = ""
     Public Property SoundFile As String
-    Public Property Skip As Boolean = False 'don't use randomly if true
-    Public Property Group As Integer = 0 'the behavior group that this line is assigned to.  0 = all
+    Public Property Skip As Boolean
+    Public Property Group As Integer = Behavior.AnyGroup
 
     Public Shared Function TryLoad(iniLine As String, soundDirectory As String,
                                    ByRef result As Speech, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
@@ -1087,10 +1220,7 @@ Public Class PonyContext
             Return _randomSpeechChance
         End Get
         Set(value As Double)
-            If value < 0 OrElse value > 1 Then
-                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0 and 1 inclusive.")
-            End If
-            _randomSpeechChance = value
+            _randomSpeechChance = Argument.EnsureInRangeInclusive(value, "value", 0, 1)
         End Set
     End Property
 
@@ -1101,8 +1231,7 @@ Public Class PonyContext
             Return _cursorAvoidanceRadius
         End Get
         Set(ByVal value As Single)
-            If value < 0 Then Throw New ArgumentOutOfRangeException("value", value, "value must be greater than or equal to zero.")
-            _cursorAvoidanceRadius = value
+            _cursorAvoidanceRadius = Argument.EnsureNonnegative(value, "value")
         End Set
     End Property
     Public Property DraggingEnabled As Boolean
@@ -1117,10 +1246,7 @@ Public Class PonyContext
             Return _timeFactor
         End Get
         Set(value As Double)
-            If value < 0.1 OrElse value > 10 Then
-                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.1 and 10 inclusive.")
-            End If
-            _timeFactor = value
+            _timeFactor = Argument.EnsureInRangeInclusive(value, "value", 0.1, 10)
         End Set
     End Property
     Private _scaleFactor As Single
@@ -1129,10 +1255,7 @@ Public Class PonyContext
             Return _scaleFactor
         End Get
         Set(value As Single)
-            If value < 0.25 OrElse value > 4 Then
-                Throw New ArgumentOutOfRangeException("value", value, "value must be between 0.25 and 4 inclusive.")
-            End If
-            _scaleFactor = value
+            _scaleFactor = Argument.EnsureInRangeInclusive(value, "value", 0.25F, 4.0F)
         End Set
     End Property
     Private _region As Rectangle
@@ -1270,7 +1393,7 @@ Public Class Pony
     ''' <summary>
     ''' Gets the context that affects how this pony behaves.
     ''' </summary>
-    Public ReadOnly Property Context() As PonyContext
+    Public ReadOnly Property Context As PonyContext
         Get
             Return _context
         End Get
@@ -1279,7 +1402,7 @@ Public Class Pony
     ''' <summary>
     ''' Gets the base on which this sprite instance is modeled.
     ''' </summary>
-    Public ReadOnly Property Base() As PonyBase
+    Public ReadOnly Property Base As PonyBase
         Get
             Return _base
         End Get
@@ -1851,10 +1974,22 @@ Public Class Pony
     ''' </summary>
     Public Property MovementOverride As Vector2F?
 
+    Private _speedOverride As Double?
     ''' <summary>
     ''' Gets or sets the desired movement speed of the pony in pixels per second. If null, the speed is determined by the current behavior.
     ''' </summary>
     Public Property SpeedOverride As Double?
+        Get
+            Return _speedOverride
+        End Get
+        Set(value As Double?)
+            If value Is Nothing Then
+                _speedOverride = value
+            Else
+                _speedOverride = Argument.EnsureNonnegative(value.Value, "value")
+            End If
+        End Set
+    End Property
 
     ''' <summary>
     ''' Gets or sets a destination in screen coordinates that the pony should seek out, ignoring other destinations specified by behaviors.
@@ -2225,8 +2360,8 @@ Public Class Pony
         If _inMouseoverState OrElse _inDragState Then
             _behaviorDesiredDuration = TimeSpan.FromDays(1)
         Else
-            _behaviorDesiredDuration = TimeSpan.FromSeconds(
-                _currentBehavior.MinDuration + Rng.NextDouble() * (_currentBehavior.MaxDuration - _currentBehavior.MinDuration))
+            _behaviorDesiredDuration = _currentBehavior.MinDuration + TimeSpan.FromSeconds(
+                Rng.NextDouble() * (_currentBehavior.MaxDuration.TotalSeconds - _currentBehavior.MinDuration.TotalSeconds))
         End If
         SetFollowTarget()
 
@@ -2320,7 +2455,7 @@ Public Class Pony
     ''' suitable). Otherwise, a target is chosen uniformly from all available targets.
     ''' </summary>
     Private Sub SetFollowTarget()
-        If _followTarget Is Nothing AndAlso _currentBehavior.OriginalFollowTargetName <> "" Then
+        If _followTarget Is Nothing AndAlso _currentBehavior.FollowTargetName <> "" Then
             ' If an interaction is running, we want to prefer those ponies involved in the interaction before trying other ponies.
             If _currentInteraction IsNot Nothing Then
                 If ReferenceEquals(Me, _currentInteraction.Initiator) Then
@@ -2330,7 +2465,7 @@ Public Class Pony
                 Else
                     ' If we are an interaction target, prefer to follow the initiator if they are suitable.
                     ' Otherwise follow any of the other targets - but avoid following ourselves since we are a target.
-                    If _currentBehavior.OriginalFollowTargetName = _currentInteraction.Initiator.Base.Directory Then
+                    If _currentBehavior.FollowTargetName = _currentInteraction.Initiator.Base.Directory Then
                         AddUpdateRecord("SetFollowTarget using interaction initiator.")
                         _followTarget = _currentInteraction.Initiator
                     Else
@@ -2356,7 +2491,7 @@ Public Class Pony
     ''' </returns>
     Private Function TargetReachable(behavior As Behavior) As Boolean
         If behavior.TargetMode <> TargetMode.Pony Then Return True
-        Return Context.OtherPonies(Me).Any(Function(p) Not p._expired AndAlso p.Base.Directory = behavior.OriginalFollowTargetName)
+        Return Context.OtherPonies(Me).Any(Function(p) Not p._expired AndAlso p.Base.Directory = behavior.FollowTargetName)
     End Function
 
     ''' <summary>
@@ -2370,7 +2505,7 @@ Public Class Pony
     ''' </returns>
     Private Function GetRandomFollowTarget(allCandidates As IEnumerable(Of Pony)) As Pony
         Dim suitableCandidates = allCandidates.Where(
-            Function(p) Not p._expired AndAlso p.Base.Directory = _currentBehavior.OriginalFollowTargetName).ToImmutableArray()
+            Function(p) Not p._expired AndAlso p.Base.Directory = _currentBehavior.FollowTargetName).ToImmutableArray()
         If suitableCandidates.Length > 0 Then
             Return suitableCandidates.RandomElement()
         Else
@@ -2476,7 +2611,7 @@ Public Class Pony
             _destination = _followTarget._location
             Return
         End If
-        Dim offsetVector = New Vector2(_currentBehavior.OriginalDestinationXCoord, _currentBehavior.OriginalDestinationYCoord)
+        Dim offsetVector = _currentBehavior.TargetVector
         If _followTarget IsNot Nothing AndAlso Not Single.IsNaN(_followTarget._location.X) Then
             ' Move to follow target.
             ' Here the offset represents a custom offset from the center of the target.
@@ -2594,7 +2729,7 @@ Public Class Pony
     Private Sub StartEffects()
         For Each effectBase In _currentBehavior.Effects
             StartNewEffect(effectBase, _lastUpdateTime, _currentTime, Vector2F.Zero)
-            If effectBase.RepeatDelay > 0 Then
+            If effectBase.RepeatDelay > TimeSpan.Zero Then
                 _effectBasesToRepeat.Add(New EffectBaseRepeat(effectBase, _lastUpdateTime, _currentTime))
             End If
         Next
@@ -2618,10 +2753,10 @@ Public Class Pony
                                 Function() Me.regionF.Location,
                                 Function() Me._region.Size,
                                 Context, externalStartTime, internalStartTime, initialLocationOffset)
-        If effectBase.Duration = 0 Then
+        If effectBase.Duration = TimeSpan.Zero Then
             _effectsToManuallyExpire.Add(effect)
         Else
-            effect.DesiredDuration = TimeSpan.FromSeconds(effectBase.Duration)
+            effect.DesiredDuration = effectBase.Duration
         End If
         _activeEffects.Add(effect)
         AddHandler effect.Expired, Sub() _activeEffects.Remove(effect)
@@ -2636,17 +2771,16 @@ Public Class Pony
         For i = 0 To _effectBasesToRepeat.Count - 1
             Dim repeatState = _effectBasesToRepeat(i)
             Dim base = repeatState.EffectBase
-            Dim repeatDelay = TimeSpan.FromSeconds(base.RepeatDelay)
             Dim lastExternalStartTime = repeatState.LastExternalStartTime
             Dim lastInternalStartTime = repeatState.LastInternalStartTime
             Dim externalStartTime = _lastUpdateTime
-            Dim internalStartTime = lastInternalStartTime + repeatDelay
+            Dim internalStartTime = lastInternalStartTime + base.RepeatDelay
             While _currentTime - internalStartTime >= TimeSpan.Zero
                 Dim offset = -_movement * CSng((_currentTime - internalStartTime).TotalMilliseconds / StepSize)
-                lastExternalStartTime += TimeSpan.FromMilliseconds(repeatDelay.TotalMilliseconds / Context.TimeFactor)
+                lastExternalStartTime += TimeSpan.FromMilliseconds(base.RepeatDelay.TotalMilliseconds / Context.TimeFactor)
                 StartNewEffect(base, lastExternalStartTime, internalStartTime, offset)
                 lastInternalStartTime = internalStartTime
-                internalStartTime += repeatDelay
+                internalStartTime += base.RepeatDelay
             End While
             _effectBasesToRepeat(i) = New EffectBaseRepeat(base, lastExternalStartTime, lastInternalStartTime)
         Next
@@ -3201,8 +3335,24 @@ End Class
 Public Class EffectBase
     Implements IPonyIniSourceable, IReferential
 
+    Private _name As CaseInsensitiveString = ""
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
+        Get
+            Return _name
+        End Get
+        Set(value As CaseInsensitiveString)
+            _name = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
+    Private _behaviorName As CaseInsensitiveString = ""
     Public Property BehaviorName As CaseInsensitiveString
+        Get
+            Return _behaviorName
+        End Get
+        Set(value As CaseInsensitiveString)
+            _behaviorName = Argument.EnsureNotNull(value, "value")
+        End Set
+    End Property
     Public Property ParentPonyBase As PonyBase
     Private _leftImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
     Private _rightImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}
@@ -3216,13 +3366,61 @@ Public Class EffectBase
             Return _rightImage
         End Get
     End Property
-    Public Property Duration As Double
-    Public Property RepeatDelay As Double
+    Private _duration As TimeSpan
+    Public Property Duration As TimeSpan
+        Get
+            Return _duration
+        End Get
+        Set(value As TimeSpan)
+            _duration = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
+    Private _repeatDelay As TimeSpan
+    Public Property RepeatDelay As TimeSpan
+        Get
+            Return _repeatDelay
+        End Get
+        Set(value As TimeSpan)
+            _repeatDelay = Argument.EnsureNonnegative(value, "value")
+        End Set
+    End Property
 
+    Private _placementDirectionRight As Direction
     Public Property PlacementDirectionRight As Direction
+        Get
+            Return _placementDirectionRight
+        End Get
+        Set(value As Direction)
+            _placementDirectionRight = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
+    Private _centeringRight As Direction
     Public Property CenteringRight As Direction
+        Get
+            Return _centeringRight
+        End Get
+        Set(value As Direction)
+            _centeringRight = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
+    Private _placementDirectionLeft As Direction
     Public Property PlacementDirectionLeft As Direction
+        Get
+            Return _placementDirectionLeft
+        End Get
+        Set(value As Direction)
+            _placementDirectionLeft = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
+    Private _centeringLeft As Direction
     Public Property CenteringLeft As Direction
+        Get
+            Return _centeringLeft
+        End Get
+        Set(value As Direction)
+            _centeringLeft = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
 
     Public Property Follow As Boolean
     Public Property DoNotRepeatImageAnimations As Boolean
@@ -3253,8 +3451,8 @@ Public Class EffectBase
             e.LeftImage.Path = p.SpecifiedCombinePath(imageDirectory, e.LeftImage.Path, "Image will not be loaded.")
             p.SpecifiedFileExists(e.LeftImage.Path)
         End If
-        e.Duration = p.ParseDouble(5, 0, 300)
-        e.RepeatDelay = p.ParseDouble(0, 0, 300)
+        e.Duration = TimeSpan.FromSeconds(p.ParseDouble(5, 0, 300))
+        e.RepeatDelay = TimeSpan.FromSeconds(p.ParseDouble(0, 0, 300))
         e.PlacementDirectionRight = p.Map(DirectionFromIni, Direction.Random)
         e.CenteringRight = p.Map(DirectionFromIni, Direction.Random)
         e.PlacementDirectionLeft = p.Map(DirectionFromIni, Direction.Random)
@@ -3287,8 +3485,8 @@ Public Class EffectBase
             Quoted(BehaviorName),
             Quoted(Path.GetFileName(RightImage.Path)),
             Quoted(Path.GetFileName(LeftImage.Path)),
-            Duration.ToString(CultureInfo.InvariantCulture),
-            RepeatDelay.ToString(CultureInfo.InvariantCulture),
+            Duration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
+            RepeatDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture),
             PlacementDirectionRight.ToIniString(),
             CenteringRight.ToIniString(),
             PlacementDirectionLeft.ToIniString(),
@@ -3339,20 +3537,48 @@ Public Class Effect
         End Get
     End Property
 
-    Private _externalStartTime As TimeSpan
-    Private _internalStartTime As TimeSpan
+    Private ReadOnly _externalStartTime As TimeSpan
+    Private ReadOnly _internalStartTime As TimeSpan
     Private _currentTime As TimeSpan
     Private _lastUpdateTime As TimeSpan
 
+    Private _desiredDuration As TimeSpan?
     Public Property DesiredDuration As TimeSpan?
-    Friend _expired As Boolean
+        Get
+            Return _desiredDuration
+        End Get
+        Set(value As TimeSpan?)
+            If value Is Nothing Then
+                _desiredDuration = value
+            Else
+                _desiredDuration = Argument.EnsureNonnegative(value.Value, "value")
+            End If
+        End Set
+    End Property
+    Private _expired As Boolean
 
-    Public Property TopLeftLocation As Point
-    Private initialLocationOffset As Vector2F
+    Public Property TopLeftLocation As Vector2
+    Private ReadOnly initialLocationOffset As Vector2F
     Public Property FacingLeft As Boolean
     Public Property BeingDragged As Boolean Implements IDraggableSprite.Drag
+    Private _placementDirection As Direction
     Public Property PlacementDirection As Direction
+        Get
+            Return _placementDirection
+        End Get
+        Set(value As Direction)
+            _placementDirection = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
+    Private _centering As Direction
     Public Property Centering As Direction
+        Get
+            Return _centering
+        End Get
+        Set(value As Direction)
+            _centering = Argument.EnsureEnumIsValid(value, "value")
+        End Set
+    End Property
 
     Private ReadOnly locationProvider As Func(Of Vector2F)
     Private ReadOnly sizeProvider As Func(Of Vector2)
@@ -3402,9 +3628,8 @@ Public Class Effect
         End If
     End Sub
 
-    Public Function Center() As Point
-        Return New Point(CInt(Me.TopLeftLocation.X + (CurrentImageSize.Width / 2)),
-                         CInt(Me.TopLeftLocation.Y + (CurrentImageSize.Height / 2)))
+    Public Function Center() As Vector2F
+        Return TopLeftLocation + New Vector2F(CurrentImageSize) / 2
     End Function
 
     Public ReadOnly Property FacingRight As Boolean Implements ISprite.FacingRight
@@ -3419,7 +3644,7 @@ Public Class Effect
         End Get
     End Property
 
-    Public ReadOnly Property CurrentImageSize() As Size
+    Public ReadOnly Property CurrentImageSize As Size
         Get
             Return If(FacingLeft, Base.LeftImage.Size, Base.RightImage.Size)
         End Get
@@ -3428,11 +3653,11 @@ Public Class Effect
     Public Sub Start(_startTime As TimeSpan) Implements ISprite.Start
         If locationProvider IsNot Nothing AndAlso sizeProvider IsNot Nothing Then
             TopLeftLocation = GetEffectLocation(CurrentImageSize,
-                                              PlacementDirection,
-                                              locationProvider() + initialLocationOffset,
-                                              sizeProvider(),
-                                              Centering,
-                                              Context.ScaleFactor)
+                                                PlacementDirection,
+                                                locationProvider() + initialLocationOffset,
+                                                sizeProvider(),
+                                                Centering,
+                                                Context.ScaleFactor)
         End If
         Update(_startTime)
     End Sub
@@ -3446,11 +3671,11 @@ Public Class Effect
         End While
         If Base.Follow Then
             TopLeftLocation = GetEffectLocation(CurrentImageSize,
-                                              PlacementDirection,
-                                              locationProvider(),
-                                              sizeProvider(),
-                                              Centering,
-                                              Context.ScaleFactor)
+                                                PlacementDirection,
+                                                locationProvider(),
+                                                sizeProvider(),
+                                                Centering,
+                                                Context.ScaleFactor)
         ElseIf BeingDragged Then
             TopLeftLocation = _context.CursorLocation - New Vector2(CurrentImageSize) / 2
         End If
@@ -3512,7 +3737,7 @@ Public Class Effect
         Get
             Dim width = CInt(CurrentImageSize.Width * Context.ScaleFactor)
             Dim height = CInt(CurrentImageSize.Height * Context.ScaleFactor)
-            Return New Rectangle(TopLeftLocation, New Size(width, height))
+            Return New Rectangle(TopLeftLocation.X, TopLeftLocation.Y, width, height)
         End Get
     End Property
 
@@ -3540,64 +3765,56 @@ Public Class HouseBase
     Friend OptionsForm As HouseOptionsForm
 
     Private ReadOnly _directory As String
-    Public ReadOnly Property Directory() As String
+    Public ReadOnly Property Directory As String
         Get
             Return _directory
         End Get
     End Property
 
-    Private _doorPosition As Point
-    Public Property DoorPosition() As Point
-        Get
-            Return _doorPosition
-        End Get
-        Set(value As Point)
-            _doorPosition = value
-        End Set
-    End Property
+    Public Property DoorPosition As Vector2
 
     Private _cycleInterval As TimeSpan = TimeSpan.FromMinutes(5)
-    Public Property CycleInterval() As TimeSpan
+    Public Property CycleInterval As TimeSpan
         Get
             Return _cycleInterval
         End Get
         Set(value As TimeSpan)
-            _cycleInterval = value
+            _cycleInterval = Argument.EnsurePositive(value, "value")
         End Set
     End Property
 
     Private _minimumPonies As Integer = 1
-    Public Property MinimumPonies() As Integer
+    Public Property MinimumPonies As Integer
         Get
             Return _minimumPonies
         End Get
         Set(value As Integer)
-            _minimumPonies = value
+            _minimumPonies = Argument.EnsurePositive(value, "value")
         End Set
     End Property
 
     Private _maximumPonies As Integer = 50
-    Public Property MaximumPonies() As Integer
+    Public Property MaximumPonies As Integer
         Get
             Return _maximumPonies
         End Get
         Set(value As Integer)
-            _maximumPonies = value
+            _maximumPonies = Argument.EnsurePositive(value, "value")
         End Set
     End Property
 
     Private _bias As Decimal = 0.5D
-    Public Property Bias() As Decimal
+    Public Property Bias As Decimal
         Get
             Return _bias
         End Get
         Set(value As Decimal)
-            _bias = value
+            _bias = Argument.EnsureInRangeInclusive(value, "value", 0D, 1D)
         End Set
     End Property
 
     Private ReadOnly _visitors As New List(Of String)
-    Public ReadOnly Property Visitors() As List(Of String)
+    Public ReadOnly Property Visitors As List(Of String)
         Get
             Return _visitors
         End Get
@@ -3617,6 +3834,7 @@ Public Class HouseBase
     End Sub
 
     Private Sub LoadFromIni()
+        ' TODO: Migrate to relaxed parser.
         Dim fullDirectory = Path.Combine(RootDirectory, Directory)
         Dim imageFilename As String = Nothing
         Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
@@ -3644,8 +3862,8 @@ Public Class HouseBase
                             RightImage.Path = imageFilename
                         End If
                     Case "door"
-                        DoorPosition = New Point(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
-                                         Integer.Parse(columns(2), CultureInfo.InvariantCulture))
+                        DoorPosition = New Vector2(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
+                                                   Integer.Parse(columns(2), CultureInfo.InvariantCulture))
                     Case "cycletime"
                         CycleInterval = TimeSpan.FromSeconds(Integer.Parse(columns(1), CultureInfo.InvariantCulture))
                     Case "minspawn"
@@ -3729,7 +3947,7 @@ Public Class House
     Public Sub Teleport()
         ' TODO: Change this to also respect the exclusion region.
         Dim region = Options.GetAllowedArea()
-        TopLeftLocation = New Point(
+        TopLeftLocation = New Vector2(
             CInt(region.X + Rng.NextDouble() * (region.Width - CurrentImageSize.Width)),
             CInt(region.Y + Rng.NextDouble() * (region.Height - CurrentImageSize.Height)))
     End Sub
@@ -3775,7 +3993,7 @@ Public Class House
             recallExpiringPonies.Remove(pony)
         Next
         If recallingPonies.Count > 0 Then
-            Dim destination = New Vector2(TopLeftLocation + New Size(HouseBase.DoorPosition))
+            Dim destination = TopLeftLocation + HouseBase.DoorPosition
             For Each pony In recallingPonies
                 pony.DestinationOverride = destination
                 If pony.AtDestination Then recallExpiringPonies.Add(pony, currentTime)
@@ -3814,7 +4032,7 @@ Public Class House
         End If
 
         Dim ponyToDeploy = New Pony(Context, baseToDeploy)
-        ponyToDeploy.Location = New Vector2(TopLeftLocation + New Size(HouseBase.DoorPosition))
+        ponyToDeploy.Location = TopLeftLocation + HouseBase.DoorPosition
         AddHandler ponyToDeploy.Expired, Sub() StopTrackingPony(ponyToDeploy)
 
         Context.PendingSprites.Add(ponyToDeploy)
