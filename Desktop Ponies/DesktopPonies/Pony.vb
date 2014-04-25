@@ -830,7 +830,7 @@ Public Class Behavior
             Return _followOffset
         End Get
         Set(value As FollowOffsetType)
-            value = Argument.EnsureEnumIsValid(value, "value")
+            _followOffset = Argument.EnsureEnumIsValid(value, "value")
         End Set
     End Property
 
