@@ -3353,6 +3353,13 @@ Public Class EffectBase
             _behaviorName = Argument.EnsureNotNull(value, "value")
         End Set
     End Property
+    Private ReadOnly behaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = BehaviorName)
+    Public ReadOnly Property Behavior As Behavior
+        Get
+            If ParentPonyBase Is Nothing Then Return Nothing
+            Return ParentPonyBase.Behaviors.OnlyOrDefault(behaviorNamePredicate)
+        End Get
+    End Property
     Public Property ParentPonyBase As PonyBase
     Private _leftImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
     Private _rightImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}

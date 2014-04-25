@@ -39,9 +39,9 @@
         Bind(Function() Edited.CenteringLeft, LeftCenterComboBox)
         Bind(Function() Edited.CenteringRight, RightCenterComboBox)
         Bind(Function() Edited.LeftImage.Path, LeftImageFileSelector, LeftImageViewer,
-             BehaviorComboBox, Function() Edited.BehaviorName, True)
+             BehaviorComboBox, Function() Edited.Behavior, True)
         Bind(Function() Edited.RightImage.Path, RightImageFileSelector, RightImageViewer,
-             BehaviorComboBox, Function() Edited.BehaviorName, False)
+             BehaviorComboBox, Function() Edited.Behavior, False)
     End Sub
 
     Protected Overrides Sub ChangeItem()
@@ -61,7 +61,13 @@
         EffectBase.TryLoad(Source.Text, PonyBasePath, Base, e, parseIssues)
         Edited = e
 
-        Dim duration As TimeSpan? = If(Edited.Duration = TimeSpan.Zero, Nothing, Edited.Duration)
+        Dim duration As TimeSpan?
+        If Edited.Duration <> TimeSpan.Zero Then
+            duration = Edited.Duration
+        Else
+            Dim behavior = Edited.Behavior
+            If behavior IsNot Nothing Then duration = behavior.MinDuration
+        End If
         LeftImageViewer.Placement = Edited.PlacementDirectionLeft
         LeftImageViewer.Centering = Edited.CenteringLeft
         LeftImageViewer.FixedAnimationDuration = duration

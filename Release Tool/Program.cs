@@ -67,11 +67,9 @@
                 var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png")).
                     Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
                 // Ignore any images involved in effects, as the transparent borders may be used for alignment.
-                var imagesToIgnore = ponyBase.Effects.Select(e =>
-                {
-                    var behavior = ponyBase.Behaviors.Single(b => b.Name == e.BehaviorName);
-                    return new string[] { e.LeftImage.Path, e.RightImage.Path, behavior.LeftImage.Path, behavior.RightImage.Path };
-                }).SelectMany(images => images).ToArray();
+                var imagesToIgnore = ponyBase.Effects.Select(
+                    e => new string[] { e.LeftImage.Path, e.RightImage.Path, e.Behavior.LeftImage.Path, e.Behavior.RightImage.Path }).
+                    SelectMany(images => images).ToArray();
                 var imageFilePathsToUse = new HashSet<string>(imageFilePaths, PathEquality.Comparer);
                 imageFilePathsToUse.ExceptWith(imagesToIgnore);
                 var imageCropInfo = new Dictionary<string, Point>(PathEquality.Comparer);

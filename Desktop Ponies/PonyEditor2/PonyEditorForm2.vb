@@ -734,7 +734,7 @@ Public Class PonyEditorForm2
         Else
             Dim effectItem = TryCast(e.Item, EffectBase)
             If effectItem IsNot Nothing Then
-                previewStartBehavior = ref.PonyBase.Behaviors.SingleOrDefault(Function(b) b.Name = effectItem.BehaviorName)
+                previewStartBehavior = effectItem.Behavior
             End If
         End If
         OpenTab(New PageRef(ref.PonyBase))

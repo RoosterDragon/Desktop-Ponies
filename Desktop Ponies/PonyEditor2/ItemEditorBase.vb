@@ -260,17 +260,17 @@ Public Class ItemEditorBase
 
     Protected Sub Bind(memberAccessExpression As Expressions.Expression(Of Func(Of String)), fileSelector As FileSelector,
                    effectImageViewer As EffectImageViewer, behaviorComboBox As ComboBox,
-                   getBehaviorName As Func(Of CaseInsensitiveString), useLeftImage As Boolean)
+                   getBehavior As Func(Of Behavior), useLeftImage As Boolean)
         Argument.EnsureNotNull(effectImageViewer, "effectImageViewer")
         Argument.EnsureNotNull(behaviorComboBox, "behaviorComboBox")
-        Argument.EnsureNotNull(getBehaviorName, "getBehaviorName")
+        Argument.EnsureNotNull(getBehavior, "getBehavior")
         Bind(memberAccessExpression, fileSelector)
 
         Dim behaviorImagePath As String = Nothing
         Dim effectImagePath As String = Nothing
         Dim refreshImageViewer =
             Sub()
-                Dim behavior = Base.Behaviors.OnlyOrDefault(Function(b) b.Name = getBehaviorName())
+                Dim behavior = getBehavior()
                 Dim newBehaviorImagePath As String = Nothing
                 If behavior IsNot Nothing Then newBehaviorImagePath = If(useLeftImage, behavior.LeftImage, behavior.RightImage).Path
                 If Not PathEquality.Equals(behaviorImagePath, newBehaviorImagePath) OrElse

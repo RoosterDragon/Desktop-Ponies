@@ -11,12 +11,20 @@ Public Class AnimatedImageViewer
         Set(value As TimeSpan?)
             _fixedAnimationDuration = value
             Time = TimeSpan.Zero
-            Invalidate()
         End Set
     End Property
+    Private _time As TimeSpan
     <Description("The time index into the animated image.")>
     <DefaultValue(0)>
     Protected Property Time As TimeSpan
+        Get
+            Return _time
+        End Get
+        Set(value As TimeSpan)
+            _time = value
+            Invalidate()
+        End Set
+    End Property
     Private WithEvents animationTimer As New Timer() With {.Interval = 33}
     Private _image As AnimatedImage(Of BitmapFrame)
     <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -26,9 +34,8 @@ Public Class AnimatedImageViewer
         End Get
         Set(value As AnimatedImage(Of BitmapFrame))
             _image = value
-            Time = TimeSpan.Zero
             If AutoSize Then Size = PreferredSize
-            Invalidate()
+            Time = TimeSpan.Zero
         End Set
     End Property
     <Description("Indicates whether the image should be animated, or else displayed statically.")>
@@ -86,9 +93,9 @@ Public Class AnimatedImageViewer
             loopTime = FixedAnimationDuration.Value
         End If
         If TimeSpan.FromMilliseconds(animationTimer.Interval) > loopTime Then
-            Time = TimeSpan.Zero
+            _time = TimeSpan.Zero
         ElseIf Time > loopTime Then
-            Time -= loopTime
+            _time -= loopTime
         End If
 
         Dim bitmap = image(Time).Image
@@ -101,7 +108,6 @@ Public Class AnimatedImageViewer
 
     Private Sub animationTimer_Tick(sender As Object, e As EventArgs) Handles animationTimer.Tick
         Time += TimeSpan.FromMilliseconds(animationTimer.Interval)
-        Invalidate()
     End Sub
 
     Private Sub AnimatedImageViewer_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
