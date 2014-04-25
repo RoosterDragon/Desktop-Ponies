@@ -10,17 +10,30 @@
     public static class ControlExtensions
     {
         /// <summary>
+        /// Ensures the control is not disposed or being disposed.
+        /// </summary>
+        /// <param name="control">The control to verify as not having been disposed.</param>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
+        private static void EnsureNotDisposed(Control control)
+        {
+            if (control.Disposing || control.IsDisposed)
+                throw new ObjectDisposedException(control.GetType().FullName);
+        }
+
+        /// <summary>
         /// Efficiently executes the specified method on the thread that owns the control's underlying window handle.
         /// </summary>
         /// <param name="control">The control to invoke upon.</param>
         /// <param name="method">The method to execute.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="method"/> is null.
         /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, MethodInvoker method)
         {
             Argument.EnsureNotNull(control, "control");
             Argument.EnsureNotNull(method, "method");
+            EnsureNotDisposed(control);
             if (control.InvokeRequired)
                 control.SafeInvoke(method);
             else
@@ -34,11 +47,13 @@
         /// <param name="handler">The event handler to execute.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler)
         {
             Argument.EnsureNotNull(control, "control");
             Argument.EnsureNotNull(handler, "handler");
+            EnsureNotDisposed(control);
             if (control.InvokeRequired)
                 control.SafeInvoke(handler);
             else
@@ -53,11 +68,13 @@
         /// <param name="sender">The source of the event.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler, object sender)
         {
             Argument.EnsureNotNull(control, "control");
             Argument.EnsureNotNull(handler, "handler");
+            EnsureNotDisposed(control);
             if (control.InvokeRequired)
                 control.SafeInvoke(handler, sender);
             else
@@ -73,11 +90,13 @@
         /// <param name="e">Data about the event.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
         /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, EventHandler handler, object sender, EventArgs e)
         {
             Argument.EnsureNotNull(control, "control");
             Argument.EnsureNotNull(handler, "handler");
+            EnsureNotDisposed(control);
             if (control.InvokeRequired)
                 control.SafeInvoke(handler, sender, e);
             else
@@ -92,11 +111,13 @@
         /// <param name="state">An object containing information to be used by the callback method.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="callback"/> is null.
         /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
         public static void SmartInvoke(this Control control, WaitCallback callback, object state)
         {
             Argument.EnsureNotNull(control, "control");
             Argument.EnsureNotNull(callback, "callback");
+            EnsureNotDisposed(control);
             if (control.InvokeRequired)
                 control.SafeInvoke(callback, state);
             else
