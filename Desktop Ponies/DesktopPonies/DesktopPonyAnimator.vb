@@ -30,10 +30,10 @@ Public Class DesktopPonyAnimator
         ownerControl = owner
 
         If ownerControl IsNot Nothing AndAlso Options.EnablePonyLogs AndAlso Not OperatingSystemInfo.IsMacOSX Then
-            ownerControl.SmartInvoke(Sub()
-                                         spriteDebugForm = New SpriteDebugForm()
-                                         spriteDebugForm.Show(ownerControl)
-                                     End Sub)
+            ownerControl.TryInvoke(Sub()
+                                       spriteDebugForm = New SpriteDebugForm()
+                                       spriteDebugForm.Show(ownerControl)
+                                   End Sub)
             AddHandler spriteDebugForm.Disposed, Sub() spriteDebugForm = Nothing
         End If
 
@@ -169,7 +169,7 @@ Public Class DesktopPonyAnimator
             menuItems.AddLast(New SimpleContextMenuItem(
                               "Show Options",
                               Sub()
-                                  ownerControl.SmartInvoke(
+                                  ownerControl.TryInvoke(
                                       Sub()
                                           If optionsForm Is Nothing Then
                                               Dim currentScale = Options.ScaleFactor
@@ -195,7 +195,7 @@ Public Class DesktopPonyAnimator
                 New SimpleContextMenuItem(
                     Nothing,
                     Sub()
-                        ownerControl.SmartInvoke(
+                        ownerControl.TryInvoke(
                             Sub()
                                 If houseOptionsForms.ContainsKey(selectedHouse.HouseBase) Then
                                     houseOptionsForms(selectedHouse.HouseBase).BringToFront()
@@ -250,12 +250,12 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Sub UpdateDebugForm(form As SpriteDebugForm)
-        form.SmartInvoke(Sub() form.UpdateSprites(Sprites))
+        form.TryInvoke(Sub() form.UpdateSprites(Sprites))
     End Sub
 
     Public Overrides Sub Finish()
         If spriteDebugForm IsNot Nothing Then
-            spriteDebugForm.SmartInvoke(AddressOf spriteDebugForm.Close)
+            spriteDebugForm.TryInvoke(AddressOf spriteDebugForm.Close)
             spriteDebugForm = Nothing
         End If
         MyBase.Finish()
@@ -325,8 +325,8 @@ Public Class DesktopPonyAnimator
     Protected Overrides Sub Dispose(disposing As Boolean)
         MyBase.Dispose(disposing)
         If disposing Then
-            If optionsForm IsNot Nothing Then ownerControl.SmartInvoke(AddressOf optionsForm.Dispose)
-            If spriteDebugForm IsNot Nothing Then ownerControl.SmartInvoke(AddressOf spriteDebugForm.Dispose)
+            If optionsForm IsNot Nothing Then ownerControl.TryInvoke(AddressOf optionsForm.Dispose)
+            If spriteDebugForm IsNot Nothing Then ownerControl.TryInvoke(AddressOf spriteDebugForm.Dispose)
         End If
     End Sub
 End Class

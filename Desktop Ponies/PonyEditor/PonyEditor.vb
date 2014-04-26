@@ -8,7 +8,7 @@ Public Class PonyEditor
     Private editorAnimator As EditorPonyAnimator
     Private editorInterface As ISpriteCollectionView
 
-    Private ReadOnly worker As New IdleWorker(Me)
+    Private worker As IdleWorker
     Private ReadOnly context As New PonyContext()
     Private ponies As PonyCollection
     Private ponyImageList As ImageList
@@ -120,6 +120,8 @@ Public Class PonyEditor
         editorInterface.Topmost = True
         editorAnimator = New EditorPonyAnimator(editorInterface, ponies, context, Me)
         AddHandler editorAnimator.AnimationFinished, AddressOf PonyEditorAnimator_AnimationFinished
+
+        worker = New IdleWorker(Me)
 
         Enabled = True
         UseWaitCursor = False
@@ -1247,7 +1249,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub PonyEditorAnimator_AnimationFinished(sender As Object, e As EventArgs)
-        SmartInvoke(AddressOf Close)
+        TryInvoke(AddressOf Close)
     End Sub
 
     Private Sub PonyEditor_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing

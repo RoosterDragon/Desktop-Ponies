@@ -11,7 +11,7 @@ Public Class MainForm
     Private initialized As Boolean
     Private loading As Boolean
     Private ReadOnly loadWatch As New Diagnostics.Stopwatch()
-    Private ReadOnly worker As New IdleWorker(Me)
+    Private worker As IdleWorker
 
     Private oldWindowState As FormWindowState
     Private layoutPendingFromRestore As Boolean
@@ -90,6 +90,7 @@ Public Class MainForm
             End If
         End If
 
+        worker = New IdleWorker(Me)
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
     End Sub
 
@@ -195,12 +196,12 @@ Public Class MainForm
         ' Wait for ponies and houses to load.
         worker.WaitOnAllTasks()
         If Not ponies.Bases.Any() Then
-            SmartInvoke(Sub()
-                            MessageBox.Show(Me, "Sorry, but you don't seem to have any usable ponies installed. " &
-                                            "There should have at least been a 'Derpy' folder in the same spot as this program.",
-                                            "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                            GoButton.Enabled = False
-                        End Sub)
+            If Not TryInvoke(Sub()
+                                 MessageBox.Show(Me, "Sorry, but you don't seem to have any usable ponies installed. " &
+                                                 "There should have at least been a 'Derpy' folder in the same spot as this program.",
+                                                 "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                                 GoButton.Enabled = False
+                             End Sub) Then Return
         End If
 
         ' Load pony counts.
@@ -762,7 +763,7 @@ Public Class MainForm
     End Sub
 
     Private Sub PonyStartup(createAnimator As Func(Of DesktopPonyAnimator), startupPonies As IEnumerable(Of Pony))
-        If Globals.InScreensaverMode Then SmartInvoke(AddressOf CreateScreensaverForms)
+        If Globals.InScreensaverMode Then TryInvoke(AddressOf CreateScreensaverForms)
 
         AddHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
         ponyViewer = Options.GetInterface()
@@ -784,7 +785,7 @@ Public Class MainForm
 
         animator = createAnimator()
         AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
-                                                   Sub() SmartInvoke(
+                                                   Sub() TryInvoke(
                                                        Sub()
                                                            Dim exitRequest = animator.ExitRequested
                                                            PonyShutdown()
@@ -834,14 +835,12 @@ Public Class MainForm
     End Sub
 
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
-        If Not Disposing AndAlso Not IsDisposed Then
-            SmartInvoke(Sub()
-                            PonyShutdown()
-                            MessageBox.Show(Me, "You will be returned to the menu because your screen resolution has changed.",
-                                            "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                            Show()
-                        End Sub)
-        End If
+        TryInvoke(Sub()
+                      PonyShutdown()
+                      MessageBox.Show(Me, "You will be returned to the menu because your screen resolution has changed.",
+                                          "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                      Show()
+                  End Sub)
     End Sub
 
     Private Sub LoadPoniesAsyncEnd(cancelled As Boolean, Optional uiAction As Action = Nothing)

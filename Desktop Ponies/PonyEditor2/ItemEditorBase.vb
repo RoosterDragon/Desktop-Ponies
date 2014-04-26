@@ -2,7 +2,7 @@
 Imports System.IO
 
 Public Class ItemEditorBase
-    Private ReadOnly worker As New IdleWorker(Me)
+    Private worker As IdleWorker
     Private ReadOnly idleFocusControl As New Control(Me, Nothing) With {.TabStop = False}
     Private lastFocusedControl As Control
 
@@ -86,6 +86,10 @@ Public Class ItemEditorBase
     End Property
     Public Event DirtinessChanged As EventHandler
     Public Event AssetFileIOPerformed As EventHandler
+
+    Private Sub ItemEditorBase_Load(sender As Object, e As EventArgs) Handles Me.Load
+        worker = New IdleWorker(Me)
+    End Sub
 
     Public Sub NewItem(ponyBase As PonyBase, item As IPonyIniSourceable)
         SetupItem(ponyBase, item)

@@ -10,163 +10,92 @@
     public static class ControlExtensions
     {
         /// <summary>
-        /// Ensures the control is not disposed or being disposed.
+        /// Attempts to execute the specified action on the thread that owns the specified control, if the control is in a valid state.
         /// </summary>
-        /// <param name="control">The control to verify as not having been disposed.</param>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        private static void EnsureNotDisposed(Control control)
-        {
-            if (control.Disposing || control.IsDisposed)
-                throw new ObjectDisposedException(control.GetType().FullName);
-        }
-
-        /// <summary>
-        /// Efficiently executes the specified method on the thread that owns the control's underlying window handle.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="method">The method to execute.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="method"/> is null.
+        /// <param name="control">The control in whose thread context the specified action should be executed.</param>
+        /// <param name="action">The action to execute on the owning thread of the specified control. If the calling thread owns the
+        /// control the delegate is executed immediately, otherwise the action is invoked across threads.</param>
+        /// <returns>A value indicating whether the action was executed. If the control lacks a valid window handle by the time the action
+        /// is ready to execute, then the action is not executed and the return value is false; otherwise it is true.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="action"/> is null.
         /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        public static void SmartInvoke(this Control control, MethodInvoker method)
+        public static bool TryInvoke(this Control control, Action action)
         {
             Argument.EnsureNotNull(control, "control");
-            Argument.EnsureNotNull(method, "method");
-            EnsureNotDisposed(control);
-            if (control.InvokeRequired)
-                control.SafeInvoke(method);
-            else
-                method();
+            Argument.EnsureNotNull(action, "action");
+            // When creating or recreating its handle, a control locks on itself. We'll lock on the control to prevent race conditions
+            // where the handle is swapped out from under us whilst we are determining if we are in a cross-thread call or not. This is
+            // required because InvokeRequired returns false is the handle has yet to be created, as well as if we are on the UI thread.
+            bool isCrossThreadCall;
+            lock (control)
+            {
+                // If the control lacks an accessible window handle then we can't run our actions.
+                if (!control.IsHandleCreated)
+                    return false;
+                // We know the the handle is created, so we can rely on InvokeRequired to accurately report if this is a cross-thread call.
+                isCrossThreadCall = control.InvokeRequired;
+            }
+            if (isCrossThreadCall)
+                return CrossThreadInvoke(control, action);
+            // If invoking is not required, we know we are on the UI thread with a valid control, so we can execute the specified actions
+            // directly.
+            action();
+            return true;
         }
 
         /// <summary>
-        /// Efficiently executes the specified event handler on the thread that owns the control's underlying window handle.
+        /// Attempts to execute the specified action on the thread that owns the specified control, if the control is in a valid state.
         /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="handler">The event handler to execute.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        public static void SmartInvoke(this Control control, EventHandler handler)
+        /// <param name="control">The control in whose thread context the specified action should be executed.</param>
+        /// <param name="action">The action to execute on the owning thread of the specified control. The action is invoked across threads.
+        /// </param>
+        /// <returns>A value indicating whether the action was executed. If the control has been disposed at the time the action is ready
+        /// to execute then it will not execute and the return value is false; otherwise, it is true.</returns>
+        private static bool CrossThreadInvoke(Control control, Action action)
         {
-            Argument.EnsureNotNull(control, "control");
-            Argument.EnsureNotNull(handler, "handler");
-            EnsureNotDisposed(control);
-            if (control.InvokeRequired)
-                control.SafeInvoke(handler);
-            else
-                handler(control, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// Efficiently executes the specified event handler on the thread that owns the control's underlying window handle.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="handler">The event handler to execute.</param>
-        /// <param name="sender">The source of the event.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        public static void SmartInvoke(this Control control, EventHandler handler, object sender)
-        {
-            Argument.EnsureNotNull(control, "control");
-            Argument.EnsureNotNull(handler, "handler");
-            EnsureNotDisposed(control);
-            if (control.InvokeRequired)
-                control.SafeInvoke(handler, sender);
-            else
-                handler(sender, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// Efficiently executes the specified event handler on the thread that owns the control's underlying window handle.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="handler">The event handler to execute.</param>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">Data about the event.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="handler"/> is null.
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        public static void SmartInvoke(this Control control, EventHandler handler, object sender, EventArgs e)
-        {
-            Argument.EnsureNotNull(control, "control");
-            Argument.EnsureNotNull(handler, "handler");
-            EnsureNotDisposed(control);
-            if (control.InvokeRequired)
-                control.SafeInvoke(handler, sender, e);
-            else
-                handler(sender, e);
-        }
-
-        /// <summary>
-        /// Efficiently executes the specified callback on the thread that owns the control's underlying window handle.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="callback">The callback to execute.</param>
-        /// <param name="state">An object containing information to be used by the callback method.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.-or-<paramref name="callback"/> is null.
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException"><paramref name="control"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        public static void SmartInvoke(this Control control, WaitCallback callback, object state)
-        {
-            Argument.EnsureNotNull(control, "control");
-            Argument.EnsureNotNull(callback, "callback");
-            EnsureNotDisposed(control);
-            if (control.InvokeRequired)
-                control.SafeInvoke(callback, state);
-            else
-                callback(state);
-        }
-
-        /// <summary>
-        /// Invokes a method synchronously but using a begin/end pair in order to ensure the wait handle is disposed.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="method">The method to execute.</param>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        private static void SafeInvoke(this Control control, Delegate method)
-        {
-            EndAndDisposeAsyncResult(control, control.BeginInvoke(method));
-        }
-
-        /// <summary>
-        /// Invokes a method synchronously but using a begin/end pair in order to ensure the wait handle is disposed.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="method">The method to execute.</param>
-        /// <param name="args">Arguments to pass to the method.</param>
-        /// <exception cref="T:System.InvalidOperationException">No appropriate window handle can be found.</exception>
-        private static void SafeInvoke(this Control control, Delegate method, params object[] args)
-        {
-            EndAndDisposeAsyncResult(control, control.BeginInvoke(method, args));
-        }
-
-        /// <summary>
-        /// Calls EndInvoke on <paramref name="asyncResult"/> and disposes of the wait handle.
-        /// </summary>
-        /// <param name="control">The control to invoke upon.</param>
-        /// <param name="asyncResult">The async result on which to await a result.</param>
-        private static void EndAndDisposeAsyncResult(Control control, IAsyncResult asyncResult)
-        {
+            // On entering this method, we know implicitly the control has a valid window handle and a cross-thread call is required.
+            IAsyncResult asyncResult;
+            bool invoked = false;
             try
             {
+                // We use BeginInvoke so we can get access to the wait handle being used. The normal Invoke also uses a wait handle whilst
+                // it waits for the message to be processed but fails to release it, requiring that the handle be finalized. We'll step in
+                // and release it deterministically.
+                // The use of the MethodInvoker delegate here is intentional. The internal mechanism that process invoked calls will
+                // attempt to cast to this delegate (and several others) and invoke them directly which is faster than having to invoke a
+                // dynamic delegate. Despite having the same signature, an Action delegate cannot be cast to the MethodInvoker delegate.
+                asyncResult = control.BeginInvoke(new MethodInvoker(() =>
+                {
+                    // It is possible our request was posted, but that a message earlier in the queue destroys the control. Our request
+                    // will still be processed but the control will no longer be valid so we will not attempt to run the specified actions.
+                    if (control.IsDisposed)
+                        return;
+                    // The control is still valid and since we are on the UI thread, we can now safely run the actions without fear of
+                    // disposal.
+                    invoked = true;
+                    action();
+                }));
+            }
+            catch (InvalidOperationException)
+            {
+                // If a window handle no longer exists, the control was disposed before we could make our call to BeginInvoke.
+                return false;
+            }
+            try
+            {
+                // We need to wait on the completion of our action so our method completes synchronously.
                 control.EndInvoke(asyncResult);
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException)
             {
-                if (ex.ObjectName != control.GetType().Name)
-                    throw;
+                // The control can be disposed before we are able to wait on the result. We can ignore this as we have our flag to see if
+                // the action was executed.
             }
-            finally
-            {
-                asyncResult.AsyncWaitHandle.Dispose();
-            }
+            // Release the wait handle so it does not have to be finalized.
+            asyncResult.AsyncWaitHandle.Dispose();
+            // If we get this far, we know our wrapper method was executed but we need to use this flag in case we bailed from executing
+            // the specified actions because the control was disposed by the time our wrapper came to execute.
+            return invoked;
         }
 
         /// <summary>

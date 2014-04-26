@@ -34,7 +34,7 @@ Public Class EditorPonyAnimator
 
     Public Overrides Sub Start()
         PonyContext.Region = Rectangle.Empty
-        editor.SmartInvoke(AddressOf SetBounds)
+        editor.TryInvoke(AddressOf SetBounds)
         MyBase.Start()
     End Sub
 

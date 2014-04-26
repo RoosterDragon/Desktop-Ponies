@@ -201,20 +201,20 @@
                     {
                         owner.ApplicationInvoke(() =>
                         {
-                            RemoveQueuedClickHandler();
-                            item.Dispose();
+                            separator.Dispose();
+                            separator = null;
                             item = new ToolStripMenuItem();
                         });
-                        separator = null;
                     }
                     else if (!IsSeparator && value)
                     {
                         owner.ApplicationInvoke(() =>
                         {
-                            separator.Dispose();
+                            RemoveQueuedClickHandler();
+                            item.Dispose();
+                            item = null;
                             separator = new ToolStripSeparator();
                         });
-                        item = null;
                     }
                 }
             }
@@ -702,7 +702,7 @@
         /// <summary>
         /// Method call that renders the current sprite collection to the window.
         /// </summary>
-        private readonly MethodInvoker render;
+        private readonly Action render;
         /// <summary>
         /// Collection of sprites to be rendered.
         /// </summary>
@@ -778,11 +778,11 @@
         /// <summary>
         /// Sets the preventSelfClose variable to true.
         /// </summary>
-        private readonly MethodInvoker setPreventSelfCloseTrue;
+        private readonly Action setPreventSelfCloseTrue;
         /// <summary>
         /// Sets the preventSelfClose variable to false, and if a close is pending closes the form.
         /// </summary>
-        private readonly MethodInvoker setPreventSelfCloseFalse;
+        private readonly Action setPreventSelfCloseFalse;
 
         /// <summary>
         /// Gets or sets a value indicating whether the interface will be allowed to close itself. If the interface needs to close itself,
@@ -802,18 +802,6 @@
                     else
                         ApplicationInvoke(setPreventSelfCloseFalse);
             }
-        }
-        /// <summary>
-        /// Sets a value indicating whether the interface will be allowed to close itself.
-        /// </summary>
-        /// <param name="preventSelfClose">A value indicating whether the interface will be allowed to close itself.</param>
-        private void SetPreventSelfClose(bool preventSelfClose)
-        {
-            ApplicationInvoke(() =>
-            {
-                if (!(this.preventSelfClose = preventSelfClose) && closePending)
-                    Close();
-            });
         }
         /// <summary>
         /// Gets or sets the text associated with the form.
@@ -1135,10 +1123,12 @@
         /// <summary>
         /// Invokes a method synchronously on the main application thread.
         /// </summary>
-        /// <param name="method">The method to invoke. The method should take no parameters and return void.</param>
-        private void ApplicationInvoke(MethodInvoker method)
+        /// <param name="method">The method to invoke.</param>
+        /// <returns>A value indicating whether the method was executed, if not then it should be assumed the form has been disposed.
+        /// </returns>
+        private bool ApplicationInvoke(Action method)
         {
-            form.SmartInvoke(method);
+            return form.TryInvoke(method);
         }
 
         /// <summary>
@@ -1530,8 +1520,10 @@
         {
             EnsureNotDisposed();
             WinFormContextMenu menu = null;
-            ApplicationInvoke(() => menu = new WinFormContextMenu(this, menuItems));
-            contextMenus.AddLast(menu);
+            if (ApplicationInvoke(() => menu = new WinFormContextMenu(this, menuItems)))
+                contextMenus.AddLast(menu);
+            else
+                EnsureNotDisposed();
             return menu;
         }
 
@@ -1561,6 +1553,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Show()
         {
+            EnsureNotDisposed();
             ApplicationInvoke(() =>
             {
                 // TopMost interferes with initial window focus. To workaround this, we will only set it once the form has become visible.

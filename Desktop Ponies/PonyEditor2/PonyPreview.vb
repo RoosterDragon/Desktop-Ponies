@@ -6,7 +6,7 @@ Public Class PonyPreview
     Private ReadOnly editorForm As PonyEditorForm2
     Private ReadOnly ponies As PonyCollection
     Private ReadOnly context As PonyContext
-    Private ReadOnly worker As New IdleWorker(Me)
+    Private worker As IdleWorker
     Private editorAnimator As Editor2PonyAnimator
     Private editorInterface As ISpriteCollectionView
     Private previewPony As Pony
@@ -70,6 +70,7 @@ Public Class PonyPreview
         AddHandler editorInterface.Focused, Sub() RaiseEvent PreviewFocused(Me, EventArgs.Empty)
         AddHandler editorInterface.Unfocused, Sub() RaiseEvent PreviewUnfocused(Me, EventArgs.Empty)
         DetermineParentsAndScreenLocation(Me, EventArgs.Empty)
+        worker = New IdleWorker(Me)
         editorAnimator = New Editor2PonyAnimator(editorInterface, ponies, context, Me)
         editorAnimator.Start()
         loaded = True

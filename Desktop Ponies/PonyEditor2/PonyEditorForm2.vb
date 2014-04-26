@@ -7,7 +7,7 @@ Public Class PonyEditorForm2
     Private Const ValidationWarningIndex = 2
     Private Const ValidationOkIndex = 3
 
-    Private ReadOnly worker As New IdleWorker(Me)
+    Private worker As IdleWorker
     Private ReadOnly context As New PonyContext()
     Private ponies As PonyCollection
     Private ReadOnly nodeLookup As New Dictionary(Of String, TreeNode)()
@@ -104,6 +104,7 @@ Public Class PonyEditorForm2
         Dim screenArea = Screen.FromControl(Me).WorkingArea.Size
         Size = New Size(Math.Min(screenArea.Width, CInt(Width * 1.2)), Math.Min(screenArea.Height, CInt(Height * 1.2)))
         CenterToScreen()
+        worker = New IdleWorker(Me)
         worker.QueueTask(Sub()
                              Output.TabPages.Clear()
                              EnableWaitCursor(True)

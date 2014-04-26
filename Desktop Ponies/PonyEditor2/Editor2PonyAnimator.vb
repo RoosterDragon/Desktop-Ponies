@@ -35,7 +35,7 @@ Public Class Editor2PonyAnimator
 
     Public Sub ChangeEditorMenu(base As PonyBase)
         Dim behaviorItems = base.Behaviors.Select(
-            Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.SmartInvoke(Sub() preview.RunBehavior(b))))
+            Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.TryInvoke(Sub() preview.RunBehavior(b))))
         If behaviorItems.Any() Then
             Dim menuItems = New LinkedList(Of SimpleContextMenuItem)()
             menuItems.AddLast(New SimpleContextMenuItem("Run Behavior", behaviorItems))

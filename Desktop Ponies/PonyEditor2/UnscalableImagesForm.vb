@@ -61,16 +61,16 @@ Public Class UnscalableImagesForm
                         End Try
                     End Using
                     count += 1
-                    If Disposing OrElse IsDisposed Then Return
-                    If count Mod 10 = 0 Then SmartInvoke(Sub() CountLabel.Text = "Working... " & count & "/" & imagePaths.Count)
+                    If count Mod 10 = 0 Then
+                        If Not TryInvoke(Sub() CountLabel.Text = "Working... " & count & "/" & imagePaths.Count) Then Return
+                    End If
                 Next
                 unscalableImages.TrimExcess()
-                If Disposing OrElse IsDisposed Then Return
-                SmartInvoke(Sub()
-                                UpdateFilter()
-                                IgnoreListTextBox.Enabled = True
-                                FilterButton.Enabled = True
-                            End Sub)
+                If Not TryInvoke(Sub()
+                                     UpdateFilter()
+                                     IgnoreListTextBox.Enabled = True
+                                     FilterButton.Enabled = True
+                                 End Sub) Then Return
             End Sub)
     End Sub
 

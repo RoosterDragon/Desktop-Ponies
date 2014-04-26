@@ -8,8 +8,8 @@ Public Class IdleWorker
     ''' <summary>
     ''' A method that does nothing.
     ''' </summary>
-    Private Shared ReadOnly DummyCallback As New MethodInvoker(Sub()
-                                                               End Sub)
+    Private Shared ReadOnly DummyCallback As New Action(Sub()
+                                                        End Sub)
     ''' <summary>
     ''' Indicates if work should be done when idle, otherwise work will be asynchronously invoked.
     ''' </summary>
@@ -54,13 +54,15 @@ Public Class IdleWorker
     ''' </summary>
     ''' <param name="control">The control on which tasks are dependent.</param>
     ''' <exception cref="T:System.ArgumentNullException"><paramref name="control"/> is null.</exception>
-    ''' <exception cref="T:System.ArgumentException"><paramref name="control"/> has been disposed.</exception>
+    ''' <exception cref="T:System.ArgumentException"><paramref name="control"/> has no window handle.</exception>
     Public Sub New(control As Control)
         Me.control = Argument.EnsureNotNull(control, "control")
         AddHandler control.Disposed, AddressOf Control_Disposed
         If controlDisposed Then Throw New ArgumentException("control must not be disposed.", "control")
         If UseIdlePooling Then
-            control.SmartInvoke(Sub() AddHandler Application.Idle, AddressOf RunTask)
+            If Not control.TryInvoke(Sub() AddHandler Application.Idle, AddressOf RunTask) Then
+                Throw New ArgumentException("control must have a window handle.", "control")
+            End If
         End If
     End Sub
 
@@ -134,16 +136,11 @@ Public Class IdleWorker
                 If disposed OrElse controlDisposed Then Return
             End SyncLock
             ' We are on another thread, wait on the UI thread to finish processing our tasks.
-            Try
-                If UseIdlePooling Then
-                    empty.WaitOne()
-                Else
-                    control.SmartInvoke(DummyCallback)
-                End If
-            Catch ex As ObjectDisposedException
-                ' If the control is disposed after our check, we swallow the exception. We have finished waiting on tasks since the control
-                ' is closing down.
-            End Try
+            If UseIdlePooling Then
+                empty.WaitOne()
+            Else
+                control.TryInvoke(DummyCallback)
+            End If
         End If
     End Sub
 
