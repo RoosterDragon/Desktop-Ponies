@@ -22,6 +22,10 @@ The artwork is licensed under [Creative Commons Attribution-NonCommercial-ShareA
 
 The source code is available under the same license.
 
+## Documentation
+
+Some information about the file formats employed by the program can be found in the [technical documentation](techdoc.md).
+
 ## External Links
 
 * [Forums](http://desktopponies.bugs3.com/index.php) - Dedicated forums for disucssion of Desktop Ponies. If you need any assistance please post in the [support sub-forum](http://desktopponies.bugs3.com/viewforum.php?f=8).
