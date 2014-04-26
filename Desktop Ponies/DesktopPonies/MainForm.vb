@@ -186,6 +186,18 @@ Public Class MainForm
                              Array.Sort(selectionControls,
                                         Function(a, b) StringComparer.OrdinalIgnoreCase.Compare(
                                             a.PonyBase.Directory, b.PonyBase.Directory))
+                             Dim randomBaseIndex = -1
+                             For i = 0 To selectionControls.Length - 1
+                                 If Object.ReferenceEquals(selectionControls(i).PonyBase, ponies.RandomBase) Then
+                                     randomBaseIndex = i
+                                     Exit For
+                                 End If
+                             Next
+                             Dim randomBaseControl = selectionControls(randomBaseIndex)
+                             For i = randomBaseIndex To 1 Step -1
+                                 selectionControls(i) = selectionControls(i - 1)
+                             Next
+                             selectionControls(0) = randomBaseControl
                              For i = 0 To selectionControls.Length - 1
                                  PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
                              Next
@@ -317,12 +329,14 @@ Public Class MainForm
 #Region "Selection"
     Private Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel In selectionControlsFilteredVisible
+            If Object.ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
             ponyPanel.Count = 0
         Next
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
         For Each ponyPanel In selectionControlsFilteredVisible
+            If Object.ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
             ponyPanel.Count = 1
         Next
     End Sub
