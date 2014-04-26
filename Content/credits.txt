@@ -101,8 +101,9 @@ Contributors are broken down by character. If there was more than one contributo
 * DeathPony
 
 #### Apple Bloom
-* Pony Noia [All Other Images]
+* Pony Noia [Stand, Walking, Aww, Spin, PushUps, Dance]
 * The Coop [Skip]
+* Bot-chan [Gallop]
 
 #### Apple Bumpkin
 * Pony Noia
@@ -616,7 +617,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Midnyte [Stand, Walk, Scoot, Basket]
 * RainbowCrash [Stand]
 * The Coop [Skip]
-* Bot-chan [Fly]
+* Bot-chan [Fly, Gallop]
 
 #### Screw Loose
 * Bot-chan
@@ -721,6 +722,7 @@ Contributors are broken down by character. If there was more than one contributo
 * The Coop [Skip]
 * Cantorlot [HappyJump]
 * StarStep [Scoot]
+* Bot-chan [Gallop]
 
 #### Tank
 * Bot-chan
