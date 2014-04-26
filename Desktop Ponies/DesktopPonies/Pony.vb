@@ -21,23 +21,23 @@ End Interface
 Public NotInheritable Class Referential
     Private Sub New()
     End Sub
-    Public Shared Function CheckNotCircular(Of T)(propertyName As String, name As String, start As T, nextElement As Func(Of T, T),
-                                                  elementName As Func(Of T, IEquatable(Of String))) As ParseIssue
+    Public Shared Function CheckNotCircular(Of T As IPonyIniSerializable)(propertyName As String, name As String,
+                                                                          start As T, nextElement As Func(Of T, T)) As ParseIssue
         If String.IsNullOrEmpty(name) Then Return Nothing
         If start Is Nothing Then Return Nothing
         Dim currentElement = start
-        Dim currentName = elementName(currentElement)
+        Dim currentName = currentElement.Name
         Do While currentName IsNot Nothing
-            If currentName.Equals(name) Then
-                Return New ParseIssue(propertyName, name, "", "A circular loop has been detected.")
+            If currentName = name Then
+                Return New ParseIssue(propertyName, start.Name, "", "A circular loop has been detected.")
             End If
             Dim resolvedNextElement = nextElement(currentElement)
             If Object.ReferenceEquals(resolvedNextElement, currentElement) Then
-                Return New ParseIssue(propertyName, name, "", "A circular loop has been detected.")
+                Return New ParseIssue(propertyName, start.Name, "", "A circular loop has been detected.")
             End If
             currentElement = resolvedNextElement
             If currentElement Is Nothing Then Exit Do
-            currentName = elementName(currentElement)
+            currentName = currentElement.Name
         Loop
         Return Nothing
     End Function
@@ -1055,8 +1055,7 @@ Public Class Behavior
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
-                Referential.CheckNotCircular("Linked Behavior", Name, LinkedBehavior,
-                                             Function(b) b.LinkedBehavior, Function(b) b.Name),
+                Referential.CheckNotCircular("Linked Behavior", Name, LinkedBehavior, Function(b) b.LinkedBehavior),
                 Referential.CheckUnique("Start Speech", StartLineName, _base.Speeches.Select(Function(s) s.Name)),
                 Referential.CheckUnique("End Speech", EndLineName, _base.Speeches.Select(Function(s) s.Name)),
                 Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
