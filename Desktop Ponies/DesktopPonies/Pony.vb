@@ -1029,8 +1029,8 @@ Public Class Behavior
             TargetVector.Y.ToString(CultureInfo.InvariantCulture),
             Quoted(FollowTargetName),
             AutoSelectImagesOnFollow,
-            FollowStoppedBehaviorName,
-            FollowMovingBehaviorName,
+            Quoted(FollowStoppedBehaviorName),
+            Quoted(FollowMovingBehaviorName),
             Quoted(rightCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
                    rightCenter.Y.ToString(CultureInfo.InvariantCulture)),
             Quoted(leftCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
@@ -1153,7 +1153,7 @@ Public Class Speech
             Next
         End If
         Dim p As New StringCollectionParser(iniComponents,
-                                            {"Identifier", "Name", "Text", "Sound Files", "Skip", "Group"})
+                                            {"Identifier", "Name", "Speech Text", "Sound Files", "Skip", "Group"})
         p.NoParse()
         s.Name = If(named, p.NotNullOrWhiteSpace(Unnamed), p.NoParse())
         s.Text = p.NotNull()
@@ -3443,7 +3443,7 @@ Public Class EffectBase
                                              "Right Image", "Left Image", "Duration", "Repeat Delay",
                                              "Placement Right", "Centering Right",
                                              "Placement Left", "Centering Left",
-                                             "Follow", "Prevent Repeat"})
+                                             "Follow", "Prevent Animation Loop"})
         p.NoParse()
         e.Name = If(p.NotNullOrWhiteSpace(), "")
         e.BehaviorName = If(p.NotNullOrWhiteSpace(), "")
