@@ -30,9 +30,23 @@
             bool contentChanged = false;
             if (ConsoleReadYesNoQuit("Run image optimizers?"))
             {
-                CropImages(toolDirectory, contentDirectory);
-                contentChanged = CompressGifs(toolDirectory, contentDirectory) > 0 || contentChanged;
-                CompressPngs(toolDirectory, contentDirectory);
+                if (File.Exists(Path.Combine(toolDirectory, "gifsicle.exe")))
+                {
+                    CropImages(toolDirectory, contentDirectory);
+                    contentChanged = CompressGifs(toolDirectory, contentDirectory) > 0 || contentChanged;
+                }
+                else
+                {
+                    Console.WriteLine("Missing gifsicle.exe in current directory. Add a copy of this program to optimize GIFs.");
+                }
+                if (File.Exists(Path.Combine(toolDirectory, "pngout.exe")))
+                {
+                    CompressPngs(toolDirectory, contentDirectory);
+                }
+                else
+                {
+                    Console.WriteLine("Missing pngout.exe in current directory. Add a copy of this program to optimize PNGs.");
+                }
                 Console.WriteLine("Optimizing finished.");
                 Console.WriteLine();
             }
