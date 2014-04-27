@@ -172,7 +172,6 @@ Public Class DesktopPonyAnimator
                                   ownerControl.TryInvoke(
                                       Sub()
                                           If optionsForm Is Nothing Then
-                                              Dim currentScale = Options.ScaleFactor
                                               optionsForm = New OptionsForm()
                                               AddHandler optionsForm.FormClosed, Sub() optionsForm = Nothing
                                               optionsForm.Show(ownerControl)

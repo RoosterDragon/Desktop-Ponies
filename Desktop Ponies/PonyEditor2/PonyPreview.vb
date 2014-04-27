@@ -3,7 +3,6 @@ Imports System.Globalization
 
 Public Class PonyPreview
     Private loaded As Boolean
-    Private ReadOnly editorForm As PonyEditorForm2
     Private ReadOnly ponies As PonyCollection
     Private ReadOnly context As PonyContext
     Private worker As IdleWorker
@@ -19,8 +18,7 @@ Public Class PonyPreview
     Public Event PreviewFocused As EventHandler
     Public Event PreviewUnfocused As EventHandler
 
-    Public Sub New(editorForm As PonyEditorForm2, ponies As PonyCollection, context As PonyContext)
-        Me.editorForm = Argument.EnsureNotNull(editorForm, "editorForm")
+    Public Sub New(ponies As PonyCollection, context As PonyContext)
         Me.ponies = Argument.EnsureNotNull(ponies, "ponies")
         Me.context = Argument.EnsureNotNull(context, "context")
         InitializeComponent()

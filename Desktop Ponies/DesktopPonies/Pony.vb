@@ -2772,7 +2772,6 @@ Public Class Pony
             Dim base = repeatState.EffectBase
             Dim lastExternalStartTime = repeatState.LastExternalStartTime
             Dim lastInternalStartTime = repeatState.LastInternalStartTime
-            Dim externalStartTime = _lastUpdateTime
             Dim internalStartTime = lastInternalStartTime + base.RepeatDelay
             While _currentTime - internalStartTime >= TimeSpan.Zero
                 Dim offset = -_movement * CSng((_currentTime - internalStartTime).TotalMilliseconds / StepSize)
@@ -3543,7 +3542,6 @@ Public Class Effect
         End Get
     End Property
 
-    Private ReadOnly _externalStartTime As TimeSpan
     Private ReadOnly _internalStartTime As TimeSpan
     Private _currentTime As TimeSpan
     Private _lastUpdateTime As TimeSpan
@@ -3606,7 +3604,6 @@ Public Class Effect
         _context = Argument.EnsureNotNull(context, "context")
 
         _base = base
-        _externalStartTime = externalStartTime
         _internalStartTime = internalStartTime
         _lastUpdateTime = externalStartTime
         _currentTime = internalStartTime

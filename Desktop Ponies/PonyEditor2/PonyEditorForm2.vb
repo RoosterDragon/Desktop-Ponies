@@ -258,7 +258,7 @@ Public Class PonyEditorForm2
 
     Private Sub CreatePreview()
         If preview IsNot Nothing Then preview.Dispose()
-        preview = New PonyPreview(Me, ponies, context)
+        preview = New PonyPreview(ponies, context)
         AddHandler preview.PreviewFocused, AddressOf Preview_PreviewFocused
         AddHandler preview.PreviewUnfocused, AddressOf Preview_PreviewUnfocused
     End Sub

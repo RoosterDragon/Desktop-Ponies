@@ -1424,7 +1424,7 @@
         /// </summary>
         /// <param name="fileName">The path to the GIF file from which the image was loaded, in case an alpha color table exists.</param>
         /// <param name="pixbuf">The <see cref="T:Gdk.Pixbuf"/> to be altered.</param>
-        private void AlterPixbufForTransparency(string fileName, Pixbuf pixbuf)
+        private static void AlterPixbufForTransparency(string fileName, Pixbuf pixbuf)
         {
             string mapFilePath = System.IO.Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
             if (File.Exists(mapFilePath))

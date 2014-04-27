@@ -563,7 +563,6 @@ Public Class MainForm
             End If
             If filteredVisible Then filterCount += 1
             If makeVisible Then visibleCount += 1
-            Dim visibleChanged = selectionControl.Visible <> makeVisible
             selectionControl.Visible = makeVisible
         Next
 

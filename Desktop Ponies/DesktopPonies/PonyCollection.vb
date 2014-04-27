@@ -247,15 +247,6 @@ Public NotInheritable Class PonyIniParser
                                 End Function)
     End Function
 
-    Public Shared Function TryParseScale(iniLine As String, directory As String, ByRef result As Double, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
-        Return TryParse(result, issues,
-                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Scale"}),
-                                   Function(p)
-                                       p.NoParse()
-                                       Return p.ParseDouble(0, 0, 16)
-                                   End Function)
-    End Function
-
     Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String, ByRef result As BehaviorGroup, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         Return TryParse(result, issues,
                                    New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),

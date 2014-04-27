@@ -74,8 +74,8 @@ Public MustInherit Class PonyAnimator
         End Get
     End Property
 
-    Public Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
-                   ponyCollection As PonyCollection, ponyContext As PonyContext)
+    Protected Sub New(spriteViewer As ISpriteCollectionView, spriteCollection As IEnumerable(Of ISprite),
+                      ponyCollection As PonyCollection, ponyContext As PonyContext)
         MyBase.New(spriteViewer, spriteCollection)
         Me.PonyCollection = Argument.EnsureNotNull(ponyCollection, "ponyCollection")
         Me.PonyContext = Argument.EnsureNotNull(ponyContext, "ponyContext")

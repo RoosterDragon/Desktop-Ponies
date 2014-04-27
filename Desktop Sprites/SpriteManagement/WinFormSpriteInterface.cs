@@ -1914,7 +1914,7 @@
         /// </param>
         /// <param name="dataColumnIndexFixedPointInitial">The initial logical column index into the image data buffer, computed in fixed
         /// point arithmetic.</param>
-        private void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMin, int xMax, int yMin, int yMax,
+        private static void AlphaBlendScalingInitialize(ImageData image, Rectangle area, int xMin, int xMax, int yMin, int yMax,
             out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
             out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial)
         {

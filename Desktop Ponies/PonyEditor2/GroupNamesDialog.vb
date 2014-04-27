@@ -24,7 +24,7 @@
                 Dim group = base.BehaviorGroups.FirstOrDefault(Function(bg) bg.Number = i)
                 If group IsNot Nothing Then name = group.Name
             End If
-            Dim index = NamesGrid.Rows.Add(i, name)
+            NamesGrid.Rows.Add(i, name)
             If i = Behavior.AnyGroup Then
                 NamesGrid.Rows(i).ReadOnly = True
             End If

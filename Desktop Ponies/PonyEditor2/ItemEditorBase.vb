@@ -152,8 +152,8 @@ Public Class ItemEditorBase
         End Sub
     End Structure
 
-    Private Function VerifyAndGetBindingProperty(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of T)),
-                                                       Optional writable As Boolean = True) As BindingProperty(Of T)
+    Private Shared Function VerifyAndGetBindingProperty(Of T)(memberAccessExpression As Expressions.Expression(Of Func(Of T)),
+                                                              Optional writable As Boolean = True) As BindingProperty(Of T)
         Dim body = TryCast(Argument.EnsureNotNull(memberAccessExpression, "memberAccessExpression").Body, Expressions.MemberExpression)
         If body Is Nothing Then Throw New ArgumentException(
             "The body of the expression must access a field or property.", "memberAccessExpression")

@@ -15,7 +15,7 @@
 
     public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             string dpVersion = FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(typeof(DesktopPonies.Direction)).Location).FileVersion;
             Console.WriteLine("Current version of Desktop Ponies is " + dpVersion);
@@ -89,20 +89,13 @@
                 var imageCropInfo = new Dictionary<string, Point>(PathEquality.Comparer);
                 foreach (var imageFilePath in imageFilePathsToUse)
                 {
-                    Rectangle? maybeCropped = GetCroppedRegion(contentDirectory, imageFilePath);
+                    Rectangle? maybeCropped = GetCroppedRegion(imageFilePath);
                     if (maybeCropped.HasValue)
                     {
                         if (Path.GetExtension(imageFilePath) == ".gif")
-                        {
-                            if (maybeCropped.Value == Rectangle.Empty)
-                                CropGifImage(toolDirectory, contentDirectory, imageFilePath, new Rectangle(0, 0, 1, 1));
-                            else
-                                CropGifImage(toolDirectory, contentDirectory, imageFilePath, maybeCropped.Value);
-                        }
+                            CropGifImage(toolDirectory, contentDirectory, imageFilePath);
                         else
-                        {
                             CropPngImage(contentDirectory, imageFilePath, maybeCropped.Value);
-                        }
                         imageCropInfo.Add(imageFilePath, maybeCropped.Value.Location);
                     }
                 }
@@ -133,7 +126,7 @@
 
         /// <remarks>Adapted from http://stackoverflow.com/questions/4820212/automatically-trim-a-bitmap-to-minimum-size by user Thomas
         /// Levesque http://stackoverflow.com/users/98713/thomas-levesque </remarks>
-        private static Rectangle? GetCroppedRegion(string contentDirectory, string filePath)
+        private static Rectangle? GetCroppedRegion(string filePath)
         {
             Bitmap[] bitmaps;
             if (Path.GetExtension(filePath) == ".gif")
@@ -263,7 +256,7 @@
             return null;
         }
 
-        private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath, Rectangle cropArea)
+        private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath)
         {
             string tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);

@@ -462,7 +462,6 @@ Public Class Game
                 .MaxDuration = duration,
                 .Speed = 5,
                 .AllowedMovement = AllowedMoves.All}
-            Dim fastImagePath = files_path & Replace(idle_image_filename, ControlChars.Quote, "")
             fastBehavior.LeftImage.Path = files_path & Replace(fast_left_image_filename, ControlChars.Quote, "")
             fastBehavior.RightImage.Path = files_path & Replace(fast_right_image_filename, ControlChars.Quote, "")
             handlerBase.Behaviors.Add(fastBehavior)

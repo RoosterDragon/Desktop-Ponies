@@ -43,6 +43,24 @@ Public NotInheritable Class CaseInsensitiveString
     Public Shared Operator <>(left As String, right As CaseInsensitiveString) As Boolean
         Return Not left = right
     End Operator
+    Public Shared Operator <(left As CaseInsensitiveString, right As CaseInsensitiveString) As Boolean
+        Return Compare(left, right) < 0
+    End Operator
+    Public Shared Operator <(left As CaseInsensitiveString, right As String) As Boolean
+        Return Compare(left, right) < 0
+    End Operator
+    Public Shared Operator <(left As String, right As CaseInsensitiveString) As Boolean
+        Return Compare(left, right) < 0
+    End Operator
+    Public Shared Operator >(left As CaseInsensitiveString, right As CaseInsensitiveString) As Boolean
+        Return Compare(left, right) > 0
+    End Operator
+    Public Shared Operator >(left As CaseInsensitiveString, right As String) As Boolean
+        Return Compare(left, right) > 0
+    End Operator
+    Public Shared Operator >(left As String, right As CaseInsensitiveString) As Boolean
+        Return Compare(left, right) > 0
+    End Operator
     Public Shared Operator &(left As CaseInsensitiveString, right As CaseInsensitiveString) As CaseInsensitiveString
         Return New CaseInsensitiveString(ValueOrNull(left) & ValueOrNull(right))
     End Operator
