@@ -576,7 +576,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Jay Wright [Stand, Trot, Horn, Fly]
 * Anonymous [Fly]
 * StarStep [Conga, Ponder, Fashion]
-* Bot-chan [DramaCouch]
+* Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2]
 * The Coop [Gala, Tantrum, Ponder, DramaCouch, Sleep]
 * Miriam the Bat [Sleep]
 
