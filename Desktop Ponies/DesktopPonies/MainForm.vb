@@ -40,6 +40,7 @@ Public Class MainForm
     End Sub
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        worker = New IdleWorker(Me)
         BeginInvoke(New MethodInvoker(AddressOf LoadInternal))
         Threading.ThreadPool.QueueUserWorkItem(Sub() CheckForNewVersion())
     End Sub
@@ -57,6 +58,17 @@ Public Class MainForm
         SelectionControlsPanel.Enabled = False
 
         Update()
+
+        If Not Directory.Exists(PonyBase.RootDirectory) Then
+            Const message =
+                "The " & PonyBase.RootDirectory & " directory could not be found. We can't start without that! " &
+                "If you just downloaded the full program then please make sure it has extracted correctly. " &
+                "On Mac/Unix it is important to preserve the directory structure when extracting. " &
+                "If you have downloaded a patch - you need to copy these files over an existing install and overwrite if prompted."
+            MessageBox.Show(Me, message, "Directory Missing", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Close()
+            Return
+        End If
 
         Dim profile = Options.DefaultProfileName
         ProcessCommandLine()
@@ -90,7 +102,6 @@ Public Class MainForm
             End If
         End If
 
-        worker = New IdleWorker(Me)
         Threading.ThreadPool.QueueUserWorkItem(Sub() LoadTemplates())
     End Sub
 
@@ -210,7 +221,8 @@ Public Class MainForm
         If Not ponies.Bases.Any() Then
             If Not TryInvoke(Sub()
                                  MessageBox.Show(Me, "Sorry, but you don't seem to have any usable ponies installed. " &
-                                                 "There should have at least been a 'Derpy' folder in the same spot as this program.",
+                                                 "If you have downloaded a patch version, you need to copy the new files over an " &
+                                                 "existing installation of Desktop Ponies to update it.",
                                                  "No Ponies Found", MessageBoxButtons.OK, MessageBoxIcon.Information)
                                  GoButton.Enabled = False
                              End Sub) Then Return

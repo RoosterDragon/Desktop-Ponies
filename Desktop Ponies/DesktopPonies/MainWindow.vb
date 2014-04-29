@@ -63,6 +63,18 @@ Friend Class MainWindow
 
     Private Sub MainWindow_Shown(sender As Object, e As EventArgs)
         If ponies IsNot Nothing Then Return
+        If Not IO.Directory.Exists(PonyBase.RootDirectory) Then
+            Const message =
+                "The " & PonyBase.RootDirectory & " directory could not be found. We can't start without that! " &
+                "If you just downloaded the full program then please make sure it has extracted correctly. " &
+                "On Mac/Unix it is important to preserve the directory structure when extracting. " &
+                "If you have downloaded a patch - you need to copy these files over an existing install and overwrite if prompted."
+            Dim dialog = New MessageDialog(Me, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, message)
+            AddHandler dialog.Response, Sub() dialog.Destroy()
+            dialog.Run()
+            Gtk.Application.Quit()
+            Return
+        End If
         Sensitive = False
         Threading.ThreadPool.QueueUserWorkItem(
             Sub()
