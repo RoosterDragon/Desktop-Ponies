@@ -82,7 +82,8 @@
                     Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
                 // Ignore any images involved in effects, as the transparent borders may be used for alignment.
                 var imagesToIgnore = ponyBase.Effects.Select(
-                    e => new string[] { e.LeftImage.Path, e.RightImage.Path, e.Behavior.LeftImage.Path, e.Behavior.RightImage.Path }).
+                    e => new string[] {
+                        e.LeftImage.Path, e.RightImage.Path, e.GetBehavior().LeftImage.Path, e.GetBehavior().RightImage.Path }).
                     SelectMany(images => images).ToArray();
                 var imageFilePathsToUse = new HashSet<string>(imageFilePaths, PathEquality.Comparer);
                 imageFilePathsToUse.ExceptWith(imagesToIgnore);

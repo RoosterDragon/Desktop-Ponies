@@ -771,11 +771,9 @@ Public Class Behavior
         End Set
     End Property
     Private ReadOnly linkedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = LinkedBehaviorName)
-    Public ReadOnly Property LinkedBehavior As Behavior
-        Get
-            Return _base.Behaviors.OnlyOrDefault(linkedBehaviorNamePredicate)
-        End Get
-    End Property
+    Public Function GetLinkedBehavior() As Behavior
+        Return _base.Behaviors.OnlyOrDefault(linkedBehaviorNamePredicate)
+    End Function
     Private _startLineName As CaseInsensitiveString = ""
     Public Property StartLineName As CaseInsensitiveString
         Get
@@ -786,11 +784,9 @@ Public Class Behavior
         End Set
     End Property
     Private ReadOnly startLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = StartLineName)
-    Public ReadOnly Property StartLine As Speech
-        Get
-            Return _base.Speeches.OnlyOrDefault(startLineNamePredicate)
-        End Get
-    End Property
+    Public Function GetStartLine() As Speech
+        Return _base.Speeches.OnlyOrDefault(startLineNamePredicate)
+    End Function
     Private _endLineName As CaseInsensitiveString = ""
     Public Property EndLineName As CaseInsensitiveString
         Get
@@ -801,11 +797,9 @@ Public Class Behavior
         End Set
     End Property
     Private ReadOnly endLineNamePredicate As New Func(Of Speech, Boolean)(Function(s) s.Name = EndLineName)
-    Public ReadOnly Property EndLine As Speech
-        Get
-            Return _base.Speeches.OnlyOrDefault(endLineNamePredicate)
-        End Get
-    End Property
+    Public Function GetEndLine() As Speech
+        Return _base.Speeches.OnlyOrDefault(endLineNamePredicate)
+    End Function
 
     Public Property TargetVector As Vector2
     Private _followTargetName As String = ""
@@ -845,11 +839,9 @@ Public Class Behavior
         End Set
     End Property
     Private ReadOnly followStoppedBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowStoppedBehaviorName)
-    Public ReadOnly Property FollowStoppedBehavior As Behavior
-        Get
-            Return _base.Behaviors.OnlyOrDefault(followStoppedBehaviorNamePredicate)
-        End Get
-    End Property
+    Public Function GetFollowStoppedBehavior() As Behavior
+        Return _base.Behaviors.OnlyOrDefault(followStoppedBehaviorNamePredicate)
+    End Function
     Private _followMovingBehaviorName As CaseInsensitiveString = ""
     Public Property FollowMovingBehaviorName As CaseInsensitiveString
         Get
@@ -860,11 +852,9 @@ Public Class Behavior
         End Set
     End Property
     Private ReadOnly followMovingBehaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = FollowMovingBehaviorName)
-    Public ReadOnly Property FollowMovingBehavior As Behavior
-        Get
-            Return _base.Behaviors.OnlyOrDefault(followMovingBehaviorNamePredicate)
-        End Get
-    End Property
+    Public Function GetFollowMovingBehavior() As Behavior
+        Return _base.Behaviors.OnlyOrDefault(followMovingBehaviorNamePredicate)
+    End Function
 
     Private _chance As Double
     Public Property Chance As Double
@@ -1055,7 +1045,7 @@ Public Class Behavior
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
         Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
-                Referential.CheckNotCircular("Linked Behavior", Name, LinkedBehavior, Function(b) b.LinkedBehavior),
+                Referential.CheckNotCircular("Linked Behavior", Name, GetLinkedBehavior(), Function(b) b.GetLinkedBehavior()),
                 Referential.CheckUnique("Start Speech", StartLineName, _base.Speeches.Select(Function(s) s.Name)),
                 Referential.CheckUnique("End Speech", EndLineName, _base.Speeches.Select(Function(s) s.Name)),
                 Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
@@ -2055,11 +2045,13 @@ Public Class Pony
         Dim behaviorExpired = _behaviorDesiredDuration < _currentTime - _behaviorStartTime
         If behaviorExpired Then
             AddUpdateRecord("Expiring behavior.")
+            Dim linkedBehavior = _currentBehavior.GetLinkedBehavior()
             ' Having no linked behavior when interacting means we've run to the last part of a chain and should end the interaction.
-            If _currentBehavior.LinkedBehavior Is Nothing Then EndInteraction(False, False)
-            If _currentBehavior.EndLine IsNot Nothing Then SpeakInternal(_currentBehavior.EndLine)
-            SetBehaviorInternal(_currentBehavior.LinkedBehavior, True)
-            If _currentBehavior.StartLine Is Nothing AndAlso _currentBehavior.EndLine Is Nothing AndAlso
+            If linkedBehavior Is Nothing Then EndInteraction(False, False)
+            Dim endLine = _currentBehavior.GetEndLine()
+            If endLine IsNot Nothing Then SpeakInternal(endLine)
+            SetBehaviorInternal(linkedBehavior, True)
+            If _currentBehavior.GetStartLine() Is Nothing AndAlso _currentBehavior.GetEndLine() Is Nothing AndAlso
                 Rng.NextDouble() < Context.RandomSpeechChance Then
                 SpeakInternal()
             End If
@@ -2371,7 +2363,10 @@ Public Class Pony
         _effectsToManuallyExpire.Clear()
         _effectBasesToRepeat.Clear()
 
-        If speak AndAlso _currentBehavior.StartLine IsNot Nothing Then SpeakInternal(_currentBehavior.StartLine)
+        If speak Then
+            Dim startLine = _currentBehavior.GetStartLine()
+            If startLine IsNot Nothing Then SpeakInternal(startLine)
+        End If
     End Sub
 
     ''' <summary>
@@ -2528,9 +2523,9 @@ Public Class Pony
             End If
             If Not _currentBehavior.AutoSelectImagesOnFollow Then
                 If currentSpeed = 0 Then
-                    _visualOverrideBehavior = _currentBehavior.FollowStoppedBehavior
+                    _visualOverrideBehavior = _currentBehavior.GetFollowStoppedBehavior()
                 Else
-                    _visualOverrideBehavior = _currentBehavior.FollowMovingBehavior
+                    _visualOverrideBehavior = _currentBehavior.GetFollowMovingBehavior()
                 End If
             End If
             If _visualOverrideBehavior Is Nothing Then
@@ -3352,12 +3347,10 @@ Public Class EffectBase
         End Set
     End Property
     Private ReadOnly behaviorNamePredicate As New Func(Of Behavior, Boolean)(Function(b) b.Name = BehaviorName)
-    Public ReadOnly Property Behavior As Behavior
-        Get
-            If ParentPonyBase Is Nothing Then Return Nothing
-            Return ParentPonyBase.Behaviors.OnlyOrDefault(behaviorNamePredicate)
-        End Get
-    End Property
+    Public Function GetBehavior() As Behavior
+        If ParentPonyBase Is Nothing Then Return Nothing
+        Return ParentPonyBase.Behaviors.OnlyOrDefault(behaviorNamePredicate)
+    End Function
     Public Property ParentPonyBase As PonyBase
     Private _leftImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Floor}
     Private _rightImage As New SpriteImage() With {.RoundingPolicyX = RoundingPolicy.Ceiling}

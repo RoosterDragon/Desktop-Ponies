@@ -39,9 +39,9 @@
         Bind(Function() Edited.CenteringLeft, LeftCenterComboBox)
         Bind(Function() Edited.CenteringRight, RightCenterComboBox)
         Bind(Function() Edited.LeftImage.Path, LeftImageFileSelector, LeftImageViewer,
-             BehaviorComboBox, Function() Edited.Behavior, True)
+             BehaviorComboBox, AddressOf Edited.GetBehavior, True)
         Bind(Function() Edited.RightImage.Path, RightImageFileSelector, RightImageViewer,
-             BehaviorComboBox, Function() Edited.Behavior, False)
+             BehaviorComboBox, AddressOf Edited.GetBehavior, False)
     End Sub
 
     Protected Overrides Sub ChangeItem()
@@ -65,7 +65,7 @@
         If Edited.Duration <> TimeSpan.Zero Then
             duration = Edited.Duration
         Else
-            Dim behavior = Edited.Behavior
+            Dim behavior = Edited.GetBehavior()
             If behavior IsNot Nothing Then duration = behavior.MinDuration
         End If
         LeftImageViewer.Placement = Edited.PlacementDirectionLeft
