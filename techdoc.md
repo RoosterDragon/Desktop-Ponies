@@ -157,7 +157,7 @@ You MUST specify at least all the elements up to and including movement. You may
     * None - The pony cannot move (even if the speed is greater than zero).
     * Horizontal_Only - The pony can only move on the horizontal axis.
     * Vertical_Only - The pony can only move on the vertical axis.
-    * Diagonal_Only - The pony can only move on the two diagonals angled at 45 degrees.
+    * Diagonal_Only - The pony can only move on the two diagonals. When movement starts a random angle of 45 ± 30 degrees is chosen which determines the angle of the axis along which the pony travels.
     * Horizontal_Vertical - Allows horizontal or vertical movement.
     * Diagonal_horizontal - Allows diagonal or horizontal movement (note the lowercase 'h' in horizontal).
     * Diagonal_Vertical - Allows diagonal or vertical movement.

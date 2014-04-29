@@ -2697,7 +2697,8 @@ Public Class Pony
                 Case AllowedMoves.VerticalOnly
                     _movement = New Vector2F(0, CSng(speed))
                 Case AllowedMoves.DiagonalOnly
-                    _movement = New Vector2F(CSng(speed * Math.Sin(Math.PI / 4)), CSng(speed * Math.Cos(Math.PI / 4)))
+                    Dim angle = (Rng.NextDouble() * 60 + 15) * Math.PI / 180 ' Random angle between 15 and 75 degrees.
+                    _movement = New Vector2F(CSng(speed * Math.Sin(angle)), CSng(speed * Math.Cos(angle)))
             End Select
             If preserveCurrentDirections Then
                 If wasMovingRight Xor _movement.X > 0 Then _movement.X = -_movement.X
