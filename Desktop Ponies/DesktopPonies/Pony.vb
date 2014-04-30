@@ -2697,7 +2697,16 @@ Public Class Pony
                 Case AllowedMoves.VerticalOnly
                     _movement = New Vector2F(0, CSng(speed))
                 Case AllowedMoves.DiagonalOnly
-                    Dim angle = (Rng.NextDouble() * 60 + 15) * Math.PI / 180 ' Random angle between 15 and 75 degrees.
+                    Dim angle As Double
+                    Select Case moves
+                        Case AllowedMoves.DiagonalVertical
+                            angle = Rng.NextDouble() * 30 + 15 ' Random angle between 15 and 45 degrees.
+                        Case AllowedMoves.DiagonalHorizontal
+                            angle = Rng.NextDouble() * 30 + 105 ' Random angle between 105 and 135 degrees.
+                        Case Else
+                            angle = Rng.NextDouble() * 60 + 15 ' Random angle between 15 and 75 degrees.
+                    End Select
+                    angle *= Math.PI / 180.0 ' Degrees to radians.
                     _movement = New Vector2F(CSng(speed * Math.Sin(angle)), CSng(speed * Math.Cos(angle)))
             End Select
             If preserveCurrentDirections Then

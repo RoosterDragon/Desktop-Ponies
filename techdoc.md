@@ -157,11 +157,11 @@ You MUST specify at least all the elements up to and including movement. You may
     * None - The pony cannot move (even if the speed is greater than zero).
     * Horizontal_Only - The pony can only move on the horizontal axis.
     * Vertical_Only - The pony can only move on the vertical axis.
-    * Diagonal_Only - The pony can only move on the two diagonals. When movement starts a random angle of 45 ± 30 degrees is chosen which determines the angle of the axis along which the pony travels.
-    * Horizontal_Vertical - Allows horizontal or vertical movement.
-    * Diagonal_horizontal - Allows diagonal or horizontal movement (note the lowercase 'h' in horizontal).
-    * Diagonal_Vertical - Allows diagonal or vertical movement.
-    * All - Allows diagonal, vertical or horizontal movement.
+    * Diagonal_Only - The pony can only move on the two diagonal axes. When movement starts a random angle of 45 ± 30 degrees is chosen which determines the angle of the axis along which the pony travels. The pony may travel in either direction along the axis.
+    * Horizontal_Vertical - Allows horizontal or vertical movement. A uniform random selection is made between these two options.
+    * Diagonal_horizontal - Allows diagonal or horizontal movement (note the lowercase 'h' in horizontal). A uniform random selection is made between these two options. The random angle for the diagonal axis is chosen to be between 15 and 45 degrees from the horizontal axis. The pony may travel in either direction along the axis.
+    * Diagonal_Vertical - Allows diagonal or vertical movement. A uniform random selection is made between these two options. The random angle for the diagonal axis is chosen to be between 15 and 45 degrees from the vertical axis. The pony may travel in either direction along the axis.
+    * All - Allows diagonal, vertical or horizontal movement. A uniform random selection is made between these three options. If diagonal movement is selected, the rules for choosing a diagonal axis are the same as those for diagonal only movement.
     * MouseOver - Implies no movement. When the mouse is hovering over a pony a stationary behavior is automatically used whilst the hover is in effect. You can specify a behavior to use instead by using this movement type. This can be helpful if you have a specific mouseover animation to use. The behavior to use is selected from each set of behaviors in a group, so you can specify a behavior per group (if you specify more than one, then the result is undefined). A behavior with this movement type can still be used like a normal behavior, so if you to make sure it only when the mouse is over the pony, be sure to set the skip flag. Ponies in interactions will ignored mouse-over, but can still be dragged.
     * Dragged - Implies no movement. Like the mouse over option, this specifies a specific behavior to use when the pony is being dragged by the mouse. If one is not specified then if there is specific sleep behavior that is used. If neither of those are used then the mouse over behavior for the group is used.
     * Sleep - Implies no movement. Like the mouse over and dragged options, the sleep option can be used to specify a behavior to be used specifically when a pony is put to sleep. Unlike those options, only one sleep behavior is required and they are not specified per group.
