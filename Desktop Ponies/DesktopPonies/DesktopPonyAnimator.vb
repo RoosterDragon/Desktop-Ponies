@@ -7,6 +7,7 @@ Public Class DesktopPonyAnimator
     Private houseMenu As ISimpleContextMenu
     Protected selectedHouse As House
     Protected selectedPony As Pony
+    Private allSleeping As Boolean
 
     Private ownerControl As Control
     Private optionsForm As OptionsForm
@@ -63,7 +64,7 @@ Public Class DesktopPonyAnimator
 
     Private Sub DisplayPonyMenu(location As Point)
         Dim directory = If(selectedPony Is Nothing, "", selectedPony.Base.Directory)
-        Dim shouldBeSleeping = If(selectedPony Is Nothing, True, selectedPony.Sleep)
+        Dim sleeping = If(selectedPony Is Nothing, True, selectedPony.Sleep)
         Dim manualControlP1 = Object.ReferenceEquals(ManualControlPlayerOne, selectedPony)
         Dim manualControlP2 = Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony)
 
@@ -75,9 +76,9 @@ Public Class DesktopPonyAnimator
             i += 1
             ' Separator.
             i += 1
-            ponyMenu.Items(i).Text = If(shouldBeSleeping, "Wake up/Resume", "Sleep/Pause")
+            ponyMenu.Items(i).Text = If(sleeping, "Wake up/Resume", "Sleep/Pause")
             i += 1
-            ponyMenu.Items(i).Text = If(Not Paused, "Wake up/Resume All", "Sleep/Pause All")
+            ponyMenu.Items(i).Text = If(allSleeping, "Wake up/Resume All", "Sleep/Pause All")
             i += 1
             ' Separator.
             i += 1
@@ -133,7 +134,6 @@ Public Class DesktopPonyAnimator
                                                                      If selectedPony Is Nothing Then Return
                                                                      selectedPony.Sleep = Not selectedPony.Sleep
                                                                  End Sub))
-            Dim allSleeping = False
             menuItems.AddLast(New SimpleContextMenuItem(Nothing, Sub()
                                                                      allSleeping = Not allSleeping
                                                                      For Each pony In Ponies
