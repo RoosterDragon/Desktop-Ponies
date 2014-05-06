@@ -118,7 +118,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Applejack
 * Jay Wright [Stand, Trotcycle]
 * RJP! [Gallop, Rear]
-* Bot-chan [Idle, Trot, Pose, Lasso]
+* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear]
 * StarStep [Gala, Sleep, Conga, Lasso2, Hurdle]
 * Anonycat [Truck]
 * DesktopPonyGuy [Apple]
