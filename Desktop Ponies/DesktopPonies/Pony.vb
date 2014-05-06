@@ -2080,21 +2080,21 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' If not asleep, transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and behavior before
-    ''' mouseover will be set. The behavior will be set as a side effect of state transitions. Transitioning into the mouseover state will
+    ''' Transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and behavior before special state
+    ''' override will be set. The behavior will be set as a side effect of state transitions. Transitioning into the mouseover state will
     ''' trigger a random speech. The behavior desired duration will be modified to prevent behaviors expiring whilst in the mouseover or
-    ''' drag states. Entering the mouseover or drag states is restricted by the current context. If the pony is interacting then the
-    ''' mouseover state is not entered. If dragging begins, the interaction is ended and the behavior before mouseover is cleared. The pony
-    ''' resumes a random behavior on exiting drag.
+    ''' drag states. Entering the mouseover or drag states is restricted by the current context. If the pony is interacting or sleeping
+    ''' then the mouseover state is not entered. If dragging begins during sleeping, the sleep behavior is not interrupted. If it begins
+    ''' during an interaction, the interaction is ended and the behavior before special state override is cleared. The pony resumes a
+    ''' random behavior on exiting drag.
     ''' </summary>
     Private Sub HandleMouseoverAndDrag()
-        If _inSleepState Then Return
         Dim cursorLocation = CType(Context.CursorLocation, Point)
         Dim mouseoverBehavior = _mouseoverBehaviorsByGroup(CurrentBehaviorGroup)
         Dim mouseoverImage = If(_facingRight, mouseoverBehavior.RightImage, mouseoverBehavior.LeftImage)
         Dim isMouseOver = Region.Contains(cursorLocation) AndAlso GetRegionFForImage(mouseoverImage).Contains(cursorLocation)
         If Context.CursorAvoidanceEnabled AndAlso isMouseOver AndAlso Not _inMouseoverState AndAlso
-            Not _inDragState AndAlso _currentInteraction Is Nothing Then
+            Not _inDragState AndAlso _currentInteraction Is Nothing AndAlso Not _inSleepState Then
             AddUpdateRecord("Entering mouseover state.")
             _inMouseoverState = True
             _behaviorBeforeSpecialStateOverride = _currentBehavior
@@ -2109,16 +2109,18 @@ Public Class Pony
                 EndInteraction(True, True)
                 _behaviorBeforeSpecialStateOverride = Nothing
             End If
-            SetBehaviorInternal(_dragBehaviorsByGroup(CurrentBehaviorGroup))
+            If Not _inSleepState Then SetBehaviorInternal(_dragBehaviorsByGroup(CurrentBehaviorGroup))
         ElseIf Not Drag AndAlso _inDragState Then
             AddUpdateRecord("Exiting drag state.")
             _inDragState = False
-            If Context.CursorAvoidanceEnabled Then
-                _inMouseoverState = True
-                SetBehaviorInternal(_mouseoverBehaviorsByGroup(CurrentBehaviorGroup))
-            Else
-                SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
-                _behaviorBeforeSpecialStateOverride = Nothing
+            If Not _inSleepState Then
+                If Context.CursorAvoidanceEnabled Then
+                    _inMouseoverState = True
+                    SetBehaviorInternal(_mouseoverBehaviorsByGroup(CurrentBehaviorGroup))
+                Else
+                    SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
+                    _behaviorBeforeSpecialStateOverride = Nothing
+                End If
             End If
         End If
         If Not _inDragState AndAlso Not isMouseOver AndAlso _inMouseoverState Then
@@ -2348,8 +2350,8 @@ Public Class Pony
         End If
 
         _behaviorStartTime = _currentTime
-        If _inMouseoverState OrElse _inDragState Then
-            _behaviorDesiredDuration = TimeSpan.FromDays(1)
+        If _inMouseoverState OrElse _inDragState OrElse _inSleepState Then
+            _behaviorDesiredDuration = TimeSpan.Zero
         Else
             _behaviorDesiredDuration = _currentBehavior.MinDuration + TimeSpan.FromSeconds(
                 Rng.NextDouble() * (_currentBehavior.MaxDuration.TotalSeconds - _currentBehavior.MinDuration.TotalSeconds))
