@@ -51,7 +51,6 @@ Public Class PonyCollection
             Sub() LoadHouses(houseDirectories, houseLoadCallback),
             AddressOf LoadInteractions)
         ReuseStrings()
-        UpdateImageSizes()
     End Sub
 
     Private Sub LoadPonyBases(removeInvalidItems As Boolean, ponyBaseDirectories As String(), ponyLoadCallback As Action(Of PonyBase))
@@ -61,6 +60,7 @@ Public Class PonyCollection
             Sub(folder)
                 Dim pony = PonyBase.Load(Me, folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1), removeInvalidItems)
                 If pony IsNot Nothing Then
+                    UpdateImageSizes(pony)
                     ponies.Add(pony)
                     If ponyLoadCallback IsNot Nothing Then ponyLoadCallback(pony)
                 End If
@@ -181,16 +181,14 @@ Public Class PonyCollection
         Next
     End Sub
 
-    Private Sub UpdateImageSizes()
-        For Each base In Bases
-            For Each behavior In base.Behaviors
-                behavior.LeftImage.UpdateSize()
-                behavior.RightImage.UpdateSize()
-            Next
-            For Each effect In base.Effects
-                effect.LeftImage.UpdateSize()
-                effect.RightImage.UpdateSize()
-            Next
+    Private Sub UpdateImageSizes(base As PonyBase)
+        For Each behavior In base.Behaviors
+            behavior.LeftImage.UpdateSize()
+            behavior.RightImage.UpdateSize()
+        Next
+        For Each effect In base.Effects
+            effect.LeftImage.UpdateSize()
+            effect.RightImage.UpdateSize()
         Next
     End Sub
 

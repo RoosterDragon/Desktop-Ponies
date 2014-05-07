@@ -4091,8 +4091,8 @@ Public Class SpriteImage
             Return _path
         End Get
         Set(value As String)
+            If _path <> value Then _size = Nothing
             _path = value
-            _size = Nothing
         End Set
     End Property
     Public Overridable ReadOnly Property Center As Vector2
