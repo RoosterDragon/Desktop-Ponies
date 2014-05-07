@@ -60,8 +60,7 @@ Public NotInheritable Class Options
             Return _screens
         End Get
         Set(value As ImmutableArray(Of Screen))
-            Argument.EnsureNotNullOrEmpty(value, "value")
-            _screens = value
+            _screens = Argument.EnsureNotNullOrEmpty(Of ImmutableArray(Of Screen), Screen)(value, "value")
         End Set
     End Property
     Public Shared AllowedRegion As Rectangle?

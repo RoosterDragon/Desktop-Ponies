@@ -70,14 +70,30 @@
         /// <typeparam name="T">The type of the sequence elements.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> contains no elements.</exception>
+        [DebuggerStepThrough]
+        public static void EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName)
+        {
+            if (!Argument.EnsureNotNull(arg, paramName).Any())
+                throw new ArgumentException(paramName + " must contain at least one element.", paramName);
+        }
+
+        /// <summary>
+        /// Checks that a sequence argument is not null or an empty sequence.
+        /// </summary>
+        /// <typeparam name="TEnumerable">The type of the sequence.</typeparam>
+        /// <typeparam name="T">The type of the sequence elements.</typeparam>
+        /// <param name="arg">The argument to validate.</param>
+        /// <param name="paramName">The name of the parameter.</param>
         /// <returns>A reference to <paramref name="arg"/>.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="arg"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="arg"/> contains no elements.</exception>
         [DebuggerStepThrough]
-        public static IEnumerable<T> EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName) 
+        public static TEnumerable EnsureNotNullOrEmpty<TEnumerable, T>([ValidatedNotNull] TEnumerable arg, string paramName)
+            where TEnumerable : IEnumerable<T>
         {
-            if (!Argument.EnsureNotNull(arg, paramName).Any())
-                throw new ArgumentException(paramName + " must contain at least one element.", paramName);
+            EnsureNotNullOrEmpty(arg, paramName);
             return arg;
         }
 

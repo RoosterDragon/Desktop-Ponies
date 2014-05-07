@@ -570,10 +570,18 @@ Public Class InteractionBase
         i.InitiatorName = If(p.NotNullOrWhiteSpace(), "")
         i.Chance = p.ParseDouble(0, 0, 1)
         i.Proximity = p.ParseDouble(125, 0, 10000)
-        i.TargetNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)))
+        Dim targetNames = p.NotNull()
+        If targetNames IsNot Nothing Then
+            i.TargetNames.UnionWith(CommaSplitQuoteQualified(targetNames).Where(Function(s) Not String.IsNullOrWhiteSpace(s)))
+            p.Assert(targetNames, i.TargetNames.Count > 0, "There must be one or more targets.", Nothing)
+        End If
         i.Activation = p.Project(AddressOf TargetActivationFromIniString, TargetActivation.One)
-        i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(p.NotNullOrEmpty("")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)).
-                                  Select(Function(s) New CaseInsensitiveString(s)))
+        Dim behaviorNames = p.NotNull()
+        If behaviorNames IsNot Nothing Then
+            i.BehaviorNames.UnionWith(CommaSplitQuoteQualified(If(behaviorNames, "")).Where(Function(s) Not String.IsNullOrWhiteSpace(s)).
+                                      Select(Function(s) New CaseInsensitiveString(s)))
+            p.Assert(behaviorNames, i.BehaviorNames.Count > 0, "There must be one or more behaviors.", Nothing)
+        End If
         i.ReactivationDelay = TimeSpan.FromSeconds(p.ParseDouble(60, 0, 3600))
 
         issues = p.Issues.ToImmutableArray()
@@ -612,19 +620,19 @@ Public Class InteractionBase
 
     Private Sub CheckInteractionReference(ponies As PonyCollection, directory As String,
                                                propertyName As String, issues As List(Of ParseIssue))
+        If String.IsNullOrEmpty(directory) Then Return
         Dim base = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = directory)
         If base Is Nothing Then
             issues.Add(New ParseIssue(propertyName, directory, "",
                                       String.Format(CultureInfo.CurrentCulture, "No pony named '{0}' exists.", directory)))
-        Else
-            For Each behaviorName In BehaviorNames
-                Dim behavior = base.Behaviors.OnlyOrDefault(Function(b) b.Name = behaviorName)
-                If behavior Is Nothing Then
-                    issues.Add(New ParseIssue("Behaviors", behaviorName, "",
-                                              String.Format(CultureInfo.CurrentCulture,
-                                                            "'{0}' is missing behavior '{1}'.", directory, behaviorName)))
-                End If
-            Next
+        ElseIf BehaviorNames.Count > 0 Then
+            If Not base.Behaviors.Any(Function(b) BehaviorNames.Contains(b.Name)) Then
+                Dim fallbackValue = If(Activation = TargetActivation.All, Nothing, "")
+                Dim fallbackText = If(Activation = TargetActivation.All, "The interaction cannot run.", "They cannot participate.")
+                issues.Add(New ParseIssue("Behaviors", "", fallbackValue,
+                                          String.Format(CultureInfo.CurrentCulture,
+                                                        "'{0}' has none of the listed behaviors. {1}", directory, fallbackText)))
+            End If
         End If
     End Sub
 
@@ -652,16 +660,16 @@ Public Class Interaction
             Return _involvedTargets
         End Get
     End Property
-    Private ReadOnly _targets As New List(Of Pony)()
-    Public ReadOnly Property Targets As List(Of Pony)
+    Private ReadOnly _targets As ImmutableArray(Of Pony)
+    Public ReadOnly Property Targets As ImmutableArray(Of Pony)
         Get
             Return _targets
         End Get
     End Property
-    Public Property Behaviors As ImmutableArray(Of Behavior)
 
-    Public Sub New(base As InteractionBase)
+    Public Sub New(base As InteractionBase, targets As ImmutableArray(Of Pony))
         _base = Argument.EnsureNotNull(base, "base")
+        _targets = Argument.EnsureNotNullOrEmpty(Of ImmutableArray(Of Pony), Pony)(targets, "targets")
     End Sub
     Public Overrides Function ToString() As String
         Return MyBase.ToString() & ", Base.Name: " & Base.Name
@@ -1571,10 +1579,6 @@ Public Class Pony
     ''' interactions.
     ''' </summary>
     Private _interactionCooldownEndTime As TimeSpan
-    ''' <summary>
-    ''' Indicates the behaviors allowed for the interaction under consideration.
-    ''' </summary>
-    Private ReadOnly _behaviorsAllowed As New HashSet(Of CaseInsensitiveString)()
 
     ''' <summary>
     ''' Indicates if the pony is currently in a state reacting to mouseover.
@@ -1652,12 +1656,12 @@ Public Class Pony
     ''' reachable target.
     ''' </summary>
     Private behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate As Func(Of Behavior, Boolean) =
-        Function(b) Not b.Skip AndAlso (b.Group = Behavior.AnyGroup OrElse b.Group = CurrentBehaviorGroup) AndAlso TargetReachable(b)
+        Function(b) Not b.Skip AndAlso BehaviorAllowedByCurrentGroup(b) AndAlso TargetReachable(b)
     ''' <summary>
     ''' A predicate that filters behaviors that are in the any group or current behavior group and allowed for use at random.
     ''' </summary>
     Private behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
-        Function(b) Not b.Skip AndAlso (b.Group = Behavior.AnyGroup OrElse b.Group = CurrentBehaviorGroup)
+        Function(b) Not b.Skip AndAlso BehaviorAllowedByCurrentGroup(b)
     ''' <summary>
     ''' A predicate that filters behaviors that are allowed for use at random.
     ''' </summary>
@@ -3060,38 +3064,29 @@ Public Class Pony
 
         interactions.Clear()
         For Each interactionBase In Base.Interactions
-            Dim interaction = New Interaction(interactionBase)
+            Dim targets = New List(Of Pony)()
 
             ' Get all actual instances of target ponies.
-            interaction.Targets.Clear()
             Dim missingTargetNames = New HashSet(Of String)(interactionBase.TargetNames)
             For Each candidatePony In currentPonies
-                If Not ReferenceEquals(Me, candidatePony) AndAlso interactionBase.TargetNames.Contains(candidatePony.Base.Directory) Then
+                If Not ReferenceEquals(Me, candidatePony) AndAlso
+                    interactionBase.TargetNames.Contains(candidatePony.Base.Directory) AndAlso
+                    candidatePony.Base.Behaviors.Any(Function(b) interactionBase.BehaviorNames.Contains(b.Name)) Then
                     missingTargetNames.Remove(candidatePony.Base.Directory)
-                    interaction.Targets.Add(candidatePony)
+                    targets.Add(candidatePony)
                 End If
             Next
+
             ' If no instances of the target ponies are present, we can forget this interaction.
             ' Alternatively, if it is specified all targets must be present but some are missing, the interaction cannot be used.
-            If interaction.Targets.Count = 0 OrElse
-                (interaction.Base.Activation = TargetActivation.All AndAlso
+            If targets.Count = 0 OrElse
+                (interactionBase.Activation = TargetActivation.All AndAlso
                 missingTargetNames.Count > 0) Then
                 Continue For
             End If
 
-            ' Determine the common set of behaviors by name actually implemented by this pony and all discovered targets.
-            Dim commonBehaviors As New HashSet(Of CaseInsensitiveString)(interactionBase.BehaviorNames)
-            For Each pony In {Me}.Concat(interaction.Targets)
-                commonBehaviors.IntersectWith(pony.Base.Behaviors.Select(Function(b) b.Name))
-                If commonBehaviors.Count = 0 Then Exit For
-            Next
-            ' We need at least one common behavior to exist on all targets, or we cannot run the interaction.
-            If commonBehaviors.Count = 0 Then Continue For
-            ' Keep a copy of behaviors for the current pony for use when the interaction is activated later.
-            interaction.Behaviors = Base.Behaviors.Where(Function(b) commonBehaviors.Contains(b.Name)).ToImmutableArray()
-
             ' We can list this as a possible interaction.
-            interactions.Add(interaction)
+            interactions.Add(New Interaction(interactionBase, targets.ToImmutableArray()))
         Next
     End Sub
 
@@ -3133,43 +3128,34 @@ Public Class Pony
     Private Function GetInteractionTriggerIfConditionsMet(interaction As Interaction,
                                                           ByRef availableTargetsForAnyActivation As List(Of Pony)) As Pony
         availableTargetsForAnyActivation = Nothing
-        ' Update set of behaviors available to this pony.
-        RebuildAllowedInteractionBehaviors(interaction)
         ' If this pony cannot interact, we can bail out early.
-        If _behaviorsAllowed.Count = 0 Then Return Nothing
+        If Not HasAllowedBehavior(interaction.Base.BehaviorNames) Then Return Nothing
 
         Select Case interaction.Base.Activation
             Case TargetActivation.All
                 Dim trigger As Pony = Nothing
                 For Each target In interaction.Targets
                     If target.IsBusy Then Return Nothing
+                    If Not target.HasAllowedBehavior(interaction.Base.BehaviorNames) Then Return Nothing
                     If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
-                    target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
-                    If _behaviorsAllowed.Count = 0 Then Return Nothing
                 Next
                 Return trigger
             Case TargetActivation.Any
                 Dim trigger As Pony = Nothing
                 For Each target In interaction.Targets
                     If target.IsBusy Then Continue For
+                    If Not target.HasAllowedBehavior(interaction.Base.BehaviorNames) Then Continue For
                     If trigger Is Nothing AndAlso IsInteractionTargetInRange(interaction, target) Then trigger = target
-                    target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
-                    If _behaviorsAllowed.Count = 0 Then Return Nothing
                     If availableTargetsForAnyActivation Is Nothing Then availableTargetsForAnyActivation = New List(Of Pony)()
                     availableTargetsForAnyActivation.Add(target)
                 Next
+                If trigger Is Nothing Then availableTargetsForAnyActivation = Nothing
                 Return trigger
             Case TargetActivation.One
                 For Each target In interaction.Targets
                     If target.IsBusy Then Continue For
-                    If IsInteractionTargetInRange(interaction, target) Then
-                        target.PruneAllowableInteractionBehaviors(_behaviorsAllowed)
-                        If _behaviorsAllowed.Count = 0 Then
-                            RebuildAllowedInteractionBehaviors(interaction)
-                        Else
-                            Return target
-                        End If
-                    End If
+                    If Not target.HasAllowedBehavior(interaction.Base.BehaviorNames) Then Continue For
+                    If IsInteractionTargetInRange(interaction, target) Then Return target
                 Next
                 Return Nothing
             Case Else
@@ -3188,29 +3174,33 @@ Public Class Pony
     End Function
 
     ''' <summary>
-    ''' Resets the behaviors allowed to those allowed by the specified interaction, and available to the pony under the current behavior
-    ''' group.
+    ''' Determines if a behavior is allowed by the current group (because the groups match, or it is in the 'Any' group).
     ''' </summary>
-    ''' <param name="interaction">The interaction which defines the set of behaviors allowed.</param>
-    Private Sub RebuildAllowedInteractionBehaviors(interaction As Interaction)
-        _behaviorsAllowed.Clear()
-        For Each behavior In interaction.Behaviors
-            _behaviorsAllowed.Add(behavior.Name)
-        Next
-        PruneAllowableInteractionBehaviors(_behaviorsAllowed)
-    End Sub
+    ''' <param name="behavior">The behavior to test.</param>
+    ''' <returns>Returns true if the behavior group matches the 'Any' group, or the current behavior group.</returns>
+    Private Function BehaviorAllowedByCurrentGroup(behavior As Behavior) As Boolean
+        Return behavior.Group = behavior.AnyGroup OrElse behavior.Group = CurrentBehaviorGroup
+    End Function
 
     ''' <summary>
-    ''' Removes behaviors from the specified set where they are not available to this pony under the current behavior group.
+    ''' Determines if any of the allowed behaviors of the pony are present in the specified list of behavior names.
     ''' </summary>
-    ''' <param name="setToPrune">The set of behaviors names from which ineligible behaviors should be removed.</param>
-    Private Sub PruneAllowableInteractionBehaviors(setToPrune As HashSet(Of CaseInsensitiveString))
+    ''' <param name="behaviorNames">The set of behaviors names of which at least one of the currently allowed behaviors must match.</param>
+    Private Function HasAllowedBehavior(behaviorNames As HashSet(Of CaseInsensitiveString)) As Boolean
         For Each behavior In Base.Behaviors
-            If behavior.Group <> behavior.AnyGroup AndAlso behavior.Group <> CurrentBehaviorGroup Then
-                setToPrune.Remove(behavior.Name)
-            End If
+            If BehaviorAllowedByCurrentGroup(behavior) AndAlso behaviorNames.Contains(behavior.Name) Then Return True
         Next
-    End Sub
+        Return False
+    End Function
+
+    ''' <summary>
+    ''' Returns one of the allowed behaviors of the pony that is also in the specified list of behavior names. Throws otherwise.
+    ''' </summary>
+    ''' <param name="behaviorNames">The set of behaviors names of which at least one of the currently allowed behaviors must match.</param>
+    ''' <returns>One of the allowed behaviors of the pony that is also in the specified list of behavior names.</returns>
+    Private Function GetRandomAllowedBehavior(behaviorNames As HashSet(Of CaseInsensitiveString)) As Behavior
+        Return Base.Behaviors.Where(Function(b) BehaviorAllowedByCurrentGroup(b) AndAlso behaviorNames.Contains(b.Name)).RandomElement()
+    End Function
 
     ''' <summary>
     ''' Starts the specified interaction, specifying this pony as the initiator. This sets the current interaction and effects a behavior
@@ -3223,20 +3213,19 @@ Public Class Pony
     Private Sub StartInteraction(interaction As Interaction, availableTargetsForAnyActivation As List(Of Pony))
         _currentInteraction = interaction
         interaction.Initiator = Me
-        Dim randomBehaviorName = _behaviorsAllowed.RandomElement()
-        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = randomBehaviorName), True)
+        SetBehaviorInternal(GetRandomAllowedBehavior(interaction.Base.BehaviorNames), True)
 
         Select Case interaction.Base.Activation
             Case TargetActivation.All
                 For Each target In interaction.Targets
-                    target.StartInteractionAsTarget(randomBehaviorName, interaction)
+                    target.StartInteractionAsTarget(interaction)
                 Next
             Case TargetActivation.Any
                 For Each target In availableTargetsForAnyActivation
-                    target.StartInteractionAsTarget(randomBehaviorName, interaction)
+                    target.StartInteractionAsTarget(interaction)
                 Next
             Case TargetActivation.One
-                interaction.Trigger.StartInteractionAsTarget(randomBehaviorName, interaction)
+                interaction.Trigger.StartInteractionAsTarget(interaction)
         End Select
     End Sub
 
@@ -3244,14 +3233,13 @@ Public Class Pony
     ''' Starts the specified interaction as a target. This sets the current interaction and effects a behavior transition. This pony will
     ''' be added to the involved targets of the interaction.
     ''' </summary>
-    ''' <param name="behaviorName">The name of the behavior to run (which references the same behavior the initiator chose).</param>
     ''' <param name="interaction">The interaction which becomes the current interaction, and in which this pony becomes and involved
     ''' target.</param>
-    Private Sub StartInteractionAsTarget(behaviorName As CaseInsensitiveString, interaction As Interaction)
+    Private Sub StartInteractionAsTarget(interaction As Interaction)
         AddUpdateRecord("Starting interaction as target ", interaction.Base.Name)
         _currentInteraction = interaction
         _currentInteraction.InvolvedTargets.Add(Me)
-        SetBehaviorInternal(Base.Behaviors.First(Function(b) b.Name = behaviorName), True)
+        SetBehaviorInternal(GetRandomAllowedBehavior(interaction.Base.BehaviorNames), True)
     End Sub
 
     ''' <summary>

@@ -93,7 +93,7 @@ Public Class NewInteractionDialog
         interactionToEdit.BehaviorNames.UnionWith(BehaviorsList.CheckedItems.Cast(Of CaseInsensitiveString))
 
         MessageBox.Show(Me, "Important note:" & Environment.NewLine &
-                        "You need to make sure all the targets ponies have all the behaviors you selected, or the interaction won't work.",
+                        "You need to make sure each target pony has one or more of the behaviors you selected, or the interaction won't work.",
                         "Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         DialogResult = DialogResult.OK
