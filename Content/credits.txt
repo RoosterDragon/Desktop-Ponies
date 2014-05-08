@@ -158,6 +158,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Blues
 * Anonycat [Stand, Walk]
 * StarStep [Sit, Sax, SaxPlay]
+* Bot-chan [Sax2, Standup]
 
 #### Bon-Bon
 * Jay Wright [Idle, Walk]
@@ -696,7 +697,8 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan [Smoke, Dash, SuitlessStand, SuitlessTrot, SuitlessFly]
 
 #### Spot
-* Pony Noia
+* Pony Noia [Blink, Threat, Walk]
+* Bot-chan [MakeItStop]
 
 #### Stella
 * Pony Noia
