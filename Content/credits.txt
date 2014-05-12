@@ -697,8 +697,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan [Smoke, Dash, SuitlessStand, SuitlessTrot, SuitlessFly]
 
 #### Spot
-* Pony Noia [Blink, Threat, Walk]
-* Bot-chan [MakeItStop]
+* Pony Noia
 
 #### Stella
 * Pony Noia

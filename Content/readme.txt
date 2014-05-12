@@ -64,8 +64,9 @@ Latest changes:
 
 v1.49:
 - Added Carousel Boutique and The Moon by StarStep.
-- Added Farmer Rarity, Twilight Sparkle's Starswirl costume, new AJ galloping and rearing animations, CMC galloping animations, an extra Queen Chrysalis walk,
-  some sax transitions for Blues and a make-it-stop animation for Spot by Bot-chan.
+- Added Farmer Rarity, Twilight Sparkle's Starswirl costume, new AJ galloping and rearing animations, CMC galloping animations, an extra Queen Chrysalis walk
+  and some sax transitions for Blues by Bot-chan.
+- Added a make-it-stop animation for Spot by Pony Noia.
 - The 0/1 of All Ponies buttons now apply to only those ponies in the current filter, and also exclude the special random pony.
 - When an interaction is considering for starting, ponies will now individually choose a suitable behavior to run, subject to group restrictions. This means:
   - Interactions in 'Any' mode may be able to run more often, as targets will be ignored individually if they lack a suitable behavior at the time.
