@@ -206,6 +206,7 @@ Contributors are broken down by character. If there was more than one contributo
 * CANDYBAG [Stand, Trot]
 * vulcan539 [Sit]
 * Azure Fang [Sleep]
+* Bot-chan [Pilot]
 
 #### Cloud Kicker
 * Tyranico
@@ -446,8 +447,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Parasprite
-* DesktopPonyGuy [Fly, Stay]
-* Gilgapony [Red, Yellow, Brown, Green]
+* Bot-chan
 
 #### Jesús Pezuña
 * Anonycat
@@ -730,6 +730,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Thunderlane
 * fanofetcetera
+
+#### Tirek
+* Bot-chan
 
 #### Trenderhoof
 * Bot-chan
