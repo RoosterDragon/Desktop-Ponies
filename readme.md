@@ -12,7 +12,7 @@ There are over 190 ponies and other characters from the show included. There is 
 
 Desktop Ponies works on Windows, Mac and Linux.
 
-* [Download the latest version (v1.48)](https://www.dropbox.com/s/6usp0x4tcfxvz5l/Desktop%20Ponies%20v1.48.zip)
+* [Download the latest version (v1.49)](https://www.dropbox.com/s/bri7ag4f4x71eau/Desktop%20Ponies%20v1.49.zip)
 * Extract the files.
 * Check the included readme file for further instructions.
 
