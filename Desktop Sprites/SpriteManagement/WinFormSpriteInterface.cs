@@ -63,7 +63,8 @@
             protected override void OnResize(EventArgs e)
             {
                 base.OnResize(e);
-                BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                if (!IsDisposed)
+                    BackgroundGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             }
         }
         #endregion

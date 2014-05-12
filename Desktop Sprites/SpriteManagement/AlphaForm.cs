@@ -49,10 +49,14 @@
         /// <see cref="M:DesktopSprites.SpriteManagement.AlphaForm.UpdateBackgroundGraphics"/> will update the form background with the
         /// graphics drawn onto this buffer. This buffer is recreated whenever the form is resized.
         /// </summary>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
         public Graphics BackgroundGraphics
         {
             get
             {
+                if (IsDisposed)
+                    throw new ObjectDisposedException(GetType().FullName);
+
                 // Lazily initialize the graphics buffer.
                 if (backgroundGraphics == null)
                 {
@@ -132,6 +136,8 @@
                 Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
             hBitmap = NativeMethods.CreateDIBSection(
                 hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
+            if (hBitmap == IntPtr.Zero)
+                throw new Win32Exception();
             GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);
             bitmapSize = new Size(Width, Height);
             hPrevBitmap = NativeMethods.SelectObject(new HandleRef(this, hdcBackground), new HandleRef(this, hBitmap));
@@ -202,7 +208,7 @@
             Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
         public void UpdateBackgroundGraphics(byte opacity)
         {
-            if (hdcScreen == IntPtr.Zero)
+            if (IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
             POINT dstPos = new POINT(Left, Top);
@@ -222,21 +228,24 @@
         {
             try
             {
-                if (!Disposing && !IsDisposed)
+                ReleaseBuffers(disposing);
+                Win32Exception cleanupEx = null;
+                if (hdcScreen != IntPtr.Zero)
                 {
-                    ReleaseBuffers(disposing);
-                    Win32Exception cleanupEx = null;
                     if (NativeMethods.ReleaseDC(new HandleRef(this, IntPtr.Zero), new HandleRef(this, hdcScreen)) == 0)
                         cleanupEx = new Win32Exception();
                     else
                         hdcScreen = IntPtr.Zero;
+                }
+                if (hdcBackground != IntPtr.Zero)
+                {
                     if (!NativeMethods.DeleteDC(new HandleRef(this, hdcBackground)))
                         cleanupEx = new Win32Exception();
                     else
                         hdcBackground = IntPtr.Zero;
-                    if (cleanupEx != null)
-                        throw cleanupEx;
                 }
+                if (cleanupEx != null)
+                    throw cleanupEx;
             }
             finally
             {
