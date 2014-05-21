@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
 
@@ -11,6 +12,23 @@
     /// </summary>
     public static class StringExtensions
     {
+        /// <summary>
+        /// Replaces the format item in a specified string with the string representation of a corresponding object in a specified array.
+        /// The culture for the current thread is used to culture-specific formatting information.
+        /// </summary>
+        /// <param name="format">A composite format string.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <returns>A copy of <paramref name="format"/> in which the format items have been replaced by the string representation of the
+        /// corresponding objects in <paramref name="args"/>.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="format"/> is null.-or-<paramref name="args"/> is null.
+        /// </exception>
+        /// <exception cref="T:System.FormatException"><paramref name="format"/> is invalid.-or-The index of a format item is less than
+        /// zero, or greater than or equal to the length of the <paramref name="args"/> array.</exception>
+        public static string FormatWith(this string format, params object[] args)
+        {
+            return string.Format(CultureInfo.CurrentCulture, format, args);
+        }
+
         /// <summary>
         /// Returns a string array that contains the substrings in this string that are delimited by elements of a specified string array.
         /// Text elements can be qualified so their content is treated as plain text (i.e. the delimiter is ignored).

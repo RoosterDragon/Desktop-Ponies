@@ -151,9 +151,9 @@ Public Class Game
                             "Invalid Description", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
 
-        minBalls = Integer.Parse(gameColumns(3), CultureInfo.InvariantCulture)
-        maxBalls = Integer.Parse(gameColumns(4), CultureInfo.InvariantCulture)
-        maxScore = Integer.Parse(gameColumns(5), CultureInfo.InvariantCulture)
+        minBalls = Number.ParseInt32Invariant(gameColumns(3))
+        maxBalls = Number.ParseInt32Invariant(gameColumns(4))
+        maxScore = Number.ParseInt32Invariant(gameColumns(5))
         If maxScore < 1 Then
             Throw New InvalidDataException("The maximum score must be at least 1 - error loading name " & Name)
         End If
@@ -191,7 +191,7 @@ Public Class Game
 
         For Each line In goalData
             Dim columns = CommaSplitBraceQualified(line)
-            Dim newGoal As New GoalArea(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
+            Dim newGoal As New GoalArea(Number.ParseInt32Invariant(columns(1)),
                                         Path.Combine(directory, Trim(columns(2).Replace(ControlChars.Quote, ""))),
                                         columns(3), ponyContext)
             goals.Add(newGoal)
@@ -205,18 +205,18 @@ Public Class Game
 
         For Each line In positionData
             Dim columns = CommaSplitBraceQualified(line)
-            Dim newPosition As New Position(columns(1), Integer.Parse(columns(2), CultureInfo.InvariantCulture), columns(3),
+            Dim newPosition As New Position(columns(1), Number.ParseInt32Invariant(columns(2)), columns(3),
                                              columns(4), columns(5), columns(6), columns(7), columns(8), columns(9), columns(10),
                                              columns(11), Me)
-            Teams(Integer.Parse(columns(2), CultureInfo.InvariantCulture) - 1).Positions.Add(newPosition)
+            Teams(Number.ParseInt32Invariant(columns(2)) - 1).Positions.Add(newPosition)
         Next
 
         For Each line In ballData
             Dim columns = CommaSplitQuoteQualified(line)
             Dim newBall As New Ball(columns(1),
                                      Trim(columns(2)), Trim(columns(3)), Trim(columns(4)), Trim(columns(5)), Trim(columns(6)),
-                                     Integer.Parse(columns(7), CultureInfo.InvariantCulture),
-                                     Integer.Parse(columns(8), CultureInfo.InvariantCulture), directory & Path.DirectorySeparatorChar,
+                                     Number.ParseInt32Invariant(columns(7)),
+                                     Number.ParseInt32Invariant(columns(8)), directory & Path.DirectorySeparatorChar,
                                      ponyCollection, ponyContext)
             Balls.Add(newBall)
         Next
@@ -552,8 +552,8 @@ Public Class Game
 
             Dim locationParts = Split(location, ",")
             startPoint = New Vector2(
-                Integer.Parse(locationParts(0), CultureInfo.InvariantCulture),
-                Integer.Parse(locationParts(1), CultureInfo.InvariantCulture))
+                Number.ParseInt32Invariant(locationParts(0)),
+                Number.ParseInt32Invariant(locationParts(1)))
         End Sub
 
         Public Sub Initialize(gameScreen As Screen)
@@ -596,8 +596,8 @@ Public Class Game
             HostEffect = New Effect(base, context)
 
             startPoint = New Point(
-                Integer.Parse(x, CultureInfo.InvariantCulture),
-                Integer.Parse(y, CultureInfo.InvariantCulture))
+                Number.ParseInt32Invariant(x),
+                Number.ParseInt32Invariant(y))
         End Sub
 
         Public Sub Initialize(gameScreen As Screen)
@@ -728,8 +728,8 @@ Public Class Game
 
             Dim start_points = Split(_start_location, ",")
             startLocation = New Point(
-                Integer.Parse(start_points(0), CultureInfo.InvariantCulture),
-                Integer.Parse(start_points(1), CultureInfo.InvariantCulture))
+                Number.ParseInt32Invariant(start_points(0)),
+                Number.ParseInt32Invariant(start_points(1)))
 
             If LCase(Trim(_Allowed_area)) <> "any" Then
                 areaPoints = Split(_Allowed_area, ",")
@@ -768,10 +768,10 @@ Public Class Game
             Argument.EnsureNotNull(gameScreen, "gameScreen")
             If Not IsNothing(areaPoints) Then
                 allowedArea = New Rectangle(
-                    CInt(Double.Parse(areaPoints(0), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
-                    CInt(Double.Parse(areaPoints(1), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y),
-                    CInt(Double.Parse(areaPoints(2), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Width),
-                    CInt(Double.Parse(areaPoints(3), CultureInfo.InvariantCulture) * 0.01 * gameScreen.WorkingArea.Height))
+                    CInt(Number.ParseDoubleInvariant(areaPoints(0)) * 0.01 * gameScreen.WorkingArea.Width + gameScreen.WorkingArea.X),
+                    CInt(Number.ParseDoubleInvariant(areaPoints(1)) * 0.01 * gameScreen.WorkingArea.Height + gameScreen.WorkingArea.Y),
+                    CInt(Number.ParseDoubleInvariant(areaPoints(2)) * 0.01 * gameScreen.WorkingArea.Width),
+                    CInt(Number.ParseDoubleInvariant(areaPoints(3)) * 0.01 * gameScreen.WorkingArea.Height))
             Else
                 allowedArea = gameScreen.WorkingArea
             End If
@@ -1079,7 +1079,7 @@ Public Class Game
             Dim region2 = pony2.Region
 
             If Not region1.IntersectsWith(region2) Then Return
-            
+
             Dim leftDistance = region1.Right - region2.Left
             Dim rightDistance = region2.Right - region1.Left
             Dim topDistance = region1.Bottom - region2.Top

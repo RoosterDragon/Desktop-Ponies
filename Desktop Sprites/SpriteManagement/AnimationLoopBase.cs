@@ -523,8 +523,8 @@
             /// <returns>A short summary of current performance.</returns>
             public string GetSummary()
             {
-                return string.Format(CultureInfo.CurrentCulture,
-                    "fps: {0:0.0}/{1:0.0} time: {2:0.0}ms/{3:0.0}ms/{4:0.0}ms interval: {5:0.0}ms/{6:0.0}ms/{7:0.0}ms",
+                return 
+                    "fps: {0:0.0}/{1:0.0} time: {2:0.0}ms/{3:0.0}ms/{4:0.0}ms interval: {5:0.0}ms/{6:0.0}ms/{7:0.0}ms".FormatWith(
                     FramesPerSecond, AchievableFramesPerSecond,
                     MinTime, MeanTime, MaxTime,
                     MinInterval, MeanInterval, MaxInterval);

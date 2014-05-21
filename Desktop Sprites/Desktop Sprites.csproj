@@ -113,6 +113,7 @@
     <Compile Include="Core\Forms.cs" />
     <Compile Include="Core\Hash.cs" />
     <Compile Include="Core\Linq.cs" />
+    <Compile Include="Core\Number.cs" />
     <Compile Include="Core\PathEquality.cs" />
     <Compile Include="Core\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Core\Runtime.cs" />

@@ -52,7 +52,7 @@
                 ImageSelector.SelectedIndex = 0;
             else
                 MessageBox.Show(this,
-                    string.Format(CultureInfo.CurrentCulture, "No .gif files found in {0} or its subdirectories.", filesPath),
+                    "No .gif files found in {0} or its subdirectories.".FormatWith(filesPath),
                     "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -83,15 +83,14 @@
                 return;
             }
 
-            ImageInfo.Text = string.Format(CultureInfo.CurrentCulture,
-                "Duration: {0:0.00s} Iterations: {1}  Size: {2}",
+            ImageInfo.Text =
+                "Duration: {0:0.00s} Iterations: {1}  Size: {2}".FormatWith(
                 TimeSpan.FromMilliseconds(gifImage.Duration).TotalSeconds, gifImage.Iterations, gifImage.Size);
 
             ImmutableArray<GifFrame<BitmapFrame>> frames = gifImage.Frames;
             for (int i = 0; i < frames.Length; i++)
             {
-                string info = string.Format(CultureInfo.CurrentCulture,
-                    "{0}: {1}ms", i + 1, frames[i].Duration);
+                string info = "{0}: {1}ms".FormatWith(i + 1, frames[i].Duration);
                 GifControl gc = new GifControl(frames[i], info);
                 FramesDisplayPanel.Controls.Add(gc);
             }

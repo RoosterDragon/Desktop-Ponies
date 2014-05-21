@@ -46,8 +46,8 @@ Public NotInheritable Class Referential
         Dim result = CheckReference(name, collection)
         If result <> ReferenceResult.Unique Then
             Dim reason = If(result = ReferenceResult.NotFound,
-                            String.Format(CultureInfo.CurrentCulture, "There is no element with the name '{0}'.", name),
-                            String.Format(CultureInfo.CurrentCulture, "The name '{0}' does not refer to a unique element.", name))
+                            "There is no element with the name '{0}'.".FormatWith(name),
+                            "The name '{0}' does not refer to a unique element.".FormatWith(name))
             Return New ParseIssue(propertyName, name, "", reason)
         End If
         Return Nothing
@@ -600,12 +600,12 @@ Public Class InteractionBase
         Return String.Join(",",
             Name,
             Quoted(InitiatorName),
-            Chance.ToString(CultureInfo.InvariantCulture),
-            Proximity.ToString(CultureInfo.InvariantCulture),
+            Chance.ToStringInvariant(),
+            Proximity.ToStringInvariant(),
             Braced(String.Join(",", TargetNames.Select(Function(n) Quoted(n)))),
             Activation.ToString(),
             Braced(String.Join(",", BehaviorNames.Select(Function(n) Quoted(n)))),
-            ReactivationDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture))
+            ReactivationDelay.TotalSeconds.ToStringInvariant())
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
@@ -623,15 +623,13 @@ Public Class InteractionBase
         If String.IsNullOrEmpty(directory) Then Return
         Dim base = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = directory)
         If base Is Nothing Then
-            issues.Add(New ParseIssue(propertyName, directory, "",
-                                      String.Format(CultureInfo.CurrentCulture, "No pony named '{0}' exists.", directory)))
+            issues.Add(New ParseIssue(propertyName, directory, "", "No pony named '{0}' exists.".FormatWith(directory)))
         ElseIf BehaviorNames.Count > 0 Then
             If Not base.Behaviors.Any(Function(b) BehaviorNames.Contains(b.Name)) Then
                 Dim fallbackValue = If(Activation = TargetActivation.All, Nothing, "")
                 Dim fallbackText = If(Activation = TargetActivation.All, "The interaction cannot run.", "They cannot participate.")
                 issues.Add(New ParseIssue("Behaviors", "", fallbackValue,
-                                          String.Format(CultureInfo.CurrentCulture,
-                                                        "'{0}' has none of the listed behaviors. {1}", directory, fallbackText)))
+                                          "'{0}' has none of the listed behaviors. {1}".FormatWith(directory, fallbackText)))
             End If
         End If
     End Sub
@@ -1012,10 +1010,10 @@ Public Class Behavior
         Return String.Join(
             ",", "Behavior",
             Quoted(Name),
-            Chance.ToString(CultureInfo.InvariantCulture),
-            MaxDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
-            MinDuration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
-            Speed.ToString(CultureInfo.InvariantCulture),
+            Chance.ToStringInvariant(),
+            MaxDuration.TotalSeconds.ToStringInvariant(),
+            MinDuration.TotalSeconds.ToStringInvariant(),
+            Speed.ToStringInvariant(),
             Quoted(Path.GetFileName(RightImage.Path)),
             Quoted(Path.GetFileName(LeftImage.Path)),
             AllowedMovement.ToIniString(),
@@ -1023,18 +1021,18 @@ Public Class Behavior
             Quoted(StartLineName),
             Quoted(EndLineName),
             Skip,
-            TargetVector.X.ToString(CultureInfo.InvariantCulture),
-            TargetVector.Y.ToString(CultureInfo.InvariantCulture),
+            TargetVector.X.ToStringInvariant(),
+            TargetVector.Y.ToStringInvariant(),
             Quoted(FollowTargetName),
             AutoSelectImagesOnFollow,
             Quoted(FollowStoppedBehaviorName),
             Quoted(FollowMovingBehaviorName),
-            Quoted(rightCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   rightCenter.Y.ToString(CultureInfo.InvariantCulture)),
-            Quoted(leftCenter.X.ToString(CultureInfo.InvariantCulture) & "," &
-                   leftCenter.Y.ToString(CultureInfo.InvariantCulture)),
+            Quoted(rightCenter.X.ToStringInvariant() & "," &
+                   rightCenter.Y.ToStringInvariant()),
+            Quoted(leftCenter.X.ToStringInvariant() & "," &
+                   leftCenter.Y.ToStringInvariant()),
             DoNotRepeatImageAnimations,
-            Group.ToString(CultureInfo.InvariantCulture),
+            Group.ToStringInvariant(),
             FollowOffset.ToString())
     End Function
 
@@ -1416,7 +1414,7 @@ Public Class Pony
             Me.Info = info
         End Sub
         Public Overrides Function ToString() As String
-            Return String.Format(CultureInfo.CurrentCulture, "{0:000.000} {1}", Time.TotalSeconds, Info)
+            Return "{0:000.000} {1}".FormatWith(Time.TotalSeconds, Info)
         End Function
     End Structure
 
@@ -3483,8 +3481,8 @@ Public Class EffectBase
             Quoted(BehaviorName),
             Quoted(Path.GetFileName(RightImage.Path)),
             Quoted(Path.GetFileName(LeftImage.Path)),
-            Duration.TotalSeconds.ToString(CultureInfo.InvariantCulture),
-            RepeatDelay.TotalSeconds.ToString(CultureInfo.InvariantCulture),
+            Duration.TotalSeconds.ToStringInvariant(),
+            RepeatDelay.TotalSeconds.ToStringInvariant(),
             PlacementDirectionRight.ToIniString(),
             CenteringRight.ToIniString(),
             PlacementDirectionLeft.ToIniString(),
@@ -3855,16 +3853,16 @@ Public Class HouseBase
                             RightImage.Path = imageFilename
                         End If
                     Case "door"
-                        DoorPosition = New Vector2(Integer.Parse(columns(1), CultureInfo.InvariantCulture),
-                                                   Integer.Parse(columns(2), CultureInfo.InvariantCulture))
+                        DoorPosition = New Vector2(Number.ParseInt32Invariant(columns(1)),
+                                                   Number.ParseInt32Invariant(columns(2)))
                     Case "cycletime"
-                        CycleInterval = TimeSpan.FromSeconds(Integer.Parse(columns(1), CultureInfo.InvariantCulture))
+                        CycleInterval = TimeSpan.FromSeconds(Number.ParseInt32Invariant(columns(1)))
                     Case "minspawn"
-                        MinimumPonies = Integer.Parse(columns(1), CultureInfo.InvariantCulture)
+                        MinimumPonies = Number.ParseInt32Invariant(columns(1))
                     Case "maxspawn"
-                        MaximumPonies = Integer.Parse(columns(1), CultureInfo.InvariantCulture)
+                        MaximumPonies = Number.ParseInt32Invariant(columns(1))
                     Case "bias"
-                        Bias = Decimal.Parse(columns(1), CultureInfo.InvariantCulture)
+                        Bias = Number.ParseDecimalInvariant(columns(1))
                     Case Else
                         Visitors.Add(Trim(line))
                 End Select

@@ -172,8 +172,8 @@
         /// </summary>
         private void UpdateLabel()
         {
-            FrameLabel.Text = string.Format(CultureInfo.CurrentCulture,
-                "Frame: {0:00} of {1:00}  Time: {2:00.00} of {3:00.00} seconds",
+            FrameLabel.Text =
+                "Frame: {0:00} of {1:00}  Time: {2:00.00} of {3:00.00} seconds".FormatWith(
                 FrameIndex + 1, FrameSelector.Maximum + 1, TimeIndex / 1000f, TimeSelector.Maximum / 1000f);
         }
 

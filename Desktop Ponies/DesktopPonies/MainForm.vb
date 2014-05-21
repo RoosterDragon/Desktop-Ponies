@@ -242,8 +242,7 @@ Public Class MainForm
         worker.QueueTask(Sub()
                              Console.WriteLine("Templates Loaded in {0:0.00s}", loadWatch.Elapsed.TotalSeconds)
 
-                             PonyPaginationLabel.Text = String.Format(
-                                     CultureInfo.CurrentCulture, "Viewing {0} ponies", PonySelectionPanel.Controls.Count)
+                             PonyPaginationLabel.Text = "Viewing {0} ponies".FormatWith(PonySelectionPanel.Controls.Count)
 
                              If Not Runtime.IsMono Then LoadingProgressBar.Visible = False
                              LoadingProgressBar.Value = 0
@@ -581,16 +580,13 @@ Public Class MainForm
         PonySelectionPanel.ResumeLayout()
 
         If Not PaginationEnabled.Checked OrElse visibleCount = 0 Then
-            PonyPaginationLabel.Text = String.Format(CultureInfo.CurrentCulture,
-                                                     "Viewing {0} ponies",
-                                                     filterCount)
+            PonyPaginationLabel.Text = "Viewing {0} ponies".FormatWith(filterCount)
         Else
             PonyPaginationLabel.Text =
-            String.Format(CultureInfo.CurrentCulture,
-                          "Viewing {0} to {1} of {2} ponies",
-                          ponyOffset + 1,
-                          Math.Min(ponyOffset + PoniesPerPage.Value, filterCount),
-                          filterCount)
+                "Viewing {0} to {1} of {2} ponies".FormatWith(
+                    ponyOffset + 1,
+                    Math.Min(ponyOffset + PoniesPerPage.Value, filterCount),
+                    filterCount)
         End If
 
         Dim min = ponyOffset = 0
@@ -735,13 +731,12 @@ Public Class MainForm
                 LoadPoniesAsyncEnd(
                     True,
                     Sub()
-                        MessageBox.Show(Me, String.Format(
-                            CultureInfo.CurrentCulture,
-                            "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
+                        MessageBox.Show(
+                            Me, "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
                             "Try choosing no more than {2} in total.{0}" &
-                            "(or, you can increase the limit via the options menu)",
-                            Environment.NewLine, totalPonies, Options.MaxPonyCount),
-                        "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            "(or, you can increase the limit via the options menu)".FormatWith(
+                                Environment.NewLine, totalPonies, Options.MaxPonyCount),
+                            "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End Sub)
                 Return
             End If

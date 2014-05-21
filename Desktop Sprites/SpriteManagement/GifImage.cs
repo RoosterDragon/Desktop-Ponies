@@ -1479,13 +1479,11 @@
             string signature = new string(reader.ReadCharsExact(3));
             if (signature != SignatureExpected)
                 throw new InvalidDataException(
-                    string.Format(CultureInfo.CurrentCulture, "Invalid signature in header. Expected '{0}'. Read '{1}'.",
-                    SignatureExpected, signature));
+                    "Invalid signature in header. Expected '{0}'. Read '{1}'.".FormatWith(SignatureExpected, signature));
 
             string version = new string(reader.ReadCharsExact(3));
             if (!char.IsDigit(version, 0) || !char.IsDigit(version, 1) || !char.IsLetter(version, 2))
-                throw new InvalidDataException(
-                    string.Format(CultureInfo.CurrentCulture, "Invalid version in header. Read '{0}'.", version));
+                throw new InvalidDataException("Invalid version in header. Read '{0}'.".FormatWith(version));
         }
         /// <summary>
         /// Reads the logical screen section. This contains the logical screen descriptor and global color table.
@@ -2027,8 +2025,8 @@
             {
                 // No conflict, so check the value is in range and set the pixel.
                 if (pixel >= colorTable.Length)
-                    throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture,
-                            "Indexed value of {0} was larger that the maximum of {1}.", pixel, colorTable.Length - 1));
+                    throw new InvalidDataException(
+                        "Indexed value of {0} was larger that the maximum of {1}.".FormatWith(pixel, colorTable.Length - 1));
                 iterator.SetValue(pixel);
             }
             else if (imageTransparentIndex != imageTransparentIndexRemap)

@@ -124,11 +124,9 @@ Public Class StringCollectionParser
         If Boolean.TryParse(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, BooleanFailureFormat, s,
-                                                                    Boolean.TrueString, Boolean.FalseString))
+            Return Parsed.Fallback(s, fallback.Value, BooleanFailureFormat.FormatWith(s, Boolean.TrueString, Boolean.FalseString))
         Else
-            Return Parsed.Failed(Of Boolean)(s, String.Format(CultureInfo.CurrentCulture, BooleanFailureFormat, s,
-                                                              Boolean.TrueString, Boolean.FalseString))
+            Return Parsed.Failed(Of Boolean)(s, BooleanFailureFormat.FormatWith(s, Boolean.TrueString, Boolean.FalseString))
         End If
     End Function
     Public Function ParseInt32() As Integer
@@ -150,11 +148,11 @@ Public Class StringCollectionParser
         If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
         Dim failReason As String = Nothing
         Dim result As Integer
-        If Not Integer.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, result) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, IntegerFailureFormat, s)
+        If Not Number.TryParseInt32Invariant(s, result) Then
+            failReason = IntegerFailureFormat.FormatWith(s)
         End If
         If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
+            failReason = OutOfRangeFailureFormat.FormatWith(result, min, max)
         End If
         If failReason Is Nothing Then
             Return Parsed.Success(result)
@@ -183,11 +181,11 @@ Public Class StringCollectionParser
         If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
         Dim failReason As String = Nothing
         Dim result As Single
-        If Not Single.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, result) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, FloatFailureFormat, s)
+        If Not Number.TryParseSingleInvariant(s, result) Then
+            failReason = FloatFailureFormat.FormatWith(s)
         End If
         If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
+            failReason = OutOfRangeFailureFormat.FormatWith(result, min, max)
         End If
         If failReason Is Nothing Then
             Return Parsed.Success(result)
@@ -216,11 +214,11 @@ Public Class StringCollectionParser
         If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
         Dim failReason As String = Nothing
         Dim result As Double
-        If Not Double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, result) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, FloatFailureFormat, s)
+        If Not Number.TryParseDoubleInvariant(s, result) Then
+            failReason = FloatFailureFormat.FormatWith(s)
         End If
         If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
-            failReason = String.Format(CultureInfo.CurrentCulture, OutOfRangeFailureFormat, result, min, max)
+            failReason = OutOfRangeFailureFormat.FormatWith(result, min, max)
         End If
         If failReason Is Nothing Then
             Return Parsed.Success(result)
@@ -242,12 +240,14 @@ Public Class StringCollectionParser
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
             Return Parsed.Fallback(s, fallback.Value,
-                                   String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
-                                                 s, String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
+                                   MapFailureFormat.FormatWith(
+                                       s,
+                                       String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
         Else
             Return Parsed.Failed(Of TEnum)(s,
-                                           String.Format(CultureInfo.CurrentCulture, MapFailureFormat,
-                                                         s, String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
+                                           MapFailureFormat.FormatWith(
+                                               s,
+                                               String.Join(", ", DirectCast([Enum].GetValues(GetType(TEnum)), TEnum()))))
         End If
     End Function
     Public Function Map(Of T As Structure)(mapping As IDictionary(Of String, T)) As T
@@ -262,11 +262,9 @@ Public Class StringCollectionParser
         If s IsNot Nothing AndAlso mapping.TryGetValue(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value,
-                                   String.Format(CultureInfo.CurrentCulture, MapFailureFormat, s, String.Join(", ", mapping.Keys)))
+            Return Parsed.Fallback(s, fallback.Value, MapFailureFormat.FormatWith(s, String.Join(", ", mapping.Keys)))
         Else
-            Return Parsed.Failed(Of T)(s,
-                                       String.Format(CultureInfo.CurrentCulture, MapFailureFormat, s, String.Join(", ", mapping.Keys)))
+            Return Parsed.Failed(Of T)(s, MapFailureFormat.FormatWith(s, String.Join(", ", mapping.Keys)))
         End If
     End Function
     Public Function Project(Of T As Structure)(projection As Func(Of String, T)) As T
@@ -291,9 +289,9 @@ Public Class StringCollectionParser
         If result IsNot Nothing Then
             Return Parsed.Success(result.Value)
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, ProjectFailureFormat, s, message))
+            Return Parsed.Fallback(s, fallback.Value, ProjectFailureFormat.FormatWith(s, message))
         Else
-            Return Parsed.Failed(Of T)(s, String.Format(CultureInfo.CurrentCulture, ProjectFailureFormat, s, message))
+            Return Parsed.Failed(Of T)(s, ProjectFailureFormat.FormatWith(s, message))
         End If
     End Function
     Public Function ParseVector2() As Vector2
@@ -308,13 +306,13 @@ Public Class StringCollectionParser
         Dim x As Integer
         Dim y As Integer
         If parts IsNot Nothing AndAlso parts.Length = 2 AndAlso
-            Integer.TryParse(parts(0), NumberStyles.Integer, CultureInfo.InvariantCulture, x) AndAlso
-            Integer.TryParse(parts(1), NumberStyles.Integer, CultureInfo.InvariantCulture, y) Then
+            Number.TryParseInt32Invariant(parts(0), x) AndAlso
+            Number.TryParseInt32Invariant(parts(1), y) Then
             Return Parsed.Success(New Vector2(x, y))
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback.Value, String.Format(CultureInfo.CurrentCulture, Vector2FailureFormat, s))
+            Return Parsed.Fallback(s, fallback.Value, Vector2FailureFormat.FormatWith(s))
         Else
-            Return Parsed.Failed(Of Vector2)(s, String.Format(CultureInfo.CurrentCulture, Vector2FailureFormat, s))
+            Return Parsed.Failed(Of Vector2)(s, Vector2FailureFormat.FormatWith(s))
         End If
     End Function
     Public Function SpecifiedCombinePath(pathPrefix As String, source As String) As String
@@ -335,9 +333,9 @@ Public Class StringCollectionParser
         If failReasonFormat Is Nothing Then
             Return Parsed.Success(Path.Combine(pathPrefix, s))
         ElseIf fallback IsNot Nothing Then
-            Return Parsed.Fallback(s, fallback, String.Format(CultureInfo.CurrentCulture, failReasonFormat, s))
+            Return Parsed.Fallback(s, fallback, failReasonFormat.FormatWith(s))
         Else
-            Return Parsed.Failed(Of String)(s, String.Format(CultureInfo.CurrentCulture, failReasonFormat, s))
+            Return Parsed.Failed(Of String)(s, failReasonFormat.FormatWith(s))
         End If
     End Function
     Public Sub SpecifiedFileExists(filePath As String)
@@ -347,11 +345,9 @@ Public Class StringCollectionParser
         If File.Exists(filePath) Then
             HandleParsed(Parsed.Success(filePath))
         ElseIf fallback IsNot Nothing Then
-            HandleParsed(Parsed.Fallback(filePath, fallback,
-                                         String.Format(CultureInfo.CurrentCulture, FileNotFoundFailureFormat, filePath)))
+            HandleParsed(Parsed.Fallback(filePath, fallback, FileNotFoundFailureFormat.FormatWith(filePath)))
         Else
-            HandleParsed(Parsed.Failed(Of String)(filePath,
-                                                  String.Format(CultureInfo.CurrentCulture, FileNotFoundFailureFormat, filePath)))
+            HandleParsed(Parsed.Failed(Of String)(filePath, FileNotFoundFailureFormat.FormatWith(filePath)))
         End If
     End Sub
     Public Function Assert(source As String, condition As Boolean, reason As String, fallback As String) As Boolean

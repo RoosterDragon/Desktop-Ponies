@@ -190,7 +190,7 @@ Public NotInheritable Class Options
                             Case "count"
                                 If columns.Length <> 3 Then Exit Select
                                 Dim count As Integer
-                                If Integer.TryParse(columns(2), NumberStyles.Integer, CultureInfo.InvariantCulture, count) AndAlso
+                                If Number.TryParseInt32Invariant(columns(2), count) AndAlso
                                     count > 0 Then
                                     newCounts.Add(columns(1), count)
                                 End If
@@ -268,40 +268,40 @@ Public NotInheritable Class Options
             Dim region = If(AllowedRegion, Rectangle.Empty)
             Dim optionsLine = String.Join(",", "options",
                                      PonySpeechEnabled,
-                                     PonySpeechChance.ToString(CultureInfo.InvariantCulture),
+                                     PonySpeechChance.ToStringInvariant(),
                                      CursorAvoidanceEnabled,
-                                     CursorAvoidanceSize.ToString(CultureInfo.InvariantCulture),
+                                     CursorAvoidanceSize.ToStringInvariant(),
                                      PonyDraggingEnabled,
                                      PonyInteractionsEnabled,
                                      displayPonyInteractionsErrors,
-                                     ExclusionZone.X.ToString(CultureInfo.InvariantCulture),
-                                     ExclusionZone.Y.ToString(CultureInfo.InvariantCulture),
-                                     ExclusionZone.Width.ToString(CultureInfo.InvariantCulture),
-                                     ExclusionZone.Height.ToString(CultureInfo.InvariantCulture),
-                                     ScaleFactor.ToString(CultureInfo.InvariantCulture),
-                                     MaxPonyCount.ToString(CultureInfo.InvariantCulture),
+                                     ExclusionZone.X.ToStringInvariant(),
+                                     ExclusionZone.Y.ToStringInvariant(),
+                                     ExclusionZone.Width.ToStringInvariant(),
+                                     ExclusionZone.Height.ToStringInvariant(),
+                                     ScaleFactor.ToStringInvariant(),
+                                     MaxPonyCount.ToStringInvariant(),
                                      alphaBlendingEnabled,
                                      PonyEffectsEnabled,
                                      WindowAvoidanceEnabled,
                                      PonyAvoidsPonies,
                                      WindowContainment,
                                      PonyTeleportEnabled,
-                                     TimeFactor.ToString(CultureInfo.InvariantCulture),
+                                     TimeFactor.ToStringInvariant(),
                                      SoundEnabled,
                                      SoundSingleChannelOnly,
-                                     SoundVolume.ToString(CultureInfo.InvariantCulture),
+                                     SoundVolume.ToStringInvariant(),
                                      AlwaysOnTop,
                                      SuspendForFullscreenApplication,
                                      ScreensaverSoundEnabled,
                                      ScreensaverStyle,
-                                     ScreensaverBackgroundColor.ToArgb().ToString(CultureInfo.InvariantCulture),
+                                     ScreensaverBackgroundColor.ToArgb().ToStringInvariant(),
                                      ScreensaverBackgroundImagePath,
                                      NoRandomDuplicates,
                                      ShowInTaskbar,
-                                     region.X.ToString(CultureInfo.InvariantCulture),
-                                     region.Y.ToString(CultureInfo.InvariantCulture),
-                                     region.Width.ToString(CultureInfo.InvariantCulture),
-                                     region.Height.ToString(CultureInfo.InvariantCulture))
+                                     region.X.ToStringInvariant(),
+                                     region.Y.ToStringInvariant(),
+                                     region.Width.ToStringInvariant(),
+                                     region.Height.ToStringInvariant())
             file.WriteLine(optionsLine)
 
             For Each screen In Screens
@@ -309,7 +309,7 @@ Public NotInheritable Class Options
             Next
 
             For Each entry In PonyCounts.Where(Function(kvp) kvp.Value > 0)
-                file.WriteLine(String.Join(",", "count", Quoted(entry.Key), entry.Value.ToString(CultureInfo.InvariantCulture)))
+                file.WriteLine(String.Join(",", "count", Quoted(entry.Key), entry.Value.ToStringInvariant()))
             Next
 
             For Each tag In CustomTags

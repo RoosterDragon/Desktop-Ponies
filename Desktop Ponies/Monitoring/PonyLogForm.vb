@@ -34,9 +34,9 @@ Friend Class PonyLogForm
                 If lastRecord.Info = record.Info Then
                     similarRecords += 1
                     LogView.Nodes(LogView.Nodes.Count - 1).Text =
-                        String.Format(CultureInfo.CurrentCulture, "{0:000.000}-{1:000.000} {2} x{3}",
-                                      firstSimilarRecordTime.TotalSeconds, record.Time.TotalSeconds,
-                                      record.Info, similarRecords)
+                        "{0:000.000}-{1:000.000} {2} x{3}".FormatWith(
+                            firstSimilarRecordTime.TotalSeconds, record.Time.TotalSeconds,
+                            record.Info, similarRecords)
                 Else
                     lastRecord = record
                     firstSimilarRecordTime = record.Time

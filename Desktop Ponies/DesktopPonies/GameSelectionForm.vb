@@ -313,8 +313,8 @@ Public Class GameSelectionForm
             Exit Sub
         End If
 
-        If Integer.Parse(GameTeam1.RequiredSpacesLeftCountLabel.Text, CultureInfo.InvariantCulture) > 0 OrElse
-            Integer.Parse(GameTeam2.RequiredSpacesLeftCountLabel.Text, CultureInfo.InvariantCulture) > 0 Then
+        If Number.ParseInt32Invariant(GameTeam1.RequiredSpacesLeftCountLabel.Text) > 0 OrElse
+            Number.ParseInt32Invariant(GameTeam2.RequiredSpacesLeftCountLabel.Text) > 0 Then
             MessageBox.Show(Me, "You must fill each required position with a pony before you can start the game.",
                             "Insufficient Positions Filled", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub

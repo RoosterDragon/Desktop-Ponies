@@ -179,12 +179,12 @@ Public Class HouseOptionsForm
 
                 new_ini.WriteLine("image," & base.LeftImage.Path.Remove(0, base.LeftImage.Path.LastIndexOf(Path.DirectorySeparatorChar) + 1))
                 new_ini.WriteLine("door," &
-                                  base.DoorPosition.X.ToString(CultureInfo.InvariantCulture) & cma &
-                                  base.DoorPosition.Y.ToString(CultureInfo.InvariantCulture))
-                new_ini.WriteLine("cycletime," & CInt(base.CycleInterval.TotalSeconds).ToString(CultureInfo.InvariantCulture))
-                new_ini.WriteLine("minspawn," & base.MinimumPonies.ToString(CultureInfo.InvariantCulture))
-                new_ini.WriteLine("maxspawn," & base.MaximumPonies.ToString(CultureInfo.InvariantCulture))
-                new_ini.WriteLine("bias," & base.Bias.ToString(CultureInfo.InvariantCulture))
+                                  base.DoorPosition.X.ToStringInvariant() & cma &
+                                  base.DoorPosition.Y.ToStringInvariant())
+                new_ini.WriteLine("cycletime," & CInt(base.CycleInterval.TotalSeconds).ToStringInvariant())
+                new_ini.WriteLine("minspawn," & base.MinimumPonies.ToStringInvariant())
+                new_ini.WriteLine("maxspawn," & base.MaximumPonies.ToStringInvariant())
+                new_ini.WriteLine("bias," & base.Bias.ToStringInvariant())
 
                 If Visitors_CheckedListBox.Items.Count = Visitors_CheckedListBox.CheckedItems.Count Then
                     new_ini.WriteLine("all")

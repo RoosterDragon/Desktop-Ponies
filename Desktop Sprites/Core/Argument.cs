@@ -954,8 +954,8 @@
         {
             TypeCode underlyingTypeCode = Type.GetTypeCode(Enum.GetUnderlyingType(enumType));
             if (underlyingTypeCode == TypeCode.Int64 || underlyingTypeCode == TypeCode.UInt64 || underlyingTypeCode == TypeCode.UInt32)
-                return new InvalidEnumArgumentException(string.Format(CultureInfo.CurrentCulture,
-                    "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.\nParameter name: {0}",
+                return new InvalidEnumArgumentException(
+                    "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.\nParameter name: {0}".FormatWith(
                     paramName, arg, enumType.Name));
             else
                 return new InvalidEnumArgumentException(paramName, Convert.ToInt32(arg), enumType);

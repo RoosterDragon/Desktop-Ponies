@@ -104,7 +104,7 @@
                 ImageSelector.SelectedIndex = 0;
             else
                 MessageBox.Show(this,
-                    string.Format(CultureInfo.CurrentCulture, "No .gif files found in {0} or its subdirectories.", filesPath),
+                    "No .gif files found in {0} or its subdirectories.".FormatWith(filesPath),
                     "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -343,11 +343,10 @@
         /// </summary>
         private void UpdateColorHex()
         {
-            SourceAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", currentColor.A);
-            SourceColorCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X6}", currentColor.ToArgb() & 0x00FFFFFF);
-            DesiredAlphaCode.Text = string.Format(CultureInfo.CurrentCulture, "{0:X2}", colorMappingTable[currentColor].A);
-            DesiredColorCode.Text =
-                string.Format(CultureInfo.CurrentCulture, "{0:X6}", colorMappingTable[currentColor].ToArgb() & 0x00FFFFFF);
+            SourceAlphaCode.Text = "{0:X2}".FormatWith(currentColor.A);
+            SourceColorCode.Text = "{0:X6}".FormatWith(currentColor.ToArgb() & 0x00FFFFFF);
+            DesiredAlphaCode.Text = "{0:X2}".FormatWith(colorMappingTable[currentColor].A);
+            DesiredColorCode.Text = "{0:X6}".FormatWith(colorMappingTable[currentColor].ToArgb() & 0x00FFFFFF);
         }
 
         /// <summary>
