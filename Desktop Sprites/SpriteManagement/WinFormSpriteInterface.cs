@@ -613,6 +613,10 @@
             /// <returns>Returns true if the specified arrays are structurally equal; otherwise, false.</returns>
             public bool Equals(int[] x, int[] y)
             {
+                if (x == y)
+                    return true;
+                if (x == null || y == null)
+                    return x == null && y == null;
                 if (x.Length != y.Length)
                     return false;
                 for (int i = 0; i < x.Length; i++)
@@ -627,6 +631,8 @@
             /// <returns>A hash code for the specified array.</returns>
             public int GetHashCode(int[] obj)
             {
+                if (obj == null)
+                    return 0;
                 const int OffsetBasis32 = unchecked((int)2166136261);
                 const int FnvPrime32 = 16777619;
                 int hash = OffsetBasis32;
@@ -1207,28 +1213,28 @@
         /// Loads the given collection of file paths as images in a format that this
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/> can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
-        public void LoadImages(IEnumerable<SpriteImagePaths> imageFilePaths)
+        public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths)
         {
-            LoadImages(imageFilePaths, null);
+            LoadImages(imagePaths, null);
         }
 
         /// <summary>
         /// Loads the given collection of file paths as images in a format that this
         /// <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface"/> can display.
         /// </summary>
-        /// <param name="imageFilePaths">The collection of paths to image files that should be loaded by the interface. Any images not
+        /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
         /// loaded by this method will be loaded on demand.</param>
         /// <param name="imageLoadedHandler">An <see cref="T:System.EventHandler"/> that is raised when an image is loaded.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="imageFilePaths"/> is null.</exception>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         /// <exception cref="T:System.AggregateException">One or more images failed to load.</exception>
-        public void LoadImages(IEnumerable<SpriteImagePaths> imageFilePaths, EventHandler imageLoadedHandler)
+        public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths, EventHandler imageLoadedHandler)
         {
-            Argument.EnsureNotNull(imageFilePaths, "imageFilePaths");
+            Argument.EnsureNotNull(imagePaths, "imageFilePaths");
             EnsureNotDisposed();
 
             object syncObject = new object();
@@ -1245,7 +1251,7 @@
             lock (syncObject)
             {
                 lock (imageLoadedHandler)
-                    foreach (var paths in imageFilePaths)
+                    foreach (var paths in imagePaths)
                     {
                         remaining++;
                         ThreadPool.QueueUserWorkItem(o =>

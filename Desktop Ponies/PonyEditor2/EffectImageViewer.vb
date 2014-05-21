@@ -53,6 +53,7 @@ Public Class EffectImageViewer
     End Function
 
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
+        Argument.EnsureNotNull(e, "e")
         If EffectImage Is Nothing Then
             PaintImageInCenter(Image, e)
             Return

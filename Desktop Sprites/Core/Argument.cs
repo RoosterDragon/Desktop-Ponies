@@ -210,7 +210,7 @@
         public static int EnsureInRangeInclusive(int arg, string paramName, int min, int max)
         {
             if (arg < min || arg > max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -229,7 +229,7 @@
         public static int EnsureInRangeExclusive(int arg, string paramName, int min, int max)
         {
             if (arg <= min || arg >= max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -346,7 +346,7 @@
         public static long EnsureInRangeInclusive(long arg, string paramName, long min, long max)
         {
             if (arg < min || arg > max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -365,7 +365,7 @@
         public static long EnsureInRangeExclusive(long arg, string paramName, long min, long max)
         {
             if (arg <= min || arg >= max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -482,7 +482,7 @@
         public static float EnsureInRangeInclusive(float arg, string paramName, float min, float max)
         {
             if (arg < min || arg > max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -501,7 +501,7 @@
         public static float EnsureInRangeExclusive(float arg, string paramName, float min, float max)
         {
             if (arg <= min || arg >= max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -618,7 +618,7 @@
         public static double EnsureInRangeInclusive(double arg, string paramName, double min, double max)
         {
             if (arg < min || arg > max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -637,7 +637,7 @@
         public static double EnsureInRangeExclusive(double arg, string paramName, double min, double max)
         {
             if (arg <= min || arg >= max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -754,7 +754,7 @@
         public static TimeSpan EnsureInRangeInclusive(TimeSpan arg, string paramName, TimeSpan min, TimeSpan max)
         {
             if (arg < min || arg > max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -773,7 +773,7 @@
         public static TimeSpan EnsureInRangeExclusive(TimeSpan arg, string paramName, TimeSpan min, TimeSpan max)
         {
             if (arg <= min || arg >= max)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -860,7 +860,7 @@
         public static T EnsureInRangeInclusive<T>(T arg, string paramName, T min, T max) where T : IComparable<T>
         {
             if (arg.CompareTo(min) < 0 || arg.CompareTo(max) > 0)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeInclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeInclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -879,7 +879,7 @@
         public static T EnsureInRangeExclusive<T>(T arg, string paramName, T min, T max) where T : IComparable<T>
         {
             if (arg.CompareTo(min) <= 0 || arg.CompareTo(max) >= 0)
-                throw new ArgumentOutOfRangeException(paramName, arg, string.Format(InRangeExclusiveFormat, paramName, min, max));
+                throw new ArgumentOutOfRangeException(paramName, arg, InRangeExclusiveFormat.FormatWith(paramName, min, max));
             return arg;
         }
 
@@ -958,7 +958,7 @@
                     "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.\nParameter name: {0}".FormatWith(
                     paramName, arg, enumType.Name));
             else
-                return new InvalidEnumArgumentException(paramName, Convert.ToInt32(arg), enumType);
+                return new InvalidEnumArgumentException(paramName, Convert.ToInt32(arg, CultureInfo.InvariantCulture), enumType);
         }
     }
 }

@@ -4,6 +4,7 @@
     Private Const ButtonPadding As Integer = 15
 
     Protected Overrides Sub OnControlAdded(e As ControlEventArgs)
+        Argument.EnsureNotNull(e, "e")
         MyBase.OnControlAdded(e)
         Dim padding = e.Control.Padding
         padding.Right += ButtonPadding
@@ -11,6 +12,7 @@
     End Sub
 
     Protected Overrides Sub OnControlRemoved(e As ControlEventArgs)
+        Argument.EnsureNotNull(e, "e")
         MyBase.OnControlRemoved(e)
         Dim padding = e.Control.Padding
         padding.Right -= ButtonPadding
@@ -18,6 +20,7 @@
     End Sub
 
     Protected Overrides Sub OnDrawItem(e As DrawItemEventArgs)
+        Argument.EnsureNotNull(e, "e")
         MyBase.OnDrawItem(e)
         e.DrawBackground()
         e.DrawFocusRectangle()

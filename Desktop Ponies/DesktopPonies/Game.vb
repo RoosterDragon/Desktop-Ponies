@@ -257,6 +257,7 @@ Public Class Game
     End Sub
 
     Public Sub Update(animator As GameAnimator, manualControlPlayerOne As Pony, manualControlPlayerTwo As Pony)
+        Argument.EnsureNotNull(animator, "animator")
         Me.manualControlPlayerOne = manualControlPlayerOne
         Me.manualControlPlayerTwo = manualControlPlayerTwo
         Select Case Status

@@ -75,6 +75,7 @@ Public Class PonyPreview
     End Sub
 
     Public Sub RestartForPony(base As PonyBase, Optional startBehavior As Behavior = Nothing)
+        Argument.EnsureNotNull(base, "base")
         If Not Created Then CreateControl()
         editorAnimator.Pause(True)
         editorAnimator.Clear()
@@ -101,6 +102,7 @@ Public Class PonyPreview
     End Sub
 
     Public Function ShowDialogOverPreview(show As Func(Of DialogResult)) As DialogResult
+        Argument.EnsureNotNull(show, "show")
         Dim wasVisible = editorAnimator IsNot Nothing AndAlso Not editorAnimator.Paused
         If wasVisible Then HidePreview()
         Dim result = show()

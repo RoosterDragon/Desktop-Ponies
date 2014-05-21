@@ -7,9 +7,16 @@ Public Class PonyCollection
         Private Sub New()
         End Sub
         Public Overloads Function Equals(x As CaseInsensitiveString, y As CaseInsensitiveString) As Boolean Implements IEqualityComparer(Of CaseInsensitiveString).Equals
-            Return String.Equals(x.ToString(), y.ToString())
+            If x Is Nothing AndAlso y Is Nothing Then
+                Return True
+            ElseIf x Is Nothing Xor y Is Nothing Then
+                Return False
+            Else
+                Return String.Equals(x.ToString(), y.ToString())
+            End If
         End Function
         Public Overloads Function GetHashCode(obj As CaseInsensitiveString) As Integer Implements IEqualityComparer(Of CaseInsensitiveString).GetHashCode
+            If obj Is Nothing Then Return StringComparer.Ordinal.GetHashCode(Nothing)
             Return obj.ToString().GetHashCode()
         End Function
     End Class
@@ -181,7 +188,7 @@ Public Class PonyCollection
         Next
     End Sub
 
-    Private Sub UpdateImageSizes(base As PonyBase)
+    Private Shared Sub UpdateImageSizes(base As PonyBase)
         For Each behavior In base.Behaviors
             behavior.LeftImage.UpdateSize()
             behavior.RightImage.UpdateSize()
@@ -252,7 +259,7 @@ Public NotInheritable Class PonyIniParser
                                        p.NoParse()
                                        Dim bg As New BehaviorGroup("", 0)
                                        bg.Number = p.ParseInt32(0, 100)
-                                       bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToString())
+                                       bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToStringInvariant())
                                        Return bg
                                    End Function)
     End Function

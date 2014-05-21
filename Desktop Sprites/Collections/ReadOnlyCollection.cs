@@ -101,7 +101,7 @@
         /// otherwise, false.</returns>
         public static bool operator ==(ReadOnlyCollection<T> left, ReadOnlyCollection<T> right)
         {
-            return left.collection.Equals(right.collection);
+            return object.Equals(left.collection, right.collection);
         }
         /// <summary>
         /// Tests whether two specified <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> structures are different.

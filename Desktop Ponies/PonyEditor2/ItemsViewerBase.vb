@@ -71,6 +71,7 @@
     End Function
 
     Protected Shared Function GetGroupName(ponyBase As PonyBase, groupNumber As Integer) As String
+        Argument.EnsureNotNull(ponyBase, "ponyBase")
         If groupNumber = Behavior.AnyGroup Then Return "Any"
         Dim group = ponyBase.BehaviorGroups.FirstOrDefault(Function(bg) bg.Number = groupNumber)
         Return If(group Is Nothing, groupNumber.ToString(Globalization.CultureInfo.CurrentCulture), group.Name.ToString())

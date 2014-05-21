@@ -7,11 +7,13 @@ Public Class HouseOptionsForm
     Private houseImage As Image
     Private doorLocation As Vector2
 
-    Public Sub New(_house As House, ponyBases As IEnumerable(Of PonyBase))
+    Public Sub New(house As House, ponyBases As IEnumerable(Of PonyBase))
+        Argument.EnsureNotNull(house, "house")
+        Argument.EnsureNotNull(ponyBases, "ponyBases")
         InitializeComponent()
         Icon = My.Resources.Twilight
 
-        house = _house
+        Me.house = house
         Dim base = house.HouseBase
 
         Text = base.Name + " - House Options - Desktop Ponies"

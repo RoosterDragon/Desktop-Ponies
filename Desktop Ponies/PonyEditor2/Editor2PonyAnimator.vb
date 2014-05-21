@@ -34,6 +34,7 @@ Public Class Editor2PonyAnimator
     End Sub
 
     Public Sub ChangeEditorMenu(base As PonyBase)
+        Argument.EnsureNotNull(base, "base")
         Dim behaviorItems = base.Behaviors.Select(
             Function(b) New SimpleContextMenuItem(b.Name, Sub() preview.TryInvoke(Sub() preview.RunBehavior(b))))
         If behaviorItems.Any() Then

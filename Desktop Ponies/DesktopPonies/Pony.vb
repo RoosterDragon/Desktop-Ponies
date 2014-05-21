@@ -23,6 +23,7 @@ Public NotInheritable Class Referential
     End Sub
     Public Shared Function CheckNotCircular(Of T As IPonyIniSerializable)(propertyName As String, name As String,
                                                                           start As T, nextElement As Func(Of T, T)) As ParseIssue
+        Argument.EnsureNotNull(nextElement, "nextElement")
         If String.IsNullOrEmpty(name) Then Return Nothing
         If start Is Nothing Then Return Nothing
         Dim currentElement = start
@@ -231,6 +232,7 @@ Public Class PonyBase
     End Sub
 
     Public Function ChangeDirectory(newDirectory As String) As Boolean
+        Argument.EnsureNotNull(newDirectory, "newDirectory")
         If PathEquality.Equals(newDirectory, RandomDirectory) Then
             Throw New ArgumentException("Cannot change directory to the random pony directory.")
         End If
@@ -271,6 +273,7 @@ Public Class PonyBase
     End Function
 
     Public Shared Function Create(directory As String) As Boolean
+        Argument.EnsureNotNull(directory, "directory")
         Try
             If directory.Contains("""") Then Throw New ArgumentException("directory may not contain any quote characters.", "directory")
             Dim fullPath = Path.Combine(PonyBase.RootDirectory, directory)
@@ -1050,6 +1053,7 @@ Public Class Behavior
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
+        Argument.EnsureNotNull(ponies, "ponies")
         Return {Referential.CheckUnique("Linked Behavior", LinkedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
                 Referential.CheckNotCircular("Linked Behavior", Name, GetLinkedBehavior(), Function(b) b.GetLinkedBehavior()),
                 Referential.CheckUnique("Start Speech", StartLineName, _base.Speeches.Select(Function(s) s.Name)),

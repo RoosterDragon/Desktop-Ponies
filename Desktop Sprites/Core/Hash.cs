@@ -10,6 +10,7 @@
         /// </summary>
         /// <param name="input">The sequence of bytes which should be hashed.</param>
         /// <returns>A 32-bit integer that is the hash code for the input bytes.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="input"/> is null.</exception>
         public static int Fnv1A32(byte[] input)
         {
             const int Fnv1AOffsetBasis32 = unchecked((int)2166136261);
@@ -21,8 +22,10 @@
         /// <param name="input">The sequence of bytes which should be hashed.</param>
         /// <param name="hash">The initial hash value to be hashed further.</param>
         /// <returns>A 32-bit integer that is the hash code for the input bytes.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="input"/> is null.</exception>
         public static int Fnv1A32(byte[] input, int hash)
         {
+            Argument.EnsureNotNull(input, "input");
             const int FnvPrime32 = 16777619;
             foreach (byte octet in input)
             {

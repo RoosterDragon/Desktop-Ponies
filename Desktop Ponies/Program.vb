@@ -84,7 +84,8 @@ Friend NotInheritable Class Program
         Console.WriteLine("-----")
         Console.WriteLine(message)
         Console.WriteLine(
-            "Error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() & " occurred " & DateTime.UtcNow.ToString("u"))
+            "Error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() & " occurred " &
+            DateTime.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
         Console.WriteLine()
         Console.WriteLine(ex.ToString())
         Console.WriteLine("-----")
@@ -95,7 +96,7 @@ Friend NotInheritable Class Program
         Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
             errorFile.WriteLine(
                 "Unhandled error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() &
-                " occurred " & DateTime.UtcNow.ToString("u"))
+                " occurred " & DateTime.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
             errorFile.WriteLine()
             errorFile.WriteLine(ex.ToString())
             Console.WriteLine("An error file can be found at " & path)

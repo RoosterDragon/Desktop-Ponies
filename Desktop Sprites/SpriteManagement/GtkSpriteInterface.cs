@@ -1464,8 +1464,7 @@
         /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface"/> can display.
         /// </summary>
         /// <param name="imagePaths">The collection of paths to image files that should be loaded by the interface. Any images not
-        /// loaded by this method will be loaded on demand. This method can be called asynchronously to ensure all images become loaded but
-        /// without incurring the delay up front.</param>
+        /// loaded by this method will be loaded on demand.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="imagePaths"/> is null.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths)
