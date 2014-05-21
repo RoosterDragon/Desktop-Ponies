@@ -11,31 +11,23 @@ Public Class NewInteractionDialog
         InitializeComponent()
         Icon = My.Resources.Twilight
 
-        BehaviorsList.SuspendLayout()
-        For Each behavior In ponyBase.Behaviors
-            BehaviorsList.Items.Add(behavior.Name)
-        Next
-        If interaction IsNot Nothing Then
-            For i = 0 To BehaviorsList.Items.Count - 1
-                If interaction.BehaviorNames.Contains(DirectCast(BehaviorsList.Items(i), CaseInsensitiveString)) Then
-                    BehaviorsList.SetItemChecked(i, True)
-                End If
-            Next
-        End If
-        BehaviorsList.ResumeLayout()
-
         TargetsList.SuspendLayout()
         For Each target In ponyBase.Collection.Bases
             TargetsList.Items.Add(target.Directory)
         Next
         If interaction IsNot Nothing Then
             For i = 0 To TargetsList.Items.Count - 1
-                If interaction.TargetNames.Contains(DirectCast(TargetsList.Items(i), String)) Then
-                    TargetsList.SetItemChecked(i, True)
-                End If
+                TargetsList.SetItemChecked(i, interaction.TargetNames.Contains(DirectCast(TargetsList.Items(i), String)))
             Next
         End If
         TargetsList.ResumeLayout()
+        AddHandler TargetsList.ItemCheck, AddressOf TargetsList_ItemCheck
+
+        If interaction IsNot Nothing Then
+            RebuildBehaviorsList(interaction.TargetNames, interaction.BehaviorNames)
+        Else
+            RebuildBehaviorsList({}, New HashSet(Of CaseInsensitiveString)())
+        End If
 
         If interaction Is Nothing Then Return
 
@@ -52,6 +44,35 @@ Public Class NewInteractionDialog
             Case TargetActivation.All
                 AllRadioButton.Checked = True
         End Select
+    End Sub
+
+    Private Sub RebuildBehaviorsList(targetNames As IEnumerable(Of String), behaviorNames As ISet(Of CaseInsensitiveString))
+        Dim behaviors = New SortedSet(Of CaseInsensitiveString)(behaviorNames)
+        behaviors.UnionWith(base.Behaviors.Select(Function(b) b.Name))
+        For Each targetName In targetNames
+            Dim targetBase = base.Collection.Bases.FirstOrDefault(Function(b) b.Directory = targetName)
+            If targetBase Is Nothing Then Continue For
+            behaviors.UnionWith(targetBase.Behaviors.Select(Function(b) b.Name))
+        Next
+
+        BehaviorsList.SuspendLayout()
+        BehaviorsList.Items.Clear()
+        BehaviorsList.Items.AddRange(behaviors.ToArray())
+        For i = 0 To BehaviorsList.Items.Count - 1
+            BehaviorsList.SetItemChecked(i, behaviorNames.Contains(DirectCast(BehaviorsList.Items(i), CaseInsensitiveString)))
+        Next
+        BehaviorsList.ResumeLayout()
+    End Sub
+
+    Private Sub TargetsList_ItemCheck(sender As Object, e As ItemCheckEventArgs)
+        Dim targets = New HashSet(Of String)(TargetsList.CheckedItems.Cast(Of String)())
+        Dim item = DirectCast(TargetsList.Items(e.Index), String)
+        If e.NewValue <> CheckState.Unchecked Then
+            targets.Add(item)
+        Else
+            targets.Remove(item)
+        End If
+        RebuildBehaviorsList(targets, New HashSet(Of CaseInsensitiveString)(BehaviorsList.CheckedItems.Cast(Of CaseInsensitiveString)()))
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click

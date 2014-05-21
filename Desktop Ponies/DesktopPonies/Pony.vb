@@ -612,21 +612,25 @@ Public Class InteractionBase
     End Function
 
     Public Function GetReferentialIssues(ponies As PonyCollection) As ImmutableArray(Of ParseIssue) Implements IReferential.GetReferentialIssues
+        Dim allPoniesExist = True
         Dim issues As New List(Of ParseIssue)()
-        CheckInteractionReference(ponies, InitiatorName, "Initiator", issues)
 
+        allPoniesExist = allPoniesExist And CheckInteractionPonyReference(ponies, InitiatorName, "Initiator", issues)
         For Each targetName In TargetNames
-            CheckInteractionReference(ponies, targetName, "Targets", issues)
+            allPoniesExist = allPoniesExist And CheckInteractionPonyReference(ponies, targetName, "Targets", issues)
         Next
+        If allPoniesExist Then CheckInteractionBehaviorReferences(ponies, issues)
+
         Return issues.ToImmutableArray()
     End Function
 
-    Private Sub CheckInteractionReference(ponies As PonyCollection, directory As String,
-                                               propertyName As String, issues As List(Of ParseIssue))
-        If String.IsNullOrEmpty(directory) Then Return
+    Private Function CheckInteractionPonyReference(ponies As PonyCollection, directory As String,
+                                                   propertyName As String, issues As List(Of ParseIssue)) As Boolean
+        If String.IsNullOrEmpty(directory) Then Return True
         Dim base = ponies.Bases.FirstOrDefault(Function(pb) pb.Directory = directory)
         If base Is Nothing Then
             issues.Add(New ParseIssue(propertyName, directory, "", "No pony named '{0}' exists.".FormatWith(directory)))
+            Return False
         ElseIf BehaviorNames.Count > 0 Then
             If Not base.Behaviors.Any(Function(b) BehaviorNames.Contains(b.Name)) Then
                 Dim fallbackValue = If(Activation = TargetActivation.All, Nothing, "")
@@ -635,6 +639,26 @@ Public Class InteractionBase
                                           "'{0}' has none of the listed behaviors. {1}".FormatWith(directory, fallbackText)))
             End If
         End If
+        Return True
+    End Function
+
+    Private Sub CheckInteractionBehaviorReferences(ponies As PonyCollection, issues As List(Of ParseIssue))
+        If BehaviorNames.Count = 0 Then Return
+
+        Dim orphanedBehaviorNames = New HashSet(Of CaseInsensitiveString)(BehaviorNames)
+        Dim initiator = ponies.Bases.First(Function(pb) pb.Directory = InitiatorName)
+        orphanedBehaviorNames.ExceptWith(initiator.Behaviors.Select(Function(b) b.Name))
+        If orphanedBehaviorNames.Count = 0 Then Return
+
+        For Each targetName In TargetNames
+            Dim target = ponies.Bases.First(Function(pb) pb.Directory = targetName)
+            orphanedBehaviorNames.ExceptWith(target.Behaviors.Select(Function(b) b.Name))
+            If orphanedBehaviorNames.Count = 0 Then Return
+        Next
+
+        issues.Add(New ParseIssue("Behaviors", "", "",
+                                  "No behaviors with these names exist for any pony: {0}".FormatWith(
+                                      String.Join(", ", orphanedBehaviorNames))))
     End Sub
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni

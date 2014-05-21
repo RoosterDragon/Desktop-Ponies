@@ -30,18 +30,47 @@
         Bind(Function() Edited.ReactivationDelay, DelayNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
         Bind(Function() Edited.TargetNames, TargetsList)
         Bind(Function() Edited.BehaviorNames, BehaviorsList)
+        AddHandler TargetsList.ItemCheck, AddressOf TargetsList_ItemCheck
     End Sub
 
     Protected Overrides Sub ChangeItem()
+        TargetsList.SuspendLayout()
         TargetsList.Items.Clear()
         TargetsList.Items.AddRange(Base.Collection.Bases.Select(Function(pb) pb.Directory).ToArray())
-        BehaviorsList.Items.Clear()
-        BehaviorsList.Items.AddRange(Base.Behaviors.Select(Function(b) b.Name).ToArray())
+        TargetsList.ResumeLayout()
+
+        RebuildBehaviorsList()
     End Sub
 
     Protected Overrides Sub ReparseSource(ByRef parseIssues As ImmutableArray(Of ParseIssue))
         Dim ib As InteractionBase = Nothing
         InteractionBase.TryLoad(Source.Text, ib, parseIssues)
         Edited = ib
+    End Sub
+
+    Private Sub TargetsList_ItemCheck(sender As Object, e As ItemCheckEventArgs)
+        RebuildBehaviorsList()
+
+        Dim behaviorNames = New HashSet(Of CaseInsensitiveString)(Edited.BehaviorNames)
+        BehaviorsList.SuspendLayout()
+        For i = 0 To BehaviorsList.Items.Count - 1
+            BehaviorsList.SetItemChecked(i, behaviorNames.Contains(DirectCast(BehaviorsList.Items(i), CaseInsensitiveString)))
+        Next
+        BehaviorsList.ResumeLayout()
+    End Sub
+
+    Private Sub RebuildBehaviorsList()
+        Dim behaviors = New SortedSet(Of CaseInsensitiveString)(Edited.BehaviorNames)
+        behaviors.UnionWith(Base.Behaviors.Select(Function(b) b.Name))
+        For Each targetName In Edited.TargetNames
+            Dim targetBase = Base.Collection.Bases.FirstOrDefault(Function(b) b.Directory = targetName)
+            If targetBase Is Nothing Then Continue For
+            behaviors.UnionWith(targetBase.Behaviors.Select(Function(b) b.Name))
+        Next
+
+        BehaviorsList.SuspendLayout()
+        BehaviorsList.Items.Clear()
+        BehaviorsList.Items.AddRange(behaviors.ToArray())
+        BehaviorsList.ResumeLayout()
     End Sub
 End Class
