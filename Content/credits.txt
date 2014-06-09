@@ -395,9 +395,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Manticore
 * Bot-chan
 
-#### Master
-* Anonycat
-
 #### Mayor Mare
 * Anonycat
 
@@ -453,6 +450,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Jesús Pezuña
+* Anonycat
+
+#### Perfect Pace
 * Anonycat
 
 #### Philomena
