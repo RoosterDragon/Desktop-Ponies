@@ -118,7 +118,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Applejack
 * Jay Wright [Stand, Trotcycle]
 * RJP! [Gallop, Rear]
-* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear]
+* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear, Crystal]
 * StarStep [Gala, Sleep, Conga, Lasso2, Hurdle]
 * Anonycat [Truck]
 * DesktopPonyGuy [Apple]
@@ -322,6 +322,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Ponyluver [Sleep]
 * Asparagus [Sleep]
 * Half-n-Half [Gallop]
+* Bot-chan [Crystal]
 
 #### Fluttershy (Filly)
 * PsychoShutin
@@ -471,6 +472,7 @@ Contributors are broken down by character. If there was more than one contributo
 * DeathPony [All Other Images]
 * sidekick ponyguy [Fly]
 * StarStep [Conga]
+* Bot-chan [Crystal]
 
 #### Pinkie Pie (Filly)
 * PsychoShutin
@@ -580,7 +582,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Jay Wright [Stand, Trot, Horn, Fly]
 * Anonymous [Fly]
 * StarStep [Conga, Ponder, Fashion]
-* Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2]
+* Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2, Drag, DragC, Crystal]
 * The Coop [Gala, Tantrum, Ponder, DramaCouch, Sleep]
 * Miriam the Bat [Sleep]
 
