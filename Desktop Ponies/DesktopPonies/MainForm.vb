@@ -804,18 +804,22 @@ Public Class MainForm
         ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
 
         animator = createAnimator()
-        AddHandler animator.AnimationFinished, Sub() Threading.ThreadPool.QueueUserWorkItem(
-                                                   Sub() TryInvoke(
-                                                       Sub()
-                                                           Dim exitRequest = animator.ExitRequested
-                                                           PonyShutdown()
-                                                           If exitRequest = exitRequest.ExitApplication Then
-                                                               Close()
-                                                           Else
-                                                               Show()
-                                                               General.FullCollect()
-                                                           End If
-                                                       End Sub))
+        AddHandler animator.AnimationFinished, AddressOf ShutdownOnFinish
+    End Sub
+
+    Private Sub ShutdownOnFinish(sender As Object, e As EventArgs)
+        Threading.ThreadPool.QueueUserWorkItem(
+            Sub() TryInvoke(
+                Sub()
+                    Dim exitRequest = animator.ExitRequested
+                    PonyShutdown()
+                    If exitRequest = exitRequest.ExitApplication Then
+                        Close()
+                    Else
+                        Show()
+                        General.FullCollect()
+                    End If
+                End Sub))
     End Sub
 
     Private Sub CreateScreensaverForms()
@@ -857,9 +861,9 @@ Public Class MainForm
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         TryInvoke(Sub()
                       PonyShutdown()
-                      MessageBox.Show(Me, "You will be returned to the menu because your screen resolution has changed.",
-                                          "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
                       Show()
+                      MessageBox.Show(Me, "You have been returned to the menu because your screen resolution has changed.",
+                                      "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
                   End Sub)
     End Sub
 
@@ -903,8 +907,12 @@ Public Class MainForm
     Private Sub PonyShutdown()
         RemoveHandlerDisplaySettingsChanged(AddressOf ReturnToMenuOnResolutionChange)
 
-        If animator IsNot Nothing Then animator.Finish()
-        If animator IsNot Nothing Then animator.Clear()
+        If animator IsNot Nothing Then
+            RemoveHandler animator.AnimationFinished, AddressOf ShutdownOnFinish
+            animator.Finish()
+            animator.Clear()
+            animator = Nothing
+        End If
 
         If screensaverForms IsNot Nothing Then
             For Each screensaverForm In screensaverForms
@@ -912,8 +920,6 @@ Public Class MainForm
             Next
             screensaverForms = Nothing
         End If
-
-        animator = Nothing
 
         If ponyViewer IsNot Nothing Then
             ponyViewer.Close()
