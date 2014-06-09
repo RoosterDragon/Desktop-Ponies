@@ -14,7 +14,7 @@
     {
         /// <summary>
         /// Replaces the format item in a specified string with the string representation of a corresponding object in a specified array.
-        /// The culture for the current thread is used to culture-specific formatting information.
+        /// The culture for the current thread is used to apply culture-specific formatting information.
         /// </summary>
         /// <param name="format">A composite format string.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>

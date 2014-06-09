@@ -87,9 +87,11 @@ Public Class PonyCollection
             houseDirectories,
             Sub(folder)
                 Try
-                    Dim house = New HouseBase(folder)
-                    houses.Add(house)
-                    If houseLoadCallback IsNot Nothing Then houseLoadCallback(house)
+                    Dim house = HouseBase.Load(folder, True)
+                    If house IsNot Nothing Then
+                        houses.Add(house)
+                        If houseLoadCallback IsNot Nothing Then houseLoadCallback(house)
+                    End If
                 Catch ex As Exception
                     ' Ignore errors from loading badly configured houses.
                 End Try
@@ -231,42 +233,153 @@ Public Class PonyCollection
     End Function
 End Class
 
-Public NotInheritable Class PonyIniParser
+Public NotInheritable Class IniParser
     Private Sub New()
     End Sub
-
-    Private Shared Function TryParse(Of T)(ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue),
-                                                  parser As StringCollectionParser,
-                                                  parse As Func(Of StringCollectionParser, T)) As ParseResult
+    Public Shared Sub TryParse(Of T)(line As String, removeInvalidItems As Boolean,
+                                     parseFunc As TryParse(Of T), onParse As Action(Of T))
+        Dim result As T
+        If parseFunc(line, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
+            onParse(result)
+        End If
+    End Sub
+    Public Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean,
+                                     parseFunc As TryParseDirectory(Of T), onParse As Action(Of T))
+        Dim result As T
+        If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
+            onParse(result)
+        End If
+    End Sub
+    Public Shared Function TryParse(Of T)(ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue),
+                                          parser As StringCollectionParser,
+                                          parse As Func(Of StringCollectionParser, T)) As ParseResult
         result = parse(parser)
         issues = parser.Issues.ToImmutableArray()
         Return parser.Result
     End Function
+End Class
 
-    Public Shared Function TryParseName(iniLine As String, directory As String, ByRef result As String, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
-        Return TryParse(result, issues,
-                                New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Name"}),
-                                Function(p)
-                                    p.NoParse()
-                                    Return p.NoParse()
-                                End Function)
+Public NotInheritable Class PonyIniParser
+    Private Sub New()
+    End Sub
+
+    Public Shared Function TryParseName(iniLine As String, directory As String,
+                                        ByRef result As String,
+                                        ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Name"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.NoParse()
+                                  End Function)
     End Function
 
-    Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String, ByRef result As BehaviorGroup, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
-        Return TryParse(result, issues,
-                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
-                                   Function(p)
-                                       p.NoParse()
-                                       Dim bg As New BehaviorGroup("", 0)
-                                       bg.Number = p.ParseInt32(0, 100)
-                                       bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToStringInvariant())
-                                       Return bg
-                                   End Function)
+    Public Shared Function TryParseBehaviorGroup(iniLine As String, directory As String,
+                                                 ByRef result As BehaviorGroup,
+                                                 ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Dim bg As New BehaviorGroup("", 0)
+                                      bg.Number = p.ParseInt32(0, 100)
+                                      bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToStringInvariant())
+                                      Return bg
+                                  End Function)
     End Function
 End Class
 
-Public Delegate Function TryParse(Of T)(iniLine As String, directory As String,
+Public NotInheritable Class HouseIniParser
+    Private Sub New()
+    End Sub
+
+    Public Shared Function TryParseName(iniLine As String,
+                                        ByRef result As String,
+                                        ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Name"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.NotNullOrWhiteSpace()
+                                  End Function)
+    End Function
+
+    Public Shared Function TryParseImage(iniLine As String, directory As String,
+                                         ByRef result As String,
+                                         ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Image"}),
+                                  Function(p)
+                                      Dim path = p.NoParse()
+                                      If p.Assert(path, Not String.IsNullOrEmpty(path), "An image path has not been set.", Nothing) Then
+                                          path = p.SpecifiedCombinePath(directory, path, "Image will not be loaded.")
+                                          p.SpecifiedFileExists(path)
+                                      End If
+                                      Return path
+                                  End Function)
+    End Function
+
+    Public Shared Function TryParseDoorPosition(iniLine As String,
+                                                ByRef result As Vector2,
+                                                ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Door Position"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.ParseVector2(Vector2.Zero)
+                                  End Function)
+    End Function
+
+    Public Shared Function TryParseCycleInterval(iniLine As String,
+                                                ByRef result As Integer,
+                                                ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Cycle Interval"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.ParseInt32(300, 0, 3600)
+                                  End Function)
+    End Function
+
+    Public Shared Function TryParseMinSpawn(iniLine As String,
+                                            ByRef result As Integer,
+                                            ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return TryParseSpawn(iniLine, "Min", 1, result, issues)
+    End Function
+
+    Public Shared Function TryParseMaxSpawn(iniLine As String,
+                                            ByRef result As Integer,
+                                            ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return TryParseSpawn(iniLine, "Max", 50, result, issues)
+    End Function
+
+    Private Shared Function TryParseSpawn(iniLine As String,
+                                         name As String,
+                                         fallback As Integer,
+                                         ByRef result As Integer,
+                                         ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", name & " Spawn"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.ParseInt32(fallback, 1, 9999)
+                                  End Function)
+    End Function
+
+    Public Shared Function TryParseBias(iniLine As String,
+                                        ByRef result As Decimal,
+                                        ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+        Return IniParser.TryParse(result, issues,
+                                  New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Bias"}),
+                                  Function(p)
+                                      p.NoParse()
+                                      Return p.ParseDecimal(0.5D, 0D, 1D)
+                                  End Function)
+    End Function
+End Class
+
+Public Delegate Function TryParse(Of T)(iniLine As String,
                                         ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
 
-Public Delegate Function TryParseBase(Of T)(iniLine As String, directory As String, pony As PonyBase,
-                                        ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+Public Delegate Function TryParseDirectory(Of T)(iniLine As String, directory As String,
+                                                 ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult

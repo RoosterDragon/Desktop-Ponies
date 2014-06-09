@@ -228,6 +228,39 @@ Public Class StringCollectionParser
             Return Parsed.Failed(Of Double)(s, failReason)
         End If
     End Function
+    Public Function ParseDecimal() As Decimal
+        Return ParseDecimal(Decimal.MinValue, Decimal.MaxValue)
+    End Function
+    Public Function ParseDecimal(fallback As Decimal) As Decimal
+        Return ParseDecimal(fallback, Decimal.MinValue, Decimal.MaxValue)
+    End Function
+    Public Function ParseDecimal(min As Decimal, max As Decimal) As Decimal
+        Return ParseDecimalInternal(Nothing, min, max)
+    End Function
+    Public Function ParseDecimal(fallback As Decimal, min As Decimal, max As Decimal) As Decimal
+        Return ParseDecimalInternal(fallback, min, max)
+    End Function
+    Private Function ParseDecimalInternal(fallback As Decimal?, min As Decimal, max As Decimal) As Decimal
+        Return HandleParsed(ParsedDecimal(GetNextItem(), fallback, min, max))
+    End Function
+    Private Shared Function ParsedDecimal(s As String, fallback As Decimal?, min As Decimal, max As Decimal) As Parsed(Of Decimal)
+        If min > max Then Throw New ArgumentException("min must be less than or equal to max.")
+        Dim failReason As String = Nothing
+        Dim result As Decimal
+        If Not Number.TryParseDecimalInvariant(s, result) Then
+            failReason = FloatFailureFormat.FormatWith(s)
+        End If
+        If failReason Is Nothing AndAlso (result < min OrElse result > max) Then
+            failReason = OutOfRangeFailureFormat.FormatWith(result, min, max)
+        End If
+        If failReason Is Nothing Then
+            Return Parsed.Success(result)
+        ElseIf fallback IsNot Nothing Then
+            Return Parsed.Fallback(s, fallback.Value, failReason)
+        Else
+            Return Parsed.Failed(Of Decimal)(s, failReason)
+        End If
+    End Function
     Public Function ParseEnum(Of TEnum As Structure)() As TEnum
         ParseEnum(Of TEnum)(Nothing)
     End Function

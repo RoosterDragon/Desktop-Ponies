@@ -246,8 +246,8 @@ Public Class PonyBase
             If newDirectory.Contains("""") Then
                 Throw New ArgumentException("newDirectory may not contain any quote characters.", "newDirectory")
             End If
-            Dim currentPath = Path.Combine(PonyBase.RootDirectory, Directory)
-            Dim newPath = Path.Combine(PonyBase.RootDirectory, newDirectory)
+            Dim currentPath = Path.Combine(RootDirectory, Directory)
+            Dim newPath = Path.Combine(RootDirectory, newDirectory)
             IO.Directory.Move(currentPath, newPath)
         Catch ex As Exception
             Return False
@@ -276,7 +276,7 @@ Public Class PonyBase
         Argument.EnsureNotNull(directory, "directory")
         Try
             If directory.Contains("""") Then Throw New ArgumentException("directory may not contain any quote characters.", "directory")
-            Dim fullPath = Path.Combine(PonyBase.RootDirectory, directory)
+            Dim fullPath = Path.Combine(RootDirectory, directory)
             If IO.Directory.Exists(fullPath) Then Return False
             IO.Directory.CreateDirectory(fullPath)
             Return True
@@ -288,8 +288,8 @@ Public Class PonyBase
     Public Shared Function Load(collection As PonyCollection, directory As String, removeInvalidItems As Boolean) As PonyBase
         Dim pony As PonyBase = Nothing
         Try
-            Dim fullPath = Path.Combine(PonyBase.RootDirectory, directory)
-            Dim iniFileName = Path.Combine(fullPath, PonyBase.ConfigFilename)
+            Dim fullPath = Path.Combine(RootDirectory, directory)
+            Dim iniFileName = Path.Combine(fullPath, ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
                 pony = New PonyBase(collection)
                 pony._validatedOnLoad = removeInvalidItems
@@ -328,23 +328,24 @@ Public Class PonyBase
             Else
                 Select Case line.Substring(0, firstComma).ToLowerInvariant()
                     Case "name"
-                        TryParse(Of String)(line, folder, removeInvalidItems,
-                                            AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
+                        IniParser.TryParse(Of String)(line, folder, removeInvalidItems,
+                                                      AddressOf PonyIniParser.TryParseName, Sub(n) pony.DisplayName = n)
                     Case "scale"
                         ' The scale factor was previously defined in a non-useful way. Keep it for compatibility but ignore the value.
                         pony.invalidLines.Add(line)
                     Case "behaviorgroup"
-                        TryParse(Of BehaviorGroup)(line, folder, removeInvalidItems,
-                                                   AddressOf PonyIniParser.TryParseBehaviorGroup, Sub(bg) pony.BehaviorGroups.Add(bg))
+                        IniParser.TryParse(Of BehaviorGroup)(line, folder, removeInvalidItems,
+                                                             AddressOf PonyIniParser.TryParseBehaviorGroup,
+                                                             Sub(bg) pony.BehaviorGroups.Add(bg))
                     Case "behavior"
                         TryParse(Of Behavior)(line, folder, removeInvalidItems, pony,
-                                              AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
+                                                        AddressOf Behavior.TryLoad, Sub(b) pony.Behaviors.Add(b))
                     Case "effect"
                         TryParse(Of EffectBase)(line, folder, removeInvalidItems, pony,
-                                                AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
+                                                          AddressOf EffectBase.TryLoad, Sub(e) pony.Effects.Add(e))
                     Case "speak"
-                        TryParse(Of Speech)(line, folder, removeInvalidItems,
-                                            AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
+                        IniParser.TryParse(Of Speech)(line, folder, removeInvalidItems,
+                                                      AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Length - 1
@@ -357,14 +358,6 @@ Public Class PonyBase
         Loop
     End Sub
 
-    Private Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean,
-                                      parseFunc As TryParse(Of T), onParse As Action(Of T))
-        Dim result As T
-        If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
-            onParse(result)
-        End If
-    End Sub
-
     Private Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean, pony As PonyBase,
                                       parseFunc As TryParseBase(Of T), onParse As Action(Of T))
         Dim result As T
@@ -372,6 +365,9 @@ Public Class PonyBase
             onParse(result)
         End If
     End Sub
+
+    Private Delegate Function TryParseBase(Of T)(iniLine As String, directory As String, pony As PonyBase,
+                                                 ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
 
     ''' <summary>
     ''' Gets the name of the behavior group with the specified number.
@@ -389,7 +385,7 @@ Public Class PonyBase
 
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
-        Dim configFilePath = IO.Path.Combine(PonyBase.RootDirectory, Directory, PonyBase.ConfigFilename)
+        Dim configFilePath = IO.Path.Combine(RootDirectory, Directory, ConfigFilename)
 
         Dim tempFileName = Path.GetTempFileName()
         Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
@@ -422,7 +418,7 @@ Public Class PonyBase
         End Using
         MoveOrReplace(tempFileName, configFilePath)
 
-        Dim interactionsFilePath = Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename)
+        Dim interactionsFilePath = Path.Combine(RootDirectory, InteractionBase.ConfigFilename)
         Dim interactionFileLines As New List(Of String)()
         Using reader = New StreamReader(interactionsFilePath)
             Do Until reader.EndOfStream
@@ -3839,7 +3835,31 @@ Public Class HouseBase
         End Get
     End Property
 
-    Public Sub New(directory As String)
+    Private ReadOnly commentLines As New List(Of String)()
+
+    Public Shared Function Load(directory As String, removeInvalidItems As Boolean) As HouseBase
+        Dim house As HouseBase = Nothing
+        Try
+            Dim fullPath = Path.Combine(RootDirectory, directory)
+            Dim iniFileName = Path.Combine(fullPath, ConfigFilename)
+            If IO.Directory.Exists(fullPath) Then
+                house = New HouseBase(directory)
+                If File.Exists(iniFileName) Then
+                    Using reader = New StreamReader(iniFileName)
+                        ParseHouseConfig(fullPath, reader, house, removeInvalidItems)
+                    End Using
+                End If
+                If removeInvalidItems AndAlso house.Visitors.Count = 0 Then
+                    Return Nothing
+                End If
+            End If
+        Catch ex As Exception
+            Return Nothing
+        End Try
+        Return house
+    End Function
+
+    Private Sub New(directory As String)
         Argument.EnsureNotNull(directory, "directory")
 
         Dim lastSeparator = directory.LastIndexOf(Path.DirectorySeparatorChar)
@@ -3848,61 +3868,55 @@ Public Class HouseBase
         Else
             _directory = directory
         End If
-
-        LoadFromIni()
     End Sub
 
-    Private Sub LoadFromIni()
-        ' TODO: Migrate to relaxed parser.
-        Dim fullDirectory = Path.Combine(RootDirectory, Directory)
-        Dim imageFilename As String = Nothing
-        Using configFile = File.OpenText(Path.Combine(fullDirectory, ConfigFilename))
-            Do Until configFile.EndOfStream
+    Private Shared Sub ParseHouseConfig(folder As String, reader As StreamReader, house As HouseBase, removeInvalidItems As Boolean)
+        Do Until reader.EndOfStream
+            Dim line = reader.ReadLine()
 
-                Dim line = configFile.ReadLine
-
-                'ignore blank or 'commented out' lines.
-                If line = "" OrElse line(0) = "'" Then
-                    Continue Do
-                End If
-
-                Dim columns = CommaSplitQuoteBraceQualified(line)
-
-                Select Case LCase(columns(0))
-
-                    Case "name"
-                        Name = columns(1)
-                    Case "image"
-                        imageFilename = Path.Combine(fullDirectory, columns(1))
-                        If Not File.Exists(imageFilename) Then
-                            Throw New FileNotFoundException(imageFilename, imageFilename)
-                        Else
-                            LeftImage.Path = imageFilename
-                            RightImage.Path = imageFilename
-                        End If
-                    Case "door"
-                        DoorPosition = New Vector2(Number.ParseInt32Invariant(columns(1)),
-                                                   Number.ParseInt32Invariant(columns(2)))
-                    Case "cycletime"
-                        CycleInterval = TimeSpan.FromSeconds(Number.ParseInt32Invariant(columns(1)))
-                    Case "minspawn"
-                        MinimumPonies = Number.ParseInt32Invariant(columns(1))
-                    Case "maxspawn"
-                        MaximumPonies = Number.ParseInt32Invariant(columns(1))
-                    Case "bias"
-                        Bias = Number.ParseDecimalInvariant(columns(1))
-                    Case Else
-                        Visitors.Add(Trim(line))
-                End Select
-            Loop
-
-            If String.IsNullOrEmpty(Name) OrElse String.IsNullOrEmpty(imageFilename) OrElse
-                Visitors.Count = 0 Then
-                Throw New InvalidDataException("Unable to load 'House' at: " & fullDirectory &
-                                               ".INI file does not contain all necessary parameters: " & ControlChars.NewLine &
-                                               "name, image, and at least one pony's name")
+            ' Ignore blank lines.
+            If String.IsNullOrWhiteSpace(line) Then Continue Do
+            ' Lines starting with a single quote are comments.
+            If line(0) = "'" Then
+                house.commentLines.Add(line)
+                Continue Do
             End If
-        End Using
+
+            Dim firstComma = line.IndexOf(","c)
+            If firstComma = -1 Then
+                house.Visitors.Add(line.Trim())
+            Else
+                Select Case line.Substring(0, firstComma).ToLowerInvariant()
+                    Case "name"
+                        IniParser.TryParse(Of String)(line, removeInvalidItems,
+                                                      AddressOf HouseIniParser.TryParseName, Sub(n) house.Name = n)
+                    Case "image"
+                        IniParser.TryParse(Of String)(line, folder, removeInvalidItems,
+                                                      AddressOf HouseIniParser.TryParseImage, Sub(i)
+                                                                                                  house.LeftImage.Path = i
+                                                                                                  house.RightImage.Path = i
+                                                                                              End Sub)
+                    Case "door"
+                        IniParser.TryParse(Of Vector2)(line, removeInvalidItems,
+                                                       AddressOf HouseIniParser.TryParseDoorPosition, Sub(dp) house.DoorPosition = dp)
+                    Case "cycletime"
+                        IniParser.TryParse(Of Integer)(line, removeInvalidItems,
+                                                       AddressOf HouseIniParser.TryParseCycleInterval,
+                                                       Sub(ci) house.CycleInterval = TimeSpan.FromSeconds(ci))
+                    Case "minspawn"
+                        IniParser.TryParse(Of Integer)(line, removeInvalidItems,
+                                                       AddressOf HouseIniParser.TryParseMinSpawn, Sub(ms) house.MinimumPonies = ms)
+                    Case "maxspawn"
+                        IniParser.TryParse(Of Integer)(line, removeInvalidItems,
+                                                       AddressOf HouseIniParser.TryParseMaxSpawn, Sub(ms) house.MaximumPonies = ms)
+                    Case "bias"
+                        IniParser.TryParse(Of Decimal)(line, removeInvalidItems,
+                                                       AddressOf HouseIniParser.TryParseBias, Sub(b) house.Bias = b)
+                    Case Else
+                        house.Visitors.Add(line.Trim())
+                End Select
+            End If
+        Loop
     End Sub
 
     Public Overrides Function ToString() As String
