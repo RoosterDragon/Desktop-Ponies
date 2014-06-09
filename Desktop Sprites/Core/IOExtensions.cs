@@ -20,21 +20,21 @@
         /// </exception>
         /// <exception cref="T:System.ArgumentException">The sum of offset and count is larger than the buffer length.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">offset or count is negative.</exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs.-or-count was greater than the number of bytes available.
-        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         /// <exception cref="T:System.NotSupportedException">The stream does not support reading.</exception>
         /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed.</exception>
+        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this Stream stream, byte[] buffer, int offset, int count)
         {
             Argument.EnsureNotNull(stream, "stream");
             while (count > 0)
             {
-                int bytesRead = stream.Read(buffer, offset, count);
+                int bytesRead;
+                if ((bytesRead = stream.Read(buffer, offset, count)) == 0)
+                    throw new EndOfStreamException();
                 offset += bytesRead;
                 count -= bytesRead;
             }
-            if (count > 0)
-                throw InsufficientDataAvailableException();
         }
         /// <summary>
         /// Reads the specified number of bytes from the stream, starting from a specified point in the byte array.
@@ -49,20 +49,20 @@
         /// characters to read is greater than count. This can happen if a Unicode decoder returns fallback characters or a surrogate pair.
         /// </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">index or count is negative.</exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs.-or-count was greater than the number of bytes available.
-        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
+        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this BinaryReader reader, byte[] buffer, int index, int count)
         {
             Argument.EnsureNotNull(reader, "reader");
             while (count > 0)
             {
-                int bytesRead = reader.Read(buffer, index, count);
+                int bytesRead;
+                if ((bytesRead = reader.Read(buffer, index, count)) == 0)
+                    throw new EndOfStreamException();
                 index += bytesRead;
                 count -= bytesRead;
             }
-            if (count > 0)
-                throw InsufficientDataAvailableException();
         }
         /// <summary>
         /// Reads the specified number of characters from the stream, starting from a specified point in the character array.
@@ -77,20 +77,20 @@
         /// characters to read is greater than count. This can happen if a Unicode decoder returns fallback characters or a surrogate pair.
         /// </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">index or count is negative.</exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs.-or-count was greater than the number of characters available.
-        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
+        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this BinaryReader reader, char[] buffer, int index, int count)
         {
             Argument.EnsureNotNull(reader, "reader");
             while (count > 0)
             {
-                int bytesRead = reader.Read(buffer, index, count);
+                int bytesRead;
+                if ((bytesRead = reader.Read(buffer, index, count)) == 0)
+                    throw new EndOfStreamException();
                 index += bytesRead;
                 count -= bytesRead;
             }
-            if (count > 0)
-                throw InsufficientDataAvailableException();
         }
         /// <summary>
         /// Reads the specified number of bytes from the current stream into a byte array and advances the current position by that number
@@ -102,15 +102,15 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="reader"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The number of decoded characters to read is greater than count. This can happen if
         /// a Unicode decoder returns fallback characters or a surrogate pair.</exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs.-or-count was greater than the number of bytes available.
-        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">count is negative.</exception>
+        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static byte[] ReadBytesExact(this BinaryReader reader, int count)
         {
             byte[] result = Argument.EnsureNotNull(reader, "reader").ReadBytes(count);
             if (result.Length < count)
-                throw InsufficientDataAvailableException();
+                throw new EndOfStreamException();
             return result;
         }
         /// <summary>
@@ -123,24 +123,16 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="reader"/> is null.</exception>
         /// <exception cref="T:System.ArgumentException">The number of decoded characters to read is greater than count. This can happen if
         /// a Unicode decoder returns fallback characters or a surrogate pair.</exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs.-or-count was greater than the number of bytes available.
-        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The stream is closed.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">count is negative.</exception>
+        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static char[] ReadCharsExact(this BinaryReader reader, int count)
         {
             char[] result = Argument.EnsureNotNull(reader, "reader").ReadChars(count);
             if (result.Length < count)
-                throw InsufficientDataAvailableException();
+                throw new EndOfStreamException();
             return result;
-        }
-        /// <summary>
-        /// Creates an exception that represents the error where more data was requested to be read into a buffer than was available.
-        /// </summary>
-        /// <returns>A new <see cref="T:System.IO.IOException"/>.</returns>
-        private static IOException InsufficientDataAvailableException()
-        {
-            return new IOException("Attempted to read more data into a buffer than was available.");
         }
     }
 }
