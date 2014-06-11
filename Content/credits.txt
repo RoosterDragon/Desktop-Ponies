@@ -707,6 +707,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Stella
 * Pony Noia
 
+#### Stellar Eclipse
+* Bot-chan
+
 #### Steven Magnet
 * StarStep
 
