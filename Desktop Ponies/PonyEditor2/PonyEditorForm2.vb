@@ -283,20 +283,24 @@ Public Class PonyEditorForm2
                     Next
                 End Sub
             worker.QueueTask(Sub() resetNodeIndices(DocumentsView.Nodes))
+
+            Dim result = ParseResult.Success
             For Each base In ponies.Bases
                 If initialValidationIndex <> validationIndex Then Exit For
-                ValidateBase(base)
+                result = result.Combine(ValidateBase(base))
             Next
+            Dim index = If(result = ParseResult.Success, ValidationOkIndex,
+                           If(result = ParseResult.Fallback, ValidationWarningIndex, ValidationErrorIndex))
             worker.QueueTask(Sub()
                                  Dim node = FindNode(New PageRef().ToString())
-                                 node.ImageIndex = ValidationOkIndex
-                                 node.SelectedImageIndex = ValidationOkIndex
+                                 node.ImageIndex = index
+                                 node.SelectedImageIndex = index
                              End Sub)
             worker.WaitOnAllTasks()
         End SyncLock
     End Sub
 
-    Private Sub ValidateBase(base As PonyBase)
+    Private Function ValidateBase(base As PonyBase) As ParseResult
         Dim validateBehavior = Function(behavior As Behavior)
                                    Dim b As Behavior = Nothing
                                    Return behavior.TryLoad(
@@ -332,16 +336,17 @@ Public Class PonyEditorForm2
         Dim interactionsValid = ValidateItems(base, base.Interactions, validateInteraction,
                                               PageContent.Interactions, PageContent.Interaction)
 
+        Dim result = behaviorsValid.Combine(effectsValid).Combine(speechesValid).Combine(interactionsValid)
         worker.QueueTask(Sub()
                              Dim ref = New PageRef(base)
                              Dim node = FindNode(ref.ToString())
-                             Dim result = behaviorsValid.Combine(effectsValid).Combine(speechesValid).Combine(interactionsValid)
                              Dim index = If(result = ParseResult.Success, ValidationOkIndex,
                                             If(result = ParseResult.Fallback, ValidationWarningIndex, ValidationErrorIndex))
                              node.ImageIndex = index
                              node.SelectedImageIndex = index
                          End Sub)
-    End Sub
+        Return result
+    End Function
 
     Private Function ValidateItems(Of T As IPonyIniSourceable)(base As PonyBase, items As IEnumerable(Of T),
                                                                validateItem As Func(Of T, ParseResult),
