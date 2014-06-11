@@ -206,7 +206,7 @@ Contributors are broken down by character. If there was more than one contributo
 * CANDYBAG [Stand, Trot]
 * vulcan539 [Sit]
 * Azure Fang [Sleep]
-* Bot-chan [Pilot]
+* Bot-chan [Pilot, Balloon]
 
 #### Cloud Kicker
 * Tyranico
@@ -752,9 +752,8 @@ Contributors are broken down by character. If there was more than one contributo
 #### Twilight Sparkle
 * Jay Wright [Stand, Trot]
 * humle [Teleport]
-* Bot-chan [Rage, Owl, Starswirl]
+* Bot-chan [Rage, Owl, Starswirl, Balloon]
 * StarStep [Conga, Discorded, Drag, Gala]
-* Anonycat [Balloon]
 * InfinityDash [Gallop]
 * supersaiyanmikito [Crystallized, Breakdown]
 * asluc96 [Windblown]
