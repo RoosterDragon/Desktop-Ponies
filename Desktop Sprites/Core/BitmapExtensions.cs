@@ -78,7 +78,7 @@
         }
 
         /// <summary>
-        /// Pre-multiples the alpha channel with each of the RGB color channels. This is, for each channel the value is multiplied by the
+        /// Premultiplies the alpha channel with each of the RGB color channels. This is, for each channel the value is multiplied by the
         /// value of the alpha channel, and then divided by 255.
         /// </summary>
         /// <param name="bitmap">The bitmap whose colors should be pre-multiplied with their alpha values.</param>
@@ -102,7 +102,7 @@
                     BitmapData data =
                         bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                    byte[] colors = new byte[data.Stride];
+                    int[] colors = new int[data.Stride / 4];
                     for (int row = 0; row < data.Height; row++)
                     {
                         IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
@@ -111,17 +111,13 @@
                         Marshal.Copy(rowPtr, colors, 0, data.Width * 4);
 
                         // Multiply the color channels in each pixel.
-                        for (int i = 0; i < colors.Length; i += 4)
-                        {
-                            int alpha = colors[i + 3];
-                            colors[i + 0] = (byte)((colors[i + 0] * alpha) / 255);
-                            colors[i + 1] = (byte)((colors[i + 1] * alpha) / 255);
-                            colors[i + 2] = (byte)((colors[i + 2] * alpha) / 255);
-                        }
+                        for (int i = 0; i < colors.Length; i++)
+                            colors[i] = Color.FromArgb(colors[i]).PremultipliedAlpha().ToArgb();
 
                         // Copy the array back into the bitmap.
                         Marshal.Copy(colors, 0, rowPtr, data.Width * 4);
                     }
+                    data.PixelFormat = PixelFormat.Format32bppPArgb;
                     bitmap.UnlockBits(data);
                     break;
                 case PixelFormat.Format1bppIndexed:
@@ -130,11 +126,7 @@
                     // We're using a color palette, so we can just pre-multiply colors in that.
                     ColorPalette palette = bitmap.Palette;
                     for (int i = 0; i < palette.Entries.Length; i++)
-                    {
-                        Color color = palette.Entries[i];
-                        palette.Entries[i] =
-                            Color.FromArgb(color.A, color.R * color.A / 255, color.G * color.A / 255, color.B * color.A / 255);
-                    }
+                        palette.Entries[i] = palette.Entries[i].PremultipliedAlpha();
                     bitmap.Palette = palette;
                     break;
                 default:

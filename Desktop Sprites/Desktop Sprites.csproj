@@ -103,6 +103,7 @@
     <Compile Include="Collections\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyDictionary.cs" />
     <Compile Include="Collections\ReadOnlyList.cs" />
+    <Compile Include="Core\ColorExtensions.cs" />
     <Compile Include="Core\ControlExtensions.cs" />
     <Compile Include="Core\ExceptionDialog.cs">
       <SubType>Form</SubType>

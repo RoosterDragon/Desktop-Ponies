@@ -149,7 +149,7 @@
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.ArgbColor"/> structure with premultiplied components.</returns>
         public ArgbColor PremultipliedAlpha()
         {
-            return new ArgbColor(A, (byte)((R * A) / 255), (byte)((G * A) / 255), (byte)((B * A) / 255));
+            return new ArgbColor(A, (byte)(R * A / 255), (byte)(G * A / 255), (byte)(B * A / 255));
         }
 
         /// <summary>
