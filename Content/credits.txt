@@ -470,15 +470,13 @@ Contributors are broken down by character. If there was more than one contributo
 #### Pinkie Pie
 * Jay Wright [Stand, Trot, Bounce, Parade]
 * DeathPony [All Other Images]
+* humle [GalaIdle, GalaTrot, GalaBounce]
 * sidekick ponyguy [Fly]
 * StarStep [Conga]
 * Bot-chan [Crystal]
 
 #### Pinkie Pie (Filly)
 * PsychoShutin
-
-#### Pinkie Pie (Gala)
-* humle
 
 #### Pipsqueak
 * StarStep
