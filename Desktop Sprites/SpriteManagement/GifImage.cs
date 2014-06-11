@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using System.Globalization;
     using System.IO;
     using DesktopSprites.Collections;
     using DesktopSprites.Core;
@@ -37,11 +36,11 @@
     /// // Create an image of the given width and height in pixels, and of the given bit depth.
     /// // The GifDecoder can be constrained to produce certain bit depths, for formats that only support certain values.
     /// Image frame = new Image(width, height, depth);
-    /// 
+    ///
     /// // Assume the image provides access to its buffer. Different formats allow different things. Some may allow an array to be passed
     /// // in as a parameter in the constructor, and then lock it.  Others may require use of marshaling to get access.
     /// byte[] frameBuffer = frame.Buffer;
-    /// 
+    ///
     /// // Copy over row by row.
     /// for(int row = 0; row < height; row++)
     /// {
@@ -49,16 +48,16 @@
     ///     // Notice how the starting index for each array is dependent of the stride width of their respective sources.
     ///     Array.Copy(buffer, row * stride, frameBuffer, row * frame.Stride, stride);
     /// }
-    /// 
+    ///
     /// // Copy over the source palette, into a palette made up of theoretical Color elements.
     /// // Note we cannot be sure which palette will be bigger, and thus must check the bounds of each.
     /// for(int i = 0; i < palette.Length && i < frame.Palette.Length; i++)
     ///     frame.Palette[i] = new Color(palette[i].R, palette[i].G, palette[i].B);
-    /// 
+    ///
     /// // Apply the transparent color. We assume our theoretical color has an alpha channel.
     /// if(transparentIndex != -1)
     ///     frame.Palette[transparentIndex] = Color.Transparent;
-    /// 
+    ///
     /// // The image is complete.
     /// return frame;
     /// ]]></code></example>
@@ -1832,7 +1831,7 @@
             // Interlacing fields.
             int interlacePass = 1;
             int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
-            
+
             // This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
             byte[] pixelStack = new byte[MaxCodeWords];
             // Variable for the next available index in the stack.
@@ -1900,7 +1899,7 @@
 
                 // Flush the pixel stack and write resulting pixel values to the frame buffer.
                 if (!subframeComplete)
-                    subframeComplete = ApplyStackToFrame(pixelStack, ref stackIndex, 
+                    subframeComplete = ApplyStackToFrame(pixelStack, ref stackIndex,
                         imageDescriptor, ref left, ref top, ref interlacePass, ref yIncrement,
                         iterator, transparentIndex);
             }

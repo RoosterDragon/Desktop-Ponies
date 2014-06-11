@@ -78,13 +78,12 @@
                     Console.WriteLine("Checking images for " + ponyBase.Directory);
                 currentLine = Console.CursorTop;
                 var ponyDirectory = Path.Combine(poniesDirectory, ponyBase.Directory);
-                var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png")).
-                    Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
+                var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png"))
+                    .Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
                 // Ignore any images involved in effects, as the transparent borders may be used for alignment.
                 var imagesToIgnore = ponyBase.Effects.Select(
-                    e => new string[] {
-                        e.LeftImage.Path, e.RightImage.Path, e.GetBehavior().LeftImage.Path, e.GetBehavior().RightImage.Path }).
-                    SelectMany(images => images).ToArray();
+                    e => new[] { e.LeftImage.Path, e.RightImage.Path, e.GetBehavior().LeftImage.Path, e.GetBehavior().RightImage.Path })
+                    .SelectMany(images => images).ToArray();
                 var imageFilePathsToUse = new HashSet<string>(imageFilePaths, PathEquality.Comparer);
                 imageFilePathsToUse.ExceptWith(imagesToIgnore);
                 var imageCropInfo = new Dictionary<string, Point>(PathEquality.Comparer);
@@ -475,12 +474,14 @@
             }
             ZipFile.CreateFromDirectory(sourceDirectory, destinationFilename, CompressionLevel.Optimal, false);
             using (var zip = ZipFile.Open(destinationFilename, ZipArchiveMode.Update))
-                foreach (var entryToRemove in new[]{
-                    "Desktop Ponies.vshost.exe", 
+                foreach (var entryToRemove in new[]
+                {
+                    "Desktop Ponies.vshost.exe",
                     "Desktop Ponies.vshost.exe.config",
                     "Desktop Ponies.vshost.exe.manifest",
                     "Desktop Ponies.xml",
-                    "Desktop Sprites.xml"})
+                    "Desktop Sprites.xml"
+                })
                 {
                     var entry = zip.GetEntry(entryToRemove);
                     if (entry != null)

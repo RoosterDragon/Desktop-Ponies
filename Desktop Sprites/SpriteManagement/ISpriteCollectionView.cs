@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using DesktopSprites.Collections;
 
     /// <summary>
     /// Defines a visual interface capable of displaying a collection of objects which implement

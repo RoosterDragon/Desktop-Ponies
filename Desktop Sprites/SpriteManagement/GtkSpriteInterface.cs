@@ -63,7 +63,7 @@
             public static void SetHasShadow(Gdk.Window window, bool hasShadow)
             {
                 // Get the native window handle.
-                IntPtr nativeWindow = 
+                IntPtr nativeWindow =
                     DesktopSprites.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
 
                 // Register the method with the runtime, if it has not yet been.
@@ -193,7 +193,7 @@
 
                 speechBubble = new SpeechWindow();
 
-                Events |= EventMask.ButtonPressMask | EventMask.ButtonReleaseMask | 
+                Events |= EventMask.ButtonPressMask | EventMask.ButtonReleaseMask |
                     EventMask.KeyPressMask | EventMask.EnterNotifyMask | EventMask.FocusChangeMask;
             }
 
@@ -849,7 +849,7 @@
             /// <see cref="T:DesktopSprites.SpriteManagement.GtkSpriteInterface.GtkContextMenu"/>.</param>
             /// <param name="menuItems">The items which should be displayed in this menu.</param>
             /// <param name="topLevel">Indicates if the menu is a top level menu, instead of a sub-menu.</param>
-            /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItems"/> is 
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="parent"/> is null.-or-<paramref name="menuItems"/> is
             /// null.</exception>
             public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems, bool topLevel)
             {
@@ -1230,7 +1230,7 @@
             if (button == SimpleMouseButtons.None)
                 return;
             SimpleMouseEventArgs e = new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot);
-            int doubleClickMillisesonds = 
+            int doubleClickMillisesonds =
                 (drawOrderedWindows.Count > 0 ?
                 Settings.GetForScreen(drawOrderedWindows[0].Screen) :
                 Settings.Default).DoubleClickTime;
@@ -1706,7 +1706,7 @@
                     GraphicsWindow window = loopWindow;
 
                     ISprite sprite = window.Sprite;
-                    
+
                     // Gtk# operations need to be invoked on the main thread. Although they will usually succeed, eventually an invalid
                     // unmanaged memory access is likely to result.
                     // By invoking within the loop, the actions are chunked up so that the message pump doesn't become tied down for too

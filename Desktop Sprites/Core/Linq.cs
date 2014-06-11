@@ -31,7 +31,7 @@
             }
             return result;
         }
-        
+
         /// <summary>
         /// Returns the only element of a sequence that satisfies a specified condition or a default value if no such element exists or
         /// more than one element satisfies the condition.

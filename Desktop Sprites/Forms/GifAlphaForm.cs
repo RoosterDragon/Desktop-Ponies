@@ -218,10 +218,10 @@
                 location.X += swatchSize + 1;
             }
             location.Y = 0;
-            Panel blankSourcePanel = 
+            Panel blankSourcePanel =
                 new Panel() { Size = ImageSourcePalette.Size, Location = location, BackColor = SystemColors.Control };
             ImageSourcePalette.Controls.Add(blankSourcePanel);
-            Panel blankDesiredPanel = 
+            Panel blankDesiredPanel =
                 new Panel() { Size = ImageDesiredPalette.Size, Location = location, BackColor = SystemColors.Control };
             ImageDesiredPalette.Controls.Add(blankDesiredPanel);
             ImageSourcePalette.ResumeLayout();

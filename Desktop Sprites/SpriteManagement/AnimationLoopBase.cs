@@ -3,9 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Globalization;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using DesktopSprites.Collections;
     using DesktopSprites.Core;
@@ -227,7 +225,7 @@
                 /// <param name="concurrentReadOnlySpriteCollection">The collection to proxy.</param>
                 public DebugView(ConcurrentReadOnlySpriteCollection concurrentReadOnlySpriteCollection)
                 {
-                    this.concurrentReadOnlySpriteCollection = 
+                    this.concurrentReadOnlySpriteCollection =
                         Argument.EnsureNotNull(concurrentReadOnlySpriteCollection, "concurrentReadOnlySpriteCollection");
                 }
 
@@ -523,7 +521,7 @@
             /// <returns>A short summary of current performance.</returns>
             public string GetSummary()
             {
-                return 
+                return
                     "fps: {0:0.0}/{1:0.0} time: {2:0.0}ms/{3:0.0}ms/{4:0.0}ms interval: {5:0.0}ms/{6:0.0}ms/{7:0.0}ms".FormatWith(
                     FramesPerSecond, AchievableFramesPerSecond,
                     MinTime, MeanTime, MaxTime,
@@ -672,7 +670,7 @@
                         new Cairo.Rectangle(
                         barLeft, graphArea.Bottom - 1 - intervalHeight, barWidth, intervalHeight - timeHeight));
                     context.Fill();
-                        
+
                     if (timeBarNumber == 0)
                         context.SetSourceRGB(1, 0, 0);
                     else if (timeBarNumber == 1)
@@ -681,11 +679,11 @@
                         context.SetSourceRGB(0, 0, 1);
                     else
                         context.SetSourceRGB(1, 1, 1);
-                    
+
                     context.Rectangle(
                         new Cairo.Rectangle(barLeft, graphArea.Bottom - 1 - timeHeight, barWidth, timeHeight));
                     context.Fill();
-                        
+
                     context.SetSourceRGB(0.2, 0.2, 0.5);
                     context.Rectangle(
                         new Cairo.Rectangle(barLeft, graphArea.Bottom - 1 - targetHeight, barWidth, 1));
@@ -695,7 +693,7 @@
                     if (++m >= Count)
                         m = 0;
                 }
-                
+
                 context.LineWidth = 1;
 
                 // Draw the mean interval time.
@@ -797,7 +795,7 @@
         /// </summary>
         public TimeSpan ElapsedTime
         {
-            get 
+            get
             {
 #if DEBUG
                 lock (tickSync)
@@ -1228,7 +1226,7 @@
 
         /// <summary>
         /// Process any pending queued actions on the sprites collection now. This method is called during every update, but may be called
-        /// in derived classes if they need to force queued changes to be applied immediately. 
+        /// in derived classes if they need to force queued changes to be applied immediately.
         /// </summary>
         /// <exception cref="T:System.ObjectDisposedException">The animator has been stopped.</exception>
         protected void ProcessQueuedActions()

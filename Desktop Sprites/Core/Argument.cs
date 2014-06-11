@@ -780,6 +780,7 @@
         /// <summary>
         /// Checks that an argument is greater than a specified value.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="value">The value that the argument should be strictly greater than.</param>
@@ -797,6 +798,7 @@
         /// <summary>
         /// Checks that an argument is greater than or equal to a specified value.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="value">The value that the argument should be greater than or equal to.</param>
@@ -814,6 +816,7 @@
         /// <summary>
         /// Checks that an argument is less than a specified value.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="value">The value that the argument should be strictly less than.</param>
@@ -831,6 +834,7 @@
         /// <summary>
         /// Checks that an argument is less than or equal to a specified value.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="value">The value that the argument should be less than or equal to.</param>
@@ -848,6 +852,7 @@
         /// <summary>
         /// Checks that an argument is within the specified range.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="min">The value that the argument should be greater than or equal to.</param>
@@ -867,6 +872,7 @@
         /// <summary>
         /// Checks that an argument is within the specified range.
         /// </summary>
+        /// <typeparam name="T">The type of the argument and value.</typeparam>
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <param name="min">The value that the argument should be strictly greater than.</param>

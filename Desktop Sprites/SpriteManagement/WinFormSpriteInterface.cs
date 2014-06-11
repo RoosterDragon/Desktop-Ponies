@@ -444,8 +444,8 @@
             /// </summary>
             public byte[] Data { get; private set; }
             /// <summary>
-            /// Gets the array containing packed ARGB colors that define the color palette of the image. This will be null if the image is
-            /// instead made up of a bitmap.
+            /// Gets or sets the array containing packed ARGB colors that define the color palette of the image. This will be null if the
+            /// image is instead made up of a bitmap.
             /// </summary>
             public int[] ArgbPalette { get; set; }
             /// <summary>
@@ -2081,7 +2081,7 @@
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
                 out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint,
                 out dataRowIndexFixedPoint, out dataColumnIndexFixedPointInitial);
-            
+
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
             int imageStride = image.Stride;
@@ -2231,7 +2231,7 @@
                     ApplicationInvoke(() => Dispose(disposing));
                     return;
                 }
-                
+
                 form.Dispose();
 
                 foreach (var image in images.Values)

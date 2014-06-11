@@ -65,7 +65,7 @@
             if (qualifiers.GetLength(1) != 2)
                 throw new ArgumentException("The dimensions of the qualifiers array must be [n,2]. " +
                     "The two characters are the opening and closing qualifier pair. You may have n pairs of qualifiers.", "qualifiers");
-            
+
             char[] openingQualifiers = new char[qualifiers.GetLength(0)];
             for (int i = 0; i < qualifiers.GetLength(0); i++)
                 openingQualifiers[i] = qualifiers[i, 0];
@@ -134,7 +134,7 @@
                     if (qualifierIndex == -1)
                         throw new ArgumentException(
                             "Source string contains qualified text with no closing qualifier. The opening qualifier '" + openingQualifier +
-                            "' was encountered at position " + (index - 1) + ", but the closing qualifier '" + closingQualifier + 
+                            "' was encountered at position " + (index - 1) + ", but the closing qualifier '" + closingQualifier +
                             "' could not found at a subsequent position.");
                     // Append the text up to the closing qualifier.
                     segment.Append(source, index, qualifierIndex - index);

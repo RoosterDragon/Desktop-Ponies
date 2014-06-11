@@ -3,7 +3,6 @@
     using System;
     using System.ComponentModel;
     using System.Drawing;
-    using System.Globalization;
     using System.Windows.Forms;
     using DesktopSprites.Collections;
     using DesktopSprites.Core;
@@ -29,7 +28,7 @@
         /// <summary>
         /// Brushes used to draw sections for each frame.
         /// </summary>
-        private static readonly ImmutableArray<Brush> SectionBrushes = 
+        private static readonly ImmutableArray<Brush> SectionBrushes =
             new Brush[] { Brushes.DarkGray, Brushes.LightGray }.ToImmutableArray();
         /// <summary>
         /// Brush used to draw the section of the currently selected frame.

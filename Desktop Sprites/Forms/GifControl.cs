@@ -27,7 +27,7 @@
             Argument.EnsureNotNull(frame, "frame");
 
             InitializeComponent();
-            
+
             this.frame = frame;
             FrameInfo.Text = info;
 
