@@ -37,10 +37,10 @@
                     BitmapData data =
                         bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                    int[] colors = new int[data.Stride / 4];
+                    int[] colors = new int[data.Width];
                     for (int row = 0; row < data.Height; row++)
                     {
-                        IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride / 4);
+                        IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
 
                         // Copy the data to a managed array.
                         Marshal.Copy(rowPtr, colors, 0, data.Width);
@@ -102,20 +102,20 @@
                     BitmapData data =
                         bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                    int[] colors = new int[data.Stride / 4];
+                    int[] colors = new int[data.Width];
                     for (int row = 0; row < data.Height; row++)
                     {
                         IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
 
                         // Copy the data to a managed array.
-                        Marshal.Copy(rowPtr, colors, 0, data.Width * 4);
+                        Marshal.Copy(rowPtr, colors, 0, colors.Length);
 
                         // Multiply the color channels in each pixel.
                         for (int i = 0; i < colors.Length; i++)
                             colors[i] = Color.FromArgb(colors[i]).PremultipliedAlpha().ToArgb();
 
                         // Copy the array back into the bitmap.
-                        Marshal.Copy(colors, 0, rowPtr, data.Width * 4);
+                        Marshal.Copy(colors, 0, rowPtr, colors.Length);
                     }
                     data.PixelFormat = PixelFormat.Format32bppPArgb;
                     bitmap.UnlockBits(data);
