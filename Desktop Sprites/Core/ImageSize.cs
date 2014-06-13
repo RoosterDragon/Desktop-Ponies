@@ -76,7 +76,7 @@
         /// GIF or BMP format.</param>
         /// <returns>The width and height of the image, in pixels.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="reader"/> is null.</exception>
-        /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>    
+        /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         public static Size GetSize(BinaryReader reader)
         {
             Argument.EnsureNotNull(reader, "reader");

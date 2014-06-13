@@ -252,7 +252,7 @@
         /// <summary>
         /// The bmiColors member contains one of the following:
         /// An array of RGBQUAD. The elements of the array that make up the color table.
-        /// An array of 16-bit unsigned integers that specifies indexes into the currently realized logical palette. 
+        /// An array of 16-bit unsigned integers that specifies indexes into the currently realized logical palette.
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1, ArraySubType = UnmanagedType.Struct)]
         public RGBQUAD[] bmiColors;
