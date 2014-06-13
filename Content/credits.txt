@@ -403,9 +403,15 @@ Contributors are broken down by character. If there was more than one contributo
 #### Mjolna
 * Anonymous
 
+#### Mr Breezy
+* Anonycat
+
 #### Mr Cake
 * Anonycat [Idle]
 * Bot-chan [Trot]
+
+#### Mr Greenhooves
+* Anonycat
 
 #### Mrs Cake
 * Bot-chan
