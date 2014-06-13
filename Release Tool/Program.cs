@@ -80,10 +80,30 @@
                 var ponyDirectory = Path.Combine(poniesDirectory, ponyBase.Directory);
                 var imageFilePaths = Directory.GetFiles(ponyDirectory, "*.gif").Concat(Directory.GetFiles(ponyDirectory, "*.png"))
                     .Select(filePath => filePath.Replace(contentDirectory + Path.DirectorySeparatorChar, ""));
-                // Ignore any images involved in effects, as the transparent borders may be used for alignment.
+
+                // Ignore any images involved in effects or behavior chains when set up by follow targets, as the transparent borders may
+                // be used for alignment.
+                // TODO: An improved method would not be to ignore these images, but consider them more carefully.
+                // For effects, each side could be considered individually and the minimum of any shared padding between the behavior and
+                // effect could be cropped.
+                // For images in sequences, the union of the minimums for each image in the sequences for both the follower and followee
+                // could be cropped.
                 var imagesToIgnore = ponyBase.Effects.Select(
                     e => new[] { e.LeftImage.Path, e.RightImage.Path, e.GetBehavior().LeftImage.Path, e.GetBehavior().RightImage.Path })
-                    .SelectMany(images => images).ToArray();
+                .Concat(
+                ponyBase.Behaviors.Where(b => !string.IsNullOrEmpty(b.FollowTargetName)).SelectMany(
+                    b =>
+                    {
+                        var behaviorChain = new List<DesktopPonies.Behavior>();
+                        while (b != null)
+                        {
+                            behaviorChain.Add(b);
+                            b = b.GetLinkedBehavior();
+                        }
+                        return behaviorChain;
+                    }).Select(
+                    b => new[] { b.LeftImage.Path, b.RightImage.Path }))
+                    .SelectMany(images => images);
                 var imageFilePathsToUse = new HashSet<string>(imageFilePaths, PathEquality.Comparer);
                 imageFilePathsToUse.ExceptWith(imagesToIgnore);
                 var imageCropInfo = new Dictionary<string, Point>(PathEquality.Comparer);
