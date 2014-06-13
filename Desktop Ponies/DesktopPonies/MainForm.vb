@@ -801,10 +801,14 @@ Public Class MainForm
                              LoadingProgressBar.Value = 0
                              LoadingProgressBar.Maximum = images.Length
                          End Sub)
-        ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
-
-        animator = createAnimator()
-        AddHandler animator.AnimationFinished, AddressOf ShutdownOnFinish
+        Try
+            ponyViewer.LoadImages(images, Sub() worker.QueueTask(Sub() LoadingProgressBar.Value += 1))
+            animator = createAnimator()
+            AddHandler animator.AnimationFinished, AddressOf ShutdownOnFinish
+        Catch ex As Exception
+            ponyViewer.Dispose()
+            Throw
+        End Try
     End Sub
 
     Private Sub ShutdownOnFinish(sender As Object, e As EventArgs)
