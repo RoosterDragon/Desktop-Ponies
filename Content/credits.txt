@@ -163,7 +163,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Bon-Bon
 * Jay Wright [Idle, Walk]
 * Starly [Sleep]
-* Bot-chan [Idle]
+* Bot-chan [Idle, Bench]
 
 #### Boxxy Brown
 * Bot-chan
@@ -389,6 +389,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Lyra
 * Starly [Stand, Walk, Sit, Sleep, Jump]
 * Anonymous [Stand, Walk]
+* Bot-chan [BenchBig]
 
 #### Mane-iac
 * Bot-chan
