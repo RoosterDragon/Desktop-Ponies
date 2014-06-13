@@ -45,7 +45,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         public ImmutableArray(IEnumerable<T> source)
         {
-            array = Argument.EnsureNotNull(source, "source").ToArray();
+            array = source.ToArray();
         }
         /// <summary>
         /// Gets the element at the specified index in the immutable array.

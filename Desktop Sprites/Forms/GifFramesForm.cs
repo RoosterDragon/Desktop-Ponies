@@ -86,7 +86,7 @@
                 "Duration: {0:0.00s} Iterations: {1}  Size: {2}".FormatWith(
                 TimeSpan.FromMilliseconds(gifImage.Duration).TotalSeconds, gifImage.Iterations, gifImage.Size);
 
-            ImmutableArray<GifFrame<BitmapFrame>> frames = gifImage.Frames;
+            var frames = gifImage.Frames;
             for (int i = 0; i < frames.Length; i++)
             {
                 string info = "{0}: {1}ms".FormatWith(i + 1, frames[i].Duration);
