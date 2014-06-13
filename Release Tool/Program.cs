@@ -113,7 +113,7 @@
                     if (maybeCropped.HasValue)
                     {
                         if (Path.GetExtension(imageFilePath) == ".gif")
-                            CropGifImage(toolDirectory, contentDirectory, imageFilePath);
+                            CropGifImage(toolDirectory, contentDirectory, imageFilePath, maybeCropped.Value);
                         else
                             CropPngImage(contentDirectory, imageFilePath, maybeCropped.Value);
                         imageCropInfo.Add(imageFilePath, maybeCropped.Value.Location);
@@ -128,6 +128,8 @@
                 if (changed)
                     ponyBase.Save();
             }
+            if (currentLine == Console.CursorTop)
+                ConsoleReplacePreviousLine("");
         }
 
         private static bool FixCustomCenter(Dictionary<string, Point> imageCropInfo, DesktopPonies.Behavior behavior, bool left)
@@ -276,7 +278,7 @@
             return null;
         }
 
-        private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath)
+        private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath, Rectangle cropArea)
         {
             string tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
@@ -294,7 +296,8 @@
                 string trimmedSourcePath = filePath.Replace(contentDirectory, "");
                 Console.WriteLine("Cropping " + trimmedSourcePath);
                 File.Copy(filePath, tempFilePath, true);
-                process.StartInfo.Arguments = "-b --crop-transparency \"" + tempFilePath + "\"";
+                process.StartInfo.Arguments = "-b --crop {1},{2}+{3}x{4} \"{0}\"".FormatWith(
+                    tempFilePath, cropArea.X, cropArea.Y, cropArea.Width, cropArea.Height);
                 process.Start();
                 process.WaitForExit();
                 if (process.ExitCode != 0)
