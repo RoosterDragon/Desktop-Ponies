@@ -2063,8 +2063,8 @@ Public Class Pony
 
         _destination = Nothing
         _behaviorChangedDuringStep = False
-        HandleSleep()
-        HandleMouseoverAndDrag()
+        Dim exitedSleep = HandleSleep()
+        Dim exitedMouseoverOrDrag = HandleMouseoverAndDrag()
         SendToCustomDestination("override", DestinationOverride, _atDestinationOverride)
         HandleFollowTargetOverride()
         StartInteractionAtRandom()
@@ -2083,14 +2083,17 @@ Public Class Pony
             End If
         End If
         If _currentTime - _speechStartTime > _speechDuration Then _currentSpeechText = Nothing
-        UpdateState(Context.TeleportationEnabled, behaviorExpired)
+        UpdateState(Context.TeleportationEnabled, exitedSleep OrElse exitedMouseoverOrDrag OrElse behaviorExpired)
     End Sub
 
     ''' <summary>
     ''' Transfers the pony in and out of the sleeping state. The sleep state will be set. The behavior will be set as a side effect of
     ''' state transitions. The behavior desired duration will be modified to prevent the behavior expiring whilst in the sleep state.
     ''' </summary>
-    Private Sub HandleSleep()
+    ''' <returns>A value indicating whether the pony resumed the behavior it was undertaking before entering the mouseover or drag state.
+    ''' </returns>
+    Private Function HandleSleep() As Boolean
+        Dim resumedBehaviorBeforeSpecialStateOverride As Boolean
         If Sleep AndAlso Not _inSleepState Then
             AddUpdateRecord("Entering sleep state.")
             _inSleepState = True
@@ -2101,9 +2104,11 @@ Public Class Pony
             _inSleepState = False
             If _currentInteraction Is Nothing Then SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
             _behaviorBeforeSpecialStateOverride = Nothing
+            resumedBehaviorBeforeSpecialStateOverride = True
         End If
         If _inSleepState Then ExtendBehaviorDurationIndefinitely()
-    End Sub
+        Return resumedBehaviorBeforeSpecialStateOverride
+    End Function
 
     ''' <summary>
     ''' Transfers the pony in and out of the mouseover and drag states. The mouseover state, drag state and behavior before special state
@@ -2114,7 +2119,10 @@ Public Class Pony
     ''' during an interaction, the interaction is ended and the behavior before special state override is cleared. The pony resumes a
     ''' random behavior on exiting drag.
     ''' </summary>
-    Private Sub HandleMouseoverAndDrag()
+    ''' <returns>A value indicating whether the pony resumed the behavior it was undertaking before entering the mouseover or drag state.
+    ''' </returns>
+    Private Function HandleMouseoverAndDrag() As Boolean
+        Dim resumedBehaviorBeforeSpecialStateOverride As Boolean
         Dim cursorLocation = CType(Context.CursorLocation, Point)
         Dim mouseoverBehavior = _mouseoverBehaviorsByGroup(CurrentBehaviorGroup)
         Dim mouseoverImage = If(_facingRight, mouseoverBehavior.RightImage, mouseoverBehavior.LeftImage)
@@ -2146,6 +2154,7 @@ Public Class Pony
                 Else
                     SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
                     _behaviorBeforeSpecialStateOverride = Nothing
+                    resumedBehaviorBeforeSpecialStateOverride = True
                 End If
             End If
         End If
@@ -2154,9 +2163,11 @@ Public Class Pony
             _inMouseoverState = False
             SetBehaviorInternal(_behaviorBeforeSpecialStateOverride)
             _behaviorBeforeSpecialStateOverride = Nothing
+            resumedBehaviorBeforeSpecialStateOverride = True
         End If
         If _inMouseoverState OrElse _inDragState Then ExtendBehaviorDurationIndefinitely()
-    End Sub
+        Return resumedBehaviorBeforeSpecialStateOverride
+    End Function
 
     ''' <summary>
     ''' Sends a pony to a custom destination if a destination has not yet been specified. Behaviors are automatically selected to give
@@ -2506,7 +2517,7 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' Determines if a behavior has a reachable follow target. 
+    ''' Determines if a behavior has a reachable follow target.
     ''' </summary>
     ''' <param name="behavior">The behavior to test.</param>
     ''' <returns>Returns true if the target mode is not a pony or if a pony matching the target name is present in the current context.
