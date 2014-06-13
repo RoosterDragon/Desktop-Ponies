@@ -87,7 +87,7 @@ Public Class PonyCollection
             houseDirectories,
             Sub(folder)
                 Try
-                    Dim house = HouseBase.Load(folder, True)
+                    Dim house = HouseBase.Load(folder.Substring(folder.LastIndexOf(Path.DirectorySeparatorChar) + 1), True)
                     If house IsNot Nothing Then
                         houses.Add(house)
                         If houseLoadCallback IsNot Nothing Then houseLoadCallback(house)
@@ -310,6 +310,7 @@ Public NotInheritable Class HouseIniParser
         Return IniParser.TryParse(result, issues,
                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Image"}),
                                   Function(p)
+                                      p.NoParse()
                                       Dim path = p.NoParse()
                                       If p.Assert(path, Not String.IsNullOrEmpty(path), "An image path has not been set.", Nothing) Then
                                           path = p.SpecifiedCombinePath(directory, path, "Image will not be loaded.")
@@ -326,7 +327,10 @@ Public NotInheritable Class HouseIniParser
                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Door Position"}),
                                   Function(p)
                                       p.NoParse()
-                                      Return p.ParseVector2(Vector2.Zero)
+                                      Dim position As Vector2
+                                      position.X = p.ParseInt32(0)
+                                      position.Y = p.ParseInt32(0)
+                                      Return position
                                   End Function)
     End Function
 
