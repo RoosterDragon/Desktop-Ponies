@@ -85,6 +85,9 @@ You may also be interested in the [deviantART group for Desktop Ponies](http://d
 
 Contributors are broken down by character. If there was more than one contributor to a character, the images they created are listed against their name. If no images are listed, then all contributors contributed to each image.
 
+#### A.K. Yearling
+* Bot-chan
+
 #### Ace
 * Bot-chan
 
@@ -365,6 +368,9 @@ Contributors are broken down by character. If there was more than one contributo
 * StarStep
 
 #### King Sombra
+* Bot-chan
+
+#### Lady Justice
 * Bot-chan
 
 #### Lemon Hearts
