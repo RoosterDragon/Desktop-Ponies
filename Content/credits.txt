@@ -189,7 +189,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Carrot Top
 * CANDYBAG [Idle, Trot]
-* Pony Noia [All Other Images]
+* Pony Noia [Blink, Chomp, SpawningCarrot, Tv]
+* StarStep [Banner, BannerRaise]
+* Anonycat [Banner]
 
 #### Changeling
 * Bot-chan
