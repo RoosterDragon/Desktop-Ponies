@@ -656,8 +656,20 @@ Public Class PonyEditor
                 Select Case e.ColumnIndex
                     Case colBehaviorName.Index
                         If Not EditorCommon.ValidateName(Me, "behavior", newValue, CurrentBase.Behaviors, behavior.Name) Then Return
+                        Dim oldValue = behavior.Name
                         behavior.Name = newValue
                         BehaviorsGrid.Rows(e.RowIndex).Cells(colBehaviorOriginalName.Index).Value = behavior.Name
+
+                        For Each b In CurrentBase.Behaviors
+                            If b.LinkedBehaviorName = oldValue Then b.LinkedBehaviorName = newValue
+                            If b.FollowMovingBehaviorName = oldValue Then b.FollowMovingBehaviorName = newValue
+                            If b.FollowStoppedBehaviorName = oldValue Then b.FollowStoppedBehaviorName = newValue
+                        Next
+                        For Each effect In CurrentBase.Effects
+                            If effect.BehaviorName = oldValue Then effect.BehaviorName = newValue
+                        Next
+
+                        LoadPonyInfo()
 
                     Case colBehaviorChance.Index
                         behavior.Chance = Double.Parse(
@@ -836,8 +848,16 @@ Public Class PonyEditor
                 Select Case e.ColumnIndex
                     Case colSpeechName.Index
                         If Not EditorCommon.ValidateName(Me, "speech", newValue, CurrentBase.Speeches, speech.Name) Then Return
+                        Dim oldValue = speech.Name
                         speech.Name = newValue
                         SpeechesGrid.Rows(e.RowIndex).Cells(colSpeechOriginalName.Index).Value = speech.Name
+
+                        For Each b In CurrentBase.Behaviors
+                            If b.StartLineName = oldValue Then b.StartLineName = newValue
+                            If b.EndLineName = oldValue Then b.EndLineName = newValue
+                        Next
+
+                        LoadPonyInfo()
 
                     Case colSpeechText.Index
                         speech.Text = newValue
