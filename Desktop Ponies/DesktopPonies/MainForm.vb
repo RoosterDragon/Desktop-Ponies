@@ -197,6 +197,7 @@ Public Class MainForm
                              Array.Sort(selectionControls,
                                         Function(a, b) StringComparer.OrdinalIgnoreCase.Compare(
                                             a.PonyBase.Directory, b.PonyBase.Directory))
+                             ' Move random pony to the top of the sort.
                              Dim randomBaseIndex = -1
                              For i = 0 To selectionControls.Length - 1
                                  If Object.ReferenceEquals(selectionControls(i).PonyBase, ponies.RandomBase) Then
@@ -204,14 +205,16 @@ Public Class MainForm
                                      Exit For
                                  End If
                              Next
-                             Dim randomBaseControl = selectionControls(randomBaseIndex)
-                             For i = randomBaseIndex To 1 Step -1
-                                 selectionControls(i) = selectionControls(i - 1)
-                             Next
-                             selectionControls(0) = randomBaseControl
-                             For i = 0 To selectionControls.Length - 1
-                                 PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
-                             Next
+                             If randomBaseIndex <> -1 Then
+                                 Dim randomBaseControl = selectionControls(randomBaseIndex)
+                                 For i = randomBaseIndex To 1 Step -1
+                                     selectionControls(i) = selectionControls(i - 1)
+                                 Next
+                                 selectionControls(0) = randomBaseControl
+                                 For i = 0 To selectionControls.Length - 1
+                                     PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
+                                 Next
+                             End If
                              ' Now controls are added and sorted, resume layouts.
                              PonySelectionPanel.ResumeLayout()
                          End Sub)
