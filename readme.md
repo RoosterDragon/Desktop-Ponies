@@ -6,13 +6,13 @@ Desktop Ponies lets you choose some ponies from [My Little Pony: Friendship is M
 
 The ponies will move around on screen performing a variety of custom animations. They also talk occasionally and some ponies will interact with each other.
 
-There are over 190 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
+There are 200 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
 
 ## Installation
 
 Desktop Ponies works on Windows, Mac and Linux.
 
-* [Download the latest version (v1.49)](https://www.dropbox.com/s/bri7ag4f4x71eau/Desktop%20Ponies%20v1.49.zip)
+* [Download the latest version (v1.50)](https://www.dropbox.com/s/j24ndnvbcnyittu/Desktop%20Ponies%20v1.50.zip)
 * Extract the files.
 * Check the included readme file for further instructions.
 

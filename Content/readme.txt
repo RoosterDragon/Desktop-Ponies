@@ -62,6 +62,25 @@ Change Log
 
 Latest changes:
 
+v1.50:
+- Added A.K. Yearling, Featherweight, Lady Justice, Stellar Eclipse and Tirek by Bot-chan.
+- Added crystal Applejack, Fluttershy, Pinkpie Pie and Rarity by Bot-chan.
+- Revamped Parasprite, Bulk Biceps by Bot-chan.
+- Added Rarity dragging animations, Cheery Berry with goggles and tweaks to Spitfire's goggles by Bot-chan.
+- Added balloon riding animations for Cherry Berry and Twilight Sparkle by Bot-chan.
+- Added bench interaction for Lyra, Bon-Bon and Shoeshine by Bot-chan.
+- Added Mr Breezy and Mr Greenhooves by Anonycat.
+- Renamed Master to Perfect Pace, Clyde Pie to Igneous Rock and added revamped animations by Anonycat.
+- Revamped Braeburn, Davenport, Hayseed Turnip Truck and Horte Cuisine by Anonycat.
+- Added Carrot Top raising 'Welcome Princess Celest' banner as an interaction with Twilight Sparkle by StarStep and Anonycat.
+- Fixed the "Do not repeat animations" setting to work again for behaviors and effects.
+- Fixed a minor issue where a pony resuming its old behavior after exiting sleep, mouseover or drag would not re-trigger effects for that behavior.
+- Fixed creating/editing of interactions to keep the list of possible behaviors updated as you add or remove targets.
+- Fixed renaming behaviors and speeches in the editor to update places the reference those names too.
+- Prevent a crash that would occur if you deleted the random pony, introduced in 1.47.
+- Fixed a crash that could occur when changing the screen resolution with ponies active on Windows.
+- Fixed a crash that could occur when closing the program on Windows.
+
 v1.49:
 - Added Carousel Boutique and The Moon by StarStep.
 - Added Farmer Rarity, Twilight Sparkle's Starswirl costume, new AJ galloping and rearing animations, CMC galloping animations, an extra Queen Chrysalis walk
