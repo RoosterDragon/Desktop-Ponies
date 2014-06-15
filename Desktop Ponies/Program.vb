@@ -1,14 +1,41 @@
-﻿''' <summary>
-''' Contains the main entry point for the program.
-''' </summary>
-Friend NotInheritable Class Program
+﻿Friend NotInheritable Class Bootstrap
     Private Sub New()
     End Sub
 
     Public Shared Sub Main()
+        IO.Directory.SetCurrentDirectory(IO.Path.GetDirectoryName(Reflection.Assembly.GetEntryAssembly().Location))
+        If VerifyLocalDependanicesExist() Then Program.Run()
+    End Sub
+
+    Private Shared Function VerifyLocalDependanicesExist() As Boolean
+        Try
+            Reflection.Assembly.ReflectionOnlyLoad("Desktop Sprites")
+        Catch ex As Exception
+            Dim message =
+                "Some required files are missing! " &
+                "If you have just downloaded Desktop Ponies please ensure you have extracted everything. " &
+                "If you are trying to run Desktop Ponies without extracting first it won't work!"
+            Console.WriteLine(message)
+            Dim form = New Form() With {.StartPosition = FormStartPosition.CenterScreen, .Size = Size.Empty, .Text = "Fatal Error"}
+            AddHandler form.Shown,
+                Sub()
+                    MessageBox.Show(form, message, "Required Files Missing", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    form.Close()
+                End Sub
+            Application.Run(form)
+            Return False
+        End Try
+        Return True
+    End Function
+End Class
+
+Friend NotInheritable Class Program
+    Private Sub New()
+    End Sub
+
+    Public Shared Sub Run()
         AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf AppDomain_UnhandledException
         AddHandler Threading.Tasks.TaskScheduler.UnobservedTaskException, AddressOf TaskScheduler_UnobservedTaskException
-        IO.Directory.SetCurrentDirectory(IO.Path.GetDirectoryName(Reflection.Assembly.GetEntryAssembly().Location))
         If Not OperatingSystemInfo.IsMacOSX Then
             RunWinForms()
         Else
