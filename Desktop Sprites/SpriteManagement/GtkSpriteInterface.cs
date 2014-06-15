@@ -1718,7 +1718,7 @@
                         {
                             var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, createPair);
                             var animation = sprite.FacingRight ? pair.Right : pair.Left;
-                            var frame = animation.Image[sprite.ImageTimeIndex];
+                            var frame = animation.Image[sprite.ImageTimeIndex, sprite.PreventAnimationLoop];
                             if (frame != null)
                                 window.CurrentImage = frame.Image;
                             else

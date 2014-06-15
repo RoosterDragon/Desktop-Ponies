@@ -1717,7 +1717,7 @@
                         var area = OffsetRectangle(sprite.Region, translate);
                         var pair = animationPairsByPaths.GetOrAdd(sprite.ImagePaths, generatePair);
                         var animation = sprite.FacingRight ? pair.Right : pair.Left;
-                        var frame = animation.Image[sprite.ImageTimeIndex];
+                        var frame = animation.Image[sprite.ImageTimeIndex, sprite.PreventAnimationLoop];
                         unsafe
                         {
                             backgroundData = form.GetBackgroundData();

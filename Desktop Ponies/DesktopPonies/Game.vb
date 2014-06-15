@@ -641,6 +641,12 @@ Public Class Game
                 End Get
             End Property
 
+            Public ReadOnly Property PreventAnimationLoop As Boolean Implements ISprite.PreventAnimationLoop
+                Get
+                    Return False
+                End Get
+            End Property
+
             Public ReadOnly Property Region As Rectangle Implements ISprite.Region
                 Get
                     Return New Rectangle(Vector2.Round(parent.HostEffect.TopLeftLocation +

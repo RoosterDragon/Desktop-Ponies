@@ -1949,6 +1949,15 @@ Public Class Pony
     End Property
 
     ''' <summary>
+    ''' Gets a value indicating whether the animation should be prevented from looping.
+    ''' </summary>
+    Public ReadOnly Property PreventAnimationLoop As Boolean Implements ISprite.PreventAnimationLoop
+        Get
+            Return _currentBehavior.DoNotRepeatImageAnimations
+        End Get
+    End Property
+
+    ''' <summary>
     ''' Gets the current speech text that is being spoken by the sprite, or null to indicate nothing is being spoken.
     ''' </summary>
     Public ReadOnly Property SpeechText As String Implements ISpeakingSprite.SpeechText
@@ -3759,6 +3768,12 @@ Public Class Effect
     Public ReadOnly Property ImageTimeIndex As TimeSpan Implements ISprite.ImageTimeIndex
         Get
             Return _currentTime - _internalStartTime
+        End Get
+    End Property
+
+    Public ReadOnly Property PreventAnimationLoop As Boolean Implements ISprite.PreventAnimationLoop
+        Get
+            Return Base.DoNotRepeatImageAnimations
         End Get
     End Property
 

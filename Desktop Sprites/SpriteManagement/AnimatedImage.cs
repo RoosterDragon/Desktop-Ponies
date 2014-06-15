@@ -215,7 +215,19 @@
         /// <returns>The frame that should be displayed for the given time index in the animation.</returns>
         public T this[TimeSpan time]
         {
-            get { return frames[FrameIndexFromTimeIndex(time)]; }
+            get { return this[time, false]; }
+        }
+
+        /// <summary>
+        /// Gets the frame for the given time index in the animation.
+        /// </summary>
+        /// <param name="time">The time index of the animation from which to retrieve a frame.</param>
+        /// <param name="preventLoop">Indicates if the number of loops in the animation is respected when seeking frames. If set, the
+        /// number of loops set by the animation is ignored and the animation will not loop once it ends.</param>
+        /// <returns>The frame that should be displayed for the given time index in the animation.</returns>
+        public T this[TimeSpan time, bool preventLoop]
+        {
+            get { return frames[FrameIndexFromTimeIndex(time, preventLoop)]; }
         }
 
         /// <summary>
@@ -236,11 +248,12 @@
         /// <summary>
         /// Gets the frame index for the given time index in the animation.
         /// </summary>
-        /// <param name="time">The time index of the animation from which to retrieve a frame index. The number of loops in the animation
-        /// is respected when seeking frames.</param>
+        /// <param name="time">The time index of the animation from which to retrieve a frame.</param>
+        /// <param name="preventLoop">Indicates if the number of loops in the animation is respected when seeking frames. If set, the
+        /// number of loops set by the animation is ignored and the animation will not loop once it ends.</param>
         /// <returns>The frame index that should be displayed for the given time index in the animation.</returns>
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="time"/> is negative.</exception>
-        private int FrameIndexFromTimeIndex(TimeSpan time)
+        private int FrameIndexFromTimeIndex(TimeSpan time, bool preventLoop)
         {
             Argument.EnsureNonnegative(time, "time");
             EnsureNotDisposed();
@@ -252,25 +265,33 @@
             {
                 // Get overall time to find in milliseconds.
                 int timeToSeek = (int)time.TotalMilliseconds;
-                // Use integer division to find out how many whole loops will run in that time.
-                int completeLoops = timeToSeek / ImageDuration;
-
-                if (LoopCount != 0 && completeLoops >= LoopCount)
+                if (preventLoop && timeToSeek >= ImageDuration)
                 {
-                    // We have reached the end of looping, and thus want the final frame.
+                    // We do not want to loop, so we want the final frame.
                     frame = FrameCount - 1;
                 }
                 else
                 {
-                    // Subtract the complete loops leaving us with a duration into one run of the animation.
-                    int durationToSeek = timeToSeek - (completeLoops * ImageDuration);
+                    // Use integer division to find out how many whole loops will run in that time.
+                    int completeLoops = timeToSeek / ImageDuration;
 
-                    // Determine which frame we want.
-                    if (commonFrameDuration != -1)
-                        frame = durationToSeek / commonFrameDuration;
+                    if (LoopCount != 0 && completeLoops >= LoopCount)
+                    {
+                        // We have reached the end of looping, and thus want the final frame.
+                        frame = FrameCount - 1;
+                    }
                     else
-                        while (durationToSeek > durations[frame])
-                            durationToSeek -= durations[frame++];
+                    {
+                        // Subtract the complete loops leaving us with a duration into one run of the animation.
+                        int durationToSeek = timeToSeek - (completeLoops * ImageDuration);
+
+                        // Determine which frame we want.
+                        if (commonFrameDuration != -1)
+                            frame = durationToSeek / commonFrameDuration;
+                        else
+                            while (durationToSeek > durations[frame])
+                                durationToSeek -= durations[frame++];
+                    }
                 }
             }
 

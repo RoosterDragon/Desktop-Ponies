@@ -25,6 +25,10 @@
         /// </summary>
         TimeSpan ImageTimeIndex { get; }
         /// <summary>
+        /// Gets a value indicating whether the animation should be prevented from looping.
+        /// </summary>
+        bool PreventAnimationLoop { get; }
+        /// <summary>
         /// Starts the sprite using the given time as a zero point.
         /// </summary>
         /// <param name="startTime">The time that will be used as a zero point against the time given in future updates.</param>
