@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using DesktopSprites.Core;
 
     /// <summary>
     /// Defines a method that a type implements to compare two objects.
@@ -14,6 +15,7 @@
         /// <typeparam name="T">The type of objects to compare.</typeparam>
         /// <param name="comparison">The comparison to use.</param>
         /// <returns>The new comparer.</returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
         public static Comparer<T> Create<T>(Comparison<T> comparison)
         {
             return new ComparerFromComparison<T>(comparison);
@@ -32,9 +34,10 @@
             /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.Comparer.ComparerFromComparison`1"/> class.
             /// </summary>
             /// <param name="comparison">The comparison function to invoke when comparing objects.</param>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
             public ComparerFromComparison(Comparison<T> comparison)
             {
-                this.comparison = comparison;
+                this.comparison = Argument.EnsureNotNull(comparison, "comparison");
             }
             /// <summary>
             /// Performs a comparison of two objects of the same type and returns a value indicating whether one object is less than, equal
