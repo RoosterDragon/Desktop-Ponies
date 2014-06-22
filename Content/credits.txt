@@ -319,6 +319,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Flitter
 * fanofetcetera
 
+#### Flutterbat
+* Bot-chan
+
 #### Fluttershy
 * Jay Wright [Stand, Trot, Fly]
 * humle [GalaStand, GalaTrot, GalaFly]
