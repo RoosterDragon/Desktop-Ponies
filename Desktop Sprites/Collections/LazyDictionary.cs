@@ -158,7 +158,7 @@
         /// during the enumeration.</exception>
         public IEnumerable<KeyValuePair<TKey, TValue>> InitializedItems
         {
-            get { return Enumerable.From(GetInitializedEnumerator()); }
+            get { return Enumerable.Create(GetInitializedEnumerator); }
         }
         /// <summary>
         /// Gets a collection containing the only the initialized values in the
@@ -207,7 +207,7 @@
         /// during the enumeration.</exception>
         public IEnumerable<TKey> UninitializedKeys
         {
-            get { return Enumerable.From(GetUninitializedEnumerator()); }
+            get { return Enumerable.Create(GetUninitializedEnumerator); }
         }
         /// <summary>
         /// Gets the <see cref="T:System.Func`2"/> delegate that is used to lazily initialize values based on their key.
