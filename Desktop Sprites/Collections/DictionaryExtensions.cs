@@ -27,15 +27,9 @@
         {
             Argument.EnsureNotNull(dictionary, "dictionary");
             TValue currentValue;
-            if (dictionary.TryGetValue(key, out currentValue))
-            {
-                return currentValue;
-            }
-            else
-            {
-                dictionary.Add(key, value);
-                return value;
-            }
+            if (!dictionary.TryGetValue(key, out currentValue))
+                dictionary.Add(key, currentValue = value);
+            return currentValue;
         }
 
         /// <summary>
@@ -58,16 +52,9 @@
             Argument.EnsureNotNull(dictionary, "dictionary");
             Argument.EnsureNotNull(valueFactory, "valueFactory");
             TValue currentValue;
-            if (dictionary.TryGetValue(key, out currentValue))
-            {
-                return currentValue;
-            }
-            else
-            {
-                TValue value = valueFactory(key);
-                dictionary.Add(key, value);
-                return value;
-            }
+            if (!dictionary.TryGetValue(key, out currentValue))
+                dictionary.Add(key, currentValue = valueFactory(key));
+            return currentValue;
         }
     }
 }
