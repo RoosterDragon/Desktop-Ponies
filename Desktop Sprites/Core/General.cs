@@ -31,12 +31,12 @@
         /// <para>The finalization queue is now forcibly emptied by running all pending finalizers. These objects no longer need to be kept
         /// alive and their memory can be reclaimed. Therefore a second collection is run to reclaim the remaining unreferenced memory.
         /// </para>
-        /// <para>Since this method ultimately performs two full garbage collections (i.e. collections across all generations) and
-        /// processes finalizers (an expensive operation), it is very expensive to call and should be done only when absolutely necessary
-        /// (e.g. when a long running process releases a substantial amount of memory that is likely to have survived into the oldest
-        /// generation. If your process is not allocating much new memory it may be a substantial amount of time before the runtime decides
-        /// to perform a full collection on its own accord.) Calling this method needlessly will disrupt the ability of the runtime to
-        /// schedule garbage collections effectively.</para>
+        /// <para>This method should be called only when absolutely necessary or efficient GC operation will be disrupted as objects will
+        /// be promoted into older generations earlier. If these are short-lived objects this means they will survive much longer than
+        /// otherwise. It is best to call this method when you know a substantial amount of long-lived objects are no longer referenced and
+        /// can be reclaimed and at a time when there are minimal short-lived objects with live references. When called in this manner it
+        /// allows memory to be reclaimed earlier and more deterministically than waiting for the next natural GC cycle, but without
+        /// promoting objects needlessly.</para>
         /// </remarks>
         public static void FullCollect()
         {
