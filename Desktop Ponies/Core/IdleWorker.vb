@@ -80,7 +80,7 @@ Public Class IdleWorker
 
             If UseIdlePooling Then
                 tasks.Enqueue(task)
-                ' If there were previously no tasks in the queue, the application may already be an an idle state.
+                ' If there were previously no tasks in the queue, the application may already be in an idle state.
                 ' We will post a dummy event to the message queue, so that the idle event can be raised once the message queue is
                 ' cleared.
                 If tasks.Count = 1 Then

@@ -2874,9 +2874,9 @@ Public Class Pony
     End Sub
 
     ''' <summary>
-    ''' If there is no overlap between the pony region and the context region, the location is adjusted so the the nearest two edges become
-    ''' collinear. In effect, the pony is clamped to the outer edge of the boundary. The movement vector and facing state will be changed
-    ''' to put the pony on a course to within the context region.
+    ''' If there is no overlap between the pony region and the context region, the location is adjusted so that the nearest two edges
+    ''' become collinear. In effect, the pony is clamped to the outer edge of the boundary. The movement vector and facing state will be
+    ''' changed to put the pony on a course to within the context region.
     ''' </summary>
     ''' <returns>Return true if the pony was teleported to the boundary edge, otherwise; false.</returns>
     Private Function TeleportToBoundaryIfOutside() As Boolean

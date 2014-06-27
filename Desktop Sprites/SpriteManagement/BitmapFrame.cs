@@ -15,7 +15,7 @@
         /// <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/>.
         /// </summary>
         /// <param name="fileName">The path to the file which contains the image to be loaded.</param>
-        /// <returns>An animated image loaded from the specified file that that uses bitmaps for each frame.</returns>
+        /// <returns>An animated image loaded from the specified file that uses bitmaps for each frame.</returns>
         public static AnimatedImage<BitmapFrame> AnimationFromFile(string fileName)
         {
             return new AnimatedImage<BitmapFrame>(fileName, path => new BitmapFrame(path), FromBuffer, AllowableBitDepths);

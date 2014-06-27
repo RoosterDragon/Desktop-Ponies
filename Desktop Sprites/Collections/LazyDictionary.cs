@@ -404,7 +404,7 @@
         /// Returns an enumerator that iterates through only the initialized items in the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.
         /// </summary>
-        /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for initialized items in the the
+        /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for initialized items in the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.</returns>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
         /// during the enumeration.</exception>
@@ -424,7 +424,7 @@
         /// Returns an enumerator that iterates through only the uninitialized keys in the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.
         /// </summary>
-        /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for uninitialized keys in the the
+        /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for uninitialized keys in the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.</returns>
         /// <exception cref="T:System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
         /// during the enumeration.</exception>

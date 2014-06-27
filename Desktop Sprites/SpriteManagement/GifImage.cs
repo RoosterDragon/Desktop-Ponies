@@ -328,7 +328,7 @@
                 public DataBuffer DataBuffer { get; private set; }
 
                 /// <summary>
-                /// Reference the the underlying buffer in the data buffer.
+                /// Reference to the underlying buffer in the data buffer.
                 /// </summary>
                 private byte[] buffer;
                 /// <summary>
@@ -947,7 +947,7 @@
                 return Result.PushedCodeword;
             }
             /// <summary>
-            /// Decodes the the codeword the given code represents into the given stack buffer.
+            /// Decodes the codeword the given code represents into the given stack buffer.
             /// </summary>
             /// <param name="code">The code.</param>
             /// <param name="stack">A stack into which a decoded codeword should reside.</param>

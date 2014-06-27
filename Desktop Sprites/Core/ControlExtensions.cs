@@ -31,7 +31,7 @@
                 // If the control lacks an accessible window handle then we can't run our actions.
                 if (!control.IsHandleCreated)
                     return false;
-                // We know the the handle is created, so we can rely on InvokeRequired to accurately report if this is a cross-thread call.
+                // We know the handle is created, so we can rely on InvokeRequired to accurately report if this is a cross-thread call.
                 isCrossThreadCall = control.InvokeRequired;
             }
             if (isCrossThreadCall)
