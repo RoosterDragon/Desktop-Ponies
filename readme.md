@@ -28,7 +28,6 @@ Some information about the file formats employed by the program can be found in 
 
 ## External Links
 
-* [Forums](http://desktopponies.bugs3.com/index.php) - Dedicated forums for disucssion of Desktop Ponies. If you need any assistance please post in the [support sub-forum](http://desktopponies.bugs3.com/viewforum.php?f=8).
 * [Ponychan Mane Thread](http://www.ponychan.net/chan/collab/res/45984.html) - Discussion of the program and canon artwork.
 * [Ponychan OC Thread](http://www.ponychan.net/chan/collab/res/43607.html) - Download a collection of common OCs and other art. Includes templates and resources for creating your own ponies.
 * [deviantART Group](http://desktop-pony-team.deviantart.com/) - Group maintained by contributing artists to showcase their work.
