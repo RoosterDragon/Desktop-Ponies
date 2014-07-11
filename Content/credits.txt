@@ -121,7 +121,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Applejack
 * Jay Wright [Stand, Trotcycle]
 * RJP! [Gallop, Rear]
-* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear, Crystal]
+* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear, Crystal, Breezie]
 * StarStep [Gala, Sleep, Conga, Lasso2, Hurdle]
 * Anonycat [Truck]
 * DesktopPonyGuy [Apple]
@@ -330,7 +330,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Ponyluver [Sleep]
 * Asparagus [Sleep]
 * Half-n-Half [Gallop]
-* Bot-chan [Crystal]
+* Bot-chan [Crystal, Breezie]
 
 #### Fluttershy (Filly)
 * PsychoShutin
@@ -491,7 +491,7 @@ Contributors are broken down by character. If there was more than one contributo
 * humle [GalaIdle, GalaTrot, GalaBounce]
 * sidekick ponyguy [Fly]
 * StarStep [Conga]
-* Bot-chan [Crystal]
+* Bot-chan [Crystal, Breezie]
 
 #### Pinkie Pie (Filly)
 * PsychoShutin
@@ -574,7 +574,7 @@ Contributors are broken down by character. If there was more than one contributo
 * StarStep [Conga, Gala, Salute, Dash]
 * SarkInABox [Dash]
 * fanofetcetera [Motivate]
-* Bot-chan [Drag]
+* Bot-chan [Drag, Breezie]
 * Felix-0 [Beep]
 * DrZoin [Dizzy]
 * supersaiyanmikito [Crysallized]
@@ -598,7 +598,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Jay Wright [Stand, Trot, Horn, Fly]
 * Anonymous [Fly]
 * StarStep [Conga, Ponder, Fashion]
-* Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2, Drag, DragC, Crystal]
+* Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2, Drag, DragC, Crystal, Breezie]
 * The Coop [Gala, Tantrum, Ponder, DramaCouch, Sleep]
 * Miriam the Bat [Sleep]
 
