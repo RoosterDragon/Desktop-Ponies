@@ -121,7 +121,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Applejack
 * Jay Wright [Stand, Trotcycle]
 * RJP! [Gallop, Rear]
-* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear, Crystal, Breezie]
+* Bot-chan [Idle, Trot, Pose, Lasso, AJGallop, AJRear, Crystal, Breezie, Banjo]
 * StarStep [Gala, Sleep, Conga, Lasso2, Hurdle]
 * Anonycat [Truck]
 * DesktopPonyGuy [Apple]
@@ -400,7 +400,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Lyra
 * Starly [Stand, Walk, Sit, Sleep, Jump]
 * Anonymous [Stand, Walk]
-* Bot-chan [BenchBig]
+* Bot-chan [BenchBig, Lyre]
 
 #### Mane-iac
 * Bot-chan
