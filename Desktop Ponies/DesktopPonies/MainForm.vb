@@ -213,7 +213,9 @@ Public Class MainForm
                                  selectionControls(0) = randomBaseControl
                              End If
                              For i = 0 To selectionControls.Length - 1
-                                 PonySelectionPanel.Controls.SetChildIndex(selectionControls(i), i)
+                                 Dim selectionControl = selectionControls(i)
+                                 selectionControl.TabIndex = i
+                                 PonySelectionPanel.Controls.SetChildIndex(selectionControl, i)
                              Next
                              ' Now controls are added and sorted, resume layouts.
                              PonySelectionPanel.ResumeLayout()
