@@ -610,6 +610,7 @@ Public Class MainForm
         If Char.IsLetter(e.KeyChar) Then
             e.Handled = True
             For Each selectionControl In selectionControlsFilteredVisible
+                If Object.ReferenceEquals(selectionControl.PonyBase, ponies.RandomBase) Then Continue For
                 If selectionControl.PonyName.Text.Length > 0 Then
                     Dim compare = String.Compare(selectionControl.PonyName.Text(0), e.KeyChar, StringComparison.OrdinalIgnoreCase)
                     If compare = 0 Then
