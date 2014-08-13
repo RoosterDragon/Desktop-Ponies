@@ -1,16 +1,13 @@
 ﻿Desktop Ponies!
 Have little ponies running around your desktop aimlessly! Might entertain you for a few minutes!
 
-We have a forum for things Desktop Pony related:
-http://desktopponies.bugs3.com/index.php
-If you have any trouble, you can ask for assistance in this sub-forum:
-http://desktopponies.bugs3.com/viewforum.php?f=8
-
-There are also threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
+There are threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
 http://www.ponychan.net/chan/collab/
 Latest threads at time of writing:
 Mane - http://www.ponychan.net/chan/collab/res/45984.html
   OC - http://www.ponychan.net/chan/collab/res/43607.html
+
+If you need any help setting up or running the program, please post in the main thread.
 
 The sprite artists maintain a community for their works on DeviantArt:
 http://desktop-pony-team.deviantart.com/
@@ -61,6 +58,18 @@ Screensaver (Windows Only)
 Change Log
 
 Latest changes:
+
+v1.51:
+- Added Flutterbat, Aunt Orange, Goldie Delicious, Tealove, Truffle Shuffle and Mane 6 Breezies by Bot-chan.
+- Added Surprise change, Applejack banjo and drag, Lyra lyre, Pinkie Pie sleep, Saddle Rager transform,
+  Rainbow Dash swim and Bulk Biceps drag, muscles and fly animations by Bot-chan.
+- Updated Nightmare Moon and new fly animation by Bot-chan.
+- Updated Rarity gala animations by The Coop.
+- Added Filly Rarity Smile animation by RJP!
+- Tweaked Princess Luna animations by Bot-chan.
+- Fix tab key in the menu to go through ponies in order.
+- Fix minor bug where ponies would appear in a random order if the Random Pony was missing.
+- The Random Pony is now ignored when using the keyboard to jump to a pony by name in the menu.
 
 v1.50:
 - Added A.K. Yearling, Featherweight, Lady Justice, Stellar Eclipse and Tirek by Bot-chan.
