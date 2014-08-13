@@ -581,7 +581,7 @@ Contributors are broken down by character. If there was more than one contributo
 * StarStep [Conga, Gala, Salute, Dash]
 * SarkInABox [Dash]
 * fanofetcetera [Motivate]
-* Bot-chan [Drag, Breezie]
+* Bot-chan [Drag, Breezie, Swim]
 * Felix-0 [Beep]
 * DrZoin [Dizzy]
 * supersaiyanmikito [Crysallized]
