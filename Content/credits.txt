@@ -759,6 +759,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Tank
 * Bot-chan
 
+#### Tealove
+* Bot-chan
+
 #### Thunderlane
 * fanofetcetera
 
