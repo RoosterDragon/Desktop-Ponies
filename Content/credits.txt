@@ -777,6 +777,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Starly [NakedStand, NakedTrot]
 * Bot-chan [Flowers]
 
+#### Truffle Shuffle
+* Bot-chan
+
 #### Twilight Sparkle
 * Jay Wright [Stand, Trot]
 * humle [Teleport]
