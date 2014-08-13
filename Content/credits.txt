@@ -347,6 +347,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Ginger Snap
 * Bot-chan
 
+#### Goldie Delicious
+* Bot-chan
+
 #### Grace Manewitz
 * Pony Noia
 
