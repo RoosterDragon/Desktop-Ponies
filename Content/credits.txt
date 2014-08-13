@@ -449,7 +449,8 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan [Gallop]
 
 #### Nightmare Moon
-* Yamino
+* Yamino [Stand, Walk]
+* Bot-chan [Stand, Walk, Fly]
 * Images modified from Princess Celestia.
 
 #### Nurse Redheart
