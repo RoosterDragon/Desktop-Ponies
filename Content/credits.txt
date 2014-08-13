@@ -498,7 +498,7 @@ Contributors are broken down by character. If there was more than one contributo
 * humle [GalaIdle, GalaTrot, GalaBounce]
 * sidekick ponyguy [Fly]
 * StarStep [Conga]
-* Bot-chan [Crystal, Breezie]
+* Bot-chan [Crystal, Breezie, Sleep]
 
 #### Pinkie Pie (Filly)
 * PsychoShutin
