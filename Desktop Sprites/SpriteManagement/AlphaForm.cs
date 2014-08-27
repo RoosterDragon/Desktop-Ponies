@@ -76,8 +76,12 @@
         /// resized.
         /// </summary>
         /// <returns>A lazily initialized pointer to the array of raw pixels for the background graphics buffer.</returns>
+        /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
         public unsafe int* GetBackgroundData()
         {
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+
             InitializeBuffer();
             return backgroundData;
         }
