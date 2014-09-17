@@ -38,7 +38,6 @@
             this.DesiredAlphaCode = new System.Windows.Forms.TextBox();
             this.SaveCommand = new System.Windows.Forms.Button();
             this.FrameControls = new System.Windows.Forms.GroupBox();
-            this.Indexer = new DesktopSprites.Forms.AnimatedImageIndexer();
             this.ImageNameLabel = new System.Windows.Forms.Label();
             this.ColorControls = new System.Windows.Forms.GroupBox();
             this.ResetCommand = new System.Windows.Forms.Button();
@@ -51,11 +50,14 @@
             this.DesiredPaletteLabel = new System.Windows.Forms.Label();
             this.SourcePaletteLabel = new System.Windows.Forms.Label();
             this.ErrorLabel = new System.Windows.Forms.Label();
+            this.ImagePanel = new System.Windows.Forms.Panel();
+            this.Indexer = new DesktopSprites.Forms.AnimatedImageIndexer();
             this.ImageComparison.SuspendLayout();
             this.FrameControls.SuspendLayout();
             this.ColorControls.SuspendLayout();
             this.ImageColors.SuspendLayout();
             this.PaletteControls.SuspendLayout();
+            this.ImagePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // ImageSelector
@@ -76,11 +78,9 @@
             // 
             // ImageComparison
             // 
-            this.ImageComparison.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ImageComparison.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.ImageComparison.BackColor = System.Drawing.Color.Black;
-            this.ImageComparison.Location = new System.Drawing.Point(12, 178);
+            this.ImageComparison.Location = new System.Drawing.Point(-36, 0);
             this.ImageComparison.Name = "ImageComparison";
             // 
             // ImageComparison.Panel1
@@ -92,9 +92,9 @@
             // 
             this.ImageComparison.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ImageComparison.Panel2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ImageComparison_Panel_MouseClick);
-            this.ImageComparison.Size = new System.Drawing.Size(710, 322);
-            this.ImageComparison.SplitterDistance = 352;
-            this.ImageComparison.TabIndex = 6;
+            this.ImageComparison.Size = new System.Drawing.Size(746, 322);
+            this.ImageComparison.SplitterDistance = 369;
+            this.ImageComparison.TabIndex = 0;
             // 
             // BackgroundColorCommand
             // 
@@ -114,7 +114,7 @@
             this.ImageSourcePalette.BackColor = System.Drawing.Color.Black;
             this.ImageSourcePalette.Location = new System.Drawing.Point(55, 16);
             this.ImageSourcePalette.Name = "ImageSourcePalette";
-            this.ImageSourcePalette.Size = new System.Drawing.Size(423, 13);
+            this.ImageSourcePalette.Size = new System.Drawing.Size(351, 13);
             this.ImageSourcePalette.TabIndex = 1;
             this.ImageSourcePalette.Resize += new System.EventHandler(this.ImagePalette_Resize);
             // 
@@ -125,7 +125,7 @@
             this.ImageDesiredPalette.BackColor = System.Drawing.Color.Black;
             this.ImageDesiredPalette.Location = new System.Drawing.Point(55, 38);
             this.ImageDesiredPalette.Name = "ImageDesiredPalette";
-            this.ImageDesiredPalette.Size = new System.Drawing.Size(423, 13);
+            this.ImageDesiredPalette.Size = new System.Drawing.Size(351, 13);
             this.ImageDesiredPalette.TabIndex = 3;
             this.ImageDesiredPalette.Resize += new System.EventHandler(this.ImagePalette_Resize);
             // 
@@ -177,16 +177,6 @@
             this.FrameControls.TabIndex = 2;
             this.FrameControls.TabStop = false;
             this.FrameControls.Text = "Frame";
-            // 
-            // Indexer
-            // 
-            this.Indexer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Indexer.Enabled = false;
-            this.Indexer.Location = new System.Drawing.Point(3, 16);
-            this.Indexer.Name = "Indexer";
-            this.Indexer.Size = new System.Drawing.Size(214, 114);
-            this.Indexer.TabIndex = 0;
-            this.Indexer.IndexChanged += new System.EventHandler(this.Indexer_IndexChanged);
             // 
             // ImageNameLabel
             // 
@@ -324,27 +314,49 @@
             // 
             this.ErrorLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ErrorLabel.Location = new System.Drawing.Point(12, 178);
+            this.ErrorLabel.Location = new System.Drawing.Point(0, 0);
             this.ErrorLabel.Name = "ErrorLabel";
             this.ErrorLabel.Size = new System.Drawing.Size(710, 100);
-            this.ErrorLabel.TabIndex = 5;
+            this.ErrorLabel.TabIndex = 0;
             this.ErrorLabel.Text = "Error Message";
             this.ErrorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.ErrorLabel.Visible = false;
+            // 
+            // ImagePanel
+            // 
+            this.ImagePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ImagePanel.AutoScroll = true;
+            this.ImagePanel.Controls.Add(this.ErrorLabel);
+            this.ImagePanel.Controls.Add(this.ImageComparison);
+            this.ImagePanel.Location = new System.Drawing.Point(12, 178);
+            this.ImagePanel.Name = "ImagePanel";
+            this.ImagePanel.Size = new System.Drawing.Size(710, 322);
+            this.ImagePanel.TabIndex = 5;
+            // 
+            // Indexer
+            // 
+            this.Indexer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Indexer.Enabled = false;
+            this.Indexer.Location = new System.Drawing.Point(3, 16);
+            this.Indexer.Name = "Indexer";
+            this.Indexer.Size = new System.Drawing.Size(214, 114);
+            this.Indexer.TabIndex = 0;
+            this.Indexer.IndexChanged += new System.EventHandler(this.Indexer_IndexChanged);
             // 
             // GifAlphaForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(734, 512);
-            this.Controls.Add(this.ErrorLabel);
+            this.Controls.Add(this.ImagePanel);
             this.Controls.Add(this.PaletteControls);
             this.Controls.Add(this.ColorControls);
             this.Controls.Add(this.ImageNameLabel);
             this.Controls.Add(this.FrameControls);
-            this.Controls.Add(this.ImageComparison);
             this.Controls.Add(this.ImageSelector);
-            this.MinimumSize = new System.Drawing.Size(600, 400);
+            this.MinimumSize = new System.Drawing.Size(725, 400);
             this.Name = "GifAlphaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GIF Alpha";
@@ -357,6 +369,7 @@
             this.ImageColors.ResumeLayout(false);
             this.PaletteControls.ResumeLayout(false);
             this.PaletteControls.PerformLayout();
+            this.ImagePanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -387,5 +400,6 @@
         private System.Windows.Forms.Label ErrorLabel;
         private System.Windows.Forms.Button ResetCommand;
         private AnimatedImageIndexer Indexer;
+        private System.Windows.Forms.Panel ImagePanel;
     }
 }

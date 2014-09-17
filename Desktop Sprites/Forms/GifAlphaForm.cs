@@ -304,8 +304,16 @@
             if (frameIndex != newFrameIndex)
             {
                 frameIndex = newFrameIndex;
-                ImageComparison.Panel1.BackgroundImage = gifImage.Frames[newFrameIndex].Image;
-                ImageComparison.Panel2.BackgroundImage = desiredFrames[newFrameIndex];
+                var sourceImage = gifImage.Frames[newFrameIndex].Image;
+                var desiredImage = desiredFrames[newFrameIndex];
+                ImageComparison.Panel1.BackgroundImage = sourceImage;
+                ImageComparison.Panel2.BackgroundImage = desiredImage;
+                const int padding = 8;
+                ImageComparison.Size = new Size(
+                    sourceImage.Width + desiredImage.Width + ImageComparison.SplitterWidth + 2 * padding,
+                    Math.Max(sourceImage.Height, desiredImage.Height) + 2 * padding);
+                ImageComparison.SplitterDistance = sourceImage.Width + padding;
+                ImageComparison.Left = ImagePanel.Width / 2 - ImageComparison.Width / 2 + padding;
                 ImageComparison.Panel1.Invalidate();
                 ImageComparison.Panel2.Invalidate();
             }
