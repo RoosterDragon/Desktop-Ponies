@@ -833,6 +833,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### HomeStead
 * StarStep
 
+#### Ponyville Library
+* StepStep
+
 #### Section 8
 * Half-n-Half
 
