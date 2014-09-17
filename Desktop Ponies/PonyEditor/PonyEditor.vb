@@ -773,6 +773,8 @@ Public Class PonyEditor
             Catch ex As Exception
                 Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              BehaviorsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
+            Finally
+                LoadPonyInfo()
             End Try
             hasSaved = False
 
@@ -828,6 +830,8 @@ Public Class PonyEditor
             Catch ex As Exception
                 Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              EffectsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
+            Finally
+                LoadPonyInfo()
             End Try
             hasSaved = False
 
@@ -873,6 +877,8 @@ Public Class PonyEditor
             Catch ex As Exception
                 Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              SpeechesGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
+            Finally
+                LoadPonyInfo()
             End Try
             hasSaved = False
 
@@ -916,6 +922,8 @@ Public Class PonyEditor
             Catch ex As Exception
                 Program.NotifyUserOfNonFatalException(ex, "You entered an invalid value for column '" &
                                                              InteractionsGrid.Columns(e.ColumnIndex).HeaderText & "': " & newValue)
+            Finally
+                LoadPonyInfo()
             End Try
             hasSaved = False
 
