@@ -97,8 +97,10 @@
                     "Cannot create an instance of this class on non-Windows platforms due to use of platform invoke.");
             FormBorderStyle = FormBorderStyle.None;
 
-            hdcScreen = NativeMethods.GetDC(new HandleRef(this, IntPtr.Zero));
-            hdcBackground = NativeMethods.CreateCompatibleDC(new HandleRef(this, hdcScreen));
+            if ((hdcScreen = NativeMethods.GetDC(new HandleRef(this, IntPtr.Zero))) == IntPtr.Zero)
+                throw new Win32Exception();
+            if ((hdcBackground = NativeMethods.CreateCompatibleDC(new HandleRef(this, hdcScreen))) == IntPtr.Zero)
+                throw new Win32Exception();
         }
 
         /// <summary>
