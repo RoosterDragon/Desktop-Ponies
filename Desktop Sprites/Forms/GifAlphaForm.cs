@@ -119,6 +119,9 @@
             if (!SavePrompt())
                 return;
 
+            bool wasPlaying = Indexer.Playing;
+            Indexer.Playing = false;
+
             loaded = false;
             changed = false;
             filePath = Path.Combine(filesPath, (string)ImageSelector.Items[ImageSelector.SelectedIndex]);
@@ -242,6 +245,9 @@
             UpdateSelectedFrame(0);
             UpdateColorHex();
             UpdateColorDisplay();
+
+            if (wasPlaying)
+                Indexer.Playing = true;
 
             loaded = true;
         }

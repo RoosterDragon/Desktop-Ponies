@@ -110,6 +110,27 @@
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether automatic playback is taking place.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Playing
+        {
+            get
+            {
+                return PlaybackTimer.Enabled;
+            }
+            set
+            {
+                PlaybackTimer.Enabled = value;
+                FrameSelector.Enabled = !value;
+                TimeSelector.Enabled = !value;
+                NextCommand.Enabled = !value;
+                PreviousCommand.Enabled = !value;
+                PlayCommand.Text = value ? "Pause" : "Play";
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the interval, in milliseconds, at which the time index is advanced when playback is active.
         /// </summary>
         [Description("The interval, in milliseconds, at which the time index is advanced when playback is active.")]
@@ -129,13 +150,13 @@
         }
 
         /// <summary>
-        /// Uses durations from the specified image to set up the control for indexing.
+        /// Uses durations from the specified image to set up the control for indexing. This will stop playback.
         /// </summary>
         /// <typeparam name="T">The type of the frame images.</typeparam>
         /// <param name="image">The image whose durations should be used to specify frame and time indexes.</param>
         public void UseTimingsFrom<T>(GifImage<T> image)
         {
-            PlaybackTimer.Stop();
+            Playing = false;
             if (image == null)
             {
                 durations = null;
@@ -174,22 +195,6 @@
             FrameLabel.Text =
                 "Frame: {0:00} of {1:00}  Time: {2:00.00} of {3:00.00} seconds".FormatWith(
                 FrameIndex + 1, FrameSelector.Maximum + 1, TimeIndex / 1000f, TimeSelector.Maximum / 1000f);
-        }
-
-        /// <summary>
-        /// Starts seeking through the indexes automatically.
-        /// </summary>
-        public void Play()
-        {
-            PlaybackTimer.Start();
-        }
-
-        /// <summary>
-        /// Stops seeking through the indexes.
-        /// </summary>
-        public void Pause()
-        {
-            PlaybackTimer.Stop();
         }
 
         /// <summary>
@@ -250,13 +255,7 @@
         /// <param name="e">The event data.</param>
         private void PlayCommand_Click(object sender, EventArgs e)
         {
-            PlaybackTimer.Enabled = !PlaybackTimer.Enabled;
-
-            FrameSelector.Enabled = !PlaybackTimer.Enabled;
-            TimeSelector.Enabled = !PlaybackTimer.Enabled;
-            NextCommand.Enabled = !PlaybackTimer.Enabled;
-            PreviousCommand.Enabled = !PlaybackTimer.Enabled;
-            PlayCommand.Text = PlaybackTimer.Enabled ? "Pause" : "Play";
+            Playing = !Playing;
         }
 
         /// <summary>
