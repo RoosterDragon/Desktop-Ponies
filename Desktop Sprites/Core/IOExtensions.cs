@@ -27,6 +27,7 @@
         public static void ReadExact(this Stream stream, byte[] buffer, int offset, int count)
         {
             Argument.EnsureNotNull(stream, "stream");
+            Argument.EnsureNonnegative(count, "count");
             while (count > 0)
             {
                 int bytesRead;
@@ -55,6 +56,7 @@
         public static void ReadExact(this BinaryReader reader, byte[] buffer, int index, int count)
         {
             Argument.EnsureNotNull(reader, "reader");
+            Argument.EnsureNonnegative(count, "count");
             while (count > 0)
             {
                 int bytesRead;
@@ -83,6 +85,7 @@
         public static void ReadExact(this BinaryReader reader, char[] buffer, int index, int count)
         {
             Argument.EnsureNotNull(reader, "reader");
+            Argument.EnsureNonnegative(count, "count");
             while (count > 0)
             {
                 int bytesRead;
