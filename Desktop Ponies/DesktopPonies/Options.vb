@@ -213,6 +213,8 @@ Public NotInheritable Class Options
             Catch ex As IO.IOException
                 ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
                 Console.WriteLine("Warning: Failed to save current.txt file.")
+            Catch ex As UnauthorizedAccessException
+                Console.WriteLine("Warning: Failed to save current.txt file.")
             End Try
         End If
     End Sub
