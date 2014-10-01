@@ -24,7 +24,7 @@
             Argument.EnsureNotNull(action, "action");
             // When creating or recreating its handle, a control locks on itself. We'll lock on the control to prevent race conditions
             // where the handle is swapped out from under us whilst we are determining if we are in a cross-thread call or not. This is
-            // required because InvokeRequired returns false is the handle has yet to be created, as well as if we are on the UI thread.
+            // required because InvokeRequired returns false if the handle has yet to be created, as well as if we are on the UI thread.
             bool isCrossThreadCall;
             lock (control)
             {
