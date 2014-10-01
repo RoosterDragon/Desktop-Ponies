@@ -7,13 +7,9 @@ Public Class PonyCollection
         Private Sub New()
         End Sub
         Public Overloads Function Equals(x As CaseInsensitiveString, y As CaseInsensitiveString) As Boolean Implements IEqualityComparer(Of CaseInsensitiveString).Equals
-            If x Is Nothing AndAlso y Is Nothing Then
-                Return True
-            ElseIf x Is Nothing Xor y Is Nothing Then
-                Return False
-            Else
-                Return String.Equals(x.ToString(), y.ToString())
-            End If
+            If x Is Nothing AndAlso y Is Nothing Then Return True
+            If x Is Nothing Or y Is Nothing Then Return False
+            Return String.Equals(x.ToString(), y.ToString())
         End Function
         Public Overloads Function GetHashCode(obj As CaseInsensitiveString) As Integer Implements IEqualityComparer(Of CaseInsensitiveString).GetHashCode
             If obj Is Nothing Then Return StringComparer.Ordinal.GetHashCode(Nothing)
@@ -238,6 +234,8 @@ Public NotInheritable Class IniParser
     End Sub
     Public Shared Sub TryParse(Of T)(line As String, removeInvalidItems As Boolean,
                                      parseFunc As TryParse(Of T), onParse As Action(Of T))
+        Argument.EnsureNotNull(parseFunc, "parseFunc")
+        Argument.EnsureNotNull(onParse, "onParse")
         Dim result As T
         If parseFunc(line, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
             onParse(result)
@@ -245,6 +243,8 @@ Public NotInheritable Class IniParser
     End Sub
     Public Shared Sub TryParse(Of T)(line As String, directory As String, removeInvalidItems As Boolean,
                                      parseFunc As TryParseDirectory(Of T), onParse As Action(Of T))
+        Argument.EnsureNotNull(parseFunc, "parseFunc")
+        Argument.EnsureNotNull(onParse, "onParse")
         Dim result As T
         If parseFunc(line, directory, result, Nothing) <> ParseResult.Failed OrElse Not removeInvalidItems Then
             onParse(result)
@@ -253,7 +253,8 @@ Public NotInheritable Class IniParser
     Public Shared Function TryParse(Of T)(ByRef result As T, ByRef issues As ImmutableArray(Of ParseIssue),
                                           parser As StringCollectionParser,
                                           parse As Func(Of StringCollectionParser, T)) As ParseResult
-        result = parse(parser)
+        Argument.EnsureNotNull(parser, "parser")
+        result = Argument.EnsureNotNull(parse, "parse")(parser)
         issues = parser.Issues.ToImmutableArray()
         Return parser.Result
     End Function

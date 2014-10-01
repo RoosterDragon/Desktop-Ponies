@@ -2123,7 +2123,6 @@
         private unsafe void AlphaBlendPixel(int backgroundIndex, int srcColor, int srcAlpha)
         {
             int dstColor = backgroundData[backgroundIndex];
-            int dstAlpha = (dstColor >> 24) & 0xFF;
             int inverseSrcAlpha = byte.MaxValue - srcAlpha;
             int dstAG = ((dstColor >> 8) & 0x00FF00FF) * inverseSrcAlpha;
             int dstRB = (dstColor & 0x00FF00FF) * inverseSrcAlpha;
