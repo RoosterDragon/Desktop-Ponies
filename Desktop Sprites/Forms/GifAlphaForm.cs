@@ -308,12 +308,12 @@
                 var desiredImage = desiredFrames[newFrameIndex];
                 ImageComparison.Panel1.BackgroundImage = sourceImage;
                 ImageComparison.Panel2.BackgroundImage = desiredImage;
-                const int padding = 8;
+                const int Padding = 8;
                 ImageComparison.Size = new Size(
-                    sourceImage.Width + desiredImage.Width + ImageComparison.SplitterWidth + 2 * padding,
-                    Math.Max(sourceImage.Height, desiredImage.Height) + 2 * padding);
-                ImageComparison.SplitterDistance = sourceImage.Width + padding;
-                ImageComparison.Left = ImagePanel.Width / 2 - ImageComparison.Width / 2 + padding;
+                    sourceImage.Width + desiredImage.Width + ImageComparison.SplitterWidth + 2 * Padding,
+                    Math.Max(sourceImage.Height, desiredImage.Height) + 2 * Padding);
+                ImageComparison.SplitterDistance = sourceImage.Width + Padding;
+                ImageComparison.Left = ImagePanel.Width / 2 - ImageComparison.Width / 2 + Padding;
                 ImageComparison.Panel1.Invalidate();
                 ImageComparison.Panel2.Invalidate();
             }

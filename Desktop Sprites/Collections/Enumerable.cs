@@ -37,7 +37,7 @@
             /// </summary>
             private Func<IEnumerator<T>> enumeratorFactory;
             /// <summary>
-            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.Enumerable.EnumeratorWrapper`1"/> struct from
+            /// Initializes a new instance of the <see cref="T:DesktopSprites.Collections.Enumerable.EnumerableFromFactory`1"/> struct from
             /// the specified enumerator generation function.
             /// </summary>
             /// <param name="enumeratorFactory">A <see cref="T:System.Func`1"/> that generates a new enumerator that enumerates the

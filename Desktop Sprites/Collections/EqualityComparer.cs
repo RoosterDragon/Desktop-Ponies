@@ -38,7 +38,7 @@
             private readonly Func<T, int> getHashCode;
             /// <summary>
             /// Initializes a new instance of the
-            /// <see cref="T:DesktopSprites.Collections.EqualityCompare.EqualityComparerFromDelegates`1"/> class.
+            /// <see cref="T:DesktopSprites.Collections.EqualityComparer.EqualityComparerFromDelegates`1"/> class.
             /// </summary>
             /// <param name="equals">The function to use when determining whether the specified objects are equal.</param>
             /// <param name="getHashCode">The function that returns a hash code for the specified object.</param>
