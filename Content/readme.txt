@@ -59,6 +59,13 @@ Change Log
 
 Latest changes:
 
+v1.52:
+- Added Neon Lights by Bot-chan.
+- Added Ponyville Library by StarStep.
+- When editing a pony, it will be respawned when changes are made to ensure it gets the updated configuration.
+- Added some scrollbars to the window for setting up transparency for GIF images.
+- Prevent a crash when the current profile selection cannot be remembered due to file security.
+
 v1.51:
 - Added Flutterbat, Aunt Orange, Goldie Delicious, Tealove, Truffle Shuffle and Mane 6 Breezies by Bot-chan.
 - Added Surprise change, Applejack banjo and drag, Lyra lyre, Pinkie Pie sleep, Saddle Rager transform,
