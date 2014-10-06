@@ -282,11 +282,17 @@ Public MustInherit Class PonyAnimator
                 If audio IsNot Nothing Then audio.Dispose()
             Finally
                 If audio IsNot Nothing AndAlso Not audio.Disposed Then
-                    activeSounds.Add(audio)
-                    If Options.SoundSingleChannelOnly Then
-                        globalSoundEnd = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                    If audio.Duration > TimeSpan.FromDays(1).TotalSeconds Then
+                        ' Ignore sounds with a crazy duration value - they're probably corrupt and mess with our date arithmetic.
+                        audio.Dispose()
                     Else
-                        soundEndBySprite(soundfulSprite) = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                        activeSounds.Add(audio)
+                        Dim endTime = Date.UtcNow + TimeSpan.FromSeconds(audio.Duration)
+                        If Options.SoundSingleChannelOnly Then
+                            globalSoundEnd = endTime
+                        Else
+                            soundEndBySprite(soundfulSprite) = endTime
+                        End If
                     End If
                 End If
             End Try
