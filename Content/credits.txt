@@ -687,6 +687,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Shopkeeper
 * Bot-chan
 
+#### Silver Shill
+* Bot-chan
+
 #### Silver Spoon
 * Anonycat
 
