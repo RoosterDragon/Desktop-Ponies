@@ -504,7 +504,7 @@ Contributors are broken down by character. If there was more than one contributo
 * humle [GalaIdle, GalaTrot, GalaBounce]
 * sidekick ponyguy [Fly]
 * StarStep [Conga]
-* Bot-chan [Crystal, Breezie, Sleep]
+* Bot-chan [Crystal, Breezie, Sleep, Dance]
 
 #### Pinkie Pie (Filly)
 * PsychoShutin
@@ -544,7 +544,7 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Princess Cadance
 * emeralddarkness [Stand]
-* Bot-chan [Walk, Flight]
+* Bot-chan [Walk, Flight, Dance]
 
 #### Princess Cadence (Teenager)
 * Klopp
