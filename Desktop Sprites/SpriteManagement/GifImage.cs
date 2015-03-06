@@ -1498,7 +1498,8 @@
         /// <summary>
         /// Reads the logical screen descriptor block. (required - one per stream).
         /// </summary>
-        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GifLogicalScreenDescriptor"/> describing the logical screen.</returns>
+        /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GifLogicalScreenDescriptor"/> describing the logical screen.
+        /// </returns>
         private LogicalScreenDescriptor ReadLogicalScreenDescriptor()
         {
             ushort logicalScreenWidth = reader.ReadUInt16();

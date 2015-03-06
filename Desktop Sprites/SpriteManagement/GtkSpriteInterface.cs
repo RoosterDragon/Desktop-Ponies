@@ -5,7 +5,6 @@
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Threading;
-    using Cairo;
     using DesktopSprites.Collections;
     using DesktopSprites.Core;
     using Gdk;
@@ -264,9 +263,9 @@
 
                             // Create the Cairo context for possible alpha drawing. A context may not be reused, and must be recreated
                             // each draw. The context also implements IDisposable, and thus should be disposed after use.
-                            using (Context context = CairoHelper.Create(GdkWindow))
+                            using (Cairo.Context context = CairoHelper.Create(GdkWindow))
                             {
-                                context.Antialias = Antialias.None;
+                                context.Antialias = Cairo.Antialias.None;
                                 if (newRegion == null)
                                     Console.WriteLine("Region empty.");
                                 CairoHelper.Region(context, newRegion);
@@ -274,7 +273,7 @@
                                 if (SupportsRgba)
                                 {
                                     // Clear the window to be transparent.
-                                    context.Operator = Operator.Source;
+                                    context.Operator = Cairo.Operator.Source;
                                     context.SetSourceRGBA(0, 0, 0, 0);
                                     context.Paint();
                                 }
@@ -417,12 +416,12 @@
 
                 // Create the Cairo context for possible alpha drawing. A context may not be reused, and must be recreated each draw.
                 // The context also implements IDisposable, and thus should be disposed after use.
-                using (Context context = CairoHelper.Create(GdkWindow))
+                using (Cairo.Context context = CairoHelper.Create(GdkWindow))
                 {
-                    context.Antialias = Antialias.None;
+                    context.Antialias = Cairo.Antialias.None;
 
                     // Draw the current sprite.
-                    context.Operator = Operator.Source;
+                    context.Operator = Cairo.Operator.Source;
                     CairoHelper.SetSourcePixbuf(context, CurrentImage.Image, 0, 0);
                     context.Paint();
                 }

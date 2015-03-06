@@ -42,8 +42,8 @@
             /// </summary>
             /// <param name="equals">The function to use when determining whether the specified objects are equal.</param>
             /// <param name="getHashCode">The function that returns a hash code for the specified object.</param>
-            /// <exception cref="T:System.ArgumentNullException"><paramref name="equals"/> is null.-or-<paramref name="getHashCode"/> is null.
-            /// </exception>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="equals"/> is null.-or-<paramref name="getHashCode"/> is
+            /// null.</exception>
             public EqualityComparerFromDelegates(Func<T, T, bool> equals, Func<T, int> getHashCode)
             {
                 this.equals = Argument.EnsureNotNull(equals, "equals");
