@@ -384,6 +384,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Lady Justice
 * Bot-chan
 
+#### Laid-back Mule
+* Bot-chan
+
 #### Lemon Hearts
 * fanofetcetera
 
