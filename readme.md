@@ -2,6 +2,9 @@
 
 8 bit ponies on your desktop.
 
+![Desktop Ponies](http://i.imgur.com/2vVLGt8.jpg)
+*[Desktop Background by CuteSkitty](http://cuteskitty.deviantart.com/art/Celestia-256362644)*
+
 Desktop Ponies lets you choose some ponies from [My Little Pony: Friendship is Magic](http://wikipedia.org/wiki/My_Little_Pony:_Friendship_Is_Magic) to trot around your desktop whilst you work.
 
 The ponies will move around on screen performing a variety of custom animations. They also talk occasionally and some ponies will interact with each other.
