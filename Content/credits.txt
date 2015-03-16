@@ -414,6 +414,21 @@ Contributors are broken down by character. If there was more than one contributo
 #### Mane-iac
 * Bot-chan
 
+#### Mane-iac Henchpony 1
+* Bot-chan
+
+#### Mane-iac Henchpony 2
+* Bot-chan
+
+#### Mane-iac Henchpony 3
+* Bot-chan
+
+#### Mane-iac Henchpony 4
+* Bot-chan
+
+#### Mane-iac Henchpony 5
+* Bot-chan
+
 #### Manticore
 * Bot-chan
 
