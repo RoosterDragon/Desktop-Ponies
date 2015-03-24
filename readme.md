@@ -19,6 +19,8 @@ Desktop Ponies works on Windows, Mac and Linux.
 * Extract the files.
 * Check the included readme file for further instructions.
 
+On Mac, some tools will not extract the files correctly into their folders. One tool recommend by some users is [The Unarchiver](http://unarchiver.c3.cx/unarchiver) which will extract your files correctly.
+
 ## License
 
 The artwork is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](http://creativecommons.org/licenses/by-nc-sa/3.0/). This means you are allowed to share and alter the artwork, provided you give credit, do not use it for commercial purposes and release it under this same license. You can find assets for the ponies and other characters in the [Content/Ponies](Content/Ponies) directory. There is a [list of credits](Content/credits.txt) in the [Content](Content) directory.
