@@ -264,6 +264,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Discord
 * StarStep
 
+#### Doctor Horse
+* Bot-chan
+
 #### Doctor Whooves
 * Asparagus [Stand, Trot]
 * RJP! [Stand, Trot]
