@@ -59,6 +59,10 @@ Change Log
 
 Latest changes:
 
+v1.53:
+- Added Laid-back Mule, Silver Shill, Mane-iac henchponies and Doctor Horse by Bot-chan.
+- Updated Sunset Shimmer and added dance animations for Pinkie Pie and Princess Cadance by Bot-chan.
+
 v1.52:
 - Added Neon Lights by Bot-chan.
 - Added Ponyville Library by StarStep.
