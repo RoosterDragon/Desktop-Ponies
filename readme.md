@@ -31,7 +31,7 @@ The source code is available under the same license.
 
 ## External Links
 
-* [Ponychan Mane Thread](http://www.ponychan.net/chan/collab/res/45984.html) - Discussion of the program and canon artwork.
+* [Ponychan Mane Thread](http://www.ponychan.net/chan/collab/res/47567.html) - Discussion of the program and canon artwork.
 * [Ponychan OC Thread](http://www.ponychan.net/chan/collab/res/43607.html) - Download a collection of common OCs and other art. Includes templates and resources for creating your own ponies.
 * [deviantART Group](http://desktop-pony-team.deviantart.com/) - Group maintained by contributing artists to showcase their work.
 

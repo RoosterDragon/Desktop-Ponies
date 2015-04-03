@@ -4,7 +4,7 @@ Have little ponies running around your desktop aimlessly! Might entertain you fo
 There are threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
 http://www.ponychan.net/chan/collab/
 Latest threads at time of writing:
-Mane - http://www.ponychan.net/chan/collab/res/45984.html
+Mane - http://www.ponychan.net/chan/collab/res/47567.html
   OC - http://www.ponychan.net/chan/collab/res/43607.html
 
 If you need any help setting up or running the program, please post in the main thread.
