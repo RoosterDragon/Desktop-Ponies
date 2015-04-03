@@ -11,6 +11,8 @@ The ponies will move around on screen performing a variety of custom animations.
 
 There are 200 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
 
+Don't want to restrict yourself to just ponies? Try downloading the [Equestria Girls](http://sta.sh/2ouk6qgs0sg) characters made by [Bot-chan](http://botchan-mlp.deviantart.com/).
+
 ## Installation
 
 Desktop Ponies works on Windows, Mac and Linux.
