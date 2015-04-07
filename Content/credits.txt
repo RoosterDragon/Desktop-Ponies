@@ -759,6 +759,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Spot
 * Pony Noia
 
+#### Starlight Glimmer
+* Bot-chan
+
 #### Stella
 * Pony Noia
 
