@@ -239,6 +239,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Daring Do
 * Anonymous [Stand, Trot, Fly]
 * StarStep [Fly]
+* Bot-chan [Gallop]
 
 #### Davenport
 * Anonycat
