@@ -436,6 +436,10 @@ Contributors are broken down by character. If there was more than one contributo
 #### Manticore
 * Bot-chan
 
+#### Maud Pie
+* Anonycat [Idle, Walk]
+* Bot-chan [Idle, Walk, Lying, Boulder]
+
 #### Mayor Mare
 * Anonycat
 
