@@ -3431,7 +3431,7 @@ Public Class EffectBase
             Return _placementDirectionRight
         End Get
         Set(value As Direction)
-            _placementDirectionRight = Argument.EnsureEnumIsValid(value, "value")
+            _placementDirectionRight = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
     Private _centeringRight As Direction
@@ -3440,7 +3440,7 @@ Public Class EffectBase
             Return _centeringRight
         End Get
         Set(value As Direction)
-            _centeringRight = Argument.EnsureEnumIsValid(value, "value")
+            _centeringRight = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
     Private _placementDirectionLeft As Direction
@@ -3449,7 +3449,7 @@ Public Class EffectBase
             Return _placementDirectionLeft
         End Get
         Set(value As Direction)
-            _placementDirectionLeft = Argument.EnsureEnumIsValid(value, "value")
+            _placementDirectionLeft = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
     Private _centeringLeft As Direction
@@ -3458,7 +3458,7 @@ Public Class EffectBase
             Return _centeringLeft
         End Get
         Set(value As Direction)
-            _centeringLeft = Argument.EnsureEnumIsValid(value, "value")
+            _centeringLeft = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
 
@@ -3606,7 +3606,7 @@ Public Class Effect
             Return _placementDirection
         End Get
         Set(value As Direction)
-            _placementDirection = Argument.EnsureEnumIsValid(value, "value")
+            _placementDirection = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
     Private _centering As Direction
@@ -3615,7 +3615,7 @@ Public Class Effect
             Return _centering
         End Get
         Set(value As Direction)
-            _centering = Argument.EnsureEnumIsValid(value, "value")
+            _centering = EnsureDirectionIsValid(value, "value")
         End Set
     End Property
 
@@ -4236,6 +4236,13 @@ Public Enum Direction
 End Enum
 
 Public Module DirectionExtensions
+    Public Function EnsureDirectionIsValid(direction As Direction, paramName As String) As Direction
+        If direction < DesktopPonies.Direction.TopLeft OrElse direction > DesktopPonies.Direction.RandomNotCenter Then
+            Throw New System.ComponentModel.InvalidEnumArgumentException(paramName, direction, GetType(Direction))
+        End If
+        Return direction
+    End Function
+
     <System.Runtime.CompilerServices.Extension()>
     Public Function ToDisplayString(location As Direction) As String
         Select Case location
