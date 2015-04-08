@@ -1652,11 +1652,11 @@ Public Class Pony
     ''' <summary>
     ''' A predicate that filters for behaviors that do not move.
     ''' </summary>
-    Private Shared stationaryBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsStationaryBehavior
+    Private Shared ReadOnly stationaryBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsStationaryBehavior
     ''' <summary>
     ''' A predicate that filters for behaviors that move.
     ''' </summary>
-    Private Shared movingBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsMovingBehavior
+    Private Shared ReadOnly movingBehaviorPredicate As Func(Of Behavior, Boolean) = AddressOf IsMovingBehavior
     ''' <summary>
     ''' Determines if a behavior is stationary.
     ''' </summary>
@@ -1677,17 +1677,25 @@ Public Class Pony
     ''' A predicate that filters behaviors that are in the any group or current behavior group, allowed for use at random and that have a
     ''' reachable target.
     ''' </summary>
-    Private behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate As Func(Of Behavior, Boolean) =
+    Private ReadOnly behaviorsAllowedAtRandomByCurrentGroupWithReachableTargetPredicate As Func(Of Behavior, Boolean) =
         Function(b) Not b.Skip AndAlso BehaviorAllowedByCurrentGroup(b) AndAlso TargetReachable(b)
     ''' <summary>
     ''' A predicate that filters behaviors that are in the any group or current behavior group and allowed for use at random.
     ''' </summary>
-    Private behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
+    Private ReadOnly behaviorsAllowedAtRandomByCurrentGroupPredicate As Func(Of Behavior, Boolean) =
         Function(b) Not b.Skip AndAlso BehaviorAllowedByCurrentGroup(b)
     ''' <summary>
     ''' A predicate that filters behaviors that are allowed for use at random.
     ''' </summary>
-    Private Shared behaviorsAllowedAtRandomPredicate As Func(Of Behavior, Boolean) = Function(b) Not b.Skip
+    Private Shared ReadOnly behaviorsAllowedAtRandomPredicate As Func(Of Behavior, Boolean) = Function(b) Not b.Skip
+    ''' <summary>
+    ''' Provides the top-left location of this pony for use by effects.
+    ''' </summary>
+    Private ReadOnly effectLocationProvider As Func(Of Vector2F) = Function() Me.regionF.Location
+    ''' <summary>
+    ''' Provides the size of this pony for use by effects.
+    ''' </summary>
+    Private ReadOnly effectSizeProvider As Func(Of Vector2) = Function() Me._region.Size
 #End Region
 
 #Region "EffectBaseRepeat Structure"
@@ -2802,8 +2810,8 @@ Public Class Pony
                                initialLocationOffset As Vector2F)
         If Not Context.EffectsEnabled Then Return
         Dim effect = New Effect(effectBase, Not _facingRight,
-                                Function() Me.regionF.Location,
-                                Function() Me._region.Size,
+                                effectLocationProvider,
+                                effectSizeProvider,
                                 Context, externalStartTime, internalStartTime, initialLocationOffset)
         If effectBase.Duration = TimeSpan.Zero Then
             _effectsToManuallyExpire.Add(effect)
