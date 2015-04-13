@@ -284,6 +284,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Donut Joe
 * Bot-chan
 
+#### Double Diamond
+* Bot-chan
+
 #### Dr. Caballeron
 * Bot-chan
 
@@ -477,6 +480,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Neon Lights
 * Bot-chan
 
+#### Night Glider
+* Bot-chan
+
 #### Nightmare Moon
 * Yamino [Stand, Walk]
 * Bot-chan [Stand, Walk, Fly]
@@ -502,6 +508,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Parasprite
+* Bot-chan
+
+#### Party Favor
 * Bot-chan
 
 #### Jesús Pezuña
@@ -773,6 +782,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Sue Pie
 * Anonycat
+
+#### Sugar Belle
+* Bot-chan
 
 #### Sunset Shimmer
 * Bot-chan
