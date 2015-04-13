@@ -59,6 +59,12 @@ Change Log
 
 Latest changes:
 
+v1.54:
+- Added Starlight Glimmer, Double Diamond, Night Glider, Party Favor and Sugar Belle by Bot-chan.
+- Added Maud Pie by Anonycat and Bot-chan.
+- Added Daring Do gallop animation by Bot-chan.
+- Updated Changeling by Bot-chan.
+
 v1.53:
 - Added Laid-back Mule, Silver Shill, Mane-iac henchponies and Doctor Horse by Bot-chan.
 - Updated Sunset Shimmer and added dance animations for Pinkie Pie and Princess Cadance by Bot-chan.
