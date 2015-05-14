@@ -887,6 +887,12 @@ Contributors are broken down by character. If there was more than one contributo
 * sidekick ponyguy [Stand, Trot]
 * RJP! [Stand, Trot, Balance, Dig]
 
+#### Zipporwhill
+* Bot-chan
+
+#### Zipporwhill's Father
+* Bot-chan
+
 ### Houses
 
 #### Carousel Boutique
