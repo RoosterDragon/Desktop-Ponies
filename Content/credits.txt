@@ -818,6 +818,12 @@ Contributors are broken down by character. If there was more than one contributo
 #### Tirek
 * Bot-chan
 
+#### Toe-Tapper
+* Bot-chan
+
+#### Torch Song
+* Bot-chan
+
 #### Trenderhoof
 * Bot-chan
 
