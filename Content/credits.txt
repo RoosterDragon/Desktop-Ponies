@@ -223,6 +223,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Azure Fang [Sleep]
 * Bot-chan [Pilot, Balloon]
 
+#### Cloakseller
+* Pony Noia
+
 #### Cloud Kicker
 * Tyranico
 
@@ -659,6 +662,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan [DramaCouch, FarmerIdle, FarmerTrot, FarmerScratch, Fly1, Fly2, Drag, DragC, Crystal, Breezie]
 * The Coop [Gala, Tantrum, Ponder, DramaCouch, Sleep]
 * Miriam the Bat [Sleep]
+* Pony Noia [OhPleaseBehave]
 
 #### Rarity (Filly)
 * RJP!
