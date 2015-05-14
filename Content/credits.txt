@@ -624,6 +624,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Queen Chrysalis
 * Bot-chan
 
+#### Rainbow Blaze
+* Bot-chan
+
 #### Rainbow Dash
 * Jay Wright [Stand, Trot, TrotWing, Hover, Fly, FlyZoom]
 * StarStep [Conga, Gala, Salute, Dash]
