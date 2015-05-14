@@ -9,7 +9,7 @@ Desktop Ponies lets you choose some ponies from [My Little Pony: Friendship is M
 
 The ponies will move around on screen performing a variety of custom animations. They also talk occasionally and some ponies will interact with each other.
 
-There are 200 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
+There are over 230 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
 
 Don't want to restrict yourself to just ponies? Try downloading the [Equestria Girls](http://sta.sh/2ouk6qgs0sg) characters made by [Bot-chan](http://botchan-mlp.deviantart.com/).
 
@@ -17,7 +17,7 @@ Don't want to restrict yourself to just ponies? Try downloading the [Equestria G
 
 Desktop Ponies works on Windows, Mac and Linux.
 
-* [Download the latest version (v1.54)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.54/Desktop.Ponies.v1.54.zip)
+* [Download the latest version (v1.55)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.55/Desktop.Ponies.v1.55.zip)
 * Extract the files.
 * Check the included readme file for further instructions.
 
@@ -31,7 +31,7 @@ The source code is available under the same license.
 
 ## External Links
 
-* [Ponychan Mane Thread](http://www.ponychan.net/chan/collab/res/47567.html) - Discussion of the program and canon artwork.
+* [Ponychan Mane Thread](http://www.ponychan.net/fan/res/458.html) - Discussion of the program and canon artwork.
 * [Ponychan OC Thread](http://www.ponychan.net/chan/collab/res/43607.html) - Download a collection of common OCs and other art. Includes templates and resources for creating your own ponies.
 * [deviantART Group](http://desktop-pony-team.deviantart.com/) - Group maintained by contributing artists to showcase their work.
 

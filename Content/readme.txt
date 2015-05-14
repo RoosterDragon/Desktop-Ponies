@@ -4,7 +4,7 @@ Have little ponies running around your desktop aimlessly! Might entertain you fo
 There are threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
 http://www.ponychan.net/chan/collab/
 Latest threads at time of writing:
-Mane - http://www.ponychan.net/chan/collab/res/47567.html
+Mane - http://www.ponychan.net/fan/res/458.html
   OC - http://www.ponychan.net/chan/collab/res/43607.html
 
 If you need any help setting up or running the program, please post in the main thread.
@@ -58,6 +58,17 @@ Screensaver (Windows Only)
 Change Log
 
 Latest changes:
+
+v1.55:
+- Added Maud Pie by Bot-chan.
+- Added Trouble Shoes by Bot-chan.
+- Added Rainbow Blaze by Bot-chan.
+- Added Toe-Tapper and Torch Song by Bot-chan.
+- Added Adagio Dazzle, Aria Blaze and Sonata Dusk by Bot-chan.
+- Updated Big McIntosh, including ponytones outfit, by Bot-chan.
+- Added Zipporwhill and Zipporwhill's Father by Bot-chan.
+- Added Written Script by Bot-chan, including a nuzzle interaction with Carrot Top.
+- Added Cloakseller by Pony Noia, including an interaction with Rarity.
 
 v1.54:
 - Added Starlight Glimmer, Double Diamond, Night Glider, Party Favor and Sugar Belle by Bot-chan.
