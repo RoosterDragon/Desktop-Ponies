@@ -201,6 +201,7 @@ Contributors are broken down by character. If there was more than one contributo
 * Pony Noia [Blink, Chomp, SpawningCarrot, Tv]
 * StarStep [Banner, BannerRaise]
 * Anonycat [Banner]
+* Bot-chan [Nuzzle]
 
 #### Changeling
 * Bot-chan
@@ -885,6 +886,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Winona
 * DeathPony
+
+#### Written Script
+* Bot-chan
 
 #### Zecora
 * sidekick ponyguy [Stand, Trot]
