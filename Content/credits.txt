@@ -91,6 +91,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Ace
 * Bot-chan
 
+#### Adagio Dazzle
+* Bot-chan
+
 #### Ahuizotl
 * Bot-chan
 
@@ -132,6 +135,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Archer
 * vulcan539
+
+#### Aria Blaze
+* Bot-chan
 
 #### Aunt Orange
 * Bot-chan
@@ -753,6 +759,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Soigne Folio
 * Pony Noia
+
+#### Sonata Dusk
+* Bot-chan
 
 #### Sparkler
 * vulcan539 [Stand, Walk, Jump, Sit, Sleep, Stand]
