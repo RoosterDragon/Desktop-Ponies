@@ -364,6 +364,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Ginger Snap
 * Bot-chan
 
+#### Gizmo
+* Bot-chan
+
 #### Goldie Delicious
 * Bot-chan
 
