@@ -306,6 +306,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Dude
 * Bot-chan
 
+#### Dumb-Bell
+* Bot-chan
+
 #### Elsie
 * Pony Noia
 
@@ -391,6 +394,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Hoity-Toity
 * Pony Noia
+
+#### Hoops
+* Bot-chan
 
 #### Horte Cuisine
 * Anonycat
@@ -711,6 +717,9 @@ Contributors are broken down by character. If there was more than one contributo
 * RainbowCrash [Stand]
 * The Coop [Skip]
 * Bot-chan [Fly, Gallop]
+
+#### Score
+* Bot-chan
 
 #### Screw Loose
 * Bot-chan
