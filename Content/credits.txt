@@ -508,6 +508,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Night Glider
 * Bot-chan
 
+#### Night Light
+* Bot-chan
+
 #### Nightmare Moon
 * Yamino [Stand, Walk]
 * Bot-chan [Stand, Walk, Fly]
