@@ -154,6 +154,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Azure Fang [SitBerry, Sleep]
 * Bot-chan [Drink]
 
+#### Biff
+* Bot-chan
+
 #### Big Mac
 * Anonycat [Stand]
 * StarStep [Stand, Trot, Buck, Sleep]
@@ -679,6 +682,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Raven
 * Bot-chan
 
+#### Rogue
+* Bot-chan
+
 #### Roseluck
 * Anonymous
 
@@ -896,6 +902,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Winona
 * DeathPony
+
+#### Withers
+* Bot-chan
 
 #### Written Script
 * Bot-chan
