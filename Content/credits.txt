@@ -246,6 +246,9 @@ Contributors are broken down by character. If there was more than one contributo
 * vulcan539 [Sit]
 * Anonymous [Sit]
 
+#### Cranky Doodle Donkey
+* Bot-chan
+
 #### Daisy
 * Anonycat
 
@@ -459,6 +462,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Manticore
+* Bot-chan
+
+#### Matilda
 * Bot-chan
 
 #### Maud Pie
