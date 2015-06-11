@@ -86,7 +86,7 @@ Public Class MainForm
             Try
                 profileFile = New StreamReader(Path.Combine(Options.ProfileDirectory, "current.txt"), System.Text.Encoding.UTF8)
                 profile = profileFile.ReadLine()
-            Catch ex As FileNotFoundException
+            Catch ex As IOException
                 ' We don't mind if no preferred profile is saved.
             Finally
                 If profileFile IsNot Nothing Then profileFile.Close()
