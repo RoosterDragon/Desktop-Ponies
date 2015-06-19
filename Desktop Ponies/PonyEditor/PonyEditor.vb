@@ -193,14 +193,14 @@ Public Class PonyEditor
         Try
             If PonyList.SelectedItems.Count = 0 Then Return
             If PreventStateChange("Save changes before loading a different pony?") Then Return
-            LoadPony()
+            LoadPony(DirectCast(PonyList.SelectedItems(0).Tag, PonyBase))
             hasSaved = True
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to select pony.")
         End Try
     End Sub
 
-    Private Sub LoadPony()
+    Private Sub LoadPony(ponyBase As PonyBase)
         worker.QueueTask(Sub()
                              EnableWaitCursor(True)
 
@@ -221,7 +221,7 @@ Public Class PonyEditor
         worker.QueueTask(Sub()
                              EnableWaitCursor(False)
 
-                             _currentBase = DirectCast(PonyList.SelectedItems(0).Tag, PonyBase)
+                             _currentBase = ponyBase
                              LoadPonyInfo()
 
                              PausePonyButton.Text = "Pause Pony"
