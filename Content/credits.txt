@@ -189,6 +189,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Bulk Biceps
 * Bot-chan
 
+#### Button Mash
+* Bot-chan
+
 #### Caesar
 * Anonycat
 
