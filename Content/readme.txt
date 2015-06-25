@@ -59,6 +59,24 @@ Change Log
 
 Latest changes:
 
+v1.56:
+- Added Gizmo by Bot-chan.
+- Added Biff, Rogue and Withers by Bot-chan.
+- Added Dumb-Bell, Hoops and Score by Bot-chan.
+- Added Night Light by Bot-chan.
+- Added Parcel Post, Smooze and Tree Hugger by Bot-chan.
+- Added Cranky Doodle Donkey and Matilda by Bot-chan.
+- Added Button Mash by Bot-chan.
+- Added comic ponies by Bot-chan.
+- Updated Lebowski ponies by Bot-chan.
+- Added galloping Princess Twilight Sparkle animation by Bot-chan.
+- Updated Changeling by Bot-chan.
+- Fixes to Soigne Folio by Bot-chan.
+- Fixed Maud Pie sprite from Bot-chan.
+- Fix Archer's gender.
+- Prevent a crash if the Profiles folder is deleted.
+- Prevent a crash when loading a pony in the editor if you change selections quickly.
+
 v1.55:
 - Added Maud Pie by Bot-chan.
 - Added Trouble Shoes by Bot-chan.
