@@ -164,6 +164,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Big McIntosh
 * Bot-chan
 
+#### Bittersweet
+* Bot-chan
+
 #### Blinkie Pie
 * Anonycat
 
@@ -420,6 +423,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Laid-back Mule
+* Bot-chan
+
+#### Leadwing
 * Bot-chan
 
 #### Lemon Hearts
