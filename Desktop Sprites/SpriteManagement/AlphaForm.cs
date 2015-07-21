@@ -54,7 +54,7 @@
         {
             get
             {
-                if (IsDisposed)
+                if (Disposing || IsDisposed)
                     throw new ObjectDisposedException(GetType().FullName);
 
                 // Lazily initialize the graphics buffer.
@@ -79,7 +79,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The current instance has been disposed.</exception>
         public unsafe int* GetBackgroundData()
         {
-            if (IsDisposed)
+            if (Disposing || IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
             InitializeBuffer();
@@ -214,7 +214,7 @@
             Flags = System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode)]
         public void UpdateBackgroundGraphics(byte opacity)
         {
-            if (IsDisposed)
+            if (Disposing || IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
             POINT dstPos = new POINT(Left, Top);
