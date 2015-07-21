@@ -268,7 +268,7 @@ Public Class StringCollectionParser
         Return HandleParsed(ParsedEnum(GetNextItem(), fallback))
     End Function
     Private Shared Function ParsedEnum(Of TEnum As Structure)(s As String, fallback As TEnum?) As Parsed(Of TEnum)
-        Dim result As TEnum
+        Dim result As TEnum = Nothing
         If [Enum].TryParse(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
@@ -291,7 +291,7 @@ Public Class StringCollectionParser
     End Function
     Private Shared Function ParsedMap(Of T As Structure)(s As String, mapping As IDictionary(Of String, T), fallback As T?) As Parsed(Of T)
         Argument.EnsureNotNull(mapping, "mapping")
-        Dim result As T
+        Dim result As T = Nothing
         If s IsNot Nothing AndAlso mapping.TryGetValue(s, result) Then
             Return Parsed.Success(result)
         ElseIf fallback IsNot Nothing Then
