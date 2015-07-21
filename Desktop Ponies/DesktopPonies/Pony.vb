@@ -2745,8 +2745,9 @@ Public Class Pony
             If (moves And AllowedMoves.VerticalOnly) > 0 Then movesList.Add(AllowedMoves.VerticalOnly)
             If (moves And AllowedMoves.DiagonalOnly) > 0 Then movesList.Add(AllowedMoves.DiagonalOnly)
             Dim selectedDirection = movesList.RandomElement()
-            Dim wasMovingRight = _movement.X > 0
-            Dim wasMovingDown = _movement.Y > 0
+            ' Track movement direction in case we need to preserve it. If the movement is zero, randomize the future direction.
+            Dim wasMovingRight = _movement.X > 0 OrElse (_movement.X = 0 AndAlso Rng.NextDouble() < 0.5)
+            Dim wasMovingDown = _movement.Y > 0 OrElse (_movement.Y = 0 AndAlso Rng.NextDouble() < 0.5)
             Select Case selectedDirection
                 Case AllowedMoves.HorizontalOnly
                     _movement = New Vector2F(CSng(speed), 0)
