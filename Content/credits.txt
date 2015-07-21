@@ -728,7 +728,8 @@ Contributors are broken down by character. If there was more than one contributo
 * Pony Noia
 
 #### Royal Guard
-* StarStep
+* StarStep [Stand, Trot, Fly]
+* Bot-chan [Stand, Idle1]
 
 #### Royal Night Guard
 * Bot-chan
