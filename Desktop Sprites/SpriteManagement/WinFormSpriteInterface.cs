@@ -1124,6 +1124,7 @@
 
             lock (parameters.Item1)
                 Monitor.Pulse(parameters.Item1);
+            Application.ThreadException += (sender, e) => { };
             Application.Run();
         }
 
