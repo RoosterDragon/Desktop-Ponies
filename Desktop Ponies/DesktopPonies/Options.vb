@@ -254,7 +254,7 @@ Public NotInheritable Class Options
 
         NoRandomDuplicates = True
 
-        MaxPonyCount = 300
+        MaxPonyCount = 500
         TimeFactor = 1
         ScaleFactor = 1
         ExclusionZone = RectangleF.Empty
