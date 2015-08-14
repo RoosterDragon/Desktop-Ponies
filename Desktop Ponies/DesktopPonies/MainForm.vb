@@ -738,9 +738,9 @@ Public Class MainForm
                     True,
                     Sub()
                         MessageBox.Show(
-                            Me, "Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
+                            Me, ("Sorry you selected {1} ponies, which is more than the limit specified in the options menu.{0}" &
                             "Try choosing no more than {2} in total.{0}" &
-                            "(or, you can increase the limit via the options menu)".FormatWith(
+                            "(or, you can increase the limit via the options menu)").FormatWith(
                                 Environment.NewLine, totalPonies, Options.MaxPonyCount),
                             "Too Many Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End Sub)
