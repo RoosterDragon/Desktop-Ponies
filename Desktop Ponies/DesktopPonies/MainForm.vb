@@ -726,8 +726,16 @@ Public Class MainForm
                     LoadPoniesAsyncEnd(
                         True,
                         Sub()
-                            MessageBox.Show(Me, "You haven't selected any ponies! Choose some ponies to roam your desktop first.",
-                                            "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            If autoStarted Then
+                                MessageBox.Show(Me, ("You haven't created a profile with ponies to use.{0}" &
+                                                "Create a profile named 'autostart', choose some ponies and save the profile.{0}" &
+                                                "In future, these ponies will be loaded automatically when using autostart.").
+                                                FormatWith(Environment.NewLine),
+                                                "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            Else
+                                MessageBox.Show(Me, "You haven't selected any ponies! Choose some ponies to roam your desktop first.",
+                                                "No Ponies Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            End If
                         End Sub)
                     Return
                 End If
