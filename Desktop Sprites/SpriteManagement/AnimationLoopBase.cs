@@ -414,7 +414,7 @@
                     float sumTimes = 0;
                     for (int i = 0; i < Count; i++)
                         sumTimes += frameRecords[i].Time;
-                    return Count != 0 ? sumTimes / (float)Count : 0;
+                    return Count != 0 ? sumTimes / Count : 0;
                 }
             }
             /// <summary>
@@ -456,7 +456,7 @@
                     float sumIntervals = 0;
                     for (int i = 0; i < Count; i++)
                         sumIntervals += frameRecords[i].Interval;
-                    return Count != 0 ? sumIntervals / (float)Count : 0;
+                    return Count != 0 ? sumIntervals / Count : 0;
                 }
             }
             /// <summary>
@@ -559,7 +559,7 @@
             {
                 // Determine the bar height scale, this will adjust if the max time is too high to fit on the graph.
                 float barHeightScale = barHeightFactor;
-                float height = (float)(graphArea.Height - 2);
+                float height = graphArea.Height - 2;
                 if (MaxTime != 0 && MaxInterval != 0)
                     barHeightScale = Math.Min(barHeightFactor, Math.Min(height / MaxTime, height / MaxInterval));
 
@@ -631,7 +631,7 @@
 
                 // Determine the bar height scale, this will adjust if the max time is too high to fit on the graph.
                 float barHeightScale = barHeightFactor;
-                float height = (float)(graphArea.Height - 2);
+                float height = graphArea.Height - 2;
                 if (MaxTime != 0 && MaxInterval != 0)
                     barHeightScale = Math.Min(barHeightFactor, Math.Min(height / MaxTime, height / MaxInterval));
 

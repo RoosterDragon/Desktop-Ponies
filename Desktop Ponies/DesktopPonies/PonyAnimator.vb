@@ -22,7 +22,7 @@ Public MustInherit Class PonyAnimator
                 _manualControlPlayerOne.SpeedOverride = Nothing
                 _manualControlPlayerOne.DestinationOverride = Nothing
             End If
-            If Object.ReferenceEquals(_manualControlPlayerTwo, value) Then
+            If ReferenceEquals(_manualControlPlayerTwo, value) Then
                 _manualControlPlayerTwo = Nothing
             End If
             _manualControlPlayerOne = value
@@ -38,7 +38,7 @@ Public MustInherit Class PonyAnimator
                 _manualControlPlayerTwo.SpeedOverride = Nothing
                 _manualControlPlayerTwo.DestinationOverride = Nothing
             End If
-            If Object.ReferenceEquals(_manualControlPlayerOne, value) Then
+            If ReferenceEquals(_manualControlPlayerOne, value) Then
                 _manualControlPlayerOne = Nothing
             End If
             _manualControlPlayerTwo = value

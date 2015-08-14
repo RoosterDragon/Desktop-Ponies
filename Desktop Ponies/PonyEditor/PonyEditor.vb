@@ -186,7 +186,7 @@ Public Class PonyEditor
         Dim oldImage = ponyImageList.Images(PonyList.SelectedIndices(0))
         ponyImageList.Images(PonyList.SelectedIndices(0)) = newImage
         PonyList.Refresh()
-        If Not Object.ReferenceEquals(oldImage, My.Resources.RandomPony) Then oldImage.Dispose()
+        If Not ReferenceEquals(oldImage, My.Resources.RandomPony) Then oldImage.Dispose()
     End Sub
 
     Private Sub PonyList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PonyList.SelectedIndexChanged
@@ -476,7 +476,7 @@ Public Class PonyEditor
         Next
 
         PreviewPony.SetBehavior(behavior)
-        If Object.ReferenceEquals(PreviewPony.CurrentBehavior, behavior) Then
+        If ReferenceEquals(PreviewPony.CurrentBehavior, behavior) Then
             If behavior.FollowTargetName <> "" Then
                 Dim followTarget As Pony = Nothing
                 Dim targetBase = ponies.Bases.OnlyOrDefault(Function(ponyBase) ponyBase.Directory = behavior.FollowTargetName)
@@ -505,7 +505,7 @@ Public Class PonyEditor
                                                                               items As IEnumerable(Of TPonyIniSerializable)
                                                                               ) As TPonyIniSerializable
         Dim grid = DirectCast(sender, DataGridView)
-        If Not Object.ReferenceEquals(column.DataGridView, grid) Then
+        If Not ReferenceEquals(column.DataGridView, grid) Then
             Throw New ArgumentException("column must be a child of the sender grid.")
         End If
         Dim name = DirectCast(grid.Rows(e.RowIndex).Cells(column.Index).Value, CaseInsensitiveString)
@@ -537,7 +537,7 @@ Public Class PonyEditor
                     UpdateImagePath(BehaviorsGrid, e.RowIndex, colBehaviorLeftImage.Index,
                                     Sub(newPath)
                                         behavior.LeftImage.Path = newPath
-                                        If Object.ReferenceEquals(behavior, CurrentBase.Behaviors(0)) Then
+                                        If ReferenceEquals(behavior, CurrentBase.Behaviors(0)) Then
                                             UpdatePreviewListImage()
                                         End If
                                     End Sub, CurrentBase.Directory & " Left Image...")
@@ -1050,20 +1050,20 @@ Public Class PonyEditor
         SaveSortOrder()
         Try
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
-            If Object.ReferenceEquals(grid, EffectsGrid) Then
+            If ReferenceEquals(grid, EffectsGrid) Then
                 Dim effectToRemove = CurrentBase.Effects.Single(
                     Function(effect) effect.Name = e.Row.Cells(colEffectName.Index).Value.ToString())
                 CurrentBase.Effects.Remove(effectToRemove)
-            ElseIf Object.ReferenceEquals(grid, BehaviorsGrid) Then
+            ElseIf ReferenceEquals(grid, BehaviorsGrid) Then
                 Dim behaviorToRemove = CurrentBase.Behaviors.Single(
                     Function(behavior) behavior.Name = e.Row.Cells(colBehaviorName.Index).Value.ToString())
                 CurrentBase.Behaviors.Remove(behaviorToRemove)
                 UpdatePreviewListImage()
-            ElseIf Object.ReferenceEquals(grid, InteractionsGrid) Then
+            ElseIf ReferenceEquals(grid, InteractionsGrid) Then
                 Dim interactionToRemove = CurrentBase.Interactions.Single(
                     Function(interaction) interaction.Name = e.Row.Cells(colInteractionName.Index).Value.ToString())
                 CurrentBase.Interactions.Remove(interactionToRemove)
-            ElseIf Object.ReferenceEquals(grid, SpeechesGrid) Then
+            ElseIf ReferenceEquals(grid, SpeechesGrid) Then
                 Dim speechToRemove = CurrentBase.Speeches.Single(
                     Function(speech) speech.Name = e.Row.Cells(colSpeechName.Index).Value.ToString())
                 CurrentBase.Speeches.Remove(speechToRemove)
@@ -1245,7 +1245,7 @@ Public Class PonyEditor
     Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
         HidePony()
         ImagesContextMenu.Hide()
-        If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
+        If ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
             If CurrentBase.Behaviors.Count = 0 Then
                 MessageBox.Show(Me, "You need to create some behaviors before you can set up image centers.",
                                 "No Behaviors", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -1255,13 +1255,13 @@ Public Class PonyEditor
                     If form.ChangesMade Then hasSaved = False
                 End Using
             End If
-        ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
+        ElseIf ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
-        ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
+        ElseIf ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
             Using form = New DesktopSprites.Forms.GifFramesForm(Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory))
                 form.Icon = Icon
                 form.Text &= " - Desktop Ponies"

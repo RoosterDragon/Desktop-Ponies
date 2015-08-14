@@ -4,7 +4,6 @@
     using System.IO;
     using System.Linq;
     using System.Windows.Forms;
-    using DesktopSprites.Collections;
     using DesktopSprites.Core;
     using DesktopSprites.SpriteManagement;
 

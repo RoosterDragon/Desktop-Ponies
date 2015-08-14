@@ -1,5 +1,4 @@
-﻿Imports System.Windows.Forms
-Imports System.IO
+﻿Imports System.IO
 
 Public Class NewPonyDialog2
     Private _newDirectory As String

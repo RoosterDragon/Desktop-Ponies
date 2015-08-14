@@ -381,7 +381,7 @@ Public Class ItemEditorBase
                             selector.UseWaitCursor = False
                             selector.Enabled = True
                             If hadFocus AndAlso lastFocusedControl IsNot Nothing AndAlso
-                                Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
+                                ReferenceEquals(ActiveControl, idleFocusControl) Then
                                 lastFocusedControl.Focus()
                                 lastFocusedControl = Nothing
                             End If
@@ -460,7 +460,7 @@ Public Class ItemEditorBase
                             selector.Enabled = True
                             behaviorCombo.Enabled = True
                             If hadFocus AndAlso lastFocusedControl IsNot Nothing AndAlso
-                                Object.ReferenceEquals(ActiveControl, idleFocusControl) Then
+                                ReferenceEquals(ActiveControl, idleFocusControl) Then
                                 lastFocusedControl.Focus()
                                 If behaviorComboHasFocus Then
                                     Dim lastFocusedComboBox = DirectCast(lastFocusedControl, ComboBox)
@@ -554,7 +554,7 @@ Public Class ItemEditorBase
         End If
 
         If Collection.Cast(Of IPonyIniSourceable).Any(
-            Function(item) item.Name = Edited.Name AndAlso Not Object.ReferenceEquals(item, original)) Then
+            Function(item) item.Name = Edited.Name AndAlso Not ReferenceEquals(item, original)) Then
             MessageBox.Show(Me, "A " & ItemTypeName & " with the name '" & Edited.Name &
                             "' already exists for this pony. Please choose another name.",
                             "Name Not Unique", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)

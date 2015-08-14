@@ -91,7 +91,7 @@ Public Class PonySelectionControl
         Dim oldImage = PonyImage(timeIndex)
         timeIndex += amount
         Dim newImage = PonyImage(timeIndex)
-        If Not Object.ReferenceEquals(oldImage, newImage) Then
+        If Not ReferenceEquals(oldImage, newImage) Then
             InvalidatePonyImageArea()
         End If
     End Sub

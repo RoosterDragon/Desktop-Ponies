@@ -75,7 +75,7 @@ Public Class OptionsForm
         screenCoverageOption.Checked = True
         For Each screen In Options.Screens
             For i = 0 To MonitorsSelection.Items.Count - 1
-                If Object.ReferenceEquals(MonitorsSelection.Items(i), screen) Then
+                If ReferenceEquals(MonitorsSelection.Items(i), screen) Then
                     MonitorsSelection.SetSelected(i, True)
                 End If
             Next

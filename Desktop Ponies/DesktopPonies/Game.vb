@@ -338,12 +338,12 @@ Public Class Game
     End Sub
 
     Private Function IsUnderManualControl(pony As Pony) As Boolean
-        Return Object.ReferenceEquals(pony, manualControlPlayerOne) OrElse Object.ReferenceEquals(pony, manualControlPlayerTwo)
+        Return ReferenceEquals(pony, manualControlPlayerOne) OrElse ReferenceEquals(pony, manualControlPlayerTwo)
     End Function
 
     Private Function IsUnderManualControlAndActionWanted(pony As Pony) As Boolean
-        Return (Object.ReferenceEquals(pony, manualControlPlayerOne) AndAlso KeyboardState.IsKeyPressed(Keys.RControlKey)) OrElse
-            (Object.ReferenceEquals(pony, manualControlPlayerTwo) AndAlso KeyboardState.IsKeyPressed(Keys.LControlKey))
+        Return (ReferenceEquals(pony, manualControlPlayerOne) AndAlso KeyboardState.IsKeyPressed(Keys.RControlKey)) OrElse
+            (ReferenceEquals(pony, manualControlPlayerTwo) AndAlso KeyboardState.IsKeyPressed(Keys.LControlKey))
     End Function
 
     Private Function CheckForScore() As Boolean
@@ -505,7 +505,7 @@ Public Class Game
                     behaviorIndex = 2
             End Select
             Dim newBehavior = Handler.Base.Behaviors(behaviorIndex)
-            If Not Object.ReferenceEquals(newBehavior, Handler.CurrentBehavior) Then
+            If Not ReferenceEquals(newBehavior, Handler.CurrentBehavior) Then
                 Handler.SetBehavior(newBehavior)
                 Handler.MovementOverride = Handler.Movement
             End If

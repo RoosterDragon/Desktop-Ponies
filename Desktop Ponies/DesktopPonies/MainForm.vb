@@ -200,7 +200,7 @@ Public Class MainForm
                              ' Move random pony to the top of the sort.
                              Dim randomBaseIndex = -1
                              For i = 0 To selectionControls.Length - 1
-                                 If Object.ReferenceEquals(selectionControls(i).PonyBase, ponies.RandomBase) Then
+                                 If ReferenceEquals(selectionControls(i).PonyBase, ponies.RandomBase) Then
                                      randomBaseIndex = i
                                      Exit For
                                  End If
@@ -345,14 +345,14 @@ Public Class MainForm
 #Region "Selection"
     Private Sub ZeroPoniesButton_Click(sender As Object, e As EventArgs) Handles ZeroPoniesButton.Click
         For Each ponyPanel In selectionControlsFilteredVisible
-            If Object.ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
+            If ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
             ponyPanel.Count = 0
         Next
     End Sub
 
     Private Sub OnePoniesButton_Click(sender As Object, e As EventArgs) Handles OnePoniesButton.Click
         For Each ponyPanel In selectionControlsFilteredVisible
-            If Object.ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
+            If ReferenceEquals(ponyPanel.PonyBase, ponies.RandomBase) Then Continue For
             ponyPanel.Count = 1
         Next
     End Sub
@@ -610,7 +610,7 @@ Public Class MainForm
         If Char.IsLetter(e.KeyChar) Then
             e.Handled = True
             For Each selectionControl In selectionControlsFilteredVisible
-                If Object.ReferenceEquals(selectionControl.PonyBase, ponies.RandomBase) Then Continue For
+                If ReferenceEquals(selectionControl.PonyBase, ponies.RandomBase) Then Continue For
                 If selectionControl.PonyName.Text.Length > 0 Then
                     Dim compare = String.Compare(selectionControl.PonyName.Text(0), e.KeyChar, StringComparison.OrdinalIgnoreCase)
                     If compare = 0 Then

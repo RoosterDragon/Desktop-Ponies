@@ -1,5 +1,4 @@
-﻿Imports System.Globalization
-Imports System.IO
+﻿Imports System.IO
 
 Public Class PonyEditorForm2
     Private Const ValidationPendingIndex = 0
@@ -483,7 +482,7 @@ Public Class PonyEditorForm2
         Dim contextBase = contextRef.PonyBase
         If contextBase Is Nothing Then Return
         Dim contextBaseHasOpenDocuments = Documents.TabPages.Cast(Of TabPage).Any(
-            Function(tab) Object.ReferenceEquals(GetPageRef(tab).PonyBase, contextBase))
+            Function(tab) ReferenceEquals(GetPageRef(tab).PonyBase, contextBase))
         Using dialog As New PonyDetailsDialog(contextBase, Not contextBaseHasOpenDocuments)
             Dim ref = New PageRef(contextBase)
             Dim refOriginalName = ref.ToString()
@@ -664,7 +663,7 @@ Public Class PonyEditorForm2
                 newTab.Controls.Add(preview)
                 preview.RestartForPony(contextRef.PonyBase, previewStartBehavior)
                 previewStartBehavior = Nothing
-                If Object.ReferenceEquals(Me, Form.ActiveForm) Then
+                If ReferenceEquals(Me, Form.ActiveForm) Then
                     preview.ShowPreview()
                 Else
                     previewHiddenForUnfocus = True
@@ -943,7 +942,7 @@ Public Class PonyEditorForm2
     Private Sub DeactivateHandler()
         If preview Is Nothing OrElse previewHiddenForUnfocus Then Return
         previewHiddenForUnfocus = Not reshowingPreviewAfterUnfocus AndAlso preview.PreviewVisible AndAlso
-            Not Object.ReferenceEquals(Me, Form.ActiveForm) AndAlso Not preview.PreviewHasFocus
+            Not ReferenceEquals(Me, Form.ActiveForm) AndAlso Not preview.PreviewHasFocus
         If previewHiddenForUnfocus AndAlso Not preview.Disposing AndAlso Not preview.IsDisposed Then preview.HidePreview()
         If formLostFocusAndPendingActivationChange AndAlso Not preview.PreviewHasFocus Then
             ' If the form has lost focus, we will start polling in case it has actually also become deactivated but the deactivated event
@@ -961,7 +960,7 @@ Public Class PonyEditorForm2
     Private Sub ActiveFormPollingTimer_Tick(sender As Object, e As EventArgs) Handles ActiveFormPollingTimer.Tick
         ' Whilst we believe the form to possibly have been deactivated but that the deactivated event has been delayed in firing, we will
         ' poll to see if the form becomes active. This is because until the deactivated event fires, we cannot receive an activated event.
-        If Object.ReferenceEquals(Me, Form.ActiveForm) Then
+        If ReferenceEquals(Me, Form.ActiveForm) Then
             ActivatedHandler()
             ActiveFormPollingTimer.Enabled = False
         End If

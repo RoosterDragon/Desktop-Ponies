@@ -51,7 +51,7 @@
         ReplaceItemsInComboBox(StartSpeechComboBox, speeches)
         ReplaceItemsInComboBox(EndSpeechComboBox, speeches)
 
-        Dim behaviors = Base.Behaviors.Where(Function(b) Not Object.ReferenceEquals(b, Edited)).Select(Function(s) s.Name).ToArray()
+        Dim behaviors = Base.Behaviors.Where(Function(b) Not ReferenceEquals(b, Edited)).Select(Function(s) s.Name).ToArray()
         ReplaceItemsInComboBox(LinkedBehaviorComboBox, behaviors)
     End Sub
 
@@ -99,19 +99,19 @@
 
     Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
         ImagesContextMenu.Hide()
-        If Object.ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
+        If ReferenceEquals(e.ClickedItem, ImageCentersMenuItem) Then
             Using form = New ImageCentersForm(Base)
                 form.ShowDialog(Me)
                 If form.ChangesMade Then UpdateDirtyFlag(True)
             End Using
-        ElseIf Object.ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
+        ElseIf ReferenceEquals(e.ClickedItem, GifAlphaMenuItem) Then
             Using form = New DesktopSprites.Forms.GifAlphaForm(
                          IO.Path.Combine(PonyBase.RootDirectory, Base.Directory))
                 form.Icon = ParentForm.Icon
                 form.Text &= " - Desktop Ponies"
                 form.ShowDialog(Me)
             End Using
-        ElseIf Object.ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
+        ElseIf ReferenceEquals(e.ClickedItem, GifViewerMenuItem) Then
             Using form = New DesktopSprites.Forms.GifFramesForm(
                          IO.Path.Combine(PonyBase.RootDirectory, Base.Directory))
                 form.Icon = ParentForm.Icon

@@ -65,8 +65,8 @@ Public Class DesktopPonyAnimator
     Private Sub DisplayPonyMenu(location As Point)
         Dim directory = If(selectedPony Is Nothing, "", selectedPony.Base.Directory)
         Dim sleeping = If(selectedPony Is Nothing, True, selectedPony.Sleep)
-        Dim manualControlP1 = Object.ReferenceEquals(ManualControlPlayerOne, selectedPony)
-        Dim manualControlP2 = Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony)
+        Dim manualControlP1 = ReferenceEquals(ManualControlPlayerOne, selectedPony)
+        Dim manualControlP2 = ReferenceEquals(ManualControlPlayerTwo, selectedPony)
 
         Dim i = 0
         If allowAddingAndRemovingSprites Then
@@ -119,7 +119,7 @@ Public Class DesktopPonyAnimator
             menuItems.AddLast(
                 New SimpleContextMenuItem(
                     Nothing,
-                    Sub() QueueRemove(Function(sprite) Object.ReferenceEquals(sprite, selectedPony))))
+                    Sub() QueueRemove(Function(sprite) ReferenceEquals(sprite, selectedPony))))
             menuItems.AddLast(
                 New SimpleContextMenuItem(
                     Nothing,
@@ -152,7 +152,7 @@ Public Class DesktopPonyAnimator
                     Nothing,
                     Sub()
                         If selectedPony Is Nothing Then Return
-                        Dim controlToggle = If(Object.ReferenceEquals(ManualControlPlayerOne, selectedPony), Nothing, selectedPony)
+                        Dim controlToggle = If(ReferenceEquals(ManualControlPlayerOne, selectedPony), Nothing, selectedPony)
                         ManualControlPlayerOne = controlToggle
                     End Sub))
             menuItems.AddLast(
@@ -160,7 +160,7 @@ Public Class DesktopPonyAnimator
                     Nothing,
                     Sub()
                         If selectedPony Is Nothing Then Return
-                        Dim controlToggle = If(Object.ReferenceEquals(ManualControlPlayerTwo, selectedPony), Nothing, selectedPony)
+                        Dim controlToggle = If(ReferenceEquals(ManualControlPlayerTwo, selectedPony), Nothing, selectedPony)
                         ManualControlPlayerTwo = controlToggle
                     End Sub))
             menuItems.AddLast(New SimpleContextMenuItem())

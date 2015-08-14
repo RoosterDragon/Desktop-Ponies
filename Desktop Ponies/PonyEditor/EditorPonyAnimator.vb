@@ -84,8 +84,8 @@ Public Class EditorPonyAnimator
     Private Function SpriteIsOldInteractionTarget(sprite As ISprite) As Boolean
         Dim pony = TryCast(sprite, Pony)
         Return pony IsNot Nothing AndAlso
-            Not Object.ReferenceEquals(pony, editor.PreviewPony) AndAlso
-            Not Object.ReferenceEquals(pony, editor.PreviewPony.FollowTarget)
+            Not ReferenceEquals(pony, editor.PreviewPony) AndAlso
+            Not ReferenceEquals(pony, editor.PreviewPony.FollowTarget)
     End Function
 
     Protected Overrides Sub SynchronizeContext()

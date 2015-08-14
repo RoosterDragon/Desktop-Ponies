@@ -1,6 +1,4 @@
-﻿Imports System.Globalization
-
-Public Class NewInteractionDialog
+﻿Public Class NewInteractionDialog
 
     Private base As PonyBase
     Private interactionToEdit As InteractionBase

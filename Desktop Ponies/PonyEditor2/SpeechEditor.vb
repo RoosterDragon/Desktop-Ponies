@@ -1,6 +1,4 @@
-﻿Imports System.IO
-
-Friend Class SpeechEditor
+﻿Friend Class SpeechEditor
     Private Shadows Property Edited As Speech
         Get
             Return DirectCast(MyBase.Edited, Speech)

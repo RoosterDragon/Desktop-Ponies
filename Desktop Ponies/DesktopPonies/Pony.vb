@@ -1,5 +1,4 @@
-﻿Imports System.Globalization
-Imports System.IO
+﻿Imports System.IO
 Imports DesktopSprites.SpriteManagement
 
 #Region "Interfaces"
@@ -33,7 +32,7 @@ Public NotInheritable Class Referential
                 Return New ParseIssue(propertyName, start.Name, "", "A circular loop has been detected.")
             End If
             Dim resolvedNextElement = nextElement(currentElement)
-            If Object.ReferenceEquals(resolvedNextElement, currentElement) Then
+            If ReferenceEquals(resolvedNextElement, currentElement) Then
                 Return New ParseIssue(propertyName, start.Name, "", "A circular loop has been detected.")
             End If
             currentElement = resolvedNextElement
@@ -1344,7 +1343,7 @@ Public Class PonyContext
     ''' <returns>An enumerable for other ponies in the current sprite collection.</returns>
     Public Iterator Function OtherPonies(except As Pony) As IEnumerable(Of Pony)
         For Each sprite In Sprites
-            If Object.ReferenceEquals(except, sprite) Then Continue For
+            If ReferenceEquals(except, sprite) Then Continue For
             Dim pony = TryCast(sprite, Pony)
             If pony Is Nothing Then Continue For
             Yield pony

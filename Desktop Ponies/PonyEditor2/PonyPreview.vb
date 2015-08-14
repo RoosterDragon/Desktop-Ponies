@@ -91,7 +91,7 @@ Public Class PonyPreview
 
     Private Sub HandleAddedNotification(addedPony As Pony, startBehavior As Behavior)
         SyncLock previewPonyGuard
-            If Object.ReferenceEquals(addedPony, previewPony) Then
+            If ReferenceEquals(addedPony, previewPony) Then
                 previewPonyReady = True
                 editorAnimator.ChangeEditorMenu(previewPony.Base)
                 If startBehavior IsNot Nothing Then
@@ -112,7 +112,7 @@ Public Class PonyPreview
 
     Public Sub RunBehavior(behavior As Behavior)
         previewPony.SetBehavior(behavior)
-        If Not Object.ReferenceEquals(previewPony.CurrentBehavior, behavior) Then
+        If Not ReferenceEquals(previewPony.CurrentBehavior, behavior) Then
             ShowDialogOverPreview(
                 Function() MessageBox.Show(Me, "Couldn't run this behavior. Maybe images are missing or it is not set up correctly.",
                                            "Run Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning))

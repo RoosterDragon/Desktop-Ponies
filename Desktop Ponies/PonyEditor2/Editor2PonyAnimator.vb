@@ -1,5 +1,4 @@
-﻿Imports System.Globalization
-Imports DesktopSprites.SpriteManagement
+﻿Imports DesktopSprites.SpriteManagement
 
 Public Class Editor2PonyAnimator
     Inherits PonyAnimator

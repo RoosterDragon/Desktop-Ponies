@@ -1,6 +1,4 @@
-﻿Imports System.Globalization
-
-Friend Class PonyLogForm
+﻿Friend Class PonyLogForm
     Private _pony As Pony
     Private index As Integer
     Private similarRecords As Integer = 0

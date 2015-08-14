@@ -1,5 +1,4 @@
-﻿Imports System.Globalization
-Imports System.IO
+﻿Imports System.IO
 Imports System.Runtime.CompilerServices
 
 Public Class StringCollectionParser

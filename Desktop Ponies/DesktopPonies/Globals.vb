@@ -28,7 +28,7 @@ Public NotInheritable Class Globals
         Try
             ' You may get a LoaderLock exception here when debugging. It does not occur normally - only under a debugger. Ignoring it
             ' appears to be harmless and the load will not be affected.
-            System.Reflection.Assembly.Load(
+            Reflection.Assembly.Load(
                 "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
             Return True
         Catch ex As Exception

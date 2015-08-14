@@ -1060,7 +1060,7 @@
                 if (pixelAspectRatio == 0)
                     ApproximateAspectRatio = null;
                 else
-                    ApproximateAspectRatio = (float)(pixelAspectRatio + 15) / 64f;
+                    ApproximateAspectRatio = (pixelAspectRatio + 15) / 64f;
             }
         }
         #endregion
@@ -1935,7 +1935,7 @@
                     reader.ReadExact(block, 0, bytesLeftInBlock);
                     blockIndex = 0;
                 }
-                bitBuffer += (int)block[blockIndex++] << bitsBuffered;
+                bitBuffer += block[blockIndex++] << bitsBuffered;
                 bitsBuffered += 8;
                 bytesLeftInBlock--;
             }

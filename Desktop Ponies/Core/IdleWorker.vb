@@ -1,6 +1,4 @@
-﻿Imports System.Threading
-
-''' <summary>
+﻿''' <summary>
 ''' Processes UI dependent tasks on the UI thread when it becomes idle.
 ''' </summary>
 ''' <remarks>When the control is disposed, any tasks queued for execution are abandoned.</remarks>
