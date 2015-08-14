@@ -281,7 +281,7 @@ Public Class MainForm
         Dim ponySelection As New PonySelectionControl(ponyBase, ponyBase.Behaviors(0).RightImage.Path) With {
             .Location = New Point(-Width, -Height)}
         AddHandler ponySelection.PonyCount.TextChanged, Sub() HandleCountChange(ponySelection.PonyBase, ponySelection.Count)
-        If ponyBase.Directory = ponyBase.RandomDirectory Then
+        If ponyBase.Directory = PonyBase.RandomDirectory Then
             ponySelection.NoDuplicates.Visible = True
             ponySelection.NoDuplicates.Checked = Options.NoRandomDuplicates
             AddHandler ponySelection.NoDuplicates.CheckedChanged, Sub() Options.NoRandomDuplicates = ponySelection.NoDuplicates.Checked
@@ -823,7 +823,7 @@ Public Class MainForm
                 Sub()
                     Dim exitRequest = animator.ExitRequested
                     PonyShutdown()
-                    If exitRequest = exitRequest.ExitApplication Then
+                    If exitRequest = ExitRequest.ExitApplication Then
                         Close()
                     Else
                         Show()

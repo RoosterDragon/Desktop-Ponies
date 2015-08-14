@@ -303,7 +303,7 @@ Public Class PonyEditorForm2
     Private Function ValidateBase(base As PonyBase) As ParseResult
         Dim validateBehavior = Function(behavior As Behavior)
                                    Dim b As Behavior = Nothing
-                                   Return behavior.TryLoad(
+                                   Return Behavior.TryLoad(
                                        behavior.SourceIni,
                                        Path.Combine(PonyBase.RootDirectory, base.Directory),
                                        base, b, Nothing).Combine(
@@ -320,7 +320,7 @@ Public Class PonyEditorForm2
                              End Function
         Dim effectsValid = ValidateItems(base, base.Effects, validateEffect, PageContent.Effects, PageContent.Effect)
         Dim validateSpeech = Function(speech As Speech)
-                                 Return speech.TryLoad(
+                                 Return Speech.TryLoad(
                                      speech.SourceIni,
                                      Path.Combine(PonyBase.RootDirectory, base.Directory),
                                      Nothing, Nothing)

@@ -104,7 +104,7 @@ Public Class ItemEditorBase
         Argument.EnsureNotNull(ponyBase, "ponyBase")
         Argument.EnsureNotNull(item, "item")
         loadingItem = True
-        _ponyBasePath = Path.Combine(ponyBase.RootDirectory, ponyBase.Directory)
+        _ponyBasePath = Path.Combine(PonyBase.RootDirectory, ponyBase.Directory)
         _base = ponyBase
         original = item
         Edited = item.Clone()

@@ -274,8 +274,8 @@ Public Class PonyEditor
 
             Dim unnamedCounter = 1
             For Each speech In CurrentBase.Speeches
-                If speech.Name = speech.Unnamed Then
-                    speech.Name = speech.Unnamed & " #" & unnamedCounter
+                If speech.Name = Speech.Unnamed Then
+                    speech.Name = Speech.Unnamed & " #" & unnamedCounter
                     unnamedCounter += 1
                 End If
 
@@ -742,7 +742,7 @@ Public Class PonyEditor
                         End If
 
                     Case colBehaviorGroupName.Index
-                        If behavior.Group = behavior.AnyGroup Then
+                        If behavior.Group = Behavior.AnyGroup Then
                             MessageBox.Show(Me, "You can't change the name of the 'Any' group. This is reserved. " &
                                             "It means the behavior can run at any time, regardless of the current group that is running.",
                                             "Editing Denied", MessageBoxButtons.OK, MessageBoxIcon.Information)

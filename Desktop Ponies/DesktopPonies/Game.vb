@@ -715,7 +715,7 @@ Public Class Game
         Private ReadOnly noBallActions As New List(Of PlayerActionType)()
 
         Public Sub New(_Name As String, _team_number As Integer, _start_location As String, _Allowed_area As String,
-                _Have_Ball_Actions As String, _Hostile_Ball_Actions As String, _Friendly_Ball_Actions As String, _
+                _Have_Ball_Actions As String, _Hostile_Ball_Actions As String, _Friendly_Ball_Actions As String,
                 _Neutral_Ball_Actions As String, _Distance_Ball_Actions As String, _No_Ball_Actions As String, _required As String,
                 game As Game)
             Argument.EnsureNotNull(_Name, "_Name")

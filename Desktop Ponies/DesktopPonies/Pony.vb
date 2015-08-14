@@ -1852,11 +1852,11 @@ Public Class Pony
         For Each group In groups
             Dim fallbackStationaryBehavior = GetFallbackStationaryBehavior(group)
             Dim mouseoverBehavior = If(GetBehaviorMatching(
-                                        Function(b) b.group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
+                                        Function(b) b.Group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.MouseOver)),
                                     fallbackStationaryBehavior)
             mouseoverBehaviorsByGroup.Add(group, mouseoverBehavior)
             Dim dragBehavior = If(GetBehaviorMatching(
-                                  Function(b) b.group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.Dragged)),
+                                  Function(b) b.Group = group AndAlso b.AllowedMovement.HasFlag(AllowedMoves.Dragged)),
                               If(flaggedSleepBehavior, mouseoverBehavior))
             dragBehaviorsByGroup.Add(group, dragBehavior)
         Next
@@ -3230,7 +3230,7 @@ Public Class Pony
     ''' <param name="behavior">The behavior to test.</param>
     ''' <returns>Returns true if the behavior group matches the 'Any' group, or the current behavior group.</returns>
     Private Function BehaviorAllowedByCurrentGroup(behavior As Behavior) As Boolean
-        Return behavior.Group = behavior.AnyGroup OrElse behavior.Group = CurrentBehaviorGroup
+        Return behavior.Group = Behavior.AnyGroup OrElse behavior.Group = CurrentBehaviorGroup
     End Function
 
     ''' <summary>
