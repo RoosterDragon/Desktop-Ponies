@@ -321,7 +321,13 @@ Public Class MainForm
     End Sub
 
     Private Sub CountSelectedPonies()
-        Dim totalPonies = Options.PonyCounts.Values.Sum()
+        Dim totalPonies = 0
+        For Each selectionControl As PonySelectionControl In PonySelectionPanel.Controls
+            Dim subTotal As Integer
+            If Options.PonyCounts.TryGetValue(selectionControl.PonyBase.Directory, subTotal) Then
+                totalPonies += subTotal
+            End If
+        Next
         PonyCountValueLabel.Text = totalPonies.ToString(CultureInfo.CurrentCulture)
     End Sub
 
