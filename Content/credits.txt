@@ -247,11 +247,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Coco Pommel
 * StarStep
 
-#### Colgate
-* RJP! [Stand, Walk, Stretch, Brush]
-* vulcan539 [Sit]
-* Anonymous [Sit]
-
 #### Cranky Doodle Donkey
 * Bot-chan
 
@@ -488,6 +483,11 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Mayor Mare
 * Anonycat
+
+#### Minuette
+* RJP! [Stand, Walk, Stretch, Brush]
+* vulcan539 [Sit]
+* Anonymous [Sit]
 
 #### Mjolna
 * Anonymous
