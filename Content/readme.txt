@@ -59,6 +59,16 @@ Change Log
 
 Latest changes:
 
+v1.57:
+- Added Gustysnows, Moondancer and Quiet Gestures by Bot-chan.
+- Updated Royal Guard by Bot-chan.
+- Renamed Colgate to Minuette.
+- Increase the default max pony count to 500.
+- Fixed an issue where ponies in a profile that do not exist count towards the total pony count.
+- Fixed ponies not moving in properly random directions.
+- Fix a rare crash when trying to return to the menu.
+- Improve some error messages.
+
 v1.56:
 - Added Gizmo by Bot-chan.
 - Added Biff, Rogue and Withers by Bot-chan.
