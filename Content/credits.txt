@@ -241,9 +241,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Cloudchaser
 * fanofetcetera
 
-#### Clyde Pie
-* Anonycat
-
 #### Coco Pommel
 * StarStep
 
@@ -408,11 +405,17 @@ Contributors are broken down by character. If there was more than one contributo
 #### Horte Cuisine
 * Anonycat
 
+#### Igneous Rock
+* Anonycat
+
 #### Inky Pie
 * Anonycat
 
 #### Iron Will
 * StarStep
+
+#### Jesús Pezuña
+* Anonycat
 
 #### King Sombra
 * Bot-chan
@@ -564,9 +567,6 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Party Favor
 * Bot-chan
-
-#### Jesús Pezuña
-* Anonycat
 
 #### Perfect Pace
 * Anonycat
