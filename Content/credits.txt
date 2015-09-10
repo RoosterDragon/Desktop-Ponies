@@ -383,6 +383,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Granny Smith
 * Bot-chan
 
+#### Greta
+* Bot-chan
+
 #### Gummy
 * CANDYBAG [Stand, Walk, Bounce]
 * DeathPony [Dance]
