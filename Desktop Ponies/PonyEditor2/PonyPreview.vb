@@ -25,6 +25,7 @@ Public Class PonyPreview
         AddHandler Disposed, Sub()
                                  Threading.Interlocked.Exchange(disposedFlag, 1)
                                  If editorAnimator IsNot Nothing Then editorAnimator.Finish()
+                                 editorAnimator = Nothing
                              End Sub
     End Sub
 
