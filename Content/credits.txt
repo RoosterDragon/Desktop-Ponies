@@ -380,6 +380,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Grace Manewitz
 * Pony Noia
 
+#### Grampa Gruff
+* Bot-chan
+
 #### Granny Smith
 * Bot-chan
 
