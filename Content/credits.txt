@@ -858,6 +858,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Steven Magnet
 * StarStep
 
+#### Stormy Flare
+* Bot-chan
+
 #### Sue Pie
 * Anonycat
 
