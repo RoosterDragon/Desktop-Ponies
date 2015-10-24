@@ -949,6 +949,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Walter
 * Bot-chan
 
+#### Whoa Nelly
+* Bot-chan
+
 #### Wild Fire
 * Bot-chan
 
