@@ -59,6 +59,10 @@ Change Log
 
 Latest changes:
 
+v1.58:
+- Added Greta, Grampa Gruff, Whoa Nelly and Stormy Flare by Bot-chan.
+- Corrected Leadwing's name.
+
 v1.57:
 - Added Gustysnows, Moondancer and Quiet Gestures by Bot-chan.
 - Updated Royal Guard by Bot-chan.
