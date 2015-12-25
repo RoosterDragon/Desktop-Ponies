@@ -53,6 +53,22 @@ Screensaver (Windows Only)
     To install it as a Windows screensaver, right-click and choose "Install" from the context menu.
     If you create a profile named "screensaver", these characters will appear when the screensaver starts, otherwise you will get a random pony.
 
+    The standard Windows command line arguments for screensavers can be used:
+        * "Desktop Ponies.scr" /s
+            Start in screensaver mode. This uses the 'screensaver' profile.
+        * "Desktop Ponies.scr" /c
+            Configure screensaver mode.
+        * "Desktop Ponies.scr" /p
+            Preview screensaver mode. This does nothing.
+
+---------------------------------------
+
+Autostart
+
+    Starting the program from the command line using '"Desktop Ponies.exe" autostart' will start and show ponies straight away,
+    using the 'autostart' profile. If you have not yet configured this profile, you will get a prompt.
+    You can use this to quickly launch the program with your favourite ponies.
+
 ---------------------------------------
 
 Change Log
