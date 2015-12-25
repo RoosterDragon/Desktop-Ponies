@@ -122,6 +122,7 @@ Public Class MainForm
                         ' Immediately start the ponies, using the autostart profile if available.
                         autoStarted = True
                         ShowInTaskbar = False
+                        WindowState = FormWindowState.Minimized
 
                         Try
                             Options.LoadProfile(Autostart, False)
@@ -733,6 +734,7 @@ Public Class MainForm
                         True,
                         Sub()
                             If autoStarted Then
+                                WindowState = FormWindowState.Normal
                                 MessageBox.Show(Me, ("You haven't created a profile with ponies to use.{0}" &
                                                 "Create a profile named 'autostart', choose some ponies and save the profile.{0}" &
                                                 "In future, these ponies will be loaded automatically when using autostart.").
