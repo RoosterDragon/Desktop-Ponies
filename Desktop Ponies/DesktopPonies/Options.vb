@@ -341,7 +341,9 @@ Public NotInheritable Class Options
             Next
             Return area
         Else
-            Return AllowedRegion.Value
+            Dim area = AllowedRegion.Value
+            area.Intersect(GetCombinedScreenBounds())
+            Return area
         End If
     End Function
 
