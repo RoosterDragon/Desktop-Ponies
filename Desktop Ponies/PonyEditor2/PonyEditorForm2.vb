@@ -60,11 +60,11 @@ Public Class PonyEditorForm2
             End Set
         End Property
         Public Sub New()
-            _pageContent = DesktopPonies.PageContent.Ponies
+            _pageContent = PageContent.Ponies
         End Sub
         Public Sub New(ponyBase As PonyBase)
             _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
-            _pageContent = DesktopPonies.PageContent.Pony
+            _pageContent = PageContent.Pony
         End Sub
         Public Sub New(ponyBase As PonyBase, pageContent As PageContent)
             _ponyBase = Argument.EnsureNotNull(ponyBase, "ponyBase")
@@ -263,7 +263,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Function AddItemNode(base As PonyBase, item As IPonyIniSourceable, parentCollectionNode As TreeNode) As TreeNode
-        Dim ref = New PageRef(base, PageContentExtensions.FromSource(item), item)
+        Dim ref = New PageRef(base, FromSource(item), item)
         Dim node = New TreeNode(item.Name) With {.Tag = ref, .Name = ref.ToString()}
         parentCollectionNode.Nodes.Add(node)
         nodeLookup(node.Name) = node
@@ -394,7 +394,7 @@ Public Class PonyEditorForm2
             Case PageContent.Behavior, PageContent.Effect, PageContent.Speech, PageContent.Interaction
                 Return pageRef.PonyBase.Directory & ": " & If(pageRef.Item Is Nothing, "[New]", pageRef.Item.Name.ToString())
             Case Else
-                Throw New System.ComponentModel.InvalidEnumArgumentException("Unknown Content in pageRef")
+                Throw New ComponentModel.InvalidEnumArgumentException("Unknown Content in pageRef")
         End Select
     End Function
 
@@ -422,7 +422,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub DocumentsView_NodeMouseDoubleClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseDoubleClick
-        If e.Button = Windows.Forms.MouseButtons.Left Then
+        If e.Button = MouseButtons.Left Then
             OpenTabFromNode(e.Node)
         End If
     End Sub
@@ -433,7 +433,7 @@ Public Class PonyEditorForm2
     End Sub
 
     Private Sub DocumentsView_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles DocumentsView.NodeMouseClick
-        If e.Button = Windows.Forms.MouseButtons.Right Then
+        If e.Button = MouseButtons.Right Then
             contextRef = GetPageRef(e.Node)
             Select Case contextRef.PageContent
                 Case PageContent.Pony
@@ -461,7 +461,7 @@ Public Class PonyEditorForm2
             Next
         End If
         Using dialog = New NewPonyDialog2()
-            If dialog.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
+            If dialog.ShowDialog(Me) = DialogResult.OK Then
                 ReloadBases(dialog.NewDirectory)
             End If
         End Using
@@ -663,7 +663,7 @@ Public Class PonyEditorForm2
                 newTab.Controls.Add(preview)
                 preview.RestartForPony(contextRef.PonyBase, previewStartBehavior)
                 previewStartBehavior = Nothing
-                If ReferenceEquals(Me, Form.ActiveForm) Then
+                If ReferenceEquals(Me, ActiveForm) Then
                     preview.ShowPreview()
                 Else
                     previewHiddenForUnfocus = True
@@ -942,7 +942,7 @@ Public Class PonyEditorForm2
     Private Sub DeactivateHandler()
         If preview Is Nothing OrElse previewHiddenForUnfocus Then Return
         previewHiddenForUnfocus = Not reshowingPreviewAfterUnfocus AndAlso preview.PreviewVisible AndAlso
-            Not ReferenceEquals(Me, Form.ActiveForm) AndAlso Not preview.PreviewHasFocus
+            Not ReferenceEquals(Me, ActiveForm) AndAlso Not preview.PreviewHasFocus
         If previewHiddenForUnfocus AndAlso Not preview.Disposing AndAlso Not preview.IsDisposed Then preview.HidePreview()
         If formLostFocusAndPendingActivationChange AndAlso Not preview.PreviewHasFocus Then
             ' If the form has lost focus, we will start polling in case it has actually also become deactivated but the deactivated event
@@ -960,7 +960,7 @@ Public Class PonyEditorForm2
     Private Sub ActiveFormPollingTimer_Tick(sender As Object, e As EventArgs) Handles ActiveFormPollingTimer.Tick
         ' Whilst we believe the form to possibly have been deactivated but that the deactivated event has been delayed in firing, we will
         ' poll to see if the form becomes active. This is because until the deactivated event fires, we cannot receive an activated event.
-        If ReferenceEquals(Me, Form.ActiveForm) Then
+        If ReferenceEquals(Me, ActiveForm) Then
             ActivatedHandler()
             ActiveFormPollingTimer.Enabled = False
         End If

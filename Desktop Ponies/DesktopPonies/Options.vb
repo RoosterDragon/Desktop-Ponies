@@ -208,8 +208,8 @@ Public NotInheritable Class Options
 
         If setAsCurrent Then
             Try
-                IO.File.WriteAllText(IO.Path.Combine(Options.ProfileDirectory, "current.txt"), profile, System.Text.Encoding.UTF8)
-            Catch ex As IO.IOException
+                File.WriteAllText(Path.Combine(ProfileDirectory, "current.txt"), profile, Encoding.UTF8)
+            Catch ex As IOException
                 ' If we cannot write out the file that remembers the last used profile, that is unfortunate but not a fatal problem.
                 Console.WriteLine("Warning: Failed to save current.txt file.")
             Catch ex As UnauthorizedAccessException

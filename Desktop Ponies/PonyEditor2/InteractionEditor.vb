@@ -10,9 +10,9 @@
             MyBase.Edited = value
         End Set
     End Property
-    Protected Overrides ReadOnly Property Collection As System.Collections.IList
+    Protected Overrides ReadOnly Property Collection As Collections.IList
         Get
-            Return CType(Base.Interactions, Collections.IList)
+            Return Base.Interactions
         End Get
     End Property
     Protected Overrides ReadOnly Property ItemTypeName As String
@@ -26,7 +26,7 @@
         Bind(Function() Edited.Name, NameTextBox)
         Bind(Function() Edited.Chance, ChanceNumber, Function(dbl) CDec(dbl) * 100, Function(dec) dec / 100)
         Bind(Function() Edited.Activation, TypeComboBox)
-        Bind(Function() Edited.Proximity, ProximityNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.Proximity, ProximityNumber, Function(dbl) CDec(dbl), Function(dec) dec)
         Bind(Function() Edited.ReactivationDelay, DelayNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
         Bind(Function() Edited.TargetNames, TargetsList)
         Bind(Function() Edited.BehaviorNames, BehaviorsList)

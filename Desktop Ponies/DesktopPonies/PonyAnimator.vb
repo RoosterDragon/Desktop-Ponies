@@ -185,17 +185,17 @@ Public MustInherit Class PonyAnimator
         ' Handle player controlled movement.
         If AllowManualControl Then
             ManualControl(ManualControlPlayerOne,
-                          KeyboardState.IsKeyPressed(Keys.Up),
-                          KeyboardState.IsKeyPressed(Keys.Down),
-                          KeyboardState.IsKeyPressed(Keys.Left),
-                          KeyboardState.IsKeyPressed(Keys.Right),
-                          KeyboardState.IsKeyPressed(Keys.RShiftKey))
+                          IsKeyPressed(Keys.Up),
+                          IsKeyPressed(Keys.Down),
+                          IsKeyPressed(Keys.Left),
+                          IsKeyPressed(Keys.Right),
+                          IsKeyPressed(Keys.RShiftKey))
             ManualControl(ManualControlPlayerTwo,
-                          KeyboardState.IsKeyPressed(Keys.W),
-                          KeyboardState.IsKeyPressed(Keys.S),
-                          KeyboardState.IsKeyPressed(Keys.A),
-                          KeyboardState.IsKeyPressed(Keys.D),
-                          KeyboardState.IsKeyPressed(Keys.LShiftKey))
+                          IsKeyPressed(Keys.W),
+                          IsKeyPressed(Keys.S),
+                          IsKeyPressed(Keys.A),
+                          IsKeyPressed(Keys.D),
+                          IsKeyPressed(Keys.LShiftKey))
         End If
 
         ' Process queued actions now, so the sprite collection is up to date. Then we can tell if interactions need to be reinitialized.

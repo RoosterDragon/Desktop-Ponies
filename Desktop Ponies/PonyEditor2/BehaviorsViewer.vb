@@ -81,7 +81,7 @@
     Private Sub GroupNamesButton_Click(sender As Object, e As EventArgs) Handles GroupNamesButton.Click
         Using dialog = New GroupNamesDialog(base)
             If dialog.ShowDialog(Me) = DialogResult.OK Then
-                Me.LoadFor(base)
+                LoadFor(base)
             End If
         End Using
     End Sub

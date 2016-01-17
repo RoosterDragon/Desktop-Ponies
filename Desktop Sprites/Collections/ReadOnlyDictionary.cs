@@ -152,7 +152,7 @@
         /// otherwise, false.</returns>
         public static bool operator ==(ReadOnlyDictionary<TKey, TValue> left, ReadOnlyDictionary<TKey, TValue> right)
         {
-            return object.Equals(left.dictionary, right.dictionary);
+            return Equals(left.dictionary, right.dictionary);
         }
         /// <summary>
         /// Tests whether two specified <see cref="T:DesktopSprites.Collections.ReadOnlyDictionary`2"/> structures are different.

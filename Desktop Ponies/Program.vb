@@ -112,7 +112,7 @@ Friend NotInheritable Class Program
         Console.WriteLine(message)
         Console.WriteLine(
             "Error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() & " occurred " &
-            DateTime.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
+            Date.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
         Console.WriteLine()
         Console.WriteLine(ex.ToString())
         Console.WriteLine("-----")
@@ -120,10 +120,10 @@ Friend NotInheritable Class Program
 
     Private Shared Sub LogErrorToDisk(ex As Exception)
         Const path = "error.txt"
-        Using errorFile As New IO.StreamWriter(path, False, System.Text.Encoding.UTF8)
+        Using errorFile As New IO.StreamWriter(path, False, Text.Encoding.UTF8)
             errorFile.WriteLine(
                 "Unhandled error in Desktop Ponies v" & General.GetAssemblyVersion().ToDisplayString() &
-                " occurred " & DateTime.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
+                " occurred " & Date.UtcNow.ToString("u", Globalization.CultureInfo.InvariantCulture))
             errorFile.WriteLine()
             errorFile.WriteLine(ex.ToString())
             Console.WriteLine("An error file can be found at " & path)

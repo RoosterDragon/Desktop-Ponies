@@ -19,7 +19,7 @@
         /// synchronization. When mutating of the collection is required, the animation thread blocks until all enumerators complete.
         /// </summary>
         [System.Diagnostics.DebuggerDisplay("Count = {Count}")]
-        [System.Diagnostics.DebuggerTypeProxy(typeof(ConcurrentReadOnlySpriteCollection.DebugView))]
+        [System.Diagnostics.DebuggerTypeProxy(typeof(DebugView))]
         public struct ConcurrentReadOnlySpriteCollection : ICollection<ISprite>
         {
             #region Enumerator struct
@@ -45,7 +45,7 @@
                 /// <param name="animationLoopBase">The animator whose sprite collection should be enumerated.</param>
                 internal Enumerator(AnimationLoopBase animationLoopBase)
                 {
-                    this.guard = animationLoopBase.spritesGuard;
+                    guard = animationLoopBase.spritesGuard;
                     guard.EnterReadLock();
                     enumerator = animationLoopBase.sprites.GetEnumerator();
                 }

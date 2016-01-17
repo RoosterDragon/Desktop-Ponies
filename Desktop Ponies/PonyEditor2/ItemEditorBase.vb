@@ -13,7 +13,7 @@ Public Class ItemEditorBase
             Return original
         End Get
     End Property
-    Protected Overridable ReadOnly Property Collection As System.Collections.IList
+    Protected Overridable ReadOnly Property Collection As Collections.IList
         Get
             Throw New NotImplementedException()
         End Get

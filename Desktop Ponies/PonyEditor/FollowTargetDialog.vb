@@ -180,7 +180,7 @@
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
         DialogResult = DialogResult.Cancel
-        Me.Close()
+        Close()
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -221,6 +221,6 @@
         behaviorToChange.FollowOffset = If(OffsetTypeMirrorOption.Checked, FollowOffsetType.Mirror, FollowOffsetType.Fixed)
 
         DialogResult = DialogResult.OK
-        Me.Close()
+        Close()
     End Sub
 End Class

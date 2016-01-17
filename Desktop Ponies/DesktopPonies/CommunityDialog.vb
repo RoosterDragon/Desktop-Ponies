@@ -23,7 +23,7 @@
                 Using client As New Net.WebClient()
                     latest = client.DownloadString("https://dl.dropboxusercontent.com/s/tjeymr4wsopqgib/community.xml")
                 End Using
-                Dim doc = System.Xml.Linq.XDocument.Parse(latest)
+                Dim doc = Xml.Linq.XDocument.Parse(latest)
                 latestVersion = Version.Parse(doc.Root.<LatestVersion>.Single().Value)
                 latestVersionUrl = New Uri(doc.Root.<LatestVersionUrl>.Single().Value)
                 Dim patchFromValue = doc.Root.<LatestVersionPatchFrom>.Single().Value
@@ -129,8 +129,8 @@
 
     Private Sub Link_MouseDown(sender As Object, e As MouseEventArgs) Handles DownloadLink.MouseDown, PatchLink.MouseDown
         link = DirectCast(sender, LinkLabel).Links(0)
-        If e.Button = Windows.Forms.MouseButtons.Right Then
-            LinkContextMenu.Show(Control.MousePosition)
+        If e.Button = MouseButtons.Right Then
+            LinkContextMenu.Show(MousePosition)
         End If
     End Sub
 

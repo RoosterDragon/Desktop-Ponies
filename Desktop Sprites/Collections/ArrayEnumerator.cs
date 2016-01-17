@@ -25,7 +25,7 @@
         public ArrayEnumerator(T[] array)
         {
             this.array = Argument.EnsureNotNull(array, "array");
-            this.index = -1;
+            index = -1;
         }
         /// <summary>
         /// Advances the enumerator to the next element of the array.

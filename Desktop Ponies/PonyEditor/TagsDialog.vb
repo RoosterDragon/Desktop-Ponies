@@ -8,7 +8,7 @@
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
         DialogResult = DialogResult.Cancel
-        Me.Close()
+        Close()
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
@@ -18,11 +18,11 @@
         _editor.CurrentBase.Tags.UnionWith(PonyFilterList.CheckedItems.Cast(Of CaseInsensitiveString)())
 
         DialogResult = DialogResult.OK
-        Me.Close()
+        Close()
     End Sub
 
     Private Sub Tags_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.Text = "Tags for " & _editor.CurrentBase.Directory
+        Text = "Tags for " & _editor.CurrentBase.Directory
 
         For Each tag As CaseInsensitiveString In PonyBase.StandardTags.Concat(Options.CustomTags)
             PonyFilterList.Items.Add(tag)

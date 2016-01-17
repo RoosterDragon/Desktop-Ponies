@@ -408,14 +408,14 @@ Public Class MainForm
     End Sub
 
     Private Sub PonyEditorButton_Click(sender As Object, e As EventArgs) Handles PonyEditorButton.Click
-        Me.Visible = False
+        Visible = False
         Using form = New PonyEditor()
             form.ShowDialog(Me)
 
             PonyShutdown()
 
-            If Not Me.IsDisposed Then
-                Me.Visible = True
+            If Not IsDisposed Then
+                Visible = True
             End If
 
             If form.ChangesMade Then
@@ -431,15 +431,15 @@ Public Class MainForm
 
     Private Sub GamesButton_Click(sender As Object, e As EventArgs) Handles GamesButton.Click
         Try
-            Me.Visible = False
+            Visible = False
             Using gameForm As New GameSelectionForm(ponies)
                 If gameForm.ShowDialog(Me) = DialogResult.OK Then
                     PonyStartup(Function() New Game.GameAnimator(ponyViewer, {}, ponies, gameForm.PonyContext, gameForm.Game, Me), {})
                     gameForm.Game.Setup()
                     animator.Start()
                 Else
-                    If Me.IsDisposed = False Then
-                        Me.Visible = True
+                    If IsDisposed = False Then
+                        Visible = True
                     End If
                 End If
             End Using
@@ -524,7 +524,7 @@ Public Class MainForm
     End Sub
 
     Private Sub FilterAllRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAllRadio.CheckedChanged
-        If FilterAllRadio.Checked AndAlso Me.Visible Then
+        If FilterAllRadio.Checked AndAlso Visible Then
             FilterOptionsBox.Enabled = False
             RefilterSelection()
         End If

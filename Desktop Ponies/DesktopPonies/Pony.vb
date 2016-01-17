@@ -193,9 +193,9 @@ Public Class PonyBase
 
         Public Sub New(base As PonyBase, skip As Boolean)
             Argument.EnsureNotNull(base, "base")
-            Me.speeches = base.Speeches
+            speeches = base.Speeches
             Me.skip = skip
-            Me.index = -1
+            index = -1
         End Sub
 
         Public ReadOnly Property Current As Speech Implements IEnumerator(Of Speech).Current
@@ -384,10 +384,10 @@ Public Class PonyBase
 
     Public Sub Save()
         If Directory Is Nothing Then Throw New InvalidOperationException("Directory must be set before Save can be called.")
-        Dim configFilePath = IO.Path.Combine(RootDirectory, Directory, ConfigFilename)
+        Dim configFilePath = Path.Combine(RootDirectory, Directory, ConfigFilename)
 
         Dim tempFileName = Path.GetTempFileName()
-        Using writer As New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
+        Using writer As New StreamWriter(tempFileName, False, Text.Encoding.UTF8)
             For Each commentLine In commentLines
                 writer.WriteLine(commentLine)
             Next
@@ -429,7 +429,7 @@ Public Class PonyBase
         End Using
 
         tempFileName = Path.GetTempFileName()
-        Using writer = New StreamWriter(tempFileName, False, System.Text.Encoding.UTF8)
+        Using writer = New StreamWriter(tempFileName, False, Text.Encoding.UTF8)
             For Each line In interactionFileLines
                 writer.WriteLine(line)
             Next
@@ -588,7 +588,7 @@ Public Class InteractionBase
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
-        Dim copy = DirectCast(MyBase.MemberwiseClone(), InteractionBase)
+        Dim copy = DirectCast(MemberwiseClone(), InteractionBase)
         copy._targetNames = New HashSet(Of String)(_targetNames)
         copy._behaviorNames = New HashSet(Of CaseInsensitiveString)(_behaviorNames)
         Return copy
@@ -934,9 +934,9 @@ Public Class Behavior
 
         Public Sub New(behavior As Behavior)
             Argument.EnsureNotNull(behavior, "behavior")
-            Me.behaviorName = behavior.Name
-            Me.effects = behavior._base.Effects
-            Me.index = -1
+            behaviorName = behavior.Name
+            effects = behavior._base.Effects
+            index = -1
         End Sub
 
         Public ReadOnly Property Current As EffectBase Implements IEnumerator(Of EffectBase).Current
@@ -968,7 +968,7 @@ Public Class Behavior
 #End Region
 
     Public Sub New(base As PonyBase)
-        Me._base = Argument.EnsureNotNull(base, "base")
+        _base = Argument.EnsureNotNull(base, "base")
     End Sub
 
     Public Shared Function TryLoad(iniLine As String, imageDirectory As String, pony As PonyBase, ByRef result As Behavior, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
@@ -1059,7 +1059,7 @@ Public Class Behavior
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
-        Dim copy = DirectCast(MyBase.MemberwiseClone(), Behavior)
+        Dim copy = DirectCast(MemberwiseClone(), Behavior)
         copy._leftImage = New CenterableSpriteImage() With {.Path = _leftImage.Path,
                                                             .CustomCenter = _leftImage.CustomCenter,
                                                             .RoundingPolicyX = _leftImage.RoundingPolicyX,
@@ -1080,11 +1080,11 @@ Public Class Behavior
                 Referential.CheckUnique("Follow Stopped Behavior", FollowStoppedBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
                 Referential.CheckUnique("Follow Moving Behavior", FollowMovingBehaviorName, _base.Behaviors.Select(Function(b) b.Name)),
                 Referential.CheckUnique("Follow Target", FollowTargetName, ponies.Bases.Select(Function(pb) pb.Directory)),
-                If(TargetMode <> DesktopPonies.TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
+                If(TargetMode <> TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
                    String.IsNullOrEmpty(FollowStoppedBehaviorName),
                    New ParseIssue("Follow Stopped Behavior", FollowStoppedBehaviorName,
                                   "Auto select will be used.", "Manual image selection was specified but no behavior is set."), Nothing),
-                If(TargetMode <> DesktopPonies.TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
+                If(TargetMode <> TargetMode.None AndAlso Not AutoSelectImagesOnFollow AndAlso
                    String.IsNullOrEmpty(FollowMovingBehaviorName),
                    New ParseIssue("Follow Moving Behavior", FollowMovingBehaviorName,
                                   "Auto select will be used.", "Manual image selection was specified but no behavior is set."), Nothing)}.
@@ -1215,7 +1215,7 @@ Public Class Speech
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
-        Return DirectCast(MyBase.MemberwiseClone(), Speech)
+        Return DirectCast(MemberwiseClone(), Speech)
     End Function
 
     Public Property SourceIni As String Implements IPonyIniSourceable.SourceIni
@@ -1690,11 +1690,11 @@ Public Class Pony
     ''' <summary>
     ''' Provides the top-left location of this pony for use by effects.
     ''' </summary>
-    Private ReadOnly effectLocationProvider As Func(Of Vector2F) = Function() Me.regionF.Location
+    Private ReadOnly effectLocationProvider As Func(Of Vector2F) = Function() regionF.Location
     ''' <summary>
     ''' Provides the size of this pony for use by effects.
     ''' </summary>
-    Private ReadOnly effectSizeProvider As Func(Of Vector2) = Function() Me._region.Size
+    Private ReadOnly effectSizeProvider As Func(Of Vector2) = Function() _region.Size
 #End Region
 
 #Region "EffectBaseRepeat Structure"
@@ -3076,7 +3076,7 @@ Public Class Pony
         Dim hWnd = Interop.Win32.WindowFromPoint(New Interop.Win32.POINT(regionCenter.X, regionCenter.Y))
         If hWnd = IntPtr.Zero Then Return Nothing
         Dim windowRect As Interop.Win32.RECT
-        If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New System.ComponentModel.Win32Exception()
+        If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New ComponentModel.Win32Exception()
         Return Rectangle.FromLTRB(windowRect.Left, windowRect.Top, windowRect.Right, windowRect.Bottom)
     End Function
 
@@ -3093,7 +3093,7 @@ Public Class Pony
                 Dim hWnd = Interop.Win32.WindowFromPoint(corner)
                 If hWnd <> IntPtr.Zero Then
                     Dim windowRect As Interop.Win32.RECT
-                    If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New System.ComponentModel.Win32Exception()
+                    If Not Interop.Win32.GetWindowRect(hWnd, windowRect) Then Throw New ComponentModel.Win32Exception()
                     Yield Rectangle.FromLTRB(windowRect.Left, windowRect.Top, windowRect.Right, windowRect.Bottom)
                 End If
             Next
@@ -3517,7 +3517,7 @@ Public Class EffectBase
     End Sub
 
     Public Sub New(pony As PonyBase)
-        Me.ParentPonyBase = Argument.EnsureNotNull(pony, "pony")
+        ParentPonyBase = Argument.EnsureNotNull(pony, "pony")
     End Sub
 
     Public Sub New(_name As String, leftImagePath As String, rightImagePath As String)
@@ -3544,7 +3544,7 @@ Public Class EffectBase
     End Function
 
     Public Function Clone() As IPonyIniSourceable Implements IPonyIniSourceable.Clone
-        Dim copy = DirectCast(MyBase.MemberwiseClone(), EffectBase)
+        Dim copy = DirectCast(MemberwiseClone(), EffectBase)
         copy._leftImage = New SpriteImage() With {.Path = _leftImage.Path,
                                                   .RoundingPolicyX = _leftImage.RoundingPolicyX,
                                                   .RoundingPolicyY = _leftImage.RoundingPolicyY}
@@ -3785,7 +3785,7 @@ Public Class Effect
         End Get
     End Property
 
-    Public ReadOnly Property Region As System.Drawing.Rectangle Implements ISprite.Region
+    Public ReadOnly Property Region As Rectangle Implements ISprite.Region
         Get
             Dim width = CInt(CurrentImageSize.Width * Context.ScaleFactor)
             Dim height = CInt(CurrentImageSize.Height * Context.ScaleFactor)
@@ -4028,11 +4028,11 @@ Public Class House
         If currentTime - lastCycleTime <= HouseBase.CycleInterval Then Return
         lastCycleTime = currentTime
 
-        Console.WriteLine(Me.Base.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
+        Console.WriteLine(Base.Name & " - Cycling. Deployed ponies: " & deployedPonies.Count)
 
         If Rng.NextDouble() < 0.5 Then
             'skip this round
-            Console.WriteLine(Me.Base.Name & " - Decided to skip this round of cycling.")
+            Console.WriteLine(Base.Name & " - Decided to skip this round of cycling.")
             Exit Sub
         End If
 
@@ -4040,13 +4040,13 @@ Public Class House
             If deployedPonies.Count < HouseBase.MaximumPonies AndAlso Ponies.Count() < Options.MaxPonyCount Then
                 DeployPony(ponyBases)
             Else
-                Console.WriteLine(Me.Base.Name & " - Cannot deploy. Pony limit reached.")
+                Console.WriteLine(Base.Name & " - Cannot deploy. Pony limit reached.")
             End If
         Else
             If deployedPonies.Count > HouseBase.MinimumPonies AndAlso Ponies.Count() > 1 Then
                 RecallPony(cancelRecalls)
             Else
-                Console.WriteLine(Me.Base.Name & " - Cannot recall. Too few ponies deployed.")
+                Console.WriteLine(Base.Name & " - Cannot recall. Too few ponies deployed.")
             End If
         End If
     End Sub
@@ -4105,7 +4105,7 @@ Public Class House
         Context.PendingSprites.Add(ponyToDeploy)
         deployedPonies.Add(ponyToDeploy)
 
-        Console.WriteLine(Me.Base.Name & " - Deployed " & baseToDeploy.Directory)
+        Console.WriteLine(Base.Name & " - Deployed " & baseToDeploy.Directory)
     End Sub
 
     Private Sub RecallPony(cancelRecalls As IEnumerable(Of Pony))
@@ -4123,7 +4123,7 @@ Public Class House
 
         If Not deployedPonies.Remove(ponyToRecall) Then AddHandler ponyToRecall.Expired, Sub() StopTrackingPony(ponyToRecall)
         recallingPonies.Add(ponyToRecall)
-        Console.WriteLine(Me.Base.Name & " - Recalled " & ponyToRecall.Base.Directory)
+        Console.WriteLine(Base.Name & " - Recalled " & ponyToRecall.Base.Directory)
     End Sub
 
     Private Sub StopTrackingPony(pony As Pony)
@@ -4245,8 +4245,8 @@ End Enum
 
 Public Module DirectionExtensions
     Public Function EnsureDirectionIsValid(direction As Direction, paramName As String) As Direction
-        If direction < DesktopPonies.Direction.TopLeft OrElse direction > DesktopPonies.Direction.RandomNotCenter Then
-            Throw New System.ComponentModel.InvalidEnumArgumentException(paramName, direction, GetType(Direction))
+        If direction < Direction.TopLeft OrElse direction > Direction.RandomNotCenter Then
+            Throw New ComponentModel.InvalidEnumArgumentException(paramName, direction, GetType(Direction))
         End If
         Return direction
     End Function
@@ -4277,7 +4277,7 @@ Public Module DirectionExtensions
             Case Direction.RandomNotCenter
                 Return "Any Except Center"
             Case Else
-                Throw New System.ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
+                Throw New ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
         End Select
     End Function
 
@@ -4307,7 +4307,7 @@ Public Module DirectionExtensions
             Case Direction.RandomNotCenter
                 Return "Any-Not_Center"
             Case Else
-                Throw New System.ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
+                Throw New ComponentModel.InvalidEnumArgumentException("location", location, location.GetType())
         End Select
     End Function
 End Module
@@ -4354,7 +4354,7 @@ Public Module AllowedMovesExtensions
             Case AllowedMoves.Dragged
                 Return "Dragged"
             Case Else
-                Throw New System.ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
+                Throw New ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
         End Select
     End Function
 
@@ -4384,7 +4384,7 @@ Public Module AllowedMovesExtensions
             Case AllowedMoves.Dragged
                 Return "Dragged"
             Case Else
-                Throw New System.ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
+                Throw New ComponentModel.InvalidEnumArgumentException("movement", movement, movement.GetType())
         End Select
     End Function
 End Module

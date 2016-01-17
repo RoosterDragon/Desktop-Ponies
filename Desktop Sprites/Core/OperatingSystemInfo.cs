@@ -24,7 +24,7 @@
             try
             {
                 buffer = Marshal.AllocHGlobal(8196);
-                if (DesktopSprites.Interop.Unix.NativeMethods.uname(buffer) == 0)
+                if (Interop.Unix.NativeMethods.uname(buffer) == 0)
                 {
                     // The buffer contains 5 or 6 null-terminated char arrays, we will marshal the first one, containing the system name.
                     string osName = Marshal.PtrToStringAnsi(buffer);

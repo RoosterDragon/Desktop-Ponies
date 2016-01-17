@@ -207,6 +207,6 @@ Public Class HouseOptionsForm
     End Sub
 
     Private Sub Close_Button_Click(sender As Object, e As EventArgs) Handles Close_Button.Click
-        Me.Close()
+        Close()
     End Sub
 End Class

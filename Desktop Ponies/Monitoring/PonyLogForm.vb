@@ -15,11 +15,11 @@
         UpdateLogs()
     End Sub
 
-    Private Sub chkActiveRefresh_CheckedChanged(sender As System.Object, e As System.EventArgs) Handles chkActiveRefresh.CheckedChanged
+    Private Sub chkActiveRefresh_CheckedChanged(sender As Object, e As EventArgs) Handles chkActiveRefresh.CheckedChanged
         RefreshTimer.Enabled = chkActiveRefresh.Checked
     End Sub
 
-    Private Sub RefreshTimer_Tick(sender As System.Object, e As System.EventArgs) Handles RefreshTimer.Tick
+    Private Sub RefreshTimer_Tick(sender As Object, e As EventArgs) Handles RefreshTimer.Tick
         UpdateLogs()
     End Sub
 

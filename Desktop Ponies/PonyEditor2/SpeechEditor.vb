@@ -7,9 +7,9 @@
             MyBase.Edited = value
         End Set
     End Property
-    Protected Overrides ReadOnly Property Collection As System.Collections.IList
+    Protected Overrides ReadOnly Property Collection As Collections.IList
         Get
-            Return CType(Base.Speeches, Collections.IList)
+            Return Base.Speeches
         End Get
     End Property
     Protected Overrides ReadOnly Property ItemTypeName As String
@@ -33,7 +33,7 @@
         Bind(Function() Edited.Text, LineTextBox)
         Bind(Function() Edited.SoundFile, SoundFileSelector)
         Bind(Function() Edited.Skip, RandomCheckBox, True)
-        Bind(Function() Edited.Group, GroupNumber, Function(int) CDec(int), Function(dec) CInt(dec))
+        Bind(Function() Edited.Group, GroupNumber, Function(int) int, Function(dec) CInt(dec))
     End Sub
 
     Protected Overrides Sub ChangeItem()

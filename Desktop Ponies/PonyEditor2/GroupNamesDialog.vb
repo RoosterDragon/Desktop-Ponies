@@ -33,7 +33,7 @@
         Enabled = True
     End Sub
 
-    Private Sub OK_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK_Button.Click
+    Private Sub OK_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles OK_Button.Click
         Dim originalGroups = base.BehaviorGroups.ToImmutableArray()
         base.BehaviorGroups.Clear()
         For Each row As DataGridViewRow In NamesGrid.Rows
@@ -54,7 +54,7 @@
         Close()
     End Sub
 
-    Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
+    Private Sub Cancel_Button_Click(ByVal sender As Object, ByVal e As EventArgs) Handles Cancel_Button.Click
         DialogResult = DialogResult.Cancel
         Close()
     End Sub

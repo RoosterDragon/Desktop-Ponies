@@ -27,7 +27,7 @@ Public Class DesktopPonyAnimator
                    ponyCollection As PonyCollection, ponyContext As PonyContext,
                    allowAddingAndRemovingPonies As Boolean, owner As Control)
         MyBase.New(spriteViewer, spriteCollection, ponyCollection, ponyContext)
-        Me.allowAddingAndRemovingSprites = allowAddingAndRemovingPonies
+        allowAddingAndRemovingSprites = allowAddingAndRemovingPonies
         ownerControl = owner
 
         If ownerControl IsNot Nothing AndAlso Options.EnablePonyLogs AndAlso Not OperatingSystemInfo.IsMacOSX Then

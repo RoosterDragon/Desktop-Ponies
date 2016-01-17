@@ -10,9 +10,9 @@
             MyBase.Edited = value
         End Set
     End Property
-    Protected Overrides ReadOnly Property Collection As System.Collections.IList
+    Protected Overrides ReadOnly Property Collection As Collections.IList
         Get
-            Return CType(Base.Behaviors, Collections.IList)
+            Return Base.Behaviors
         End Get
     End Property
     Protected Overrides ReadOnly Property ItemTypeName As String
@@ -26,9 +26,9 @@
     Protected Overrides Sub CreateBindings()
         MovementComboBox.Items.AddRange(allowedMovesValues)
         Bind(Function() Edited.Name, NameTextBox)
-        Bind(Function() Edited.Group, GroupNumber, Function(int) CDec(int), Function(dec) CInt(dec))
+        Bind(Function() Edited.Group, GroupNumber, Function(int) int, Function(dec) CInt(dec))
         Bind(Function() Edited.Chance, ChanceNumber, Function(dbl) CDec(dbl) * 100, Function(dec) dec / 100)
-        Bind(Function() Edited.Speed, SpeedNumber, Function(dbl) CDec(dbl), Function(dec) CDbl(dec))
+        Bind(Function() Edited.Speed, SpeedNumber, Function(dbl) CDec(dbl), Function(dec) dec)
         Bind(Function() Edited.AllowedMovement, MovementComboBox)
         Bind(Function() Edited.MinDuration, MinDurationNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))
         Bind(Function() Edited.MaxDuration, MaxDurationNumber, Function(ts) CDec(ts.TotalSeconds), Function(dec) TimeSpan.FromSeconds(dec))

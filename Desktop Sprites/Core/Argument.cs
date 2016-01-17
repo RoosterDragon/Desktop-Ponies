@@ -59,7 +59,7 @@
         [DebuggerStepThrough]
         public static string EnsureNotNullOrEmpty([ValidatedNotNull] string arg, string paramName)
         {
-            if (Argument.EnsureNotNull(arg, paramName).Length == 0)
+            if (EnsureNotNull(arg, paramName).Length == 0)
                 throw new ArgumentException(paramName + " must not be empty.", paramName);
             return arg;
         }
@@ -75,7 +75,7 @@
         [DebuggerStepThrough]
         public static void EnsureNotNullOrEmpty<T>([ValidatedNotNull] IEnumerable<T> arg, string paramName)
         {
-            if (!Argument.EnsureNotNull(arg, paramName).Any())
+            if (!EnsureNotNull(arg, paramName).Any())
                 throw new ArgumentException(paramName + " must contain at least one element.", paramName);
         }
 
@@ -906,7 +906,7 @@
         /// <param name="arg">The argument to validate.</param>
         /// <param name="paramName">The name of the parameter.</param>
         /// <returns>The value of <paramref name="arg"/>.</returns>
-        /// <exception cref="T:System.ArgumentException"><typeparamref name="TEnum"/> is not an <see cref="System.Enum"/> type.</exception>
+        /// <exception cref="T:System.ArgumentException"><typeparamref name="TEnum"/> is not an <see cref="Enum"/> type.</exception>
         /// <exception cref="T:System.ComponentModel.InvalidEnumArgumentException"><paramref name="arg"/> is not a valid member of its
         /// enumeration. That is, the enumeration is non-flagged and the value is not a defined member, or the enumeration is flagged and
         /// the value contains a flag that is not a defined member.</exception>

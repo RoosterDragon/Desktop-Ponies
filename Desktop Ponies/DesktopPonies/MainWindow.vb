@@ -18,7 +18,7 @@ Friend Class MainWindow
         Icon = New Pixbuf("Twilight.ico")
         SetSizeRequest(300, 150)
         DefaultSize = New Size(400, 550)
-        WindowPosition = Gtk.WindowPosition.Center
+        WindowPosition = WindowPosition.Center
 
         Dim layoutBox = New VBox(False, 4)
         Add(layoutBox)
@@ -72,7 +72,7 @@ Friend Class MainWindow
             Dim dialog = New MessageDialog(Me, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, message)
             AddHandler dialog.Response, Sub() dialog.Destroy()
             dialog.Run()
-            Gtk.Application.Quit()
+            Application.Quit()
             Return
         End If
         Sensitive = False
@@ -158,7 +158,7 @@ Friend Class MainWindow
         Sensitive = False
         progressBar.Fraction = 0
         progressBar.Show()
-        Dim viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface(False)
+        Dim viewer = New GtkSpriteInterface(False)
         Threading.ThreadPool.QueueUserWorkItem(
             Sub()
                 viewer.Topmost = Options.AlwaysOnTop
@@ -180,7 +180,7 @@ Friend Class MainWindow
                                                            Sub() Invoke(
                                                                Sub()
                                                                    If animator.ExitRequested = ExitRequest.ExitApplication Then
-                                                                       Gtk.Application.Quit()
+                                                                       Application.Quit()
                                                                    Else
                                                                        Show()
                                                                        ponySelectionBox.Show()

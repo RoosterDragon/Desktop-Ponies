@@ -63,14 +63,14 @@
             {
                 // Get the native window handle.
                 IntPtr nativeWindow =
-                    DesktopSprites.Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
+                    Interop.MacOSX.NativeMethods.gdk_quartz_window_get_nswindow(window.Handle);
 
                 // Register the method with the runtime, if it has not yet been.
                 if (setHasShadowSelector == IntPtr.Zero)
-                    setHasShadowSelector = DesktopSprites.Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
+                    setHasShadowSelector = Interop.MacOSX.NativeMethods.sel_registerName("setHasShadow:");
 
                 // Send a message to the window, indicating the set shadow method and specified argument.
-                DesktopSprites.Interop.MacOSX.NativeMethods.objc_msgSend(nativeWindow, setHasShadowSelector, hasShadow);
+                Interop.MacOSX.NativeMethods.objc_msgSend(nativeWindow, setHasShadowSelector, hasShadow);
 
                 // Keep the managed window from being garbage collected until native code is finished running.
                 System.GC.KeepAlive(window);
@@ -122,7 +122,7 @@
                 {
                     const int XPadding = 6;
                     const int YPadding = 2;
-                    Gtk.Requisition size = Child.SizeRequest();
+                    Requisition size = Child.SizeRequest();
                     Move(x - size.Width / 2 - XPadding, y - size.Height - YPadding);
                     Resize(size.Width + 2 * XPadding, size.Height + 2 * YPadding);
                     if (!Visible)
@@ -250,15 +250,15 @@
                         {
                             // Right edge.
                             if (newWidth > lastWidth)
-                                newRegion.UnionWithRect(new Gdk.Rectangle(
+                                newRegion.UnionWithRect(new Rectangle(
                                     lastWidth, 0, newWidth - lastWidth, lastHeight));
                             // Bottom edge.
                             if (newHeight > lastHeight)
-                                newRegion.UnionWithRect(new Gdk.Rectangle(
+                                newRegion.UnionWithRect(new Rectangle(
                                     0, lastHeight, lastWidth, newHeight - lastHeight));
                             // Bottom-right corner.
                             if (newWidth > lastWidth && newHeight > lastHeight)
-                                newRegion.UnionWithRect(new Gdk.Rectangle(
+                                newRegion.UnionWithRect(new Rectangle(
                                     lastWidth, lastHeight, newWidth - lastWidth, newHeight - lastHeight));
 
                             // Create the Cairo context for possible alpha drawing. A context may not be reused, and must be recreated
@@ -289,7 +289,7 @@
                 {
                     using (Region all = new Region())
                     {
-                        all.UnionWithRect(new Gdk.Rectangle(0, 0, newWidth, newHeight));
+                        all.UnionWithRect(new Rectangle(0, 0, newWidth, newHeight));
                         GdkWindow.InputShapeCombineRegion(all, 0, 0);
                     }
                     lastClip = null;
@@ -370,7 +370,7 @@
                             updatingMask = false;
                             using (Region all = new Region())
                             {
-                                all.UnionWithRect(new Gdk.Rectangle(0, 0, width, height));
+                                all.UnionWithRect(new Rectangle(0, 0, width, height));
                                 GdkWindow.InputShapeCombineRegion(all, 0, 0);
                             }
                             lastClip = null;
@@ -535,7 +535,7 @@
                     throw new ArgumentOutOfRangeException("depth", depth, "depth must be 8.");
 
                 ClippedImage frameImage = new ClippedImage();
-                List<Gdk.Point> points = new List<Gdk.Point>((int)Math.Ceiling((float)width * (float)height / 8f));
+                List<Point> points = new List<Point>((int)Math.Ceiling((float)width * height / 8f));
 
                 // Create a data buffer to hold 32bbp RGBA values.
                 byte[] data = new byte[width * height * 4];
@@ -558,7 +558,7 @@
                             data[offset + 3] = 255;
 
                             // Save the point for creating the mask later.
-                            points.Add(new Gdk.Point(x, row));
+                            points.Add(new Point(x, row));
                         }
                         else
                         {
@@ -1425,7 +1425,7 @@
         /// <param name="pixbuf">The <see cref="T:Gdk.Pixbuf"/> to be altered.</param>
         private static void AlterPixbufForTransparency(string fileName, Pixbuf pixbuf)
         {
-            string mapFilePath = System.IO.Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+            string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
             if (File.Exists(mapFilePath))
             {
                 AlphaRemappingTable map = new AlphaRemappingTable();

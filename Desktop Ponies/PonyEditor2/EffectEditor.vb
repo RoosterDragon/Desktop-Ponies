@@ -10,9 +10,9 @@
             MyBase.Edited = value
         End Set
     End Property
-    Protected Overrides ReadOnly Property Collection As System.Collections.IList
+    Protected Overrides ReadOnly Property Collection As Collections.IList
         Get
-            Return CType(Base.Effects, Collections.IList)
+            Return Base.Effects
         End Get
     End Property
     Protected Overrides ReadOnly Property ItemTypeName As String

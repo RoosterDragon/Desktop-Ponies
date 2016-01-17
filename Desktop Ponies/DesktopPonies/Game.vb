@@ -103,7 +103,7 @@ Public Class Game
         Dim ballData As New List(Of String)()
         Dim goalData As New List(Of String)()
 
-        Using configFile As New StreamReader(Path.Combine(directory, Game.ConfigFilename))
+        Using configFile As New StreamReader(Path.Combine(directory, ConfigFilename))
             Do Until configFile.EndOfStream
                 Dim line = configFile.ReadLine
 
@@ -342,8 +342,8 @@ Public Class Game
     End Function
 
     Private Function IsUnderManualControlAndActionWanted(pony As Pony) As Boolean
-        Return (ReferenceEquals(pony, manualControlPlayerOne) AndAlso KeyboardState.IsKeyPressed(Keys.RControlKey)) OrElse
-            (ReferenceEquals(pony, manualControlPlayerTwo) AndAlso KeyboardState.IsKeyPressed(Keys.LControlKey))
+        Return (ReferenceEquals(pony, manualControlPlayerOne) AndAlso IsKeyPressed(Keys.RControlKey)) OrElse
+            (ReferenceEquals(pony, manualControlPlayerTwo) AndAlso IsKeyPressed(Keys.LControlKey))
     End Function
 
     Private Function CheckForScore() As Boolean
@@ -701,7 +701,7 @@ Public Class Game
 
         Private areaPoints As String()
 
-        Private lastKickTime As DateTime = DateTime.MinValue
+        Private lastKickTime As Date = Date.MinValue
 
         Private nearestBallDistance As Double
 
@@ -818,8 +818,8 @@ Public Class Game
 
                     'if we recently kicked the ball, don't do it for 2 seconds.
                     If ReferenceEquals(CurrentActionGroup, haveBallActions) Then
-                        If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
-                            If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) > 1 AndAlso
+                        If DateDiff(DateInterval.Second, lastKickTime, Date.UtcNow) <= 2 Then
+                            If DateDiff(DateInterval.Second, lastKickTime, Date.UtcNow) > 1 AndAlso
                                 game.IsUnderManualControl(Player) Then
                                 Speak("Can't kick again so soon!")
                             End If
@@ -848,7 +848,7 @@ Public Class Game
                 Case PlayerActionType.AvoidBall
                     Throw New NotImplementedException("Not implemented yet: action type " & selectedAction)
                 Case PlayerActionType.ThrowBallToGoal
-                    If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
+                    If DateDiff(DateInterval.Second, lastKickTime, Date.UtcNow) <= 2 Then
                         'can't kick again so soon
                         Exit Sub
                     End If
@@ -856,9 +856,9 @@ Public Class Game
                     If game.IsUnderManualControl(Player) AndAlso
                         Not game.IsUnderManualControlAndActionWanted(Player) Then Exit Sub
                     KickBall(ball, 10, GetOtherTeamGoal(), Nothing, Me, "*Kick*!")
-                    lastKickTime = DateTime.UtcNow
+                    lastKickTime = Date.UtcNow
                 Case PlayerActionType.ThrowBallToTeammate
-                    If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
+                    If DateDiff(DateInterval.Second, lastKickTime, Date.UtcNow) <= 2 Then
                         'can't kick again so soon
                         Exit Sub
                     End If
@@ -866,7 +866,7 @@ Public Class Game
                     'don't pass if we are under control - kick instead.
                     If game.IsUnderManualControl(Player) Then Exit Sub
 
-                    lastKickTime = DateTime.UtcNow
+                    lastKickTime = Date.UtcNow
                     Dim openTeammate = GetOpenTeammate()
                     If openTeammate Is Nothing Then
                         'no teammates to pass to, kick to goal instead, unless a player controlled pony.
@@ -877,7 +877,7 @@ Public Class Game
 
                     KickBall(ball, 10, Nothing, openTeammate, Me, "*Pass*!")
                 Case PlayerActionType.ThrowBallReflect
-                    If DateDiff(DateInterval.Second, lastKickTime, DateTime.UtcNow) <= 2 Then
+                    If DateDiff(DateInterval.Second, lastKickTime, Date.UtcNow) <= 2 Then
                         'can't kick again so soon
                         Exit Sub
                     End If
@@ -886,7 +886,7 @@ Public Class Game
                         Not game.IsUnderManualControlAndActionWanted(Player) Then Exit Sub
 
                     BounceBall(ball, 7, Me, "*Ping*!")
-                    lastKickTime = DateTime.UtcNow
+                    lastKickTime = Date.UtcNow
                 Case PlayerActionType.ApproachOwnGoal
                     SetDestination(Vector2.Round(GetTeamGoal().HostEffect.Center()))
                 Case PlayerActionType.ApproachTargetGoal
@@ -895,10 +895,10 @@ Public Class Game
                     If CurrentAction = PlayerActionType.Idle Then Exit Sub
                     Player.FollowTargetOverride = Nothing
                     If game.IsUnderManualControl(Player) Then Exit Sub
-                    Console.WriteLine(Player.Base.Directory & " Calling SetBehavior from Idle action " & DateTime.UtcNow)
+                    Console.WriteLine(Player.Base.Directory & " Calling SetBehavior from Idle action " & Date.UtcNow)
                     Player.SetBehavior(Nothing, False)
                 Case Else
-                    Throw New System.ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selectedAction)
+                    Throw New ComponentModel.InvalidEnumArgumentException("Invalid action type: " & selectedAction)
             End Select
 
             CurrentAction = selectedAction
@@ -1074,10 +1074,10 @@ Public Class Game
 
             For Each otherposition As Position In allPositions
                 Dim otherpony = otherposition.Player
-                If ReferenceEquals(Me.Player, otherpony) Then Continue For
+                If ReferenceEquals(Player, otherpony) Then Continue For
 
                 ' Push overlapping ponies a bit apart.
-                PonyPush(Me.Player, otherpony)
+                PonyPush(Player, otherpony)
             Next
         End Sub
 

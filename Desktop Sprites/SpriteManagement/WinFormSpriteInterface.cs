@@ -52,7 +52,7 @@
                 SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
                 // Force creation of the window handle, so properties may be altered before the form is shown.
-                if (!this.IsHandleCreated)
+                if (!IsHandleCreated)
                     CreateHandle();
             }
 
@@ -480,7 +480,7 @@
                 Bitmap = new Bitmap(path);
                 Width = Bitmap.Width;
                 Height = Bitmap.Height;
-                this.hashCode = path.GetHashCode();
+                hashCode = path.GetHashCode();
             }
             /// <summary>
             /// Initializes a new instance of the <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.ImageData"/> class by
@@ -1149,7 +1149,7 @@
         /// </returns>
         private ImageFrame ImageFrameFromFile(string fileName)
         {
-            return Disposable.SetupSafely(new ImageFrame(fileName), frame =>
+            return SetupSafely(new ImageFrame(fileName), frame =>
             {
                 // Check for an alpha remapping table, and apply it if one exists.
                 string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
@@ -1183,7 +1183,7 @@
         {
             if (BufferPreprocess != null)
                 BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
-            return Disposable.SetupSafely(
+            return SetupSafely(
                 new ImageFrame(new ImageData(buffer, palette, transparentIndex, stride, width, height, depth)),
                 frame =>
                 {

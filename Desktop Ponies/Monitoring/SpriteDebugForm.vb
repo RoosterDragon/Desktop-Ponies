@@ -38,7 +38,7 @@ Public Class SpriteDebugForm
         PonyDataGridView.ResumeLayout()
     End Sub
 
-    Private Sub PonyDataGridView_CellContentClick(sender As System.Object, e As System.Windows.Forms.DataGridViewCellEventArgs) Handles PonyDataGridView.CellContentClick
+    Private Sub PonyDataGridView_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles PonyDataGridView.CellContentClick
         If e.RowIndex < 0 Then Return
 
         If e.ColumnIndex = colLog.Index Then

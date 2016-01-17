@@ -85,7 +85,7 @@ Public Class FileSelector
     Private Sub FilePathChooseButton_Click(sender As Object, e As EventArgs) Handles FilePathChooseButton.Click
         Using dialog As New OpenFileDialog()
             dialog.InitialDirectory = IO.Path.GetFullPath(_baseDirectory)
-            Dim filterBuilder As New System.Text.StringBuilder()
+            Dim filterBuilder As New Text.StringBuilder()
             Dim first = True
             For Each pattern In SearchPatterns
                 If first Then
@@ -97,7 +97,7 @@ Public Class FileSelector
             Next
             Dim filter = filterBuilder.ToString()
             dialog.Filter = filter & "|" & filter
-            If dialog.ShowDialog(Me.ParentForm) = DialogResult.OK Then
+            If dialog.ShowDialog(ParentForm) = DialogResult.OK Then
                 Dim destinationFileName = IO.Path.GetFileName(dialog.FileName)
                 If IO.Path.GetDirectoryName(dialog.FileName) = BaseDirectory Then
                     FilePathComboBox.SelectedItem = destinationFileName

@@ -434,19 +434,19 @@ Public Class StringCollectionParser
         End Property
         Public Sub New(_value As T)
             Me._value = _value
-            Me._result = ParseResult.Success
+            _result = ParseResult.Success
         End Sub
         Public Sub New(_source As String, _value As T, _reason As String)
             Me._source = _source
             Me._value = _value
             Me._reason = _reason
-            Me._result = ParseResult.Fallback
+            _result = ParseResult.Fallback
         End Sub
         Public Sub New(_source As String, _reason As String, _fallback As T)
             Me._source = _source
             Me._reason = _reason
-            Me._result = ParseResult.Failed
-            Me._value = _fallback
+            _result = ParseResult.Failed
+            _value = _fallback
         End Sub
     End Structure
 End Class

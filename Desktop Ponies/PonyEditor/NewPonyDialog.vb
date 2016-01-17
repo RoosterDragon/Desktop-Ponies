@@ -18,13 +18,13 @@
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         If Not ValidateAndCreate() Then Return
-        Me.DialogResult = DialogResult.OK
-        Me.Close()
+        DialogResult = DialogResult.OK
+        Close()
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
-        Me.DialogResult = DialogResult.Cancel
-        Me.Close()
+        DialogResult = DialogResult.Cancel
+        Close()
     End Sub
 
     Private Function ValidateAndCreate() As Boolean

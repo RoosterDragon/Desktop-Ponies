@@ -36,7 +36,7 @@
         /// </summary>
         /// <param name="capacity">The initial number of elements that the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> can
         /// contain.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
         public LazyDictionary(int capacity)
         {
             dictionary = new Dictionary<TKey, Lazy<TValue>>(capacity);
@@ -88,7 +88,7 @@
         /// contain.</param>
         /// <param name="valueFactory">The delegate that is invoked to produce the lazily initialized value, based on the key, when the
         /// value is needed, or null to invoke the default constructor for the type of value.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
         public LazyDictionary(int capacity, Func<TKey, TValue> valueFactory)
             : this(capacity)
         {
@@ -121,7 +121,7 @@
         /// </param>
         /// <param name="valueFactory">The delegate that is invoked to produce the lazily initialized value, based on the key, when the
         /// value is needed, or null to invoke the default constructor for the type of value.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="capacity"/> is less than 0.</exception>
         public LazyDictionary(int capacity, IEqualityComparer<TKey> comparer, Func<TKey, TValue> valueFactory)
             : this(capacity, comparer)
         {
@@ -154,8 +154,8 @@
         /// Gets an enumerator which iterates over only key/value pairs in the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>
         /// whose values are initialized. If any items are initialized during the enumeration, the enumerator is invalidated.
         /// </summary>
-        /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized
-        /// during the enumeration.</exception>
+        /// <exception cref="InvalidOperationException">The collection was modified during enumeration.-or-An item was initialized during
+        /// the enumeration.</exception>
         public IEnumerable<KeyValuePair<TKey, TValue>> InitializedItems
         {
             get { return Enumerable.Create(GetInitializedEnumerator); }
@@ -318,7 +318,7 @@
         /// <param name="key">The key to locate in the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.</param>
         /// <returns>Returns true if the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key; otherwise, false.</returns>
-        /// <exception cref="System.ArgumentException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="key"/> is null.</exception>
         public bool ContainsKey(TKey key)
         {
             return dictionary.ContainsKey(key);
@@ -377,7 +377,7 @@
         /// <returns>An <see cref="T:System.Collections.Generic.IEnumerator`1"/> for the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.</exception>
+        /// <exception cref="InvalidOperationException">The collection was modified during enumeration.</exception>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             foreach (var kvp in dictionary)
@@ -395,7 +395,7 @@
         /// <returns>An <see cref="T:System.Collections.IEnumerator"/> for the
         /// <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/>.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException">The collection was modified during enumeration.</exception>
+        /// <exception cref="InvalidOperationException">The collection was modified during enumeration.</exception>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -558,7 +558,7 @@
         /// parameter is passed uninitialized.</param>
         /// <returns>Returns true if the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key; otherwise, false.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         bool IDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value)
         {
             return TryGetValue(key, out value, true);
@@ -576,7 +576,7 @@
         /// <returns>Returns true if the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> contains an element with the
         /// specified key whose value is already initialized or was made to initialize by setting initialize to true; otherwise, false.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         public bool TryGetValue(TKey key, out TValue value, bool initialize)
         {
             Lazy<TValue> lazy;

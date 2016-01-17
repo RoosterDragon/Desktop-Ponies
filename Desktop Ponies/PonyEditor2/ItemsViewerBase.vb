@@ -48,8 +48,8 @@
         Next
         If Grid.SortedColumn IsNot Nothing AndAlso Grid.SortOrder <> SortOrder.None Then
             Grid.Sort(Grid.SortedColumn, If(Grid.SortOrder = SortOrder.Ascending,
-                                            System.ComponentModel.ListSortDirection.Ascending,
-                                            System.ComponentModel.ListSortDirection.Descending))
+                                            ComponentModel.ListSortDirection.Ascending,
+                                            ComponentModel.ListSortDirection.Descending))
         End If
         Grid.ResumeLayout()
     End Sub

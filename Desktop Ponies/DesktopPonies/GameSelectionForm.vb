@@ -194,7 +194,7 @@ Public Class GameSelectionForm
 
         For Each Control In panel.Controls
             If Control.GetType Is GetType(PictureBox) Then
-                Dim picturebox As PictureBox = CType(Control, Windows.Forms.PictureBox)
+                Dim picturebox As PictureBox = CType(Control, PictureBox)
                 If picturebox.Name = "NotSet" Then
                     picturebox.Name = pony.Base.Directory
                     Select Case team
@@ -323,7 +323,7 @@ Public Class GameSelectionForm
         _game.GameScreen = Screen.AllScreens(MonitorComboBox.SelectedIndex)
         context.Region = _game.GameScreen.WorkingArea
 
-        Me.DialogResult = DialogResult.OK
+        DialogResult = DialogResult.OK
     End Sub
 
     Private Sub SetStage(stage As Byte)

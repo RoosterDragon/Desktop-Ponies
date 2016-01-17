@@ -113,7 +113,7 @@ Public Class PonyEditor
             LoadPonies(Nothing)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error attempting to load the editor. It will now close.")
-            Me.Close()
+            Close()
         End Try
 
         editorInterface = Options.GetInterface()
@@ -168,7 +168,7 @@ Public Class PonyEditor
             Dim srcImage As Image = Nothing
             Try
                 srcImage = If(ponyBase.Behaviors.Any(),
-                              Bitmap.FromFile(pathSelect(ponyBase.Behaviors(0))),
+                              Image.FromFile(pathSelect(ponyBase.Behaviors(0))),
                               My.Resources.RandomPony)
                 g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
                 g.DrawImage(srcImage, 0, 0, size, size)
@@ -407,7 +407,7 @@ Public Class PonyEditor
             editorAnimator.CreateEditorMenu(CurrentBase)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
-            Me.Close()
+            Close()
         End Try
     End Sub
 
@@ -448,7 +448,7 @@ Public Class PonyEditor
             rowIndexesByName.Add(DirectCast(BehaviorsGrid.Rows(i).Cells(colBehaviorOriginalName.Index).Value, CaseInsensitiveString), i)
         Next
         Dim behaviorSequencesByName As New Dictionary(Of CaseInsensitiveString, String)()
-        Dim sequence As New System.Text.StringBuilder()
+        Dim sequence As New Text.StringBuilder()
         For Each behavior In CurrentBase.Behaviors
             Dim links As List(Of ChainLink) = Nothing
             If chainsByBehaviorName.TryGetValue(behavior.Name, links) Then
@@ -960,11 +960,11 @@ Public Class PonyEditor
     Private Shared Function ConvertSortOrder(sort As SortOrder) As System.ComponentModel.ListSortDirection
         Select Case sort
             Case SortOrder.Ascending
-                Return System.ComponentModel.ListSortDirection.Ascending
+                Return ComponentModel.ListSortDirection.Ascending
             Case SortOrder.Descending
-                Return System.ComponentModel.ListSortDirection.Descending
+                Return ComponentModel.ListSortDirection.Descending
             Case Else
-                Return System.ComponentModel.ListSortDirection.Ascending
+                Return ComponentModel.ListSortDirection.Ascending
         End Select
     End Function
 
@@ -1120,7 +1120,7 @@ Public Class PonyEditor
                             "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error trying to handle a data error! The editor will now close.")
-            Me.Close()
+            Close()
         End Try
     End Sub
 
@@ -1169,7 +1169,7 @@ Public Class PonyEditor
 
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error creating new pony. The editor will now close.")
-            Me.Close()
+            Close()
         End Try
     End Sub
 

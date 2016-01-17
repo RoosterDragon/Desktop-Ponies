@@ -40,14 +40,14 @@ Friend Class EditorCommon
     End Function
     Public Shared Function SetImage(editor As PonyEditor, parent As IWin32Window,
                                     box As PictureBox, durationCallback As Action(Of Decimal)) As String
-        Dim path = EditorCommon.PromptUserForImagePath(parent, editor.CurrentBase)
+        Dim path = PromptUserForImagePath(parent, editor.CurrentBase)
         If path Is Nothing Then Return Nothing
 
         If box.Image IsNot Nothing Then box.Image.Dispose()
         box.Image = Image.FromFile(path)
 
         If PathEquality.Equals(IO.Path.GetExtension(path), ".gif") Then
-            Dim runtime = EditorCommon.GetGifTotalRuntime(box.Image)
+            Dim runtime = GetGifTotalRuntime(box.Image)
             If runtime <> 0 Then durationCallback(runtime)
         End If
 
@@ -55,7 +55,7 @@ Friend Class EditorCommon
     End Function
     Private Shared Function GetGifTotalRuntime(image As Image) As Decimal
         Try
-            Dim dimension = New System.Drawing.Imaging.FrameDimension(image.FrameDimensionsList(0))
+            Dim dimension = New Imaging.FrameDimension(image.FrameDimensionsList(0))
             Dim frameCount = image.GetFrameCount(dimension)
 
             Const PropertyTagFrameDelay As Integer = &H5100 ' From gdiplugimaging.h

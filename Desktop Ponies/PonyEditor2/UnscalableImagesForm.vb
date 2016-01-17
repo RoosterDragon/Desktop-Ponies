@@ -83,7 +83,7 @@ Public Class UnscalableImagesForm
         For Each unscalableImage In unscalableImagesToDisplay
             ImagesGrid.Rows.Add(unscalableImage.Item1, unscalableImage.Item2)
         Next
-        ImagesGrid.Sort(colImagePath, System.ComponentModel.ListSortDirection.Ascending)
+        ImagesGrid.Sort(colImagePath, ComponentModel.ListSortDirection.Ascending)
         ImagesGrid.ResumeLayout()
         CountLabel.Text = "Showing " & unscalableImagesToDisplay.Length & " of " & unscalableImages.Count & " unscalable images."
     End Sub
