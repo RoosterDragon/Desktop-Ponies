@@ -214,9 +214,6 @@ Public Class PonyEditor
                          End Sub)
         worker.QueueTask(Sub()
                              EnableWaitCursor(False)
-
-                             SaveSortOrder()
-                             RestoreSortOrder()
                          End Sub)
         worker.QueueTask(Sub()
                              EnableWaitCursor(False)
@@ -249,6 +246,8 @@ Public Class PonyEditor
             EffectsGrid.SuspendLayout()
             InteractionsGrid.SuspendLayout()
             SpeechesGrid.SuspendLayout()
+
+            SaveSortOrder()
 
             BehaviorsGrid.Rows.Clear()
             EffectsGrid.Rows.Clear()
@@ -399,6 +398,8 @@ Public Class PonyEditor
                     "Duplicate Names", MessageBoxButtons.OK, MessageBoxIcon.Information)
             End If
 
+            RestoreSortOrder()
+
             BehaviorsGrid.ResumeLayout()
             EffectsGrid.ResumeLayout()
             InteractionsGrid.ResumeLayout()
@@ -505,18 +506,9 @@ Public Class PonyEditor
                                                                               items As IEnumerable(Of TPonyIniSerializable)
                                                                               ) As TPonyIniSerializable
         Dim grid = DirectCast(sender, DataGridView)
-        If Not ReferenceEquals(column.DataGridView, grid) Then
-            Throw New ArgumentException("column must be a child of the sender grid.")
-        End If
+        If Not ReferenceEquals(column.DataGridView, grid) Then Throw New ArgumentException("column must be a child of the sender grid.")
         Dim name = DirectCast(grid.Rows(e.RowIndex).Cells(column.Index).Value, CaseInsensitiveString)
-        Dim item = items.OnlyOrDefault(Function(i) i.Name = name)
-
-        SaveSortOrder()
-        If item Is Nothing Then
-            LoadPonyInfo()
-            RestoreSortOrder()
-        End If
-        Return item
+        Return items.OnlyOrDefault(Function(i) i.Name = name)
     End Function
 
     Private Sub BehaviorsGrid_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles BehaviorsGrid.CellClick
@@ -668,8 +660,6 @@ Public Class PonyEditor
                         For Each effect In CurrentBase.Effects
                             If effect.BehaviorName = oldValue Then effect.BehaviorName = newValue
                         Next
-
-                        LoadPonyInfo()
 
                     Case colBehaviorChance.Index
                         behavior.Chance = Double.Parse(
@@ -861,8 +851,6 @@ Public Class PonyEditor
                             If b.EndLineName = oldValue Then b.EndLineName = newValue
                         Next
 
-                        LoadPonyInfo()
-
                     Case colSpeechText.Index
                         speech.Text = newValue
 
@@ -1047,7 +1035,6 @@ Public Class PonyEditor
 
     Private Sub Grid_UserDeletingRow(sender As Object, e As DataGridViewRowCancelEventArgs) Handles BehaviorsGrid.UserDeletingRow,
         EffectsGrid.UserDeletingRow, InteractionsGrid.UserDeletingRow, SpeechesGrid.UserDeletingRow
-        SaveSortOrder()
         Try
             Dim grid As DataGridView = DirectCast(sender, DataGridView)
             If ReferenceEquals(grid, EffectsGrid) Then
@@ -1081,7 +1068,6 @@ Public Class PonyEditor
     Private Sub Grid_UserDeletedRow(sender As Object, e As DataGridViewRowEventArgs) Handles BehaviorsGrid.UserDeletedRow,
         EffectsGrid.UserDeletedRow, InteractionsGrid.UserDeletedRow, SpeechesGrid.UserDeletedRow
         LoadPonyInfo()
-        RestoreSortOrder()
     End Sub
 
     Private Sub Grid_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles SpeechesGrid.DataError, InteractionsGrid.DataError, EffectsGrid.DataError, BehaviorsGrid.DataError
@@ -1180,7 +1166,6 @@ Public Class PonyEditor
             _changesMade = True
             CurrentBase.Save()
             LoadPonyInfo()
-            RestoreSortOrder()
             If editorAnimator.Started Then editorAnimator.Resume()
             PausePonyButton.Enabled = True
         Catch ex As ArgumentException When ex.ParamName = "text"
@@ -1273,7 +1258,6 @@ Public Class PonyEditor
 
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
         LoadPonyInfo()
-        RestoreSortOrder()
     End Sub
 
     Private Sub PonyEditorAnimator_AnimationFinished(sender As Object, e As EventArgs)
