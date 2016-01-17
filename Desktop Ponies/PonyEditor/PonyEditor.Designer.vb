@@ -6,7 +6,7 @@ Partial Class PonyEditor
     Private components As System.ComponentModel.IContainer
 
     'NOTE: The following procedure is required by the Windows Form Designer
-    'It can be modified using the Windows Form Designer.  
+    'It can be modified using the Windows Form Designer.
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
@@ -253,30 +253,35 @@ Partial Class PonyEditor
         Me.colBehaviorRightImage.HeaderText = "Right Image"
         Me.colBehaviorRightImage.Name = "colBehaviorRightImage"
         Me.colBehaviorRightImage.Width = 70
+        Me.colBehaviorRightImage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colBehaviorLeftImage
         '
         Me.colBehaviorLeftImage.HeaderText = "Left Image"
         Me.colBehaviorLeftImage.Name = "colBehaviorLeftImage"
         Me.colBehaviorLeftImage.Width = 63
+        Me.colBehaviorLeftImage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colBehaviorMovement
         '
         Me.colBehaviorMovement.HeaderText = "Movement Allowed"
         Me.colBehaviorMovement.Name = "colBehaviorMovement"
         Me.colBehaviorMovement.Width = 103
+        Me.colBehaviorMovement.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colBehaviorStartSpeech
         '
         Me.colBehaviorStartSpeech.HeaderText = "Starting Speech"
         Me.colBehaviorStartSpeech.Name = "colBehaviorStartSpeech"
         Me.colBehaviorStartSpeech.Width = 89
+        Me.colBehaviorStartSpeech.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colBehaviorEndSpeech
         '
         Me.colBehaviorEndSpeech.HeaderText = "Ending Speech"
         Me.colBehaviorEndSpeech.Name = "colBehaviorEndSpeech"
         Me.colBehaviorEndSpeech.Width = 86
+        Me.colBehaviorEndSpeech.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colBehaviorFollow
         '
@@ -310,6 +315,7 @@ Partial Class PonyEditor
         Me.colBehaviorDoNotRepeatAnimations.HeaderText = "Don't repeat animations"
         Me.colBehaviorDoNotRepeatAnimations.Name = "colBehaviorDoNotRepeatAnimations"
         Me.colBehaviorDoNotRepeatAnimations.Width = 124
+        Me.colBehaviorDoNotRepeatAnimations.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'SpeechesGrid
         '
@@ -363,6 +369,7 @@ Partial Class PonyEditor
         Me.colSpeechSoundFile.HeaderText = "Sound File"
         Me.colSpeechSoundFile.Name = "colSpeechSoundFile"
         Me.colSpeechSoundFile.Width = 63
+        Me.colSpeechSoundFile.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colSpeechUseRandomly
         '
@@ -370,6 +377,7 @@ Partial Class PonyEditor
         Me.colSpeechUseRandomly.Name = "colSpeechUseRandomly"
         Me.colSpeechUseRandomly.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.colSpeechUseRandomly.Width = 82
+        Me.colSpeechUseRandomly.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'InteractionsGrid
         '
@@ -861,6 +869,7 @@ Partial Class PonyEditor
         Me.colEffectBehavior.HeaderText = "Behavior"
         Me.colEffectBehavior.Name = "colEffectBehavior"
         Me.colEffectBehavior.Width = 55
+        Me.colEffectBehavior.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colEffectRightImage
         '
@@ -868,6 +877,7 @@ Partial Class PonyEditor
         Me.colEffectRightImage.Name = "colEffectRightImage"
         Me.colEffectRightImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.colEffectRightImage.Width = 70
+        Me.colEffectRightImage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colEffectLeftImage
         '
@@ -875,13 +885,13 @@ Partial Class PonyEditor
         Me.colEffectLeftImage.Name = "colEffectLeftImage"
         Me.colEffectLeftImage.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.colEffectLeftImage.Width = 63
+        Me.colEffectLeftImage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colEffectDuration
         '
         Me.colEffectDuration.HeaderText = "Duration"
         Me.colEffectDuration.Name = "colEffectDuration"
         Me.colEffectDuration.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectDuration.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         Me.colEffectDuration.Width = 53
         '
         'colEffectRepeatDelay
@@ -889,7 +899,6 @@ Partial Class PonyEditor
         Me.colEffectRepeatDelay.HeaderText = "Repeat Delay"
         Me.colEffectRepeatDelay.Name = "colEffectRepeatDelay"
         Me.colEffectRepeatDelay.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.colEffectRepeatDelay.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         Me.colEffectRepeatDelay.Width = 78
         '
         'colEffectLocationRight
@@ -913,6 +922,7 @@ Partial Class PonyEditor
         Me.colEffectLocationLeft.HeaderText = "Location Heading Left"
         Me.colEffectLocationLeft.Name = "colEffectLocationLeft"
         Me.colEffectLocationLeft.Width = 118
+        Me.colEffectLocationLeft.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'colEffectCenteringLeft
         '
@@ -935,6 +945,7 @@ Partial Class PonyEditor
         Me.colEffectDoNotRepeatAnimations.HeaderText = "Don't Repeat Animations"
         Me.colEffectDoNotRepeatAnimations.Name = "colEffectDoNotRepeatAnimations"
         Me.colEffectDoNotRepeatAnimations.Width = 130
+        Me.colEffectDoNotRepeatAnimations.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'PonyEditor
         '
