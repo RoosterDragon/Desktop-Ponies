@@ -448,6 +448,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Lily
 * Bot-chan
 
+#### Limestone Pie
+* Bot-chan
+
 #### Little Strongheart
 * Pony Noia
 
@@ -478,6 +481,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Manticore
+* Bot-chan
+
+#### Marble Pie
 * Bot-chan
 
 #### Matilda
