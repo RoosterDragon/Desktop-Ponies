@@ -76,9 +76,7 @@ Public Class MainForm
             profile = Options.ScreensaverProfileName
             If Globals.InScreensaverMode Then
                 ' We are starting in screensaver mode. Hide the program during loading.
-                autoStarted = True
-                ShowInTaskbar = False
-                WindowState = FormWindowState.Minimized
+                ActivateAutostart()
             End If
         Else
             ' Load the profile that was last in use by this user.
@@ -120,9 +118,7 @@ Public Class MainForm
                 Select Case Split(args(1).Trim(), ":")(0).ToLowerInvariant()
                     Case Autostart
                         ' Immediately start the ponies, using the autostart profile if available.
-                        autoStarted = True
-                        ShowInTaskbar = False
-                        WindowState = FormWindowState.Minimized
+                        ActivateAutostart()
 
                         Try
                             Options.LoadProfile(Autostart, False)
@@ -160,6 +156,18 @@ Public Class MainForm
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error processing command line arguments. They will be ignored.")
         End Try
+    End Sub
+
+    Private Sub ActivateAutostart()
+        autoStarted = True
+        ShowInTaskbar = False
+        WindowState = FormWindowState.Minimized
+    End Sub
+
+    Private Sub DeactivateAutostart()
+        autoStarted = False
+        ShowInTaskbar = True
+        WindowState = FormWindowState.Normal
     End Sub
 
     Private Sub ConfigureScreensaver()
@@ -254,19 +262,17 @@ Public Class MainForm
                              LoadingProgressBar.Value = 0
                              LoadingProgressBar.Maximum = 1
 
-                             If autoStarted Then
-                                 LoadPonies()
-                             Else
-                                 CountSelectedPonies()
+                             CountSelectedPonies()
 
-                                 PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
-                                 PaginationEnabled.Enabled = True
-                                 PaginationEnabled.Checked = Not OperatingSystemInfo.IsWindows
+                             PoniesPerPage.Maximum = PonySelectionPanel.Controls.Count
+                             PaginationEnabled.Enabled = True
+                             PaginationEnabled.Checked = Not OperatingSystemInfo.IsWindows
 
-                                 PonySelectionPanel.Enabled = True
-                                 SelectionControlsPanel.Enabled = True
-                                 AnimationTimer.Enabled = True
-                             End If
+                             PonySelectionPanel.Enabled = True
+                             SelectionControlsPanel.Enabled = True
+                             AnimationTimer.Enabled = True
+
+                             If autoStarted Then LoadPonies()
 
                              General.FullCollect()
                              loading = False
@@ -414,9 +420,7 @@ Public Class MainForm
 
             PonyShutdown()
 
-            If Not IsDisposed Then
-                Visible = True
-            End If
+            If Not IsDisposed Then Visible = True
 
             If form.ChangesMade Then
                 ResetPonySelection()
@@ -438,9 +442,7 @@ Public Class MainForm
                     gameForm.Game.Setup()
                     animator.Start()
                 Else
-                    If IsDisposed = False Then
-                        Visible = True
-                    End If
+                    If Not IsDisposed Then Visible = True
                 End If
             End Using
         Catch ex As Exception
@@ -734,7 +736,7 @@ Public Class MainForm
                         True,
                         Sub()
                             If autoStarted Then
-                                WindowState = FormWindowState.Normal
+                                DeactivateAutostart()
                                 MessageBox.Show(Me, ("You haven't created a profile with ponies to use.{0}" &
                                                 "Create a profile named 'autostart', choose some ponies and save the profile.{0}" &
                                                 "In future, these ponies will be loaded automatically when using autostart.").
@@ -842,6 +844,7 @@ Public Class MainForm
                     If exitRequest = ExitRequest.ExitApplication Then
                         Close()
                     Else
+                        DeactivateAutostart()
                         Show()
                         General.FullCollect()
                     End If
@@ -887,6 +890,7 @@ Public Class MainForm
     Private Sub ReturnToMenuOnResolutionChange(sender As Object, e As EventArgs)
         TryInvoke(Sub()
                       PonyShutdown()
+                      DeactivateAutostart()
                       Show()
                       MessageBox.Show(Me, "You have been returned to the menu because your screen resolution has changed.",
                                       "Resolution Changed - Desktop Ponies", MessageBoxButtons.OK, MessageBoxIcon.Information)
