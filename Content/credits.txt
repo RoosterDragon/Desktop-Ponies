@@ -167,9 +167,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Bittersweet
 * Bot-chan
 
-#### Blinkie Pie
-* Anonycat
-
 #### Blossomforth
 * fanofetcetera
 
@@ -414,9 +411,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Igneous Rock
 * Anonycat
 
-#### Inky Pie
-* Anonycat
-
 #### Iron Will
 * StarStep
 
@@ -450,6 +444,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Limestone Pie
 * Bot-chan
+
+#### Limestone Pie (Filly)
+* Anonycat
 
 #### Little Strongheart
 * Pony Noia
@@ -485,6 +482,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Marble Pie
 * Bot-chan
+
+#### Marble Pie (Filly)
+* Anonycat
 
 #### Matilda
 * Bot-chan
