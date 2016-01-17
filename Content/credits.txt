@@ -442,6 +442,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Lily
 * Bot-chan
 
+#### Lily Longsocks
+* Anonycat
+
 #### Limestone Pie
 * Bot-chan
 
