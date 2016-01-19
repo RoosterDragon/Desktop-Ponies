@@ -886,6 +886,9 @@ Contributors are broken down by character. If there was more than one contributo
 * DeathPony [Stand, Trotcycle, Backtrack, Fly, Fly2, Hummingbird, TongueDance]
 * Bot-chan [SuitIdle, SuitTrot, SuitFly, SuitFastFly, Smoke, Change]
 
+#### Svengallop
+* Anonycat
+
 #### Sweetie Belle
 * Midnyte [Stand, Walk, Fly, Sit, Look]
 * The Coop [Skip]
