@@ -226,6 +226,7 @@ Public Class PonyEditor
                              Enabled = True
                              editorAnimator.Resume()
                              UseWaitCursor = False
+                             Activate()
                          End Sub)
     End Sub
 

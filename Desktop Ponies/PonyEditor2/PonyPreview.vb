@@ -126,6 +126,7 @@ Public Class PonyPreview
 
     Public Sub ShowPreview()
         If editorAnimator IsNot Nothing Then editorAnimator.Resume()
+        ParentForm.Activate()
     End Sub
 
     Public ReadOnly Property PreviewVisible As Boolean
