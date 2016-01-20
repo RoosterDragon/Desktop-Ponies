@@ -412,7 +412,7 @@
                     process.StartInfo.Arguments = "\"" + sourceFilePath + "\" /q";
                     process.Start();
                     process.WaitForExit();
-                    if (process.ExitCode != 0)
+                    if (process.ExitCode != 0 && process.ExitCode != 2)
                     {
                         Console.WriteLine("pngout exited with code " + process.ExitCode + " for " + trimmedSourcePath);
                         Console.WriteLine();
