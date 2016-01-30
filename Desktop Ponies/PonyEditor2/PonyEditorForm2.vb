@@ -328,7 +328,7 @@ Public Class PonyEditorForm2
         Dim validateInteraction = Function(interaction As InteractionBase)
                                       Dim i As InteractionBase = Nothing
                                       Return InteractionBase.TryLoad(
-                                          interaction.SourceIni,
+                                          interaction.SourceIni, base.Directory,
                                           i, Nothing).Combine(
                                           If(i.GetReferentialIssues(ponies).Length = 0, ParseResult.Success, ParseResult.Fallback))
                                   End Function

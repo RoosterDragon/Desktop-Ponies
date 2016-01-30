@@ -35,8 +35,6 @@ Public Class PonyCollection
             Return _houses
         End Get
     End Property
-    Private ReadOnly _interactions As New Dictionary(Of String, List(Of InteractionBase))()
-    Private Shared ReadOnly newListFactory As New Func(Of String, List(Of InteractionBase))(Function(s) New List(Of InteractionBase)())
 
     Public Sub New(removeInvalidItems As Boolean)
         Me.New(removeInvalidItems, Nothing, Nothing, Nothing, Nothing)
@@ -49,10 +47,10 @@ Public Class PonyCollection
         If ponyCountCallback IsNot Nothing Then ponyCountCallback(ponyBaseDirectories.Length)
         Dim houseDirectories = Directory.GetDirectories(HouseBase.RootDirectory)
         If houseCountCallback IsNot Nothing Then houseCountCallback(houseDirectories.Length)
+        UpgradeInteractions()
         Threading.Tasks.Parallel.Invoke(
             Sub() LoadPonyBases(removeInvalidItems, ponyBaseDirectories, ponyLoadCallback),
-            Sub() LoadHouses(houseDirectories, houseLoadCallback),
-            AddressOf LoadInteractions)
+            Sub() LoadHouses(houseDirectories, houseLoadCallback))
         ReuseStrings()
     End Sub
 
@@ -95,13 +93,12 @@ Public Class PonyCollection
         _houses = houses.OrderBy(Function(hb) hb.Name).ToImmutableArray()
     End Sub
 
-    Private Sub LoadInteractions()
-        If Not File.Exists(Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename)) Then
-            Exit Sub
-        End If
-        Dim newListFactory = Function(s As String) New List(Of InteractionBase)()
-        Using reader As New StreamReader(
-            Path.Combine(PonyBase.RootDirectory, InteractionBase.ConfigFilename))
+    Private Sub UpgradeInteractions()
+        Dim fileName = Path.Combine(PonyBase.RootDirectory, InteractionBase.LegacyConfigFilename)
+        If Not File.Exists(fileName) Then Exit Sub
+
+        Dim failedLines = New List(Of String)()
+        Using reader As New StreamReader(fileName)
             Do Until reader.EndOfStream
                 Dim line = reader.ReadLine()
 
@@ -109,11 +106,16 @@ Public Class PonyCollection
                 If String.IsNullOrWhiteSpace(line) OrElse line(0) = "'" Then Continue Do
 
                 Dim i As InteractionBase = Nothing
-                If InteractionBase.TryLoad(line, i, Nothing) <> ParseResult.Failed Then
-                    _interactions.GetOrAdd(i.InitiatorName, newListFactory).Add(i)
+                If InteractionBase.TryLoad(line, Nothing, i, Nothing) <> ParseResult.Failed AndAlso
+                    File.Exists(Path.Combine(PonyBase.RootDirectory, i.InitiatorName, PonyBase.ConfigFilename)) Then
+                    File.AppendAllLines(Path.Combine(PonyBase.RootDirectory, i.InitiatorName, PonyBase.ConfigFilename), New String() {i.GetPonyIni()})
+                Else
+                    failedLines.Add(line)
                 End If
             Loop
         End Using
+        File.Delete(fileName)
+        If failedLines.Count > 0 Then File.WriteAllLines(fileName, failedLines)
     End Sub
 
     Private Sub ReuseStrings()
@@ -196,37 +198,6 @@ Public Class PonyCollection
             effect.RightImage.UpdateSize()
         Next
     End Sub
-
-    ''' <summary>
-    ''' Registers a change in directory name of a pony. Updates references accordingly.
-    ''' </summary>
-    ''' <param name="oldDirectory">The old directory name.</param>
-    ''' <param name="newDirectory">The new directory name.</param>
-    Public Sub ChangePonyDirectory(oldDirectory As String, newDirectory As String)
-        If oldDirectory = newDirectory Then Return
-        SyncLock _interactions
-            If _interactions.ContainsKey(newDirectory) Then Throw New ArgumentException("The new directory already exists.", "newDirectory")
-            If _interactions.ContainsKey(oldDirectory) Then
-                Dim actions = _interactions(oldDirectory)
-                _interactions.Remove(oldDirectory)
-                For Each action In actions
-                    action.InitiatorName = newDirectory
-                Next
-                _interactions(newDirectory) = actions
-            End If
-        End SyncLock
-    End Sub
-
-    ''' <summary>
-    ''' Gets a list of interactions owned by the pony with the given directory identifier. This list may be edited.
-    ''' </summary>
-    ''' <param name="directory">The directory identifier of the pony.</param>
-    ''' <returns>A list of all interactions where this pony is listed as the initiator.</returns>
-    Public Function Interactions(directory As String) As List(Of InteractionBase)
-        SyncLock _interactions
-            Return _interactions.GetOrAdd(directory, newListFactory)
-        End SyncLock
-    End Function
 End Class
 
 Public NotInheritable Class IniParser

@@ -44,7 +44,7 @@
 
     Protected Overrides Sub ReparseSource(ByRef parseIssues As ImmutableArray(Of ParseIssue))
         Dim ib As InteractionBase = Nothing
-        InteractionBase.TryLoad(Source.Text, ib, parseIssues)
+        InteractionBase.TryLoad(Source.Text, Base.Directory, ib, parseIssues)
         Edited = ib
     End Sub
 

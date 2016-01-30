@@ -268,15 +268,40 @@ Should appear: 0 or 1 times.
 
 This type of line is deprecated and no longer has any effect. It will be ignored.
 
+### Interaction
+
+Should appear: 0 or more times.
+
+#### Format
+    Interaction,*Name*,*Chance*,*Proximity*,*Targets*,*Target Activation*,*Behaviors*,*Reactivation Delay*
+
+#### Defaults
+    Interaction,"",0,125,*Targets Required*,One,*Behaviors Required*,60
+
+You MUST specify at least all the elements up to and including behaviors. You may rely on the defaults for subsequent elements and can leave them off if desired. The defaults for elements up to and including behaviors are the values Desktop Ponies will substitute if that element is invalid. These particular defaults are specific to Desktop Ponies only and are subject to change.
+
+#### Examples
+    Interaction,nervous,1,100,{"Braeburn"},One,{"nervous"},30
+    Interaction,Conga,0.2,250,{"Applejack","Fluttershy","Rainbow Dash","Rarity","Twilight Sparkle"},All,{"Conga Start"},300
+	Interaction,random,0.5,150,{"Pinkie Pie","Rainbow Dash"},Any,{"Random1","Random2"},3600
+
+#### Elements
+* *Name* - A case insensitive name that uniquely identifies the interaction. This may be quoted. If this name is not unique then it will still work but references to it from other areas may not work.
+* *Chance* - A decimal number between 0.0 and 1.0 inclusive. Whilst an interaction is in a state where it could be started then this chance will be spun against a dice roll each tick (a tick is 1/25 of a second currently) to see whether it should start. A chance of 1.0 means it will definitely start if possible, whereas a chance of 0.0 means it never will. This pony must be present for the interaction to be considered for activation. If this pony is busy then the interaction cannot run until it stops being busy. A pony that is busy is unavailable for interaction. A pony is considered busy if it is already involved in an interaction, is being moused-over or dragged, is sleeping, or is being manually directed by the program for various reasons (this includes ponies under manual control by the user, or ponies outside the allowed region of the screen that are being directed to return to the allowed area). If a pony becomes busy whilst they are involved in an interaction (e.g. they start being dragged), the interaction will be canceled and this pony and all targets will resume with random behaviors.
+* *Proximity* - An integer between 0 and 10000 inclusive that specifies the distance is pixels at which the interaction is considered for activation. If the distance between any potential target and this pony is less than this value then the interaction can be used. This prevents interactions starting until the targets are within a certain range of each other.
+* *Targets* - A unordered, quoted, comma separated list surrounded by braces that gives a list of targets (ponies) that should be involved in the interaction. How the targets are used is affected by the target activation element. At least one of these targets must be present and within range of this pony for the interaction to be considered for activation. You may have a target that is the same as this pony, in which case this pony will interact with a second instance of itself. You cannot however duplicate targets. For example, if you list "Rarity" twice in the list, the second one will be ignored.
+* *Target Activation* - Controls how many targets are required for the interaction to be considered for activation. This can be one of a series of values. These values are case sensitive.
+    * One - Specifies that the interaction acts with only one of the listed targets. The target that comes within range is that one that triggers the interaction, and the one that this pony interacts with. If both this pony and this target are not busy and possess a behavior capable of being run, they begin the interaction. (Desktop Ponies also supports the case insensitive values "False" and "random" for this setting, which were used in older versions of this format).
+    * Any - Specifies that the interaction will start with any targets that are present if one of them triggers the interaction. For example if an interaction has targets of Rarity, Fluttershy and Applejack and only Rarity and Fluttershy are onscreen, then the interaction can start if Rarity walks within the trigger distance. Fluttershy does not need to be within the trigger distance and Applejack not being present does not matter. Only if this pony and trigger are not busy and both possess a behavior capable of being run can the interaction start. Additional targets will only become involved if they are not busy and also possess behaviors capable of being run. If there are other instances of the trigger pony onscreen, the trigger becomes involved in the interaction in preference to the others that did not trigger it. (Desktop Ponies also supports the case insensitive values "True" and "all" for this setting, which were used in older versions of this format).
+    * All - Specifies that the interaction requires all the listed targets to be present. This means that at least one instance of each target must be onscreen, not busy and have a behavior capable of being run, as well as this pony. Once any one of the targets walks within the trigger distance the interaction can start. If there are other instances of the trigger pony onscreen, the trigger becomes involved in the interaction in preference to the others that did not trigger it.
+* *Behaviors* - An unordered, quoted, comma separated list surrounded by braces that gives a list of behaviors. Typically only one behavior is ever specified. When an interaction is being considered each target will individually select a behavior uniformly at random from this list, provided the behavior is in the 'Any' group or the current behavior group for the pony. If no such behavior exists because the pony lacks behaviors with any of the listed names, or the behaviors are part of the wrong group, then the pony cannot participate because it does not possess a behavior capable of being run.
+* *Reactivation Delay* - A decimal number between 0.0 and 3600.0 inclusive. Specifies a time period in seconds. After an interaction finishes, all ponies involved in the interaction will undergo a cooldown period where they cannot initiate any interactions until it expires. They may however still be considered as targets for interactions during this time. If an interaction is canceled rather than ending normally, the cooldown period is capped at 30 seconds. This is because it may not have completed, so it would be nice to allow the ponies to start interacting earlier and try again.
+
 ## interactions.ini File Format
 
 The file named "interactions.ini" (always lowercase) inside the Ponies directory specifies interactions between ponies. The general format matches that of the pony.ini format.
 
-It supports only a single type of line for configuring interactions.
-
-### Interaction
-
-Should appear: 0 or more times.
+It supports only a single type of line for configuring interactions. This is a legacy format that will be upgraded by Desktop Ponies automatically on startup. It lacks the line identifer and contains an extra element.
 
 #### Format
     *Name*,*Initiator*,*Chance*,*Proximity*,*Targets*,*Target Activation*,*Behaviors*,*Reactivation Delay*
@@ -284,22 +309,11 @@ Should appear: 0 or more times.
 #### Defaults
     "",*Initiator Required*,0,125,*Targets Required*,One,*Behaviors Required*,60
 
-You MUST specify at least all the elements up to and including behaviors. You may rely on the defaults for subsequent elements and can leave them off if desired. The defaults for elements up to and including behaviors are the values Desktop Ponies will substitute if that element is invalid. These particular defaults are specific to Desktop Ponies only and are subject to change.
-
 #### Examples
     nervous,"Little Strongheart",1,100,{"Braeburn"},One,{"nervous"},30
     Conga,"Pinkie Pie",0.2,250,{"Applejack","Fluttershy","Rainbow Dash","Rarity","Twilight Sparkle"},All,{"Conga Start"},300
 	random,Pinkie Pie,0.5,150,{"Pinkie Pie","Rainbow Dash"},Any,{"Random1","Random2"},3600
 
 #### Elements
-* *Name* - A case insensitive name that uniquely identifies the interaction. This may be quoted. If this name is not unique then it will still work but references to it from other areas may not work.
-* *Initiator* - The name of a pony that initiates the interaction. This may be quoted. The initiator must be present for the interaction to be considered for activation. If the initiator is busy then the interaction cannot run until it stops being busy. A pony that is busy is unavailable for interaction. A pony is considered busy if it is already involved in an interaction, is being moused-over or dragged, is sleeping, or is being manually directed by the program for various reasons (this includes ponies under manual control by the user, or ponies outside the allowed region of the screen that are being directed to return to the allowed area). If a pony becomes busy whilst they are involved in an interaction (e.g. they start being dragged), the interaction will be canceled and the initiator and all targets will resume with random behaviors.
-* *Chance* - A decimal number between 0.0 and 1.0 inclusive. Whilst an interaction is in a state where it could be started then this chance will be spun against a dice roll each tick (a tick is 1/25 of a second currently) to see whether it should start. A chance of 1.0 means it will definitely start if possible, whereas a chance of 0.0 means it never will.
-* *Proximity* - An integer between 0 and 10000 inclusive that specifies the distance is pixels at which the interaction is considered for activation. If the distance between any potential target and the initiator is less than this value then the interaction can be used. This prevents interactions starting until the targets are within a certain range of each other.
-* *Targets* - A unordered, quoted, comma separated list surrounded by braces that gives a list of targets (ponies) that should be involved in the interaction. How the targets are used is affected by the target activation element. At least one of these targets must be present and within range of the initiator for the interaction to be considered for activation. You may have a target that is the same as the initiator, in which case the initiator will interact with a second instance of itself. You cannot however duplicate targets. For example, if you list "Rarity" twice in the list, the second one will be ignored.
-* *Target Activation* - Controls how many targets are required for the interaction to be considered for activation. This can be one of a series of values. These values are case sensitive.
-    * One - Specifies that the interaction acts with only one of the listed targets. The target that comes within range is that one that triggers the interaction, and the one that the initiator interacts with. If both the initiator and this target are not busy and possess a behavior capable of being run, they begin the interaction. (Desktop Ponies also supports the case insensitive values "False" and "random" for this setting, which were used in older versions of this format).
-    * Any - Specifies that the interaction will start with any targets that are present if one of them triggers the interaction. For example if an interaction has targets of Rarity, Fluttershy and Applejack and only Rarity and Fluttershy are onscreen, then the interaction can start if Rarity walks within the trigger distance. Fluttershy does not need to be within the trigger distance and Applejack not being present does not matter. Only if the initiator and trigger are not busy and both possess a behavior capable of being run can the interaction start. Additional targets will only become involved if they are not busy and also possess behaviors capable of being run. If there are other instances of the trigger pony onscreen, the trigger becomes involved in the interaction in preference to the others that did not trigger it. (Desktop Ponies also supports the case insensitive values "True" and "all" for this setting, which were used in older versions of this format).
-    * All - Specifies that the interaction requires all the listed targets to be present. This means that at least one instance of each target must be onscreen, not busy and have a behavior capable of being run, as well as the initiator. Once any one of the targets walks within the trigger distance the interaction can start. If there are other instances of the trigger pony onscreen, the trigger becomes involved in the interaction in preference to the others that did not trigger it.
-* *Behaviors* - An unordered, quoted, comma separated list surrounded by braces that gives a list of behaviors. Typically only one behavior is ever specified. When an interaction is being considered each target will individually select a behavior uniformly at random from this list, provided the behavior is in the 'Any' group or the current behavior group for the pony. If no such behavior exists because the pony lacks behaviors with any of the listed names, or the behaviors are part of the wrong group, then the pony cannot participate because it does not possess a behavior capable of being run.
-* *Reactivation Delay* - A decimal number between 0.0 and 3600.0 inclusive. Specifies a time period in seconds. After an interaction finishes, all ponies involved in the interaction will undergo a cooldown period where they cannot initiate any interactions until it expires. They may however still be considered as targets for interactions during this time. If an interaction is canceled rather than ending normally, the cooldown period is capped at 30 seconds. This is because it may not have completed, so it would be nice to allow the ponies to start interacting earlier and try again.
+As the standard interaction and also:
+* *Initiator* - The name of a pony that initiates the interaction. This may be quoted.

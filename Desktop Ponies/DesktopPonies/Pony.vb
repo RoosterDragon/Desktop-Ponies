@@ -135,9 +135,10 @@ Public Class PonyBase
             Return _effects
         End Get
     End Property
+    Private ReadOnly _interactions As New List(Of InteractionBase)()
     Public ReadOnly Property Interactions As List(Of InteractionBase)
         Get
-            Return Collection.Interactions(Directory)
+            Return _interactions
         End Get
     End Property
     Private ReadOnly _speeches As New List(Of Speech)()
@@ -251,7 +252,6 @@ Public Class PonyBase
         Catch ex As Exception
             Return False
         End Try
-        Collection.ChangePonyDirectory(Directory, newDirectory)
         For Each behavior In Behaviors
             behavior.LeftImage.Path = behavior.LeftImage.Path.Replace(Directory, newDirectory)
             behavior.RightImage.Path = behavior.RightImage.Path.Replace(Directory, newDirectory)
@@ -262,6 +262,9 @@ Public Class PonyBase
         Next
         For Each speech In Speeches
             If speech.SoundFile IsNot Nothing Then speech.SoundFile = speech.SoundFile.Replace(Directory, newDirectory)
+        Next
+        For Each interaction In Interactions
+            interaction.InitiatorName = newDirectory
         Next
         _directory = newDirectory
         Return True
@@ -345,6 +348,12 @@ Public Class PonyBase
                     Case "speak"
                         IniParser.TryParse(Of Speech)(line, folder, removeInvalidItems,
                                                       AddressOf Speech.TryLoad, Sub(sl) pony.Speeches.Add(sl))
+                    Case "interaction"
+                        TryParse(line, folder, removeInvalidItems, pony,
+                                                     Function(iniLine As String, directory As String, p As PonyBase,
+                                                              ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue))
+                                                         Return InteractionBase.TryLoad(iniLine, p.Directory, result, issues)
+                                                     End Function, Sub(i) pony.Interactions.Add(i))
                     Case "categories"
                         Dim columns = CommaSplitQuoteQualified(line)
                         For i = 1 To columns.Length - 1
@@ -411,34 +420,15 @@ Public Class PonyBase
                 writer.WriteLine(speech.GetPonyIni())
             Next
 
+            For Each interaction In Interactions
+                writer.WriteLine(interaction.GetPonyIni())
+            Next
+
             For Each invalidLine In invalidLines
                 writer.WriteLine(invalidLine)
             Next
         End Using
         MoveOrReplace(tempFileName, configFilePath)
-
-        Dim interactionsFilePath = Path.Combine(RootDirectory, InteractionBase.ConfigFilename)
-        Dim interactionFileLines As New List(Of String)()
-        Using reader = New StreamReader(interactionsFilePath)
-            Do Until reader.EndOfStream
-                Dim line = reader.ReadLine()
-                Dim lineParts = CommaSplitQuoteQualified(line)
-                ' Only save interactions not belonging to this pony.
-                If lineParts.Length < 2 OrElse lineParts(1) <> Directory Then interactionFileLines.Add(line)
-            Loop
-        End Using
-
-        tempFileName = Path.GetTempFileName()
-        Using writer = New StreamWriter(tempFileName, False, Text.Encoding.UTF8)
-            For Each line In interactionFileLines
-                writer.WriteLine(line)
-            Next
-
-            For Each interaction In Interactions
-                writer.WriteLine(interaction.GetPonyIni())
-            Next
-        End Using
-        MoveOrReplace(tempFileName, interactionsFilePath)
     End Sub
 
     Private Shared Sub MoveOrReplace(tempFileName As String, destinationFileName As String)
@@ -485,7 +475,7 @@ End Class
 Public Class InteractionBase
     Implements IPonyIniSourceable, IReferential
 
-    Public Const ConfigFilename = "interactions.ini"
+    Public Const LegacyConfigFilename = "interactions.ini"
 
     Private _name As CaseInsensitiveString = ""
     Public Property Name As CaseInsensitiveString Implements IPonyIniSerializable.Name
@@ -554,7 +544,7 @@ Public Class InteractionBase
         End Set
     End Property
 
-    Public Shared Function TryLoad(iniLine As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
+    Public Shared Function TryLoad(iniLine As String, initiator As String, ByRef result As InteractionBase, ByRef issues As ImmutableArray(Of ParseIssue)) As ParseResult
         result = Nothing
         issues = Nothing
 
@@ -564,8 +554,9 @@ Public Class InteractionBase
                                             {"Name", "Initiator", "Chance",
                                              "Proximity", "Targets", "Target Activation",
                                              "Behaviors", "Reactivation Delay"})
+        If initiator IsNot Nothing Then p.NoParse()
         i.Name = If(p.NotNullOrWhiteSpace(), "")
-        i.InitiatorName = If(p.NotNullOrWhiteSpace(), "")
+        i.InitiatorName = If(initiator, If(p.NotNullOrWhiteSpace(), ""))
         i.Chance = p.ParseDouble(0, 0, 1)
         i.Proximity = p.ParseDouble(125, 0, 10000)
         Dim targetNames = p.NotNull()
@@ -595,9 +586,8 @@ Public Class InteractionBase
     End Function
 
     Public Function GetPonyIni() As String Implements IPonyIniSerializable.GetPonyIni
-        Return String.Join(",",
+        Return String.Join(",", "Interaction",
             Name,
-            Quoted(InitiatorName),
             Chance.ToStringInvariant(),
             Proximity.ToStringInvariant(),
             Braced(String.Join(",", TargetNames.Select(Function(n) Quoted(n)))),
