@@ -513,6 +513,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Moondancer
 * Bot-chan
 
+#### Moonlight Raven
+* Bot-chan
+
 #### Mr Breezy
 * Anonycat
 
@@ -542,6 +545,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan [Gallop]
 
 #### Neon Lights
+* Bot-chan
+
+#### Nerdy Delegate
 * Bot-chan
 
 #### Night Glider
@@ -877,6 +883,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Sunset Shimmer
+* Bot-chan
+
+#### Sunshine Smiles
 * Bot-chan
 
 #### Suri Polomare
