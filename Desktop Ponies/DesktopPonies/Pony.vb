@@ -4500,7 +4500,7 @@ Public Module EnumConversions
                                             String.Join(", ", [Enum].GetNames(GetType(TargetActivation))), "activation")
             End If
         End If
-        Return targetsOut
+        Return Argument.EnsureEnumIsValid(targetsOut, "activation")
     End Function
 End Module
 #End Region

@@ -269,8 +269,14 @@ Public Class StringCollectionParser
     Private Shared Function ParsedEnum(Of TEnum As Structure)(s As String, fallback As TEnum?) As Parsed(Of TEnum)
         Dim result As TEnum = Nothing
         If [Enum].TryParse(s, result) Then
-            Return Parsed.Success(result)
-        ElseIf fallback IsNot Nothing Then
+            Try
+                Argument.EnsureEnumIsValid(result, "s")
+                Return Parsed.Success(result)
+            Catch
+                ' Swallow error and allow other error handling to take over.
+            End Try
+        End If
+        If fallback IsNot Nothing Then
             Return Parsed.Fallback(s, fallback.Value,
                                    MapFailureFormat.FormatWith(
                                        s,
