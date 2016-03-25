@@ -75,6 +75,23 @@ Change Log
 
 Latest changes:
 
+v1.59:
+- Added Limestone Pie and Marble Pie by Bot-chan.
+- Added Lily Longsocks and Svengallop by Anonycat.
+- Added Sunshine Smiles, Moonlight Raven and Nerdy Delegate by Bot-chan.
+- Added Granny Smith (Teenager), Sourpuss and Spoiled Rich by Bot-chan.
+- Added Sailor Moon ponies by Bot-chan.
+- Updated Vinyl Scratch by Bot-chan.
+- Interactions are now saved per-pony, rather than in their own file.
+  If you have an interactions.ini file, it will be upgraded automatically when the program starts.
+- Added the ability to filter ponies by excluding certain tags.
+- Fix category for Zipporwhill's Father.
+- Fix pony editor to not mess with sort order of tables when saving.
+- Fix some columns not being sortable in the pony editor.
+- Fix a crash that would occur if you save a config for multiple monitors, then load the program with less monitors available.
+- When using autostart, fix the main menu not working when returning to it.
+- When using autostart, the program will minimize during loading.
+
 v1.58:
 - Added Greta, Grampa Gruff, Whoa Nelly and Stormy Flare by Bot-chan.
 - Corrected Leadwing's name.
