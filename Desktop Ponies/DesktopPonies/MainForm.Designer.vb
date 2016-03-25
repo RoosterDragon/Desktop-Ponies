@@ -24,6 +24,7 @@ Partial Class MainForm
         Me.ZeroPoniesButton = New System.Windows.Forms.Button()
         Me.PonyCountLabel = New System.Windows.Forms.Label()
         Me.FilterGroupBox = New System.Windows.Forms.GroupBox()
+        Me.FilterExceptRadio = New System.Windows.Forms.RadioButton()
         Me.FilterAllRadio = New System.Windows.Forms.RadioButton()
         Me.FilterOptionsBox = New System.Windows.Forms.CheckedListBox()
         Me.FilterAnyRadio = New System.Windows.Forms.RadioButton()
@@ -186,6 +187,7 @@ Partial Class MainForm
         'FilterGroupBox
         '
         Me.FilterGroupBox.Anchor = System.Windows.Forms.AnchorStyles.Top
+        Me.FilterGroupBox.Controls.Add(Me.FilterExceptRadio)
         Me.FilterGroupBox.Controls.Add(Me.FilterAllRadio)
         Me.FilterGroupBox.Controls.Add(Me.FilterOptionsBox)
         Me.FilterGroupBox.Controls.Add(Me.FilterAnyRadio)
@@ -196,6 +198,16 @@ Partial Class MainForm
         Me.FilterGroupBox.TabIndex = 10
         Me.FilterGroupBox.TabStop = False
         Me.FilterGroupBox.Text = "Pony Filter"
+        '
+        'FilterExceptRadio
+        '
+        Me.FilterExceptRadio.AutoSize = True
+        Me.FilterExceptRadio.Location = New System.Drawing.Point(6, 88)
+        Me.FilterExceptRadio.Name = "FilterExceptRadio"
+        Me.FilterExceptRadio.Size = New System.Drawing.Size(67, 17)
+        Me.FilterExceptRadio.TabIndex = 3
+        Me.FilterExceptRadio.Text = "Except..."
+        Me.FilterExceptRadio.UseVisualStyleBackColor = True
         '
         'FilterAllRadio
         '
@@ -219,7 +231,7 @@ Partial Class MainForm
         Me.FilterOptionsBox.Location = New System.Drawing.Point(112, 14)
         Me.FilterOptionsBox.Name = "FilterOptionsBox"
         Me.FilterOptionsBox.Size = New System.Drawing.Size(170, 94)
-        Me.FilterOptionsBox.TabIndex = 3
+        Me.FilterOptionsBox.TabIndex = 4
         '
         'FilterAnyRadio
         '
@@ -505,5 +517,5 @@ Partial Class MainForm
     Friend WithEvents PaginationEnabled As System.Windows.Forms.CheckBox
     Friend WithEvents LayoutTable As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents CommunityLink As System.Windows.Forms.LinkLabel
-
+    Friend WithEvents FilterExceptRadio As RadioButton
 End Class

@@ -525,6 +525,13 @@ Public Class MainForm
         End If
     End Sub
 
+    Private Sub FilterExceptRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterExceptRadio.CheckedChanged
+        If FilterExceptRadio.Checked Then
+            FilterOptionsBox.Enabled = True
+            RefilterSelection()
+        End If
+    End Sub
+
     Private Sub FilterAllRadio_CheckedChanged(sender As Object, e As EventArgs) Handles FilterAllRadio.CheckedChanged
         If FilterAllRadio.Checked AndAlso Visible Then
             FilterOptionsBox.Enabled = False
@@ -561,6 +568,13 @@ Public Class MainForm
                 Dim visible = If(notTaggedFlag,
                                  selectionControl.PonyBase.Tags.Count = 0 AndAlso tags.Count = 0,
                                  selectionControl.PonyBase.Tags.IsSupersetOf(tags))
+                selectionControlFilter(selectionControl) = visible
+            End If
+
+            ' Show ponies with no matching tags.
+            If FilterExceptRadio.Checked Then
+                Dim visible = Not (selectionControl.PonyBase.Tags.Any(Function(tag) tags.Contains(tag)) OrElse
+                (selectionControl.PonyBase.Tags.Count = 0 AndAlso notTaggedFlag))
                 selectionControlFilter(selectionControl) = visible
             End If
         Next
