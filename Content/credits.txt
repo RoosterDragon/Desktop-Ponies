@@ -389,6 +389,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Granny Smith
 * Bot-chan
 
+#### Granny Smith (Teenager)
+* Bot-chan
+
 #### Greta
 * Bot-chan
 
@@ -850,6 +853,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sonata Dusk
 * Bot-chan
 
+#### Sourpuss
+* Bot-chan
+
 #### Sparkler
 * vulcan539 [Stand, Walk, Jump, Sit, Sleep, Stand]
 * Images modified from Lyra.
@@ -863,6 +869,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Spitfire
 * Rainbowdutch [Stand, Trot, Fly, Goggles, SuitlessStand, SuitlessTrot, SuitlessFly]
 * Bot-chan [Smoke, Dash, SuitlessStand, SuitlessTrot, SuitlessFly]
+
+#### Spoiled Rich
+* Bot-chan
 
 #### Spot
 * Pony Noia
