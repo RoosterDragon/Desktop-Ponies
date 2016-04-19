@@ -683,6 +683,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Princess Celestia (Filly)
 * Asparagus
 
+#### Princess Ember
+* Bot-chan
+
 #### Princess Luna
 * Bot-chan
 
