@@ -635,6 +635,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Pokey Pierce
 * Anonycat
 
+#### Police Pony
+* Bot-chan
+
 #### Pound Cake
 * Bot-chan
 
