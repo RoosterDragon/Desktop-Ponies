@@ -897,6 +897,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sugar Belle
 * Bot-chan
 
+#### Sunburst
+* Bot-chan
+
 #### Sunset Shimmer
 * Bot-chan
 
