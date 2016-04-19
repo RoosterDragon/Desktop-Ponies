@@ -241,6 +241,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Cloudchaser
 * fanofetcetera
 
+#### Cloudy Quartz
+* Anonycat
+
 #### Coco Pommel
 * StarStep
 
@@ -890,9 +893,6 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Stormy Flare
 * Bot-chan
-
-#### Sue Pie
-* Anonycat
 
 #### Sugar Belle
 * Bot-chan
