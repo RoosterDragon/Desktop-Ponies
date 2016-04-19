@@ -352,6 +352,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Flitter
 * fanofetcetera
 
+#### Flurry Heart
+* Bot-chan
+
 #### Flutterbat
 * Bot-chan
 
