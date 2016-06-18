@@ -579,6 +579,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Nurse Redheart
 * Logan [Trot]
 * StarStep [Idle]
+* Bot-chan [Idle, Idle2, Trot]
 
 #### Nurse Snowheart
 * Bot-chan
