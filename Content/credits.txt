@@ -586,6 +586,12 @@ Contributors are broken down by character. If there was more than one contributo
 #### Nurse Sweetheart
 * Bot-chan
 
+#### Nurse Tenderheart
+* Bot-chan
+
+#### Nursery Rhyme
+* Bot-chan
+
 #### Octavia
 * RJP!
 
