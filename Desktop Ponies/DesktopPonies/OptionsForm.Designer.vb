@@ -307,33 +307,33 @@ Partial Class OptionsForm
         'SizeScale
         '
         Me.SizeScale.LargeChange = 25
-        Me.SizeScale.Location = New System.Drawing.Point(6, 195)
+        Me.SizeScale.Location = New System.Drawing.Point(6, 214)
         Me.SizeScale.Maximum = 80
         Me.SizeScale.Minimum = 5
         Me.SizeScale.Name = "SizeScale"
         Me.SizeScale.Size = New System.Drawing.Size(244, 45)
-        Me.SizeScale.TabIndex = 10
+        Me.SizeScale.TabIndex = 12
         Me.SizeScale.TickFrequency = 5
         Me.SizeScale.Value = 5
         '
         'SizeScaleLabel
         '
         Me.SizeScaleLabel.AutoSize = True
-        Me.SizeScaleLabel.Location = New System.Drawing.Point(6, 227)
+        Me.SizeScaleLabel.Location = New System.Drawing.Point(6, 195)
         Me.SizeScaleLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.SizeScaleLabel.Name = "SizeScaleLabel"
         Me.SizeScaleLabel.Size = New System.Drawing.Size(62, 13)
-        Me.SizeScaleLabel.TabIndex = 11
+        Me.SizeScaleLabel.TabIndex = 10
         Me.SizeScaleLabel.Text = "Pony Sizes:"
         '
         'SizeScaleValueLabel
         '
         Me.SizeScaleValueLabel.AutoSize = True
-        Me.SizeScaleValueLabel.Location = New System.Drawing.Point(74, 227)
+        Me.SizeScaleValueLabel.Location = New System.Drawing.Point(74, 195)
         Me.SizeScaleValueLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.SizeScaleValueLabel.Name = "SizeScaleValueLabel"
         Me.SizeScaleValueLabel.Size = New System.Drawing.Size(18, 13)
-        Me.SizeScaleValueLabel.TabIndex = 12
+        Me.SizeScaleValueLabel.TabIndex = 11
         Me.SizeScaleValueLabel.Text = "0x"
         '
         'CustomFiltersButton
@@ -524,12 +524,12 @@ Partial Class OptionsForm
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Volume.Enabled = False
         Me.Volume.LargeChange = 10
-        Me.Volume.Location = New System.Drawing.Point(6, 88)
+        Me.Volume.Location = New System.Drawing.Point(6, 101)
         Me.Volume.Maximum = 100
         Me.Volume.Minimum = 10
         Me.Volume.Name = "Volume"
         Me.Volume.Size = New System.Drawing.Size(238, 45)
-        Me.Volume.TabIndex = 3
+        Me.Volume.TabIndex = 5
         Me.Volume.TickFrequency = 10
         Me.Volume.Value = 10
         '
@@ -537,51 +537,51 @@ Partial Class OptionsForm
         '
         Me.VolumeLabel.AutoSize = True
         Me.VolumeLabel.Enabled = False
-        Me.VolumeLabel.Location = New System.Drawing.Point(6, 120)
+        Me.VolumeLabel.Location = New System.Drawing.Point(6, 85)
         Me.VolumeLabel.Name = "VolumeLabel"
         Me.VolumeLabel.Size = New System.Drawing.Size(79, 13)
-        Me.VolumeLabel.TabIndex = 4
+        Me.VolumeLabel.TabIndex = 3
         Me.VolumeLabel.Text = "Sound Volume:"
         '
         'VolumeValueLabel
         '
         Me.VolumeValueLabel.AutoSize = True
         Me.VolumeValueLabel.Enabled = False
-        Me.VolumeValueLabel.Location = New System.Drawing.Point(91, 120)
+        Me.VolumeValueLabel.Location = New System.Drawing.Point(91, 85)
         Me.VolumeValueLabel.Name = "VolumeValueLabel"
         Me.VolumeValueLabel.Size = New System.Drawing.Size(22, 13)
-        Me.VolumeValueLabel.TabIndex = 5
+        Me.VolumeValueLabel.TabIndex = 4
         Me.VolumeValueLabel.Text = "0.0"
         '
         'TimeScaleValueLabel
         '
         Me.TimeScaleValueLabel.AutoSize = True
-        Me.TimeScaleValueLabel.Location = New System.Drawing.Point(83, 276)
+        Me.TimeScaleValueLabel.Location = New System.Drawing.Point(83, 246)
         Me.TimeScaleValueLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.TimeScaleValueLabel.Name = "TimeScaleValueLabel"
         Me.TimeScaleValueLabel.Size = New System.Drawing.Size(18, 13)
-        Me.TimeScaleValueLabel.TabIndex = 15
+        Me.TimeScaleValueLabel.TabIndex = 14
         Me.TimeScaleValueLabel.Text = "0x"
         '
         'TimeScaleLabel
         '
         Me.TimeScaleLabel.AutoSize = True
-        Me.TimeScaleLabel.Location = New System.Drawing.Point(6, 276)
+        Me.TimeScaleLabel.Location = New System.Drawing.Point(6, 246)
         Me.TimeScaleLabel.Margin = New System.Windows.Forms.Padding(3)
         Me.TimeScaleLabel.Name = "TimeScaleLabel"
         Me.TimeScaleLabel.Size = New System.Drawing.Size(71, 13)
-        Me.TimeScaleLabel.TabIndex = 14
+        Me.TimeScaleLabel.TabIndex = 13
         Me.TimeScaleLabel.Text = "Time Dilation:"
         '
         'TimeScale
         '
         Me.TimeScale.LargeChange = 10
-        Me.TimeScale.Location = New System.Drawing.Point(6, 246)
+        Me.TimeScale.Location = New System.Drawing.Point(6, 265)
         Me.TimeScale.Maximum = 40
         Me.TimeScale.Minimum = 1
         Me.TimeScale.Name = "TimeScale"
         Me.TimeScale.Size = New System.Drawing.Size(244, 45)
-        Me.TimeScale.TabIndex = 13
+        Me.TimeScale.TabIndex = 15
         Me.TimeScale.TickFrequency = 10
         Me.TimeScale.Value = 1
         '
