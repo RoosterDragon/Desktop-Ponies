@@ -544,7 +544,13 @@ Contributors are broken down by character. If there was more than one contributo
 #### Mr Greenhooves
 * Anonycat
 
+#### Mr Shy
+* Bot-chan
+
 #### Mrs Cake
+* Bot-chan
+
+#### Mrs Shy
 * Bot-chan
 
 #### Mrs Sparkle
@@ -1037,6 +1043,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Zecora
 * sidekick ponyguy [Stand, Trot]
 * RJP! [Stand, Trot, Balance, Dig]
+
+#### Zephyr Breeze
+* Bot-chan
 
 #### Zipporwhill
 * Bot-chan
