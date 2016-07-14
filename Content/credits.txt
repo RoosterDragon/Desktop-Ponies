@@ -377,6 +377,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Fredrick Horeshoepin
 * vulcan539
 
+#### Fresh Coat
+* Bot-chan
+
 #### Gilda
 * Bot-chan
 
