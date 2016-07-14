@@ -136,10 +136,14 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub PonyCount_TextChanged(sender As Object, e As EventArgs) Handles PonyCount.TextChanged
+        _count = 0
         If PonyCount.Text <> "" Then
-            _count = Integer.Parse(PonyCount.Text, Globalization.NumberStyles.None, Globalization.CultureInfo.CurrentCulture)
-        Else
-            _count = 0
+            Dim newCount As Integer
+            If Integer.TryParse(PonyCount.Text, Globalization.NumberStyles.None, Globalization.CultureInfo.CurrentCulture, newCount) Then
+                _count = newCount
+            Else
+                PonyCount.Text = ""
+            End If
         End If
         MinusButton.Enabled = _count > 0
         PlusButton.Enabled = _count < 99999
