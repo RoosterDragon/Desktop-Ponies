@@ -247,6 +247,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Coco Pommel
 * StarStep
 
+#### Coriander Cumin
+* Bot-chan
+
 #### Cranky Doodle Donkey
 * Bot-chan
 
