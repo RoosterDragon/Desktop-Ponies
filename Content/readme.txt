@@ -75,6 +75,24 @@ Change Log
 
 Latest changes:
 
+v1.60:
+- Rename Sue Pie to Cloudy Quartz.
+- Added Sunburst and updated Starlight Glimmer by Bot-chan.
+- Added a crystallized Princess Twilight Sparkle by Bot-chan.
+- Added Flurry Heart by Bot-chan.
+- Added Police Pony by Bot-chan.
+- Added Princess Ember by Bot-chan.
+- Added Nurse Tenderheat and Nursery Rhyme by Bot-chan.
+- Added Plaid Stripes by Bot-chan.
+- Added Saffron Masala and Coriander Cumin by Bot-chan.
+- Added Mr Shy, Mrs Shy and Zephyr Breeze by Bot-chan.
+- Added Fresh Coat by Bot-chan.
+- Added hug interaction between Moonlight Raven and Sunshine Smiles by Bot-chan.
+- Add popcorn behaviour to Starlight Glimmer by Bot-chan.
+- Update Nurse Redheart by Bot-chan.
+- Fix a category for Seabreeze.
+- Fix crash when an invalid number is pasted into the pony count field.
+
 v1.59:
 - Added Limestone Pie and Marble Pie by Bot-chan.
 - Added Lily Longsocks and Svengallop by Anonycat.
