@@ -960,6 +960,7 @@ Public Class PonyEditor
     End Function
 
     Private Sub PausePonyButton_Click(sender As Object, e As EventArgs) Handles PausePonyButton.Click
+        If PromptedDueTonNoPonySelected() Then Exit Sub
         Try
             If Not editorAnimator.Paused Then
                 editorAnimator.Pause(False)
@@ -1009,13 +1010,18 @@ Public Class PonyEditor
         RunMutatingDialog(Function() New NewInteractionDialog(Nothing, CurrentBase))
     End Sub
 
+    Private Function PromptedDueTonNoPonySelected() As Boolean
+        If CurrentBase Is Nothing Then
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return True
+        End If
+        Return False
+    End Function
+
     Private Function RunMutatingDialog(createDialog As Func(Of Form)) As Boolean
         Try
-            If CurrentBase Is Nothing Then
-                MessageBox.Show(Me, "Select a pony or create a new one first.",
-                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                Return False
-            End If
+            If PromptedDueTonNoPonySelected() Then Return False
 
             HidePony()
             Dim changesMade As Boolean
@@ -1204,21 +1210,12 @@ Public Class PonyEditor
     End Function
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
-        If CurrentBase Is Nothing Then
-            MessageBox.Show(Me, "Select a pony or create a new one first.",
-                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Exit Sub
-        End If
-
+        If PromptedDueTonNoPonySelected() Then Exit Sub
         SavePony()
     End Sub
 
     Private Sub DeleteButton_Click(sender As Object, e As EventArgs) Handles DeleteButton.Click
-        If CurrentBase Is Nothing Then
-            MessageBox.Show(Me, "Select a pony or create a new one first.",
-                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Exit Sub
-        End If
+        If PromptedDueTonNoPonySelected() Then Exit Sub
 
         If MessageBox.Show(Me, "Would you really like to delete this pony?", "Delete Pony?",
                            MessageBoxButtons.YesNo,
@@ -1245,12 +1242,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
-        If CurrentBase Is Nothing Then
-            MessageBox.Show(Me, "Select a pony or create a new one first.",
-                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Exit Sub
-        End If
-
+        If PromptedDueTonNoPonySelected() Then Exit Sub
         HidePony()
         Using dialog = New TagsDialog(Me)
             If dialog.ShowDialog(Me) = DialogResult.OK Then hasSaved = False
@@ -1259,12 +1251,8 @@ Public Class PonyEditor
     End Sub
 
     Private Sub ImagesButton_Click(sender As Object, e As EventArgs) Handles ImagesButton.Click
-        If CurrentBase Is Nothing Then
-            MessageBox.Show(Me, "Select a pony or create a new one first.",
-                                "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        Else
-            ImagesContextMenu.Show(ImagesButton, Point.Empty)
-        End If
+        If PromptedDueTonNoPonySelected() Then Exit Sub
+        ImagesContextMenu.Show(ImagesButton, Point.Empty)
     End Sub
 
     Private Sub ImagesContextMenu_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ImagesContextMenu.ItemClicked
@@ -1297,12 +1285,7 @@ Public Class PonyEditor
     End Sub
 
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
-        If CurrentBase Is Nothing Then
-            MessageBox.Show(Me, "Select a pony or create a new one first.",
-                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            Exit Sub
-        End If
-
+        If PromptedDueTonNoPonySelected() Then Exit Sub
         LoadPonyInfo()
     End Sub
 
