@@ -58,6 +58,7 @@ Public Class EditorPonyAnimator
                                  Sub()
                                      If editor.IsClosing Then Exit Sub
                                      If editor.PreviewPony Is Nothing Then
+                                         If Paused Then Exit Sub
                                          editor.CurrentBehaviorValueLabel.Text = ""
                                          editor.GroupValueLabel.Text = ""
                                          editor.TimeLeftValueLabel.Text = ""

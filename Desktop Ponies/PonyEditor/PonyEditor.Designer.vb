@@ -86,6 +86,7 @@ Partial Class PonyEditor
         Me.BehaviorsPanel = New System.Windows.Forms.Panel()
         Me.LayoutTable = New System.Windows.Forms.TableLayoutPanel()
         Me.PonyPanel = New System.Windows.Forms.Panel()
+        Me.DeleteButton = New System.Windows.Forms.Button()
         Me.ImagesButton = New System.Windows.Forms.Button()
         Me.ImagesContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.ImageCentersMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -494,7 +495,7 @@ Partial Class PonyEditor
         Me.CurrentBehaviorLabel.Location = New System.Drawing.Point(741, 247)
         Me.CurrentBehaviorLabel.Name = "CurrentBehaviorLabel"
         Me.CurrentBehaviorLabel.Size = New System.Drawing.Size(89, 13)
-        Me.CurrentBehaviorLabel.TabIndex = 9
+        Me.CurrentBehaviorLabel.TabIndex = 10
         Me.CurrentBehaviorLabel.Text = "Current Behavior:"
         '
         'CurrentBehaviorValueLabel
@@ -504,7 +505,7 @@ Partial Class PonyEditor
         Me.CurrentBehaviorValueLabel.Location = New System.Drawing.Point(836, 247)
         Me.CurrentBehaviorValueLabel.Name = "CurrentBehaviorValueLabel"
         Me.CurrentBehaviorValueLabel.Size = New System.Drawing.Size(27, 13)
-        Me.CurrentBehaviorValueLabel.TabIndex = 10
+        Me.CurrentBehaviorValueLabel.TabIndex = 11
         Me.CurrentBehaviorValueLabel.Text = "N/A"
         '
         'TimeLeftLabel
@@ -514,7 +515,7 @@ Partial Class PonyEditor
         Me.TimeLeftLabel.Location = New System.Drawing.Point(716, 274)
         Me.TimeLeftLabel.Name = "TimeLeftLabel"
         Me.TimeLeftLabel.Size = New System.Drawing.Size(54, 13)
-        Me.TimeLeftLabel.TabIndex = 11
+        Me.TimeLeftLabel.TabIndex = 12
         Me.TimeLeftLabel.Text = "Time Left:"
         '
         'TimeLeftValueLabel
@@ -524,7 +525,7 @@ Partial Class PonyEditor
         Me.TimeLeftValueLabel.Location = New System.Drawing.Point(776, 274)
         Me.TimeLeftValueLabel.Name = "TimeLeftValueLabel"
         Me.TimeLeftValueLabel.Size = New System.Drawing.Size(27, 13)
-        Me.TimeLeftValueLabel.TabIndex = 12
+        Me.TimeLeftValueLabel.TabIndex = 13
         Me.TimeLeftValueLabel.Text = "N/A"
         '
         'EffectsLabel
@@ -634,12 +635,12 @@ Partial Class PonyEditor
         'SaveButton
         '
         Me.SaveButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
-        Me.SaveButton.BackColor = System.Drawing.Color.IndianRed
+        Me.SaveButton.BackColor = System.Drawing.Color.DeepSkyBlue
         Me.SaveButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.SaveButton.Location = New System.Drawing.Point(420, 270)
         Me.SaveButton.Name = "SaveButton"
-        Me.SaveButton.Size = New System.Drawing.Size(100, 21)
-        Me.SaveButton.TabIndex = 7
+        Me.SaveButton.Size = New System.Drawing.Size(90, 21)
+        Me.SaveButton.TabIndex = 8
         Me.SaveButton.Text = "SAVE"
         Me.SaveButton.UseVisualStyleBackColor = False
         '
@@ -658,10 +659,10 @@ Partial Class PonyEditor
         Me.RefreshButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
         Me.RefreshButton.BackColor = System.Drawing.Color.SpringGreen
         Me.RefreshButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RefreshButton.Location = New System.Drawing.Point(532, 270)
+        Me.RefreshButton.Location = New System.Drawing.Point(520, 270)
         Me.RefreshButton.Name = "RefreshButton"
-        Me.RefreshButton.Size = New System.Drawing.Size(175, 21)
-        Me.RefreshButton.TabIndex = 8
+        Me.RefreshButton.Size = New System.Drawing.Size(187, 21)
+        Me.RefreshButton.TabIndex = 9
         Me.RefreshButton.Text = "Apply/Refresh/Validate"
         Me.RefreshButton.UseVisualStyleBackColor = False
         '
@@ -672,7 +673,7 @@ Partial Class PonyEditor
         Me.GroupValueLabel.Location = New System.Drawing.Point(860, 274)
         Me.GroupValueLabel.Name = "GroupValueLabel"
         Me.GroupValueLabel.Size = New System.Drawing.Size(27, 13)
-        Me.GroupValueLabel.TabIndex = 14
+        Me.GroupValueLabel.TabIndex = 15
         Me.GroupValueLabel.Text = "N/A"
         '
         'GroupLabel
@@ -682,7 +683,7 @@ Partial Class PonyEditor
         Me.GroupLabel.Location = New System.Drawing.Point(815, 274)
         Me.GroupLabel.Name = "GroupLabel"
         Me.GroupLabel.Size = New System.Drawing.Size(39, 13)
-        Me.GroupLabel.TabIndex = 13
+        Me.GroupLabel.TabIndex = 14
         Me.GroupLabel.Text = "Group:"
         '
         'SelectPonyGroup
@@ -796,6 +797,7 @@ Partial Class PonyEditor
         '
         'PonyPanel
         '
+        Me.PonyPanel.Controls.Add(Me.DeleteButton)
         Me.PonyPanel.Controls.Add(Me.ImagesButton)
         Me.PonyPanel.Controls.Add(Me.SelectPonyGroup)
         Me.PonyPanel.Controls.Add(Me.GroupValueLabel)
@@ -816,6 +818,18 @@ Partial Class PonyEditor
         Me.PonyPanel.Name = "PonyPanel"
         Me.PonyPanel.Size = New System.Drawing.Size(1002, 294)
         Me.PonyPanel.TabIndex = 1
+        '
+        'DeleteButton
+        '
+        Me.DeleteButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom
+        Me.DeleteButton.BackColor = System.Drawing.Color.IndianRed
+        Me.DeleteButton.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.DeleteButton.Location = New System.Drawing.Point(248, 270)
+        Me.DeleteButton.Name = "DeleteButton"
+        Me.DeleteButton.Size = New System.Drawing.Size(90, 21)
+        Me.DeleteButton.TabIndex = 7
+        Me.DeleteButton.Text = "Delete"
+        Me.DeleteButton.UseVisualStyleBackColor = False
         '
         'ImagesButton
         '
@@ -1069,4 +1083,5 @@ Partial Class PonyEditor
     Friend WithEvents colEffectCenteringLeft As System.Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents colEffectFollowPony As System.Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents colEffectDoNotRepeatAnimations As System.Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents DeleteButton As Button
 End Class

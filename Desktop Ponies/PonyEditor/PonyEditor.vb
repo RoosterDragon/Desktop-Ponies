@@ -224,7 +224,7 @@ Public Class PonyEditor
                              PausePonyButton.Text = "Pause Pony"
                              PonyName.Enabled = True
                              Enabled = True
-                             editorAnimator.Resume()
+                             If CurrentBase IsNot Nothing Then editorAnimator.Resume()
                              UseWaitCursor = False
                              Activate()
                          End Sub)
@@ -233,15 +233,14 @@ Public Class PonyEditor
     Private Sub LoadPonyInfo()
         Try
             If alreadyUpdating Then Exit Sub
+            alreadyUpdating = True
 
             If PreviewPony IsNot Nothing Then editorAnimator.RemoveSprite(PreviewPony)
             _previewPony = Nothing
-            If CurrentBase.Behaviors.Any() Then
+            If CurrentBase IsNot Nothing AndAlso CurrentBase.Behaviors.Any() Then
                 _previewPony = New Pony(context, CurrentBase)
                 context.PendingSprites.Add(PreviewPony)
             End If
-
-            alreadyUpdating = True
 
             BehaviorsGrid.SuspendLayout()
             EffectsGrid.SuspendLayout()
@@ -255,10 +254,11 @@ Public Class PonyEditor
             InteractionsGrid.Rows.Clear()
             SpeechesGrid.Rows.Clear()
 
-            PonyName.Text = CurrentBase.DisplayName
+            PonyName.Text = If(CurrentBase IsNot Nothing, CurrentBase.DisplayName, "")
 
             CurrentBehaviorValueLabel.Text = "N/A"
             TimeLeftValueLabel.Text = "N/A"
+            GroupValueLabel.Text = "N/A"
 
             Dim none = New CaseInsensitiveString(NoneText)
 
@@ -272,83 +272,84 @@ Public Class PonyEditor
             colBehaviorEndSpeech.Items.Clear()
             colBehaviorEndSpeech.Items.Add(none)
 
-            Dim unnamedCounter = 1
-            For Each speech In CurrentBase.Speeches
-                If speech.Name = Speech.Unnamed Then
-                    speech.Name = Speech.Unnamed & " #" & unnamedCounter
-                    unnamedCounter += 1
-                End If
+            If CurrentBase IsNot Nothing Then
+                Dim unnamedCounter = 1
+                For Each speech In CurrentBase.Speeches
+                    If speech.Name = Speech.Unnamed Then
+                        speech.Name = Speech.Unnamed & " #" & unnamedCounter
+                        unnamedCounter += 1
+                    End If
 
-                SpeechesGrid.Rows.Add(
-                    speech.Name, speech.Name, speech.Group, CurrentBase.GetBehaviorGroupName(speech.Group), speech.Text,
-                    Path.GetFileName(speech.SoundFile), (Not speech.Skip).ToString())
-                colBehaviorStartSpeech.Items.Add(speech.Name)
-                colBehaviorEndSpeech.Items.Add(speech.Name)
-            Next
+                    SpeechesGrid.Rows.Add(
+                        speech.Name, speech.Name, speech.Group, CurrentBase.GetBehaviorGroupName(speech.Group), speech.Text,
+                        Path.GetFileName(speech.SoundFile), (Not speech.Skip).ToString())
+                    colBehaviorStartSpeech.Items.Add(speech.Name)
+                    colBehaviorEndSpeech.Items.Add(speech.Name)
+                Next
 
-            For Each behavior In CurrentBase.Behaviors
-                colBehaviorLinked.Items.Add(behavior.Name)
-                colEffectBehavior.Items.Add(behavior.Name)
-            Next
+                For Each behavior In CurrentBase.Behaviors
+                    colBehaviorLinked.Items.Add(behavior.Name)
+                    colEffectBehavior.Items.Add(behavior.Name)
+                Next
 
-            Dim behaviorSequencesByName = DetermineBehaviorSequences()
-            For Each behavior In CurrentBase.Behaviors
-                Dim followName As String = ""
-                Select Case behavior.TargetMode
-                    Case TargetMode.Pony
-                        followName = behavior.FollowTargetName
-                    Case TargetMode.Point
-                        followName = behavior.TargetVector.X & " , " & behavior.TargetVector.Y
-                    Case TargetMode.None
-                        followName = "Select..."
-                End Select
+                Dim behaviorSequencesByName = DetermineBehaviorSequences()
+                For Each behavior In CurrentBase.Behaviors
+                    Dim followName As String = ""
+                    Select Case behavior.TargetMode
+                        Case TargetMode.Pony
+                            followName = behavior.FollowTargetName
+                        Case TargetMode.Point
+                            followName = behavior.TargetVector.X & " , " & behavior.TargetVector.Y
+                        Case TargetMode.None
+                            followName = "Select..."
+                    End Select
 
-                Dim chance = "N/A"
-                If Not behavior.Skip Then
-                    chance = behavior.Chance.ToString("P", CultureInfo.CurrentCulture)
-                End If
+                    Dim chance = "N/A"
+                    If Not behavior.Skip Then
+                        chance = behavior.Chance.ToString("P", CultureInfo.CurrentCulture)
+                    End If
 
-                BehaviorsGrid.Rows.Add(
-                    "Run",
-                    behavior.Name,
-                    behavior.Name,
-                    behavior.Group,
-                    CurrentBase.GetBehaviorGroupName(behavior.Group),
-                    chance,
-                    behavior.MaxDuration.TotalSeconds,
-                    behavior.MinDuration.TotalSeconds,
-                    behavior.Speed,
-                    Path.GetFileName(behavior.RightImage.Path),
-                    Path.GetFileName(behavior.LeftImage.Path),
-                    behavior.AllowedMovement.ToDisplayString(),
-                    If(behavior.StartLineName <> "", behavior.StartLineName, none),
-                    If(behavior.EndLineName <> "", behavior.EndLineName, none),
-                    followName,
-                    If(behavior.LinkedBehaviorName <> "", behavior.LinkedBehaviorName, none),
-                    behaviorSequencesByName(behavior.Name),
-                    behavior.Skip,
-                    behavior.DoNotRepeatImageAnimations)
-            Next
+                    BehaviorsGrid.Rows.Add(
+                        "Run",
+                        behavior.Name,
+                        behavior.Name,
+                        behavior.Group,
+                        CurrentBase.GetBehaviorGroupName(behavior.Group),
+                        chance,
+                        behavior.MaxDuration.TotalSeconds,
+                        behavior.MinDuration.TotalSeconds,
+                        behavior.Speed,
+                        Path.GetFileName(behavior.RightImage.Path),
+                        Path.GetFileName(behavior.LeftImage.Path),
+                        behavior.AllowedMovement.ToDisplayString(),
+                        If(behavior.StartLineName <> "", behavior.StartLineName, none),
+                        If(behavior.EndLineName <> "", behavior.EndLineName, none),
+                        followName,
+                        If(behavior.LinkedBehaviorName <> "", behavior.LinkedBehaviorName, none),
+                        behaviorSequencesByName(behavior.Name),
+                        behavior.Skip,
+                        behavior.DoNotRepeatImageAnimations)
+                Next
 
-            For Each effect In CurrentBase.Effects
-                EffectsGrid.Rows.Add(
-                    effect.Name,
-                    effect.Name,
-                    effect.BehaviorName,
-                    Path.GetFileName(effect.RightImage.Path),
-                    Path.GetFileName(effect.LeftImage.Path),
-                    effect.Duration.TotalSeconds,
-                    effect.RepeatDelay.TotalSeconds,
-                    effect.PlacementDirectionRight.ToDisplayString(),
-                    effect.CenteringRight.ToDisplayString(),
-                    effect.PlacementDirectionLeft.ToDisplayString(),
-                    effect.CenteringLeft.ToDisplayString(),
-                    effect.Follow,
-                    effect.DoNotRepeatImageAnimations)
-            Next
+                For Each effect In CurrentBase.Effects
+                    EffectsGrid.Rows.Add(
+                        effect.Name,
+                        effect.Name,
+                        effect.BehaviorName,
+                        Path.GetFileName(effect.RightImage.Path),
+                        Path.GetFileName(effect.LeftImage.Path),
+                        effect.Duration.TotalSeconds,
+                        effect.RepeatDelay.TotalSeconds,
+                        effect.PlacementDirectionRight.ToDisplayString(),
+                        effect.CenteringRight.ToDisplayString(),
+                        effect.PlacementDirectionLeft.ToDisplayString(),
+                        effect.CenteringLeft.ToDisplayString(),
+                        effect.Follow,
+                        effect.DoNotRepeatImageAnimations)
+                Next
 
-            For Each interaction In CurrentBase.Interactions
-                InteractionsGrid.Rows.Add(
+                For Each interaction In CurrentBase.Interactions
+                    InteractionsGrid.Rows.Add(
                     interaction.Name,
                     interaction.Name,
                     interaction.Chance.ToString("P", CultureInfo.CurrentCulture),
@@ -357,46 +358,45 @@ Public Class PonyEditor
                     interaction.Activation.ToString(),
                     "Select...",
                     interaction.ReactivationDelay.TotalSeconds)
-            Next
+                Next
 
-            alreadyUpdating = False
+                Dim conflicts As New List(Of String)()
 
-            Dim conflicts As New List(Of String)()
+                Dim behaviorNames As New HashSet(Of CaseInsensitiveString)()
+                Dim effectNames As New HashSet(Of CaseInsensitiveString)()
+                For Each behavior In CurrentBase.Behaviors
+                    If Not behaviorNames.Add(behavior.Name) Then
+                        conflicts.Add("Behavior: " & behavior.Name)
+                    End If
+                    effectNames.Clear()
+                    For Each effect In behavior.Effects
+                        If Not effectNames.Add(effect.Name) Then
+                            conflicts.Add("Effect: " & effect.Name & " of behavior " & behavior.Name)
+                        End If
+                    Next
+                Next
 
-            Dim behaviorNames As New HashSet(Of CaseInsensitiveString)()
-            Dim effectNames As New HashSet(Of CaseInsensitiveString)()
-            For Each behavior In CurrentBase.Behaviors
-                If Not behaviorNames.Add(behavior.Name) Then
-                    conflicts.Add("Behavior: " & behavior.Name)
-                End If
-                effectNames.Clear()
-                For Each effect In behavior.Effects
-                    If Not effectNames.Add(effect.Name) Then
-                        conflicts.Add("Effect: " & effect.Name & " of behavior " & behavior.Name)
+                Dim speechNames As New HashSet(Of CaseInsensitiveString)()
+                For Each speech In CurrentBase.Speeches
+                    If Not speechNames.Add(speech.Name) Then
+                        conflicts.Add("Speech: " & speech.Name)
                     End If
                 Next
-            Next
 
-            Dim speechNames As New HashSet(Of CaseInsensitiveString)()
-            For Each speech In CurrentBase.Speeches
-                If Not speechNames.Add(speech.Name) Then
-                    conflicts.Add("Speech: " & speech.Name)
-                End If
-            Next
+                Dim interactionNames As New HashSet(Of CaseInsensitiveString)()
+                For Each interaction In CurrentBase.Interactions
+                    If Not interactionNames.Add(interaction.Name) Then
+                        conflicts.Add("Interaction: " & interaction.Name)
+                    End If
+                Next
 
-            Dim interactionNames As New HashSet(Of CaseInsensitiveString)()
-            For Each interaction In CurrentBase.Interactions
-                If Not interactionNames.Add(interaction.Name) Then
-                    conflicts.Add("Interaction: " & interaction.Name)
-                End If
-            Next
-
-            If conflicts.Count > 0 Then
-                MessageBox.Show(
+                If conflicts.Count > 0 Then
+                    MessageBox.Show(
                     Me, "Warning: Two or more behaviors, interactions, effects or speeches have duplicate names. " &
                     "Please give them unique names or the pony may act in undefined ways." & Environment.NewLine & Environment.NewLine &
                     String.Join(Environment.NewLine, conflicts),
                     "Duplicate Names", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                End If
             End If
 
             RestoreSortOrder()
@@ -410,6 +410,8 @@ Public Class PonyEditor
         Catch ex As Exception
             Program.NotifyUserOfNonFatalException(ex, "Error loading pony parameters. The editor will now close.")
             Close()
+        Finally
+            alreadyUpdating = False
         End Try
     End Sub
 
@@ -1202,7 +1204,44 @@ Public Class PonyEditor
     End Function
 
     Private Sub SaveButton_Click(sender As Object, e As EventArgs) Handles SaveButton.Click
+        If CurrentBase Is Nothing Then
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
         SavePony()
+    End Sub
+
+    Private Sub DeleteButton_Click(sender As Object, e As EventArgs) Handles DeleteButton.Click
+        If CurrentBase Is Nothing Then
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If MessageBox.Show(Me, "Would you really like to delete this pony?", "Delete Pony?",
+                           MessageBoxButtons.YesNo,
+                           MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then Exit Sub
+
+        HidePony()
+
+        Try
+            _changesMade = True
+            Directory.Delete(Path.Combine(PonyBase.RootDirectory, CurrentBase.Directory), True)
+        Catch ex As IOException
+            MessageBox.Show(Me, "Error attempting to delete this pony. Perhaps it has already been deleted.",
+                            "Delete Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        Catch ex As UnauthorizedAccessException
+            MessageBox.Show(Me, "Error attempting to delete this pony.",
+                            "Delete Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End Try
+
+        EnableWaitCursor(True)
+        LoadPonies(Nothing)
+        LoadPony(Nothing)
+        Enabled = True
+        UseWaitCursor = False
     End Sub
 
     Private Sub EditTagsButton_Click(sender As Object, e As EventArgs) Handles EditTagsButton.Click
@@ -1258,6 +1297,12 @@ Public Class PonyEditor
     End Sub
 
     Private Sub RefreshButton_Click(sender As Object, e As EventArgs) Handles RefreshButton.Click
+        If CurrentBase Is Nothing Then
+            MessageBox.Show(Me, "Select a pony or create a new one first.",
+                            "No Pony Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
         LoadPonyInfo()
     End Sub
 
