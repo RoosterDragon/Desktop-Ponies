@@ -2001,6 +2001,8 @@
                                     top = 1;
                                     yIncrement = 2;
                                     break;
+                                case 5:
+                                    return true;
                             }
                         }
                         while (top >= bottom);
