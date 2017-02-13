@@ -1241,37 +1241,36 @@
             object syncObject = new object();
             int remaining = 0;
             imageLoadedHandler += (sender, e) =>
-                {
+            {
+                lock (syncObject)
                     if (--remaining == 0)
-                        lock (syncObject)
-                            Monitor.Pulse(syncObject);
-                };
+                        Monitor.Pulse(syncObject);
+            };
 
             var badPaths = new HashSet<string>(PathEquality.Comparer);
             List<Exception> exceptions = null;
             lock (syncObject)
             {
-                lock (imageLoadedHandler)
-                    foreach (var paths in imagePaths)
+                foreach (var paths in imagePaths)
+                {
+                    remaining++;
+                    ThreadPool.QueueUserWorkItem(o =>
                     {
-                        remaining++;
-                        ThreadPool.QueueUserWorkItem(o =>
+                        try
                         {
-                            try
-                            {
                                 LoadPaths(paths, imageLoadedHandler, badPaths);
                             }
-                            catch (Exception ex)
+                        catch (Exception ex)
+                        {
+                            lock (badPaths)
                             {
-                                lock (badPaths)
-                                {
-                                    if (exceptions == null)
-                                        exceptions = new List<Exception>();
-                                    exceptions.Add(ex);
-                                }
+                                if (exceptions == null)
+                                    exceptions = new List<Exception>();
+                                exceptions.Add(ex);
                             }
-                        });
-                    }
+                        }
+                    });
+                }
                 if (remaining > 0)
                     Monitor.Wait(syncObject);
             }
@@ -1312,8 +1311,7 @@
             }
             finally
             {
-                lock (imageLoadedHandler)
-                    imageLoadedHandler.Raise(this);
+                imageLoadedHandler.Raise(this);
             }
         }
 
