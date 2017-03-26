@@ -75,6 +75,14 @@ Change Log
 
 Latest changes:
 
+v1.61:
+- Added "level 2" Changelings by Bot-chan.
+- Readded Starlight Glimmer (Season 5) by Bot-chan.
+- Added the ability to delete ponies from the editor.
+- Fix the .zip file not extracting properly on non-Windows systems.
+- Fix an issues that may cause images not to load and instead hang the program.
+- Fix crash if the pony editor if you tried to pause with no pony selected.
+
 v1.60:
 - Rename Sue Pie to Cloudy Quartz.
 - Added Sunburst and updated Starlight Glimmer by Bot-chan.
