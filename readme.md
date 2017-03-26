@@ -37,6 +37,18 @@ The source code is available under the same license.
 
 Some information about the file formats employed by the program can be found in the [technical documentation](techdoc.md).
 
+## Related Projects
+
+* [DPengine](https://github.com/hidefromkgb/DPengine) - Multi-platform reimplementation of Desktop Ponies. Worth trying if you use Mac or Linux or need better performance.
+* [Browser Ponies](http://panzi.github.io/Browser-Ponies/) - Desktop Ponies in Javscript. Get ponies in your browser.
+* [BronyLiveWallpaper](https://github.com/frankkienl/BronyLiveWallpaper) - Live Android Wallpaper using Desktop Ponies sprites.
+* [PonyPaper](https://github.com/Smithers888/PonyPaper) - Live Android Wallpaper using Desktop Ponies sprites.
+* [ponysay](https://github.com/erkin/ponysay) - cowsay reimplementation for ponies, using some Desktop Ponies sprites.
+* [Linux/GTK+](https://github.com/killerrabbit/Ponies-for-Linux-GTK-) - Desktop Ponies reimplementation for Linux.
+* [Desktop Ponies for OS X](https://github.com/xobs/desktop-ponies-mac) - Desktop Ponies reimplementation for OS X.
+* [qponies](https://github.com/svenstaro/qponies) - Desktop Ponies reimplementation with Qt.
+* [Qt-ponies](https://github.com/myszha/qt-ponies) - Desktop Ponies reimplementation with Qt.
+
 ## Building
 
 This project evolved from a Windows only solution and whilst it just about runs on non-Windows machines thanks to Mono, it is not really portable in terms on building on other platforms (sorry about that).
