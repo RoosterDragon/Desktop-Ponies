@@ -51,7 +51,18 @@ Public NotInheritable Class Options
     Public Shared MaxPonyCount As Integer
     Public Shared TimeFactor As Single
     Public Shared ScaleFactor As Single
-    Public Shared ExclusionZone As RectangleF
+
+    Private Shared Property _exclusionZone As RectangleF
+    Public Shared Property ExclusionZone As RectangleF
+        Get
+            Return _exclusionZone
+        End Get
+        Set(value As RectangleF)
+            If value.Right > 1 Then value.Width = 1 - value.Left
+            If value.Bottom > 1 Then value.Height = 1 - value.Top
+            _exclusionZone = value
+        End Set
+    End Property
 
     Private Shared _screens As ImmutableArray(Of Screen)
     Public Shared Property Screens As ImmutableArray(Of Screen)
@@ -152,10 +163,12 @@ Public NotInheritable Class Options
                                 PonyDraggingEnabled = p.ParseBoolean(True)
                                 PonyInteractionsEnabled = p.ParseBoolean(True)
                                 displayPonyInteractionsErrors = p.ParseBoolean(False)
-                                ExclusionZone.X = p.ParseSingle(0, 0, 1)
-                                ExclusionZone.Y = p.ParseSingle(0, 0, 1)
-                                ExclusionZone.Width = p.ParseSingle(0, 0, 1)
-                                ExclusionZone.Height = p.ParseSingle(0, 0, 1)
+                                Dim exclusion = New RectangleF()
+                                exclusion.X = p.ParseSingle(0, 0, 1)
+                                exclusion.Y = p.ParseSingle(0, 0, 1)
+                                exclusion.Width = p.ParseSingle(0, 0, 1)
+                                exclusion.Height = p.ParseSingle(0, 0, 1)
+                                ExclusionZone = exclusion
                                 ScaleFactor = p.ParseSingle(1, 0.25, 4)
                                 MaxPonyCount = p.ParseInt32(300, 0, 10000)
                                 alphaBlendingEnabled = p.ParseBoolean(True)
