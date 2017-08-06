@@ -2606,7 +2606,7 @@ Public Class Pony
             Dim isOnEdgeOfBounds =
                 RectangleF.Intersect(Context.Region, currentRegion) <> currentRegion OrElse
                 (Context.ExclusionRegion <> RectangleF.Empty AndAlso
-                 RectangleF.Intersect(Context.ExclusionRegion, currentRegion) <> currentRegion)
+                 RectangleF.Intersect(Context.ExclusionRegion, currentRegion) <> RectangleF.Empty)
             If isOnEdgeOfBounds Then
                 _allowingNaturalReturnToZone = True
                 AddUpdateRecord("Allowing a natural return to zone until the next behavior.")
