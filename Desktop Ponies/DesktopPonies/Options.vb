@@ -346,10 +346,12 @@ Public NotInheritable Class Options
         If AllowedRegion Is Nothing Then
             Dim area As Rectangle = Rectangle.Empty
             For Each screen In Screens
+                Dim screenArea = screen.WorkingArea
+                If screenArea = Rectangle.Empty Then screenArea = screen.Bounds
                 If area = Rectangle.Empty Then
-                    area = screen.WorkingArea
+                    area = screenArea
                 Else
-                    area = Rectangle.Union(area, screen.WorkingArea)
+                    area = Rectangle.Union(area, screenArea)
                 End If
             Next
             Return area
