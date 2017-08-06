@@ -463,6 +463,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### King Sombra
 * Bot-chan
 
+#### King Thorax
+* Bot-chan
+
 #### Lady Justice
 * Bot-chan
 
