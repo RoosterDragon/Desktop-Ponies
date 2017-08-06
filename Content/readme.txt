@@ -75,6 +75,13 @@ Change Log
 
 Latest changes:
 
+v1.62:
+- Added Countess Coloratura by Blaze5565.
+- Added King Thorax by Bot-chan.
+- Tag pets as non-ponies.
+- Fix ponies thinking they were in the exclusion area when they were not.
+- Fix crashes when setting up an exclusion zone or multiple monitors.
+
 v1.61:
 - Added "level 2" Changelings by Bot-chan.
 - Readded Starlight Glimmer (Season 5) by Bot-chan.
