@@ -89,6 +89,7 @@ Public Class OptionsForm
         ScreenAreaHeight.Maximum = totalScreenBounds.Height
 
         Dim area = Options.GetAllowedArea()
+        area.Intersect(totalScreenBounds)
         ScreenAreaX.Value = area.X
         ScreenAreaY.Value = area.Y
         ScreenAreaWidth.Value = area.Width
