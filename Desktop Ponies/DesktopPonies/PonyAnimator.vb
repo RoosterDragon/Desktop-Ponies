@@ -273,9 +273,10 @@ Public MustInherit Class PonyAnimator
 
             Dim audio As Microsoft.DirectX.AudioVideoPlayback.Audio = Nothing
             Try
-                audio = New Microsoft.DirectX.AudioVideoPlayback.Audio(soundfulSprite.SoundPath)
                 ' Volume is between -10000 and 0, with 0 being the loudest.
-                audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
+                audio = New Microsoft.DirectX.AudioVideoPlayback.Audio(soundfulSprite.SoundPath) With {
+                    .Volume = CInt(Options.SoundVolume * 10000 - 10000)
+                }
                 audio.Play()
             Catch ex As Exception
                 ' Swallow any exception here. The sound file may be missing, inaccessible, not a playable format, etc.

@@ -63,8 +63,9 @@
     Private Sub PlaySound()
         Try
             Dim fullPath = IO.Path.Combine(SoundFileSelector.BaseDirectory, SoundFileSelector.FilePath)
-            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(fullPath)
-            audio.Volume = CInt(Options.SoundVolume * 10000 - 10000)
+            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(fullPath) With {
+                .Volume = CInt(Options.SoundVolume * 10000 - 10000)
+            }
             audio.Play()
             sound = audio
             SoundPreviewButton.Text = "Stop"

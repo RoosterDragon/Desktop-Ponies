@@ -253,8 +253,9 @@ Public NotInheritable Class PonyIniParser
                                   New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine), {"Identifier", "Number", "Name"}),
                                   Function(p)
                                       p.NoParse()
-                                      Dim bg As New BehaviorGroup("", 0)
-                                      bg.Number = p.ParseInt32(0, 100)
+                                      Dim bg As New BehaviorGroup("", 0) With {
+                                          .Number = p.ParseInt32(0, 100)
+                                      }
                                       bg.Name = p.NotNullOrWhiteSpace(bg.Number.ToStringInvariant())
                                       Return bg
                                   End Function)

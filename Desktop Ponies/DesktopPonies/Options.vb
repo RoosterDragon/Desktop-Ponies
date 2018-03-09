@@ -163,11 +163,12 @@ Public NotInheritable Class Options
                                 PonyDraggingEnabled = p.ParseBoolean(True)
                                 PonyInteractionsEnabled = p.ParseBoolean(True)
                                 displayPonyInteractionsErrors = p.ParseBoolean(False)
-                                Dim exclusion = New RectangleF()
-                                exclusion.X = p.ParseSingle(0, 0, 1)
-                                exclusion.Y = p.ParseSingle(0, 0, 1)
-                                exclusion.Width = p.ParseSingle(0, 0, 1)
-                                exclusion.Height = p.ParseSingle(0, 0, 1)
+                                Dim exclusion = New RectangleF With {
+                                    .X = p.ParseSingle(0, 0, 1),
+                                    .Y = p.ParseSingle(0, 0, 1),
+                                    .Width = p.ParseSingle(0, 0, 1),
+                                    .Height = p.ParseSingle(0, 0, 1)
+                                }
                                 ExclusionZone = exclusion
                                 ScaleFactor = p.ParseSingle(1, 0.25, 4)
                                 MaxPonyCount = p.ParseInt32(300, 0, 10000)
@@ -189,11 +190,12 @@ Public NotInheritable Class Options
                                 ScreensaverBackgroundImagePath = p.NotNull("")
                                 NoRandomDuplicates = p.ParseBoolean(True)
                                 ShowInTaskbar = p.ParseBoolean(OperatingSystemInfo.IsWindows)
-                                Dim region = New Rectangle()
-                                region.X = p.ParseInt32(0)
-                                region.Y = p.ParseInt32(0)
-                                region.Width = p.ParseInt32(0, 0, Integer.MaxValue)
-                                region.Height = p.ParseInt32(0, 0, Integer.MaxValue)
+                                Dim region = New Rectangle With {
+                                    .X = p.ParseInt32(0),
+                                    .Y = p.ParseInt32(0),
+                                    .Width = p.ParseInt32(0, 0, Integer.MaxValue),
+                                    .Height = p.ParseInt32(0, 0, Integer.MaxValue)
+                                }
                                 If region.Width > 0 AndAlso region.Height > 0 Then AllowedRegion = region
                             Case "monitor"
                                 If columns.Length <> 2 Then Exit Select
@@ -388,8 +390,9 @@ Public NotInheritable Class Options
     Public Shared Function GetInterface() As DesktopSprites.SpriteManagement.ISpriteCollectionView
         Dim viewer As DesktopSprites.SpriteManagement.ISpriteCollectionView
         If GetInterfaceType() = GetType(DesktopSprites.SpriteManagement.WinFormSpriteInterface) Then
-            viewer = New DesktopSprites.SpriteManagement.WinFormSpriteInterface(GetAllowedArea())
-            viewer.BufferPreprocess = AddressOf GifProcessing.LosslessDownscale
+            viewer = New DesktopSprites.SpriteManagement.WinFormSpriteInterface(GetAllowedArea()) With {
+                .BufferPreprocess = AddressOf GifProcessing.LosslessDownscale
+            }
         Else
             viewer = New DesktopSprites.SpriteManagement.GtkSpriteInterface()
         End If

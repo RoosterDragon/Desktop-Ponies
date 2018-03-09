@@ -293,10 +293,11 @@ Public Class PonyBase
             Dim fullPath = Path.Combine(RootDirectory, directory)
             Dim iniFileName = Path.Combine(fullPath, ConfigFilename)
             If IO.Directory.Exists(fullPath) Then
-                pony = New PonyBase(collection)
-                pony._validatedOnLoad = removeInvalidItems
-                pony._directory = directory
-                pony.DisplayName = directory
+                pony = New PonyBase(collection) With {
+                    ._validatedOnLoad = removeInvalidItems,
+                    ._directory = directory,
+                    .DisplayName = directory
+                }
                 If File.Exists(iniFileName) Then
                     Using reader = New StreamReader(iniFileName)
                         ParsePonyConfig(fullPath, reader, pony, removeInvalidItems)
@@ -548,8 +549,9 @@ Public Class InteractionBase
         result = Nothing
         issues = Nothing
 
-        Dim i = New InteractionBase()
-        i.SourceIni = iniLine
+        Dim i = New InteractionBase With {
+            .SourceIni = iniLine
+        }
         Dim p As New StringCollectionParser(CommaSplitQuoteBraceQualified(iniLine),
                                             {"Name", "Initiator", "Chance",
                                              "Proximity", "Targets", "Target Activation",
@@ -965,8 +967,9 @@ Public Class Behavior
         result = Nothing
         issues = Nothing
 
-        Dim b = New Behavior(pony)
-        b.SourceIni = iniLine
+        Dim b = New Behavior(pony) With {
+            .SourceIni = iniLine
+        }
         Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Name", "Chance",
                                              "Max Duration", "Min Duration", "Speed",
@@ -1143,8 +1146,9 @@ Public Class Speech
         result = Nothing
         issues = Nothing
 
-        Dim s = New Speech()
-        s.SourceIni = iniLine
+        Dim s = New Speech With {
+            .SourceIni = iniLine
+        }
         Dim iniComponents = CommaSplitQuoteBraceQualified(iniLine)
         Dim named = True
         If iniComponents.Length = 2 Then
@@ -3468,8 +3472,9 @@ Public Class EffectBase
         result = Nothing
         issues = Nothing
 
-        Dim e = New EffectBase(pony)
-        e.SourceIni = iniLine
+        Dim e = New EffectBase(pony) With {
+            .SourceIni = iniLine
+        }
         Dim p As New StringCollectionParser(CommaSplitQuoteQualified(iniLine),
                                             {"Identifier", "Effect Name", "Behavior Name",
                                              "Right Image", "Left Image", "Duration", "Repeat Delay",
@@ -4088,8 +4093,9 @@ Public Class House
             baseToDeploy = candidates.RandomElement()
         End If
 
-        Dim ponyToDeploy = New Pony(Context, baseToDeploy)
-        ponyToDeploy.Location = TopLeftLocation + HouseBase.DoorPosition
+        Dim ponyToDeploy = New Pony(Context, baseToDeploy) With {
+            .Location = TopLeftLocation + HouseBase.DoorPosition
+        }
         AddHandler ponyToDeploy.Expired, Sub() StopTrackingPony(ponyToDeploy)
 
         Context.PendingSprites.Add(ponyToDeploy)

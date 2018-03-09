@@ -136,8 +136,9 @@ Public Class GameSelectionForm
 
                 AddHandler picturebox.Click, AddressOf PictureClick
 
-                Dim new_label As New Label
-                new_label.Text = Position.Name
+                Dim new_label As New Label With {
+                    .Text = Position.Name
+                }
 
                 Select Case Position.TeamNumber
                     Case 1
