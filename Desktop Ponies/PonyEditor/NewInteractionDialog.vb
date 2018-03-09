@@ -76,7 +76,7 @@
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         Dim newName = NameTextBox.Text.Trim()
         If Not EditorCommon.ValidateName(Me, "interaction", newName, base.Interactions,
-                                         If(interactionToEdit Is Nothing, Nothing, interactionToEdit.Name)) Then Return
+                                         interactionToEdit?.Name) Then Return
 
         If TargetsList.CheckedItems.Count = 0 Then
             MessageBox.Show(Me, "You need to select at least one target to interact with.",

@@ -20,10 +20,10 @@ Public Class SpriteDebugForm
                 pony.CurrentBehavior.Name,
                 pony.BehaviorRemainingDuration.TotalSeconds.ToString("0.00s", CultureInfo.CurrentCulture),
                 pony.Movement.ToString("0.00"),
-                If(pony.Destination IsNot Nothing, pony.Destination.Value.ToString("0.00"), Nothing),
+                pony.Destination?.ToString("0.00"),
                 pony.CurrentBehavior.FollowTargetName,
                 If(pony.FollowTarget IsNot Nothing, If(pony.FollowTarget.Base.Directory, pony.FollowTarget.Base.DisplayName), Nothing),
-                If(pony.VisualOverrideBehavior IsNot Nothing, pony.VisualOverrideBehavior.Name, Nothing),
+                pony.VisualOverrideBehavior?.Name,
                 Nothing,
                 If(gamePony IsNot Nothing AndAlso gamePony.CurrentPosition IsNot Nothing,
                    gamePony.CurrentPosition.CurrentAction.ToString(), Nothing))

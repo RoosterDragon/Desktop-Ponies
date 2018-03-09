@@ -801,7 +801,7 @@ Public Class Game
                 Exit Sub
             End If
 
-            Dim ballLastHandledByTeam = If(nearestBall.LastHandledBy IsNot Nothing, nearestBall.LastHandledBy.Team, Nothing)
+            Dim ballLastHandledByTeam = nearestBall.LastHandledBy?.Team
             If ballLastHandledByTeam Is Nothing Then
                 PerformAction(neutralBallActions, nearestBall)
             ElseIf ballLastHandledByTeam.Number = TeamNumber Then
