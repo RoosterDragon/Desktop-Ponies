@@ -121,8 +121,7 @@
                 if (frameDuration == 0 && !(ImageDuration == 0 && sourceFrame == frameCount - 1))
                 {
                     // Dispose of unused frame.
-                    IDisposable disposable = gifImage.Frames[sourceFrame].Image as IDisposable;
-                    if (disposable != null)
+                    if (gifImage.Frames[sourceFrame].Image is IDisposable disposable)
                         disposable.Dispose();
                     continue;
                 }
@@ -178,8 +177,7 @@
             else
             {
                 // Dispose of duplicate frame.
-                IDisposable disposable = frame.Image as IDisposable;
-                if (disposable != null)
+                if (frame.Image is IDisposable disposable)
                     disposable.Dispose();
             }
         }
@@ -328,8 +326,7 @@
             {
                 foreach (T frame in frames)
                 {
-                    IDisposable disposable = frame as IDisposable;
-                    if (disposable != null)
+                    if (frame is IDisposable disposable)
                         disposable.Dispose();
                 }
             }

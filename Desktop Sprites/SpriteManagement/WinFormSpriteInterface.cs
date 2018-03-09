@@ -1666,8 +1666,7 @@
                         var invalidRect = OffsetRectangle(sprite.Region, translate);
                         invalidRect.Size += new Size(1, 1);
                         postUpdateInvalidRegion.Union(invalidRect);
-                        ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                        if (speakingSprite != null && speakingSprite.SpeechText != null)
+                        if (sprite is ISpeakingSprite speakingSprite && speakingSprite.SpeechText != null)
                             postUpdateInvalidRegion.Union(
                                 OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, form.BackgroundGraphics), translate));
                     }
@@ -1729,8 +1728,7 @@
                     }
 
                     // Draw a speech bubble for a speaking sprite.
-                    ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                    if (speakingSprite != null && speakingSprite.SpeechText != null)
+                    if (sprite is ISpeakingSprite speakingSprite && speakingSprite.SpeechText != null)
                     {
                         Rectangle bubble = OffsetRectangle(GetSpeechBubbleRegion(speakingSprite, form.BackgroundGraphics), translate);
                         form.BackgroundGraphics.FillRectangle(Brushes.White,

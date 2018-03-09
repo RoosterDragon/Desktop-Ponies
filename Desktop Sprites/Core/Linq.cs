@@ -70,8 +70,7 @@
         public static TSource RandomElement<TSource>(this IEnumerable<TSource> source)
         {
             Argument.EnsureNotNull(source, "source");
-            var collection = source as ICollection<TSource>;
-            if (collection != null)
+            if (source is ICollection<TSource> collection)
             {
                 if (collection.Count == 0)
                     throw new ArgumentException("source must contain at least one element.", "source");

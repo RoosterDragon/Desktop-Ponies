@@ -1723,8 +1723,7 @@
                         window.DrawFrame(sprite.Region.Width, sprite.Region.Height);
 
                         // Display any speech.
-                        ISpeakingSprite speakingSprite = sprite as ISpeakingSprite;
-                        if (speakingSprite != null && speakingSprite.SpeechText != null)
+                        if (sprite is ISpeakingSprite speakingSprite && speakingSprite.SpeechText != null)
                             window.ShowSpeech(speakingSprite.SpeechText, sprite.Region.X + sprite.Region.Width / 2, sprite.Region.Y - 2);
                         else
                             window.HideSpeech();
