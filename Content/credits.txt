@@ -915,6 +915,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sonata Dusk
 * Bot-chan
 
+#### Songbird Serenade
+* Bot-chan
+
 #### Sourpuss
 * Bot-chan
 
