@@ -267,8 +267,7 @@
                     Color sourceColor = Color.FromArgb(sourceRgbColor.ToArgb());
                     if (!colorMappingTable.ContainsKey(sourceColor))
                     {
-                        ArgbColor desiredArgbColor;
-                        if (!alphaMap.TryGetMapping(sourceRgbColor, out desiredArgbColor))
+                        if (!alphaMap.TryGetMapping(sourceRgbColor, out ArgbColor desiredArgbColor))
                             desiredArgbColor = sourceArgbColor;
                         colorMappingTable.Add(sourceColor, Color.FromArgb(desiredArgbColor.ToArgb()));
                     }
@@ -383,8 +382,7 @@
             if (!loaded)
                 return;
 
-            byte value;
-            if (byte.TryParse(DesiredAlphaCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out value))
+            if (byte.TryParse(DesiredAlphaCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out byte value))
             {
                 DesiredAlphaCode.ForeColor = Color.Black;
                 Color newColor = Color.FromArgb(value, colorMappingTable[currentColor]);
@@ -420,8 +418,7 @@
             if (!loaded)
                 return;
 
-            int value;
-            if (int.TryParse(DesiredColorCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out value))
+            if (int.TryParse(DesiredColorCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int value))
             {
                 DesiredColorCode.ForeColor = Color.Black;
                 Color newColor = Color.FromArgb(colorMappingTable[currentColor].A, value >> 16, value >> 8 & 0xFF, value & 0xFF);

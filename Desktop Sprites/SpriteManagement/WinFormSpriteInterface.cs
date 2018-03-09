@@ -1199,8 +1199,7 @@
                             ArgbColor paletteColor = new ArgbColor(colorPalette[i]);
                             if (paletteColor.A != 255)
                                 continue;
-                            ArgbColor argbColor;
-                            if (map.TryGetMapping(new RgbColor(paletteColor.R, paletteColor.G, paletteColor.B), out argbColor))
+                            if (map.TryGetMapping(new RgbColor(paletteColor.R, paletteColor.G, paletteColor.B), out ArgbColor argbColor))
                                 colorPalette[i] = argbColor.PremultipliedAlpha().ToArgb();
                         }
                     }
@@ -1947,9 +1946,9 @@
         /// <param name="sectionCount">The number of scanline sections.</param>
         private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
             AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
+                out int xMin, out int xMax, out int yMin, out int yMax,
+                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -1984,9 +1983,9 @@
         /// <param name="sectionCount">The number of scanline sections.</param>
         private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
             AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
+                out int xMin, out int xMax, out int yMin, out int yMax,
+                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
 
             int dataIndex = yMin * image.Stride;
             int dataIndexRowChange = image.Stride;
@@ -2027,14 +2026,12 @@
         /// <param name="sectionCount">The number of scanline sections.</param>
         private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
             AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
-
-            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
+                out int xMin, out int xMax, out int yMin, out int yMax,
+                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
-                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint,
-                out dataRowIndexFixedPoint, out dataColumnIndexFixedPointInitial);
+                out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
+                out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial);
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;
@@ -2072,14 +2069,12 @@
         /// <param name="sectionCount">The number of scanline sections.</param>
         private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
-            int xMin, xMax, yMin, yMax, backgroundIndex, backgroundIndexChange, backgroundIndexRowChange;
             AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
-                out xMin, out xMax, out yMin, out yMax, out backgroundIndex, out backgroundIndexChange, out backgroundIndexRowChange);
-
-            int xShift, yShift, xScaleFixedPoint, yScaleFixedPoint, dataRowIndexFixedPoint, dataColumnIndexFixedPointInitial;
+                out int xMin, out int xMax, out int yMin, out int yMax,
+                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
-                out xShift, out yShift, out xScaleFixedPoint, out yScaleFixedPoint,
-                out dataRowIndexFixedPoint, out dataColumnIndexFixedPointInitial);
+                out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
+                out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial);
 
             byte[] data = image.Data;
             int[] palette = image.ArgbPalette;

@@ -308,8 +308,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="item"/> is null.</exception>
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
-            Lazy<TValue> lazy;
-            bool found = dictionary.TryGetValue(item.Key, out lazy);
+            bool found = dictionary.TryGetValue(item.Key, out Lazy<TValue> lazy);
             return found ? EqualityComparer<TValue>.Default.Equals(item.Value, lazy.Value) : false;
         }
         /// <summary>
@@ -527,8 +526,7 @@
         /// internal state of the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> is now unreliable.</exception>
         public bool Remove(TKey key)
         {
-            Lazy<TValue> lazy;
-            bool exists = dictionary.TryGetValue(key, out lazy);
+            bool exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
             if (exists && lazy.IsValueCreated)
                 InitializedCount--;
             bool removed = dictionary.Remove(key);
@@ -579,8 +577,7 @@
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         public bool TryGetValue(TKey key, out TValue value, bool initialize)
         {
-            Lazy<TValue> lazy;
-            bool exists = dictionary.TryGetValue(key, out lazy);
+            bool exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
 
             if (exists && initialize && !lazy.IsValueCreated)
                 InitializedCount++;

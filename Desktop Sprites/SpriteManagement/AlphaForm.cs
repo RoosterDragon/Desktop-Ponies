@@ -137,11 +137,10 @@
                 if (backgroundData != null)
                     return;
             }
-            IntPtr backgroundBits;
             var bitmapInfo = new BITMAPINFO(new BITMAPINFOHEADER(
                 Width, -Height, 32, BiFlags.BI_RGB, (uint)(Width * Height * 4), 0, 0, 0, 0));
             hBitmap = NativeMethods.CreateDIBSection(
-                hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out backgroundBits, IntPtr.Zero, 0);
+                hdcBackground, ref bitmapInfo, DibFlags.DIB_RGB_COLORS, out IntPtr backgroundBits, IntPtr.Zero, 0);
             if (hBitmap == IntPtr.Zero)
                 throw new Win32Exception();
             GC.AddMemoryPressure(bitmapSizeInBytes = bitmapInfo.bmiHeader.biSizeImage);

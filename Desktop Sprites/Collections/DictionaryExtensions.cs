@@ -26,8 +26,7 @@
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
             Argument.EnsureNotNull(dictionary, "dictionary");
-            TValue currentValue;
-            if (!dictionary.TryGetValue(key, out currentValue))
+            if (!dictionary.TryGetValue(key, out TValue currentValue))
                 dictionary.Add(key, currentValue = value);
             return currentValue;
         }
@@ -51,8 +50,7 @@
         {
             Argument.EnsureNotNull(dictionary, "dictionary");
             Argument.EnsureNotNull(valueFactory, "valueFactory");
-            TValue currentValue;
-            if (!dictionary.TryGetValue(key, out currentValue))
+            if (!dictionary.TryGetValue(key, out TValue currentValue))
                 dictionary.Add(key, currentValue = valueFactory(key));
             return currentValue;
         }

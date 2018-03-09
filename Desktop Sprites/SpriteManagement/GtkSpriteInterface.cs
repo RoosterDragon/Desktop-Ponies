@@ -310,8 +310,7 @@
                 {
                     // Start actively updating the input mask for RGBA supported windows.
                     updatingMask = true;
-                    int width, height;
-                    GetSize(out width, out height);
+                    GetSize(out int width, out int height);
                     SetClip(width, height);
                 }
                 return base.OnEnterNotifyEvent(evnt);
@@ -360,8 +359,7 @@
                 else if (updatingMask)
                 {
                     // Only update the input mask, since alpha is already taken care of.
-                    int x, y;
-                    GetPointer(out x, out y);
+                    GetPointer(out int x, out int y);
                     if (x < 0 || y < 0 || x > width || y > height)
                     {
                         if (lastClip != null)
@@ -485,10 +483,8 @@
                 gtkSpriteInterface.ApplicationInvoke(() =>
                 {
                     // Create the image and get its clipping mask.
-                    Pixmap clipMap;
-                    Pixmap clipMask;
                     Image = new Pixbuf(fileName);
-                    Image.RenderPixmapAndMask(out clipMap, out clipMask, 255);
+                    Image.RenderPixmapAndMask(out Pixmap clipMap, out Pixmap clipMask, 255);
                     Clip = clipMask;
                     clipMap.Dispose();
                 });
@@ -1106,9 +1102,7 @@
             get
             {
                 EnsureNotDisposed();
-                int x, y;
-                ModifierType mod;
-                GetPointer(out x, out y, out mod);
+                GetPointer(out int x, out int y, out ModifierType mod);
                 return new SD.Point(x, y);
             }
         }
@@ -1121,9 +1115,7 @@
             get
             {
                 EnsureNotDisposed();
-                int x, y;
-                ModifierType mod;
-                GetPointer(out x, out y, out mod);
+                GetPointer(out int x, out int y, out ModifierType mod);
                 SimpleMouseButtons buttons = SimpleMouseButtons.None;
                 if ((mod & ModifierType.Button1Mask) == ModifierType.Button1Mask)
                     buttons |= SimpleMouseButtons.Left;
@@ -1443,8 +1435,7 @@
                     {
                         // Map RGB colors to ARGB colors.
                         int offset = 4 * x;
-                        ArgbColor argbColor;
-                        if (map.TryGetMapping(new RgbColor(scan[offset + 0], scan[offset + 1], scan[offset + 2]), out argbColor))
+                        if (map.TryGetMapping(new RgbColor(scan[offset + 0], scan[offset + 1], scan[offset + 2]), out ArgbColor argbColor))
                         {
                             scan[offset + 0] = argbColor.R;
                             scan[offset + 1] = argbColor.G;

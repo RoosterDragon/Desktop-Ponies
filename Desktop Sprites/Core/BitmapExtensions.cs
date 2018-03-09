@@ -49,8 +49,7 @@
                         for (int i = 0; i < data.Width; i++)
                         {
                             Color mapSource = Color.FromArgb(colors[i]);
-                            Color mapDestination;
-                            if (map.TryGetValue(mapSource, out mapDestination))
+                            if (map.TryGetValue(mapSource, out Color mapDestination))
                                 colors[i] = mapDestination.ToArgb();
                         }
 
@@ -66,8 +65,7 @@
                     ColorPalette palette = bitmap.Palette;
                     for (int paletteIndex = 0; paletteIndex < palette.Entries.Length; paletteIndex++)
                     {
-                        Color mapDestination;
-                        if (map.TryGetValue(palette.Entries[paletteIndex], out mapDestination))
+                        if (map.TryGetValue(palette.Entries[paletteIndex], out Color mapDestination))
                             palette.Entries[paletteIndex] = mapDestination;
                     }
                     bitmap.Palette = palette;
