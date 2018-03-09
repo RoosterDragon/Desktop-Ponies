@@ -75,6 +75,12 @@ Change Log
 
 Latest changes:
 
+v1.63:
+- Added Songbird Serenade by Bot-chan.
+- Added Tempest Shadow by Bot-chan.
+- Added Tea Shop Pony by Blaze5565.
+- Fixed launching on Mac.
+
 v1.62:
 - Added Countess Coloratura by Blaze5565.
 - Added King Thorax by Bot-chan.

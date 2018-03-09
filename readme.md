@@ -17,7 +17,7 @@ Don't want to restrict yourself to just ponies? Try downloading the [Equestria G
 
 Desktop Ponies works on Windows, Mac and Linux.
 
-* [Download the latest version (v1.62)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.62/Desktop.Ponies.v1.62.zip)
+* [Download the latest version (v1.63)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.63/Desktop.Ponies.v1.63.zip)
 * Extract the files.
 * Check the included readme file for further instructions.
 
