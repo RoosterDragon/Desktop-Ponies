@@ -744,21 +744,23 @@ Public Class Game
                 allowedArea = Nothing
             End If
 
-            Dim Action_Lists As New List(Of List(Of PlayerActionType))
-            Action_Lists.Add(haveBallActions)
-            Action_Lists.Add(hostileBallActions)
-            Action_Lists.Add(friendlyBallActions)
-            Action_Lists.Add(neutralBallActions)
-            Action_Lists.Add(distantBallActions)
-            Action_Lists.Add(noBallActions)
+            Dim Action_Lists As New List(Of List(Of PlayerActionType)) From {
+                haveBallActions,
+                hostileBallActions,
+                friendlyBallActions,
+                neutralBallActions,
+                distantBallActions,
+                noBallActions
+            }
 
-            Dim Actions_strings As New List(Of String)
-            Actions_strings.Add(_Have_Ball_Actions)
-            Actions_strings.Add(_Hostile_Ball_Actions)
-            Actions_strings.Add(_Friendly_Ball_Actions)
-            Actions_strings.Add(_Neutral_Ball_Actions)
-            Actions_strings.Add(_Distance_Ball_Actions)
-            Actions_strings.Add(_No_Ball_Actions)
+            Dim Actions_strings As New List(Of String) From {
+                _Have_Ball_Actions,
+                _Hostile_Ball_Actions,
+                _Friendly_Ball_Actions,
+                _Neutral_Ball_Actions,
+                _Distance_Ball_Actions,
+                _No_Ball_Actions
+            }
 
             For i = 0 To Action_Lists.Count - 1
                 Dim list As List(Of PlayerActionType) = Action_Lists(i)

@@ -261,8 +261,9 @@ Public Class DesktopPonyAnimator
     End Sub
 
     Private Function PonySelectionList() As List(Of ISimpleContextMenuItem)
-        Dim tagList = New List(Of ISimpleContextMenuItem)()
-        tagList.Add(New SimpleContextMenuItem(PonyBase.RandomDirectory, Sub() AddPonySelection(PonyBase.RandomDirectory)))
+        Dim tagList = New List(Of ISimpleContextMenuItem) From {
+            New SimpleContextMenuItem(PonyBase.RandomDirectory, Sub() AddPonySelection(PonyBase.RandomDirectory))
+        }
 
         For Each tag In PonyBase.StandardTags.Concat(Options.CustomTags)
             Dim ponyList = New List(Of ISimpleContextMenuItem)
