@@ -33,7 +33,7 @@ Public Class IdleWorker
     ''' <summary>
     ''' Indicates if the control has been disposed.
     ''' </summary>
-    Private ReadOnly Property controlDisposed As Boolean
+    Private ReadOnly Property ControlDisposed As Boolean
         Get
             Return control.Disposing OrElse control.IsDisposed
         End Get
@@ -56,7 +56,7 @@ Public Class IdleWorker
     Public Sub New(control As Control)
         Me.control = Argument.EnsureNotNull(control, "control")
         AddHandler control.Disposed, AddressOf Control_Disposed
-        If controlDisposed Then Throw New ArgumentException("control must not be disposed.", "control")
+        If ControlDisposed Then Throw New ArgumentException("control must not be disposed.", "control")
         If UseIdlePooling Then
             If Not control.TryInvoke(Sub() AddHandler Application.Idle, AddressOf RunTask) Then
                 Throw New ArgumentException("control must have a window handle.", "control")
@@ -72,7 +72,7 @@ Public Class IdleWorker
         Argument.EnsureNotNull(task, "task")
         SyncLock tasks
             ' If the control is disposed or the handle has been lost, we will drop all new tasks since they can't be processed anyway.
-            If disposed OrElse controlDisposed OrElse Not control.IsHandleCreated Then
+            If disposed OrElse ControlDisposed OrElse Not control.IsHandleCreated Then
                 Return
             End If
 
@@ -101,7 +101,7 @@ Public Class IdleWorker
     ''' <param name="e">Data about the event.</param>
     Private Sub RunTask(sender As Object, e As EventArgs)
         SyncLock tasks
-            If disposed OrElse controlDisposed Then Return
+            If disposed OrElse ControlDisposed Then Return
             runWatch.Restart()
             ' For efficiency, run a batch of tasks whilst idle.
             ' This reduces the message loop overhead in the case of lots of very short tasks.
@@ -120,7 +120,7 @@ Public Class IdleWorker
             ' We are on the UI thread, invoke tasks until all are complete.
             If UseIdlePooling Then
                 SyncLock tasks
-                    If disposed OrElse controlDisposed Then Return
+                    If disposed OrElse ControlDisposed Then Return
                     While tasks.Count > 0
                         tasks.Dequeue.Invoke()
                     End While
@@ -131,7 +131,7 @@ Public Class IdleWorker
             End If
         Else
             SyncLock tasks
-                If disposed OrElse controlDisposed Then Return
+                If disposed OrElse ControlDisposed Then Return
             End SyncLock
             ' We are on another thread, wait on the UI thread to finish processing our tasks.
             If UseIdlePooling Then

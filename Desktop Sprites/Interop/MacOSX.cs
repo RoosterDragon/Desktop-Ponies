@@ -6,6 +6,9 @@
     /// <summary>
     /// Exposes MacOSX native functions.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style", "IDE1006:Naming Styles",
+        Justification = "Following OSX conventions.")]
     internal static class NativeMethods
     {
         /// <summary>

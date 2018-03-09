@@ -6,6 +6,9 @@
     /// <summary>
     /// Exposes native functions for Unix and Unix-like systems.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style", "IDE1006:Naming Styles",
+        Justification = "Following Unix conventions.")]
     internal static class NativeMethods
     {
         /// <summary>

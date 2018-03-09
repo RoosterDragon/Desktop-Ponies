@@ -29,7 +29,7 @@ Public Class PonySelectionControl
     Private originalImageSize As Size
     Private imageSize As Size
     Private timeIndex As TimeSpan
-    Private ReadOnly Property ponyImageArea As Rectangle
+    Private ReadOnly Property PonyImageArea As Rectangle
         Get
             Return New Rectangle(ImageMargin,
                                  CInt(ClientSize.Height / 2 - imageSize.Height / 2),
@@ -113,7 +113,7 @@ Public Class PonySelectionControl
     End Sub
 
     Private Sub InvalidatePonyImageArea()
-        Invalidate(ponyImageArea)
+        Invalidate(PonyImageArea)
     End Sub
 
     Private Sub PonySelectionControl_Paint(sender As Object, e As PaintEventArgs) Handles MyBase.Paint
@@ -123,7 +123,7 @@ Public Class PonySelectionControl
             e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
             e.Graphics.PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
             Dim bitmap = image(timeIndex).Image
-            e.Graphics.DrawImage(bitmap, ponyImageArea)
+            e.Graphics.DrawImage(bitmap, PonyImageArea)
         End If
     End Sub
 

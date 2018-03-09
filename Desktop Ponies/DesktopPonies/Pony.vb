@@ -1680,7 +1680,7 @@ Public Class Pony
     ''' <summary>
     ''' Provides the top-left location of this pony for use by effects.
     ''' </summary>
-    Private ReadOnly effectLocationProvider As Func(Of Vector2F) = Function() regionF.Location
+    Private ReadOnly effectLocationProvider As Func(Of Vector2F) = Function() RegionF.Location
     ''' <summary>
     ''' Provides the size of this pony for use by effects.
     ''' </summary>
@@ -1884,7 +1884,7 @@ Public Class Pony
     ''' <summary>
     ''' Gets the behavior that provides the current image (based on the visual override behavior and current behavior).
     ''' </summary>
-    Private ReadOnly Property currentImageBehavior As Behavior
+    Private ReadOnly Property CurrentImageBehavior As Behavior
         Get
             Return If(If(_visualOverrideBehavior, _currentBehavior), Base.Behaviors(0))
         End Get
@@ -1893,9 +1893,9 @@ Public Class Pony
     ''' <summary>
     ''' Gets the current image (based on the visual override behavior, current behavior and facing).
     ''' </summary>
-    Private ReadOnly Property currentImage As CenterableSpriteImage
+    Private ReadOnly Property CurrentImage As CenterableSpriteImage
         Get
-            Dim behavior = currentImageBehavior
+            Dim behavior = CurrentImageBehavior
             Return If(_facingRight, behavior.RightImage, behavior.LeftImage)
         End Get
     End Property
@@ -1914,16 +1914,16 @@ Public Class Pony
     ''' </summary>
     Public ReadOnly Property ImagePaths As SpriteImagePaths Implements ISprite.ImagePaths
         Get
-            Return New SpriteImagePaths(currentImageBehavior.LeftImage.Path, currentImageBehavior.RightImage.Path)
+            Return New SpriteImagePaths(CurrentImageBehavior.LeftImage.Path, CurrentImageBehavior.RightImage.Path)
         End Get
     End Property
 
     ''' <summary>
     ''' Gets the non-aligned region the sprite currently occupies.
     ''' </summary>
-    Private ReadOnly Property regionF As RectangleF
+    Private ReadOnly Property RegionF As RectangleF
         Get
-            Return GetRegionFForImage(currentImage)
+            Return GetRegionFForImage(CurrentImage)
         End Get
     End Property
 
@@ -2035,8 +2035,8 @@ Public Class Pony
         _lastUpdateTime = startTime
         SetBehaviorInternal(Nothing, True)
         If Single.IsNaN(_location.X) OrElse Single.IsNaN(_location.Y) Then
-            Dim area = New Vector2(Context.Region.Size) - New Vector2F(regionF.Size)
-            _location = currentImage.Center * Context.ScaleFactor +
+            Dim area = New Vector2(Context.Region.Size) - New Vector2F(RegionF.Size)
+            _location = CurrentImage.Center * Context.ScaleFactor +
                 New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
         End If
         UpdateState(True, True)
@@ -2220,7 +2220,7 @@ Public Class Pony
     Private Function GetInRegionDestination() As Vector2F?
         Dim contextRegion = Context.Region
         Dim exclusionRegion = Context.ExclusionRegion
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         Dim destination = _location
 
         ' Move back into the overall region allowed by the context.
@@ -2602,7 +2602,7 @@ Public Class Pony
             _allowingNaturalReturnToZone = False
         Else
             UpdateRegion()
-            Dim currentRegion = regionF
+            Dim currentRegion = RegionF
             Dim isOnEdgeOfBounds =
                 RectangleF.Intersect(Context.Region, currentRegion) <> currentRegion OrElse
                 (Context.ExclusionRegion <> RectangleF.Empty AndAlso
@@ -2851,7 +2851,7 @@ Public Class Pony
             UpdateRegion()
             If _destination Is Nothing AndAlso (_lastStepWasInBounds OrElse Not TeleportToBoundaryIfOutside()) Then ReboundOffRegions()
         End If
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         _lastStepWasInBounds =
             CType(Context.Region, RectangleF).Contains(currentRegion) AndAlso Not currentRegion.IntersectsWith(Context.ExclusionRegion)
         ' Check if the pony is back in bounds, or no longer even intersecting the allowed area at all.
@@ -2867,7 +2867,7 @@ Public Class Pony
     ''' Updates the region based on the current location, image and scale factor.
     ''' </summary>
     Private Sub UpdateRegion()
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         _region = New Rectangle(Vector2.Round(currentRegion.Location), Vector2.Truncate(currentRegion.Size))
     End Sub
 
@@ -2879,7 +2879,7 @@ Public Class Pony
     ''' <returns>Return true if the pony was teleported to the boundary edge, otherwise; false.</returns>
     Private Function TeleportToBoundaryIfOutside() As Boolean
         Dim contextRegion = Context.Region
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         Dim initialLocation = _location
         If contextRegion.Top > currentRegion.Bottom Then
             _location.Y += contextRegion.Top - currentRegion.Bottom
@@ -2956,7 +2956,7 @@ Public Class Pony
     Private Function ReboundIntoContainmentRegion(containmentRegion As Rectangle, regionName As String,
                                                   Optional checkVerticalBoundaries As Boolean = True) As Boolean
         If Not _lastStepWasInBounds Then Return False
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         Dim initialLocation = _location
         If containmentRegion.Top > currentRegion.Top Then
             _location.Y += 2 * (containmentRegion.Top - currentRegion.Top)
@@ -2993,7 +2993,7 @@ Public Class Pony
     Private Function ReboundOutOfExclusionRegion(exclusionRegion As Rectangle, regionName As String,
                                                  moveAwayIfContained As Boolean) As Boolean
         If exclusionRegion.Size = Size.Empty Then Return False
-        Dim currentRegion = regionF
+        Dim currentRegion = RegionF
         If Not currentRegion.IntersectsWith(exclusionRegion) Then Return False
         If Not moveAwayIfContained AndAlso CType(exclusionRegion, RectangleF).Contains(currentRegion) Then Return False
 
@@ -3062,7 +3062,7 @@ Public Class Pony
     ''' </summary>
     ''' <returns>The bounding rectangle of the window at the center of the sprite region, if any.</returns>
     Private Function WindowRegionAtCenter() As Rectangle?
-        Dim regionCenter = Point.Round(regionF.Center())
+        Dim regionCenter = Point.Round(RegionF.Center())
         Dim hWnd = Interop.Win32.WindowFromPoint(New Interop.Win32.POINT(regionCenter.X, regionCenter.Y))
         If hWnd = IntPtr.Zero Then Return Nothing
         Dim windowRect As Interop.Win32.RECT
