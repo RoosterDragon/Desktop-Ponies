@@ -454,6 +454,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Iron Will
 * StarStep
 
+#### Jasmine Leaf
+* Blaze5565
+
 #### Jeff Letrotski
 * Bot-chan
 
@@ -993,9 +996,6 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Tank
 * Bot-chan
-
-#### Tea Shop Pony
-* Blaze5565
 
 #### Tealove
 * Bot-chan
