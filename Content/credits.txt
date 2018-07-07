@@ -332,9 +332,6 @@ Contributors are broken down by character. If there was more than one contributo
 #### Dr. Caballeron
 * Bot-chan
 
-#### Dude
-* Bot-chan
-
 #### Dumb-Bell
 * Bot-chan
 
@@ -396,7 +393,7 @@ Contributors are broken down by character. If there was more than one contributo
 #### Fluttershy (Filly)
 * PsychoShutin
 
-#### Fredrick Horeshoepin
+#### Frederic Horseshoepin
 * vulcan539
 
 #### Fresh Coat
@@ -456,6 +453,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Iron Will
 * StarStep
+
+#### Jeff Letrotski
+* Bot-chan
 
 #### Jesús Pezuña
 * Anonycat
@@ -694,10 +694,10 @@ Contributors are broken down by character. If there was more than one contributo
 #### PP Hum Drum
 * Bot-chan
 
-#### PP Masked Matterhorn
+#### PP Masked Matter-Horn
 * Bot-chan
 
-#### PP Mistress Marevelous
+#### PP Mistress Mare-velous
 * Bot-chan
 
 #### PP Radiance
