@@ -648,6 +648,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Party Favor
 * Bot-chan
 
+#### Pear Butter
+* emeralddarkness
+
 #### Perfect Pace
 * Anonycat
 
