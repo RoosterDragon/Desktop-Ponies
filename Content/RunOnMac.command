@@ -24,8 +24,16 @@ export DYLD_FALLBACK_LIBRARY_PATH="/Library/Frameworks/Mono.framework/Versions/C
 
 # launch!
 if $only64bits && $have_mono; then
-    # This probably won't work. See https://github.com/RoosterDragon/Desktop-Ponies/issues/28
-    exec mono "Desktop Ponies.exe" "$@"
+    mono "Desktop Ponies.exe" "$@" && exit 0
+    v=$?
+    echo;echo;echo;echo
+    echo "Mono 6.8.0.123 is known not to work with macOS 10.13.4 or later"
+    echo "for the features we need in Desktop Ponies."
+    echo
+    echo "More information:"
+    echo "https://github.com/RoosterDragon/Desktop-Ponies/issues/28"
+    echo
+    exit $v
 elif $have_mono32; then
     exec mono32 "Desktop Ponies.exe" "$@"
 elif $have_mono; then
