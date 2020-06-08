@@ -15,15 +15,16 @@ fi
 # check macOS version to use the appropriate launcher
 os_version=$(sw_vers -productVersion | tr '.' ' ')
 version_parts=($os_version)
-[ ${version_parts[0]} -gt 10 ] || [ ${version_parts[0]} -eq 10 ] && [ ${version_parts[1]} -ge 15 ]
-catalina_or_later=${tf[$?]}
+[ ${version_parts[0]} -gt 10 ] || [ ${version_parts[0]} -eq 10 ] && [ ${version_parts[1]} -ge 13 ]
+only64bits=${tf[$?]}
 sw_vers  # output macOS version to encourage including it while reporting bugs
 
 # make sure libraries can be found
 export DYLD_FALLBACK_LIBRARY_PATH="/Library/Frameworks/Mono.framework/Versions/Current/lib:/lib:/usr/lib"
 
 # launch!
-if $catalina_or_later && $have_mono; then
+if $only64bits && $have_mono; then
+    # This probably won't work. See https://github.com/RoosterDragon/Desktop-Ponies/issues/28
     exec mono "Desktop Ponies.exe" "$@"
 elif $have_mono32; then
     exec mono32 "Desktop Ponies.exe" "$@"
