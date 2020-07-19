@@ -184,6 +184,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Starly [Sleep]
 * Bot-chan [Idle, Bench]
 
+#### Bow Hothoof
+* Bot-chan
+
 #### Boxxy Brown
 * Bot-chan
 
@@ -901,6 +904,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Slendermane
 * Bot-chan
 
+#### Smolder
+* Bot-chan
+
 #### Smooze
 * Bot-chan
 
@@ -930,6 +936,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Sparkler
 * vulcan539 [Stand, Walk, Jump, Sit, Sleep, Stand]
 * Images modified from Lyra.
+
+#### Sphinx
+* Bot-chan
 
 #### Spike
 * Peter Kurucz (Fantos) [Idle, Run]
