@@ -75,6 +75,15 @@ Change Log
 
 Latest changes:
 
+v1.64:
+- Added Pear Butter by emeralddarkness.
+- Added Jasmine Leaf by Blaze5565.
+- Added Bow Hothoof by Bot-chan.
+- Added Smolder by Bot-chan.
+- Added Sphinx by Bot-chan
+- Fixed naming of some ponies.
+- Improve launching on Mac.
+
 v1.63:
 - Added Songbird Serenade by Bot-chan.
 - Added Tempest Shadow by Bot-chan.
