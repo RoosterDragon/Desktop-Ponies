@@ -40,7 +40,7 @@ Some information about the file formats employed by the program can be found in 
 ## Related Projects
 
 * [DPengine](https://github.com/hidefromkgb/DPengine) - Multi-platform reimplementation of Desktop Ponies. Worth trying if you use Mac or Linux or need better performance.
-* [Browser Ponies](http://panzi.github.io/Browser-Ponies/) - Desktop Ponies in Javscript. Get ponies in your browser.
+* [Browser Ponies](http://panzi.github.io/Browser-Ponies/) - Desktop Ponies in Javascript. Get ponies in your browser.
 * [BronyLiveWallpaper](https://github.com/frankkienl/BronyLiveWallpaper) - Live Android Wallpaper using Desktop Ponies sprites.
 * [PonyPaper](https://github.com/Smithers888/PonyPaper) - Live Android Wallpaper using Desktop Ponies sprites.
 * [ponysay](https://github.com/erkin/ponysay) - cowsay reimplementation for ponies, using some Desktop Ponies sprites.
