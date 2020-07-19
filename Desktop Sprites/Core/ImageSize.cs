@@ -51,9 +51,9 @@
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         public static Size GetSize(string path)
         {
-            using (FileStream stream =
+            using (var stream =
                 new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 32, FileOptions.SequentialScan))
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream))
             {
                 try
                 {
@@ -62,7 +62,7 @@
                 catch (ArgumentException ex)
                 {
                     if (ex.Message.StartsWith(ErrorMessage, StringComparison.Ordinal))
-                        throw new ArgumentException(ErrorMessage, "path", ex);
+                        throw new ArgumentException(ErrorMessage, nameof(path), ex);
                     else
                         throw;
                 }
@@ -79,11 +79,11 @@
         /// <exception cref="T:System.ArgumentException">The image was of an unrecognized format.</exception>
         public static Size GetSize(BinaryReader reader)
         {
-            Argument.EnsureNotNull(reader, "reader");
+            Argument.EnsureNotNull(reader, nameof(reader));
 
-            int magicBytesLength = 0;
-            byte[] magicBytes = new byte[MaxMagicBytesLength];
-            int decoderIndex = 0;
+            var magicBytesLength = 0;
+            var magicBytes = new byte[MaxMagicBytesLength];
+            var decoderIndex = 0;
             var decoder = ImageDecoders[decoderIndex];
             while (magicBytesLength < MaxMagicBytesLength)
             {
@@ -99,11 +99,11 @@
                     if (++decoderIndex < ImageDecoders.Length)
                         decoder = ImageDecoders[decoderIndex];
                     else
-                        throw new ArgumentException(ErrorMessage, "reader");
+                        throw new ArgumentException(ErrorMessage, nameof(reader));
                 }
                 while (decoder.Key.Length == magicBytesLength);
             }
-            throw new ArgumentException(ErrorMessage, "reader");
+            throw new ArgumentException(ErrorMessage, nameof(reader));
         }
 
         /// <summary>
@@ -118,7 +118,7 @@
             if (source.Length < theseBytes.Length)
                 return false;
 
-            for (int i = 0; i < theseBytes.Length; i++)
+            for (var i = 0; i < theseBytes.Length; i++)
                 if (source[i] != theseBytes[i])
                     return false;
 
@@ -136,8 +136,8 @@
         /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         private static short ReadLittleEndianInt16(this BinaryReader binaryReader)
         {
-            byte[] bytes = new byte[sizeof(short)];
-            for (int i = 0; i < bytes.Length; i++)
+            var bytes = new byte[sizeof(short)];
+            for (var i = 0; i < bytes.Length; i++)
                 bytes[bytes.Length - 1 - i] = binaryReader.ReadByte();
             return BitConverter.ToInt16(bytes, 0);
         }
@@ -153,8 +153,8 @@
         /// <exception cref="T:System.IO.IOException">An I/O error occurs.</exception>
         private static int ReadLittleEndianInt32(this BinaryReader binaryReader)
         {
-            byte[] bytes = new byte[sizeof(int)];
-            for (int i = 0; i < bytes.Length; i++)
+            var bytes = new byte[sizeof(int)];
+            for (var i = 0; i < bytes.Length; i++)
                 bytes[bytes.Length - 1 - i] = binaryReader.ReadByte();
             return BitConverter.ToInt32(bytes, 0);
         }
@@ -206,8 +206,8 @@
         {
             while (binaryReader.ReadByte() == 0xFF)
             {
-                byte marker = binaryReader.ReadByte();
-                short chunkLength = binaryReader.ReadLittleEndianInt16();
+                var marker = binaryReader.ReadByte();
+                var chunkLength = binaryReader.ReadLittleEndianInt16();
                 if (marker == 0xC0)
                 {
                     binaryReader.ReadByte();
@@ -216,7 +216,7 @@
 
                 if (chunkLength < 0)
                 {
-                    ushort uchunkLength = (ushort)chunkLength;
+                    var uchunkLength = (ushort)chunkLength;
                     binaryReader.ReadBytesExact(uchunkLength - 2);
                 }
                 else

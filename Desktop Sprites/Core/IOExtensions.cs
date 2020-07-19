@@ -26,8 +26,8 @@
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this Stream stream, byte[] buffer, int offset, int count)
         {
-            Argument.EnsureNotNull(stream, "stream");
-            Argument.EnsureNonnegative(count, "count");
+            Argument.EnsureNotNull(stream, nameof(stream));
+            Argument.EnsureNonnegative(count, nameof(count));
             while (count > 0)
             {
                 int bytesRead;
@@ -55,8 +55,8 @@
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this BinaryReader reader, byte[] buffer, int index, int count)
         {
-            Argument.EnsureNotNull(reader, "reader");
-            Argument.EnsureNonnegative(count, "count");
+            Argument.EnsureNotNull(reader, nameof(reader));
+            Argument.EnsureNonnegative(count, nameof(count));
             while (count > 0)
             {
                 int bytesRead;
@@ -84,8 +84,8 @@
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static void ReadExact(this BinaryReader reader, char[] buffer, int index, int count)
         {
-            Argument.EnsureNotNull(reader, "reader");
-            Argument.EnsureNonnegative(count, "count");
+            Argument.EnsureNotNull(reader, nameof(reader));
+            Argument.EnsureNonnegative(count, nameof(count));
             while (count > 0)
             {
                 int bytesRead;
@@ -111,7 +111,7 @@
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static byte[] ReadBytesExact(this BinaryReader reader, int count)
         {
-            byte[] result = Argument.EnsureNotNull(reader, "reader").ReadBytes(count);
+            var result = Argument.EnsureNotNull(reader, nameof(reader)).ReadBytes(count);
             if (result.Length < count)
                 throw new EndOfStreamException();
             return result;
@@ -132,7 +132,7 @@
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached.</exception>
         public static char[] ReadCharsExact(this BinaryReader reader, int count)
         {
-            char[] result = Argument.EnsureNotNull(reader, "reader").ReadChars(count);
+            var result = Argument.EnsureNotNull(reader, nameof(reader)).ReadChars(count);
             if (result.Length < count)
                 throw new EndOfStreamException();
             return result;

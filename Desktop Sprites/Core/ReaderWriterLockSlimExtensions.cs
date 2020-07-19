@@ -29,7 +29,7 @@
             /// encounter it.</exception>
             public ReadMode(ReaderWriterLockSlim rwls)
             {
-                this.rwls = Argument.EnsureNotNull(rwls, "rwls");
+                this.rwls = Argument.EnsureNotNull(rwls, nameof(rwls));
                 rwls.EnterReadLock();
             }
             /// <summary>
@@ -62,7 +62,7 @@
             /// never encounter it.</exception>
             public UpgradeableMode(ReaderWriterLockSlim rwls)
             {
-                this.rwls = Argument.EnsureNotNull(rwls, "rwls");
+                this.rwls = Argument.EnsureNotNull(rwls, nameof(rwls));
                 rwls.EnterUpgradeableReadLock();
             }
             /// <summary>
@@ -95,7 +95,7 @@
             /// should never encounter it.</exception>
             public WriteMode(ReaderWriterLockSlim rwls)
             {
-                this.rwls = Argument.EnsureNotNull(rwls, "rwls");
+                this.rwls = Argument.EnsureNotNull(rwls, nameof(rwls));
                 rwls.EnterWriteLock();
             }
             /// <summary>

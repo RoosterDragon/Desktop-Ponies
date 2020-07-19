@@ -235,10 +235,10 @@
             /// <returns>Returns true to stop other handlers being invoked; otherwise, false.</returns>
             protected override bool OnConfigureEvent(EventConfigure evnt)
             {
-                Argument.EnsureNotNull(evnt, "evnt");
+                Argument.EnsureNotNull(evnt, nameof(evnt));
 
-                int newWidth = evnt.Width;
-                int newHeight = evnt.Height;
+                var newWidth = evnt.Width;
+                var newHeight = evnt.Height;
 
                 // We can only clear newly exposed areas if we support RGBA drawing.
                 if (SupportsRgba)
@@ -246,7 +246,7 @@
                     // Clear the window to be transparent in the newly exposed areas.
                     if (newWidth > lastWidth || newHeight > lastHeight)
                     {
-                        using (Region newRegion = new Region())
+                        using (var newRegion = new Region())
                         {
                             // Right edge.
                             if (newWidth > lastWidth)
@@ -287,7 +287,7 @@
                 // Update clipping area to cover the whole of the newly resized window.
                 if (SupportsRgba && !updatingMask)
                 {
-                    using (Region all = new Region())
+                    using (var all = new Region())
                     {
                         all.UnionWithRect(new Rectangle(0, 0, newWidth, newHeight));
                         GdkWindow.InputShapeCombineRegion(all, 0, 0);
@@ -310,7 +310,7 @@
                 {
                     // Start actively updating the input mask for RGBA supported windows.
                     updatingMask = true;
-                    GetSize(out int width, out int height);
+                    GetSize(out var width, out var height);
                     SetClip(width, height);
                 }
                 return base.OnEnterNotifyEvent(evnt);
@@ -359,14 +359,14 @@
                 else if (updatingMask)
                 {
                     // Only update the input mask, since alpha is already taken care of.
-                    GetPointer(out int x, out int y);
+                    GetPointer(out var x, out var y);
                     if (x < 0 || y < 0 || x > width || y > height)
                     {
                         if (lastClip != null)
                         {
                             // The cursor is no longer over the window, so we can clear the region to something cheaper to evaluate.
                             updatingMask = false;
-                            using (Region all = new Region())
+                            using (var all = new Region())
                             {
                                 all.UnionWithRect(new Rectangle(0, 0, width, height));
                                 GdkWindow.InputShapeCombineRegion(all, 0, 0);
@@ -528,22 +528,22 @@
                 byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth)
             {
                 if (depth != 8)
-                    throw new ArgumentOutOfRangeException("depth", depth, "depth must be 8.");
+                    throw new ArgumentOutOfRangeException(nameof(depth), depth, "depth must be 8.");
 
-                ClippedImage frameImage = new ClippedImage();
-                List<Point> points = new List<Point>((int)Math.Ceiling((float)width * height / 8f));
+                var frameImage = new ClippedImage();
+                var points = new List<Point>((int)Math.Ceiling((float)width * height / 8f));
 
                 // Create a data buffer to hold 32bbp RGBA values.
-                byte[] data = new byte[width * height * 4];
+                var data = new byte[width * height * 4];
 
                 // Loop over the pixels in each row (to account for stride width of the source).
-                for (int row = 0; row < height; row++)
-                    for (int x = 0; x < width; x++)
+                for (var row = 0; row < height; row++)
+                    for (var x = 0; x < width; x++)
                     {
                         // Get the index value from the 8bbp source.
-                        byte index = buffer[row * stride + x];
+                        var index = buffer[row * stride + x];
                         // Get the destination offset in the 32bbp array.
-                        int offset = 4 * (width * row + x);
+                        var offset = 4 * (width * row + x);
                         if (index != transparentIndex)
                         {
                             // Get the color from the palette, and set the RGB values.
@@ -566,7 +566,7 @@
                 // Create the clipping mask by setting all the pixels in the mask from the list of points we draw on.
                 gtkSpriteInterface.ApplicationInvoke(() => frameImage.Clip = new Pixmap(null, width, height, 1));
                 if (points.Count > 0)
-                    using (Gdk.GC context = new Gdk.GC(frameImage.Clip))
+                    using (var context = new Gdk.GC(frameImage.Clip))
                     {
                         context.Function = Gdk.Function.Set;
                         frameImage.Clip.DrawPoints(context, points.ToArray());
@@ -575,7 +575,7 @@
                 // Create the image from the data array.
                 frameImage.Image = new Pixbuf(data, true, 8, width, height, width * 4);
 
-                int hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
+                var hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
 
                 return new GtkFrame(frameImage, hashCode);
             }
@@ -683,7 +683,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="separatorItem"/> is null.</exception>
             public GtkContextMenuItem(SeparatorMenuItem separatorItem, bool topLevel)
             {
-                Argument.EnsureNotNull(separatorItem, "separatorItem");
+                Argument.EnsureNotNull(separatorItem, nameof(separatorItem));
                 this.topLevel = topLevel;
                 item = separatorItem;
             }
@@ -697,7 +697,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="menuItem"/> is null.</exception>
             public GtkContextMenuItem(MenuItem menuItem, EventHandler activated, bool topLevel)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                Argument.EnsureNotNull(menuItem, nameof(menuItem));
                 this.topLevel = topLevel;
                 item = menuItem;
                 Activated = activated;
@@ -717,11 +717,11 @@
             public GtkContextMenuItem(MenuItem menuItem, IEnumerable<ISimpleContextMenuItem> subItems, GtkSpriteInterface parent,
                 bool topLevel)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
-                Argument.EnsureNotNullOrEmpty(subItems, "subItems");
+                Argument.EnsureNotNull(menuItem, nameof(menuItem));
+                Argument.EnsureNotNullOrEmpty(subItems, nameof(subItems));
                 this.topLevel = topLevel;
                 item = menuItem;
-                GtkContextMenu gtkContextMenu = new GtkContextMenu(parent, subItems, false);
+                var gtkContextMenu = new GtkContextMenu(parent, subItems, false);
                 item.Submenu = gtkContextMenu;
                 SubItems = gtkContextMenu.Items;
             }
@@ -848,8 +848,8 @@
             /// null.</exception>
             public GtkContextMenu(GtkSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems, bool topLevel)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItems, "menuItems");
+                Argument.EnsureNotNull(parent, nameof(parent));
+                Argument.EnsureNotNull(menuItems, nameof(menuItems));
 
                 owner = parent;
 
@@ -1102,7 +1102,7 @@
             get
             {
                 EnsureNotDisposed();
-                GetPointer(out int x, out int y, out ModifierType mod);
+                GetPointer(out var x, out var y, out ModifierType mod);
                 return new SD.Point(x, y);
             }
         }
@@ -1115,7 +1115,7 @@
             get
             {
                 EnsureNotDisposed();
-                GetPointer(out int x, out int y, out ModifierType mod);
+                GetPointer(out var x, out var y, out ModifierType mod);
                 SimpleMouseButtons buttons = SimpleMouseButtons.None;
                 if ((mod & ModifierType.Button1Mask) == ModifierType.Button1Mask)
                     buttons |= SimpleMouseButtons.Left;
@@ -1153,7 +1153,7 @@
             get
             {
                 EnsureNotDisposed();
-                bool hasFocus = false;
+                var hasFocus = false;
                 ApplicationInvoke(() =>
                 {
                     foreach (var window in drawOrderedWindows)
@@ -1220,8 +1220,8 @@
             var button = GetButtonsFromNative(args.Event.Button);
             if (button == SimpleMouseButtons.None)
                 return;
-            SimpleMouseEventArgs e = new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot);
-            int doubleClickMillisesonds =
+            var e = new SimpleMouseEventArgs(button, (int)args.Event.XRoot, (int)args.Event.YRoot);
+            var doubleClickMillisesonds =
                 (drawOrderedWindows.Count > 0 ?
                 Settings.GetForScreen(drawOrderedWindows[0].Screen) :
                 Settings.Default).DoubleClickTime;
@@ -1271,7 +1271,7 @@
             {
                 try
                 {
-                    AppDomain domain = AppDomain.CreateDomain("Assembly Test Domain");
+                    var domain = AppDomain.CreateDomain("Assembly Test Domain");
                     domain.Load("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
                     domain.Load("atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f");
                     domain.Load("gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f");
@@ -1405,7 +1405,7 @@
         {
             if (BufferPreprocess != null)
                 BufferPreprocess(ref buffer, ref palette, ref transparentIndex, ref stride, ref width, ref height, ref depth);
-            GtkFrame frame = GtkFrame.FromBuffer(this, buffer, palette, transparentIndex, stride, width, height, depth);
+            var frame = GtkFrame.FromBuffer(this, buffer, palette, transparentIndex, stride, width, height, depth);
             AlterPixbufForTransparency(fileName, frame.Image.Image);
             return frame;
         }
@@ -1417,24 +1417,24 @@
         /// <param name="pixbuf">The <see cref="T:Gdk.Pixbuf"/> to be altered.</param>
         private static void AlterPixbufForTransparency(string fileName, Pixbuf pixbuf)
         {
-            string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+            var mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
             if (File.Exists(mapFilePath))
             {
-                AlphaRemappingTable map = new AlphaRemappingTable();
+                var map = new AlphaRemappingTable();
                 map.LoadMap(mapFilePath);
 
                 // Loop over the pixels in each row (to account for stride width of the source).
                 IntPtr start = pixbuf.Pixels;
-                byte[] scan = new byte[pixbuf.Rowstride];
-                for (int row = 0; row < pixbuf.Height; row++)
+                var scan = new byte[pixbuf.Rowstride];
+                for (var row = 0; row < pixbuf.Height; row++)
                 {
                     // Copy the scan line into a managed array.
-                    IntPtr rowPtr = IntPtr.Add(start, row * pixbuf.Rowstride);
+                    var rowPtr = IntPtr.Add(start, row * pixbuf.Rowstride);
                     Marshal.Copy(rowPtr, scan, 0, pixbuf.Rowstride);
-                    for (int x = 0; x < pixbuf.Width; x++)
+                    for (var x = 0; x < pixbuf.Width; x++)
                     {
                         // Map RGB colors to ARGB colors.
-                        int offset = 4 * x;
+                        var offset = 4 * x;
                         if (map.TryGetMapping(new RgbColor(scan[offset + 0], scan[offset + 1], scan[offset + 2]), out ArgbColor argbColor))
                         {
                             scan[offset + 0] = argbColor.R;
@@ -1473,7 +1473,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void LoadImages(IEnumerable<SpriteImagePaths> imagePaths, EventHandler imageLoadedHandler)
         {
-            Argument.EnsureNotNull(imagePaths, "imagePaths");
+            Argument.EnsureNotNull(imagePaths, nameof(imagePaths));
             EnsureNotDisposed();
 
             foreach (var paths in imagePaths)
@@ -1633,7 +1633,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Draw(ICollection<ISprite> sprites)
         {
-            Argument.EnsureNotNull(sprites, "sprites");
+            Argument.EnsureNotNull(sprites, nameof(sprites));
             EnsureNotDisposed();
 
             if (paused)

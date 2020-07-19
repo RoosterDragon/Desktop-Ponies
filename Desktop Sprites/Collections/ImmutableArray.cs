@@ -227,7 +227,7 @@
             /// <param name="immutableArray">The array to proxy.</param>
             public DebugView(ImmutableArray<T> immutableArray)
             {
-                this.immutableArray = Argument.EnsureNotNull(immutableArray, "immutableArray");
+                this.immutableArray = Argument.EnsureNotNull(immutableArray, nameof(immutableArray));
             }
 
             /// <summary>

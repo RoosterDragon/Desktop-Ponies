@@ -24,8 +24,8 @@
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void RemapColors(this Bitmap bitmap, IDictionary<Color, Color> map)
         {
-            Argument.EnsureNotNull(bitmap, "bitmap");
-            Argument.EnsureNotNull(map, "map");
+            Argument.EnsureNotNull(bitmap, nameof(bitmap));
+            Argument.EnsureNotNull(map, nameof(map));
 
             if (map.Count == 0)
                 return;
@@ -37,18 +37,18 @@
                     BitmapData data =
                         bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                    int[] colors = new int[data.Width];
-                    for (int row = 0; row < data.Height; row++)
+                    var colors = new int[data.Width];
+                    for (var row = 0; row < data.Height; row++)
                     {
-                        IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
+                        var rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
 
                         // Copy the data to a managed array.
                         Marshal.Copy(rowPtr, colors, 0, data.Width);
 
                         // Check each pixel, and map those that match to the destination color.
-                        for (int i = 0; i < data.Width; i++)
+                        for (var i = 0; i < data.Width; i++)
                         {
-                            Color mapSource = Color.FromArgb(colors[i]);
+                            var mapSource = Color.FromArgb(colors[i]);
                             if (map.TryGetValue(mapSource, out Color mapDestination))
                                 colors[i] = mapDestination.ToArgb();
                         }
@@ -63,7 +63,7 @@
                 case PixelFormat.Format8bppIndexed:
                     // We're using a color palette, so we can just remap the colors in that.
                     ColorPalette palette = bitmap.Palette;
-                    for (int paletteIndex = 0; paletteIndex < palette.Entries.Length; paletteIndex++)
+                    for (var paletteIndex = 0; paletteIndex < palette.Entries.Length; paletteIndex++)
                     {
                         if (map.TryGetValue(palette.Entries[paletteIndex], out Color mapDestination))
                             palette.Entries[paletteIndex] = mapDestination;
@@ -71,7 +71,7 @@
                     bitmap.Palette = palette;
                     break;
                 default:
-                    throw new ArgumentException("Remapping colors of a bitmap with this pixel format is not supported.", "bitmap");
+                    throw new ArgumentException("Remapping colors of a bitmap with this pixel format is not supported.", nameof(bitmap));
             }
         }
 
@@ -86,7 +86,7 @@
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public static void PremultiplyAlpha(this Bitmap bitmap)
         {
-            Argument.EnsureNotNull(bitmap, "bitmap");
+            Argument.EnsureNotNull(bitmap, nameof(bitmap));
 
             switch (bitmap.PixelFormat)
             {
@@ -100,16 +100,16 @@
                     BitmapData data =
                         bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                    int[] colors = new int[data.Width];
-                    for (int row = 0; row < data.Height; row++)
+                    var colors = new int[data.Width];
+                    for (var row = 0; row < data.Height; row++)
                     {
-                        IntPtr rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
+                        var rowPtr = IntPtr.Add(data.Scan0, row * data.Stride);
 
                         // Copy the data to a managed array.
                         Marshal.Copy(rowPtr, colors, 0, colors.Length);
 
                         // Multiply the color channels in each pixel.
-                        for (int i = 0; i < colors.Length; i++)
+                        for (var i = 0; i < colors.Length; i++)
                             colors[i] = Color.FromArgb(colors[i]).PremultipliedAlpha().ToArgb();
 
                         // Copy the array back into the bitmap.
@@ -123,12 +123,12 @@
                 case PixelFormat.Format8bppIndexed:
                     // We're using a color palette, so we can just pre-multiply colors in that.
                     ColorPalette palette = bitmap.Palette;
-                    for (int i = 0; i < palette.Entries.Length; i++)
+                    for (var i = 0; i < palette.Entries.Length; i++)
                         palette.Entries[i] = palette.Entries[i].PremultipliedAlpha();
                     bitmap.Palette = palette;
                     break;
                 default:
-                    throw new ArgumentException("Alpha blending a bitmap with this pixel format is not supported.", "bitmap");
+                    throw new ArgumentException("Alpha blending a bitmap with this pixel format is not supported.", nameof(bitmap));
             }
         }
     }

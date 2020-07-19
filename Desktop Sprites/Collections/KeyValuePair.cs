@@ -32,7 +32,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         public static IEnumerable<TKey> Keys<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             foreach (var kvp in source)
                 yield return kvp.Key;
         }
@@ -47,7 +47,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         public static IEnumerable<TValue> Values<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             foreach (var kvp in source)
                 yield return kvp.Value;
         }

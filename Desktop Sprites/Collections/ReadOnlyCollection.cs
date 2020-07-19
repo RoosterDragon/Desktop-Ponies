@@ -45,7 +45,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
         public ReadOnlyCollection(ICollection<T> collection)
         {
-            this.collection = Argument.EnsureNotNull(collection, "collection");
+            this.collection = Argument.EnsureNotNull(collection, nameof(collection));
         }
         /// <summary>
         /// Determines whether the <see cref="T:DesktopSprites.Collections.ReadOnlyCollection`1"/> contains a specific value.
@@ -206,7 +206,7 @@
             /// <param name="readOnlyCollection">The collection to proxy.</param>
             public DebugView(ReadOnlyCollection<T> readOnlyCollection)
             {
-                this.readOnlyCollection = Argument.EnsureNotNull(readOnlyCollection, "readOnlyCollection");
+                this.readOnlyCollection = Argument.EnsureNotNull(readOnlyCollection, nameof(readOnlyCollection));
             }
 
             /// <summary>

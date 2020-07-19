@@ -216,10 +216,10 @@
             if (Disposing || IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
-            POINT dstPos = new POINT(Left, Top);
-            SIZE dstSize = new SIZE(Width, Height);
+            var dstPos = new POINT(Left, Top);
+            var dstSize = new SIZE(Width, Height);
             POINT srcPos = POINT.Empty;
-            BLENDFUNCTION blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
+            var blend = new BLENDFUNCTION(BlendOp.AC_SRC_OVER, opacity, AlphaFormat.AC_SRC_ALPHA);
             if (!NativeMethods.UpdateLayeredWindow(new HandleRef(this, Handle), new HandleRef(this, hdcScreen), ref dstPos, ref dstSize,
                 new HandleRef(this, hdcBackground), ref srcPos, new COLORREF(), ref blend, UlwFlags.ULW_ALPHA))
                 throw new Win32Exception();

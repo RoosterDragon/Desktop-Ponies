@@ -45,7 +45,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="enumeratorFactory"/> is null.</exception>
             public EnumerableFromFactory(Func<IEnumerator<T>> enumeratorFactory)
             {
-                this.enumeratorFactory = Argument.EnsureNotNull(enumeratorFactory, "enumeratorFactory");
+                this.enumeratorFactory = Argument.EnsureNotNull(enumeratorFactory, nameof(enumeratorFactory));
             }
             /// <summary>
             /// Returns an enumerator that iterates through the generic collection.

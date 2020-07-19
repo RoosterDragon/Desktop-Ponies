@@ -35,7 +35,7 @@
             (byte[] buffer, RgbColor[] palette, byte? transparentIndex, int stride, int width, int height, byte depth) =>
             {
                 Bitmap bitmap = GifImage.BufferToImageOfBitmap(buffer, palette, transparentIndex, stride, width, height, depth);
-                int hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
+                var hashCode = GifImage.GetHash(buffer, palette, transparentIndex, width, height);
                 return new BitmapFrame(bitmap, hashCode);
             };
 
@@ -76,7 +76,7 @@
         /// <param name="fileName">The path to a static image file from which to create a new
         /// <see cref="T:DesktopSprites.SpriteManagement.BitmapFrame"/>.</param>
         public BitmapFrame(string fileName)
-            : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, "fileName").GetHashCode())
+            : this(new Bitmap(fileName), Argument.EnsureNotNull(fileName, nameof(fileName)).GetHashCode())
         {
         }
 

@@ -25,9 +25,9 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="input"/> is null.</exception>
         public static int Fnv1A32(byte[] input, int hash)
         {
-            Argument.EnsureNotNull(input, "input");
+            Argument.EnsureNotNull(input, nameof(input));
             const int FnvPrime32 = 16777619;
-            foreach (byte octet in input)
+            foreach (var octet in input)
             {
                 hash ^= octet;
                 hash *= FnvPrime32;

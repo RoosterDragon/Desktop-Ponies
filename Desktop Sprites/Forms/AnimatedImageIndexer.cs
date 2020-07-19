@@ -59,13 +59,13 @@
                 if (durations == null)
                     throw new InvalidOperationException("Cannot set the frame index until indexes have been defined.");
 
-                Argument.EnsureInRangeInclusive(value, "value", FrameSelector.Minimum, FrameSelector.Maximum);
+                Argument.EnsureInRangeInclusive(value, nameof(value), FrameSelector.Minimum, FrameSelector.Maximum);
 
                 updating = true;
                 FrameSelector.Value = value;
 
-                int timeIndex = 0;
-                for (int i = 0; i < value; i++)
+                var timeIndex = 0;
+                for (var i = 0; i < value; i++)
                     timeIndex += durations[i];
                 timeIndex += durations[value] / 2;
                 TimeSelector.Value = timeIndex;
@@ -93,13 +93,13 @@
                 if (durations == null)
                     throw new InvalidOperationException("Cannot set the frame index until indexes have been defined.");
 
-                Argument.EnsureInRangeInclusive(value, "value", TimeSelector.Minimum, TimeSelector.Maximum);
+                Argument.EnsureInRangeInclusive(value, nameof(value), TimeSelector.Minimum, TimeSelector.Maximum);
 
                 updating = true;
                 TimeSelector.Value = value;
 
-                int seekTime = durations[0];
-                int frameIndex = 0;
+                var seekTime = durations[0];
+                var frameIndex = 0;
                 while (seekTime <= value && frameIndex < FrameSelector.Maximum)
                     seekTime += durations[++frameIndex];
                 FrameSelector.Value = frameIndex;
@@ -171,10 +171,10 @@
                 durations = new int[image.Frames.Length];
                 sectionValues = new int[image.Frames.Length + 1];
                 sectionValues[0] = 0;
-                int accumulatedDuration = 0;
-                for (int i = 0; i < image.Frames.Length; i++)
+                var accumulatedDuration = 0;
+                for (var i = 0; i < image.Frames.Length; i++)
                 {
-                    int duration = image.Frames[i].Duration;
+                    var duration = image.Frames[i].Duration;
                     durations[i] = duration;
                     accumulatedDuration += duration;
                     sectionValues[i + 1] = accumulatedDuration;
@@ -227,7 +227,7 @@
         /// <param name="e">The event data.</param>
         private void PreviousCommand_Click(object sender, EventArgs e)
         {
-            int value = FrameIndex;
+            var value = FrameIndex;
             if (--value < FrameSelector.Minimum)
                 value = FrameSelector.Maximum;
             FrameIndex = value;
@@ -241,7 +241,7 @@
         /// <param name="e">The event data.</param>
         private void NextCommand_Click(object sender, EventArgs e)
         {
-            int value = FrameIndex;
+            var value = FrameIndex;
             if (++value > FrameSelector.Maximum)
                 value = FrameSelector.Minimum;
             FrameIndex = value;
@@ -266,10 +266,10 @@
         /// <param name="e">The event data.</param>
         private void PlaybackTimer_Tick(object sender, EventArgs e)
         {
-            int range = TimeSelector.Maximum - TimeSelector.Minimum;
+            var range = TimeSelector.Maximum - TimeSelector.Minimum;
             if (range != 0)
             {
-                int value = TimeSelector.Value + PlaybackTimer.Interval;
+                var value = TimeSelector.Value + PlaybackTimer.Interval;
                 value %= range;
                 TimeIndex = value;
             }
@@ -292,19 +292,19 @@
 
             Graphics graphics = e.Graphics;
 
-            int colorIndex = 0;
-            float currentValue = GetRelativeTime(TimeSelector.Value);
-            for (int section = 0; section < sectionValues.Length - 1; section++)
+            var colorIndex = 0;
+            var currentValue = GetRelativeTime(TimeSelector.Value);
+            for (var section = 0; section < sectionValues.Length - 1; section++)
             {
-                float min = GetRelativeTime(sectionValues[section]);
-                float max = GetRelativeTime(sectionValues[section + 1]);
+                var min = GetRelativeTime(sectionValues[section]);
+                var max = GetRelativeTime(sectionValues[section + 1]);
 
                 Brush brush = SectionBrushes[colorIndex];
                 if (currentValue >= min && (currentValue < max || (currentValue == 1 && currentValue == max)))
                     brush = sectionHighlightBrush;
 
-                int width = TimeSelectorSections.Width;
-                int height = TimeSelectorSections.Height;
+                var width = TimeSelectorSections.Width;
+                var height = TimeSelectorSections.Height;
                 graphics.FillRectangle(brush, min * width, 0, (max - min) * width, height);
 
                 if (++colorIndex >= SectionBrushes.Length)

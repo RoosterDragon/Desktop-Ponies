@@ -168,9 +168,9 @@
         {
             get
             {
-                TValue[] values = new TValue[InitializedCount];
+                var values = new TValue[InitializedCount];
 
-                int index = 0;
+                var index = 0;
                 foreach (var kvp in InitializedItems)
                     values[index++] = kvp.Value;
 
@@ -220,9 +220,9 @@
         {
             get
             {
-                TValue[] values = new TValue[Count];
+                var values = new TValue[Count];
 
-                int index = 0;
+                var index = 0;
                 foreach (var kvp in this)
                     values[index++] = kvp.Value;
 
@@ -308,7 +308,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="item"/> is null.</exception>
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
         {
-            bool found = dictionary.TryGetValue(item.Key, out Lazy<TValue> lazy);
+            var found = dictionary.TryGetValue(item.Key, out Lazy<TValue> lazy);
             return found ? EqualityComparer<TValue>.Default.Equals(item.Value, lazy.Value) : false;
         }
         /// <summary>
@@ -359,9 +359,9 @@
         /// <paramref name="arrayIndex"/> to the end of the destination array.</exception>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex, bool initialize)
         {
-            Argument.EnsureNotNull(array, "array");
-            Argument.EnsureNonnegative(arrayIndex, "arrayIndex");
-            int count = initialize ? Count : InitializedCount;
+            Argument.EnsureNotNull(array, nameof(array));
+            Argument.EnsureNonnegative(arrayIndex, nameof(arrayIndex));
+            var count = initialize ? Count : InitializedCount;
             if (array.Length - arrayIndex < count)
                 throw new ArgumentException("The size of the collection to copy is too small for the given array and arrayIndex.");
 
@@ -409,7 +409,7 @@
         /// during the enumeration.</exception>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetInitializedEnumerator()
         {
-            int startingInitializedCount = InitializedCount;
+            var startingInitializedCount = InitializedCount;
             foreach (var kvp in dictionary)
             {
                 if (startingInitializedCount != InitializedCount)
@@ -429,7 +429,7 @@
         /// during the enumeration.</exception>
         public IEnumerator<TKey> GetUninitializedEnumerator()
         {
-            int startingInitializedCount = InitializedCount;
+            var startingInitializedCount = InitializedCount;
             foreach (var kvp in dictionary)
             {
                 if (startingInitializedCount != InitializedCount)
@@ -462,9 +462,9 @@
             if (UninitializedCount == 0)
                 return;
 
-            int initalRemaining = UninitializedCount;
+            var initalRemaining = UninitializedCount;
             LinkedList<Exception> initializeExceptions = null;
-            object syncInitialize = new object();
+            var syncInitialize = new object();
             lock (syncInitialize)
             {
                 foreach (Lazy<TValue> loopLazy in dictionary.Values)
@@ -526,10 +526,10 @@
         /// internal state of the <see cref="T:DesktopSprites.Collections.LazyDictionary`2"/> is now unreliable.</exception>
         public bool Remove(TKey key)
         {
-            bool exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
+            var exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
             if (exists && lazy.IsValueCreated)
                 InitializedCount--;
-            bool removed = dictionary.Remove(key);
+            var removed = dictionary.Remove(key);
             if (exists != removed)
                 throw new InvalidOperationException("Collection was modified whilst attempting to remove an item.");
             return removed;
@@ -539,8 +539,8 @@
         /// </summary>
         public void RemoveUninitialized()
         {
-            TKey[] uninitializedKeys = new TKey[UninitializedCount];
-            int i = 0;
+            var uninitializedKeys = new TKey[UninitializedCount];
+            var i = 0;
             foreach (TKey key in UninitializedKeys)
                 uninitializedKeys[i++] = key;
 
@@ -577,12 +577,12 @@
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         public bool TryGetValue(TKey key, out TValue value, bool initialize)
         {
-            bool exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
+            var exists = dictionary.TryGetValue(key, out Lazy<TValue> lazy);
 
             if (exists && initialize && !lazy.IsValueCreated)
                 InitializedCount++;
 
-            bool result = exists && (initialize || lazy.IsValueCreated);
+            var result = exists && (initialize || lazy.IsValueCreated);
             value = result ? lazy.Value : default(TValue);
 
             return result;
@@ -638,7 +638,7 @@
             /// <param name="lazyDictionary">The dictionary to proxy.</param>
             public DebugView(LazyDictionary<TKey, TValue> lazyDictionary)
             {
-                this.lazyDictionary = Argument.EnsureNotNull(lazyDictionary, "lazyDictionary");
+                this.lazyDictionary = Argument.EnsureNotNull(lazyDictionary, nameof(lazyDictionary));
             }
 
             /// <summary>
@@ -662,7 +662,7 @@
                 get
                 {
                     var array = new object[lazyDictionary.dictionary.Count];
-                    int i = 0;
+                    var i = 0;
                     foreach (var kvp in lazyDictionary.dictionary)
                         if (kvp.Value.IsValueCreated)
                             array[i++] = KeyValuePair.Create(kvp.Key, kvp.Value.Value);

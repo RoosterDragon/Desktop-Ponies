@@ -30,10 +30,10 @@
         /// <exception cref="T:System.IO.InvalidDataException">The length of the file was not valid.</exception>
         public void LoadMap(string path)
         {
-            Argument.EnsureNotNull(path, "path");
+            Argument.EnsureNotNull(path, nameof(path));
 
             if (Path.GetExtension(path) != FileExtension)
-                throw new ArgumentException("path must point to a " + FileExtension + " file.", "path");
+                throw new ArgumentException("path must point to a " + FileExtension + " file.", nameof(path));
 
             using (FileStream file = File.OpenRead(path))
             {
@@ -59,10 +59,10 @@
         /// <see cref="F:DesktopSprites.SpriteManagement.AlphaRemappingTable.FileExtension"/>.</exception>
         public bool SaveMap(string path)
         {
-            Argument.EnsureNotNull(path, "path");
+            Argument.EnsureNotNull(path, nameof(path));
 
             if (Path.GetExtension(path) != FileExtension)
-                throw new ArgumentException("path must point to a " + FileExtension + " file.", "path");
+                throw new ArgumentException("path must point to a " + FileExtension + " file.", nameof(path));
 
             if (map.Count == 0)
             {

@@ -72,8 +72,8 @@
         public static TDisposable SetupSafely<TDisposable>(TDisposable resource, Action<TDisposable> setup)
             where TDisposable : IDisposable
         {
-            Argument.EnsureNotNull(resource, "resource");
-            Argument.EnsureNotNull(setup, "setup");
+            Argument.EnsureNotNull(resource, nameof(resource));
+            Argument.EnsureNotNull(setup, nameof(setup));
             try
             {
                 setup(resource);

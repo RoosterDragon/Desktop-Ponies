@@ -52,7 +52,7 @@
         /// opening qualifier character within a qualified string by qualifying it with a different pair.</remarks>
         public static string[] SplitQualified(this string source, char[] separators, char[,] qualifiers, StringSplitOptions options)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
                 throw new InvalidEnumArgumentException("options", (int)options, typeof(StringSplitOptions));
 
@@ -64,10 +64,10 @@
 
             if (qualifiers.GetLength(1) != 2)
                 throw new ArgumentException("The dimensions of the qualifiers array must be [n,2]. " +
-                    "The two characters are the opening and closing qualifier pair. You may have n pairs of qualifiers.", "qualifiers");
+                    "The two characters are the opening and closing qualifier pair. You may have n pairs of qualifiers.", nameof(qualifiers));
 
-            char[] openingQualifiers = new char[qualifiers.GetLength(0)];
-            for (int i = 0; i < qualifiers.GetLength(0); i++)
+            var openingQualifiers = new char[qualifiers.GetLength(0)];
+            for (var i = 0; i < qualifiers.GetLength(0); i++)
                 openingQualifiers[i] = qualifiers[i, 0];
 
             if (separators.Concat(openingQualifiers).Count() != separators.Union(openingQualifiers).Count())
@@ -81,16 +81,16 @@
                     return new string[0];
 
             // Default capacity is the larger of 16 or 1/8th of the source length, but no more than the source length.
-            int capacity = Math.Min(source.Length, Math.Max(16, (int)Math.Ceiling(source.Length / 8f)));
-            StringBuilder segment = new StringBuilder(capacity, source.Length);
-            List<string> segments = new List<string>();
-            int index = 0;
+            var capacity = Math.Min(source.Length, Math.Max(16, (int)Math.Ceiling(source.Length / 8f)));
+            var segment = new StringBuilder(capacity, source.Length);
+            var segments = new List<string>();
+            var index = 0;
 
             while (index <= source.Length)
             {
                 // Determine the positions of the next separator and qualifier.
-                int seperatorIndex = source.IndexOfAny(separators, index);
-                int qualifierIndex = source.IndexOfAny(openingQualifiers, index);
+                var seperatorIndex = source.IndexOfAny(separators, index);
+                var qualifierIndex = source.IndexOfAny(openingQualifiers, index);
                 // Specify the index of characters that couldn't be located to be the end of the source string.
                 if (seperatorIndex == -1)
                     seperatorIndex = source.Length;
@@ -115,10 +115,10 @@
                 else
                 {
                     // We encountered a qualifier, we need to find the matching closing qualifier.
-                    char openingQualifier = source[qualifierIndex];
-                    char closingQualifier = '\0';
+                    var openingQualifier = source[qualifierIndex];
+                    var closingQualifier = '\0';
                     // Get the qualifier that closes this pair.
-                    for (int i = 0; i < qualifiers.Length; i++)
+                    for (var i = 0; i < qualifiers.Length; i++)
                         if (openingQualifier == qualifiers[i, 0])
                         {
                             closingQualifier = qualifiers[i, 1];

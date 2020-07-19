@@ -68,7 +68,7 @@
         public GifAlphaForm(string path)
         {
             InitializeComponent();
-            filesPath = Argument.EnsureNotNull(path, "path");
+            filesPath = Argument.EnsureNotNull(path, nameof(path));
 
             Disposed += (sender, e) =>
             {
@@ -119,7 +119,7 @@
             if (!SavePrompt())
                 return;
 
-            bool wasPlaying = Indexer.Playing;
+            var wasPlaying = Indexer.Playing;
             Indexer.Playing = false;
 
             loaded = false;
@@ -180,8 +180,8 @@
             }
             Indexer.UseTimingsFrom(gifImage);
 
-            AlphaRemappingTable map = new AlphaRemappingTable();
-            string mapFile = Path.ChangeExtension(filePath, AlphaRemappingTable.FileExtension);
+            var map = new AlphaRemappingTable();
+            var mapFile = Path.ChangeExtension(filePath, AlphaRemappingTable.FileExtension);
             if (File.Exists(mapFile))
                 map.LoadMap(mapFile);
 
@@ -193,18 +193,18 @@
             sourceSwatches.Capacity = colorMappingTable.Count;
             desiredSwatches.Capacity = colorMappingTable.Count;
 
-            int swatchSize = ImageSourcePalette.Height - 2;
-            Size size = new Size(swatchSize, swatchSize);
-            Point location = new Point(1, 1);
+            var swatchSize = ImageSourcePalette.Height - 2;
+            var size = new Size(swatchSize, swatchSize);
+            var location = new Point(1, 1);
 
             ImageSourcePalette.SuspendLayout();
             ImageDesiredPalette.SuspendLayout();
 
-            int mappingIndex = 0;
+            var mappingIndex = 0;
             foreach (var colorMapping in colorMappingTable)
             {
-                Panel sourcePanel = new Panel() { Size = size, Location = location };
-                Panel desiredPanel = new Panel() { Size = size, Location = location };
+                var sourcePanel = new Panel() { Size = size, Location = location };
+                var desiredPanel = new Panel() { Size = size, Location = location };
                 sourcePanel.Tag = desiredPanel;
                 desiredPanel.Tag = sourcePanel;
                 sourceSwatches.Add(sourcePanel);
@@ -221,10 +221,10 @@
                 location.X += swatchSize + 1;
             }
             location.Y = 0;
-            Panel blankSourcePanel =
+            var blankSourcePanel =
                 new Panel() { Size = ImageSourcePalette.Size, Location = location, BackColor = SystemColors.Control };
             ImageSourcePalette.Controls.Add(blankSourcePanel);
-            Panel blankDesiredPanel =
+            var blankDesiredPanel =
                 new Panel() { Size = ImageDesiredPalette.Size, Location = location, BackColor = SystemColors.Control };
             ImageDesiredPalette.Controls.Add(blankDesiredPanel);
             ImageSourcePalette.ResumeLayout();
@@ -233,7 +233,7 @@
             ImageDesiredPalette.BackColor = ImageComparison.BackColor;
 
             desiredFrames = new Bitmap[gifImage.Frames.Length];
-            for (int i = 0; i < desiredFrames.Length; i++)
+            for (var i = 0; i < desiredFrames.Length; i++)
                 desiredFrames[i] = (Bitmap)gifImage.Frames[i].Image.Clone();
             UpdateDesiredFrames();
 
@@ -263,8 +263,8 @@
             foreach (ArgbColor sourceArgbColor in colorTable)
                 if (sourceArgbColor.A == 255)
                 {
-                    RgbColor sourceRgbColor = (RgbColor)sourceArgbColor;
-                    Color sourceColor = Color.FromArgb(sourceRgbColor.ToArgb());
+                    var sourceRgbColor = (RgbColor)sourceArgbColor;
+                    var sourceColor = Color.FromArgb(sourceRgbColor.ToArgb());
                     if (!colorMappingTable.ContainsKey(sourceColor))
                     {
                         if (!alphaMap.TryGetMapping(sourceRgbColor, out ArgbColor desiredArgbColor))
@@ -326,7 +326,7 @@
         /// <param name="e">The event data.</param>
         private void Swatch_Clicked(object sender, EventArgs e)
         {
-            Panel panel = (Panel)sender;
+            var panel = (Panel)sender;
             if (panel.Parent == ImageSourcePalette)
                 currentColor = panel.BackColor;
             else
@@ -382,10 +382,10 @@
             if (!loaded)
                 return;
 
-            if (byte.TryParse(DesiredAlphaCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out byte value))
+            if (byte.TryParse(DesiredAlphaCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var value))
             {
                 DesiredAlphaCode.ForeColor = Color.Black;
-                Color newColor = Color.FromArgb(value, colorMappingTable[currentColor]);
+                var newColor = Color.FromArgb(value, colorMappingTable[currentColor]);
                 if (colorMappingTable[currentColor] != newColor)
                 {
                     colorMappingTable[currentColor] = newColor;
@@ -418,10 +418,10 @@
             if (!loaded)
                 return;
 
-            if (int.TryParse(DesiredColorCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int value))
+            if (int.TryParse(DesiredColorCode.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out var value))
             {
                 DesiredColorCode.ForeColor = Color.Black;
-                Color newColor = Color.FromArgb(colorMappingTable[currentColor].A, value >> 16, value >> 8 & 0xFF, value & 0xFF);
+                var newColor = Color.FromArgb(colorMappingTable[currentColor].A, value >> 16, value >> 8 & 0xFF, value & 0xFF);
                 if (colorMappingTable[currentColor] != newColor)
                 {
                     colorMappingTable[currentColor] = newColor;
@@ -448,11 +448,11 @@
         /// </summary>
         private void UpdateDesiredFrames()
         {
-            for (int frame = 0; frame < gifImage.Frames.Length; frame++)
+            for (var frame = 0; frame < gifImage.Frames.Length; frame++)
             {
-                int tableSize = gifImage.Frames[frame].ColorTableSize;
+                var tableSize = gifImage.Frames[frame].ColorTableSize;
                 ColorPalette palette = gifImage.Frames[frame].Image.Palette;
-                for (int i = 0; i < tableSize; i++)
+                for (var i = 0; i < tableSize; i++)
                     if (palette.Entries[i].A == 255)
                         palette.Entries[i] = colorMappingTable[palette.Entries[i]];
                 desiredFrames[frame].Palette = palette;
@@ -468,7 +468,7 @@
         /// <param name="e">The event data.</param>
         private void ResetCommand_Click(object sender, EventArgs e)
         {
-            bool nonEmptyMap = false;
+            var nonEmptyMap = false;
             foreach (var colorMapping in colorMappingTable)
                 if (colorMapping.Key != colorMapping.Value)
                 {
@@ -480,7 +480,7 @@
                     "Are you sure you want to reset the mapping? You can still decline to save later.", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                Color[] keys = new Color[colorMappingTable.Keys.Count];
+                var keys = new Color[colorMappingTable.Keys.Count];
                 colorMappingTable.Keys.CopyTo(keys, 0);
                 foreach (Color color in keys)
                     colorMappingTable[color] = Color.FromArgb(255, color);
@@ -504,14 +504,14 @@
         /// </summary>
         private void SaveMapping()
         {
-            AlphaRemappingTable map = new AlphaRemappingTable();
+            var map = new AlphaRemappingTable();
             foreach (var colorMapping in colorMappingTable)
                 if (colorMapping.Key != colorMapping.Value)
                     map.AddMapping(
                         new RgbColor(colorMapping.Key.R, colorMapping.Key.G, colorMapping.Key.B),
                         new ArgbColor(colorMapping.Value.A, colorMapping.Value.R, colorMapping.Value.G, colorMapping.Value.B));
 
-            string mapFilePath = Path.ChangeExtension(filePath, AlphaRemappingTable.FileExtension);
+            var mapFilePath = Path.ChangeExtension(filePath, AlphaRemappingTable.FileExtension);
             if (map.SaveMap(mapFilePath))
                 MessageBox.Show(this, "Lookup mapping saved to '" + mapFilePath + "'",
                     "Mapping Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -576,10 +576,10 @@
             if (e.Button != MouseButtons.Left)
                 return;
 
-            Panel panel = (Panel)sender;
+            var panel = (Panel)sender;
 
-            int imageWidth = gifImage.Frames[Indexer.FrameIndex].Image.Width;
-            int imageHeight = gifImage.Frames[Indexer.FrameIndex].Image.Height;
+            var imageWidth = gifImage.Frames[Indexer.FrameIndex].Image.Width;
+            var imageHeight = gifImage.Frames[Indexer.FrameIndex].Image.Height;
             Point location = e.Location;
             location -= new Size(panel.Width / 2, panel.Height / 2);
             location += new Size(imageWidth / 2, imageHeight / 2);
@@ -614,7 +614,7 @@
         /// <param name="e">The event data.</param>
         private void ImagePalette_Resize(object sender, EventArgs e)
         {
-            Panel panel = (Panel)sender;
+            var panel = (Panel)sender;
             if (panel.Controls.Count != 0)
                 panel.Controls[panel.Controls.Count - 1].Width = panel.Width;
         }

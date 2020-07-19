@@ -917,12 +917,12 @@
             if (!enumType.IsEnum)
                 throw new ArgumentException("TEnum must be an Enum type.", "TEnum");
 
-            bool flagged = TypeFlagged.GetOrAdd(enumType, TypeHasFlagsAttribute);
-            TEnum[] enumValues = (TEnum[])Enum.GetValues(enumType);
+            var flagged = TypeFlagged.GetOrAdd(enumType, TypeHasFlagsAttribute);
+            var enumValues = (TEnum[])Enum.GetValues(enumType);
             if (!flagged)
             {
                 // Search for a matching value in the enumeration.
-                bool found = false;
+                var found = false;
                 foreach (TEnum enumValue in enumValues)
                     if (arg.Equals(enumValue))
                     {
@@ -935,13 +935,13 @@
             else
             {
                 // Get a set of flags which are not in the enumeration.
-                ulong badFlags = ulong.MaxValue;
+                var badFlags = ulong.MaxValue;
                 foreach (TEnum enumValue in enumValues)
                     badFlags &= ~Convert.ToUInt64(enumValue, CultureInfo.InvariantCulture);
 
                 // Check none of the bad flags is set.
                 ulong checkFlag = 1;
-                ulong flags = Convert.ToUInt64(arg, CultureInfo.InvariantCulture);
+                var flags = Convert.ToUInt64(arg, CultureInfo.InvariantCulture);
                 while (checkFlag <= flags || checkFlag == 0)
                 {
                     if ((flags & checkFlag & badFlags) > 0)

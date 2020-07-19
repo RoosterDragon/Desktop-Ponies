@@ -46,8 +46,8 @@
             /// null.</exception>
             public EqualityComparerFromDelegates(Func<T, T, bool> equals, Func<T, int> getHashCode)
             {
-                this.equals = Argument.EnsureNotNull(equals, "equals");
-                this.getHashCode = Argument.EnsureNotNull(getHashCode, "getHashCode");
+                this.equals = Argument.EnsureNotNull(equals, nameof(equals));
+                this.getHashCode = Argument.EnsureNotNull(getHashCode, nameof(getHashCode));
             }
             /// <summary>
             /// Determines whether the specified objects are equal.

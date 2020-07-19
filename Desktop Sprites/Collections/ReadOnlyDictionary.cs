@@ -47,7 +47,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="dictionary"/> is null.</exception>
         public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary)
         {
-            this.dictionary = Argument.EnsureNotNull(dictionary, "dictionary");
+            this.dictionary = Argument.EnsureNotNull(dictionary, nameof(dictionary));
         }
         /// <summary>
         /// Gets a collection containing the keys in the <see cref="T:DesktopSprites.Collections.ReadOnlyDictionary`2"/>.
@@ -290,7 +290,7 @@
             /// <param name="readOnlyDictionary">The dictionary to proxy.</param>
             public DebugView(ReadOnlyDictionary<TKey, TValue> readOnlyDictionary)
             {
-                this.readOnlyDictionary = Argument.EnsureNotNull(readOnlyDictionary, "readOnlyDictionary");
+                this.readOnlyDictionary = Argument.EnsureNotNull(readOnlyDictionary, nameof(readOnlyDictionary));
             }
 
             /// <summary>

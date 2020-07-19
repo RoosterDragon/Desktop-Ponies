@@ -24,7 +24,7 @@
         /// <param name="array">The array to enumerate.</param>
         public ArrayEnumerator(T[] array)
         {
-            this.array = Argument.EnsureNotNull(array, "array");
+            this.array = Argument.EnsureNotNull(array, nameof(array));
             index = -1;
         }
         /// <summary>

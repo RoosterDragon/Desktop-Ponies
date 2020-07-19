@@ -89,7 +89,7 @@
         /// <param name="e">The event data.</param>
         private void CopyTextButton_Click(object sender, EventArgs e)
         {
-            string text = string.Join("\r\n", Text, MessageLabel.Text, ExceptionText.Text, TimeLabel.Text);
+            var text = string.Join("\r\n", Text, MessageLabel.Text, ExceptionText.Text, TimeLabel.Text);
             ThreadStart copy = () =>
             {
                 var owner = InvokeRequired ? null : this;

@@ -37,7 +37,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
             public ComparerFromComparison(Comparison<T> comparison)
             {
-                this.comparison = Argument.EnsureNotNull(comparison, "comparison");
+                this.comparison = Argument.EnsureNotNull(comparison, nameof(comparison));
             }
             /// <summary>
             /// Performs a comparison of two objects of the same type and returns a value indicating whether one object is less than, equal

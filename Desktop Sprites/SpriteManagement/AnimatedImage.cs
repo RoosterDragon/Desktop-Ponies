@@ -98,21 +98,21 @@
         private void AnimatedImageFromGif(BufferToImage<T> frameFactory, BitDepths allowableDepths)
         {
             GifImage<T> gifImage;
-            using (FileStream imageStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var imageStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 gifImage = new GifImage<T>(imageStream, frameFactory, allowableDepths);
 
             Size = gifImage.Size;
             LoopCount = gifImage.Iterations;
             ImageDuration = gifImage.Duration;
 
-            int frameCount = gifImage.Frames.Length;
+            var frameCount = gifImage.Frames.Length;
             var framesList = new List<T>(frameCount);
             var durationsList = new List<int>(frameCount);
             var frameIndexesList = new List<int>(frameCount);
             var frameHashesList = new List<int>(frameCount);
-            for (int sourceFrame = 0; sourceFrame < frameCount; sourceFrame++)
+            for (var sourceFrame = 0; sourceFrame < frameCount; sourceFrame++)
             {
-                int frameDuration = gifImage.Frames[sourceFrame].Duration;
+                var frameDuration = gifImage.Frames[sourceFrame].Duration;
 
                 // Decoding the GIF may have produced frames of zero duration, we can safely drop these.
                 // If the file has all-zero durations, we're into the land of undefined behavior for animations.
@@ -155,11 +155,11 @@
         /// <param name="frameHashes">The collection of hashes for each frame.</param>
         private static void AddOrReuseFrame(GifFrame<T> frame, List<T> frames, List<int> frameIndexes, List<int> frameHashes)
         {
-            int frameHash = frame.Image.GetFrameHashCode();
+            var frameHash = frame.Image.GetFrameHashCode();
 
             // Search our existing hashes for a match.
-            bool foundMatchingBitmap = false;
-            for (int i = 0; i < frameHashes.Count && !foundMatchingBitmap; i++)
+            var foundMatchingBitmap = false;
+            for (var i = 0; i < frameHashes.Count && !foundMatchingBitmap; i++)
                 if (frameHash == frameHashes[i])
                 {
                     // We found a match, we can reuse the existing bitmap.
@@ -237,9 +237,9 @@
         /// FrameCount.</exception>
         public int GetDuration(int frameIndex)
         {
-            Argument.EnsureNonnegative(frameIndex, "frameIndex");
+            Argument.EnsureNonnegative(frameIndex, nameof(frameIndex));
             if (frameIndex >= FrameCount)
-                throw new ArgumentOutOfRangeException("frameIndex", frameIndex, "frameIndex must be less than FrameCount.");
+                throw new ArgumentOutOfRangeException(nameof(frameIndex), frameIndex, "frameIndex must be less than FrameCount.");
             return commonFrameDuration != -1 ? commonFrameDuration : durations[frameIndex];
         }
 
@@ -253,16 +253,16 @@
         /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="time"/> is negative.</exception>
         private int FrameIndexFromTimeIndex(TimeSpan time, bool preventLoop)
         {
-            Argument.EnsureNonnegative(time, "time");
+            Argument.EnsureNonnegative(time, nameof(time));
             EnsureNotDisposed();
 
-            int frame = 0;
+            var frame = 0;
 
             // Find the frame we need.
             if (FrameCount > 1)
             {
                 // Get overall time to find in milliseconds.
-                int timeToSeek = (int)time.TotalMilliseconds;
+                var timeToSeek = (int)time.TotalMilliseconds;
                 if (preventLoop && timeToSeek >= ImageDuration)
                 {
                     // We do not want to loop, so we want the final frame.
@@ -271,7 +271,7 @@
                 else
                 {
                     // Use integer division to find out how many whole loops will run in that time.
-                    int completeLoops = timeToSeek / ImageDuration;
+                    var completeLoops = timeToSeek / ImageDuration;
 
                     if (LoopCount != 0 && completeLoops >= LoopCount)
                     {
@@ -281,7 +281,7 @@
                     else
                     {
                         // Subtract the complete loops leaving us with a duration into one run of the animation.
-                        int durationToSeek = timeToSeek - (completeLoops * ImageDuration);
+                        var durationToSeek = timeToSeek - (completeLoops * ImageDuration);
 
                         // Determine which frame we want.
                         if (commonFrameDuration != -1)
@@ -306,9 +306,9 @@
         /// FrameCount.</exception>
         private int FrameIndexFromLogicalIndex(int index)
         {
-            Argument.EnsureNonnegative(index, "index");
+            Argument.EnsureNonnegative(index, nameof(index));
             if (index >= FrameCount)
-                throw new ArgumentOutOfRangeException("index", index, "index must be less than FrameCount.");
+                throw new ArgumentOutOfRangeException(nameof(index), index, "index must be less than FrameCount.");
             if (frameIndexes != null)
                 return frameIndexes[index];
             else

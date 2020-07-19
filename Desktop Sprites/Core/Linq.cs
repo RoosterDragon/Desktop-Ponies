@@ -19,7 +19,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
         public static TSource OnlyOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             TSource result;
             using (var enumerator = source.GetEnumerator())
             {
@@ -45,10 +45,10 @@
         /// </exception>
         public static TSource OnlyOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Argument.EnsureNotNull(source, "source");
-            Argument.EnsureNotNull(predicate, "predicate");
-            int count = 0;
-            TSource result = default(TSource);
+            Argument.EnsureNotNull(source, nameof(source));
+            Argument.EnsureNotNull(predicate, nameof(predicate));
+            var count = 0;
+            var result = default(TSource);
             foreach (var element in source)
                 if (predicate(element))
                 {
@@ -69,16 +69,16 @@
         /// <exception cref="T:System.ArgumentException"><paramref name="source"/> contains no elements.</exception>
         public static TSource RandomElement<TSource>(this IEnumerable<TSource> source)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             if (source is ICollection<TSource> collection)
             {
                 if (collection.Count == 0)
-                    throw new ArgumentException("source must contain at least one element.", "source");
+                    throw new ArgumentException("source must contain at least one element.", nameof(source));
                 return collection.ElementAt(Rng.Next(collection.Count));
             }
             var array = source.ToArray();
             if (array.Length == 0)
-                throw new ArgumentException("source must contain at least one element.", "source");
+                throw new ArgumentException("source must contain at least one element.", nameof(source));
             return array[Rng.Next(array.Length)];
         }
     }

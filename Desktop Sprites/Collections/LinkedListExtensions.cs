@@ -35,8 +35,8 @@
         /// </exception>
         public static void Sort<TSource>(this LinkedList<TSource> source, Comparison<TSource> comparison)
         {
-            Argument.EnsureNotNull(source, "source");
-            Argument.EnsureNotNull(comparison, "comparison");
+            Argument.EnsureNotNull(source, nameof(source));
+            Argument.EnsureNotNull(comparison, nameof(comparison));
 
             MergeSort(source, comparison);
         }
@@ -55,7 +55,7 @@
         /// <typeparamref name="TSource"/>.</exception>
         public static void Sort<TSource>(this LinkedList<TSource> source, IComparer<TSource> comparer)
         {
-            Argument.EnsureNotNull(source, "source");
+            Argument.EnsureNotNull(source, nameof(source));
             if (comparer == null && (comparer = Comparer<TSource>.Default) == null)
                 throw new InvalidOperationException();
 
@@ -78,7 +78,7 @@
                 return;
 
             // Sort the list.
-            int mergeSize = 1;
+            var mergeSize = 1;
             int merges;
             LinkedListNode<T> leftHead;
             LinkedListNode<T> rightHead;
@@ -98,8 +98,8 @@
                 {
                     // Perform a merge on the next pair of lists.
                     merges++;
-                    int leftSize = mergeSize;
-                    int rightSize = mergeSize;
+                    var leftSize = mergeSize;
+                    var rightSize = mergeSize;
 
                     // Merge whilst there are elements remaining in either list.
                     while (leftSize > 0 && rightSize > 0 && rightHead != null)
@@ -131,7 +131,7 @@
 
                     // Set up the start positions for the next pair of lists.
                     leftHead = rightHead;
-                    for (int i = 0; i < mergeSize && rightHead != null; i++)
+                    for (var i = 0; i < mergeSize && rightHead != null; i++)
                         rightHead = rightHead.Next;
 
                     // After the first merge, the left head will be positioned at the index where the right head for the next pass should

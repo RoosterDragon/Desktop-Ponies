@@ -49,7 +49,7 @@
         public static void Raise<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, Func<TEventArgs> argsFactory)
             where TEventArgs : EventArgs
         {
-            Argument.EnsureNotNull(argsFactory, "argsFactory");
+            Argument.EnsureNotNull(argsFactory, nameof(argsFactory));
             if (eventHandler != null)
                 eventHandler(sender, argsFactory());
         }

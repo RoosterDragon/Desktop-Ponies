@@ -52,7 +52,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="image"/> is null.</exception>
         protected Frame(TImage image)
         {
-            Argument.EnsureNotNull(image, "image");
+            Argument.EnsureNotNull(image, nameof(image));
             Image = image;
         }
     }

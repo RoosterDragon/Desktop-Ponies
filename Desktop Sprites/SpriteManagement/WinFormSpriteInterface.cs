@@ -1,4 +1,4 @@
-﻿namespace DesktopSprites.SpriteManagement
+namespace DesktopSprites.SpriteManagement
 {
     using System;
     using System.Collections.Generic;
@@ -111,8 +111,8 @@
             /// null.</exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripSeparator separatorItem)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(separatorItem, "separatorItem");
+                Argument.EnsureNotNull(parent, nameof(parent));
+                Argument.EnsureNotNull(separatorItem, nameof(separatorItem));
 
                 owner = parent;
                 separator = separatorItem;
@@ -130,8 +130,8 @@
             /// </exception>
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem, EventHandler activated)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                Argument.EnsureNotNull(parent, nameof(parent));
+                Argument.EnsureNotNull(menuItem, nameof(menuItem));
 
                 owner = parent;
                 item = menuItem;
@@ -153,11 +153,11 @@
             public WinFormContextMenuItem(WinFormSpriteInterface parent, ToolStripMenuItem menuItem,
                 IEnumerable<ISimpleContextMenuItem> subItems)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItem, "menuItem");
-                Argument.EnsureNotNull(subItems, "subItems");
+                Argument.EnsureNotNull(parent, nameof(parent));
+                Argument.EnsureNotNull(menuItem, nameof(menuItem));
+                Argument.EnsureNotNull(subItems, nameof(subItems));
                 if (!menuItem.HasDropDownItems)
-                    throw new ArgumentException("menuItem must have drop down items.", "menuItem");
+                    throw new ArgumentException("menuItem must have drop down items.", nameof(menuItem));
 
                 var subItemsArray = subItems.ToArray();
 
@@ -166,7 +166,7 @@
                         "The number of sub-items in menuItem is not the same as the number in the subItems collection.");
 
                 var winFormSubItemsList = new ISimpleContextMenuItem[subItemsArray.Length];
-                int index = 0;
+                var index = 0;
                 foreach (ToolStripItem toolStripItem in menuItem.DropDownItems)
                 {
                     if (subItemsArray[index].IsSeparator)
@@ -333,8 +333,8 @@
             /// null.</exception>
             public WinFormContextMenu(WinFormSpriteInterface parent, IEnumerable<ISimpleContextMenuItem> menuItems)
             {
-                Argument.EnsureNotNull(parent, "parent");
-                Argument.EnsureNotNull(menuItems, "menuItems");
+                Argument.EnsureNotNull(parent, nameof(parent));
+                Argument.EnsureNotNull(menuItems, nameof(menuItems));
 
                 owner = parent;
 
@@ -395,12 +395,12 @@
             /// </exception>
             private ToolStripMenuItem CreateItemWithSubitems(ISimpleContextMenuItem menuItem)
             {
-                Argument.EnsureNotNull(menuItem, "menuItem");
+                Argument.EnsureNotNull(menuItem, nameof(menuItem));
                 if (menuItem.SubItems == null || menuItem.SubItems.Count == 0)
                     throw new ArgumentException("menuItem.SubItems must not be null or empty.");
 
-                ToolStripItem[] subitems = new ToolStripItem[menuItem.SubItems.Count];
-                for (int i = 0; i < subitems.Length; i++)
+                var subitems = new ToolStripItem[menuItem.SubItems.Count];
+                for (var i = 0; i < subitems.Length; i++)
                 {
                     ISimpleContextMenuItem subitem = menuItem.SubItems[i];
 
@@ -476,7 +476,7 @@
             /// <exception cref="T:System.ArgumentNullException"><paramref name="path"/> is null.</exception>
             public ImageData(string path)
             {
-                Argument.EnsureNotNull(path, "path");
+                Argument.EnsureNotNull(path, nameof(path));
                 Bitmap = new Bitmap(path);
                 Width = Bitmap.Width;
                 Height = Bitmap.Height;
@@ -502,7 +502,7 @@
                 Height = height;
                 Depth = depth;
                 ArgbPalette = new int[palette.Length];
-                for (int i = 0; i < ArgbPalette.Length; i++)
+                for (var i = 0; i < ArgbPalette.Length; i++)
                     ArgbPalette[i] = new ArgbColor(255, palette[i]).ToArgb();
                 if (transparentIndex != null)
                     ArgbPalette[transparentIndex.Value] = new ArgbColor().ToArgb();
@@ -619,7 +619,7 @@
                     return x == null && y == null;
                 if (x.Length != y.Length)
                     return false;
-                for (int i = 0; i < x.Length; i++)
+                for (var i = 0; i < x.Length; i++)
                     if (x[i] != y[i])
                         return false;
                 return true;
@@ -635,8 +635,8 @@
                     return 0;
                 const int OffsetBasis32 = unchecked((int)2166136261);
                 const int FnvPrime32 = 16777619;
-                int hash = OffsetBasis32;
-                foreach (int i in obj)
+                var hash = OffsetBasis32;
+                foreach (var i in obj)
                 {
                     hash ^= (i >> 24) & 0xFF;
                     hash *= FnvPrime32;
@@ -1051,7 +1051,7 @@
             {
                 try
                 {
-                    AppDomain domain = AppDomain.CreateDomain("Assembly Test Domain");
+                    var domain = AppDomain.CreateDomain("Assembly Test Domain");
                     domain.Load("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
                     domain.Load("System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
                     AppDomain.Unload(domain);
@@ -1075,9 +1075,9 @@
         /// drawn.</param>
         public WinFormSpriteInterface(Rectangle displayBounds)
         {
-            Thread appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
+            var appThread = new Thread(ApplicationRun) { Name = "WinFormSpriteInterface.ApplicationRun" };
             appThread.SetApartmentState(ApartmentState.STA);
-            object appInitiated = new object();
+            var appInitiated = new object();
             lock (appInitiated)
             {
                 appThread.Start(Tuple.Create(appInitiated, displayBounds));
@@ -1098,7 +1098,7 @@
                 if (ParallelBlendThreads > 0)
                 {
                     parallelBlend = new Barrier(ParallelBlendTotalSections);
-                    for (int i = 0; i < ParallelBlendThreads; i++)
+                    for (var i = 0; i < ParallelBlendThreads; i++)
                         new Thread(AlphaBlendWorker) { Name = "WinFormSpriteInterface.AlphaBlendWorker" }.Start(i);
                 }
 
@@ -1152,10 +1152,10 @@
             return SetupSafely(new ImageFrame(fileName), frame =>
             {
                 // Check for an alpha remapping table, and apply it if one exists.
-                string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+                var mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
                 if (File.Exists(mapFilePath))
                 {
-                    AlphaRemappingTable map = new AlphaRemappingTable();
+                    var map = new AlphaRemappingTable();
                     map.LoadMap(mapFilePath);
                     frame.Image.Bitmap.RemapColors(map.GetMap().ToDictionary(
                         kvp => Color.FromArgb(kvp.Key.ToArgb()), kvp => Color.FromArgb(kvp.Value.ToArgb())));
@@ -1189,14 +1189,14 @@
                 {
                     var colorPalette = frame.Image.ArgbPalette;
                     // Check for an alpha remapping table, and apply it if one exists.
-                    string mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
+                    var mapFilePath = Path.ChangeExtension(fileName, AlphaRemappingTable.FileExtension);
                     if (File.Exists(mapFilePath))
                     {
-                        AlphaRemappingTable map = new AlphaRemappingTable();
+                        var map = new AlphaRemappingTable();
                         map.LoadMap(mapFilePath);
-                        for (int i = 0; i < colorPalette.Length; i++)
+                        for (var i = 0; i < colorPalette.Length; i++)
                         {
-                            ArgbColor paletteColor = new ArgbColor(colorPalette[i]);
+                            var paletteColor = new ArgbColor(colorPalette[i]);
                             if (paletteColor.A != 255)
                                 continue;
                             if (map.TryGetMapping(new RgbColor(paletteColor.R, paletteColor.G, paletteColor.B), out ArgbColor argbColor))
@@ -1237,8 +1237,8 @@
             Argument.EnsureNotNull(imagePaths, "imageFilePaths");
             EnsureNotDisposed();
 
-            object syncObject = new object();
-            int remaining = 0;
+            var syncObject = new object();
+            var remaining = 0;
             imageLoadedHandler += (sender, e) =>
             {
                 lock (syncObject)
@@ -1257,8 +1257,8 @@
                     {
                         try
                         {
-                                LoadPaths(paths, imageLoadedHandler, badPaths);
-                            }
+                            LoadPaths(paths, imageLoadedHandler, badPaths);
+                        }
                         catch (Exception ex)
                         {
                             lock (badPaths)
@@ -1288,7 +1288,7 @@
         /// the method must be called from a single thread.</param>
         private void LoadPaths(SpriteImagePaths paths, EventHandler imageLoadedHandler, HashSet<string> badPaths)
         {
-            bool needPair = true;
+            var needPair = true;
             lock (animationPairsByPaths)
                 if (animationPairsByPaths.ContainsKey(paths))
                     needPair = false;
@@ -1329,11 +1329,11 @@
         {
             AnimatedImage<ImageFrame> leftImage;
             bool leftFound;
-            bool badPath = false;
+            var badPath = false;
             lock (images)
             {
                 while ((leftFound = images.TryGetValue(paths.Left, out leftImage)) && leftImage == null &&
-                    (badPaths != null && !(badPath = badPaths.Contains(paths.Left))))
+                    badPaths != null && !(badPath = badPaths.Contains(paths.Left)))
                     Monitor.Wait(images);
                 if (!leftFound && !badPath)
                     images.Add(paths.Left, null);
@@ -1372,11 +1372,11 @@
                 return new AnimationPair<ImageFrame>(leftAnimation, leftAnimation);
 
             AnimatedImage<ImageFrame> rightImage;
-            bool mirrored = false;
+            var mirrored = false;
             bool rightFound;
             lock (images)
                 while ((rightFound = images.TryGetValue(paths.Right, out rightImage)) && rightImage == null &&
-                    (badPaths != null && !(badPath = badPaths.Contains(paths.Right))))
+                    badPaths != null && !(badPath = badPaths.Contains(paths.Right)))
                     Monitor.Wait(images);
             if (badPath)
                 return new AnimationPair<ImageFrame>();
@@ -1399,7 +1399,7 @@
                     {
                         var originalRightImage = rightImage;
                         while ((rightFound = images.TryGetValue(paths.Right, out rightImage)) && rightImage == null &&
-                            (badPaths != null && !(badPath = badPaths.Contains(paths.Right))))
+                            badPaths != null && !(badPath = badPaths.Contains(paths.Right)))
                             Monitor.Wait(images);
                         if (!rightFound && !badPath)
                             images.Add(paths.Right, rightImage = originalRightImage);
@@ -1433,7 +1433,7 @@
                 left[0].Image.Bitmap != null || right[0].Image.Bitmap != null)
                 return false;
 
-            for (int frameIndex = 0; frameIndex < left.FrameCount; frameIndex++)
+            for (var frameIndex = 0; frameIndex < left.FrameCount; frameIndex++)
             {
                 if (left.GetDuration(frameIndex) != right.GetDuration(frameIndex))
                     return false;
@@ -1443,32 +1443,32 @@
                 if (leftFrame.Depth != rightFrame.Depth || leftFrame.Width != rightFrame.Width || leftFrame.Height != rightFrame.Height)
                     return false;
                 // Check for an exact horizontal mirror match by comparing pixels in each image.
-                byte[] leftData = leftFrame.Data;
-                byte[] rightData = rightFrame.Data;
-                int[] leftPalette = leftFrame.ArgbPalette;
-                int[] rightPalette = rightFrame.ArgbPalette;
-                int rightMax = rightFrame.Stride - 1;
+                var leftData = leftFrame.Data;
+                var rightData = rightFrame.Data;
+                var leftPalette = leftFrame.ArgbPalette;
+                var rightPalette = rightFrame.ArgbPalette;
+                var rightMax = rightFrame.Stride - 1;
                 if (leftFrame.Depth == 8)
                 {
                     // If the images share a palette, we can check faster by eliding the deference of the palette and just compare indexes.
                     if (leftPalette == rightPalette)
                     {
-                        for (int y = 0; y < leftFrame.Height; y++)
+                        for (var y = 0; y < leftFrame.Height; y++)
                         {
-                            int leftRow = y * leftFrame.Stride;
-                            int rightRow = y * rightFrame.Stride;
-                            for (int x = 0; x < leftFrame.Width; x++)
+                            var leftRow = y * leftFrame.Stride;
+                            var rightRow = y * rightFrame.Stride;
+                            for (var x = 0; x < leftFrame.Width; x++)
                                 if (leftData[leftRow + x] != rightData[rightRow + rightMax - x])
                                     return false;
                         }
                     }
                     else
                     {
-                        for (int y = 0; y < leftFrame.Height; y++)
+                        for (var y = 0; y < leftFrame.Height; y++)
                         {
-                            int leftRow = y * leftFrame.Stride;
-                            int rightRow = y * rightFrame.Stride;
-                            for (int x = 0; x < leftFrame.Width; x++)
+                            var leftRow = y * leftFrame.Stride;
+                            var rightRow = y * rightFrame.Stride;
+                            for (var x = 0; x < leftFrame.Width; x++)
                                 if (leftPalette[leftData[leftRow + x]] != rightPalette[rightData[rightRow + rightMax - x]])
                                     return false;
                         }
@@ -1476,16 +1476,16 @@
                 }
                 else
                 {
-                    bool hasPadding = rightFrame.Width % 2 != 0;
-                    for (int y = 0; y < leftFrame.Height; y++)
+                    var hasPadding = rightFrame.Width % 2 != 0;
+                    for (var y = 0; y < leftFrame.Height; y++)
                     {
-                        int leftRow = y * leftFrame.Stride;
-                        int rightRow = y * rightFrame.Stride;
-                        for (int x = 0; x < leftFrame.Width; x++)
+                        var leftRow = y * leftFrame.Stride;
+                        var rightRow = y * rightFrame.Stride;
+                        for (var x = 0; x < leftFrame.Width; x++)
                         {
-                            bool xIsEven = x % 2 == 0;
-                            int halfX = x / 2;
-                            int rightOffset = hasPadding && !xIsEven ? 1 : 0;
+                            var xIsEven = x % 2 == 0;
+                            var halfX = x / 2;
+                            var rightOffset = hasPadding && !xIsEven ? 1 : 0;
                             var leftIndex = leftData[leftRow + halfX];
                             var rightIndex = rightData[rightRow + rightMax - halfX - rightOffset];
                             if (xIsEven)
@@ -1562,7 +1562,7 @@
             ApplicationInvoke(() =>
             {
                 // TopMost interferes with initial window focus. To workaround this, we will only set it once the form has become visible.
-                bool topMost = form.TopMost;
+                var topMost = form.TopMost;
                 form.TopMost = false;
                 form.Show();
                 form.TopMost = topMost;
@@ -1597,7 +1597,7 @@
         /// <exception cref="T:System.ObjectDisposedException">The interface has been disposed.</exception>
         public void Draw(ICollection<ISprite> sprites)
         {
-            Argument.EnsureNotNull(sprites, "sprites");
+            Argument.EnsureNotNull(sprites, nameof(sprites));
             EnsureNotDisposed();
 
             if (paused)
@@ -1621,7 +1621,7 @@
                     return;
 
                 // Translation offset so the top-left of the form and drawing surface coincide.
-                Size translate = new Size(-form.Left, -form.Top);
+                var translate = new Size(-form.Left, -form.Top);
 
                 // Save the invalid region from last frame.
                 preUpdateInvalidRegion.MakeEmpty();
@@ -1639,11 +1639,11 @@
                     timingsInfo = "fps: " +
                         Collector.FramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + "/" +
                         Collector.AchievableFramesPerSecond.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
-                    Size timingsSize = Size.Ceiling(form.BackgroundGraphics.MeasureString(timingsInfo, font));
+                    var timingsSize = Size.Ceiling(form.BackgroundGraphics.MeasureString(timingsInfo, font));
 
                     // Set location and get area of graph draw.
-                    Point offset = new Point(10, 10);
-                    Point graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
+                    var offset = new Point(10, 10);
+                    var graphLocation = new Point(offset.X, offset.Y + timingsSize.Height);
                     Rectangle recorderGraphArea = Collector.SetGraphingAttributes(graphLocation, 150, 1, 1.5f);
                     postUpdateInvalidRegion.Union(recorderGraphArea);
 
@@ -1693,7 +1693,7 @@
                     // Display the clipping rectangles.
                     foreach (RectangleF invalidRectangleF in invalidRectangles)
                     {
-                        Rectangle invalidRectangle = new Rectangle(
+                        var invalidRectangle = new Rectangle(
                             (int)invalidRectangleF.X, (int)invalidRectangleF.Y,
                             (int)invalidRectangleF.Width - 1, (int)invalidRectangleF.Height - 1);
                         form.BackgroundGraphics.DrawRectangle(Pens.Blue, invalidRectangle);
@@ -1787,7 +1787,7 @@
         {
             // Update cache to ensure we get the initialized synchronization object.
             Thread.MemoryBarrier();
-            int section = (int)sectionObject;
+            var section = (int)sectionObject;
             while (true)
             {
                 // Wait for work or signal to exit.
@@ -1875,8 +1875,8 @@
             yMin = Math.Max(0, -location.Y);
             yMax = Math.Min(size.Height, form.Height - location.Y);
 
-            int sectionSize = (yMax - yMin) / sectionCount;
-            yMin = yMin + section * sectionSize;
+            var sectionSize = (yMax - yMin) / sectionCount;
+            yMin += section * sectionSize;
             if (section + 1 != sectionCount)
                 yMax = yMin + sectionSize;
 
@@ -1921,8 +1921,8 @@
             out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
             out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial)
         {
-            float xScale = (float)image.Width / area.Width;
-            float yScale = (float)image.Height / area.Height;
+            var xScale = (float)image.Width / area.Width;
+            var yScale = (float)image.Height / area.Height;
 
             xShift = Math.Min((int)Math.Log(int.MaxValue / (xScale * xMax), 2), 30);
             xScaleFixedPoint = (int)(xScale * (1 << xShift));
@@ -1945,21 +1945,21 @@
         private unsafe void AlphaBlend8bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
             AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
-                out int xMin, out int xMax, out int yMin, out int yMax,
-                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
+                out var xMin, out var xMax, out var yMin, out var yMax,
+                out var backgroundIndex, out var backgroundIndexChange, out var backgroundIndexRowChange);
 
-            int dataIndex = yMin * image.Stride;
-            int dataIndexRowChange = image.Stride;
+            var dataIndex = yMin * image.Stride;
+            var dataIndexRowChange = image.Stride;
 
-            byte[] data = image.Data;
-            int[] palette = image.ArgbPalette;
-            for (int y = yMin; y < yMax; y++)
+            var data = image.Data;
+            var palette = image.ArgbPalette;
+            for (var y = yMin; y < yMax; y++)
             {
-                for (int x = xMin; x < xMax; x++)
+                for (var x = xMin; x < xMax; x++)
                 {
-                    byte paletteIndex = data[dataIndex + x];
-                    int srcColor = palette[paletteIndex];
-                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    var paletteIndex = data[dataIndex + x];
+                    var srcColor = palette[paletteIndex];
+                    var srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
@@ -1982,26 +1982,26 @@
         private unsafe void AlphaBlend4bbpUnscaled(ImageData image, Point location, bool mirror, int section, int sectionCount)
         {
             AlphaBlendInitialize(location, new Size(image.Width, image.Height), mirror, section, sectionCount,
-                out int xMin, out int xMax, out int yMin, out int yMax,
-                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
+                out var xMin, out var xMax, out var yMin, out var yMax,
+                out var backgroundIndex, out var backgroundIndexChange, out var backgroundIndexRowChange);
 
-            int dataIndex = yMin * image.Stride;
-            int dataIndexRowChange = image.Stride;
+            var dataIndex = yMin * image.Stride;
+            var dataIndexRowChange = image.Stride;
 
-            byte[] data = image.Data;
-            int[] palette = image.ArgbPalette;
-            for (int y = yMin; y < yMax; y++)
+            var data = image.Data;
+            var palette = image.ArgbPalette;
+            for (var y = yMin; y < yMax; y++)
             {
-                for (int x = xMin; x < xMax; x++)
+                for (var x = xMin; x < xMax; x++)
                 {
-                    byte paletteIndexes = data[dataIndex + x / 2];
+                    var paletteIndexes = data[dataIndex + x / 2];
                     int paletteIndex;
                     if (x % 2 == 0)
                         paletteIndex = paletteIndexes >> 4;
                     else
                         paletteIndex = paletteIndexes & 0xF;
-                    int srcColor = palette[paletteIndex];
-                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    var srcColor = palette[paletteIndex];
+                    var srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
@@ -2025,26 +2025,26 @@
         private unsafe void AlphaBlend8bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
             AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
-                out int xMin, out int xMax, out int yMin, out int yMax,
-                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
+                out var xMin, out var xMax, out var yMin, out var yMax,
+                out var backgroundIndex, out var backgroundIndexChange, out var backgroundIndexRowChange);
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
-                out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
-                out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial);
+                out var xShift, out var yShift, out var xScaleFixedPoint, out var yScaleFixedPoint,
+                out var dataRowIndexFixedPoint, out var dataColumnIndexFixedPointInitial);
 
-            byte[] data = image.Data;
-            int[] palette = image.ArgbPalette;
-            int imageStride = image.Stride;
-            for (int y = yMin; y < yMax; y++)
+            var data = image.Data;
+            var palette = image.ArgbPalette;
+            var imageStride = image.Stride;
+            for (var y = yMin; y < yMax; y++)
             {
-                int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
-                int dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
-                for (int x = xMin; x < xMax; x++)
+                var dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
+                var dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
+                for (var x = xMin; x < xMax; x++)
                 {
-                    int dataIndex = dataRowIndex + (dataColumnIndexFixedPoint >> xShift);
+                    var dataIndex = dataRowIndex + (dataColumnIndexFixedPoint >> xShift);
                     dataColumnIndexFixedPoint += xScaleFixedPoint;
-                    byte paletteIndex = data[dataIndex];
-                    int srcColor = palette[paletteIndex];
-                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    var paletteIndex = data[dataIndex];
+                    var srcColor = palette[paletteIndex];
+                    var srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
@@ -2068,32 +2068,32 @@
         private unsafe void AlphaBlend4bbp(ImageData image, Rectangle area, bool mirror, int section, int sectionCount)
         {
             AlphaBlendInitialize(area.Location, area.Size, mirror, section, sectionCount,
-                out int xMin, out int xMax, out int yMin, out int yMax,
-                out int backgroundIndex, out int backgroundIndexChange, out int backgroundIndexRowChange);
+                out var xMin, out var xMax, out var yMin, out var yMax,
+                out var backgroundIndex, out var backgroundIndexChange, out var backgroundIndexRowChange);
             AlphaBlendScalingInitialize(image, area, xMin, xMax, yMin, yMax,
-                out int xShift, out int yShift, out int xScaleFixedPoint, out int yScaleFixedPoint,
-                out int dataRowIndexFixedPoint, out int dataColumnIndexFixedPointInitial);
+                out var xShift, out var yShift, out var xScaleFixedPoint, out var yScaleFixedPoint,
+                out var dataRowIndexFixedPoint, out var dataColumnIndexFixedPointInitial);
 
-            byte[] data = image.Data;
-            int[] palette = image.ArgbPalette;
-            int imageStride = image.Stride;
-            for (int y = yMin; y < yMax; y++)
+            var data = image.Data;
+            var palette = image.ArgbPalette;
+            var imageStride = image.Stride;
+            for (var y = yMin; y < yMax; y++)
             {
-                int dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
-                int dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
-                for (int x = xMin; x < xMax; x++)
+                var dataRowIndex = (dataRowIndexFixedPoint >> yShift) * imageStride;
+                var dataColumnIndexFixedPoint = dataColumnIndexFixedPointInitial;
+                for (var x = xMin; x < xMax; x++)
                 {
-                    int dataColumnIndex = dataColumnIndexFixedPoint >> xShift;
+                    var dataColumnIndex = dataColumnIndexFixedPoint >> xShift;
                     dataColumnIndexFixedPoint += xScaleFixedPoint;
-                    int dataIndex = dataRowIndex + dataColumnIndex / 2;
-                    byte paletteIndexes = data[dataIndex];
+                    var dataIndex = dataRowIndex + dataColumnIndex / 2;
+                    var paletteIndexes = data[dataIndex];
                     int paletteIndex;
                     if (dataColumnIndex % 2 == 0)
                         paletteIndex = paletteIndexes >> 4;
                     else
                         paletteIndex = paletteIndexes & 0xF;
-                    int srcColor = palette[paletteIndex];
-                    int srcAlpha = (srcColor >> 24) & 0xFF;
+                    var srcColor = palette[paletteIndex];
+                    var srcAlpha = (srcColor >> 24) & 0xFF;
                     if (srcAlpha == byte.MaxValue)
                         backgroundData[backgroundIndex] = srcColor;
                     else if (srcAlpha > 0)
@@ -2114,10 +2114,10 @@
         /// <param name="srcAlpha">The alpha value of the source pixel.</param>
         private unsafe void AlphaBlendPixel(int backgroundIndex, int srcColor, int srcAlpha)
         {
-            int dstColor = backgroundData[backgroundIndex];
-            int inverseSrcAlpha = byte.MaxValue - srcAlpha;
-            int dstAG = ((dstColor >> 8) & 0x00FF00FF) * inverseSrcAlpha;
-            int dstRB = (dstColor & 0x00FF00FF) * inverseSrcAlpha;
+            var dstColor = backgroundData[backgroundIndex];
+            var inverseSrcAlpha = byte.MaxValue - srcAlpha;
+            var dstAG = ((dstColor >> 8) & 0x00FF00FF) * inverseSrcAlpha;
+            var dstRB = (dstColor & 0x00FF00FF) * inverseSrcAlpha;
             backgroundData[backgroundIndex] =
                 srcColor +
                 ((dstRB >> 8) & 0x00FF00FF) +
@@ -2149,8 +2149,8 @@
             if (speakingSprite.SpeechText == null)
                 return Rectangle.Empty;
 
-            Size speechSize = Size.Ceiling(surface.MeasureString(speakingSprite.SpeechText, font));
-            Point location = new Point(
+            var speechSize = Size.Ceiling(surface.MeasureString(speakingSprite.SpeechText, font));
+            var location = new Point(
                 speakingSprite.Region.X + speakingSprite.Region.Width / 2 - speechSize.Width / 2 - 1,
                 speakingSprite.Region.Y - speechSize.Height - 1);
             speechSize.Width += 1;

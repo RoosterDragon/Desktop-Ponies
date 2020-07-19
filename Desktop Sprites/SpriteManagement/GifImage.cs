@@ -94,7 +94,7 @@
                 else if (depth == 8)
                     targetFormat = PixelFormat.Format8bppIndexed;
                 else
-                    throw new ArgumentOutOfRangeException("depth", depth, "depth must be 1, 4 or 8.");
+                    throw new ArgumentOutOfRangeException(nameof(depth), depth, "depth must be 1, 4 or 8.");
 
                 // Create the bitmap.
                 return Disposable.SetupSafely(new Bitmap(width, height, targetFormat), bitmap =>
@@ -103,7 +103,7 @@
                     BitmapData data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
                     // Copy the frame buffer to the bitmap. To account for stride padding, copy row by row. Then unlock it.
-                    for (int row = 0; row < data.Height; row++)
+                    for (var row = 0; row < data.Height; row++)
                         System.Runtime.InteropServices.Marshal.Copy(
                             buffer,
                             row * stride,
@@ -113,7 +113,7 @@
 
                     // Fill in the color palette from the current table.
                     ColorPalette bitmapPalette = bitmap.Palette;
-                    for (int i = 0; i < palette.Length; i++)
+                    for (var i = 0; i < palette.Length; i++)
                         bitmapPalette.Entries[i] = Color.FromArgb(palette[i].ToArgb());
 
                     // Apply transparency.
@@ -160,14 +160,14 @@
         /// <returns>A hash code for the current frame.</returns>
         public static int GetHash(byte[] buffer, RgbColor[] palette, byte? transparentIndex, int width, int height)
         {
-            Argument.EnsureNotNull(buffer, "buffer");
-            Argument.EnsureNotNull(palette, "palette");
+            Argument.EnsureNotNull(buffer, nameof(buffer));
+            Argument.EnsureNotNull(palette, nameof(palette));
 
             // Generate a quick hash just using the raw buffer values. This means some visually identical frames could hash differently if
             // the underlying buffer and color table conspire sufficiently.
-            int hash = Hash.Fnv1A32(buffer);
-            byte[] colorValues = new byte[palette.Length * 3];
-            int i = 0;
+            var hash = Hash.Fnv1A32(buffer);
+            var colorValues = new byte[palette.Length * 3];
+            var i = 0;
             foreach (var color in palette)
             {
                 colorValues[i++] = color.R;
@@ -410,7 +410,7 @@
                 /// <param name="y">The y co-ordinate to set.</param>
                 public void SetPosition(int x, int y)
                 {
-                    int seek = DataBuffer.Seek(x, y);
+                    var seek = DataBuffer.Seek(x, y);
                     if (valuesPerByte == 1)
                     {
                         index = seek;
@@ -443,7 +443,7 @@
                         buffer[index] = value;
                         return;
                     }
-                    buffer[index] &= (byte)(~currentMask);
+                    buffer[index] &= (byte)~currentMask;
                     buffer[index] |= (byte)(value << shift);
                 }
             }
@@ -531,18 +531,18 @@
             public DataBuffer(ushort width, ushort height, byte bitsPerValue, byte initialValue = 0)
             {
                 if (bitsPerValue != 1 && bitsPerValue != 2 && bitsPerValue != 4 && bitsPerValue != 8)
-                    throw new ArgumentOutOfRangeException("bitsPerValue", bitsPerValue, "bitsPerValue may only be 1, 2, 4 or 8.");
+                    throw new ArgumentOutOfRangeException(nameof(bitsPerValue), bitsPerValue, "bitsPerValue may only be 1, 2, 4 or 8.");
 
                 BitsPerValue = bitsPerValue;
 
                 if (initialValue > MaxValue)
-                    throw new ArgumentOutOfRangeException("initialValue", initialValue,
+                    throw new ArgumentOutOfRangeException(nameof(initialValue), initialValue,
                         "initialValue is greater than the largest value that can be stored in the given number of bits (" +
                         MaxValue + ").");
 
                 Width = width;
                 Height = height;
-                Stride = (ushort)Math.Ceiling((Width * BitsPerValue) / 8f);
+                Stride = (ushort)Math.Ceiling(Width * BitsPerValue / 8f);
                 Buffer = new byte[Stride * Height];
 
                 if (initialValue != 0)
@@ -561,8 +561,8 @@
             /// <param name="value">The value to set for each entry in the buffer.</param>
             public void FillBuffer(byte value)
             {
-                byte byteValue = AllValuesInByte(value);
-                for (int i = 0; i < Buffer.Length; i++)
+                var byteValue = AllValuesInByte(value);
+                for (var i = 0; i < Buffer.Length; i++)
                     Buffer[i] = byteValue;
             }
             /// <summary>
@@ -573,7 +573,7 @@
             /// <exception cref="T:System.ArgumentException"><paramref name="bounds"/> extends outside the area of the buffer.</exception>
             public void FillBuffer(byte value, Rectangle bounds)
             {
-                byte byteValue = AllValuesInByte(value);
+                var byteValue = AllValuesInByte(value);
                 FillBuffer(bounds, true, (x, y) => value, i => byteValue);
             }
             /// <summary>
@@ -598,7 +598,7 @@
                 Func<int, int, byte> valueFactory, Func<int, byte> bufferValueFactory)
             {
                 if (!new Rectangle(Point.Empty, new Size(Width, Height)).Contains(bounds))
-                    throw new ArgumentException("Given bounds must not extend outside the area of the buffer.", "bounds");
+                    throw new ArgumentException("Given bounds must not extend outside the area of the buffer.", nameof(bounds));
 
                 // We want to set all the indices within the given area only.
 
@@ -611,9 +611,9 @@
                 // Iterate over each row.
                 // Use SetValue on the left and right edges of the row, when bit twiddling is required.
                 // We can then speed things up by using the contiguous middle region and setting it with our precomputed value.
-                for (int y = bounds.Top; y < bounds.Bottom; y++)
+                for (var y = bounds.Top; y < bounds.Bottom; y++)
                 {
-                    int x = bounds.Left;
+                    var x = bounds.Left;
                     // Set values until we are aligned on a byte
                     while (x % ValuesPerByte != 0 && x < bounds.Right)
                     {
@@ -623,12 +623,12 @@
                     // Set whole bytes along this row.
                     if (x < bounds.Right)
                     {
-                        int rowAlignmentStart = Seek(x, y) / ValuesPerByte;
-                        int rowAlignmentEnd = Seek(bounds.Right, y) / ValuesPerByte - 1;
+                        var rowAlignmentStart = Seek(x, y) / ValuesPerByte;
+                        var rowAlignmentEnd = Seek(bounds.Right, y) / ValuesPerByte - 1;
                         if (fixedValues)
                         {
-                            byte value = bufferValueFactory(0);
-                            for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
+                            var value = bufferValueFactory(0);
+                            for (var i = rowAlignmentStart; i < rowAlignmentEnd; i++)
                             {
                                 Buffer[i] = value;
                                 x += ValuesPerByte;
@@ -636,7 +636,7 @@
                         }
                         else
                         {
-                            for (int i = rowAlignmentStart; i < rowAlignmentEnd; i++)
+                            for (var i = rowAlignmentStart; i < rowAlignmentEnd; i++)
                             {
                                 Buffer[i] = bufferValueFactory(i);
                                 x += ValuesPerByte;
@@ -658,7 +658,7 @@
             /// <returns>A byte with all values in that byte set to the given value.</returns>
             private byte AllValuesInByte(byte value)
             {
-                byte resultValue = value;
+                var resultValue = value;
                 if (BitsPerValue != 8 && value != byte.MinValue && value != byte.MaxValue)
                 {
                     if (BitsPerValue == 4)
@@ -689,18 +689,18 @@
             /// <returns>The value at this location.</returns>
             public byte GetValue(int x, int y)
             {
-                int seek = Seek(x, y);
+                var seek = Seek(x, y);
                 if (ValuesPerByte == 1)
                 {
                     return Buffer[seek];
                 }
                 else
                 {
-                    int index = seek / ValuesPerByte;
-                    int shiftToEdge = 8 - BitsPerValue;
-                    int shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
-                    int lowMask = byte.MaxValue >> shiftToEdge;
-                    int valueShifted = Buffer[index] >> shift;
+                    var index = seek / ValuesPerByte;
+                    var shiftToEdge = 8 - BitsPerValue;
+                    var shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
+                    var lowMask = byte.MaxValue >> shiftToEdge;
+                    var valueShifted = Buffer[index] >> shift;
                     return (byte)(valueShifted & lowMask);
                 }
             }
@@ -713,19 +713,19 @@
             /// <param name="value">The value to set at this location.</param>
             public void SetValue(int x, int y, byte value)
             {
-                int seek = Seek(x, y);
+                var seek = Seek(x, y);
                 if (ValuesPerByte == 1)
                 {
                     Buffer[seek] = value;
                 }
                 else
                 {
-                    int index = seek / ValuesPerByte;
-                    int shiftToEdge = 8 - BitsPerValue;
-                    int shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
-                    int lowMask = byte.MaxValue >> shiftToEdge;
-                    int mask = ~(lowMask << shift);
-                    int valueShifted = value << shift;
+                    var index = seek / ValuesPerByte;
+                    var shiftToEdge = 8 - BitsPerValue;
+                    var shift = shiftToEdge - BitsPerValue * (seek % ValuesPerByte);
+                    var lowMask = byte.MaxValue >> shiftToEdge;
+                    var mask = ~(lowMask << shift);
+                    var valueShifted = value << shift;
                     Buffer[index] &= (byte)mask;
                     Buffer[index] |= (byte)valueShifted;
                 }
@@ -751,11 +751,11 @@
                 if (BitsPerValue == 8)
                     throw new InvalidOperationException("The BitsPerValue for the buffer is already at its maximum of 8.");
 
-                byte newBitsPerValue = (byte)(BitsPerValue * 2);
-                DataBuffer newDataBuffer = new DataBuffer(Width, Height, newBitsPerValue);
+                var newBitsPerValue = (byte)(BitsPerValue * 2);
+                var newDataBuffer = new DataBuffer(Width, Height, newBitsPerValue);
 
-                for (int y = 0; y < Height; y++)
-                    for (int x = 0; x < Width; x++)
+                for (var y = 0; y < Height; y++)
+                    for (var x = 0; x < Width; x++)
                         newDataBuffer.SetValue(x, y, GetValue(x, y));
 
                 BitsPerValue = newBitsPerValue;
@@ -785,16 +785,16 @@
                 if (ValuesPerByte == 1)
                 {
                     // Values are byte aligned.
-                    for (int i = 0; i < Buffer.Length; i++)
+                    for (var i = 0; i < Buffer.Length; i++)
                         yield return Buffer[i];
                 }
                 else if (Stride == Width)
                 {
                     // Values are packed, and so must be unpacked.
-                    byte mask = (byte)(0xFF >> 8 - BitsPerValue);
-                    for (int i = 0; i < Buffer.Length; i++)
+                    var mask = (byte)(0xFF >> 8 - BitsPerValue);
+                    for (var i = 0; i < Buffer.Length; i++)
                     {
-                        byte value = Buffer[i];
+                        var value = Buffer[i];
                         for (byte valueInByte = 0; valueInByte < ValuesPerByte; valueInByte++)
                         {
                             yield return (byte)(value & mask);
@@ -805,12 +805,12 @@
                 else
                 {
                     // Values are packed, and we must account for some padding at the end of each row which should be skipped.
-                    int x = 0;
-                    int y = 0;
-                    byte mask = (byte)(0xFF >> 8 - BitsPerValue);
-                    for (int i = 0; i < Buffer.Length; i++)
+                    var x = 0;
+                    var y = 0;
+                    var mask = (byte)(0xFF >> 8 - BitsPerValue);
+                    for (var i = 0; i < Buffer.Length; i++)
                     {
-                        byte value = Buffer[i];
+                        var value = Buffer[i];
                         for (byte valueInByte = 0; valueInByte < ValuesPerByte; valueInByte++)
                         {
                             yield return (byte)(value & mask);
@@ -1313,13 +1313,13 @@
         /// file.</exception>
         public GifDecoder(Stream stream, BufferToImage<T> imageFactory, BitDepths allowableDepths)
         {
-            Argument.EnsureNotNull(stream, "stream");
-            Argument.EnsureNotNull(imageFactory, "imageFactory");
-            Argument.EnsureEnumIsValid(allowableDepths, "allowableDepths");
+            Argument.EnsureNotNull(stream, nameof(stream));
+            Argument.EnsureNotNull(imageFactory, nameof(imageFactory));
+            Argument.EnsureEnumIsValid(allowableDepths, nameof(allowableDepths));
             if (!stream.CanRead)
-                throw new ArgumentException("stream must support reading.", "stream");
+                throw new ArgumentException("stream must support reading.", nameof(stream));
             if (!allowableDepths.HasFlag(BitDepths.Indexed8Bpp))
-                throw new ArgumentException("allowableDepths must support at least the Indexed8Bpp format.", "allowableDepths");
+                throw new ArgumentException("allowableDepths must support at least the Indexed8Bpp format.", nameof(allowableDepths));
 
             createFrame = imageFactory;
             validDepths = allowableDepths;
@@ -1345,7 +1345,7 @@
             {
                 // Create the initial buffers.
                 DetermineTransparentIndexes();
-                byte targetBpp = TargetBitsPerPixel(colorTable.Length);
+                var targetBpp = TargetBitsPerPixel(colorTable.Length);
                 frameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
                 previousFrameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
             }
@@ -1363,8 +1363,8 @@
         /// </returns>
         private RgbColor[] ReadColorTable(int colorCount)
         {
-            RgbColor[] colors = new RgbColor[colorCount];
-            for (int i = 0; i < colors.Length; i++)
+            var colors = new RgbColor[colorCount];
+            for (var i = 0; i < colors.Length; i++)
                 colors[i] = new RgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
             return colors;
         }
@@ -1376,9 +1376,9 @@
             // Find a pair of indexes in the color table with the same lookup value.
             // Start from the end of the table, since that's usually where all the uninitialized values live. Usually this means the loop
             // will return in the first iteration.
-            bool found = false;
-            for (int i = colorTable.Length - 1; i >= 1 && !found; i--)
-                for (int j = i - 1; j >= 0 && !found; j--)
+            var found = false;
+            for (var i = colorTable.Length - 1; i >= 1 && !found; i--)
+                for (var j = i - 1; j >= 0 && !found; j--)
                     if (colorTable[i] == colorTable[j])
                     {
                         imageTransparentIndex = (byte)i;
@@ -1391,7 +1391,7 @@
                 // There were no duplicate indexes. But there is room to make the color table bigger and use the extra slot.
                 if (colorTable.Length != 256)
                 {
-                    RgbColor[] newTable = new RgbColor[colorTable.Length + 1];
+                    var newTable = new RgbColor[colorTable.Length + 1];
                     Array.Copy(colorTable, newTable, colorTable.Length);
                     colorTable = newTable;
                 }
@@ -1413,7 +1413,7 @@
         /// </exception>
         private byte TargetBitsPerPixel(int colorCount)
         {
-            byte minBbp = (byte)Math.Ceiling(Math.Log(colorCount, 2));
+            var minBbp = (byte)Math.Ceiling(Math.Log(colorCount, 2));
             byte candidateBbp = 1;
             while (candidateBbp < minBbp || (candidateBbp & (int)validDepths) == 0)
             {
@@ -1430,7 +1430,7 @@
         {
             int oldImageTransparentIndex = imageTransparentIndex;
             DetermineTransparentIndexes();
-            byte targetBpp = TargetBitsPerPixel(colorTable.Length);
+            var targetBpp = TargetBitsPerPixel(colorTable.Length);
 
             // Ensure the buffers can handle the new table size.
             while (frameBuffer.BitsPerValue < targetBpp)
@@ -1440,8 +1440,8 @@
 
             // Remap any old transparent indexes to their new values.
             if (oldImageTransparentIndex != imageTransparentIndex)
-                for (int x = 0; x < frameBuffer.Width; x++)
-                    for (int y = 0; y < frameBuffer.Height; y++)
+                for (var x = 0; x < frameBuffer.Width; x++)
+                    for (var y = 0; y < frameBuffer.Height; y++)
                     {
                         if (frameBuffer.GetValue(x, y) == oldImageTransparentIndex)
                             frameBuffer.SetValue(x, y, imageTransparentIndex);
@@ -1475,12 +1475,12 @@
         private void ReadHeader()
         {
             const string SignatureExpected = "GIF";
-            string signature = new string(reader.ReadCharsExact(3));
+            var signature = new string(reader.ReadCharsExact(3));
             if (signature != SignatureExpected)
                 throw new InvalidDataException(
                     "Invalid signature in header. Expected '{0}'. Read '{1}'.".FormatWith(SignatureExpected, signature));
 
-            string version = new string(reader.ReadCharsExact(3));
+            var version = new string(reader.ReadCharsExact(3));
             if (!char.IsDigit(version, 0) || !char.IsDigit(version, 1) || !char.IsLetter(version, 2))
                 throw new InvalidDataException("Invalid version in header. Read '{0}'.".FormatWith(version));
         }
@@ -1502,17 +1502,17 @@
         /// </returns>
         private LogicalScreenDescriptor ReadLogicalScreenDescriptor()
         {
-            ushort logicalScreenWidth = reader.ReadUInt16();
-            ushort logicalScreenHeight = reader.ReadUInt16();
+            var logicalScreenWidth = reader.ReadUInt16();
+            var logicalScreenHeight = reader.ReadUInt16();
 
-            byte packedFields = reader.ReadByte();
-            bool globalColorTableFlag = (packedFields & 0x80) != 0;
-            byte colorResolution = (byte)(((packedFields & 0x70) >> 4) + 1);
-            bool sortFlag = (packedFields & 0x08) >> 3 == 1;
-            int globalBitsPerPixel = (packedFields & 0x07) + 1;
-            int sizeOfGlobalColorTable = 1 << globalBitsPerPixel;
-            byte backgroundColorIndex = reader.ReadByte();
-            byte pixelAspectRatio = reader.ReadByte();
+            var packedFields = reader.ReadByte();
+            var globalColorTableFlag = (packedFields & 0x80) != 0;
+            var colorResolution = (byte)(((packedFields & 0x70) >> 4) + 1);
+            var sortFlag = (packedFields & 0x08) >> 3 == 1;
+            var globalBitsPerPixel = (packedFields & 0x07) + 1;
+            var sizeOfGlobalColorTable = 1 << globalBitsPerPixel;
+            var backgroundColorIndex = reader.ReadByte();
+            var pixelAspectRatio = reader.ReadByte();
 
             return new LogicalScreenDescriptor(logicalScreenWidth, logicalScreenHeight, globalColorTableFlag, colorResolution,
                 sortFlag, sizeOfGlobalColorTable, backgroundColorIndex, pixelAspectRatio);
@@ -1552,7 +1552,7 @@
                         ReadTableBasedImage(null);
                         break;
                     case BlockCode.Extension:
-                        ExtensionLabel extensionLabel = (ExtensionLabel)reader.ReadByte();
+                        var extensionLabel = (ExtensionLabel)reader.ReadByte();
                         switch (extensionLabel)
                         {
                             case ExtensionLabel.GraphicControl:
@@ -1585,7 +1585,7 @@
             // <Table-Based Image> ::= Image Descriptor [Local Color Table] Image Data
             GraphicControlExtension graphicControl = ReadGraphicControlExtension();
 
-            BlockCode blockCode = (BlockCode)reader.ReadByte();
+            var blockCode = (BlockCode)reader.ReadByte();
             ExtensionLabel extensionLabel = ExtensionLabel.GraphicControl;
             if (blockCode == BlockCode.Extension)
             {
@@ -1640,13 +1640,13 @@
             if (reader.ReadByte() != 4)
                 throw new InvalidDataException("Unexpected block length for a graphic control extension.");
 
-            byte packedFields = reader.ReadByte();
-            DisposalMethod disposalMethod = (DisposalMethod)((packedFields & 0x1C) >> 2);
-            bool userInputFlag = (packedFields & 0x02) != 0;
-            bool transparencyFlag = (packedFields & 0x01) != 0;
+            var packedFields = reader.ReadByte();
+            var disposalMethod = (DisposalMethod)((packedFields & 0x1C) >> 2);
+            var userInputFlag = (packedFields & 0x02) != 0;
+            var transparencyFlag = (packedFields & 0x01) != 0;
 
-            ushort delayTime = reader.ReadUInt16();
-            byte transparentColorIndex = reader.ReadByte();
+            var delayTime = reader.ReadUInt16();
+            var transparentColorIndex = reader.ReadByte();
 
             // Read block terminator.
             reader.ReadByte();
@@ -1662,8 +1662,8 @@
             if (reader.ReadByte() != 11)
                 throw new InvalidDataException("Unexpected block length for an application extension.");
 
-            string applicationIdentifier = new string(reader.ReadCharsExact(8));
-            string applicationAuthenticationCode = new string(reader.ReadCharsExact(3));
+            var applicationIdentifier = new string(reader.ReadCharsExact(8));
+            var applicationAuthenticationCode = new string(reader.ReadCharsExact(3));
 
             if (applicationIdentifier == "NETSCAPE" && applicationAuthenticationCode == "2.0")
                 ReadNetscapeApplicationExtension();
@@ -1707,7 +1707,7 @@
         private void SkipExtensionBlock()
         {
             // Read block size.
-            byte blockSize = reader.ReadByte();
+            var blockSize = reader.ReadByte();
 
             if (blockSize == 0)
                 return;
@@ -1724,17 +1724,17 @@
         /// <returns>A new <see cref="T:DesktopSprites.SpriteManagement.GifDecoder`1.ImageDescriptor"/> describing the subframe.</returns>
         private ImageDescriptor ReadImageDescriptor()
         {
-            ushort imageLeftPosition = reader.ReadUInt16();
-            ushort imageTopPosition = reader.ReadUInt16();
-            ushort imageWidth = reader.ReadUInt16();
-            ushort imageHeight = reader.ReadUInt16();
+            var imageLeftPosition = reader.ReadUInt16();
+            var imageTopPosition = reader.ReadUInt16();
+            var imageWidth = reader.ReadUInt16();
+            var imageHeight = reader.ReadUInt16();
 
-            byte packedFields = reader.ReadByte();
-            bool localColorTableFlag = (packedFields & 0x80) != 0;
-            bool interlaceFlag = (packedFields & 0x40) != 0;
-            bool sortFlag = (packedFields & 0x20) != 0;
-            int localBitsPerPixel = (packedFields & 0x07) + 1;
-            int sizeOfLocalColorTable = 1 << localBitsPerPixel;
+            var packedFields = reader.ReadByte();
+            var localColorTableFlag = (packedFields & 0x80) != 0;
+            var interlaceFlag = (packedFields & 0x40) != 0;
+            var sortFlag = (packedFields & 0x20) != 0;
+            var localBitsPerPixel = (packedFields & 0x07) + 1;
+            var sizeOfLocalColorTable = 1 << localBitsPerPixel;
 
             return new ImageDescriptor(imageLeftPosition, imageTopPosition, imageWidth, imageHeight,
                 localColorTableFlag, interlaceFlag, sortFlag, sizeOfLocalColorTable);
@@ -1748,7 +1748,7 @@
         {
             // <Table-Based Image> ::= Image Descriptor [Local Color Table] Image Data
             ImageDescriptor imageDescriptor = ReadImageDescriptor();
-            Rectangle frame = new Rectangle(Point.Empty, Size);
+            var frame = new Rectangle(Point.Empty, Size);
             if (!frame.Contains(imageDescriptor.Subframe))
                 throw new InvalidDataException("Subframe area extends outside the logical screen area.");
             if (frame == imageDescriptor.Subframe && (graphicControl == null || !graphicControl.TransparencyUsed))
@@ -1770,7 +1770,7 @@
                 // No color tables have been defined. The image might be all-transparent. Set up a minimal buffer to start.
                 imageTransparentIndex = 0;
                 imageTransparentIndexRemap = 0;
-                byte targetBpp = TargetBitsPerPixel(1);
+                var targetBpp = TargetBitsPerPixel(1);
                 frameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
                 previousFrameBuffer = new DataBuffer(Width, Height, targetBpp, imageTransparentIndex);
             }
@@ -1819,42 +1819,42 @@
         /// how the value from the subframe is to be applied. This is optional.</param>
         private void ReadImageData(ImageDescriptor imageDescriptor, GraphicControlExtension graphicControl)
         {
-            byte lzwMinimumCodeSize = reader.ReadByte();
+            var lzwMinimumCodeSize = reader.ReadByte();
 
             #region Initialize decoder.
             // Image pixel position data.
-            int left = imageDescriptor.Subframe.Left;
-            int top = imageDescriptor.Subframe.Top;
+            var left = imageDescriptor.Subframe.Left;
+            var top = imageDescriptor.Subframe.Top;
             // Iterator that will allow the subframe region to be traversed efficiently.
             DataBuffer.Iterator iterator = frameBuffer.GetIterator(left, top);
             // Index used for the transparent pixel, or -1 is transparency is not in use.
-            int transparentIndex = graphicControl != null && graphicControl.TransparencyUsed ? graphicControl.TransparentIndex : -1;
+            var transparentIndex = graphicControl != null && graphicControl.TransparencyUsed ? graphicControl.TransparentIndex : -1;
             // Interlacing fields.
-            int interlacePass = 1;
-            int yIncrement = imageDescriptor.Interlaced ? 8 : 1;
+            var interlacePass = 1;
+            var yIncrement = imageDescriptor.Interlaced ? 8 : 1;
 
             // This array is used as a stack to store resulting pixel values. These values are the indexes in the color palette.
-            byte[] pixelStack = new byte[MaxCodeWords];
+            var pixelStack = new byte[MaxCodeWords];
             // Variable for the next available index in the stack.
-            int stackIndex = 0;
+            var stackIndex = 0;
 
             // Dictionary maintaining codewords.
-            LzwDictionary dictionary = new LzwDictionary(lzwMinimumCodeSize);
+            var dictionary = new LzwDictionary(lzwMinimumCodeSize);
             // The size of codes being read in, in bits.
-            int codeSize = lzwMinimumCodeSize + 1;
+            var codeSize = lzwMinimumCodeSize + 1;
             // The mask used to get the current code from the bit buffer.
-            int codeMask = (1 << codeSize) - 1;
+            var codeMask = (1 << codeSize) - 1;
 
             // Variables managing the data block buffer from which data is read in.
-            int bitsBuffered = 0;
-            int bitBuffer = 0;
-            int blockIndex = 0;
-            int bytesLeftInBlock = 0;
+            var bitsBuffered = 0;
+            var bitBuffer = 0;
+            var blockIndex = 0;
+            var bytesLeftInBlock = 0;
             #endregion
 
             #region Decode GIF pixel stream.
-            bool skipDataSubBlocks = true;
-            bool subframeComplete = false;
+            var skipDataSubBlocks = true;
+            var subframeComplete = false;
             while (true)
             {
                 // Buffer enough bits to read a code.
@@ -1866,7 +1866,7 @@
                 }
 
                 // Get the next code from our bit buffer.
-                short code = (short)(bitBuffer & codeMask);
+                var code = (short)(bitBuffer & codeMask);
                 bitBuffer >>= codeSize;
                 bitsBuffered -= codeSize;
 
@@ -1959,11 +1959,11 @@
             ImageDescriptor imageDescriptor, ref int left, ref int top, ref int interlacePass, ref int yIncrement,
             DataBuffer.Iterator iterator, int transparentIndex)
         {
-            int right = imageDescriptor.Subframe.Right;
+            var right = imageDescriptor.Subframe.Right;
             while (stackIndex > 0)
             {
                 // Apply pixel to our buffers.
-                byte pixel = pixelStack[--stackIndex];
+                var pixel = pixelStack[--stackIndex];
                 if (pixel != transparentIndex)
                     ApplyPixelToFrame(iterator, pixel);
 
@@ -1981,7 +1981,7 @@
                     iterator.SetPosition(left, top);
 
                     // If we reached the end of this interlacing pass, go back to the top and fill in every row between the current rows.
-                    int bottom = imageDescriptor.Subframe.Bottom;
+                    var bottom = imageDescriptor.Subframe.Bottom;
                     if (imageDescriptor.Interlaced && top >= bottom)
                     {
                         #region Choose next interlacing line.
@@ -2052,7 +2052,7 @@
         private void CreateFrame(GraphicControlExtension graphicControl)
         {
             // Make a copy of the current frame buffer and color table, since we'll be reusing those arrays for later frames.
-            byte[] bufferCopy = new byte[frameBuffer.Buffer.Length];
+            var bufferCopy = new byte[frameBuffer.Buffer.Length];
             Array.Copy(frameBuffer.Buffer, bufferCopy, frameBuffer.Buffer.Length);
             RgbColor[] tableCopy;
             if (colorTable != null)
@@ -2066,12 +2066,12 @@
             }
 
             // Create the frame image, and then the frame itself.
-            byte? frameTransparentIndex = anyTransparencyUsed ? imageTransparentIndex : (byte?)null;
+            var frameTransparentIndex = anyTransparencyUsed ? imageTransparentIndex : (byte?)null;
             T frame =
                 createFrame(bufferCopy, tableCopy, frameTransparentIndex,
                 frameBuffer.Stride, frameBuffer.Width, frameBuffer.Height, frameBuffer.BitsPerValue);
-            int delay = graphicControl != null ? graphicControl.Delay : 0;
-            GifFrame<T> newFrame = new GifFrame<T>(frame, delay, tableCopy, frameTransparentIndex);
+            var delay = graphicControl != null ? graphicControl.Delay : 0;
+            var newFrame = new GifFrame<T>(frame, delay, tableCopy, frameTransparentIndex);
             frames.Add(newFrame);
             Duration += newFrame.Duration;
         }
@@ -2129,8 +2129,8 @@
         /// <returns>A copy of the color table used for the image.</returns>
         public ArgbColor[] GetColorTable()
         {
-            ArgbColor[] colors = new ArgbColor[ColorTableSize];
-            for (int i = 0; i < ColorTableSize; i++)
+            var colors = new ArgbColor[ColorTableSize];
+            for (var i = 0; i < ColorTableSize; i++)
                 colors[i] = new ArgbColor(255, colorTable[i]);
 
             if (transparentIndex != null)

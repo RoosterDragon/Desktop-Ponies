@@ -18,8 +18,8 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="v"/> is null.</exception>
         public static string ToDisplayString(this Version v)
         {
-            Argument.EnsureNotNull(v, "v");
-            int fieldCount = 1;
+            Argument.EnsureNotNull(v, nameof(v));
+            var fieldCount = 1;
             if (v.Revision > 0)
                 fieldCount = 4;
             else if (v.Build > 0)

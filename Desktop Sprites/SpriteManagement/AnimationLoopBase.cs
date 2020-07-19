@@ -226,7 +226,7 @@
                 public DebugView(ConcurrentReadOnlySpriteCollection concurrentReadOnlySpriteCollection)
                 {
                     this.concurrentReadOnlySpriteCollection =
-                        Argument.EnsureNotNull(concurrentReadOnlySpriteCollection, "concurrentReadOnlySpriteCollection");
+                        Argument.EnsureNotNull(concurrentReadOnlySpriteCollection, nameof(concurrentReadOnlySpriteCollection));
                 }
 
                 /// <summary>
@@ -238,7 +238,7 @@
                     get
                     {
                         var sprites = concurrentReadOnlySpriteCollection.animationLoopBase.sprites;
-                        ISprite[] items = new ISprite[sprites.Count];
+                        var items = new ISprite[sprites.Count];
                         sprites.CopyTo(items, 0);
                         return items;
                     }
@@ -397,8 +397,8 @@
             {
                 get
                 {
-                    float minTime = float.MaxValue;
-                    for (int i = 0; i < Count; i++)
+                    var minTime = float.MaxValue;
+                    for (var i = 0; i < Count; i++)
                         if (frameRecords[i].Time < minTime)
                             minTime = frameRecords[i].Time;
                     return Count != 0 ? minTime : 0;
@@ -412,7 +412,7 @@
                 get
                 {
                     float sumTimes = 0;
-                    for (int i = 0; i < Count; i++)
+                    for (var i = 0; i < Count; i++)
                         sumTimes += frameRecords[i].Time;
                     return Count != 0 ? sumTimes / Count : 0;
                 }
@@ -424,8 +424,8 @@
             {
                 get
                 {
-                    float maxTime = float.MinValue;
-                    for (int i = 0; i < Count; i++)
+                    var maxTime = float.MinValue;
+                    for (var i = 0; i < Count; i++)
                         if (frameRecords[i].Time > maxTime)
                             maxTime = frameRecords[i].Time;
                     return Count != 0 ? maxTime : 0;
@@ -439,8 +439,8 @@
             {
                 get
                 {
-                    float minInterval = float.MaxValue;
-                    for (int i = 0; i < Count; i++)
+                    var minInterval = float.MaxValue;
+                    for (var i = 0; i < Count; i++)
                         if (frameRecords[i].Interval < minInterval)
                             minInterval = frameRecords[i].Interval;
                     return Count != 0 ? minInterval : 0;
@@ -454,7 +454,7 @@
                 get
                 {
                     float sumIntervals = 0;
-                    for (int i = 0; i < Count; i++)
+                    for (var i = 0; i < Count; i++)
                         sumIntervals += frameRecords[i].Interval;
                     return Count != 0 ? sumIntervals / Count : 0;
                 }
@@ -466,8 +466,8 @@
             {
                 get
                 {
-                    float maxInterval = float.MinValue;
-                    for (int i = 0; i < Count; i++)
+                    var maxInterval = float.MinValue;
+                    for (var i = 0; i < Count; i++)
                         if (frameRecords[i].Interval > maxInterval)
                             maxInterval = frameRecords[i].Interval;
                     return Count != 0 ? maxInterval : 0;
@@ -558,7 +558,7 @@
             public void DrawGraph(Graphics surface)
             {
                 // Determine the bar height scale, this will adjust if the max time is too high to fit on the graph.
-                float barHeightScale = barHeightFactor;
+                var barHeightScale = barHeightFactor;
                 float height = graphArea.Height - 2;
                 if (MaxTime != 0 && MaxInterval != 0)
                     barHeightScale = Math.Min(barHeightFactor, Math.Min(height / MaxTime, height / MaxInterval));
@@ -569,10 +569,10 @@
                     surface.FillRectangle(graphBackgroundBrush, graphArea);
 
                 // Start at the oldest record.
-                int barOffset = frameRecords.Length - Count;
-                int m = barOffset == 0 ? marker : 0;
+                var barOffset = frameRecords.Length - Count;
+                var m = barOffset == 0 ? marker : 0;
                 // Iterate through the records and draw each target, time and interval.
-                for (int i = 0; i < Count; i++)
+                for (var i = 0; i < Count; i++)
                 {
                     // Determine bar color by comparing this record with the previous record.
                     // The first bar has no previous record, so just get the default color.
@@ -586,10 +586,10 @@
                             frameRecords[m], frameRecords[m != 0 ? m - 1 : Count - 1]);
 
                     // Determine bar sizes.
-                    float targetHeight = frameRecords[m].Target * barHeightScale;
-                    float timeHeight = frameRecords[m].Time * barHeightScale;
-                    float intervalHeight = frameRecords[m].Interval * barHeightScale;
-                    int barLeft = graphArea.Left + 1 + barOffset + i * barWidth;
+                    var targetHeight = frameRecords[m].Target * barHeightScale;
+                    var timeHeight = frameRecords[m].Time * barHeightScale;
+                    var intervalHeight = frameRecords[m].Interval * barHeightScale;
+                    var barLeft = graphArea.Left + 1 + barOffset + i * barWidth;
 
                     // Draw the bars.
                     surface.FillRectangle(
@@ -605,19 +605,19 @@
                 }
 
                 // Draw the mean interval time.
-                int meanIntervalHeight = graphArea.Bottom - 1 - (int)(MeanInterval * barHeightScale);
+                var meanIntervalHeight = graphArea.Bottom - 1 - (int)(MeanInterval * barHeightScale);
                 surface.DrawLine(Pens.DarkGray, graphArea.Left + 1, meanIntervalHeight, graphArea.Right - 2, meanIntervalHeight);
 
                 // Draw the mean frame time.
-                int meanTimeHeight = graphArea.Bottom - 1 - (int)(MeanTime * barHeightScale);
+                var meanTimeHeight = graphArea.Bottom - 1 - (int)(MeanTime * barHeightScale);
                 surface.DrawLine(Pens.LightGray, graphArea.Left + 1, meanTimeHeight, graphArea.Right - 2, meanTimeHeight);
 
                 // Draw axis markers.
-                int markerThickness = barHeightScale < .5f ? 1 : 2;
-                for (int i = 0; i <= (graphArea.Height - 1) / barHeightScale; i += 10)
+                var markerThickness = barHeightScale < .5f ? 1 : 2;
+                for (var i = 0; i <= (graphArea.Height - 1) / barHeightScale; i += 10)
                 {
-                    int markerLineHeight = graphArea.Bottom - 1 - (int)(i * barHeightScale);
-                    int markerWidth = i % 50 == 0 ? 12 : 4;
+                    var markerLineHeight = graphArea.Bottom - 1 - (int)(i * barHeightScale);
+                    var markerWidth = i % 50 == 0 ? 12 : 4;
                     surface.FillRectangle(Brushes.Cyan, graphArea.Left + 1, markerLineHeight - 1, markerWidth, markerThickness);
                 }
             }
@@ -630,7 +630,7 @@
                 context.Save();
 
                 // Determine the bar height scale, this will adjust if the max time is too high to fit on the graph.
-                float barHeightScale = barHeightFactor;
+                var barHeightScale = barHeightFactor;
                 float height = graphArea.Height - 2;
                 if (MaxTime != 0 && MaxInterval != 0)
                     barHeightScale = Math.Min(barHeightFactor, Math.Min(height / MaxTime, height / MaxInterval));
@@ -642,10 +642,10 @@
                 context.Fill();
 
                 // Start at the oldest record.
-                int barOffset = frameRecords.Length - Count;
-                int m = barOffset == 0 ? marker : 0;
+                var barOffset = frameRecords.Length - Count;
+                var m = barOffset == 0 ? marker : 0;
                 // Iterate through the records and draw each target, time and interval.
-                for (int i = 0; i < Count; i++)
+                for (var i = 0; i < Count; i++)
                 {
                     // Determine bar color by comparing this record with the previous record.
                     // The first bar has no previous record, so just get the default color.
@@ -659,10 +659,10 @@
                             frameRecords[m], frameRecords[m != 0 ? m - 1 : Count - 1]);
 
                     // Determine bar sizes.
-                    float targetHeight = frameRecords[m].Target * barHeightScale;
-                    float timeHeight = frameRecords[m].Time * barHeightScale;
-                    float intervalHeight = frameRecords[m].Interval * barHeightScale;
-                    int barLeft = graphArea.Left + 1 + barOffset + i * barWidth;
+                    var targetHeight = frameRecords[m].Target * barHeightScale;
+                    var timeHeight = frameRecords[m].Time * barHeightScale;
+                    var intervalHeight = frameRecords[m].Interval * barHeightScale;
+                    var barLeft = graphArea.Left + 1 + barOffset + i * barWidth;
 
                     // Draw the bars.
                     context.SetSourceRGB(0.5, 0.5, 0.5);
@@ -697,7 +697,7 @@
                 context.LineWidth = 1;
 
                 // Draw the mean interval time.
-                int meanIntervalHeight = graphArea.Bottom - 1 - (int)(MeanInterval * barHeightScale);
+                var meanIntervalHeight = graphArea.Bottom - 1 - (int)(MeanInterval * barHeightScale);
                 context.SetSourceRGB(0.3, 0.3, 0.3);
                 context.MoveTo(graphArea.Left + 1, meanIntervalHeight);
                 context.LineTo(graphArea.Right - 2, meanIntervalHeight);
@@ -706,7 +706,7 @@
                 context.Fill();
 
                 // Draw the mean frame time.
-                int meanTimeHeight = graphArea.Bottom - 1 - (int)(MeanTime * barHeightScale);
+                var meanTimeHeight = graphArea.Bottom - 1 - (int)(MeanTime * barHeightScale);
                 context.SetSourceRGB(0.7, 0.7, 0.7);
                 context.MoveTo(graphArea.Left + 1, meanTimeHeight);
                 context.LineTo(graphArea.Right - 2, meanTimeHeight);
@@ -715,12 +715,12 @@
                 context.Fill();
 
                 // Draw axis markers.
-                int markerThickness = barHeightScale < .5f ? 1 : 2;
+                var markerThickness = barHeightScale < .5f ? 1 : 2;
                 context.SetSourceRGB(0.5, 1, 1);
-                for (int i = 0; i <= (graphArea.Height - 1) / barHeightScale; i += 10)
+                for (var i = 0; i <= (graphArea.Height - 1) / barHeightScale; i += 10)
                 {
-                    int markerLineHeight = graphArea.Bottom - 1 - (int)(i * barHeightScale);
-                    int markerWidth = i % 50 == 0 ? 12 : 4;
+                    var markerLineHeight = graphArea.Bottom - 1 - (int)(i * barHeightScale);
+                    var markerWidth = i % 50 == 0 ? 12 : 4;
                     context.Rectangle(
                     new Cairo.Rectangle(graphArea.Left + 1, markerLineHeight - 1, markerWidth, markerThickness));
                     context.Fill();
@@ -851,8 +851,8 @@
             }
             set
             {
-                Argument.EnsurePositive(value, "value");
-                Argument.EnsureLessThanOrEqualTo(value, "value", 120);
+                Argument.EnsurePositive(value, nameof(value));
+                Argument.EnsureLessThanOrEqualTo(value, nameof(value), 120);
                 minimumTickInterval = 1000f / value;
             }
         }
@@ -889,9 +889,9 @@
         /// <exception cref="T:System.ArgumentException"><paramref name="spriteViewer"/> is disposed.</exception>
         protected AnimationLoopBase(ISpriteCollectionView spriteViewer, IEnumerable<ISprite> spriteCollection)
         {
-            Argument.EnsureNotNull(spriteViewer, "spriteViewer");
+            Argument.EnsureNotNull(spriteViewer, nameof(spriteViewer));
             if (spriteViewer.Disposed)
-                throw new ArgumentException("spriteViewer must not be disposed.", "spriteViewer");
+                throw new ArgumentException("spriteViewer must not be disposed.", nameof(spriteViewer));
 
             Viewer = spriteViewer;
 
@@ -907,7 +907,7 @@
                 sprites = new LinkedList<ISprite>(spriteCollection);
             Sprites = new ConcurrentReadOnlySpriteCollection(this);
 
-            string collectionType = "(empty collection)";
+            var collectionType = "(empty collection)";
             if (spriteCollection != null)
                 collectionType = spriteCollection.GetType().ToString();
 
@@ -931,7 +931,7 @@
             Console.WriteLine(GetType() + " is starting an animation loop...");
             Interlocked.Exchange(ref runner, new Thread(Run) { Name = "AnimationLoopBase.Run" });
             Viewer.Open();
-            object startSync = new object();
+            var startSync = new object();
             lock (startSync)
             {
                 runner.Start(startSync);
@@ -991,7 +991,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprite"/> is null.</exception>
         protected void QueueAddAndStart(ISprite sprite)
         {
-            Argument.EnsureNotNull(sprite, "sprite");
+            Argument.EnsureNotNull(sprite, nameof(sprite));
             queuedSpriteActions.Enqueue(() =>
             {
                 sprites.AddLast(sprite);
@@ -1007,7 +1007,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprites"/> is null.</exception>
         protected void QueueAddRangeAndStart(IEnumerable<ISprite> sprites)
         {
-            Argument.EnsureNotNull(sprites, "sprites");
+            Argument.EnsureNotNull(sprites, nameof(sprites));
             if (!sprites.Any())
                 return;
             var items = sprites.ToImmutableArray();
@@ -1036,7 +1036,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="sprite"/> is null.</exception>
         protected void QueueRemove(ISprite sprite)
         {
-            Argument.EnsureNotNull(sprite, "sprite");
+            Argument.EnsureNotNull(sprite, nameof(sprite));
             queuedSpriteActions.Enqueue(() =>
             {
                 if (sprites.Remove(sprite))
@@ -1053,7 +1053,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="predicate"/> is null.</exception>
         protected void QueueRemove(Predicate<ISprite> predicate)
         {
-            Argument.EnsureNotNull(predicate, "predicate");
+            Argument.EnsureNotNull(predicate, nameof(predicate));
             queuedSpriteActions.Enqueue(() =>
             {
                 var spritesRemoved = SpritesRemoved;
@@ -1145,7 +1145,7 @@
         private void Run(object startSync)
         {
             // Keeps a count of frames since performance information was last displayed.
-            int performanceDelayCount = 0;
+            var performanceDelayCount = 0;
 
             // Loop whilst not disposed, paused or stopped.
             while (!Disposed && running.WaitOne() && !Stopped)
@@ -1179,16 +1179,16 @@
                     frameLostTime += tickElapsed - TimeSpan.FromMilliseconds(frameTime);
                 }
 #else
-                float frameTime = (float)(elapsedWatch.Elapsed - ElapsedTime).TotalMilliseconds;
+                var frameTime = (float)(elapsedWatch.Elapsed - ElapsedTime).TotalMilliseconds;
 #endif
 
                 // Sleep until the next tick should start.
-                float nextInterval = minimumTickInterval - frameTime;
+                var nextInterval = minimumTickInterval - frameTime;
                 if (nextInterval > 0)
                     Thread.Sleep((int)Math.Ceiling(nextInterval));
 
                 // Track interval timings.
-                float intervalTime = (float)intervalWatch.Elapsed.TotalMilliseconds;
+                var intervalTime = (float)intervalWatch.Elapsed.TotalMilliseconds;
                 intervalWatch.Restart();
 
                 // Record the timings and display performance summary occasionally.

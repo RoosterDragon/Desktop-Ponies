@@ -17,17 +17,17 @@
     {
         public static void Main()
         {
-            string dpVersion = FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(typeof(DesktopPonies.Direction)).Location).FileVersion;
+            var dpVersion = FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(typeof(DesktopPonies.Direction)).Location).FileVersion;
             Console.WriteLine("Current version of Desktop Ponies is " + dpVersion);
 
-            string toolDirectory = Environment.CurrentDirectory;
-            string solutionDirectory = toolDirectory.Remove(toolDirectory.IndexOf("Release Tool"));
-            string contentDirectory = Path.Combine(solutionDirectory, "Content");
-            string releaseDirectory = Path.Combine(solutionDirectory, "Desktop Ponies", "bin", "Release");
+            var toolDirectory = Environment.CurrentDirectory;
+            var solutionDirectory = toolDirectory.Remove(toolDirectory.IndexOf("Release Tool"));
+            var contentDirectory = Path.Combine(solutionDirectory, "Content");
+            var releaseDirectory = Path.Combine(solutionDirectory, "Desktop Ponies", "bin", "Release");
 
             Environment.CurrentDirectory = contentDirectory;
 
-            bool contentChanged = false;
+            var contentChanged = false;
             if (ConsoleReadYesNoQuit("Run image optimizers?"))
             {
                 if (File.Exists(Path.Combine(toolDirectory, "gifsicle.exe")))
@@ -68,8 +68,8 @@
         {
             Console.WriteLine("Loading bases pending cropping of transparent borders.");
             var ponies = new DesktopPonies.PonyCollection(true);
-            string poniesDirectory = Path.Combine(contentDirectory, DesktopPonies.PonyBase.RootDirectory);
-            int currentLine = -1;
+            var poniesDirectory = Path.Combine(contentDirectory, DesktopPonies.PonyBase.RootDirectory);
+            var currentLine = -1;
             foreach (var ponyBase in ponies.Bases)
             {
                 if (currentLine == Console.CursorTop)
@@ -119,7 +119,7 @@
                         imageCropInfo.Add(imageFilePath, maybeCropped.Value.Location);
                     }
                 }
-                bool changed = false;
+                var changed = false;
                 foreach (var behavior in ponyBase.Behaviors)
                 {
                     changed = FixCustomCenter(imageCropInfo, behavior, true) || changed;
@@ -168,7 +168,7 @@
                 {
                     #region Determine Bitmap Crop Area
                     data = bitmap.LockBits(area, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                    byte[] buffer = new byte[data.Height * data.Stride];
+                    var buffer = new byte[data.Height * data.Stride];
                     Marshal.Copy(data.Scan0, buffer, 0, buffer.Length);
 
                     int xMin = int.MaxValue,
@@ -176,15 +176,15 @@
                         yMin = int.MaxValue,
                         yMax = int.MinValue;
 
-                    bool foundPixel = false;
+                    var foundPixel = false;
 
                     // Find xMin
-                    for (int x = 0; x < data.Width; x++)
+                    for (var x = 0; x < data.Width; x++)
                     {
-                        bool stop = false;
-                        for (int y = 0; y < data.Height; y++)
+                        var stop = false;
+                        for (var y = 0; y < data.Height; y++)
                         {
-                            byte alpha = buffer[y * data.Stride + 4 * x + 3];
+                            var alpha = buffer[y * data.Stride + 4 * x + 3];
                             if (alpha != 0)
                             {
                                 xMin = x;
@@ -205,12 +205,12 @@
                     else
                     {
                         // Find yMin
-                        for (int y = 0; y < data.Height; y++)
+                        for (var y = 0; y < data.Height; y++)
                         {
-                            bool stop = false;
-                            for (int x = xMin; x < data.Width; x++)
+                            var stop = false;
+                            for (var x = xMin; x < data.Width; x++)
                             {
-                                byte alpha = buffer[y * data.Stride + 4 * x + 3];
+                                var alpha = buffer[y * data.Stride + 4 * x + 3];
                                 if (alpha != 0)
                                 {
                                     yMin = y;
@@ -223,12 +223,12 @@
                         }
 
                         // Find xMax
-                        for (int x = data.Width - 1; x >= xMin; x--)
+                        for (var x = data.Width - 1; x >= xMin; x--)
                         {
-                            bool stop = false;
-                            for (int y = yMin; y < data.Height; y++)
+                            var stop = false;
+                            for (var y = yMin; y < data.Height; y++)
                             {
-                                byte alpha = buffer[y * data.Stride + 4 * x + 3];
+                                var alpha = buffer[y * data.Stride + 4 * x + 3];
                                 if (alpha != 0)
                                 {
                                     xMax = x;
@@ -241,12 +241,12 @@
                         }
 
                         // Find yMax
-                        for (int y = data.Height - 1; y >= yMin; y--)
+                        for (var y = data.Height - 1; y >= yMin; y--)
                         {
-                            bool stop = false;
-                            for (int x = xMin; x <= xMax; x++)
+                            var stop = false;
+                            for (var x = xMin; x <= xMax; x++)
                             {
-                                byte alpha = buffer[y * data.Stride + 4 * x + 3];
+                                var alpha = buffer[y * data.Stride + 4 * x + 3];
                                 if (alpha != 0)
                                 {
                                     yMax = y;
@@ -280,7 +280,7 @@
 
         private static void CropGifImage(string toolDirectory, string contentDirectory, string filePath, Rectangle cropArea)
         {
-            string tempFilePath = Path.GetTempFileName();
+            var tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
             using (var process = new Process())
             {
@@ -293,7 +293,7 @@
                     Console.WriteLine("Missing gifsicle.exe in current directory.");
                     return;
                 }
-                string trimmedSourcePath = filePath.Replace(contentDirectory, "");
+                var trimmedSourcePath = filePath.Replace(contentDirectory, "");
                 Console.WriteLine("Cropping " + trimmedSourcePath);
                 File.Copy(filePath, tempFilePath, true);
                 process.StartInfo.Arguments = "-b --crop {1},{2}+{3}x{4} \"{0}\"".FormatWith(
@@ -309,7 +309,7 @@
 
         private static void CropPngImage(string contentDirectory, string filePath, Rectangle cropArea)
         {
-            string trimmedSourcePath = filePath.Replace(contentDirectory, "");
+            var trimmedSourcePath = filePath.Replace(contentDirectory, "");
             Console.WriteLine("Cropping " + trimmedSourcePath);
             Bitmap copiedBitmap = null;
             try
@@ -329,14 +329,14 @@
 
         private static int CompressGifs(string toolDirectory, string sourceDirectory)
         {
-            string tempFilePath = Path.GetTempFileName();
+            var tempFilePath = Path.GetTempFileName();
             File.Delete(tempFilePath);
             using (var process = new Process())
             {
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
 
-                int gifsOptimized = 0;
+                var gifsOptimized = 0;
                 process.StartInfo.FileName = Path.Combine(toolDirectory, "gifsicle.exe");
                 if (!File.Exists(process.StartInfo.FileName))
                 {
@@ -346,14 +346,14 @@
                 Console.WriteLine();
                 foreach (var sourceFilePath in Directory.EnumerateFiles(sourceDirectory, "*.gif", SearchOption.AllDirectories))
                 {
-                    string trimmedSourcePath = sourceFilePath.Replace(sourceDirectory, "");
+                    var trimmedSourcePath = sourceFilePath.Replace(sourceDirectory, "");
                     ConsoleReplacePreviousLine("Optimizing " + trimmedSourcePath);
-                    bool optimized = false;
+                    var optimized = false;
                     bool optimizedOnPass;
                     do
                     {
                         optimizedOnPass = false;
-                        FileInfo sourceFile = new FileInfo(sourceFilePath);
+                        var sourceFile = new FileInfo(sourceFilePath);
                         sourceFile.CopyTo(tempFilePath, true);
                         process.StartInfo.Arguments =
                             "-b -O3 --no-comments --no-extensions --no-names \"" + tempFilePath + "\"";
@@ -366,7 +366,7 @@
                         }
                         else
                         {
-                            FileInfo tempFile = new FileInfo(tempFilePath);
+                            var tempFile = new FileInfo(tempFilePath);
                             if (tempFile.Length < sourceFile.Length)
                             {
                                 Console.WriteLine(
@@ -406,7 +406,7 @@
                 Console.WriteLine();
                 foreach (var sourceFilePath in Directory.EnumerateFiles(sourceDirectory, "*.png", SearchOption.AllDirectories))
                 {
-                    string trimmedSourcePath = sourceFilePath.Replace(sourceDirectory, "");
+                    var trimmedSourcePath = sourceFilePath.Replace(sourceDirectory, "");
                     ConsoleReplacePreviousLine("Optimizing " + trimmedSourcePath);
 
                     process.StartInfo.Arguments = "\"" + sourceFilePath + "\" /q";
@@ -426,25 +426,25 @@
         {
             var encoding = System.Text.Encoding.UTF8;
 
-            string solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
-            byte[] solutionParentDirectoryUpperEncoded = encoding.GetBytes(solutionParentDirectory.ToUpperInvariant());
-            byte[] solutionParentDirectoryLowerEncoded = encoding.GetBytes(solutionParentDirectory.ToLowerInvariant());
-            byte[] cleanedDirectoryEncoded = encoding.GetBytes(new string('_', solutionParentDirectory.Length));
+            var solutionParentDirectory = solutionDirectory.Substring(0, solutionDirectory.IndexOf("Desktop Ponies"));
+            var solutionParentDirectoryUpperEncoded = encoding.GetBytes(solutionParentDirectory.ToUpperInvariant());
+            var solutionParentDirectoryLowerEncoded = encoding.GetBytes(solutionParentDirectory.ToLowerInvariant());
+            var cleanedDirectoryEncoded = encoding.GetBytes(new string('_', solutionParentDirectory.Length));
             if (solutionParentDirectoryUpperEncoded.Length != solutionParentDirectoryLowerEncoded.Length ||
                 solutionParentDirectoryUpperEncoded.Length != cleanedDirectoryEncoded.Length)
                 throw new Exception("Cannot clean PDB files. Directory encoding lengths do not match.");
 
-            string tempDirectory = Path.GetTempPath();
-            byte[] tempDirectoryUpperEncoded = encoding.GetBytes(tempDirectory.ToUpperInvariant());
-            byte[] tempDirectoryLowerEncoded = encoding.GetBytes(tempDirectory.ToLowerInvariant());
-            byte[] cleanedTempDirectoryEncoded = encoding.GetBytes(new string('_', tempDirectory.Length));
+            var tempDirectory = Path.GetTempPath();
+            var tempDirectoryUpperEncoded = encoding.GetBytes(tempDirectory.ToUpperInvariant());
+            var tempDirectoryLowerEncoded = encoding.GetBytes(tempDirectory.ToLowerInvariant());
+            var cleanedTempDirectoryEncoded = encoding.GetBytes(new string('_', tempDirectory.Length));
             if (tempDirectoryUpperEncoded.Length != tempDirectoryLowerEncoded.Length ||
                 tempDirectoryUpperEncoded.Length != cleanedTempDirectoryEncoded.Length)
                 throw new Exception("Cannot clean PDB files. Directory encoding lengths do not match.");
 
             foreach (var fileName in Directory.EnumerateFiles(sourceDirectory, "*.pdb"))
             {
-                byte[] contents = File.ReadAllBytes(fileName);
+                var contents = File.ReadAllBytes(fileName);
                 contents = Replace(contents,
                     solutionParentDirectoryUpperEncoded, solutionParentDirectoryLowerEncoded, cleanedDirectoryEncoded);
                 contents = Replace(contents,
@@ -455,8 +455,8 @@
 
         private static byte[] Replace(byte[] source, byte[] oldValue1, byte[] oldValue2, byte[] newValue)
         {
-            List<byte> destination = new List<byte>(source.Length);
-            int contentsIndex = 0;
+            var destination = new List<byte>(source.Length);
+            var contentsIndex = 0;
             int nextMatch;
             while ((nextMatch = IndexOf(source, oldValue1, oldValue2, contentsIndex)) != -1)
             {
@@ -470,10 +470,10 @@
 
         private static int IndexOf(byte[] source, byte[] value1, byte[] value2, int startIndex)
         {
-            for (int sourceIndex = startIndex; sourceIndex < source.Length - value1.Length; sourceIndex++)
+            for (var sourceIndex = startIndex; sourceIndex < source.Length - value1.Length; sourceIndex++)
             {
-                int src = sourceIndex;
-                int val = 0;
+                var src = sourceIndex;
+                var val = 0;
                 while (source[src] == value1[val] || source[src] == value2[val])
                 {
                     src++;
@@ -487,7 +487,7 @@
 
         private static void PackageReleaseFiles(string sourceDirectory, string destinationDirectory, string version)
         {
-            string destinationFilename = Path.Combine(destinationDirectory, "Desktop Ponies v" + version + ".zip");
+            var destinationFilename = Path.Combine(destinationDirectory, "Desktop Ponies v" + version + ".zip");
             if (File.Exists(destinationFilename))
             {
                 if (ConsoleReadYesNoQuit("Replace existing package?"))
@@ -517,7 +517,7 @@
 
         private static void RetryActionWithDelay(Action action, int attempts, TimeSpan delay)
         {
-            int currentAttempts = 0;
+            var currentAttempts = 0;
             while (++currentAttempts < attempts)
                 try
                 {

@@ -24,7 +24,7 @@
         public GifFramesForm(string path)
         {
             InitializeComponent();
-            filesPath = Argument.EnsureNotNull(path, "path");
+            filesPath = Argument.EnsureNotNull(path, nameof(path));
         }
 
         /// <summary>
@@ -70,7 +70,7 @@
             GifImage<BitmapFrame> gifImage = null;
             try
             {
-                using (FileStream gifStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var gifStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                     gifImage = new GifImage<BitmapFrame>(gifStream, BitmapFrame.FromBuffer, BitmapFrame.AllowableBitDepths);
             }
             catch (Exception)
@@ -86,10 +86,10 @@
                 TimeSpan.FromMilliseconds(gifImage.Duration).TotalSeconds, gifImage.Iterations, gifImage.Size);
 
             var frames = gifImage.Frames;
-            for (int i = 0; i < frames.Length; i++)
+            for (var i = 0; i < frames.Length; i++)
             {
-                string info = "{0}: {1}ms".FormatWith(i + 1, frames[i].Duration);
-                GifControl gc = new GifControl(frames[i], info);
+                var info = "{0}: {1}ms".FormatWith(i + 1, frames[i].Duration);
+                var gc = new GifControl(frames[i], info);
                 FramesDisplayPanel.Controls.Add(gc);
             }
 

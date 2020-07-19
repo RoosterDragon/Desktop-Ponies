@@ -45,7 +45,7 @@
         /// <exception cref="T:System.ArgumentNullException"><paramref name="list"/> is null.</exception>
         public ReadOnlyList(IList<T> list)
         {
-            this.list = Argument.EnsureNotNull(list, "list");
+            this.list = Argument.EnsureNotNull(list, nameof(list));
         }
         /// <summary>
         /// Gets the element at the specified index.
@@ -258,7 +258,7 @@
             /// <param name="readOnlyList">The list to proxy.</param>
             public DebugView(ReadOnlyList<T> readOnlyList)
             {
-                this.readOnlyList = Argument.EnsureNotNull(readOnlyList, "readOnlyList");
+                this.readOnlyList = Argument.EnsureNotNull(readOnlyList, nameof(readOnlyList));
             }
 
             /// <summary>
