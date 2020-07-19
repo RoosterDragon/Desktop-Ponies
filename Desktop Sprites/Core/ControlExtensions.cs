@@ -1,6 +1,7 @@
-﻿namespace DesktopSprites.Core
+namespace DesktopSprites.Core
 {
     using System;
+    using System.ComponentModel;
     using System.Windows.Forms;
 
     /// <summary>
@@ -88,6 +89,11 @@
             catch (ObjectDisposedException)
             {
                 // The control can be disposed before we are able to wait on the result. We can ignore this as we have our flag to see if
+                // the action was executed.
+            }
+            catch (InvalidAsynchronousStateException)
+            {
+                // The thread may no longer be running by the time we wait on the result. We can ignore this as we have our flag to see if
                 // the action was executed.
             }
             // Release the wait handle so it does not have to be finalized.
