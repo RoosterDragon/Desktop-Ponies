@@ -75,6 +75,9 @@ Change Log
 
 Latest changes:
 
+v1.65:
+- Added Ocellus by Bot-chan.
+
 v1.64:
 - Added Pear Butter by emeralddarkness.
 - Added Jasmine Leaf by Blaze5565.
