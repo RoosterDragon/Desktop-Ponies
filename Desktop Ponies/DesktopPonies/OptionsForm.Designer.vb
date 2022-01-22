@@ -68,6 +68,7 @@ Partial Class OptionsForm
         Me.WindowsGroup = New System.Windows.Forms.GroupBox()
         Me.ShowViewerInTaskbar = New System.Windows.Forms.CheckBox()
         Me.ScreenGroup = New System.Windows.Forms.GroupBox()
+        Me.BackgroundColorButton = New System.Windows.Forms.Button()
         Me.OutOfBoundsLabel = New System.Windows.Forms.Label()
         Me.OutOfBoundsWalk = New System.Windows.Forms.RadioButton()
         Me.OutOfBoundsTeleport = New System.Windows.Forms.RadioButton()
@@ -101,6 +102,7 @@ Partial Class OptionsForm
         Me.ShowPerformanceGraph = New System.Windows.Forms.CheckBox()
         Me.EnablePonyLogs = New System.Windows.Forms.CheckBox()
         Me.PoniesGroup = New System.Windows.Forms.GroupBox()
+        Me.TransparentBackground = New System.Windows.Forms.CheckBox()
         Me.ScreensaverGroup.SuspendLayout()
         Me.ScreensaverBackgroundTable.SuspendLayout()
         Me.WindowsGroup.SuspendLayout()
@@ -612,6 +614,8 @@ Partial Class OptionsForm
         'ScreenGroup
         '
         Me.ScreenGroup.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.ScreenGroup.Controls.Add(Me.TransparentBackground)
+        Me.ScreenGroup.Controls.Add(Me.BackgroundColorButton)
         Me.ScreenGroup.Controls.Add(Me.OutOfBoundsLabel)
         Me.ScreenGroup.Controls.Add(Me.OutOfBoundsWalk)
         Me.ScreenGroup.Controls.Add(Me.OutOfBoundsTeleport)
@@ -625,6 +629,15 @@ Partial Class OptionsForm
         Me.ScreenGroup.TabIndex = 2
         Me.ScreenGroup.TabStop = False
         Me.ScreenGroup.Text = "Screen"
+        '
+        'BackgroundColorButton
+        '
+        Me.BackgroundColorButton.Location = New System.Drawing.Point(406, 216)
+        Me.BackgroundColorButton.Name = "BackgroundColorButton"
+        Me.BackgroundColorButton.Size = New System.Drawing.Size(78, 23)
+        Me.BackgroundColorButton.TabIndex = 8
+        Me.BackgroundColorButton.Text = "Color"
+        Me.BackgroundColorButton.UseVisualStyleBackColor = True
         '
         'OutOfBoundsLabel
         '
@@ -660,7 +673,7 @@ Partial Class OptionsForm
         'ScreenCoveragePreviewLabel
         '
         Me.ScreenCoveragePreviewLabel.AutoSize = True
-        Me.ScreenCoveragePreviewLabel.Location = New System.Drawing.Point(333, 221)
+        Me.ScreenCoveragePreviewLabel.Location = New System.Drawing.Point(330, 195)
         Me.ScreenCoveragePreviewLabel.Name = "ScreenCoveragePreviewLabel"
         Me.ScreenCoveragePreviewLabel.Size = New System.Drawing.Size(70, 13)
         Me.ScreenCoveragePreviewLabel.TabIndex = 6
@@ -671,7 +684,7 @@ Partial Class OptionsForm
         Me.ScreenCoveragePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.ScreenCoveragePreview.Location = New System.Drawing.Point(256, 78)
         Me.ScreenCoveragePreview.Name = "ScreenCoveragePreview"
-        Me.ScreenCoveragePreview.Size = New System.Drawing.Size(225, 140)
+        Me.ScreenCoveragePreview.Size = New System.Drawing.Size(225, 114)
         Me.ScreenCoveragePreview.TabIndex = 5
         '
         'ScreenCoveragePanel
@@ -999,6 +1012,16 @@ Partial Class OptionsForm
         Me.PoniesGroup.TabStop = False
         Me.PoniesGroup.Text = "Ponies"
         '
+        'TransparentBackground
+        '
+        Me.TransparentBackground.AutoSize = True
+        Me.TransparentBackground.Location = New System.Drawing.Point(256, 220)
+        Me.TransparentBackground.Name = "TransparentBackground"
+        Me.TransparentBackground.Size = New System.Drawing.Size(144, 17)
+        Me.TransparentBackground.TabIndex = 7
+        Me.TransparentBackground.Text = "Transparent Background"
+        Me.TransparentBackground.UseVisualStyleBackColor = True
+        '
         'OptionsForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1122,4 +1145,6 @@ Partial Class OptionsForm
     Friend WithEvents OutOfBoundsWalk As System.Windows.Forms.RadioButton
     Friend WithEvents OutOfBoundsTeleport As System.Windows.Forms.RadioButton
     Friend WithEvents OutOfBoundsLabel As System.Windows.Forms.Label
+    Friend WithEvents BackgroundColorButton As Button
+    Friend WithEvents TransparentBackground As CheckBox
 End Class

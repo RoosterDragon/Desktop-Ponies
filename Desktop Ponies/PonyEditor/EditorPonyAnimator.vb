@@ -100,6 +100,7 @@ Public Class EditorPonyAnimator
         If winFormSpriteInterface IsNot Nothing Then
             winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
             winFormSpriteInterface.ShowPerformanceGraph = False
+            winFormSpriteInterface.BackgroundColor = Color.FromArgb(0)
         End If
     End Sub
 

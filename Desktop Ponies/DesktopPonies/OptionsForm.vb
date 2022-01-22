@@ -24,6 +24,8 @@ Public Class OptionsForm
         If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
             ShowViewerInTaskbar.Visible = False
             ShowPerformanceGraph.Visible = False
+            TransparentBackground.Visible = False
+            BackgroundColorButton.Visible = False
         End If
 
         If Not OperatingSystemInfo.IsWindows OrElse Options.ProfileName <> Options.ScreensaverProfileName Then
@@ -115,6 +117,8 @@ Public Class OptionsForm
 
         EnablePonyLogs.Checked = Options.EnablePonyLogs
         ShowPerformanceGraph.Checked = Options.ShowPerformanceGraph
+
+        TransparentBackground.Checked = Options.BackgroundColor.A = 0
 
         ScreensaverSounds.Checked = Options.SoundEnabled
         Select Case Options.ScreensaverStyle
@@ -403,6 +407,19 @@ Public Class OptionsForm
     Private Sub PerformanceGraph_CheckedChanged(sender As Object, e As EventArgs) Handles ShowPerformanceGraph.CheckedChanged
         If updatingFromOptions Then Return
         Options.ShowPerformanceGraph = ShowPerformanceGraph.Checked
+    End Sub
+
+    Private Sub TransparentBackground_CheckedChanged(sender As Object, e As EventArgs) Handles TransparentBackground.CheckedChanged
+        Options.BackgroundColor = Color.FromArgb(If(TransparentBackground.Checked, 0, 255), Options.BackgroundColor)
+    End Sub
+
+    Private Sub BackgroundColorButton_Click(sender As Object, e As EventArgs) Handles BackgroundColorButton.Click
+        Using dialog As New ColorDialog()
+            dialog.Color = Options.BackgroundColor
+            If dialog.ShowDialog() = DialogResult.OK Then
+                Options.BackgroundColor = Color.FromArgb(If(TransparentBackground.Checked, 0, 255), dialog.Color)
+            End If
+        End Using
     End Sub
 
     Private Sub ScreensaverSounds_CheckedChanged(sender As Object, e As EventArgs) Handles ScreensaverSounds.CheckedChanged

@@ -751,6 +751,10 @@ namespace DesktopSprites.SpriteManagement
         /// Synchronization object for parallel rendering threads.
         /// </summary>
         private readonly Barrier parallelBlend;
+        /// <summary>
+        /// The background color that was applied last render.
+        /// </summary>
+        private Color previousBackgroundColor = Color.FromArgb(0);
 
         /// <summary>
         /// List of <see cref="T:DesktopSprites.SpriteManagement.WinFormSpriteInterface.WinFormContextMenu"/> which have been created by
@@ -969,6 +973,10 @@ namespace DesktopSprites.SpriteManagement
                 return Form.ActiveForm == form;
             }
         }
+        /// <summary>
+        /// Gets or sets an ARGB color that covers the entire background.
+        /// </summary>
+        public Color BackgroundColor { get; set; } = Color.FromArgb(0);
         /// <summary>
         /// Gets or sets an optional function that pre-processes a decoded GIF buffer before the buffer is used by the viewer.
         /// </summary>
@@ -1617,6 +1625,13 @@ namespace DesktopSprites.SpriteManagement
         {
             lock (spritesGuard)
             {
+                if (previousBackgroundColor != BackgroundColor)
+                {
+                    form.BackgroundGraphics.ResetClip();
+                    form.BackgroundGraphics.Clear(BackgroundColor);
+                    previousBackgroundColor = BackgroundColor;
+                }
+
                 if (sprites == null)
                     return;
 
@@ -1679,7 +1694,7 @@ namespace DesktopSprites.SpriteManagement
 
                 // Determine the current clipping area required, and clear it of old graphics.
                 form.BackgroundGraphics.SetClip(preUpdateInvalidRegion, CombineMode.Replace);
-                form.BackgroundGraphics.Clear(Color.FromArgb(0));
+                form.BackgroundGraphics.Clear(BackgroundColor);
 
                 // Set the clipping area to the region we'll be drawing in for this frame.
                 form.BackgroundGraphics.SetClip(postUpdateInvalidRegion, CombineMode.Replace);
