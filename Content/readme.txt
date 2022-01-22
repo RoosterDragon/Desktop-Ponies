@@ -17,8 +17,8 @@ http://desktop-pony-team.deviantart.com/
 Installation
 
 * Windows
-    You will need .NET framework 4 installed. This comes by default with newer versions of Windows,
-    but you can also get it here: https://www.microsoft.com/en-gb/download/details.aspx?id=17718
+    You will need .NET framework 4.8 installed. This comes by default with newer versions of Windows,
+    but you can also get it here: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
     Once installed, simply click on 'Desktop Ponies.exe' to start the program.
 * Unix
     You will need the latest stable version of mono. You can also download it from here: 
