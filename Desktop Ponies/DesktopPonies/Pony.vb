@@ -2041,7 +2041,8 @@ Public Class Pony
         If Single.IsNaN(_location.X) OrElse Single.IsNaN(_location.Y) Then
             Dim area = New Vector2(Context.Region.Size) - New Vector2F(RegionF.Size)
             _location = CurrentImage.Center * Context.ScaleFactor +
-                New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble()))
+                New Vector2F(CSng(area.X * Rng.NextDouble()), CSng(area.Y * Rng.NextDouble())) +
+                New Vector2F(Context.Region.Location)
         End If
         UpdateState(True, True)
     End Sub
