@@ -235,6 +235,7 @@ Public Class DesktopPonyAnimator
         If winFormSpriteInterface IsNot Nothing Then
             winFormSpriteInterface.DisplayBounds = Rectangle.Intersect(PonyContext.Region, Options.GetCombinedScreenBounds())
             winFormSpriteInterface.ShowPerformanceGraph = Options.ShowPerformanceGraph
+            winFormSpriteInterface.BackgroundColor = Options.BackgroundColor
         End If
     End Sub
 

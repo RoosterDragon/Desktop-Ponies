@@ -11,10 +11,10 @@
     /// Provides methods to get the size of an image without having to load the whole file.
     /// </summary>
     /// <remarks>
-    /// Modified from http://stackoverflow.com/questions/111345/getting-image-dimensions-without-reading-the-entire-file by user ICR
-    /// http://stackoverflow.com/users/214/icr.
-    /// Modified DecodeJfif method from http://www.codeproject.com/Articles/35978/Reading-Image-Headers-to-Get-Width-and-Height by user
-    /// andywilsonuk http://www.codeproject.com/script/Membership/View.aspx?mid=1231652.
+    /// Modified from https://stackoverflow.com/questions/111345/getting-image-dimensions-without-reading-the-entire-file by user ICR
+    /// https://stackoverflow.com/users/214/icr.
+    /// Modified DecodeJfif method from https://www.codeproject.com/Articles/35978/Reading-Image-Headers-to-Get-Width-and-Height by user
+    /// andywilsonuk https://www.codeproject.com/script/Membership/View.aspx?mid=1231652.
     /// </remarks>
     public static class ImageSize
     {

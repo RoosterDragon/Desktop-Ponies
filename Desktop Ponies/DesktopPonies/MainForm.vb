@@ -828,6 +828,7 @@ Public Class MainForm
         ponyViewer.Topmost = Options.AlwaysOnTop
         If TypeOf ponyViewer Is WinFormSpriteInterface Then
             DirectCast(ponyViewer, WinFormSpriteInterface).ShowPerformanceGraph = Options.ShowPerformanceGraph
+            DirectCast(ponyViewer, WinFormSpriteInterface).BackgroundColor = Options.BackgroundColor
         End If
 
         ' Get a collection of all images to be loaded.

@@ -146,8 +146,8 @@
             return false;
         }
 
-        /// <remarks>Adapted from http://stackoverflow.com/questions/4820212/automatically-trim-a-bitmap-to-minimum-size by user Thomas
-        /// Levesque http://stackoverflow.com/users/98713/thomas-levesque </remarks>
+        /// <remarks>Adapted from https://stackoverflow.com/questions/4820212/automatically-trim-a-bitmap-to-minimum-size by user Thomas
+        /// Levesque https://stackoverflow.com/users/98713/thomas-levesque </remarks>
         private static Rectangle? GetCroppedRegion(string filePath)
         {
             Bitmap[] bitmaps;

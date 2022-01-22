@@ -1,28 +1,26 @@
 ﻿Desktop Ponies!
 Have little ponies running around your desktop aimlessly! Might entertain you for a few minutes!
 
-There are threads maintained on Ponychan for the main program, and an OC thread for custom creations. These are found on the collab board:
-http://www.ponychan.net/chan/collab/
-Latest threads at time of writing:
-Mane - http://www.ponychan.net/fan/res/458.html
-  OC - http://www.ponychan.net/chan/collab/res/43607.html
+There is a thread maintained on Ponychan for the main program. 
+Latest thread at time of writing:
+Mane - https://www.ponychan.net/fan/res/458.html
 
 If you need any help setting up or running the program, please post in the main thread.
 
 The sprite artists maintain a community for their works on DeviantArt:
-http://desktop-pony-team.deviantart.com/
+https://desktop-pony-team.deviantart.com/
 
 ---------------------------------------
 
 Installation
 
 * Windows
-    You will need .NET framework 4 installed. This comes by default with newer versions of Windows,
-    but you can also get it here: https://www.microsoft.com/en-gb/download/details.aspx?id=17718
+    You will need .NET framework 4.8 installed. This comes by default with newer versions of Windows,
+    but you can also get it here: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
     Once installed, simply click on 'Desktop Ponies.exe' to start the program.
 * Unix
     You will need the latest stable version of mono. You can also download it from here: 
-    http://www.go-mono.com/mono-downloads/download.html
+    https://www.mono-project.com/download/stable/
     Alternatively you can install the prerequisite packages for your platform. You will need packages for the mono runtime, visual basic, and gtk 2.
     These vary by distro, but here's a couple of known invocations:
         - Debian or Debian based (e.g. Ubuntu): apt-get install libmono-system-xml-linq4.0-cil libmono-microsoft-visualbasic10.0-cil libgtk2.0-cil
@@ -32,7 +30,7 @@ Installation
     which will allow the program to check online for updates.
 * Mac
     You will need mono version 3.2.1 or better.
-    Choose the "Mono MRE Installer" from: http://www.go-mono.com/mono-downloads/download.html
+    Choose the "Mono MRE Installer" from: https://www.mono-project.com/download/stable/
     Once installed, you can run the "RunOnMac.command" file to start the program.
 
 ---------------------------------------
@@ -74,6 +72,23 @@ Autostart
 Change Log
 
 Latest changes:
+
+v1.66:
+- Added Autumn Blaze by Bot-chan.
+- Added Bright Mac by Bot-chan.
+- Added Gallus by Bot-chan.
+- Added Luster Dawn by Bot-chan.
+- Update Ocellus by Bot-chan.
+- Added Potion Nova by Bot-chan.
+- Added Prince Pharynx by Bot-chan.
+- Added Sandbar by Bot-chan.
+- Added Silverstream by Bot-chan.
+- Added Somnambula by Bot-chan.
+- Added Windy Whistles by Bot-chan.
+- Added Yona by Bot-chan.
+- Added the ability to specify a background color (Windows only).
+- Fix pony spawn locations when using multiple monitors.
+- Fix crash involving InvalidAsynchronousStateException.
 
 v1.65:
 - Added Ocellus by Bot-chan.
@@ -787,7 +802,7 @@ New options:
 	-You can now choose to limit sounds to one at a time, or one per pony.
 	-The random pony now has a checkbox to prevent duplicate random ponies (except when you ask for more random ponies than you have unique ones).
 
--Mathias Panzenböck provided a bunch of sounds from the MLP:FIM Soundboard (http://kyrospawn.deviantart.com/art/MLP-FIM-Soundboard-V7-0-244757196?) and added them to the pony ini files.  
+-Mathias Panzenböck provided a bunch of sounds from the MLP:FIM Soundboard (https://kyrospawn.deviantart.com/art/MLP-FIM-Soundboard-V7-0-244757196?) and added them to the pony ini files.  
 -Note that sounds are now in .MP3 format instead of .WAV.
 -In order to support MP3s, DirectX is now used for sound playing.  If you don't have the right DirectX version, you will see that sounds are disabled in the options menu.
 -Note that the INI format for speech lines has changed to allow multiple versions of the same file (ogg, etc).  This is for compatibility with Browser Ponies.
@@ -804,7 +819,7 @@ New options:
 -Applejack and Apple Bloom's unusual behaviors (truck, dancing, spinning) have been reduced in probability a bit.
 -All saved files (ini, settings, etc) will be saved in UTF8 instead of UTF16 from now on (again for compatibility for those who run different operating systems.)
 -You will only get one error message when sounds fail to play, instead of one per try.
--When adding a “random pony” to the roster in the mini-games, you now actually get a random pony instead of just Rarity every time. (http://search.dilbert.com/comic/Random%20Number%20Generator)
+-When adding a “random pony” to the roster in the mini-games, you now actually get a random pony instead of just Rarity every time. (https://dilbert.com/search_results?terms=Random+Number+Generator)
 -When saving settings in the options menu when ponies were active, your pony counts would be reset.  This will no longer happens.
 -Lots of spelling and grammar errors in pony speech have been corrected.
 

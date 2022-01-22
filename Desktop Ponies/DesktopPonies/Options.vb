@@ -74,6 +74,7 @@ Public NotInheritable Class Options
         End Set
     End Property
     Public Shared AllowedRegion As Rectangle?
+    Public Shared BackgroundColor As Color
     Public Shared PonyCounts As ReadOnlyDictionary(Of String, Integer)
     Public Shared CustomTags As ImmutableArray(Of CaseInsensitiveString)
 
@@ -154,7 +155,8 @@ Public NotInheritable Class Options
                                      "Screensaver Sound Enabled", "Screensaver Style",
                                      "Screensaver Background Color", "Screensaver Background Image Path",
                                      "No Random Duplicates", "Show In Taskbar",
-                                     "Allowed Area X", "Allowed Area Y", "Allowed Area Width", "Allowed Area Height"})
+                                     "Allowed Area X", "Allowed Area Y", "Allowed Area Width", "Allowed Area Height",
+                                     "Background Color"})
                                 p.NoParse()
                                 PonySpeechEnabled = p.ParseBoolean(True)
                                 PonySpeechChance = p.ParseSingle(0.01, 0, 1)
@@ -197,6 +199,7 @@ Public NotInheritable Class Options
                                     .Height = p.ParseInt32(0, 0, Integer.MaxValue)
                                 }
                                 If region.Width > 0 AndAlso region.Height > 0 Then AllowedRegion = region
+                                BackgroundColor = Color.FromArgb(p.ParseInt32(0))
                             Case "monitor"
                                 If columns.Length <> 2 Then Exit Select
                                 Dim monitor = Screen.AllScreens.FirstOrDefault(Function(s) s.DeviceName = columns(1))
@@ -237,6 +240,7 @@ Public NotInheritable Class Options
         _profileName = DefaultProfileName
         Screens = {Screen.PrimaryScreen}.ToImmutableArray()
         AllowedRegion = Nothing
+        BackgroundColor = Color.FromArgb(0)
         PonyCounts = New Dictionary(Of String, Integer)().AsReadOnly()
         CustomTags = New CaseInsensitiveString() {}.ToImmutableArray()
 
@@ -317,7 +321,8 @@ Public NotInheritable Class Options
                                      region.X.ToStringInvariant(),
                                      region.Y.ToStringInvariant(),
                                      region.Width.ToStringInvariant(),
-                                     region.Height.ToStringInvariant())
+                                     region.Height.ToStringInvariant(),
+                                     BackgroundColor.ToArgb().ToStringInvariant())
             file.WriteLine(optionsLine)
 
             For Each screen In Screens
