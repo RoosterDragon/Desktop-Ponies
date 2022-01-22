@@ -19,7 +19,7 @@ Artwork included with this program is licensed under [Creative Commons Attributi
 Standing, trotting and flying templates provided by Jay Wright.
 Galloping and filly trotting templates provided by Pony Noia.
 
-[Template Files](https://dl.dropbox.com/u/35213087/Templates.zip)
+[Template Files](http://www.mediafire.com/file/le2j2igc43dsob5/Templates.zip/file)
 
 In this document, any images using these templates as a base implicitly includes the templates authors for those images, as listed above. If you are sharing or altering an image based on any of these templates, be sure to include these template authors.
 
