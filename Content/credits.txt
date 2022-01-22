@@ -1,6 +1,6 @@
 # Desktop Ponies Program Credits
 
-The source code for Desktop Ponies is available under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+The source code for Desktop Ponies is available under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 You can access the source itself from the [GitHub repository](https://github.com/RoosterDragon/Desktop-Ponies).
 
@@ -10,16 +10,16 @@ You can access the source itself from the [GitHub repository](https://github.com
 
 # Desktop Ponies Art Credits
 
-Artwork included with this program is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](http://creativecommons.org/licenses/by-nc-sa/3.0/). This means you are allowed to share and alter the artwork, provided you give credit, do not use it for commercial purposes and release it under this same license.
+Artwork included with this program is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)](https://creativecommons.org/licenses/by-nc-sa/3.0/). This means you are allowed to share and alter the artwork, provided you give credit, do not use it for commercial purposes and release it under this same license.
 
-[My Little Pony: Friendship is Magic](http://wikipedia.org/wiki/My_Little_Pony:_Friendship_Is_Magic) and sound files taken from the show are © [Hasbro](http://www.hasbro.com/).
+[My Little Pony: Friendship is Magic](https://wikipedia.org/wiki/My_Little_Pony:_Friendship_Is_Magic) and sound files taken from the show are ï¿½ [Hasbrohttps:////www.hasbro.com/).
 
 ## Templates
 
 Standing, trotting and flying templates provided by Jay Wright.
 Galloping and filly trotting templates provided by Pony Noia.
 
-[Template Files](http://dl.dropbox.com/u/35213087/Templates.zip)
+[Template Files](https://dl.dropbox.com/u/35213087/Templates.zip)
 
 In this document, any images using these templates as a base implicitly includes the templates authors for those images, as listed above. If you are sharing or altering an image based on any of these templates, be sure to include these template authors.
 
@@ -29,58 +29,58 @@ In this document, any images using these templates as a base implicitly includes
 
 The following is an alphabetical list of contributors and known aliases.
 
-You may also be interested in the [deviantART group for Desktop Ponies](http://desktop-pony-team.deviantart.com/).
+You may also be interested in the [deviantART group for Desktop Ponies](https://desktop-pony-team.deviantart.com/).
 
-* [Anonycat](http://anonycat.deviantart.com/)
-* [asluc96](http://asluc96.deviantart.com/)
-* [Asparagus](http://asparagusunited.deviantart.com/)
+* [Anonycat](https://anonycat.deviantart.com/)
+* [asluc96](https://asluc96.deviantart.com/)
+* [Asparagus](https://asparagusunited.deviantart.com/)
 * Azure Fang
-* [Blackfeathr](http://blackfeathr.deviantart.com/)
-* [Blaze5565](http://blaze5565.deviantart.com/)
-* [Bot-chan](http://botchan-mlp.deviantart.com/)
-* [CANDYBAG](http://auraion.deviantart.com/)
-* [DeathPony (DeathPwny)](http://deathpwny.deviantart.com/)
+* [Blackfeathr](https://blackfeathr.deviantart.com/)
+* [Blaze5565](https://blaze5565.deviantart.com/)
+* [Bot-chan](https://botchan-mlp.deviantart.com/)
+* [CANDYBAG](https://auraion.deviantart.com/)
+* [DeathPony (DeathPwny)](https://deathpwny.deviantart.com/)
 * DesktopPonyGuy
-* [Distoorted](http://distoorted.deviantart.com/)
+* [Distoorted](https://distoorted.deviantart.com/)
 * Doctor Blade
 * DrZoin
-* [emeralddarkness](http://emeralddarkness.deviantart.com/)
-* [fanofetcetera](http://fanofetcetera.deviantart.com/)
-* [Felix-0](http://felix-0.deviantart.com/)
+* [emeralddarkness](https://emeralddarkness.deviantart.com/)
+* [fanofetcetera](https://fanofetcetera.deviantart.com/)
+* [Felix-0](https://felix-0.deviantart.com/)
 * Gilgapony
-* [Glamador](http://glamador.deviantart.com/)
-* [Half-n-Half](http://sephurmcgoul.deviantart.com/)
-* [humle (steglad, the wizard)](http://steglad.deviantart.com/)
-* [InfinityDash](http://infinitydash.deviantart.com/)
-* [Jay Wright (monkeyjay)](http://monkeyjay.deviantart.com/)
+* [Glamador](https://glamador.deviantart.com/)
+* [Half-n-Half](https://sephurmcgoul.deviantart.com/)
+* [humle (steglad, the wizard)](https://steglad.deviantart.com/)
+* [InfinityDash](https://infinitydash.deviantart.com/)
+* [Jay Wright (monkeyjay)](https://monkeyjay.deviantart.com/)
 * JavaNut
-* [kjhf](http://kjhf.deviantart.com/)
-* [Klopp](http://klopp22.deviantart.com/)
-* [Loaded--Dice](http://loaded--dice.deviantart.com/)
+* [kjhf](https://kjhf.deviantart.com/)
+* [Klopp](https://klopp22.deviantart.com/)
+* [Loaded--Dice](https://loaded--dice.deviantart.com/)
 * Logan
-* [Midnyte (Miles000)](http://www.escapistmagazine.com/profiles/view/Miles000)
+* [Midnyte (Miles000)](https://www.escapistmagazine.com/profiles/view/Miles000)
 * Miriam the Bat
 * oppl jok
 * Peter Kurucz (Fantos)
-* [Pony Noia](http://ponynoia.deviantart.com/)
-* [Ponyluver (AngelKat58, AngelKat34)](http://angelkat34.deviantart.com/)
-* [PsychoShutin](http://psychoshutin.deviantart.com/)
+* [Pony Noia](https://ponynoia.deviantart.com/)
+* [Ponyluver (AngelKat58, AngelKat34)](https://angelkat34.deviantart.com/)
+* [PsychoShutin](https://psychoshutin.deviantart.com/)
 * RainbowCrash
 * Rainbowdutch
-* [RJP!](http://rj-p.deviantart.com/)
-* [RoboKitty](http://robokitty.deviantart.com)
+* [RJP!](https://rj-p.deviantart.com/)
+* [RoboKitty](https://robokitty.deviantart.com)
 * RQK
 * SarkInABox
 * sidekick ponyguy
-* [Starly](http://starlyk.deviantart.com/)
-* [StarStep](http://starsteppony.deviantart.com/)
-* [SupaSpeedStrut](http://supaspeedstrut.deviantart.com/)
-* [supersaiyanmikito](http://supersaiyanmikito.deviantart.com/)
-* [The Coop](http://the-coop.deviantart.com/)
-* [Tyranico](http://tyranico.deviantart.com/)
-* [vulcan539 (james539)](http://james539.deviantart.com/)
+* [Starly](https://starlyk.deviantart.com/)
+* [StarStep](https://starsteppony.deviantart.com/)
+* [SupaSpeedStrut](https://supaspeedstrut.deviantart.com/)
+* [supersaiyanmikito](https://supersaiyanmikito.deviantart.com/)
+* [The Coop](https://the-coop.deviantart.com/)
+* [Tyranico](https://tyranico.deviantart.com/)
+* [vulcan539 (james539)](https://james539.deviantart.com/)
 * Whimsy Morning
-* [Yamino](http://yamino.deviantart.com/)
+* [Yamino](https://yamino.deviantart.com/)
 
 ### Characters
 
