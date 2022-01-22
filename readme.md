@@ -2,14 +2,14 @@
 
 8 bit ponies on your desktop.
 
-![Desktop Ponies](https://i.imgur.com/2vVLGt8.jpg)
+![Desktop Ponies](https://i.imgur.com/7Z25ikB.png)
 *[Desktop Background by CuteSkitty](https://cuteskitty.deviantart.com/art/Celestia-256362644)*
 
 Desktop Ponies lets you choose some ponies from [My Little Pony: Friendship is Magic](https://wikipedia.org/wiki/My_Little_Pony:_Friendship_Is_Magic) to trot around your desktop whilst you work.
 
 The ponies will move around on screen performing a variety of custom animations. They also talk occasionally and some ponies will interact with each other.
 
-There are over 290 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
+There are over 300 ponies and other characters from the show included. There is also a wide array of OCs available and you can create your own ponies too.
 
 Don't want to restrict yourself to just ponies? Try downloading the [Equestria Girls](https://sta.sh/2ouk6qgs0sg) characters made by [Bot-chan](https://botchan-mlp.deviantart.com/).
 
@@ -17,7 +17,7 @@ Don't want to restrict yourself to just ponies? Try downloading the [Equestria G
 
 Desktop Ponies works on Windows, Mac and Linux.
 
-* [Download the latest version (v1.65)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.65/Desktop.Ponies.v1.65.zip)
+* [Download the latest version (v1.66)](https://github.com/RoosterDragon/Desktop-Ponies/releases/download/v1.66/Desktop.Ponies.v1.66.zip)
 * Extract the files.
 * Check the included readme file for further instructions.
 

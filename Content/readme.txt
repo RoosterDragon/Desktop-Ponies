@@ -73,6 +73,23 @@ Change Log
 
 Latest changes:
 
+v1.66:
+- Added Autumn Blaze by Bot-chan.
+- Added Bright Mac by Bot-chan.
+- Added Gallus by Bot-chan.
+- Added Luster Dawn by Bot-chan.
+- Update Ocellus by Bot-chan.
+- Added Potion Nova by Bot-chan.
+- Added Prince Pharynx by Bot-chan.
+- Added Sandbar by Bot-chan.
+- Added Silverstream by Bot-chan.
+- Added Somnambula by Bot-chan.
+- Added Windy Whistles by Bot-chan.
+- Added Yona by Bot-chan.
+- Added the ability to specify a background color (Windows only).
+- Fix pony spawn locations when using multiple monitors.
+- Fix crash involving InvalidAsynchronousStateException.
+
 v1.65:
 - Added Ocellus by Bot-chan.
 
