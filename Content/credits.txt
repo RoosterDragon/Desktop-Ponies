@@ -143,14 +143,17 @@ Contributors are broken down by character. If there was more than one contributo
 #### Aunt Orange
 * Bot-chan
 
+#### Autumn Blaze
+* Bot-chan
+
 #### Babs Seed
 * Anonycat
 
-#### Beauty Shock
-* Bot-chan
-
 #### Beauty Brass
 * asluc96
+
+#### Beauty Shock
+* Bot-chan
 
 #### Berry Punch
 * CANDYBAG [StandOPPP, TrotOPPP, StandBerry, TrotBerry]
@@ -192,6 +195,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Braeburn
 * Anonycat
+
+#### Bright Mac
+* Bot-chan
 
 #### Bulk Biceps
 * Bot-chan
@@ -269,11 +275,11 @@ Contributors are broken down by character. If there was more than one contributo
 #### Coco Pommel
 * StarStep
 
-#### Countess Coloratura (Rara)
-* Blaze5565
-
 #### Coriander Cumin
 * Bot-chan
+
+#### Countess Coloratura (Rara)
+* Blaze5565
 
 #### Cranky Doodle Donkey
 * Bot-chan
@@ -402,6 +408,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Fresh Coat
 * Bot-chan
 
+#### Gallus
+* Bot-chan
+
 #### Gilda
 * Bot-chan
 
@@ -508,6 +517,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Lotus
 * Jay Wright
+
+#### Luster Dawn
+* Bot-chan
 
 #### Lyra
 * Starly [Stand, Walk, Sit, Sleep, Jump]
@@ -697,6 +709,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Police Pony
 * Bot-chan
 
+#### Potion Nova
+* Bot-chan
+
 #### Pound Cake
 * Bot-chan
 
@@ -722,6 +737,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Prince Blueblood
+* Bot-chan
+
+#### Prince Pharynx
 * Bot-chan
 
 #### Princess Cadance
@@ -844,6 +862,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Saffron Masala
 * Bot-chan
 
+#### Sandbar
+* Bot-chan
+
 #### Sapphire Shores
 * Pony Noia
 
@@ -898,6 +919,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Silverspeed
 * fanofetcetera
 
+#### Silverstream
+* Bot-chan
+
 #### Sindy
 * Pony Noia
 
@@ -926,6 +950,9 @@ Contributors are broken down by character. If there was more than one contributo
 
 #### Soigne Folio
 * Pony Noia
+
+#### Somnambula
+* Bot-chan
 
 #### Sonata Dusk
 * Bot-chan
@@ -1086,6 +1113,9 @@ Contributors are broken down by character. If there was more than one contributo
 #### Wild Fire
 * Bot-chan
 
+#### Windy Whistles
+* Bot-chan
+
 #### Winona
 * DeathPony
 
@@ -1093,6 +1123,9 @@ Contributors are broken down by character. If there was more than one contributo
 * Bot-chan
 
 #### Written Script
+* Bot-chan
+
+#### Yona
 * Bot-chan
 
 #### Zecora
