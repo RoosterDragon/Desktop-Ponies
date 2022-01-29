@@ -1,6 +1,7 @@
 ﻿namespace DesktopSprites.Core
 {
     using System;
+    using System.Runtime;
 
     /// <summary>
     /// General utility methods.
@@ -20,7 +21,7 @@
 
         /// <summary>
         /// Performs a full cleanup of unused memory (full garbage collection, empty the finalization queue, another full garbage
-        /// collection).
+        /// collection that compacts LOH).
         /// </summary>
         /// <remarks>
         /// <para>The first garbage collection identifies any objects which are no longer being referenced. For objects without a
@@ -50,7 +51,7 @@
                 GC.Collect();
                 long beforeFinalize = GC.GetTotalMemory(false);
                 GC.WaitForPendingFinalizers();
-                //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect();
                 long afterCollect = GC.GetTotalMemory(false);
 
@@ -69,7 +70,7 @@
 #else
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
 #endif
         }
