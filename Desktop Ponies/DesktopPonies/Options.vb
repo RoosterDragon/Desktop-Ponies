@@ -105,6 +105,10 @@ Public NotInheritable Class Options
         If profile = DefaultProfileName Then
             Throw New ArgumentException("profile must not match the default profile name.", "profile")
         End If
+        If profile.IndexOfAny(Path.GetInvalidFileNameChars()) <> -1 OrElse
+            profile.IndexOfAny(Path.GetInvalidPathChars()) <> -1 Then
+            Throw New ArgumentException("profile must not contain special characters.", "profile")
+        End If
     End Sub
 
     Public Shared Function GetKnownProfiles() As String()

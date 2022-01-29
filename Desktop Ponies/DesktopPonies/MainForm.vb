@@ -386,6 +386,13 @@ Public Class MainForm
             Exit Sub
         End If
 
+        If profileToSave.IndexOfAny(Path.GetInvalidFileNameChars()) <> -1 OrElse
+            profileToSave.IndexOfAny(Path.GetInvalidPathChars()) <> -1 Then
+            MessageBox.Show(Me, "Cannot save the profile. Remove any special characters from the profile name first.",
+                "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
         Options.SaveProfile(profileToSave)
 
         If Not ProfileComboBox.Items.Contains(profileToSave) Then
@@ -481,6 +488,13 @@ Public Class MainForm
             Exit Sub
         End If
 
+        If copiedProfileName.IndexOfAny(Path.GetInvalidFileNameChars()) <> -1 OrElse
+            copiedProfileName.IndexOfAny(Path.GetInvalidPathChars()) <> -1 Then
+            MessageBox.Show(Me, "Cannot copy as the new profile name is invalid. Please choose another name.",
+                            "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
         Options.SaveProfile(copiedProfileName)
         GetProfiles(copiedProfileName)
     End Sub
@@ -489,6 +503,13 @@ Public Class MainForm
         If ProfileComboBox.Text = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot delete the '" & Options.DefaultProfileName & "' profile.",
                             "Invalid Profile", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If ProfileComboBox.Text.IndexOfAny(Path.GetInvalidFileNameChars()) <> -1 OrElse
+            ProfileComboBox.Text.IndexOfAny(Path.GetInvalidPathChars()) <> -1 Then
+            MessageBox.Show(Me, "Cannot delete the profile as the name is invalid.",
+                            "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
 

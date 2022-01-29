@@ -1,4 +1,5 @@
 ﻿Imports System.Globalization
+Imports System.IO
 
 Public Class OptionsForm
     Private Const PreviewMargin = 5
@@ -165,6 +166,13 @@ Public Class OptionsForm
 
         If Options.ProfileName = Options.DefaultProfileName Then
             MessageBox.Show(Me, "Cannot save over the '" & Options.DefaultProfileName & "' profile. Create a new profile first.",
+                            "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If Options.ProfileName.ToString().IndexOfAny(Path.GetInvalidFileNameChars()) <> -1 OrElse
+            Options.ProfileName.ToString().IndexOfAny(Path.GetInvalidPathChars()) <> -1 Then
+            MessageBox.Show(Me, "Cannot save as the new profile name is invalid. Please choose another name.",
                             "Invalid Profile Name", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Exit Sub
         End If
