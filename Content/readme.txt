@@ -73,6 +73,10 @@ Change Log
 
 Latest changes:
 
+v1.67:
+- Fixed Yona folder nesting.
+- Prevent saving a profile with an invalid name.
+
 v1.66:
 - Added Autumn Blaze by Bot-chan.
 - Added Bright Mac by Bot-chan.
