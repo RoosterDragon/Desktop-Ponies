@@ -73,6 +73,10 @@ Change Log
 
 Latest changes:
 
+v1.68:
+- Added Cozy Glow by rosie-eclairs.
+- Switched to using NAudio instead of DirectX for sounds (Windows only).
+
 v1.67:
 - Fixed Yona folder nesting.
 - Prevent saving a profile with an invalid name.
