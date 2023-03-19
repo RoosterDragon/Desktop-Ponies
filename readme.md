@@ -55,8 +55,6 @@ This project evolved from a Windows only solution and whilst it just about runs 
 
 You will need to install [Mono](https://www.mono-project.com/download/) in order to acquire the libraries for the Gtk/Cairo portion of the program that runs on non-Windows platforms. You will probably need to update the references for those dlls in each of the projects that requires them.
 
-The Microsoft.DirectX.AudioVideoPlayback library is long since obsolete but is used to play audio. You need to install the [DirectX 9 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=35) in order to resolve this reference.
-
 Once resolved, you have a standard Visual Studio solution split into three projects. Desktop Sprites is the library that handles rendering, Desktop Ponies is the pony specific part of the application and Release Tool is used to run image optimizers and package new releases.
 
 If you want to use the Release Tool to optimize images, you will need to acquire the [gifsicle](http://www.lcdf.org/gifsicle/) and [pngout](http://advsys.net/ken/utils.htm) and drop them into the application directory for them to work.

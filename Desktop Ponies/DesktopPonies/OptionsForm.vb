@@ -20,7 +20,7 @@ Public Class OptionsForm
     Private Sub OptionsForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         MonitorsSelection.Items.AddRange(Screen.AllScreens)
 
-        SoundGroup.Visible = Globals.DirectXSoundAvailable
+        SoundGroup.Visible = Globals.SoundAvailable
 
         If Options.GetInterfaceType = GetType(DesktopSprites.SpriteManagement.GtkSpriteInterface) Then
             ShowViewerInTaskbar.Visible = False

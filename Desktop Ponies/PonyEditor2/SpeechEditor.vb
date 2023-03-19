@@ -1,4 +1,4 @@
-﻿Friend Class SpeechEditor
+Friend Class SpeechEditor
     Private Shadows Property Edited As Speech
         Get
             Return DirectCast(MyBase.Edited, Speech)
@@ -18,13 +18,16 @@
         End Get
     End Property
 
-    Private sound As Object
+    Private sound As Tuple(Of Object, Object)
 
     Public Sub New()
         InitializeComponent()
         AddHandler Disposed, Sub()
-                                 Dim disposable = TryCast(sound, IDisposable)
-                                 If disposable IsNot Nothing Then disposable.Dispose()
+                                 If sound Is Nothing Then Return
+                                 Dim disposable1 = TryCast(sound.Item1, IDisposable)
+                                 If disposable1 IsNot Nothing Then disposable1.Dispose()
+                                 Dim disposable2 = TryCast(sound.Item2, IDisposable)
+                                 If disposable2 IsNot Nothing Then disposable2.Dispose()
                              End Sub
     End Sub
 
@@ -48,8 +51,8 @@
 
     Private Sub SoundFileSelector_FilePathSelected(sender As Object, e As EventArgs) Handles SoundFileSelector.FilePathSelected
         StopSound()
-        SoundPreviewPanel.Enabled = SoundFileSelector.FilePath IsNot Nothing AndAlso Globals.DirectXSoundAvailable
-        UpdateSoundLabel(0, 0)
+        SoundPreviewPanel.Enabled = SoundFileSelector.FilePath IsNot Nothing AndAlso Globals.SoundAvailable
+        UpdateSoundLabel(TimeSpan.Zero, TimeSpan.Zero)
     End Sub
 
     Private Sub SoundPreviewButton_Click(sender As Object, e As EventArgs) Handles SoundPreviewButton.Click
@@ -63,13 +66,15 @@
     Private Sub PlaySound()
         Try
             Dim fullPath = IO.Path.Combine(SoundFileSelector.BaseDirectory, SoundFileSelector.FilePath)
-            Dim audio As New Microsoft.DirectX.AudioVideoPlayback.Audio(fullPath) With {
-                .Volume = CInt(Options.SoundVolume * 10000 - 10000)
+            Dim audio As New NAudio.Wave.AudioFileReader(fullPath) With {
+                .Volume = Options.SoundVolume
             }
-            audio.Play()
-            sound = audio
+            Dim output = New NAudio.Wave.WaveOutEvent()
+            output.Init(audio)
+            output.Play()
+            sound = New Tuple(Of Object, Object)(audio, output)
             SoundPreviewButton.Text = "Stop"
-            UpdateSoundLabel(audio.CurrentPosition, audio.Duration)
+            UpdateSoundLabel(audio.CurrentTime, audio.TotalTime)
             SoundTimer.Start()
         Catch ex As Exception
             SoundPreviewLabel.Text = "Unable to play sound file."
@@ -78,29 +83,31 @@
     End Sub
 
     Private Sub SoundTimer_Tick(sender As Object, e As EventArgs) Handles SoundTimer.Tick
-        Dim audio = DirectCast(sound, Microsoft.DirectX.AudioVideoPlayback.Audio)
-        Dim currentPosition As Double = 0
-        Dim duration As Double = audio.Duration
-        If audio.CurrentPosition >= duration Then
+        Dim audio = DirectCast(sound.Item1, NAudio.Wave.AudioFileReader)
+        Dim currentPosition As TimeSpan = TimeSpan.Zero
+        Dim duration As TimeSpan = audio.TotalTime
+        If audio.CurrentTime >= duration Then
             StopSound()
         Else
-            currentPosition = audio.CurrentPosition
+            currentPosition = audio.CurrentTime
         End If
         UpdateSoundLabel(currentPosition, duration)
     End Sub
 
-    Private Sub UpdateSoundLabel(currentPosition As Double, duration As Double)
+    Private Sub UpdateSoundLabel(currentPosition As TimeSpan, duration As TimeSpan)
         SoundPreviewLabel.Text = "{0:0.000} / {1:0.000}".FormatWith(
-            TimeSpan.FromSeconds(currentPosition).TotalSeconds, TimeSpan.FromSeconds(duration).TotalSeconds)
+            currentPosition.TotalSeconds, duration.TotalSeconds)
     End Sub
 
     Private Sub StopSound()
         SoundTimer.Stop()
         If sound Is Nothing Then Return
-        Dim audio = DirectCast(sound, Microsoft.DirectX.AudioVideoPlayback.Audio)
+        Dim audio = DirectCast(sound.Item1, NAudio.Wave.AudioFileReader)
+        Dim output = DirectCast(sound.Item2, NAudio.Wave.WaveOutEvent)
         sound = Nothing
-        audio.Stop()
-        UpdateSoundLabel(0, audio.Duration)
+        output.Stop()
+        UpdateSoundLabel(TimeSpan.Zero, audio.TotalTime)
+        output.Dispose()
         audio.Dispose()
         SoundPreviewButton.Text = "Play"
     End Sub

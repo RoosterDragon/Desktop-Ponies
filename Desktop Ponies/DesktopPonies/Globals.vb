@@ -1,4 +1,4 @@
-﻿''' <summary>
+''' <summary>
 ''' Application global properties.
 ''' </summary>
 Public NotInheritable Class Globals
@@ -10,27 +10,24 @@ Public NotInheritable Class Globals
         Return Environment.GetCommandLineArgs()(0).EndsWith(".scr", PathEquality.Comparison)
     End Function
 
-    Private Shared ReadOnly directXSoundAvailableSync As New Object()
-    Private Shared _directXSoundAvailable As Boolean?
-    Public Shared ReadOnly Property DirectXSoundAvailable As Boolean
+    Private Shared ReadOnly soundAvailableSync As New Object()
+    Private Shared _SoundAvailable As Boolean?
+    Public Shared ReadOnly Property SoundAvailable As Boolean
         Get
-            SyncLock directXSoundAvailableSync
-                If Not _directXSoundAvailable.HasValue Then
-                    _directXSoundAvailable = IsDirectXSoundAvailable()
+            SyncLock soundAvailableSync
+                If Not _SoundAvailable.HasValue Then
+                    _SoundAvailable = IsSoundAvailable()
                 End If
-                Return _directXSoundAvailable.Value
+                Return _SoundAvailable.Value
             End SyncLock
         End Get
     End Property
 
-    Private Shared Function IsDirectXSoundAvailable() As Boolean
-        ' Check to see if the right version of DirectX is installed for sounds.
+    Private Shared Function IsSoundAvailable() As Boolean
         Try
-            ' You may get a LoaderLock exception here when debugging. It does not occur normally - only under a debugger. Ignoring it
-            ' appears to be harmless and the load will not be affected.
-            Reflection.Assembly.Load(
-                "Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")
-            Return True
+            Reflection.Assembly.Load("NAudio")
+            Reflection.Assembly.Load("NAudio.WinMM")
+            Return OperatingSystemInfo.IsWindows
         Catch ex As Exception
             ' If we can't load the assembly, just don't enable sound.
         End Try
