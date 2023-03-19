@@ -549,6 +549,7 @@
             Console.Write(text);
             if (text.Length < Console.WindowWidth)
                 Console.Write(new string(' ', Console.WindowWidth - text.Length));
+            Console.WriteLine();
         }
     }
 }
