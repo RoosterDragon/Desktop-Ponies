@@ -19,6 +19,8 @@ Installation
     but you can also get it here: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
     Once installed, simply click on 'Desktop Ponies.exe' to start the program.
 * Unix
+    Running the Windows version under Wine is recommend for best performance.
+    Alternatively, you can run via mono:
     You will need the latest stable version of mono. You can also download it from here: 
     https://www.mono-project.com/download/stable/
     Alternatively you can install the prerequisite packages for your platform. You will need packages for the mono runtime, visual basic, and gtk 2.
