@@ -2109,7 +2109,7 @@ Public Class Pony
             AddUpdateRecord("Entering sleep state.")
             _inSleepState = True
             _behaviorBeforeSpecialStateOverride = _currentBehavior
-            SetBehaviorInternal(_sleepBehavior)
+            SetBehaviorInternal(_sleepBehavior, _sleepBehavior.AllowedMovement.HasFlag(AllowedMoves.Sleep))
         ElseIf Not Sleep AndAlso _inSleepState Then
             AddUpdateRecord("Exiting sleep state.")
             _inSleepState = False
@@ -2154,7 +2154,10 @@ Public Class Pony
                 EndInteraction(True, True)
                 _behaviorBeforeSpecialStateOverride = Nothing
             End If
-            If Not _inSleepState Then SetBehaviorInternal(_dragBehaviorsByGroup(CurrentBehaviorGroup))
+            If Not _inSleepState Then
+                Dim dragBehavior = _dragBehaviorsByGroup(CurrentBehaviorGroup)
+                SetBehaviorInternal(dragBehavior, dragBehavior.AllowedMovement.HasFlag(AllowedMoves.Dragged))
+            End If
         ElseIf Not Drag AndAlso _inDragState Then
             AddUpdateRecord("Exiting drag state.")
             _inDragState = False
