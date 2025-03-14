@@ -283,8 +283,17 @@ Public MustInherit Class PonyAnimator
                 output.Play()
             Catch ex As Exception
                 ' Swallow any exception here. The sound file may be missing, inaccessible, not a playable format, etc.
-                If sound IsNot Nothing Then sound.Dispose()
-                If output IsNot Nothing Then output.Dispose()
+                If sound IsNot Nothing Then
+                    sound.Dispose()
+                    output = Nothing
+                    sound = Nothing
+                End If
+                If output IsNot Nothing Then
+                    output.Dispose()
+                    output = Nothing
+                    sound = Nothing
+                End If
+
             Finally
                 If sound IsNot Nothing Then
                     If sound.TotalTime > TimeSpan.FromDays(1) Then
