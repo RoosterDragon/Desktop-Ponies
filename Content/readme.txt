@@ -75,6 +75,10 @@ Change Log
 
 Latest changes:
 
+v1.69:
+- Drag and sleep behaviors will now play thier speech when a pony encounters the drag or sleep states.
+- Prevent a crash when running on a device without an audio playback device.
+
 v1.68:
 - Added Cozy Glow by rosie-eclairs.
 - Switched to using NAudio instead of DirectX for sounds (Windows only).
